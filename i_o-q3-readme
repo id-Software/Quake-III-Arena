@@ -1,0 +1,7 @@
+Hello and welcome to the Quake 3 source repository on icculus.org
+I'll be your maintainer, zakk@icculus.org, please send all your patches to me.
+The intent of this is to give people a baseline Quake 3. Bug fixes, SDL port, security. Extra graphics and sound will be accepted as long as they are entirely
+optional and off by default.
+
+The map editor isn't included, get a modern copy from here:
+http://www.qeradiant.com/
