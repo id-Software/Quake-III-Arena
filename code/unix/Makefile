@@ -141,17 +141,17 @@ ifeq ($(PLATFORM),linux)
 #  DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -O
   ifeq ($(ARCH),axp)
     CC=pgcc
-    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
+    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
   else
     ifeq ($(ARCH),ppc)
       NEWPGCC=/loki/global/ppc/bin/gcc
       CC=$(NEWPGCC)
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
     endif
     ifeq ($(ARCH),x86_64)
     	CC=gcc
 	CXX=g++
-	RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+	RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
     else
       #NEWPGCC=/usr/local/gcc-2.95.2/bin/gcc # bk001205
       #NEWPGCC=/loki/global/x86/bin/gcc
@@ -160,9 +160,9 @@ ifeq ($(PLATFORM),linux)
 # TTimo: legacy RELEASE_CFLAGS
 # NOTE: the -fomit-frame-pointer option leads to an unstable binary on my test box if it was built on the main box
 #   but building on the Mdk 7.2 baseline seems to work
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
 # TTimo: use this for building on P3 gcc 2.95.3 libc2.2 for all targets (experimental! -fomit-fram-pointer removed)
-#      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+#      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
     endif
   endif
 
@@ -231,13 +231,13 @@ GL_CFLAGS = -I$(MESADIR)/include -I/usr/X11R6/include
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -Werror
 ifeq ($(ARCH),axp)
 CC=pgcc
-RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
+RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
 else
 #NEWPGCC=/loki/global/x86/bin/gcc # raistlin012301
 #NEWPGCC=/usr/local/gcc-2.95.2/bin/gcc
 NEWPGCC=/home/raistllin/src/gcc/build/install/bin/gcc
 CC=$(shell if [ -f $(NEWPGCC) ]; then echo $(NEWPGCC); else echo pgcc; fi )
-RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing - fstrength-reduce
+RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing - fstrength-reduce
 endif
 
 LIBEXT=a
@@ -350,7 +350,7 @@ DO_DED_CC=$(CC) -DDEDICATED -DC_ONLY $(CFLAGS) -o $@ -c $<
 #DO_LCC=$(LCC) -o $@ -S -Wf-target=bytecode -Wf-g -DQ3_VM -I$(CGDIR) -I$(GDIR)  -I$(UIDIR)  $< 
 
 #### DEFAULT TARGET
-default:build_debug
+default:build_release
 
 debug: build_debug
 release: build_release
