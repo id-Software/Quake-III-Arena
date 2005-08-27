@@ -9,3 +9,5 @@ optional and off by default.
 
 The map editor isn't included, get a modern copy from here:
 http://www.qeradiant.com/
+
+cd code/unix && make
