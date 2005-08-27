@@ -179,6 +179,12 @@ ifeq ($(PLATFORM),linux)
   LDFLAGS=-ldl -lm
   GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
 
+  ifeq ($(ARCH),i386)
+    # linux32 make ...
+    BASE_CFLAGS += -m32
+    LDFLAGS+=-m32
+  endif
+
   ifeq ($(ARCH),axp)
     TARGETS=\
 	  $(B)/$(PLATFORM)q3ded

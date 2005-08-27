@@ -83,7 +83,7 @@ typedef struct {
 	byte				file[65536];
 	short				sqrTable[256];
 
-	unsigned int		mcomp[256];
+	int		mcomp[256];
 	byte				*qStatus[2][32768];
 
 	long				oldXOff, oldYOff, oldysize, oldxsize;
@@ -1050,8 +1050,8 @@ static void readQuadInfo( byte *qData )
 	cinTable[currentHandle].VQ0 = cinTable[currentHandle].VQNormal;
 	cinTable[currentHandle].VQ1 = cinTable[currentHandle].VQBuffer;
 
-	cinTable[currentHandle].t[0] = (0 - (unsigned int)cin.linbuf)+(unsigned int)cin.linbuf+cinTable[currentHandle].screenDelta;
-	cinTable[currentHandle].t[1] = (0 - ((unsigned int)cin.linbuf + cinTable[currentHandle].screenDelta))+(unsigned int)cin.linbuf;
+	cinTable[currentHandle].t[0] = cinTable[currentHandle].screenDelta;
+	cinTable[currentHandle].t[1] = -cinTable[currentHandle].screenDelta;
 
         cinTable[currentHandle].drawX = cinTable[currentHandle].CIN_WIDTH;
         cinTable[currentHandle].drawY = cinTable[currentHandle].CIN_HEIGHT;
@@ -1410,10 +1410,6 @@ e_status CIN_RunCinematic (int handle)
 
 	if (handle < 0 || handle>= MAX_VIDEO_HANDLES || cinTable[handle].status == FMV_EOF) return FMV_EOF;
 
-#warning disabled CIN_RunCinematic
-Com_Printf("XXX: %s disabled\n", __FUNCTION__);
-return FMV_EOF;
-
 	if (cin.currentHandle != handle) {
 		currentHandle = handle;
 		cin.currentHandle = currentHandle;
@@ -1492,11 +1488,6 @@ int CIN_PlayCinematic( const char *arg, int x, int y, int w, int h, int systemBi
 	} else {
 		Com_sprintf (name, sizeof(name), "%s", arg);
 	}
-
-#warning disabled CIN_PlayCinematic
-Com_Printf("XXX: %s disabled, not playing %s\n", __FUNCTION__, name);
-return -1;
-
 
 	if (!(systemBits & CIN_system)) {
 		for ( i = 0 ; i < MAX_VIDEO_HANDLES ; i++ ) {
