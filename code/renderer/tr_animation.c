@@ -87,7 +87,7 @@ void RB_SurfaceAnim( md4Surface_t *surface ) {
 	}
 	header = (md4Header_t *)((byte *)surface + surface->ofsHeader);
 
-	frameSize = (int)( &((md4Frame_t *)0)->bones[ header->numBones ] );
+	frameSize = (size_t)( &((md4Frame_t *)0)->bones[ header->numBones ] );
 
 	frame = (md4Frame_t *)((byte *)header + header->ofsFrames + 
 		backEnd.currentEntity->e.frame * frameSize );

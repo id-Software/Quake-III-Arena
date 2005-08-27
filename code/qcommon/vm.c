@@ -48,11 +48,14 @@ void VM_VmInfo_f( void );
 void VM_VmProfile_f( void );
 
 
+
+#if 0 // 64bit!
 // converts a VM pointer to a C pointer and
 // checks to make sure that the range is acceptable
 void	*VM_VM2C( vmptr_t p, int length ) {
 	return (void *)p;
 }
+#endif
 
 void VM_Debug( int level ) {
 	vm_debugLevel = level;
@@ -151,6 +154,7 @@ int VM_SymbolToValue( vm_t *vm, const char *symbol ) {
 VM_SymbolForCompiledPointer
 =====================
 */
+#if 0 // 64bit!
 const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
 	int			i;
 
@@ -172,6 +176,7 @@ const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
 	// now look up the bytecode instruction pointer
 	return VM_ValueToSymbol( vm, i );
 }
+#endif
 
 
 
@@ -445,6 +450,11 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 		Com_Error( ERR_FATAL, "VM_Create: bad parms" );
 	}
 
+#if !defined(__i386__) && !defined(__ppc__)
+	if(interpret >= VMI_COMPILED)
+		interpret = VMI_BYTECODE;
+#endif
+
 	remaining = Hunk_MemoryRemaining();
 
 	// see if we already have the VM
@@ -669,9 +679,6 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	vm_t	*oldVM;
 	int		r;
 	int i;
-	int args[16];
-	va_list ap;
-
 
 	if ( !vm ) {
 		Com_Error( ERR_FATAL, "VM_Call with NULL vm" );
@@ -688,6 +695,8 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
 		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
+		int args[16];
+		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < sizeof (args) / sizeof (args[i]); i++) {
 			args[i] = va_arg(ap, int);
@@ -698,10 +707,24 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9], args[10], args[11],
                             args[12], args[13], args[14], args[15]);
+#if defined(__ppc__) || defined(__i386__)
 	} else if ( vm->compiled ) {
 		r = VM_CallCompiled( vm, &callnum );
+#endif
 	} else {
-		r = VM_CallInterpreted( vm, &callnum );
+		struct {
+			int callnum;
+			int args[16];
+		} a;
+		va_list ap;
+
+		a.callnum = callnum;
+		va_start(ap, callnum);
+		for (i = 0; i < sizeof (a.args) / sizeof (a.args[0]); i++) {
+			a.args[i] = va_arg(ap, int);
+		}
+		va_end(ap);
+		r = VM_CallInterpreted( vm, &a.callnum );
 	}
 
 	if ( oldVM != NULL ) // bk001220 - assert(currentVM!=NULL) for oldVM==NULL
@@ -820,7 +843,7 @@ void VM_LogSyscalls( int *args ) {
 		f = fopen("syscalls.log", "w" );
 	}
 	callnum++;
-	fprintf(f, "%i: %i (%i) = %i %i %i %i\n", callnum, args - (int *)currentVM->dataBase,
+	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, args - (int *)currentVM->dataBase,
 		args[0], args[1], args[2], args[3], args[4] );
 }
 

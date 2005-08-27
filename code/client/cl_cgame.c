@@ -623,7 +623,10 @@ int CL_CgameSystemCalls( int *args ) {
 		Com_Memcpy( VMA(1), VMA(2), args[3] );
 		return 0;
 	case CG_STRNCPY:
-		return (int)strncpy( VMA(1), VMA(2), args[3] );
+#warning 64bit broken!
+		strncpy( VMA(1), VMA(2), args[3] );
+//		Com_Printf("%s:%d %s() *** return value of CG_STRNCPY not 64bit clean\n", __FILE__, __LINE__, __FUNCTION__);
+		return 0;
 	case CG_SIN:
 		return FloatAsInt( sin( VMF(1) ) );
 	case CG_COS:

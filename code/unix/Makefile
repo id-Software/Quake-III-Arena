@@ -60,7 +60,7 @@ BLIBDIR=$(MOUNT_DIR)/botlib
 NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
-FTDIR=$(MOUNT_DIR)/ft2
+#FTDIR=$(MOUNT_DIR)/ft2
 JPDIR=$(MOUNT_DIR)/jpeg-6
 SPLNDIR=$(MOUNT_DIR)/splines
 
@@ -80,6 +80,7 @@ DLL_ONLY=false
 # bk010215 - TODO - add all defaults / kill Ryan
 
 
+LIB=lib
 ifeq ($(PLATFORM),linux)
 
   ifneq (,$(findstring libc6,$(shell if [ -e /lib/libc.so.6* ];then echo libc6;fi)))
@@ -100,18 +101,27 @@ ifeq ($(PLATFORM),linux)
       RPMARCH=ppc
       VENDOR=unknown
       DLL_ONLY=true
+    else
+    ifneq (,$(findstring x86_64,$(shell uname -m)))
+      MESADIR=../Mesa/
+      ARCH=x86_64
+      RPMARCH=x86_64
+      VENDOR=unknown
+      DLL_ONLY=false
+      LIB=lib64
     else #default to i386
       MESADIR=../Mesa/
       ARCH=i386
       RPMARCH=i386
       VENDOR=unknown
       DLL_ONLY=false
+      endif
     endif
   endif
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
   # bk001205: no mo'  -Dstricmp=strcasecmp, see q_shared.h
-  BASE_CFLAGS =  -pipe -fsigned-char
+  BASE_CFLAGS =  -pipe -Wall
   # rcg010216: DLL_ONLY for PPC
   ifeq ($(strip $(DLL_ONLY)),true)
     BASE_CFLAGS += -DDLL_ONLY
@@ -125,9 +135,9 @@ ifeq ($(PLATFORM),linux)
   # bk001205 - took out -O to get assertions (NDEBUG)
   # bk001206 - MALLOC_CHECK in addition to ZONE_DEBUG
   # TTimo 03/30/2001 temporary took out -Werror for initial merge
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g  -Wall -Werror
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g
   DEBUG_CFLAGS += -DNO_MOUSEGRAB
-  DEBUG_CFLAGS += -O
+  DEBUG_CFLAGS += -O0
 #  DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -O
   ifeq ($(ARCH),axp)
     CC=pgcc
@@ -136,17 +146,21 @@ ifeq ($(PLATFORM),linux)
     ifeq ($(ARCH),ppc)
       NEWPGCC=/loki/global/ppc/bin/gcc
       CC=$(NEWPGCC)
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+    endif
+    ifeq ($(ARCH),x86_64)
+    	CC=gcc
+	CXX=g++
+	RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
     else
       #NEWPGCC=/usr/local/gcc-2.95.2/bin/gcc # bk001205
       #NEWPGCC=/loki/global/x86/bin/gcc
-      NEWPGCC=/usr/bin/gcc
-      CC=$(shell if [ -f $(NEWPGCC) ]; then echo $(NEWPGCC); else echo pgcc; fi )
-      CXX=/usr/bin/g++
+      CC=gcc
+      CXX=g++
 # TTimo: legacy RELEASE_CFLAGS
 # NOTE: the -fomit-frame-pointer option leads to an unstable binary on my test box if it was built on the main box
 #   but building on the Mdk 7.2 baseline seems to work
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
 # TTimo: use this for building on P3 gcc 2.95.3 libc2.2 for all targets (experimental! -fomit-fram-pointer removed)
 #      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
     endif
@@ -163,7 +177,7 @@ ifeq ($(PLATFORM),linux)
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
-  GLLDFLAGS=-L/usr/X11R6/lib -lX11 -lXext -lXxf86dga -lXxf86vm
+  GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
 
   ifeq ($(ARCH),axp)
     TARGETS=\
@@ -240,7 +254,7 @@ THREAD_LDFLAGS=-lpthread
 LDFLAGS=-lm
 #GLLDFLAGS=-L/usr/X11R6/lib -L$(MESADIR)/lib -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
 #GLLDFLAGS=-L/usr/X11/lib -lGL -lX11 -lXext -lm
-GLLDFLAGS=-L/usr/X11R6/lib -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
+GLLDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
 
 ifeq ($(ARCH),axp)
 TARGETS=\
@@ -284,7 +298,7 @@ ARFLAGS=ar rv
 RANLIB=ranlib
 
 LDFLAGS=-ldl -lm
-GLLDFLAGS=-L/usr/X11/lib -lGL -lX11 -lXext -lm
+GLLDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
 
 TARGETS=$(B)/sgiquake3 \
 	$(B)/q3ded
@@ -516,20 +530,6 @@ Q3OBJ = \
 	$(B)/client/unix_net.o \
 	$(B)/client/unix_shared.o \
 	\
-	$(B)/client/ahoptim.o  \
-	$(B)/client/autohint.o \
-	$(B)/client/ftbase.o   \
-	$(B)/client/ftdebug.o  \
-	$(B)/client/ftglyph.o  \
-	$(B)/client/ftinit.o   \
-	$(B)/client/ftmm.o     \
-	$(B)/client/ftsystem.o \
-	$(B)/client/raster1.o  \
-	$(B)/client/sfnt.o     \
-	$(B)/client/sfobjs.o   \
-	$(B)/client/smooth.o   \
-	$(B)/client/truetype.o
-#	\
 #	$(B)/client/q_parse.o \
 #	$(B)/client/math_quaternion.o \
 #	$(B)/client/util_str.o \
@@ -544,6 +544,10 @@ Q3OBJ = \
 	  Q3OBJ += $(B)/client/vm_x86.o
     endif
 
+    ifeq ($(ARCH),x86_64)
+	  Q3OBJ += $(B)/client/vm_none.o
+    endif
+
     ifeq ($(ARCH),ppc)
       ifeq ($(DLL_ONLY),false)
         Q3OBJ += $(B)/client/vm_ppc.o
@@ -555,6 +559,7 @@ Q3OBJ = \
 #platform specific objects
 ifeq ($(PLATFORM),freebsd)
 	Q3POBJ=\
+		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
 		$(B)/client/linux_glimp.o \
@@ -575,6 +580,7 @@ ifeq ($(ARCH),axp)
 	Q3POBJ=
 else
 	Q3POBJ=\
+		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
 		$(B)/client/linux_glimp.o \
@@ -584,6 +590,7 @@ else
 		$(B)/client/matha.o \
 
 	Q3POBJ_SMP=\
+		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
 		$(B)/client/linux_glimp_smp.o \
@@ -751,6 +758,7 @@ $(B)/client/irix_glimp.o : $(UDIR)/irix_glimp.c; $(DO_CC)
 $(B)/client/irix_glimp_smp.o : $(UDIR)/irix_glimp.c; $(DO_SMP_CC) 
 $(B)/client/irix_snd.o : $(UDIR)/irix_snd.c; $(DO_CC) 
 $(B)/client/irix_input.o : $(UDIR)/irix_input.c; $(DO_CC) 
+$(B)/client/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_CC)
 $(B)/client/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
 $(B)/client/linux_glimp.o : $(UDIR)/linux_glimp.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/linux_glimp_smp.o : $(UDIR)/linux_glimp.c; $(DO_SMP_CC)  $(GL_CFLAGS) 
@@ -767,6 +775,10 @@ $(B)/client/snapvector.o : $(UDIR)/snapvector.nasm; $(DO_NASM)
 $(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC) 
 endif
 
+ifeq ($(ARCH),x86_64)
+$(B)/client/vm_none.o : $(CMDIR)/vm_none.c; $(DO_CC) 
+endif
+
 ifeq ($(ARCH),ppc)
 ifeq ($(DLL_ONLY),false)
 $(B)/client/vm_ppc.o : $(CMDIR)/vm_ppc.c; $(DO_CC)
@@ -776,20 +788,6 @@ endif
 $(B)/client/unzip.o : $(CMDIR)/unzip.c; $(DO_CC) 
 $(B)/client/vm.o : $(CMDIR)/vm.c; $(DO_CC) 
 $(B)/client/vm_interpreted.o : $(CMDIR)/vm_interpreted.c; $(DO_CC) 
-
-$(B)/client/ahoptim.o  : $(FTDIR)/ahoptim.c;   $(DO_CC)
-$(B)/client/autohint.o : $(FTDIR)/autohint.c;  $(DO_CC)
-$(B)/client/ftbase.o   : $(FTDIR)/ftbase.c;    $(DO_CC)
-$(B)/client/ftdebug.o  : $(FTDIR)/ftdebug.c;   $(DO_CC)
-$(B)/client/ftglyph.o  : $(FTDIR)/ftglyph.c;   $(DO_CC)
-$(B)/client/ftinit.o   : $(FTDIR)/ftinit.c;    $(DO_CC)
-$(B)/client/ftmm.o     : $(FTDIR)/ftmm.c;      $(DO_CC)
-$(B)/client/ftsystem.o : $(FTDIR)/ftsystem.c;  $(DO_CC)
-$(B)/client/raster1.o  : $(FTDIR)/raster1.c;   $(DO_CC) -DFT_FLAT_COMPILE
-$(B)/client/sfnt.o     : $(FTDIR)/sfnt.c;      $(DO_CC)
-$(B)/client/sfobjs.o   : $(FTDIR)/sfobjs.c;    $(DO_CC)
-$(B)/client/smooth.o   : $(FTDIR)/smooth.c;    $(DO_CC) -DFT_FLAT_COMPILE
-$(B)/client/truetype.o : $(FTDIR)/truetype.c;  $(DO_CC)
 
 # TTimo: took out splines code
 #$(B)/client/q_parse.o : $(SPLNDIR)/q_parse.cpp; $(DO_CXX)
@@ -908,6 +906,7 @@ Q3DOBJ = \
 	$(B)/ded/l_script.o \
 	$(B)/ded/l_struct.o \
 	\
+	$(B)/ded/linux_signals.o \
 	$(B)/ded/linux_common.o \
 	$(B)/ded/unix_main.o \
 	$(B)/ded/unix_net.o \
@@ -919,6 +918,10 @@ Q3DOBJ = \
 
 ifeq ($(ARCH),i386)
   Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftol.o $(B)/ded/snapvector.o
+endif
+
+ifeq ($(ARCH),x86_64)
+  Q3DOBJ += $(B)/ded/vm_none.o
 endif
 
 ifeq ($(ARCH),ppc)
@@ -984,7 +987,8 @@ $(B)/ded/l_precomp.o : $(BLIBDIR)/l_precomp.c; $(DO_BOT_CC)
 $(B)/ded/l_script.o : $(BLIBDIR)/l_script.c; $(DO_BOT_CC) 
 $(B)/ded/l_struct.o : $(BLIBDIR)/l_struct.c; $(DO_BOT_CC) 
 
-$(B)/ded/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
+$(B)/ded/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_DED_CC)
+$(B)/ded/linux_common.o : $(UDIR)/linux_common.c; $(DO_DED_CC)
 $(B)/ded/unix_main.o : $(UDIR)/unix_main.c; $(DO_DED_CC) 
 $(B)/ded/unix_net.o : $(UDIR)/unix_net.c; $(DO_DED_CC) 
 $(B)/ded/unix_shared.o : $(UDIR)/unix_shared.c; $(DO_DED_CC) 
@@ -999,6 +1003,10 @@ ifeq ($(ARCH),i386)
 $(B)/ded/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_DED_CC) 
 $(B)/ded/ftol.o : $(UDIR)/ftol.nasm; $(DO_NASM)
 $(B)/ded/snapvector.o : $(UDIR)/snapvector.nasm; $(DO_NASM) 
+endif
+
+ifeq ($(ARCH),x86_64)
+$(B)/ded/vm_none.o : $(CMDIR)/vm_none.c; $(DO_DED_CC) 
 endif
 
 ifeq ($(ARCH),ppc)
@@ -1410,7 +1418,7 @@ $(B)/baseq3/ui/ui_spskill.o : $(Q3UIDIR)/ui_spskill.c; $(DO_SHLIB_CC)
 $(B)/baseq3/ui/ui_startserver.o : $(Q3UIDIR)/ui_startserver.c; $(DO_SHLIB_CC) 
 $(B)/baseq3/ui/ui_team.o : $(Q3UIDIR)/ui_team.c; $(DO_SHLIB_CC) 
 $(B)/baseq3/ui/ui_teamorders.o : $(Q3UIDIR)/ui_teamorders.c; $(DO_SHLIB_CC) 
-$(B)/baseq3/ui/ui_syscalls.o : $(Q3UIDIR)/ui_syscalls.c; $(DO_SHLIB_CC) 
+$(B)/baseq3/ui/ui_syscalls.o : $(UIDIR)/ui_syscalls.c; $(DO_SHLIB_CC) 
 $(B)/baseq3/ui/ui_video.o : $(Q3UIDIR)/ui_video.c; $(DO_SHLIB_CC) 
 
 # bk001205 - these wre the only SHLIB compiles in 1.17
@@ -1613,20 +1621,6 @@ Q3SOBJ = \
 	$(B)/q3static/unix_net.o \
 	$(B)/q3static/unix_shared.o \
 	\
-	$(B)/q3static/ahoptim.o  \
-	$(B)/q3static/autohint.o \
-	$(B)/q3static/ftbase.o   \
-	$(B)/q3static/ftdebug.o  \
-	$(B)/q3static/ftglyph.o  \
-	$(B)/q3static/ftinit.o   \
-	$(B)/q3static/ftmm.o     \
-	$(B)/q3static/ftsystem.o \
-	$(B)/q3static/raster1.o  \
-	$(B)/q3static/sfnt.o     \
-	$(B)/q3static/sfobjs.o   \
-	$(B)/q3static/smooth.o   \
-	$(B)/q3static/truetype.o \
-	\
 	$(B)/q3static/linux_qgl.o \
 	$(B)/q3static/linux_glimp.o \
 	$(B)/q3static/linux_joystick.o \
@@ -1636,6 +1630,10 @@ Q3SOBJ = \
 
 ifeq ($(ARCH),i386)
   Q3SOBJ += $(B)/q3static/vm_x86.o
+endif
+
+ifeq ($(ARCH),x86_64)
+  Q3SOBJ += $(B)/q3static/vm_none.o
 endif
 
 ifeq ($(ARCH),ppc)
@@ -1791,6 +1789,10 @@ $(B)/q3static/vm_interpreted.o : $(CMDIR)/vm_interpreted.c; $(DO_CC) -DQ3_STATIC
 
 ifeq ($(ARCH),i386)
   $(B)/q3static/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC) -DQ3_STATIC
+endif
+
+ifeq ($(ARCH),x86_64)
+  $(B)/q3static/vm_none.o : $(CMDIR)/vm_none.c; $(DO_CC) -DQ3_STATIC
 endif
 
 ifeq ($(ARCH),ppc)

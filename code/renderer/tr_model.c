@@ -418,7 +418,7 @@ static qboolean R_LoadMD4( model_t *mod, void *buffer, const char *mod_name ) {
     // we don't need to swap tags in the renderer, they aren't used
     
 	// swap all the frames
-	frameSize = (int)( &((md4Frame_t *)0)->bones[ md4->numBones ] );
+	frameSize = (size_t)( &((md4Frame_t *)0)->bones[ md4->numBones ] );
     for ( i = 0 ; i < md4->numFrames ; i++, frame++) {
 	    frame = (md4Frame_t *) ( (byte *)md4 + md4->ofsFrames + i * frameSize );
     	frame->radius = LittleFloat( frame->radius );

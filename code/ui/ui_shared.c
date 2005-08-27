@@ -132,16 +132,16 @@ qboolean UI_OutOfMemory() {
 return a hash value for the string
 ================
 */
-static long hashForString(const char *str) {
+static unsigned hashForString(const char *str) {
 	int		i;
-	long	hash;
+	unsigned	hash;
 	char	letter;
 
 	hash = 0;
 	i = 0;
 	while (str[i] != '\0') {
 		letter = tolower(str[i]);
-		hash+=(long)(letter)*(i+119);
+		hash+=(unsigned)(letter)*(i+119);
 		i++;
 	}
 	hash &= (HASH_TABLE_SIZE-1);
@@ -162,7 +162,7 @@ static stringDef_t *strHandle[HASH_TABLE_SIZE];
 
 const char *String_Alloc(const char *p) {
 	int len;
-	long hash;
+	unsigned hash;
 	stringDef_t *str, *last;
 	static const char *staticNULL = "";
 

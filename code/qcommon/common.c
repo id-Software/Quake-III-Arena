@@ -145,6 +145,7 @@ void QDECL Com_Printf( const char *fmt, ... ) {
 	char		msg[MAXPRINTMSG];
   static qboolean opening_qconsole = qfalse;
 
+
 	va_start (argptr,fmt);
 	Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
@@ -1527,7 +1528,7 @@ void Com_InitHunkMemory( void ) {
 		Com_Error( ERR_FATAL, "Hunk data failed to allocate %i megs", s_hunkTotal / (1024*1024) );
 	}
 	// cacheline align
-	s_hunkData = (byte *) ( ( (int)s_hunkData + 31 ) & ~31 );
+	s_hunkData = (byte *) ( ( (long)s_hunkData + 31 ) & ~31 );
 	Hunk_Clear();
 
 	Cmd_AddCommand( "meminfo", Com_Meminfo_f );

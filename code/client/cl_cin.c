@@ -1410,6 +1410,10 @@ e_status CIN_RunCinematic (int handle)
 
 	if (handle < 0 || handle>= MAX_VIDEO_HANDLES || cinTable[handle].status == FMV_EOF) return FMV_EOF;
 
+#warning disabled CIN_RunCinematic
+Com_Printf("XXX: %s disabled\n", __FUNCTION__);
+return FMV_EOF;
+
 	if (cin.currentHandle != handle) {
 		currentHandle = handle;
 		cin.currentHandle = currentHandle;
@@ -1488,6 +1492,11 @@ int CIN_PlayCinematic( const char *arg, int x, int y, int w, int h, int systemBi
 	} else {
 		Com_sprintf (name, sizeof(name), "%s", arg);
 	}
+
+#warning disabled CIN_PlayCinematic
+Com_Printf("XXX: %s disabled, not playing %s\n", __FUNCTION__, name);
+return -1;
+
 
 	if (!(systemBits & CIN_system)) {
 		for ( i = 0 ; i < MAX_VIDEO_HANDLES ; i++ ) {

@@ -479,7 +479,7 @@ nextInstruction2:
 
 				src = (int *)&image[ r0&dataMask ];
 				dest = (int *)&image[ r1&dataMask ];
-				if ( ( (int)src | (int)dest | count ) & 3 ) {
+				if ( ( (long)src | (long)dest | count ) & 3 ) {
 					Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
 				}
 				count >>= 2;

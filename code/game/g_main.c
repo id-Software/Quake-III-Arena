@@ -209,6 +209,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		G_ShutdownGame( arg0 );
 		return 0;
 	case GAME_CLIENT_CONNECT:
+#warning 64bit broken!
 		return (int)ClientConnect( arg0, arg1, arg2 );
 	case GAME_CLIENT_THINK:
 		ClientThink( arg0 );
