@@ -109,7 +109,26 @@ $env = new cons(
    );
 $FILESREF = \@FILES;
 
+if ($cpu eq 'i386')
+{
+  push @FILES, qw(
+    ../qcommon/vm_x86.c
+    );
+}
+elsif ($cpu eq 'ppc')
+{
+  push @FILES, qw(
+    ../qcommon/vm_ppc.c
+    );
+}
+else
+{
+  push @FILES, qw(
+    ../qcommon/vm_none.c
+    );
+}
+
 # DEDICATED_NAME is imported, holds the name of the target
 # wolfded.x86 usually
-Program $env $DEDICATED_NAME, '../qcommon/vm_x86.c', @$FILESREF;
+Program $env $DEDICATED_NAME, @$FILESREF;
 Install $env $INSTALL_DIR, $DEDICATED_NAME;

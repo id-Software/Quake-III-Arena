@@ -48,9 +48,9 @@ else
 # detection of CPU type
 $cpu = `uname -m`;
 chop ($cpu);
-if ($cpu +~ /i?86/)
+if ($cpu =~ /i.86/)
 {
-  $cpu = 'x86';
+  $cpu = 'i386';
 }
 # OS
 $OS = `uname`;
@@ -227,17 +227,17 @@ if ($do_sdk eq 1)
 # build the config directory
 $CONFIG_DIR = $config . '-' . $cpu . '-' . $OS . '-' . $libc;
 
-$COMMON_CFLAGS = '-pipe -fsigned-char ';
+$COMMON_CFLAGS = '-pipe ';
 
 if ($config eq 'debug')
 {
   # use -Werror for better QA  
-  $BASE_CFLAGS = $COMMON_CFLAGS . '-g -Wall -Werror -O ';
-	$BSPC_BASE_CFLAGS = $COMMON_CFLAGS . '-g -O -DLINUX -DBSPC -Dstricmp=strcasecmp ';
+  $BASE_CFLAGS = $COMMON_CFLAGS . '-g -Wall -O0 ';
+	$BSPC_BASE_CFLAGS = $COMMON_CFLAGS . '-g -O0 -DLINUX -DBSPC -Dstricmp=strcasecmp ';
 }
 else
 {
-  $BASE_CFLAGS = $COMMON_CFLAGS . '-DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce ';
+  $BASE_CFLAGS = $COMMON_CFLAGS . '-DNDEBUG -O3 -march=i686 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce ';
 	$BSPC_BASE_CFLAGS = $BASE_CFLAGS . '-DLINUX -DBSPC -Dstricmp=strcasecmp ';
 }
 
@@ -287,11 +287,11 @@ sub build_tools {
   system("mkdir qvmtools 2>/dev/null");
   if (@_[0] eq 'q3lcc')
   {
-    system("cd ../lcc ; make all ; cp /tmp/lcc ../code/qvmtools/q3lcc ; cp /tmp/rcc ../code/qvmtools/q3rcc ; cp /tmp/cpp ../code/qvmtools/q3cpp");
+    system("cd ../lcc && mkdir -p .obj && make all && cp .obj/q3lcc ../code/qvmtools/q3lcc && cp .obj/q3rcc ../code/qvmtools/q3rcc && cp .obj/q3cpp ../code/qvmtools/q3cpp");
   }
   elsif (@_[0] eq 'q3asm')
   {
-    system("cd ../q3asm ; make ; cp q3asm ../code/qvmtools");
+    system("cd ../q3asm && make && cp q3asm ../code/qvmtools");
   }
   else
   {
@@ -312,7 +312,7 @@ if ($do_bspc eq 1)
 	$BUILD_DIR = $CONFIG_DIR . '/bspc';
 	Link $BUILD_DIR => '.';
 	$INSTALL_DIR = $INSTALL_BASEDIR . '/utils';
-	Export qw( BSPC_BASE_CFLAGS BUILD_DIR INSTALL_DIR CC CXX LINK );
+	Export qw( BSPC_BASE_CFLAGS BUILD_DIR INSTALL_DIR CC CXX LINK cpu );
 	Build $BUILD_DIR . '/bspc/Conscript';
 }
 
@@ -323,17 +323,17 @@ $INSTALL_DIR = $INSTALL_BASEDIR . '/baseq3';
 
 $BUILD_DIR = $CONFIG_DIR . '/' . $TARGET_DIR . '/cgame';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/cgame/Conscript';
 
 $BUILD_DIR = $CONFIG_DIR . '/' . $TARGET_DIR . '/game';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/game/Conscript';
 
 $BUILD_DIR = $CONFIG_DIR . '/' . $TARGET_DIR . '/q3_ui';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/q3_ui/Conscript';
   
 # build TA
@@ -343,17 +343,17 @@ $INSTALL_DIR = $INSTALL_BASEDIR . '/missionpack';
 
 $BUILD_DIR = $CONFIG_DIR . "/" . $TARGET_DIR . '/cgame';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/cgame/Conscript';
 
 $BUILD_DIR = $CONFIG_DIR . "/" . $TARGET_DIR . '/game';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/game/Conscript';
 
 $BUILD_DIR = $CONFIG_DIR . '/' . $TARGET_DIR . '/ui';
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+Export qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK cpu );
 Build $BUILD_DIR . '/ui/Conscript';
 
 # core
@@ -367,7 +367,7 @@ $BUILD_DIR = $CONFIG_DIR . '/core/dedicated';
 Link $BUILD_DIR => '.';
 $hack = $BASE_CFLAGS; # hit me!
 $BASE_CFLAGS .= '-DDEDICATED ';
-Export qw( BASE_CFLAGS BUILD_DIR INSTALL_DIR CC CXX LINK );
+Export qw( BASE_CFLAGS BUILD_DIR INSTALL_DIR CC CXX LINK cpu );
 Build $BUILD_DIR . '/unix/Conscript-dedicated';
 $BASE_CFLAGS = $hack;
 
@@ -378,7 +378,7 @@ $BUILD_DIR = $CONFIG_DIR . '/core/client';
 $BASE_LDFLAGS = '';
 
 Link $BUILD_DIR => '.';
-Export qw( BASE_CFLAGS BASE_LDFLAGS BUILD_DIR INSTALL_DIR TARGETNAME CC CXX LINK );
+Export qw( BASE_CFLAGS BASE_LDFLAGS BUILD_DIR INSTALL_DIR TARGETNAME CC CXX LINK cpu );
 Build $BUILD_DIR . '/unix/Conscript-client';
 
 if ($do_smp eq 1)
@@ -389,7 +389,7 @@ if ($do_smp eq 1)
 	$BASE_LDFLAGS = '-lpthread ';
 	
   Link $BUILD_DIR => '.';
-  Export qw( BASE_CFLAGS BASE_LDFLAGS BUILD_DIR INSTALL_DIR TARGETNAME CC CXX LINK );
+  Export qw( BASE_CFLAGS BASE_LDFLAGS BUILD_DIR INSTALL_DIR TARGETNAME CC CXX LINK cpu );
   Build $BUILD_DIR . '/unix/Conscript-client';	
 }
 
@@ -399,7 +399,7 @@ if ($NO_VM eq 0 && $do_pk3 eq 1)
 	$INSTALL_DIR = $INSTALL_BASEDIR;
 	$BUILD_DIR = $CONFIG_DIR . '/pk3-builder';
 	Link $BUILD_DIR => 'unix';
-	Export qw( INSTALL_DIR BUILD_DIR CONFIG_DIR CC CXX LINK );
+	Export qw( INSTALL_DIR BUILD_DIR CONFIG_DIR CC CXX LINK cpu );
 	Build $BUILD_DIR . '/Conscript-pk3';
 }
 

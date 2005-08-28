@@ -153,7 +153,7 @@ $env = new cons(
   . $BUILD_DIR . '/unix/asmlib.a '
   . $BUILD_DIR . '/unix/inlinelib.a '
 	. $BASE_LDFLAGS
-  . '-L/usr/X11R6/lib -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm'
+  . '-L/usr/X11R6/lib64 -L/usr/X11R6/lib -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm'
 );
 
 @RENDERER_FILES = qw(
@@ -253,9 +253,27 @@ $SERVER_REF = \@SERVER_FILES;
 # FIXME TTimo vm_<cpu>.c
 @VM_FILES = qw(
   ../qcommon/vm.c
-  ../qcommon/vm_x86.c
   ../qcommon/vm_interpreted.c
   );
+
+if ($cpu eq 'i386')
+{
+  push @VM_FILES, qw(
+    ../qcommon/vm_x86.c
+    );
+}
+elsif ($cpu eq 'ppc')
+{
+  push @VM_FILES, qw(
+    ../qcommon/vm_ppc.c
+    );
+}
+else
+{
+  push @VM_FILES, qw(
+    ../qcommon/vm_none.c
+    );
+}
 $VM_REF = \@VM_FILES;
 
 # FIXME: import the CPU string to build the name of the target
