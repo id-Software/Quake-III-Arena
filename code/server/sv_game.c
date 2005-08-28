@@ -828,11 +828,8 @@ int SV_GameSystemCalls( int *args ) {
 		return 0;
 
 	case TRAP_STRNCPY:
-#warning 64bit broken!
-//		Com_Printf("%s:%d %s() *** return value of TRAP_STRNCPY not 64bit clean\n", __FILE__, __LINE__, __FUNCTION__);
-//		Com_Printf("%s %d\n", VMA(2), args[3]);
 		strncpy( VMA(1), VMA(2), args[3] );
-		return 0;
+		return args[1];
 
 	case TRAP_SIN:
 		return FloatAsInt( sin( VMF(1) ) );
