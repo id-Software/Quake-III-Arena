@@ -1168,7 +1168,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 				"	movl %%edi,%1		\r\n" \
 				"	popal				\r\n" \
 				: "=m" (memProgramStack), "=m" (memOpStack) \
-				: "m" (memEntryPoint), "0" (memProgramStack), "1" (memOpStack) \
+				: "m" (memEntryPoint), "m" (memProgramStack), "m" (memOpStack) \
 				: "si", "di" \
 		);
 

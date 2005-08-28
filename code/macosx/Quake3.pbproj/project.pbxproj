@@ -7885,7 +7885,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Quake3</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Quake 3 Arena 1.32b</string>
+	<string>icculus.org/quake3 1.33</string>
 	<key>CFBundleIconFile</key>
 	<string>Quake3.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -7897,7 +7897,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.32b</string>
+	<string>1.33</string>
 	<key>CFBundleSignature</key>
 	<string>IDQ3</string>
 	<key>CFBundleVersion</key>

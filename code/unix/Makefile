@@ -25,7 +25,7 @@ PLATFORM_RELEASE=$(shell uname -r)
 ###
 
 # Where we are building from (where the source code should be!)
-MOUNT_DIR=../
+MOUNT_DIR=..
 
 # Where we are building to, libMesaVoodooGL.so.3.3 should be here, etc.
 # the demo pk3 file should be here in demoq3/pak0.pk3 or baseq3/pak0.pk3
@@ -34,7 +34,7 @@ BDIR=$(MOUNT_DIR)/../run
 
 # Build name
 # BUILD_NAME=$(BUILD_NAME)
-BUILD_NAME=quake3.x86
+BUILD_NAME=quake3
 
 
 
@@ -160,9 +160,9 @@ ifeq ($(PLATFORM),linux)
 # TTimo: legacy RELEASE_CFLAGS
 # NOTE: the -fomit-frame-pointer option leads to an unstable binary on my test box if it was built on the main box
 #   but building on the Mdk 7.2 baseline seems to work
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro -march=pentium -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
 # TTimo: use this for building on P3 gcc 2.95.3 libc2.2 for all targets (experimental! -fomit-fram-pointer removed)
-#      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
+#      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
     endif
   endif
 
@@ -243,7 +243,7 @@ else
 #NEWPGCC=/usr/local/gcc-2.95.2/bin/gcc
 NEWPGCC=/home/raistllin/src/gcc/build/install/bin/gcc
 CC=$(shell if [ -f $(NEWPGCC) ]; then echo $(NEWPGCC); else echo pgcc; fi )
-RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mcpu=pentiumpro -march=pentium -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing - fstrength-reduce
+RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro -march=pentium -fomit-frame-pointer -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing - fstrength-reduce
 endif
 
 LIBEXT=a
@@ -535,16 +535,6 @@ Q3OBJ = \
 	$(B)/client/unix_main.o \
 	$(B)/client/unix_net.o \
 	$(B)/client/unix_shared.o \
-	\
-#	$(B)/client/q_parse.o \
-#	$(B)/client/math_quaternion.o \
-#	$(B)/client/util_str.o \
-#	$(B)/client/math_angles.o \
-#	$(B)/client/math_vector.o \
-#	$(B)/client/splines.o \
-#	$(B)/client/math_matrix.o
-
-#	$(B)/client/q_shared.o \
 
     ifeq ($(ARCH),i386)
 	  Q3OBJ += $(B)/client/vm_x86.o
@@ -794,58 +784,6 @@ endif
 $(B)/client/unzip.o : $(CMDIR)/unzip.c; $(DO_CC) 
 $(B)/client/vm.o : $(CMDIR)/vm.c; $(DO_CC) 
 $(B)/client/vm_interpreted.o : $(CMDIR)/vm_interpreted.c; $(DO_CC) 
-
-# TTimo: took out splines code
-#$(B)/client/q_parse.o : $(SPLNDIR)/q_parse.cpp; $(DO_CXX)
-#$(B)/client/math_quaternion.o : $(SPLNDIR)/math_quaternion.cpp; $(DO_CXX)
-# TTimo: ignored
-#$(B)/client/q_shared.o : $(SPLNDIR)/q_shared.cpp; $(DO_CXX)
-#$(B)/client/util_str.o : $(SPLNDIR)/util_str.cpp; $(DO_CXX)
-#$(B)/client/math_angles.o : $(SPLNDIR)/math_angles.cpp; $(DO_CXX)
-#$(B)/client/math_vector.o : $(SPLNDIR)/math_vector.cpp; $(DO_CXX)
-#$(B)/client/splines.o : $(SPLNDIR)/splines.cpp; $(DO_CXX)
-#$(B)/client/math_matrix.o : $(SPLNDIR)/math_matrix.cpp; $(DO_CXX)
-
-## Included by raster1.c
-# $(B)/client/ftraster.o : $(FTDIR)/ftraster.c;  $(DO_CC)
-# $(B)/client/ftrend1.o  : $(FTDIR)/ftrend1.c;   $(DO_CC)
-
-## Included by autohint.c
-# $(B)/client/ahangles.o : $(FTDIR)/ahangles.c;  $(DO_CC)
-# $(B)/client/ahglyph.o  : $(FTDIR)/ahglyph.c;   $(DO_CC)
-# $(B)/client/ahglobal.o : $(FTDIR)/ahglobal.c;  $(DO_CC)
-# $(B)/client/ahhint.o   : $(FTDIR)/ahhint.c;    $(DO_CC)
-# $(B)/client/ahmodule.o : $(FTDIR)/ahmodule.c;  $(DO_CC)
-
-## Included by ftcalc.c
-# $(B)/client/ftcalc.o   : $(FTDIR)/ftcalc.c;    $(DO_CC)
-# $(B)/client/ftobjs.o   : $(FTDIR)/ftobjs.c;    $(DO_CC)
-# $(B)/client/ftstream.o : $(FTDIR)/ftstream.c;  $(DO_CC)
-# $(B)/client/ftlist.o   : $(FTDIR)/ftlist.c;    $(DO_CC)
-# $(B)/client/ftoutln.o  : $(FTDIR)/ftoutln.c;   $(DO_CC)
-# $(B)/client/ftextend.o : $(FTDIR)/ftextend.c;  $(DO_CC)
-# $(B)/client/ftnames.o  : $(FTDIR)/ftnames.c;   $(DO_CC)
-
-## Included by sfnt.c
-# $(B)/client/ttload.o   : $(FTDIR)/ttload.c;    $(DO_CC)
-# $(B)/client/ttcmap.o   : $(FTDIR)/ttcmap.c;    $(DO_CC)
-# $(B)/client/sfobjs.o   : $(FTDIR)/sfobjs.c;    $(DO_CC)
-# $(B)/client/sfdriver.o : $(FTDIR)/sfdriver.c;  $(DO_CC)
-## Unused in sfnt.c
-# $(B)/client/ttpost.o   : $(FTDIR)/ttpost.c;    $(DO_CC)
-# $(B)/client/ttsbit.o   : $(FTDIR)/ttsbit.c;    $(DO_CC)
-
-## Included by truetype.c
-# $(B)/client/ttdriver.o : $(FTDIR)/ttdriver.c;  $(DO_CC)
-# $(B)/client/ttgload.o  : $(FTDIR)/ttgload.c;   $(DO_CC)
-# $(B)/client/ttobjs.o   : $(FTDIR)/ttobjs.c;    $(DO_CC)
-# $(B)/client/ttpload.o  : $(FTDIR)/ttpload.c;   $(DO_CC)
-## Unused in truetype.c
-# $(B)/client/ttinterp.o : $(FTDIR)/ttinterp.c;  $(DO_CC)
-
-## Included by smooth.c
-# $(B)/client/ftsmooth.o : $(FTDIR)/ftsmooth.c;  $(DO_CC) -DFT_FLAT_COMPILE
-# $(B)/client/ftgrays.o  : $(FTDIR)/ftgrays.c;   $(DO_CC)
 
 #############################################################################
 # DEDICATED SERVER                        
@@ -2066,21 +2004,24 @@ rpm: $(BUILD_NAME).spec
 	mv $(RPMROOT)/RPMS/$(RPMARCH)/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm archives/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm 
 
 copyfiles:
-	-mkdirhier $(COPYDIR)
-	cp $(BR)/linuxquake3 $(COPYDIR)/quake3.x86
-	strip $(COPYDIR)/quake3.x86
-	chmod 755 $(COPYDIR)/quake3.x86
-	cp $(BR)/linuxq3ded $(COPYDIR)/q3ded
-	strip $(COPYDIR)/q3ded
-	chmod 755 $(COPYDIR)/q3ded
-	cp $(BDIR)/libMesaVoodooGL.so.3.2 $(COPYDIR)/.
-	chmod 755 $(COPYDIR)/libMesaVoodooGL.so.3.2
-	( cd $(COPYDIR); ln -s libMesaVoodooGL.so.3.2 libMesaVoodooGL.so )
-	cp $(BDIR)/Quake_III_Arena_FAQ.html $(COPYDIR)/.
-	chmod 644 $(COPYDIR)/Quake_III_Arena_FAQ.html
-	mkdir $(COPYDIR)/baseq3
-	cp $(BASEQ3_DIR)/pak2.pk3 $(COPYDIR)/baseq3/.
-	chmod 644 $(COPYDIR)/baseq3/pak2.pk3
+	-mkdir -p -m 0755 $(COPYDIR)
+	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
+	install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
+	install -s -m 0755 $(BR)/linuxq3ded $(COPYDIR)/q3ded
+	-mkdir -p -m 0755 $(COPYDIR)/baseq3
+	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/baseq3/.
+	install -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/baseq3/.
+	install -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/baseq3/.
+	-mkdir -p -m 0755 $(COPYDIR)/missionpack
+	install -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/missionpack/.
+	install -s -m 0755 $(BR)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/missionpack/.
+	install -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+		$(COPYDIR)/missionpack/.
 
 $(BUILD_NAME).spec : $(UDIR)/$(BUILD_NAME).spec.sh Makefile
 	sh $< $(VERSION) $(RPM_RELEASE) $(ARCH) $(INSTALLDIR) > $@

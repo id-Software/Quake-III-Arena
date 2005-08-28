@@ -10,7 +10,7 @@ sub get_gcc_version
 {
   my @ret;
   my ($CC) = @_;
-  my $version=`$CC --version | head -1`;
+  my $version=`$CC --version | head -n 1`;
   chop($version);
   my $machine=`$CC -dumpmachine`;
   chop($machine);
