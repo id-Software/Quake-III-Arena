@@ -279,7 +279,7 @@ qboolean	Sys_IsLANAddress (netadr_t adr) {
 	// 192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
 	if(adr.ip[0] == 10)
 		return qtrue;
-	if(adr.ip[0] == 172 && adr.ip[1]&0xf0 == 16)
+	if(adr.ip[0] == 172 && (adr.ip[1]&0xf0) == 16)
 		return qtrue;
 	if(adr.ip[0] == 192 && adr.ip[1] == 168)
 		return qtrue;
