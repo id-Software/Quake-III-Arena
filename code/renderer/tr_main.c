@@ -1021,7 +1021,6 @@ static inline void SWAP_DRAW_SURF(drawSurf_t* a, drawSurf_t* b)
 
 static void shortsort( drawSurf_t *lo, drawSurf_t *hi ) {
     drawSurf_t	*p, *max;
-	int			temp;
 
     while (hi > lo) {
         max = lo;
@@ -1052,7 +1051,6 @@ void qsortFast (
     unsigned size;              /* size of the sub-array */
     char *lostk[30], *histk[30];
     int stkptr;                 /* stack for saving sub-array to be processed */
-	int	temp;
 
 #if 0
 	if ( sizeof(drawSurf_t) != 8 ) {
@@ -1093,8 +1091,9 @@ recurse:
            performance. */
 
         mid = lo + (size / 2) * width;      /* find middle element */
-        SWAP_DRAW_SURF(mid, lo);               /* swap it to beginning of array */
+        SWAP_DRAW_SURF((drawSurf_t *)mid, (drawSurf_t *)lo); /* swap it to beginning of array */
 
+       
         /* We now wish to partition the array into three pieces, one
            consisiting of elements <= partition element, one of elements
            equal to the parition element, and one of element >= to it.  This
@@ -1134,7 +1133,7 @@ recurse:
                A[loguy] > A[lo], A[higuy] < A[lo],
                loguy < hi, highy > lo */
 
-            SWAP_DRAW_SURF(loguy, higuy);
+            SWAP_DRAW_SURF((drawSurf_t *)loguy, (drawSurf_t *)higuy);
 
             /* A[loguy] < A[lo], A[higuy] > A[lo]; so condition at top
                of loop is re-established */
@@ -1148,7 +1147,7 @@ recurse:
                A[i] <= A[lo] for lo <= i <= higuy,
                A[i] = A[lo] for higuy < i < loguy */
 
-        SWAP_DRAW_SURF(lo, higuy);     /* put partition element in place */
+        SWAP_DRAW_SURF((drawSurf_t *)lo, (drawSurf_t *)higuy); /* put partition element in place */
 
         /* OK, now we have the following:
               A[i] >= A[higuy] for loguy <= i <= hi,
