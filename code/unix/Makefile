@@ -19,6 +19,16 @@
 
 PLATFORM=$(shell uname|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
+ARCH=$(shell uname -m)
+ifeq ($(ARCH),i486)
+ARCH=i386
+endif
+ifeq ($(ARCH),i586)
+ARCH=i386
+endif
+ifeq ($(ARCH),i686)
+ARCH=i386
+endif
 
 ###
 ### These paths are where you probably want to change things
@@ -83,40 +93,17 @@ DLL_ONLY=false
 LIB=lib
 ifeq ($(PLATFORM),linux)
 
-  ifneq (,$(findstring libc6,$(shell if [ -e /lib/libc.so.6* ];then echo libc6;fi)))
-    GLIBC=-glibc
-  else
-    GLIBC=
-  endif #libc6 test
+  GLIBC=-glibc
+  CC=gcc
+  CXX=g++
 
-  ifneq (,$(findstring alpha,$(shell uname -m)))
+  RPMARCH=$(ARCH)
+  ifeq ($(ARCH),alpha)
     ARCH=axp
-    RPMARCH=alpha
-    VENDOR=dec
   else
-    ifneq (,$(findstring ppc,$(shell uname -m)))
-      #used for linux builds
-      MESADIR=/usr/src/DRI-CVS/xc/xc/
-      ARCH=ppc
-      RPMARCH=ppc
-      VENDOR=unknown
-      DLL_ONLY=true
-    else
-    ifneq (,$(findstring x86_64,$(shell uname -m)))
-      MESADIR=../Mesa/
-      ARCH=x86_64
-      RPMARCH=x86_64
-      VENDOR=unknown
-      DLL_ONLY=false
-      LIB=lib64
-    else #default to i386
-      MESADIR=../Mesa/
-      ARCH=i386
-      RPMARCH=i386
-      VENDOR=unknown
-      DLL_ONLY=false
-      endif
-    endif
+  ifeq ($(ARCH),x86_64)
+    LIB=lib64
+  endif
   endif
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
@@ -127,8 +114,6 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -DDLL_ONLY
   endif
 
-
-  #GL_CFLAGS = -I$(MESADIR)/include -I/usr/X11R6/include
   GL_CFAGS = -I/usr/X11R6/include
 
   # bk001204 - need -O for -Wall for uninitialized
@@ -138,33 +123,16 @@ ifeq ($(PLATFORM),linux)
   DEBUG_CFLAGS = $(BASE_CFLAGS) -g
   DEBUG_CFLAGS += -DNO_MOUSEGRAB
   DEBUG_CFLAGS += -O0
-#  DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -O
-  ifeq ($(ARCH),axp)
-    CC=pgcc
-    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
+  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fno-strict-aliasing
+  ifeq ($(ARCH),x86_64)
+      OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fstrength-reduce
   else
-    ifeq ($(ARCH),ppc)
-      NEWPGCC=/loki/global/ppc/bin/gcc
-      CC=$(NEWPGCC)
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
-    endif
-    ifeq ($(ARCH),x86_64)
-    	CC=gcc
-	CXX=g++
-	RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
-    else
-      #NEWPGCC=/usr/local/gcc-2.95.2/bin/gcc # bk001205
-      #NEWPGCC=/loki/global/x86/bin/gcc
-      CC=gcc
-      CXX=g++
-# TTimo: legacy RELEASE_CFLAGS
-# NOTE: the -fomit-frame-pointer option leads to an unstable binary on my test box if it was built on the main box
-#   but building on the Mdk 7.2 baseline seems to work
-      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
-# TTimo: use this for building on P3 gcc 2.95.3 libc2.2 for all targets (experimental! -fomit-fram-pointer removed)
-#      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
-    endif
+  ifeq ($(ARCH),i386)
+      OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
   endif
+  endif
+
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   LIBEXT=a
 
@@ -222,17 +190,15 @@ GLIBC= #libc is irrelevant
 ifneq (,$(findstring alpha,$(shell uname -m)))
 ARCH=axp
 RPMARCH=alpha
-VENDOR=dec
 else #default to i386
 ARCH=i386
 RPMARCH=i386
-VENDOR=unknown
 endif #alpha test
 
 
 BASE_CFLAGS =  -pipe
 
-GL_CFLAGS = -I$(MESADIR)/include -I/usr/X11R6/include
+GL_CFLAGS = -I/usr/X11R6/include
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -Werror
 ifeq ($(ARCH),axp)
@@ -285,7 +251,6 @@ else # ifeq freebsd
 ifeq ($(PLATFORM),irix)
 
 ARCH=mips  #default to MIPS
-VENDOR=sgi
 GLIBC=  #libc is irrelevant
 
 CC=cc
