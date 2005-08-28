@@ -154,7 +154,7 @@ static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
 static ID_INLINE int BigLong(int l) { LongSwap(l); }
 #define LittleLong
-static ID_INLINE float BigFloat(const float *l) { FloatSwap(l); }
+static ID_INLINE float BigFloat(const float l) { FloatSwap(&l); }
 #define LittleFloat
 
 #define	PATH_SEP '\\'
@@ -256,6 +256,10 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 #define	CPUSTRING	"linux-alpha"
 #elif defined __x86_64__
 #define	CPUSTRING	"linux-x86_64"
+#elif defined __powerpc64__
+#define	CPUSTRING	"linux-ppc64"
+#elif defined __powerpc__
+#define	CPUSTRING	"linux-ppc"
 #else
 #define	CPUSTRING	"linux-other"
 #endif
@@ -270,12 +274,12 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 #define	BOTLIB_HARD_LINKED
 #endif
 
-#if !idppc
+#if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
 inline static short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
 inline static int BigLong(int l) { return LongSwap(l); }
 #define LittleLong
-inline static float BigFloat(const float *l) { return FloatSwap(l); }
+inline static float BigFloat(const float l) { return FloatSwap(&l); }
 #define LittleFloat
 #else
 #define BigShort
@@ -283,7 +287,7 @@ inline static short LittleShort(short l) { return ShortSwap(l); }
 #define BigLong
 inline static int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
-inline static float LittleFloat (const float *l) { return FloatSwap(l); }
+inline static float LittleFloat (const float l) { return FloatSwap(&l); }
 #endif
 
 #endif
@@ -313,7 +317,7 @@ static short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
 static int BigLong(int l) { LongSwap(l); }
 #define LittleLong
-static float BigFloat(const float *l) { FloatSwap(l); }
+static float BigFloat(const float l) { FloatSwap(&l); }
 #define LittleFloat
 #else
 #define BigShort
@@ -321,7 +325,7 @@ static short LittleShort(short l) { return ShortSwap(l); }
 #define BigLong
 static int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
-static float LittleFloat (const float *l) { return FloatSwap(l); }
+static float LittleFloat (const float l) { return FloatSwap(&l); }
 #endif
 
 #endif

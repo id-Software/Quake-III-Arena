@@ -347,14 +347,22 @@ void Sys_Init(void)
   Cmd_AddCommand ("in_restart", Sys_In_Restart_f);
 
 #if defined __linux__
-#if defined __i386__
+#  if defined __i386__
   Cvar_Set( "arch", "linux i386" );
-#elif defined __x86_64__
+#  elif defined __x86_64__
   Cvar_Set( "arch", "linux x86_64" );
-#elif defined __alpha__
+#  elif defined __powerpc64__
+  Cvar_Set( "arch", "linux ppc64" );
+#  elif defined __powerpc__
+  Cvar_Set( "arch", "linux ppc" );
+#  elif defined __alpha__
   Cvar_Set( "arch", "linux alpha" );
-#elif defined __sparc__
+#  elif defined __sparc__
   Cvar_Set( "arch", "linux sparc" );
+# else
+# error unsupported architecture
+#endif
+
 #elif defined __FreeBSD__
 
 #if defined __i386__ // FreeBSD
@@ -363,10 +371,6 @@ void Sys_Init(void)
   Cvar_Set( "arch", "freebsd alpha" );
 #else
   Cvar_Set( "arch", "freebsd unknown" );
-#endif // FreeBSD
-
-#else
-  Cvar_Set( "arch", "linux unknown" );
 #endif
 #elif defined __sun__
 #if defined __i386__
@@ -728,6 +732,8 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   snprintf (fname, sizeof(fname), "%si386.so", name);
 #elif defined __x86_64__
   snprintf (fname, sizeof(fname), "%sx86_64.so", name);
+#elif defined __powerpc64__
+  snprintf (fname, sizeof(fname), "%sppc.so", name);
 #elif defined __powerpc__   //rcg010207 - PPC support.
   snprintf (fname, sizeof(fname), "%sppc.so", name);
 #elif defined __axp__

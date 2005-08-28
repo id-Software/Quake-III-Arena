@@ -202,6 +202,10 @@ void Sys_PumpEvents( void );
 #define	CPUSTRING	"linux-alpha"
 #elif defined __x86_64__
 #define	CPUSTRING	"linux-x86_64"
+#elif defined __powerpc64__
+#define	CPUSTRING	"linux-ppc64"
+#elif defined __powerpc__
+#define	CPUSTRING	"linux-ppc"
 #else
 #define	CPUSTRING	"linux-other"
 #endif
