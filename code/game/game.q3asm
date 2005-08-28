@@ -1,6 +1,6 @@
--o "\quake3\baseq3\vm\qagame"
+-o "qagame"
 g_main
-..\g_syscalls
+../g_syscalls
 bg_misc
 bg_lib
 bg_pmove

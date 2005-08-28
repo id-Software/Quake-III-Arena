@@ -5,7 +5,7 @@ A=.a
 O=.o
 E=
 CC=cc
-CFLAGS=-g
+CFLAGS=-g -Wall
 LDFLAGS=
 LD=cc
 AR=ar ruv
@@ -22,14 +22,14 @@ T=$(TSTDIR)/
 # $Id: makefile 145 2001-10-17 21:53:10Z timo $
 
 what:
-	-@echo make all rcc lburg cpp lcc bprint liblcc triple clean clobber
+	-@echo make all q3rcc lburg q3cpp q3lcc bprint liblcc triple clean clobber
 
-all::	rcc lburg cpp lcc bprint liblcc
+all::	q3rcc lburg q3cpp q3lcc bprint liblcc
 
-rcc:	$Brcc$E
+q3rcc:	$Bq3rcc$E
 lburg:	$Blburg$E
-cpp:	$Bcpp$E
-lcc:	$Blcc$E
+q3cpp:	$Bq3cpp$E
+q3lcc:	$Bq3lcc$E
 bprint:	$Bbprint$E
 liblcc:	$Bliblcc$A
 
@@ -69,7 +69,7 @@ RCCOBJS=$Balloc$O \
 	$Bx86$O \
 	$Bx86linux$O
 
-$Brcc$E::	$Bmain$O $Blibrcc$A $(EXTRAOBJS)
+$Bq3rcc$E::	$Bmain$O $Blibrcc$A $(EXTRAOBJS)
 		$(LD) $(LDFLAGS) -o $@ $Bmain$O $(EXTRAOBJS) $Blibrcc$A $(EXTRALIBS)
 
 $Blibrcc$A:	$(RCCOBJS)
@@ -121,24 +121,24 @@ $Bsparc.c:	$Blburg$E src/sparc.md;    $Blburg src/sparc.md    $@
 $Bx86.c:	$Blburg$E src/x86.md;      $Blburg src/x86.md      $@
 $Bx86linux.c:	$Blburg$E src/x86linux.md; $Blburg src/x86linux.md $@
 
-$Brcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $B src/rcc.asdl
-$Brcc$O:	$Brcc.h;			$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -o $@ $Brcc.c
+$Bq3rcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $B src/rcc.asdl
+$Bq3rcc$O:	$Brcc.h;			$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -o $@ $Brcc.c
 $Basdl$O:	src/asdl.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -o $@ src/asdl.c
 $Bpass2$O:	src/pass2.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -o $@ src/pass2.c
 $B2html$O:	src/2html.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -o $@ src/2html.c
 
 $Bpass2$E:	$Bpass2$O $(EXTRAOBJS) $Blibrcc$A;	$(LD) $(LDFLAGS) -o $@ $Bpass2$O $(EXTRAOBJS) $Blibrcc$A $(EXTRALIBS)
-$B2html$E:	$B2html$O $Brcc$O;			$(LD) $(LDFLAGS) -o $@ $B2html$O $Brcc$O $(EXTRALIBS)
+$B2html$E:	$B2html$O $Bq3rcc$O;			$(LD) $(LDFLAGS) -o $@ $B2html$O $Bq3rcc$O $(EXTRALIBS)
 
 $Bbprint$E:	$Bbprint$O;		$(LD) $(LDFLAGS) -o $@ $Bbprint$O 
 
 $Bbprint$O:	etc/bprint.c;		$(CC) $(CFLAGS) -c -Isrc -o $@ etc/bprint.c
 
-$Blcc$E:	$Blcc$O $Bhost$O;	$(LD) $(LDFLAGS) -o $@ $Blcc$O $Bhost$O 
+$Bq3lcc$E:	$Bq3lcc$O $Bhost$O;	$(LD) $(LDFLAGS) -o $@ $Bq3lcc$O $Bhost$O 
 
 SYSTEM=$(shell cc -print-search-dirs | head -n 1 | cut -b 10-)
 
-$Blcc$O:	etc/lcc.c;	$(CC) $(CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
+$Bq3lcc$O:	etc/lcc.c;	$(CC) $(CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
 $Bhost$O:	$(HOSTFILE);	$(CC) $(CFLAGS) -c -DSYSTEM=\"$(SYSTEM)\" -o $@ $(HOSTFILE)
 
 LIBOBJS=$Bassert$O $Bbbexit$O $Byynull$O
@@ -156,15 +156,15 @@ $Blburg$O $Bgram$O:	lburg/lburg.h
 $Blburg$O:	lburg/lburg.c;	$(CC) $(CFLAGS) -c -Ilburg -o $@ lburg/lburg.c
 $Bgram$O:	lburg/gram.c;	$(CC) $(CFLAGS) -c -Ilburg -o $@ lburg/gram.c
 
-CPPOBJS=$Bcpp$O $Blexer$O $Bnlist$O $Btokens$O $Bmacro$O $Beval$O \
+CPPOBJS=$Bq3cpp$O $Blexer$O $Bnlist$O $Btokens$O $Bmacro$O $Beval$O \
 	$Binclude$O $Bhideset$O $Bgetopt$O $Bunix$O
 
-$Bcpp$E:	$(CPPOBJS)
+$Bq3cpp$E:	$(CPPOBJS)
 		$(LD) $(LDFLAGS) -o $@ $(CPPOBJS) 
 
 $(CPPOBJS):	cpp/cpp.h
 
-$Bcpp$O:	cpp/cpp.c;	$(CC) $(CFLAGS) -c -Icpp -o $@ cpp/cpp.c
+$Bq3cpp$O:	cpp/cpp.c;	$(CC) $(CFLAGS) -c -Icpp -o $@ cpp/cpp.c
 $Blexer$O:	cpp/lex.c;	$(CC) $(CFLAGS) -c -Icpp -o $@ cpp/lex.c
 $Bnlist$O:	cpp/nlist.c;	$(CC) $(CFLAGS) -c -Icpp -o $@ cpp/nlist.c
 $Btokens$O:	cpp/tokens.c;	$(CC) $(CFLAGS) -c -Icpp -o $@ cpp/tokens.c
@@ -236,17 +236,17 @@ testclean:
 install::	all
 		install -d /usr/local/lib/lcc
 		install -d /usr/local/lib/lcc/gcc
-		install $Blcc$E /usr/local/bin
-		install $Bcpp$E /usr/local/lib/lcc/gcc
-		install $Brcc$E /usr/local/lib/lcc
+		install $Bq3lcc$E /usr/local/bin
+		install $Bq3cpp$E /usr/local/lib/lcc/gcc
+		install $Bq3rcc$E /usr/local/lib/lcc
 		install $Bliblcc$A /usr/local/lib/lcc
 		install $Blibrcc$A /usr/local/lib/lcc
 
 uninstall::
 		$(RM) /usr/local/lib/lcc/librcc$A
 		$(RM) /usr/local/lib/lcc/liblcc$A
-		$(RM) /usr/local/lib/lcc/rcc$E
-		$(RM) /usr/local/lib/lcc/gcc/cpp$E
+		$(RM) /usr/local/lib/lcc/q3rcc$E
+		$(RM) /usr/local/lib/lcc/gcc/q3cpp$E
 		$(RM) /usr/local/bin/lcc$E
 		$(RMDIR) /usr/local/lib/lcc/gcc
 		$(RMDIR) /usr/local/lib/lcc
@@ -259,7 +259,7 @@ clean::		testclean
 		$(RM) $B*.ilk
 
 clobber::	clean
-		$(RM) $Brcc$E $B2html$E $Bpass2$E $Blburg$E $Bcpp$E $Blcc$E $Bbprint$E $B*$A
+		$(RM) $Bq3rcc$E $B2html$E $Bpass2$E $Blburg$E $Bq3cpp$E $Bq3lcc$E $Bbprint$E $B*$A
 		$(RM) $B*.pdb $B*.pch
 
 RCCSRCS=src/alloc.c \
@@ -298,13 +298,13 @@ RCCSRCS=src/alloc.c \
 	$Bx86linux.c \
 	$Bx86.c
 
-C=$Blcc -A -d0.6 -Wo-lccdir=$(BUILDDIR) -Isrc -I$(BUILDDIR)
-triple:	$Brcc$E $Blcc$E $Bcpp$E
+C=$Bq3lcc -A -d0.6 -Wo-lccdir=$(BUILDDIR) -Isrc -I$(BUILDDIR)
+triple:	$Bq3rcc$E $Bq3lcc$E $Bq3cpp$E
 	$C -o $B1rcc$E -B$B  $(RCCSRCS)
 	$C -o $B2rcc$E -B$B1 $(RCCSRCS)
 	strip $B1rcc$E $B2rcc$E
 	dd if=$B1rcc$E of=$Brcc1$E bs=512 skip=1
 	dd if=$B2rcc$E of=$Brcc2$E bs=512 skip=1
 	if cmp $Brcc1$E $Brcc2$E; then \
-		mv $B2rcc$E $Brcc$E; \
-		$(RM) $B1rcc$E $Brcc[12]$E; fi
+		mv $B2rcc$E $Bq3rcc$E; \
+		$(RM) $B1rcc$E $Bq3rcc[12]$E; fi

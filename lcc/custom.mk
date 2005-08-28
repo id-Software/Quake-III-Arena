@@ -1,1 +1,1 @@
-BUILDDIR=/tmp
+BUILDDIR=.obj
