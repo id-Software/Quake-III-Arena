@@ -273,6 +273,19 @@ qboolean	Sys_IsLANAddress (netadr_t adr) {
 		return qfalse;
 	}
 
+	// RFC1918:
+	// 10.0.0.0        -   10.255.255.255  (10/8 prefix)
+	// 172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+	// 192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+	if(adr.ip[0] == 10)
+		return qtrue;
+	if(adr.ip[0] == 172 && adr.ip[1]&0xf0 == 16)
+		return qtrue;
+	if(adr.ip[0] == 192 && adr.ip[1] == 168)
+		return qtrue;
+
+	// the checks below are bogus, aren't they? -- ln
+
 	// choose which comparison to use based on the class of the address being tested
 	// any local adresses of a different class than the address being tested will fail based on the first byte
 
