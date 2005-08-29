@@ -1,4 +1,4 @@
-VERSION=1.32b_ioSVNr$(shell LANG=C svnversion .)
+VERSION=1.33_SVN$(shell LANG=C svnversion .)
 
 release debug clean:
 	$(MAKE) -C code/unix $@
