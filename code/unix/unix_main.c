@@ -775,7 +775,8 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 
       if ( !libHandle )
       {
-#ifndef NDEBUG // bk001206 - in debug abort on failure
+#if 0 // don't abort -- ln
+//#ifndef NDEBUG // bk001206 - in debug abort on failure
         Com_Error ( ERR_FATAL, "Sys_LoadDll(%s) failed dlopen() completely!\n", name  );
 #else
         Com_Printf ( "Sys_LoadDll(%s) failed dlopen() completely!\n", name );
