@@ -2838,6 +2838,9 @@ if the full version is not found
 static void FS_SetRestrictions( void ) {
 	searchpath_t	*path;
 
+	Com_Printf("smells like demo data, continueing anyways\n");
+	return;
+
 #ifndef PRE_RELEASE_DEMO
 	char	*productId;
 
@@ -3254,10 +3257,8 @@ void FS_InitFilesystem( void ) {
 	// try to start up normally
 	FS_Startup( BASEGAME );
 
-#if 0
 	// see if we are going to allow add-ons
 	FS_SetRestrictions();
-#endif
 
 	// if we can't find default.cfg, assume that the paths are
 	// busted and error out now, rather than getting an unreadable
