@@ -46,7 +46,7 @@ BDIR=$(MOUNT_DIR)/../run
 # BUILD_NAME=$(BUILD_NAME)
 BUILD_NAME=quake3
 
-
+BUILD_FREETYPE=0
 
 #############################################################################
 ##
@@ -155,6 +155,13 @@ ifeq ($(PLATFORM),linux)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
   GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
+
+  DEBUG_CFLAGS += -DHAVE_EXECINFO_H
+  ifeq ($(BUILD_FREETYPE),1)
+    RELEASE_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
+    DEBUG_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
+    LDFLAGS += $(shell pkg-config --libs freetype2)
+  endif
 
   ifeq ($(ARCH),i386)
     # linux32 make ...

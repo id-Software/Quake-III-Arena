@@ -74,11 +74,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 
 #ifdef BUILD_FREETYPE
-#include "../ft2/fterrors.h"
-#include "../ft2/ftsystem.h"
-#include "../ft2/ftimage.h"
-#include "../ft2/freetype.h"
-#include "../ft2/ftoutln.h"
+#include <ft2build.h>
+#include <freetype/fterrors.h>
+#include <freetype/ftsystem.h>
+#include <freetype/ftimage.h>
+#include <freetype/freetype.h>
+#include <freetype/ftoutln.h>
 
 #define _FLOOR(x)  ((x) & -64)
 #define _CEIL(x)   (((x)+63) & -64)
@@ -310,7 +311,7 @@ typedef union {
 
 float readFloat() {
 	poor	me;
-#if idppc
+#if __WORD_ORDER == __BIG_ENDIAN
 	me.fred[0] = fdFile[fdOffset+3];
 	me.fred[1] = fdFile[fdOffset+2];
 	me.fred[2] = fdFile[fdOffset+1];
@@ -341,6 +342,12 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
   char name[1024];
 	float dpi = 72;											//
 	float glyphScale =  72.0f / dpi; 		// change the scale to be relative to 1 based on 72 dpi ( so dpi of 144 means a scale of .5 )
+
+
+  if (!fontName) {
+    ri.Printf(PRINT_ALL, "RE_RegisterFont: called with empty name\n");
+    return;
+  }
 
 	if (pointSize <= 0) {
 		pointSize = 12;
