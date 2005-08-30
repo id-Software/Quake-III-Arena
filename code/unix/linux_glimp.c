@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 **
 */
 
+#if !USE_SDL
+
 #include <termios.h>
 #include <sys/ioctl.h>
 #ifdef __linux__
@@ -1778,3 +1780,6 @@ void Sys_SendKeyEvents (void) {
 void IN_StartupJoystick( void ) {}
 void IN_JoyMove( void ) {}
 #endif
+
+#endif  // !USE_SDL
+
