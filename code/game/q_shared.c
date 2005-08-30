@@ -180,11 +180,10 @@ typedef union {
 } _FloatByteUnion;
 
 float FloatSwap (const float *f) {
-	const _FloatByteUnion *in;
 	_FloatByteUnion out;
 
-	in = (_FloatByteUnion *)f;
-	out.i = LongSwap(in->i);
+	out.f = *f;
+	out.i = LongSwap(out.i);
 
 	return out.f;
 }
