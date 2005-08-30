@@ -330,10 +330,10 @@ static inline float _vmf(long x)
 {
 	union {
 		long l;
-		float fh, fl;
+		float f;
 	} t;
 	t.l = x;
-	return t.fl;
+	return t.f;
 }
 #define	VMF(x)	_vmf(args[x])
 

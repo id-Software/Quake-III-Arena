@@ -484,8 +484,7 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 		}
 	}
 
-	// always try dll first? -- ln
-	if ( 1 || interpret == VMI_NATIVE ) {
+	if ( interpret == VMI_NATIVE ) {
 		// try to load as a system dll
 		Com_Printf( "Loading dll file %s.\n", vm->name );
 		vm->dllHandle = Sys_LoadDll( module, vm->fqpath , &vm->entryPoint, VM_DllSyscall );
