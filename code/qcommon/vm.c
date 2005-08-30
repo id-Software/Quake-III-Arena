@@ -716,8 +716,10 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9], args[10], args[11],
                             args[12], args[13], args[14], args[15]);
+#if defined(HAVE_VM_COMPILED)
 	} else if ( vm->compiled ) {
 		r = VM_CallCompiled( vm, &callnum );
+#endif
 	} else {
 		struct {
 			int callnum;

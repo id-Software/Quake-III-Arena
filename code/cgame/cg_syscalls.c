@@ -28,10 +28,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "cg_local.h"
 
-static long (QDECL *syscall)( int arg, ... ) = (long (QDECL *)( int, ...))-1;
+static long (QDECL *syscall)( long arg, ... ) = (long (QDECL *)( long, ...))-1;
 
 
-void dllEntry( long (QDECL  *syscallptr)( int arg,... ) ) {
+void dllEntry( long (QDECL  *syscallptr)( long arg,... ) ) {
 	syscall = syscallptr;
 }
 

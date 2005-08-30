@@ -12,3 +12,22 @@ http://www.qeradiant.com/
 
 cd code/unix && make
 Refer to the web-site for updated status, enjoy!
+
+Using shared libraries instead of qvm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To make quake3 prefer shared libraries instead of qvm run it with
+the following parameters:
++set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0
+
+Using Demo Data Files
+~~~~~~~~~~~~~~~~~~~~~
+you only need demoq3/pak0.pk3 from the demo installer. The qvm files inside
+pak0.pk3 will not work, you have to use the native shared libraries from this
+project. To do so copy or link ui*.so, qagame*.so, cgame*.so from baseq3 to
+demoq3 and run quake3 with the parameters described above.
+
+64bit mods
+~~~~~~~~~~
+To compile working(!) shared libraries for 64bit mods the vmMain and
+dllEntry functions as well as the syscall pointer have to be changed
+to accept and return long instead of int.
