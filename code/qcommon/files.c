@@ -3254,8 +3254,10 @@ void FS_InitFilesystem( void ) {
 	// try to start up normally
 	FS_Startup( BASEGAME );
 
+#if 0
 	// see if we are going to allow add-ons
 	FS_SetRestrictions();
+#endif
 
 	// if we can't find default.cfg, assume that the paths are
 	// busted and error out now, rather than getting an unreadable
