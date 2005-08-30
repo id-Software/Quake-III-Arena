@@ -733,7 +733,7 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 #elif defined __x86_64__
   snprintf (fname, sizeof(fname), "%sx86_64.so", name);
 #elif defined __powerpc64__
-  snprintf (fname, sizeof(fname), "%sppc.so", name);
+  snprintf (fname, sizeof(fname), "%sppc64.so", name);
 #elif defined __powerpc__   //rcg010207 - PPC support.
   snprintf (fname, sizeof(fname), "%sppc.so", name);
 #elif defined __axp__
