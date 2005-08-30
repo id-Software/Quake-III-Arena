@@ -527,10 +527,10 @@ extern char		*FS_BuildOSPath( const char *base, const char *game, const char *qp
 // fqpath will be empty if dll not loaded, otherwise will hold fully qualified path of dll module loaded
 // fqpath buffersize must be at least MAX_QPATH+1 bytes long
 void * QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoint)(int, ...),
-				  int (QDECL *systemcalls)(int, ...) ) {
+				  long (QDECL *systemcalls)(long, ...) ) {
 	static int	lastWarning = 0;
 	HINSTANCE	libHandle;
-	void	(QDECL *dllEntry)( int (QDECL *syscallptr)(int, ...) );
+	void	(QDECL *dllEntry)( long (QDECL *syscallptr)(long, ...) );
 	char	*basepath;
 	char	*cdpath;
 	char	*gamedir;

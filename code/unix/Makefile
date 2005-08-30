@@ -130,6 +130,7 @@ ifeq ($(PLATFORM),linux)
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fno-strict-aliasing
   ifeq ($(ARCH),x86_64)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fstrength-reduce -fno-strict-aliasing
+    BASE_CFLAGS += -DHAVE_VM_NATIVE
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce

@@ -127,7 +127,7 @@ struct vm_s {
     // DO NOT MOVE OR CHANGE THESE WITHOUT CHANGING THE VM_OFFSET_* DEFINES
     // USED BY THE ASM CODE
     int			programStack;		// the vm may be recursively entered
-    int			(*systemCall)( int *parms );
+    long			(*systemCall)( long *parms );
 
 	//------------------------------------
    
@@ -135,7 +135,7 @@ struct vm_s {
 
 	// for dynamic linked modules
 	void		*dllHandle;
-	int			(QDECL *entryPoint)( int callNum, ... );
+	long			(QDECL *entryPoint)( long callNum, ... );
 
 	// for interpreted modules
 	qboolean	currentlyInterpreting;
