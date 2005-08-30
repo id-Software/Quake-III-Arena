@@ -103,6 +103,10 @@ ifeq ($(PLATFORM),linux)
   else
   ifeq ($(ARCH),x86_64)
     LIB=lib64
+  else
+  ifeq ($(ARCH),ppc)
+    VM_PPC=vm_none
+  endif
   endif
   endif
 
@@ -125,10 +129,15 @@ ifeq ($(PLATFORM),linux)
   DEBUG_CFLAGS += -O0
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fno-strict-aliasing
   ifeq ($(ARCH),x86_64)
-      OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fstrength-reduce -fno-strict-aliasing
+    OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fstrength-reduce -fno-strict-aliasing
   else
   ifeq ($(ARCH),i386)
-      OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+    OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+    BASE_CFLAGS += -DHAVE_VM_NATIVE -DHAVE_VM_COMPILED
+  else
+  ifeq ($(ARCH),ppc)
+    BASE_CFLAGS += -DHAVE_VM_NATIVE
+  endif
   endif
   endif
 
@@ -511,7 +520,7 @@ Q3OBJ = \
 
     ifeq ($(ARCH),ppc)
       ifeq ($(DLL_ONLY),false)
-        Q3OBJ += $(B)/client/vm_ppc.o
+        Q3OBJ += $(B)/client/$(VM_PPC).o
       endif
     endif
 
@@ -742,7 +751,7 @@ endif
 
 ifeq ($(ARCH),ppc)
 ifeq ($(DLL_ONLY),false)
-$(B)/client/vm_ppc.o : $(CMDIR)/vm_ppc.c; $(DO_CC)
+$(B)/client/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_CC)
 endif
 endif
 
@@ -835,7 +844,7 @@ endif
 
 ifeq ($(ARCH),ppc)
   ifeq ($(DLL_ONLY),false)
-    Q3DOBJ += $(B)/ded/vm_ppc.o
+    Q3DOBJ += $(B)/ded/$(VM_PPC).o
   endif
 endif
 
@@ -920,7 +929,7 @@ endif
 
 ifeq ($(ARCH),ppc)
 ifeq ($(DLL_ONLY),false)
-$(B)/ded/vm_ppc.o : $(CMDIR)/vm_ppc.c; $(DO_DED_CC)
+$(B)/ded/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_DED_CC)
 endif
 endif
 
@@ -1547,7 +1556,7 @@ endif
 
 ifeq ($(ARCH),ppc)
   ifeq ($(DLL_ONLY),false)
-    Q3SOBJ += $(B)/q3static/vm_ppc.o
+    Q3SOBJ += $(B)/q3static/$(VM_PPC).o
   endif
 endif
 
@@ -1706,7 +1715,7 @@ endif
 
 ifeq ($(ARCH),ppc)
 ifeq ($(DLL_ONLY),false)
-$(B)/q3static/vm_ppc.o : $(CMDIR)/vm_ppc.c; $(DO_CC) -DQ3_STATIC
+$(B)/q3static/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_CC) -DQ3_STATIC
 endif
 endif
 

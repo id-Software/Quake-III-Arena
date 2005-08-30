@@ -450,11 +450,6 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 		Com_Error( ERR_FATAL, "VM_Create: bad parms" );
 	}
 
-#if !defined(__i386__) && !defined(__ppc__)
-	if(interpret >= VMI_COMPILED)
-		interpret = VMI_BYTECODE;
-#endif
-
 	remaining = Hunk_MemoryRemaining();
 
 	// see if we already have the VM
@@ -481,6 +476,7 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 	Q_strncpyz( vm->name, module, sizeof( vm->name ) );
 	vm->systemCall = systemCalls;
 
+#if defined(HAVE_VM_NATIVE)
 	// never allow dll loading with a demo
 	if ( interpret == VMI_NATIVE ) {
 		if ( Cvar_VariableValue( "fs_restrict" ) ) {
@@ -499,6 +495,12 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 		Com_Printf( "Failed to load dll, looking for qvm.\n" );
 		interpret = VMI_COMPILED;
 	}
+#else
+	if ( interpret == VMI_NATIVE ) {
+		Com_Printf("Architecture doesn't support native dll's, using qvm\n");
+		interpret = VMI_COMPILED;
+	}
+#endif
 
 	// load the image
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
@@ -550,6 +552,13 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 
 	// copy or compile the instructions
 	vm->codeLength = header->codeLength;
+
+#if !defined(HAVE_VM_COMPILED)
+	if(interpret >= VMI_COMPILED) {
+		Com_Printf("Architecture doesn't have a bytecode compiler, using interpreter\n");
+		interpret = VMI_BYTECODE;
+	}
+#endif
 
 	if ( interpret >= VMI_COMPILED ) {
 		vm->compiled = qtrue;
@@ -707,10 +716,8 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9], args[10], args[11],
                             args[12], args[13], args[14], args[15]);
-#if defined(__ppc__) || defined(__i386__)
 	} else if ( vm->compiled ) {
 		r = VM_CallCompiled( vm, &callnum );
-#endif
 	} else {
 		struct {
 			int callnum;
