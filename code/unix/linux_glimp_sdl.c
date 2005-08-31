@@ -165,12 +165,6 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
      return buf;
   }
 
-  if (keysym->unicode == '~')  // the console.
-  {
-    buf[0] = *key = '~';
-    return buf;
-  }
-
   buf[0] = '\0';
 
   switch (keysym->sym)
@@ -210,7 +204,7 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
 
     // bk001206 - from Ryan's Fakk2 
     //case SDLK_BackSpace: *key = 8; break; // ctrl-h
-  case SDLK_BACKSPACE: *key = K_BACKSPACE; break; // ctrl-h
+  case SDLK_BACKSPACE: *key = K_BACKSPACE; buf[0] = 8; break; // ctrl-h
   case SDLK_KP_PERIOD: *key = K_KP_DEL; break;
   case SDLK_DELETE: *key = K_DEL; break;
   case SDLK_PAUSE:  *key = K_PAUSE;    break;
@@ -235,6 +229,9 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   case SDLK_KP_DIVIDE: *key = K_KP_SLASH; break;
   case SDLK_SPACE: *key = K_SPACE; break;
 
+  // !!! FIXME: Console key...may not be accurate on all keyboards!
+  case SDLK_BACKQUOTE: *key = '~'; break;
+
   default:
     if (keysym->unicode <= 255)  // maps to ASCII?
     {
@@ -252,7 +249,7 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
     break;
   } 
 
-  return NULL;
+  return buf;
 }
 
 static void install_grabs(void)
@@ -319,7 +316,13 @@ static void HandleEvents(void)
 
     case SDL_MOUSEMOTION:
       if (mouse_active)
+      {
+        if (abs(e.motion.xrel) > 1)
+          e.motion.xrel *= 2;
+        if (abs(e.motion.yrel) > 1)
+          e.motion.yrel *= 2;
         Sys_QueEvent( t, SE_MOUSE, e.motion.xrel, e.motion.yrel, 0, NULL );
+      }
       break;
 
     case SDL_MOUSEBUTTONDOWN:
@@ -489,11 +492,13 @@ static qboolean GLW_StartDriverAndSetMode( const char *drivername,
 
   if (!SDL_WasInit(SDL_INIT_VIDEO))
   {
+    ri.Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_VIDEO)...\n");
     if (SDL_Init(SDL_INIT_VIDEO) == -1)
     {
 		ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) failed: %s\n", SDL_GetError());
         return qfalse;
     }
+    ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) passed.\n");
   }
 
   // don't ever bother going into fullscreen with a voodoo card
@@ -1286,11 +1291,13 @@ void IN_StartupJoystick( void )
 
   if (!SDL_WasInit(SDL_INIT_JOYSTICK))
   {
+      Com_Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_JOYSTICK)...\n");
       if (SDL_Init(SDL_INIT_JOYSTICK) == -1)
       {
           Com_Printf("SDL_Init(SDL_INIT_JOYSTICK) failed: %s\n", SDL_GetError());
           return;
       }
+      Com_Printf( PRINT_ALL, "SDL_Init(SDL_INIT_JOYSTICK) passed.\n");
   }
 
   total = SDL_NumJoysticks();
