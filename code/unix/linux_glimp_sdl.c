@@ -109,14 +109,6 @@ cvar_t   *joy_threshold    = NULL;
 cvar_t  *r_allowSoftwareGL;   // don't abort out if the pixelformat claims software
 cvar_t  *r_previousglDriver;
 
-static int win_x, win_y;
-
-static int num_vidmodes;
-
-static int mouse_accel_numerator;
-static int mouse_accel_denominator;
-static int mouse_threshold;    
-
 /*
 * Find the first occurrence of find in s.
 */
@@ -1280,6 +1272,13 @@ extern cvar_t *  in_joystick;
 extern cvar_t *  in_joystickDebug;
 extern cvar_t *  joy_threshold;
 
+#define ARRAYLEN(x) (sizeof (x) / sizeof (x[0]))
+struct
+{
+    qboolean buttons[16];  // !!! FIXME: these might be too many.
+    unsigned int oldaxes;
+} stick_state;
+
 
 /**********************************************/
 /* Joystick routines.                         */
@@ -1294,6 +1293,7 @@ void IN_StartupJoystick( void )
     SDL_JoystickClose(stick);
 
   stick = NULL;
+  memset(&stick_state, '\0', sizeof (stick_state));
 
   if( !in_joystick->integer ) {
     Com_Printf( "Joystick is not active.\n" );
@@ -1325,6 +1325,7 @@ void IN_StartupJoystick( void )
     Com_Printf( "Joystick %d opened\n", i );
     Com_Printf( "Name:    %s\n", SDL_JoystickName(i) );
     Com_Printf( "Axes:    %d\n", SDL_JoystickNumAxes(stick) );
+    Com_Printf( "Hats:    %d\n", SDL_JoystickNumHats(stick) );
     Com_Printf( "Buttons: %d\n", SDL_JoystickNumButtons(stick) );
     Com_Printf( "Balls: %d\n", SDL_JoystickNumBalls(stick) );
 
@@ -1343,83 +1344,96 @@ void IN_StartupJoystick( void )
 
 void IN_JoyMove( void )
 {
-  if (!stick)
-    return;
+    qboolean joy_pressed[ARRAYLEN(joy_keys)];
+    unsigned int axes = 0;
+    int total = 0;
+    int i = 0;
 
-  SDL_JoystickUpdate();
+    if (!stick)
+        return;
 
-#if 0   // !!! FIXME: convert this from the Linux codebase.
-  /* Store instantaneous joystick state. Hack to get around
-   * event model used in Linux joystick driver.
-	 */
-  static int axes_state[16];
-  /* Old bits for Quake-style input compares. */
-  static unsigned int old_axes = 0;
-  /* Our current goodies. */
-  unsigned int axes = 0;
-  int i = 0;
+    SDL_JoystickUpdate();
 
-  if( joy_fd == -1 ) {
-    return;
-  }
+    memset(joy_pressed, '\0', sizeof (joy_pressed));
 
-  /* Empty the queue, dispatching button presses immediately
-	 * and updating the instantaneous state for the axes.
-	 */
-  do {
-    int n = -1;
-    struct js_event event;
-
-    n = read( joy_fd, &event, sizeof( event ) );
-
-    if( n == -1 ) {
-      /* No error, we're non-blocking. */
-      break;
+    // update the ball state.
+    total = SDL_JoystickNumBalls(stick);
+    if (total > 0)
+    {
+        int balldx = 0;
+        int balldy = 0;
+        for (i = 0; i < total; i++)
+        {
+            int dx = 0;
+            int dy = 0;
+            SDL_JoystickGetBall(stick, i, &dx, &dy);
+            balldx += dx;
+            balldy += dy;
+        }
+        if (balldx || balldy)
+        {
+            // !!! FIXME: is this good for stick balls, or just mice?
+            // Scale like the mouse input...
+            if (abs(balldx) > 1)
+                balldx *= 2;
+            if (abs(balldy) > 1)
+                balldy *= 2;
+            Sys_QueEvent( 0, SE_MOUSE, balldx, balldy, 0, NULL );
+        }
     }
 
-    if( event.type & JS_EVENT_BUTTON ) {
-      Sys_QueEvent( 0, SE_KEY, K_JOY1 + event.number, event.value, 0, NULL );
-    } else if( event.type & JS_EVENT_AXIS ) {
-
-      if( event.number >= 16 ) {
-	continue;
-      }
-
-      axes_state[event.number] = event.value;
-    } else {
-      Com_Printf( "Unknown joystick event type\n" );
+    // now query the stick buttons...
+    total = SDL_JoystickNumButtons(stick);
+    if (total > 0)
+    {
+        if (total > ARRAYLEN(stick_state.buttons))
+            total = ARRAYLEN(stick_state.buttons);
+        for (i = 0; i < total; i++)
+        {
+            qboolean pressed = (SDL_JoystickGetButton(stick, i) != 0);
+            if (pressed != stick_state.buttons[i])
+            {
+                Sys_QueEvent( 0, SE_KEY, K_JOY1 + i, pressed, 0, NULL );
+                stick_state.buttons[i] = pressed;
+            }
+        }
     }
 
-  } while( 1 );
+    // !!! FIXME: look at the hats...
 
-
-  /* Translate our instantaneous state to bits. */
-  for( i = 0; i < 16; i++ ) {
-    float f = ( (float) axes_state[i] ) / 32767.0f;
-
-    if( f < -joy_threshold->value ) {
-      axes |= ( 1 << ( i * 2 ) );
-    } else if( f > joy_threshold->value ) {
-      axes |= ( 1 << ( ( i * 2 ) + 1 ) );
+    // finally, look at the axes...
+    total = SDL_JoystickNumAxes(stick);
+    if (total > 0)
+    {
+        if (total > 16) total = 16;
+        for (i = 0; i < total; i++)
+        {
+            Sint16 axis = SDL_JoystickGetAxis(stick, i);
+            float f = ( (float) axis ) / 32767.0f;
+            if( f < -joy_threshold->value ) {
+                axes |= ( 1 << ( i * 2 ) );
+            } else if( f > joy_threshold->value ) {
+                axes |= ( 1 << ( ( i * 2 ) + 1 ) );
+            }
+        }
     }
 
-  }
+    /* Time to update axes state based on old vs. new. */
+    if (axes != stick_state.oldaxes)
+    {
+        for( i = 0; i < 16; i++ ) {
+            if( ( axes & ( 1 << i ) ) && !( stick_state.oldaxes & ( 1 << i ) ) ) {
+                Sys_QueEvent( 0, SE_KEY, joy_keys[i], qtrue, 0, NULL );
+            }
 
-  /* Time to update axes state based on old vs. new. */
-  for( i = 0; i < 16; i++ ) {
-
-    if( ( axes & ( 1 << i ) ) && !( old_axes & ( 1 << i ) ) ) {
-      Sys_QueEvent( 0, SE_KEY, joy_keys[i], qtrue, 0, NULL );
+            if( !( axes & ( 1 << i ) ) && ( stick_state.oldaxes & ( 1 << i ) ) ) {
+                Sys_QueEvent( 0, SE_KEY, joy_keys[i], qfalse, 0, NULL );
+            }
+        }
     }
 
-    if( !( axes & ( 1 << i ) ) && ( old_axes & ( 1 << i ) ) ) {
-      Sys_QueEvent( 0, SE_KEY, joy_keys[i], qfalse, 0, NULL );
-    }
-  }
-
-  /* Save for future generations. */
-  old_axes = axes;
-#endif
+    /* Save for future generations. */
+    stick_state.oldaxes = axes;
 }
 
 #endif  // USE_SDL
