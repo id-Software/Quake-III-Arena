@@ -131,7 +131,7 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -DUSE_SDL=1 $(shell sdl-config --cflags)
   endif
 
-  GL_CFAGS = -I/usr/X11R6/include
+  GL_CFLAGS = -I/usr/X11R6/include
 
   # bk001204 - need -O for -Wall for uninitialized
   # bk001205 - took out -O to get assertions (NDEBUG)
