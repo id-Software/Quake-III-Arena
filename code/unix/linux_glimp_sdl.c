@@ -76,6 +76,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	WINDOW_CLASS_NAME	"Quake III: Arena"
 #define	WINDOW_CLASS_NAME_BRIEF	"quake3"
 
+//#define KBD_DBG
+
 typedef enum
 {
   RSERR_OK,
@@ -149,24 +151,19 @@ static const char *Q_stristr( const char *s, const char *find)
   return s;
 }
 
-//#define KBD_DBG
-
 static const char *XLateKey(SDL_keysym *keysym, int *key)
 {
   static char buf[2] = { '\0', '\0' };
   *key = 0;
 
+  *buf = '\0';
+
   // these happen to match the ASCII chars.
-  if ( ((keysym->sym >= SDLK_a) && (keysym->sym <= SDLK_z)) ||
-       ((keysym->sym >= SDLK_0) && (keysym->sym <= SDLK_9)) )
+  if ((keysym->sym >= ' ') && (keysym->sym <= '~'))
   {
      *key = (int) keysym->sym;
-     buf[0] = (char) *key;
-     return buf;
   }
-
-  buf[0] = '\0';
-
+  else
   switch (keysym->sym)
   {
   case SDLK_PAGEUP: *key = K_PGUP; break;
@@ -203,8 +200,7 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   case SDLK_F12:    *key = K_F12;      break;
 
     // bk001206 - from Ryan's Fakk2 
-    //case SDLK_BackSpace: *key = 8; break; // ctrl-h
-  case SDLK_BACKSPACE: *key = K_BACKSPACE; buf[0] = 8; break; // ctrl-h
+  case SDLK_BACKSPACE: *key = K_BACKSPACE; break; // ctrl-h
   case SDLK_KP_PERIOD: *key = K_KP_DEL; break;
   case SDLK_DELETE: *key = K_DEL; break;
   case SDLK_PAUSE:  *key = K_PAUSE;    break;
@@ -227,27 +223,21 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   case SDLK_KP_PLUS:  *key = K_KP_PLUS; break;
   case SDLK_KP_MINUS: *key = K_KP_MINUS; break;
   case SDLK_KP_DIVIDE: *key = K_KP_SLASH; break;
-  case SDLK_SPACE: *key = K_SPACE; break;
-
-  // !!! FIXME: Console key...may not be accurate on all keyboards!
-  case SDLK_BACKQUOTE: *key = '~'; break;
-
-  default:
-    if (keysym->unicode <= 255)  // maps to ASCII?
-    {
-        char ch = (char) keysym->unicode;
-        if (ch >= 'A' && ch <= 'Z')
-            ch = ch - 'A' + 'a';
-        // if ctrl is pressed, the keys are not between 'A' and 'Z', for instance ctrl-z == 26 ^Z ^C etc.
-        // see https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=19
-        else if (ch >= 1 && ch <= 26)
-            ch = ch + 'a' - 1;
-
-        buf[0] = ch;
-        return buf;
-    }
-    break;
+  default: break;
   } 
+
+  if (keysym->unicode <= 255 && keysym->unicode >= 20)  // maps to ASCII?
+  {
+      char ch = (char) keysym->unicode;
+      if (ch == '~')
+	*key = '~'; // console HACK
+      else if (ch >= 'A' && ch <= 'Z')
+	  ch = ch - 'A' + 'a';
+
+      buf[0] = ch;
+  }
+  else if(keysym->unicode == 8) // ctrl-h
+      buf[0] = 8;
 
   return buf;
 }
@@ -262,6 +252,21 @@ static void uninstall_grabs(void)
 {
     SDL_ShowCursor(1);
     SDL_WM_GrabInput(SDL_GRAB_OFF);
+}
+
+static void printkey(const SDL_Event* event)
+{
+#ifdef KBD_DBG
+  printf("key name: %s", SDL_GetKeyName(event->key.keysym.sym));
+  if(event->key.keysym.unicode)
+  {
+    printf(" unicode: %hx", event->key.keysym.unicode);
+    if (event->key.keysym.unicode >= '0'
+	&& event->key.keysym.unicode <= '~')  // printable?
+      printf(" (%c)", (unsigned char)(event->key.keysym.unicode));
+  }
+  puts("");
+#endif
 }
 
 static void HandleEvents(void)
@@ -297,6 +302,7 @@ static void HandleEvents(void)
     switch (e.type)
     {
     case SDL_KEYDOWN:
+      printkey(&e);
       p = XLateKey(&e.key.keysym, &key);
       if (key)
       {
@@ -1419,4 +1425,5 @@ void IN_JoyMove( void )
 #endif  // USE_SDL
 
 // end of linux_glimp_sdl.c ...
+
 
