@@ -2005,7 +2005,7 @@ rpm: $(BUILD_NAME).spec
 copyfiles:
 	-mkdir -p -m 0755 $(COPYDIR)
 	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
-	install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
+#	install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
 	install -s -m 0755 $(BR)/linuxq3ded $(COPYDIR)/q3ded
 	-mkdir -p -m 0755 $(COPYDIR)/baseq3
 	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
