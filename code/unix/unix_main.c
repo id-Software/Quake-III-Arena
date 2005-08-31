@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <libgen.h> // dirname
 #ifdef __linux__ // rb010123
   #include <mntent.h>
 #endif
@@ -707,6 +708,31 @@ changed the load procedure to match VFS logic, and allow developer use
 */
 extern char   *FS_BuildOSPath( const char *base, const char *game, const char *qpath );
 
+static void* try_dlopen(const char* base, const char* gamedir, const char* fname, char* fqpath )
+{
+  void* libHandle;
+  char* fn;
+
+  *fqpath = 0;
+
+// bk001129 - was RTLD_LAZY 
+#define Q_RTLD    RTLD_NOW
+
+  fn = FS_BuildOSPath( base, gamedir, fname );
+  Com_Printf( "Sys_LoadDll(%s)... \n", fn );
+  libHandle = dlopen( fn, Q_RTLD );
+
+  if(!libHandle) {
+    Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, dlerror() );
+    return NULL;
+  }
+
+  Com_Printf ( "Sys_LoadDll(%s): succeeded ...\n", fn );
+  Q_strncpyz ( fqpath , fn , MAX_QPATH ) ;		// added 7/20/02 by T.Ray
+
+  return libHandle;
+}
+
 void *Sys_LoadDll( const char *name, char *fqpath ,
                    long (**entryPoint)(long, ...),
                    long (*systemcalls)(long, ...) ) 
@@ -718,12 +744,10 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   char  *basepath;
   char  *homepath;
   char  *pwdpath;
+  char  *cdpath;
   char  *gamedir;
-  char  *fn;
   const char*  err = NULL;
 	
-	*fqpath = 0;
-
   // bk001206 - let's have some paranoia
   assert( name );
 
@@ -744,50 +768,33 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 #error Unknown arch
 #endif
 
-// bk001129 - was RTLD_LAZY 
-#define Q_RTLD    RTLD_NOW
-
+  // TODO: use fs_searchpaths from files.c
   pwdpath = Sys_Cwd();
   basepath = Cvar_VariableString( "fs_basepath" );
   homepath = Cvar_VariableString( "fs_homepath" );
+  cdpath = Cvar_VariableString( "fs_cdpath" );
   gamedir = Cvar_VariableString( "fs_game" );
 
-  // pwdpath
-  fn = FS_BuildOSPath( pwdpath, gamedir, fname );
-  Com_Printf( "Sys_LoadDll(%s)... \n", fn );
-  libHandle = dlopen( fn, Q_RTLD );
+  libHandle = try_dlopen(pwdpath, gamedir, fname, fqpath);
 
-  if ( !libHandle )
-  {
-    Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, dlerror() );
-    // fs_homepath
-    fn = FS_BuildOSPath( homepath, gamedir, fname );
-    Com_Printf( "Sys_LoadDll(%s)... \n", fn );
-    libHandle = dlopen( fn, Q_RTLD );
+  if(!libHandle && homepath)
+    libHandle = try_dlopen(homepath, gamedir, fname, fqpath);
 
-    if ( !libHandle )
-    {
-      Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, dlerror() );
-      // fs_basepath
-      fn = FS_BuildOSPath( basepath, gamedir, fname );
-      Com_Printf( "Sys_LoadDll(%s)... \n", fn );
-      libHandle = dlopen( fn, Q_RTLD );
+  if(!libHandle && basepath)
+    libHandle = try_dlopen(basepath, gamedir, fname, fqpath);
 
-      if ( !libHandle )
-      {
+  if(!libHandle && cdpath)
+    libHandle = try_dlopen(cdpath, gamedir, fname, fqpath);
+
+  if(!libHandle) {
 #if 0 // don't abort -- ln
 //#ifndef NDEBUG // bk001206 - in debug abort on failure
-        Com_Error ( ERR_FATAL, "Sys_LoadDll(%s) failed dlopen() completely!\n", name  );
+    Com_Error ( ERR_FATAL, "Sys_LoadDll(%s) failed dlopen() completely!\n", name  );
 #else
-        Com_Printf ( "Sys_LoadDll(%s) failed dlopen() completely!\n", name );
+    Com_Printf ( "Sys_LoadDll(%s) failed dlopen() completely!\n", name );
 #endif
-        return NULL;
-      } else
-        Com_Printf ( "Sys_LoadDll(%s): succeeded ...\n", fn );
-    } else
-      Com_Printf ( "Sys_LoadDll(%s): succeeded ...\n", fn );
-  } else
-    Com_Printf ( "Sys_LoadDll(%s): succeeded ...\n", fn ); 
+    return NULL;
+  }
 
   dllEntry = dlsym( libHandle, "dllEntry" ); 
   *entryPoint = dlsym( libHandle, "vmMain" );
@@ -808,7 +815,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   Com_Printf ( "Sys_LoadDll(%s) found **vmMain** at  %p  \n", name, *entryPoint ); // bk001212
   dllEntry( systemcalls );
   Com_Printf ( "Sys_LoadDll(%s) succeeded!\n", name );
-  if ( libHandle ) Q_strncpyz ( fqpath , fn , MAX_QPATH ) ;		// added 7/20/02 by T.Ray
   return libHandle;
 }
 
@@ -1236,6 +1242,7 @@ int main ( int argc, char* argv[] )
   // int 	oldtime, newtime; // bk001204 - unused
   int   len, i;
   char  *cmdline;
+  char cdpath[PATH_MAX] = {0};
   void Sys_SetDefaultCDPath(const char *path);
 
   // go back to real user for config loads
@@ -1244,7 +1251,8 @@ int main ( int argc, char* argv[] )
 
   Sys_ParseArgs( argc, argv );  // bk010104 - added this for support
 
-  Sys_SetDefaultCDPath(argv[0]);
+  strncat(cdpath, argv[0], sizeof(cdpath)-1);
+  Sys_SetDefaultCDPath(dirname(cdpath));
 
   // merge the command line, this is kinda silly
   for (len = 1, i = 1; i < argc; i++)
