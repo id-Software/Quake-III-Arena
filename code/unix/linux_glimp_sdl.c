@@ -386,6 +386,9 @@ static void HandleEvents(void)
         Sys_QueEvent( t, SE_KEY, K_MOUSE1 + b, qfalse, 0, NULL );
       }
       break;
+    case SDL_QUIT:
+      Sys_Quit();
+      break;
     }
   }
 }
