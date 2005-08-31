@@ -678,7 +678,7 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
   screen = vidscreen;
 
   // bk001130 - from cvs1.17 (mkv)
-  glstring = qglGetString (GL_RENDERER);
+  glstring = (char *) qglGetString (GL_RENDERER);
   ri.Printf( PRINT_ALL, "GL_RENDERER: %s\n", glstring );
 
   // bk010122 - new software token (Indirect)
@@ -952,12 +952,12 @@ void GLimp_Init( void )
   glConfig.hardwareType = GLHW_GENERIC;
 
   // get our config strings
-  Q_strncpyz( glConfig.vendor_string, qglGetString (GL_VENDOR), sizeof( glConfig.vendor_string ) );
-  Q_strncpyz( glConfig.renderer_string, qglGetString (GL_RENDERER), sizeof( glConfig.renderer_string ) );
+  Q_strncpyz( glConfig.vendor_string, (char *) qglGetString (GL_VENDOR), sizeof( glConfig.vendor_string ) );
+  Q_strncpyz( glConfig.renderer_string, (char *) qglGetString (GL_RENDERER), sizeof( glConfig.renderer_string ) );
   if (*glConfig.renderer_string && glConfig.renderer_string[strlen(glConfig.renderer_string) - 1] == '\n')
     glConfig.renderer_string[strlen(glConfig.renderer_string) - 1] = 0;
-  Q_strncpyz( glConfig.version_string, qglGetString (GL_VERSION), sizeof( glConfig.version_string ) );
-  Q_strncpyz( glConfig.extensions_string, qglGetString (GL_EXTENSIONS), sizeof( glConfig.extensions_string ) );
+  Q_strncpyz( glConfig.version_string, (char *) qglGetString (GL_VERSION), sizeof( glConfig.version_string ) );
+  Q_strncpyz( glConfig.extensions_string, (char *) qglGetString (GL_EXTENSIONS), sizeof( glConfig.extensions_string ) );
 
   //
   // chipset specific configuration
