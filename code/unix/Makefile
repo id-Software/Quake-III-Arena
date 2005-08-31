@@ -566,6 +566,7 @@ ifeq ($(PLATFORM),freebsd)
 		$(B)/client/linux_glimp_sdl.o \
 		$(B)/client/linux_glimp.o \
 		$(B)/client/linux_snd.o \
+		$(B)/client/linux_snd_sdl.o \
 		$(B)/client/snd_mixa.o \
 		$(B)/client/matha.o   \
 		$(B)/client/ftol.o \
@@ -589,6 +590,7 @@ else
 		$(B)/client/linux_glimp_sdl.o \
 		$(B)/client/linux_joystick.o \
 		$(B)/client/linux_snd.o \
+		$(B)/client/linux_snd_sdl.o \
 		$(B)/client/snd_mixa.o \
 		$(B)/client/matha.o \
 
@@ -599,6 +601,7 @@ else
 		$(B)/client/linux_glimp_smp.o \
 		$(B)/client/linux_joystick.o \
 		$(B)/client/linux_snd.o \
+		$(B)/client/linux_snd_sdl.o \
 		$(B)/client/snd_mixa.o \
 		$(B)/client/matha.o
 
@@ -770,6 +773,7 @@ $(B)/client/linux_joystick.o : $(UDIR)/linux_joystick.c; $(DO_CC)
 $(B)/client/linux_qgl.o : $(UDIR)/linux_qgl.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/linux_input.o : $(UDIR)/linux_input.c; $(DO_CC) 
 $(B)/client/linux_snd.o : $(UDIR)/linux_snd.c; $(DO_CC) 
+$(B)/client/linux_snd_sdl.o : $(UDIR)/linux_snd_sdl.c; $(DO_CC)
 $(B)/client/snd_mixa.o : $(UDIR)/snd_mixa.s; $(DO_AS) 
 $(B)/client/matha.o : $(UDIR)/matha.s; $(DO_AS) 
 
@@ -1578,6 +1582,7 @@ Q3SOBJ = \
 	$(B)/q3static/linux_glimp.o \
 	$(B)/q3static/linux_joystick.o \
 	$(B)/q3static/linux_snd.o \
+	$(B)/q3static/linux_snd_sdl.o \
 	$(B)/q3static/snd_mixa.o \
 	$(B)/q3static/matha.o
 
@@ -1735,6 +1740,7 @@ $(B)/q3static/linux_joystick.o : $(UDIR)/linux_joystick.c; $(DO_CC) -DQ3_STATIC
 $(B)/q3static/linux_qgl.o : $(UDIR)/linux_qgl.c; $(DO_CC) -DQ3_STATIC 
 $(B)/q3static/linux_input.o : $(UDIR)/linux_input.c; $(DO_CC) -DQ3_STATIC 
 $(B)/q3static/linux_snd.o : $(UDIR)/linux_snd.c; $(DO_CC) -DQ3_STATIC 
+$(B)/q3static/linux_snd_sdl.o : $(UDIR)/linux_snd_sdl.c; $(DO_CC) -DQ3_STATIC
 $(B)/q3static/snd_mixa.o : $(UDIR)/snd_mixa.s; $(DO_AS) 
 $(B)/q3static/matha.o : $(UDIR)/matha.s; $(DO_AS) 
 $(B)/q3static/unzip.o : $(CMDIR)/unzip.c; $(DO_CC) -DQ3_STATIC 
