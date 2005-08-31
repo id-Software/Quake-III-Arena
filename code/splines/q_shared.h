@@ -206,6 +206,12 @@ void Sys_PumpEvents( void );
 #define	CPUSTRING	"linux-ppc64"
 #elif defined __powerpc__
 #define	CPUSTRING	"linux-ppc"
+#elif defined __s390__
+#define	CPUSTRING	"linux-s390"
+#elif defined __s390x__
+#define	CPUSTRING	"linux-s390x"
+#elif defined __ia64__
+#define	CPUSTRING	"linux-ia64"
 #else
 #define	CPUSTRING	"linux-other"
 #endif

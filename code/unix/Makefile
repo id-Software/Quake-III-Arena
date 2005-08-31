@@ -106,8 +106,16 @@ ifeq ($(PLATFORM),linux)
   ifeq ($(ARCH),x86_64)
     LIB=lib64
   else
+  ifeq ($(ARCH),ppc64)
+    LIB=lib64
+  else
+  ifeq ($(ARCH),s390x)
+    LIB=lib64
+  else
   ifeq ($(ARCH),ppc)
     VM_PPC=vm_none
+  endif
+  endif
   endif
   endif
   endif

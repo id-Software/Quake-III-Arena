@@ -356,6 +356,12 @@ void Sys_Init(void)
   Cvar_Set( "arch", "linux ppc64" );
 #  elif defined __powerpc__
   Cvar_Set( "arch", "linux ppc" );
+#  elif defined __s390__
+  Cvar_Set( "arch", "linux s390" );
+#  elif defined __s390x__
+  Cvar_Set( "arch", "linux s390x" );
+#  elif defined __ia64__
+  Cvar_Set( "arch", "linux ia64" );
 #  elif defined __alpha__
   Cvar_Set( "arch", "linux alpha" );
 #  elif defined __sparc__
@@ -760,6 +766,12 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   snprintf (fname, sizeof(fname), "%sppc64.so", name);
 #elif defined __powerpc__   //rcg010207 - PPC support.
   snprintf (fname, sizeof(fname), "%sppc.so", name);
+#elif defined __s390__
+  snprintf (fname, sizeof(fname), "%ss390.so", name);
+#elif defined __s390x__
+  snprintf (fname, sizeof(fname), "%ss390x.so", name);
+#elif defined __ia64__
+  snprintf (fname, sizeof(fname), "%sia64.so", name);
 #elif defined __axp__
   snprintf (fname, sizeof(fname), "%saxp.so", name);
 #elif defined __mips__
