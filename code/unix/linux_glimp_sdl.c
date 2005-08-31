@@ -254,11 +254,13 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
 
 static void install_grabs(void)
 {
+    SDL_ShowCursor(0);
     SDL_WM_GrabInput(SDL_GRAB_ON);
 }
 
 static void uninstall_grabs(void)
 {
+    SDL_ShowCursor(1);
     SDL_WM_GrabInput(SDL_GRAB_OFF);
 }
 
