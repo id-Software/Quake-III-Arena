@@ -54,8 +54,6 @@ BUILD_FREETYPE=0
 ##
 #############################################################################
 
-BASEQ3_DIR=$(BDIR)/baseq3
-
 BD=debug$(ARCH)$(GLIBC)
 BR=release$(ARCH)$(GLIBC)
 CDIR=$(MOUNT_DIR)/client
@@ -96,8 +94,8 @@ LIB=lib
 ifeq ($(PLATFORM),linux)
 
   GLIBC=-glibc
-  CC=gcc
-  CXX=g++
+  CC?=gcc
+  CXX?=g++
 
   RPMARCH=$(ARCH)
   ifeq ($(ARCH),alpha)
@@ -165,8 +163,9 @@ ifeq ($(PLATFORM),linux)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  ARFLAGS=ar rv
-  RANLIB=ranlib
+  AR?=ar
+  ARFLAGS=rv
+  RANLIB?=ranlib
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
@@ -343,6 +342,10 @@ TARGETS=\
 endif #Linux
 endif #FreeBSD
 endif #IRIX
+
+ifdef DEFAULT_BASEDIR
+BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
+endif
 
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<

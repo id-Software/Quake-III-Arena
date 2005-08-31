@@ -1246,6 +1246,10 @@ void Sys_ParseArgs( int argc, char* argv[] ) {
   }
 }
 
+#ifndef DEFAULT_BASEDIR
+# define DEFAULT_BASEDIR Sys_Cwd()
+#endif
+
 #include "../client/client.h"
 extern clientStatic_t cls;
 
@@ -1265,6 +1269,8 @@ int main ( int argc, char* argv[] )
 
   strncat(cdpath, argv[0], sizeof(cdpath)-1);
   Sys_SetDefaultCDPath(dirname(cdpath));
+
+  Sys_SetDefaultInstallPath(DEFAULT_BASEDIR);
 
   // merge the command line, this is kinda silly
   for (len = 1, i = 1; i < argc; i++)
