@@ -1,4 +1,8 @@
 TODO: the Mac port seems stable, but outputs a bunch of warnings..
+2005-09-?? 
+- SDL Stuff (icculus)
+- x86_64 (ludwig von angstenheimer)
+- patches from a casth of thousands
 	
 2004-05-22
 - updated the xcode project from Apple's version
