@@ -122,7 +122,7 @@ ifeq ($(PLATFORM),linux)
 
   # !!! FIXME: make this a build option? Make it coexist with X11 glimp?
   ifeq ($(strip $(USE_SDL)),true)
-    BASE_CFLAGS += -DUSE_SDL=1 -ISDL12/include
+    BASE_CFLAGS += -DUSE_SDL=1 $(shell sdl-config --cflags)
   endif
 
   GL_CFAGS = -I/usr/X11R6/include
@@ -172,7 +172,7 @@ ifeq ($(PLATFORM),linux)
   endif
 
   ifeq ($(strip $(USE_SDL)),true)
-    LDFLAGS+=-lSDL
+    LDFLAGS+=$(shell sdl-config --libs)
   endif
 
   ifeq ($(ARCH),i386)
