@@ -132,6 +132,8 @@ qboolean SNDDMA_Init(void)
 	if (snd_inited)
 		return 1;
 
+    Com_Printf("SDL Audio driver initializing...\n");
+
 	if (!snddevice) {
 		sndbits = Cvar_Get("sndbits", "16", CVAR_ARCHIVE);
 		sndspeed = Cvar_Get("sndspeed", "22050", CVAR_ARCHIVE);
