@@ -1,17 +1,28 @@
-Name of this uh, thing: icculus.org/quake3
+Name of this project: icculus.org/quake3
 URL: http://www.icculus.org/quake3
 Hello and welcome to the Quake 3 source repository on icculus.org
-I'll be your maintainer, zakk@icculus.org, please send all your patches to me.
+I'll be your maintainer, zakk@icculus.org, please send all your patches to 
+the bugzilla: https://bugzilla.icculus.org, or join the mailing list 
+(quake3-subscribe@icculus.org) and submit your patch there.
+If you're too lazy for either method, then I would rather
+you e-mailed your patches to me directly than not at all.
+
 The intent of this is to give people a baseline Quake 3.
-Bug fixes, SDL port, security.
+Bug fixes, SDL port, OpenAL, security, etc.
 Extra graphics and sound will be accepted as long as they are entirely
 optional and off by default.
 
 The map editor isn't included, get a modern copy from here:
 http://www.qeradiant.com/
 
-cd code/unix && make
+The id software readme has been renamed to id-readme.txt
+so as to prevent confusion.
+
 Refer to the web-site for updated status, enjoy!
+
+Compiling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cd code/unix && make
 
 Using shared libraries instead of qvm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
