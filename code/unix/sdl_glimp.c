@@ -404,7 +404,7 @@ void KBD_Close(void)
 void IN_ActivateMouse( void ) 
 {
   if (!mouse_avail || !screen)
-    return;
+     return;
 
   if (!mouse_active)
   {
@@ -452,15 +452,8 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 */
 void GLimp_Shutdown( void )
 {
-  IN_DeactivateMouse();
-
-  if (stick)
-  {
-    SDL_JoystickClose(stick);
-    stick = NULL;
-  }
-
-  SDL_Quit();
+  IN_Shutdown();
+  SDL_QuitSubSystem(SDL_INIT_VIDEO);
   screen = NULL;
 
   memset( &glConfig, 0, sizeof( glConfig ) );
@@ -886,6 +879,8 @@ void GLimp_Init( void )
 
   InitSig();
 
+  IN_Init();   // rcg08312005 moved into glimp.
+
   // Hack here so that if the UI 
   if ( *r_previousglDriver->string )
   {
@@ -1209,7 +1204,17 @@ void IN_Init(void) {
 
 void IN_Shutdown(void)
 {
+  IN_DeactivateMouse();
+
   mouse_avail = qfalse;
+
+  if (stick)
+  {
+    SDL_JoystickClose(stick);
+    stick = NULL;
+  }
+
+  SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
 void IN_Frame (void) {

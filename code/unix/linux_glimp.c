@@ -1408,6 +1408,8 @@ void GLimp_Init( void )
 
   InitSig();
 
+  IN_Init();   // rcg08312005 moved into glimp.
+
   // Hack here so that if the UI 
   if ( *r_previousglDriver->string )
   {
