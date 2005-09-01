@@ -42,7 +42,9 @@ static void signal_handler(int sig) // bk010104 - replace this... (NOTE TTimo hu
   signalcaught = qtrue;
   printf("Received signal %d, exiting...\n", sig);
 #ifndef DEDICATED
-  GLimp_Shutdown(); // bk010104 - shouldn't this be CL_Shutdown
+  //GLimp_Shutdown(); // bk010104 - shouldn't this be CL_Shutdown
+  // rcg08312005 Agreed: changed to CL_Shutdown...  --ryan.
+  CL_Shutdown();
 #endif
   Sys_Exit(0); // bk010104 - abstraction NOTE TTimo send a 0 to avoid DOUBLE SIGNAL FAULT
 }
