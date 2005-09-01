@@ -19,8 +19,6 @@
  *
  * You should define USE_SDL=1 and then add this to the makefile.
  *  USE_SDL will disable the X11 target.
- *
- * !!! FIXME: linux_glimp_sdl.c isn't really "linux" specific.
  */
 
 /*
