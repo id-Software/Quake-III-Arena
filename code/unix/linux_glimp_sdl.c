@@ -638,18 +638,22 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
     if (tcolorbits == 24)
         sdlcolorbits = 8;
 
-    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, sdlcolorbits );
-    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, sdlcolorbits );
-    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
-    SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-    SDL_WM_SetCaption(WINDOW_CLASS_NAME, WINDOW_CLASS_NAME_BRIEF);
-    SDL_ShowCursor(0);
-    SDL_EnableUNICODE(1);
-    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-    sdlrepeatenabled = qtrue;
+	/* Cameron Eure - Please don't set attributes unless we have a working visual. */
+	if (vidscreen != NULL){
+		SDL_GL_SetAttribute( SDL_GL_RED_SIZE, sdlcolorbits );
+		SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, sdlcolorbits );
+		SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
+		SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
+		SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
+		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+		SDL_WM_SetCaption(WINDOW_CLASS_NAME, WINDOW_CLASS_NAME_BRIEF);
+		SDL_ShowCursor(0);
+		SDL_EnableUNICODE(1);
+		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+		sdlrepeatenabled = qtrue;
+}
 
     if (!(vidscreen = SDL_SetVideoMode(glConfig.vidWidth, glConfig.vidHeight, colorbits, flags)))
     {
