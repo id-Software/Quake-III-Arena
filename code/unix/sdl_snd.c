@@ -136,7 +136,7 @@ qboolean SNDDMA_Init(void)
 
 	if (!snddevice) {
 		sndbits = Cvar_Get("sndbits", "16", CVAR_ARCHIVE);
-		sndspeed = Cvar_Get("sndspeed", "22050", CVAR_ARCHIVE);
+		sndspeed = Cvar_Get("sndspeed", "0", CVAR_ARCHIVE);
 		sndchannels = Cvar_Get("sndchannels", "2", CVAR_ARCHIVE);
 		snddevice = Cvar_Get("snddevice", "/dev/dsp", CVAR_ARCHIVE);
 	}
@@ -164,6 +164,7 @@ qboolean SNDDMA_Init(void)
         tmp = 16;
 
     desired.freq = (int) sndspeed->value;
+    if(!desired.freq) desired.freq = 22050;
     desired.format = ((tmp == 16) ? AUDIO_S16SYS : AUDIO_U8);
 
     // I dunno if this is the best idea, but I'll give it a try...
