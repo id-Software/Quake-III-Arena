@@ -211,7 +211,7 @@ void UI_ClearScores() {
 
 
 
-static void	UI_Cache_f() {
+static void	UI_Cache_f( void ) {
 	Display_CacheAll();
 }
 
@@ -220,7 +220,7 @@ static void	UI_Cache_f() {
 UI_CalcPostGameStats
 =======================
 */
-static void UI_CalcPostGameStats() {
+static void UI_CalcPostGameStats( void ) {
 	char		map[MAX_QPATH];
 	char		fileName[MAX_QPATH];
 	char		info[MAX_INFO_STRING];

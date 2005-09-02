@@ -2135,7 +2135,7 @@ static void CG_DrawTeamVote(void) {
 }
 
 
-static qboolean CG_DrawScoreboard() {
+static qboolean CG_DrawScoreboard( void ) {
 #ifdef MISSIONPACK
 	static qboolean firstTime = qtrue;
 	float fade, *fadeColor;
@@ -2475,7 +2475,7 @@ static void CG_DrawWarmup( void ) {
 CG_DrawTimedMenus
 =================
 */
-void CG_DrawTimedMenus() {
+void CG_DrawTimedMenus( void ) {
 	if (cg.voiceTime) {
 		int t = cg.time - cg.voiceTime;
 		if ( t > 2500 ) {
@@ -2587,7 +2587,7 @@ static void CG_Draw2D( void ) {
 }
 
 
-static void CG_DrawTourneyScoreboard() {
+static void CG_DrawTourneyScoreboard( void ) {
 #ifdef MISSIONPACK
 #else
 	CG_DrawOldTourneyScoreboard();

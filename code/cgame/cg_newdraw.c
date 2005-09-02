@@ -119,7 +119,7 @@ void CG_CheckOrderPending() {
 	}
 }
 
-static void CG_SetSelectedPlayerName() {
+static void CG_SetSelectedPlayerName( void ) {
   if (cg_currentSelectedPlayer.integer >= 0 && cg_currentSelectedPlayer.integer < numSortedTeamPlayers) {
 		clientInfo_t *ci = cgs.clientinfo + sortedTeamPlayers[cg_currentSelectedPlayer.integer];
 	  if (ci) {
@@ -131,14 +131,14 @@ static void CG_SetSelectedPlayerName() {
 		trap_Cvar_Set("cg_selectedPlayerName", "Everyone");
 	}
 }
-int CG_GetSelectedPlayer() {
+int CG_GetSelectedPlayer( void ) {
 	if (cg_currentSelectedPlayer.integer < 0 || cg_currentSelectedPlayer.integer >= numSortedTeamPlayers) {
 		cg_currentSelectedPlayer.integer = 0;
 	}
 	return cg_currentSelectedPlayer.integer;
 }
 
-void CG_SelectNextPlayer() {
+void CG_SelectNextPlayer( void ) {
 	CG_CheckOrderPending();
 	if (cg_currentSelectedPlayer.integer >= 0 && cg_currentSelectedPlayer.integer < numSortedTeamPlayers) {
 		cg_currentSelectedPlayer.integer++;
@@ -148,7 +148,7 @@ void CG_SelectNextPlayer() {
 	CG_SetSelectedPlayerName();
 }
 
-void CG_SelectPrevPlayer() {
+void CG_SelectPrevPlayer( void ) {
 	CG_CheckOrderPending();
 	if (cg_currentSelectedPlayer.integer > 0 && cg_currentSelectedPlayer.integer < numSortedTeamPlayers) {
 		cg_currentSelectedPlayer.integer--;
@@ -1743,7 +1743,7 @@ CG_HideTeamMenus
 ==================
 
 */
-void CG_HideTeamMenu() {
+void CG_HideTeamMenu( void ) {
   Menus_CloseByName("teamMenu");
   Menus_CloseByName("getMenu");
 }
@@ -1754,7 +1754,7 @@ CG_ShowTeamMenus
 ==================
 
 */
-void CG_ShowTeamMenu() {
+void CG_ShowTeamMenu( void ) {
   Menus_OpenByName("teamMenu");
 }
 

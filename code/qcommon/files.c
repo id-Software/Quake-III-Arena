@@ -2699,7 +2699,7 @@ NOTE TTimo: the reordering that happens here is not reflected in the cvars (\cva
   this can lead to misleading situations, see https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=540
 ================
 */
-static void FS_ReorderPurePaks()
+static void FS_ReorderPurePaks( void )
 {
 	searchpath_t *s;
 	int i;

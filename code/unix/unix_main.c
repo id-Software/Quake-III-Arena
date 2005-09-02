@@ -163,7 +163,7 @@ void Sys_In_Restart_f( void )
 
 // flush stdin, I suspect some terminals are sending a LOT of shit
 // FIXME TTimo relevant?
-void tty_FlushIn()
+void tty_FlushIn( void )
 {
   char key;
   while (read(0, &key, 1)!=-1);
@@ -173,7 +173,7 @@ void tty_FlushIn()
 // TTimo NOTE: it seems on some terminals just sending '\b' is not enough
 //   so for now, in any case we send "\b \b" .. yeah well ..
 //   (there may be a way to find out if '\b' alone would work though)
-void tty_Back()
+void tty_Back( void )
 {
   char key;
   key = '\b';
@@ -186,7 +186,7 @@ void tty_Back()
 
 // clear the display of the line currently edited
 // bring cursor back to beginning of line
-void tty_Hide()
+void tty_Hide( void )
 {
   int i;
   assert(ttycon_on);
@@ -207,7 +207,7 @@ void tty_Hide()
 
 // show the current line
 // FIXME TTimo need to position the cursor if needed??
-void tty_Show()
+void tty_Show( void )
 {
   int i;
   assert(ttycon_on);
@@ -226,7 +226,7 @@ void tty_Show()
 }
 
 // never exit without calling this, or your terminal will be left in a pretty bad state
-void Sys_ConsoleInputShutdown()
+void Sys_ConsoleInputShutdown( void )
 {
   if (ttycon_on)
   {
@@ -255,7 +255,7 @@ void Hist_Add(field_t *field)
   hist_current = -1; // re-init
 }
 
-field_t *Hist_Prev()
+field_t *Hist_Prev( void )
 {
   int hist_prev;
   assert(hist_count <= TTY_HISTORY);
@@ -271,7 +271,7 @@ field_t *Hist_Prev()
   return &(ttyEditLines[hist_current]);
 }
 
-field_t *Hist_Next()
+field_t *Hist_Next( void )
 {
   assert(hist_count <= TTY_HISTORY);
   assert(hist_count >= 0);
@@ -473,7 +473,7 @@ void floating_point_exception_handler(int whatever)
 }
 
 // initialize the console input (tty mode if wanted and possible)
-void Sys_ConsoleInputInit()
+void Sys_ConsoleInputInit( void )
 {
   struct termios tc;
 
@@ -1193,7 +1193,7 @@ void  Sys_Print( const char *msg )
 }
 
 
-void    Sys_ConfigureFPU() { // bk001213 - divide by zero
+void    Sys_ConfigureFPU( void ) { // bk001213 - divide by zero
 #ifdef __linux__
 #ifdef __i386
 #ifndef NDEBUG

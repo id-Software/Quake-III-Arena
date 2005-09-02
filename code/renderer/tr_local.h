@@ -1601,8 +1601,8 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
 
 // font stuff
-void R_InitFreeType();
-void R_DoneFreeType();
+void R_InitFreeType( void );
+void R_DoneFreeType( void );
 void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
 
 

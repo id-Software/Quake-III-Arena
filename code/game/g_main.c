@@ -316,7 +316,7 @@ void G_FindTeams( void ) {
 	G_Printf ("%i teams with %i entities\n", c, c2);
 }
 
-void G_RemapTeamShaders() {
+void G_RemapTeamShaders( void ) {
 #ifdef MISSIONPACK
 	char string[1024];
 	float f = level.time * 0.001;

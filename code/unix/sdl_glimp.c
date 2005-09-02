@@ -803,7 +803,7 @@ static void GLW_InitExtensions( void )
 
 }
 
-static void GLW_InitGamma()
+static void GLW_InitGamma( void )
 {
     glConfig.deviceSupportsGamma = qtrue;
 }

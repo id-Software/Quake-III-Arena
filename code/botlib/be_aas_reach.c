@@ -1067,8 +1067,8 @@ int AAS_Reachability_Step_Barrier_WaterJump_WalkOffLedge(int area1num, int area2
 	float length, ground_bestlength, water_bestlength, ground_bestdist, water_bestdist;
 	vec3_t v1, v2, v3, v4, tmpv, p1area1, p1area2, p2area1, p2area2;
 	vec3_t normal, ort, edgevec, start, end, dir;
-	vec3_t ground_beststart, ground_bestend, ground_bestnormal;
-	vec3_t water_beststart, water_bestend, water_bestnormal;
+	vec3_t ground_beststart = {0, 0, 0}, ground_bestend = {0, 0, 0}, ground_bestnormal = {0, 0, 0};
+	vec3_t water_beststart = {0, 0, 0}, water_bestend = {0, 0, 0}, water_bestnormal = {0, 0, 0};
 	vec3_t invgravity = {0, 0, 1};
 	vec3_t testpoint;
 	aas_plane_t *plane;
@@ -2379,15 +2379,15 @@ int AAS_Reachability_Jump(int area1num, int area2num)
 //===========================================================================
 int AAS_Reachability_Ladder(int area1num, int area2num)
 {
-	int i, j, k, l, edge1num, edge2num, sharededgenum, lowestedgenum;
-	int face1num, face2num, ladderface1num, ladderface2num;
+	int i, j, k, l, edge1num, edge2num, sharededgenum = 0, lowestedgenum = 0;
+	int face1num, face2num, ladderface1num = 0, ladderface2num = 0;
 	int ladderface1vertical, ladderface2vertical, firstv;
-	float face1area, face2area, bestface1area, bestface2area;
+	float face1area, face2area, bestface1area = -9999, bestface2area = -9999;
 	float phys_jumpvel, maxjumpheight;
 	vec3_t area1point, area2point, v1, v2, up = {0, 0, 1};
-	vec3_t mid, lowestpoint, start, end, sharededgevec, dir;
+	vec3_t mid, lowestpoint = {0, 0}, start, end, sharededgevec, dir;
 	aas_area_t *area1, *area2;
-	aas_face_t *face1, *face2, *ladderface1, *ladderface2;
+	aas_face_t *face1, *face2, *ladderface1 = NULL, *ladderface2 = NULL;
 	aas_plane_t *plane1, *plane2;
 	aas_edge_t *sharededge, *edge1;
 	aas_lreachability_t *lreach;
@@ -2401,16 +2401,7 @@ int AAS_Reachability_Ladder(int area1num, int area2num)
 
 	area1 = &aasworld.areas[area1num];
 	area2 = &aasworld.areas[area2num];
-	//
-	ladderface1 = NULL;
-	ladderface2 = NULL;
-	ladderface1num = 0; //make compiler happy
-	ladderface2num = 0; //make compiler happy
-	bestface1area = -9999;
-	bestface2area = -9999;
-	sharededgenum = 0; //make compiler happy
-	lowestedgenum = 0; //make compiler happy
-	//
+	
 	for (i = 0; i < area1->numfaces; i++)
 	{
 		face1num = aasworld.faceindex[area1->firstface + i];

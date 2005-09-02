@@ -352,13 +352,13 @@ extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
 //
 // ui_main.c
 //
-void UI_Report();
-void UI_Load();
+void UI_Report( void );
+void UI_Load( void );
 void UI_LoadMenus(const char *menuFile, qboolean reset);
 void _UI_SetActiveMenu( uiMenuCommand_t menu );
 int UI_AdjustTimeByGame(int time);
 void UI_ShowPostGame(qboolean newHigh);
-void UI_ClearScores();
+void UI_ClearScores( void );
 void UI_LoadArenas(void);
 
 //
@@ -972,8 +972,8 @@ int				trap_LAN_GetPingQueueCount( void );
 void			trap_LAN_ClearPing( int n );
 void			trap_LAN_GetPing( int n, char *buf, int buflen, int *pingtime );
 void			trap_LAN_GetPingInfo( int n, char *buf, int buflen );
-void			trap_LAN_LoadCachedServers();
-void			trap_LAN_SaveCachedServers();
+void			trap_LAN_LoadCachedServers( void );
+void			trap_LAN_SaveCachedServers( void );
 void			trap_LAN_MarkServerVisible(int source, int n, qboolean visible);
 int				trap_LAN_ServerIsVisible( int source, int n);
 qboolean		trap_LAN_UpdateVisiblePings( int source );

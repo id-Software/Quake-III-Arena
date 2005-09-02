@@ -120,7 +120,8 @@ ifeq ($(PLATFORM),linux)
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
   # bk001205: no mo'  -Dstricmp=strcasecmp, see q_shared.h
-  BASE_CFLAGS =  -pipe -Wall
+  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  #BASE_CFLAGS += -Werror # Disabled due to #warning usage.
   # rcg010216: DLL_ONLY for PPC
   ifeq ($(strip $(DLL_ONLY)),true)
     BASE_CFLAGS += -DDLL_ONLY

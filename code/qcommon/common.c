@@ -100,7 +100,7 @@ qboolean	com_fullyInitialized;
 char	com_errorMessage[MAXPRINTMSG];
 
 void Com_WriteConfig_f( void );
-void CIN_CloseAllVideos();
+void CIN_CloseAllVideos( void );
 
 //============================================================================
 
