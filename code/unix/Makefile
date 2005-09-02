@@ -19,16 +19,7 @@
 
 PLATFORM=$(shell uname|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
-ARCH=$(shell uname -m)
-ifeq ($(ARCH),i486)
-ARCH=i386
-endif
-ifeq ($(ARCH),i586)
-ARCH=i386
-endif
-ifeq ($(ARCH),i686)
-ARCH=i386
-endif
+ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
 
 ###
 ### These paths are where you probably want to change things
