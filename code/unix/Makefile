@@ -94,8 +94,8 @@ LIB=lib
 ifeq ($(PLATFORM),linux)
 
   GLIBC=-glibc
-  CC?=gcc
-  CXX?=g++
+  CC=gcc
+  CXX=g++
 
   RPMARCH=$(ARCH)
   ifeq ($(ARCH),alpha)
@@ -163,9 +163,9 @@ ifeq ($(PLATFORM),linux)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  AR?=ar
+  AR=ar
   ARFLAGS=rv
-  RANLIB?=ranlib
+  RANLIB=ranlib
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
