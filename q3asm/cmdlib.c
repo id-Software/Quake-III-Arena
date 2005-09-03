@@ -636,12 +636,28 @@ int Q_filelength (FILE *f)
 	return end;
 }
 
+#ifndef MAXPATH
+#define MAX_PATH 4096
+#endif
+static FILE* myfopen(const char* filename, const char* mode)
+{
+	char* p;
+	char fn[MAX_PATH];
+
+	fn[0] = '\0';
+	strncat(fn, filename, sizeof(fn)-1);
+
+	for(p=fn;*p;++p) if(*p == '\\') *p = '/';
+
+	return fopen(fn, mode);
+}
+
 
 FILE *SafeOpenWrite (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen(filename, "wb");
+	f = myfopen(filename, "wb");
 
 	if (!f)
 		Error ("Error opening %s: %s",filename,strerror(errno));
@@ -653,7 +669,7 @@ FILE *SafeOpenRead (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen(filename, "rb");
+	f = myfopen(filename, "rb");
 
 	if (!f)
 		Error ("Error opening %s: %s",filename,strerror(errno));
@@ -685,7 +701,7 @@ qboolean	FileExists (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen (filename, "r");
+	f = myfopen (filename, "r");
 	if (!f)
 		return qfalse;
 	fclose (f);
@@ -761,7 +777,7 @@ int    TryLoadFile (const char *filename, void **bufferptr)
 
 	*bufferptr = NULL;
 
-	f = fopen (filename, "rb");
+	f = myfopen (filename, "rb");
 	if (!f)
 		return -1;
 	length = Q_filelength (f);
