@@ -2015,6 +2015,7 @@ rpm: $(BUILD_NAME).spec
 	mv $(RPMROOT)/RPMS/$(RPMARCH)/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm archives/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm 
 
 copyfiles:
+	@if [ ! -d $(COPYDIR) ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
 	-mkdir -p -m 0755 $(COPYDIR)
 	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
 #	install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
