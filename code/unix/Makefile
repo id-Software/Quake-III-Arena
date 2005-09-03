@@ -20,6 +20,9 @@
 PLATFORM=$(shell uname|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
 ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
+ifndef COPYDIR
+COPYDIR="/usr/local/games/quake3"
+endif
 
 ###
 ### These paths are where you probably want to change things
