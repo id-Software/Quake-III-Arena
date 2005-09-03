@@ -82,7 +82,6 @@ qboolean SNDDMA_Init(void)
     // char *s; // bk001204 - unused
 	struct audio_buf_info info;
 	int caps;
-	extern uid_t saved_euid;
 
 	if (snd_inited)
 		return 1;
@@ -96,11 +95,7 @@ qboolean SNDDMA_Init(void)
 
 	// open /dev/dsp, confirm capability to mmap, and get size of dma buffer
 	if (!audio_fd) {
-		seteuid(saved_euid);
-
 		audio_fd = open(snddevice->string, O_RDWR);
-
-		seteuid(getuid());
 
 		if (audio_fd < 0) {
 			perror(snddevice->string);

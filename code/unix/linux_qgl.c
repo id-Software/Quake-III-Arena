@@ -3038,10 +3038,9 @@ qboolean QGL_Init( const char *dllname )
 	{
 		char	fn[1024];
 		// FILE *fp; // bk001204 - unused
-		extern uid_t saved_euid; // unix_main.c
 
 		// if we are not setuid, try current directory
-		if (getuid() == saved_euid) {
+		if (1) {
 			getcwd(fn, sizeof(fn));
 			Q_strcat(fn, sizeof(fn), "/");
 			Q_strcat(fn, sizeof(fn), dllname);

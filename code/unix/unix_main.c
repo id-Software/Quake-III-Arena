@@ -61,7 +61,6 @@ refexport_t re;
 
 unsigned  sys_frame_time;
 
-uid_t saved_euid;
 qboolean stdin_active = qtrue;
 
 // =============================================================
@@ -1260,10 +1259,6 @@ int main ( int argc, char* argv[] )
   char  *cmdline;
   char cdpath[PATH_MAX] = {0};
   void Sys_SetDefaultCDPath(const char *path);
-
-  // go back to real user for config loads
-  saved_euid = geteuid();
-  seteuid(getuid());
 
   Sys_ParseArgs( argc, argv );  // bk010104 - added this for support
 
