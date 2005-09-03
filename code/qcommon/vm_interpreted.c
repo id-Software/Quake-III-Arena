@@ -480,7 +480,8 @@ nextInstruction2:
 				src = (int *)&image[ r0&dataMask ];
 				dest = (int *)&image[ r1&dataMask ];
 				if ( ( (long)src | (long)dest | count ) & 3 ) {
-					Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
+					// happens in westernq3
+					Com_Printf( S_COLOR_YELLOW "Warning: OP_BLOCK_COPY not dword aligned\n");
 				}
 				count >>= 2;
 				for ( i = count-1 ; i>= 0 ; i-- ) {
