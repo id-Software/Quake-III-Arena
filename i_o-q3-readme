@@ -51,3 +51,4 @@ demoq3 and run quake3 with the parameters described above.
 To compile working(!) shared libraries for 64bit mods the vmMain and
 dllEntry functions as well as the syscall pointer have to be changed
 to accept and return long instead of int.
+
