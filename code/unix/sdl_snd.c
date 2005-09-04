@@ -62,6 +62,8 @@ cvar_t *sndbits;
 cvar_t *sndspeed;
 cvar_t *sndchannels;
 cvar_t *snddevice;
+cvar_t *sdldevsamps;
+cvar_t *sdlmixsamps;
 
 static qboolean use_custom_memset = qfalse;
 // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371 
@@ -122,6 +124,28 @@ static void sdl_audio_callback(void *userdata, Uint8 *stream, int len)
         dmapos = 0;
 }
 
+static void print_audiospec(const char *str, const SDL_AudioSpec *spec)
+{
+    Com_Printf("%s:\n", str);
+
+    // I'm sorry this is nasty.
+    #define PRINT_AUDIO_FMT(x) \
+        if (spec->format == x) Com_Printf("Format: %s\n", #x); else
+    PRINT_AUDIO_FMT(AUDIO_U8)
+    PRINT_AUDIO_FMT(AUDIO_S8)
+    PRINT_AUDIO_FMT(AUDIO_U16LSB)
+    PRINT_AUDIO_FMT(AUDIO_S16LSB)
+    PRINT_AUDIO_FMT(AUDIO_U16MSB)
+    PRINT_AUDIO_FMT(AUDIO_S16MSB)
+    Com_Printf("Format: UNKNOWN\n");
+    #undef PRINT_AUDIO_FMT
+
+    Com_Printf("Freq: %d\n", (int) spec->freq);
+    Com_Printf("Samples: %d\n", (int) spec->samples);
+    Com_Printf("Channels: %d\n", (int) spec->channels);
+    Com_Printf("\n");
+}
+
 qboolean SNDDMA_Init(void)
 {
     char drivername[128];
@@ -139,6 +163,8 @@ qboolean SNDDMA_Init(void)
 		sndspeed = Cvar_Get("sndspeed", "0", CVAR_ARCHIVE);
 		sndchannels = Cvar_Get("sndchannels", "2", CVAR_ARCHIVE);
 		snddevice = Cvar_Get("snddevice", "/dev/dsp", CVAR_ARCHIVE);
+		sdldevsamps = Cvar_Get("sdldevsamps", "0", CVAR_ARCHIVE);
+		sdlmixsamps = Cvar_Get("sdlmixsamps", "0", CVAR_ARCHIVE);
 	}
 
     if (!SDL_WasInit(SDL_INIT_AUDIO))
@@ -169,14 +195,20 @@ qboolean SNDDMA_Init(void)
 
     // I dunno if this is the best idea, but I'll give it a try...
     //  should probably check a cvar for this...
-    if (desired.freq <= 11025)
-        desired.samples = 512;
-    else if (desired.freq <= 22050)
-        desired.samples = 1024;
-    else if (desired.freq <= 44100)
-        desired.samples = 2048;
+    if (sdldevsamps->value)
+        desired.samples = sdldevsamps->value;
     else
-        desired.samples = 4096;  // (*shrug*)
+    {
+        // just pick a sane default.
+        if (desired.freq <= 11025)
+            desired.samples = 256;
+        else if (desired.freq <= 22050)
+            desired.samples = 512;
+        else if (desired.freq <= 44100)
+            desired.samples = 1024;
+        else
+            desired.samples = 2048;  // (*shrug*)
+    }
 
     desired.channels = (int) sndchannels->value;
     desired.callback = sdl_audio_callback;
@@ -188,10 +220,36 @@ qboolean SNDDMA_Init(void)
         return qfalse;
     } // if
 
+    print_audiospec("Format we requested from SDL audio device", &desired);
+    print_audiospec("Format we actually got", &obtained);
+
+    // dma.samples needs to be big, or id's mixer will just refuse to
+    //  work at all; we need to keep it significantly bigger than the
+    //  amount of SDL callback samples, and just copy a little each time
+    //  the callback runs.
+    // 32768 is what the OSS driver filled in here on my system. I don't
+    //  know if it's a good value overall, but at least we know it's
+    //  reasonable...this is why I let the user override.
+    tmp = sdlmixsamps->value;
+    if (!tmp)
+        tmp = (obtained.samples * obtained.channels) * 4;
+
+    if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
+    {
+        int val = 1;
+        while (val < tmp)
+            val <<= 1;
+
+        val >>= 1;
+        Com_Printf("WARNING: sdlmixsamps wasn't a power of two (%d),"
+                   " so we made it one (%d).\n", tmp, val);
+        tmp = val;
+    }
+
     dmapos = 0;
 	dma.samplebits = obtained.format & 0xFF;  // first byte of format is bits.
     dma.channels = obtained.channels;
-    dma.samples = 32768; //obtained.samples * obtained.channels;
+    dma.samples = tmp;
 	dma.submission_chunk = 1;
 	dma.speed = obtained.freq;
     dmasize = (dma.samples * (dma.samplebits/8));
