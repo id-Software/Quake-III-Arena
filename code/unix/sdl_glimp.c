@@ -221,8 +221,13 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
       char ch = (char) keysym->unicode;
       if (ch == '~')
         *key = '~'; // console HACK
-      else if (ch >= 'A' && ch <= 'Z')
-        ch = ch - 'A' + 'a';
+
+      // The X11 driver converts to lowercase, but apparently we shouldn't.
+      //  There's possibly somewhere else where they covert back. Passing
+      //  uppercase to the engine works fine and fixes all-lower input.
+      //  (https://bugzilla.icculus.org/show_bug.cgi?id=2364)  --ryan.
+      //else if (ch >= 'A' && ch <= 'Z')
+      //  ch = ch - 'A' + 'a';
 
       buf[0] = ch;
   }
