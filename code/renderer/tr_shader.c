@@ -43,7 +43,9 @@ static char **shaderTextHashTable[MAX_SHADERTEXT_HASH];
 return a hash value for the filename
 ================
 */
-#warning TODO: check if long is ok here 
+#ifdef __GNUCC__
+  #warning TODO: check if long is ok here 
+#endif
 static long generateHashValue( const char *fname, const int size ) {
 	int		i;
 	long	hash;

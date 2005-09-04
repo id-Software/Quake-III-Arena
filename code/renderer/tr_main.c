@@ -1005,7 +1005,7 @@ qsort replacement
 
 =================
 */
-static inline void SWAP_DRAW_SURF(drawSurf_t* a, drawSurf_t* b)
+static __inline void SWAP_DRAW_SURF(drawSurf_t* a, drawSurf_t* b)
 {
 	drawSurf_t t;
 	memcpy(&t, a, sizeof(t));

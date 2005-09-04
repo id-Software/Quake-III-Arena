@@ -2837,12 +2837,12 @@ if the full version is not found
 */
 static void FS_SetRestrictions( void ) {
 	searchpath_t	*path;
+	char			*productId;
 
 	Com_Printf("smells like demo data, continueing anyways\n");
-	return;
+//	return;
 
 #ifndef PRE_RELEASE_DEMO
-	char	*productId;
 
 	// if fs_restrict is set, don't even look for the id file,
 	// which allows the demo release to be tested even if
