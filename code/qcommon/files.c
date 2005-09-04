@@ -2840,7 +2840,7 @@ static void FS_SetRestrictions( void ) {
 	char			*productId;
 
 	Com_Printf("smells like demo data, continueing anyways\n");
-//	return;
+	return;
 
 #ifndef PRE_RELEASE_DEMO
 
