@@ -196,7 +196,7 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   case SDLK_PAUSE:  *key = K_PAUSE;    break;
 
   case SDLK_LSHIFT:
-  case SDLK_RSHIFT:  *key = K_SHIFT;   break;
+  case SDLK_RSHIFT: *key = K_SHIFT;   break;
 
   case SDLK_LCTRL:
   case SDLK_RCTRL:  *key = K_CTRL;  break;
@@ -220,9 +220,9 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   {
       char ch = (char) keysym->unicode;
       if (ch == '~')
-	*key = '~'; // console HACK
+        *key = '~'; // console HACK
       else if (ch >= 'A' && ch <= 'Z')
-	  ch = ch - 'A' + 'a';
+        ch = ch - 'A' + 'a';
 
       buf[0] = ch;
   }
@@ -252,7 +252,7 @@ static void printkey(const SDL_Event* event)
   {
     printf(" unicode: %hx", event->key.keysym.unicode);
     if (event->key.keysym.unicode >= '0'
-	&& event->key.keysym.unicode <= '~')  // printable?
+    && event->key.keysym.unicode <= '~')  // printable?
       printf(" (%c)", (unsigned char)(event->key.keysym.unicode));
   }
   puts("");
@@ -629,18 +629,18 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
     if (tcolorbits == 24)
         sdlcolorbits = 8;
 
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, sdlcolorbits );
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, sdlcolorbits );
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
-	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
-	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, sdlcolorbits );
+    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, sdlcolorbits );
+    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
+    SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-	SDL_WM_SetCaption(WINDOW_CLASS_NAME, WINDOW_CLASS_NAME_BRIEF);
-	SDL_ShowCursor(0);
-	SDL_EnableUNICODE(1);
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-	sdlrepeatenabled = qtrue;
+    SDL_WM_SetCaption(WINDOW_CLASS_NAME, WINDOW_CLASS_NAME_BRIEF);
+    SDL_ShowCursor(0);
+    SDL_EnableUNICODE(1);
+    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+    sdlrepeatenabled = qtrue;
 
     if (!(vidscreen = SDL_SetVideoMode(glConfig.vidWidth, glConfig.vidHeight, colorbits, flags)))
     {
