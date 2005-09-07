@@ -631,6 +631,7 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
         tstencilbits = 0;
     }
 
+    sdlcolorbits = 4;
     if (tcolorbits == 24)
         sdlcolorbits = 8;
 
