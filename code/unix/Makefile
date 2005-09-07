@@ -361,16 +361,18 @@ default:build_release
 debug: build_debug
 release: build_release
 
-build_debug:
+build_debug: B=$(BD)
+build_debug: makedirs
 	$(MAKE)  targets B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
 
-build_release:
+build_release: B=$(BR)
+build_release: makedirs
 	$(MAKE)  targets B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
 
 #Build both debug and release builds
 all:build_debug build_release
 
-targets:makedirs $(TARGETS)
+targets: $(TARGETS)
 
 makedirs:
 	@if [ ! -d $(B) ];then mkdir $(B);fi
