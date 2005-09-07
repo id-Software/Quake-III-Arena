@@ -1438,9 +1438,13 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
    * In this example, we need to make an output work buffer of the right size.
    */ 
   /* JSAMPLEs per row in output buffer */
-  row_stride = cinfo.output_width * cinfo.output_components;
 
-  out = ri.Malloc(cinfo.output_width*cinfo.output_height*cinfo.output_components);
+  // This row_stride from libjpeg's example code doesn't work, since we
+  //  want to fill in an alpha channel ourselves and jpegs might be 8-bit.
+  //row_stride = cinfo.output_width * cinfo.output_components;
+  row_stride = cinfo.output_width * 4;
+  out = ri.Malloc(row_stride*cinfo.output_height);
+
 
   *pic = out;
   *width = cinfo.output_width;
