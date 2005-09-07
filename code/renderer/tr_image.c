@@ -1378,7 +1378,8 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   /* More stuff */
   JSAMPARRAY buffer;		/* Output row buffer */
   int row_stride;		/* physical row width in output buffer */
-  unsigned char *out;
+  int pixelcount;
+  unsigned char *out, *out_converted;
   byte	*fbuffer;
   byte  *bbuf;
 
@@ -1439,14 +1440,10 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
    */ 
   /* JSAMPLEs per row in output buffer */
 
-  // This row_stride from libjpeg's example code doesn't work, since we
-  //  want to fill in an alpha channel ourselves and jpegs might be 8-bit.
-  //row_stride = cinfo.output_width * cinfo.output_components;
-  row_stride = cinfo.output_width * 4;
-  out = ri.Malloc(row_stride*cinfo.output_height);
+  pixelcount = cinfo.output_width * cinfo.output_height;
+  row_stride = cinfo.output_width * cinfo.output_components;
+  out = ri.Malloc(pixelcount * 4);
 
-
-  *pic = out;
   *width = cinfo.output_width;
   *height = cinfo.output_height;
 
@@ -1465,19 +1462,44 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 	buffer = &bbuf;
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
   }
-
-  // clear all the alphas to 255
+  
+  // If we are processing an 8-bit JPEG (greyscale), we'll have to convert
+  // the greyscale values to RGBA.
+  if(cinfo.output_components == 1)
   {
+  	int sindex, dindex = 0;
+	unsigned char greyshade;
+
+	// allocate a new buffer for the transformed image
+  	out_converted = ri.Malloc(pixelcount*4);
+
+	for(sindex = 0; sindex < pixelcount; sindex++)
+	{
+		greyshade = out[sindex];
+		out_converted[dindex++] = greyshade;
+		out_converted[dindex++] = greyshade;
+		out_converted[dindex++] = greyshade;
+		out_converted[dindex++] = 255;		
+	}
+	
+	ri.Free(out);
+	out = out_converted;
+  }
+  else
+  {
+	  // clear all the alphas to 255
 	  int	i, j;
 		byte	*buf;
 
-		buf = *pic;
+		buf = out;
 
 	  j = cinfo.output_width * cinfo.output_height * 4;
 	  for ( i = 3 ; i < j ; i+=4 ) {
 		  buf[i] = 255;
 	  }
   }
+
+  *pic = out;
 
   /* Step 7: Finish decompression */
 
