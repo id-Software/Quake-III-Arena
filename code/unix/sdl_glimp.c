@@ -442,7 +442,12 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 {
   // NOTE TTimo we get the gamma value from cvar, because we can't work with the s_gammatable
   //   the API wasn't changed to avoid breaking other OSes
-  float g = Cvar_Get("r_gamma", "1.0", 0)->value;
+  float g;
+
+  if ( r_ignorehwgamma->integer )
+    return;
+
+  g  = Cvar_Get("r_gamma", "1.0", 0)->value;
   SDL_SetGamma(g, g, g);
 }
 
@@ -1448,5 +1453,6 @@ void IN_JoyMove( void )
 #endif  // USE_SDL
 
 // end of linux_glimp_sdl.c ...
+
 
 
