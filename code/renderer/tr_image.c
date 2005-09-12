@@ -901,6 +901,11 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 		rows = -rows;
 	numPixels = columns * rows;
 
+	if(!columns || !rows || numPixels > 0x1FFFFFFF) // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
+	{
+	  ri.Error (ERR_DROP, "LoadBMP: %s has an invalid image size\n", name);
+	}
+
 	if ( width ) 
 		*width = columns;
 	if ( height )
@@ -991,7 +996,7 @@ static void LoadPCX ( const char *filename, byte **pic, byte **palette, int *wid
 	int		len;
 	int		dataByte, runLength;
 	byte	*out, *pix;
-	int		xmax, ymax;
+	unsigned		xmax, ymax;
 
 	*pic = NULL;
 	*palette = NULL;
@@ -1090,6 +1095,7 @@ static void LoadPCX32 ( const char *filename, byte **pic, int *width, int *heigh
 		return;
 	}
 
+	// LoadPCX32 ensures width, height < 1024
 	c = (*width) * (*height);
 	pic32 = *pic = ri.Malloc(4 * c );
 	for (i = 0 ; i < c ; i++) {
@@ -1120,7 +1126,7 @@ LoadTGA
 */
 static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 {
-	int		columns, rows, numPixels;
+	unsigned	columns, rows, numPixels;
 	byte	*pixbuf;
 	int		row, column;
 	byte	*buf_p;
@@ -1179,14 +1185,19 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 
 	columns = targa_header.width;
 	rows = targa_header.height;
-	numPixels = columns * rows;
+	numPixels = columns * rows * 4;
 
 	if (width)
 		*width = columns;
 	if (height)
 		*height = rows;
 
-	targa_rgba = ri.Malloc (numPixels*4);
+	if(!columns || !rows || numPixels > 0x7FFFFFFF)
+	{
+		ri.Error (ERR_DROP, "LoadTGA: %s has an invalid image size\n", name);
+	}
+
+	targa_rgba = ri.Malloc (numPixels);
 	*pic = targa_rgba;
 
 	if (targa_header.id_length != 0)
@@ -1361,7 +1372,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
    */
-  struct jpeg_decompress_struct cinfo;
+  struct jpeg_decompress_struct cinfo = {0};
   /* We use our private extension JPEG error handler.
    * Note that this struct must live as long as the main JPEG parameter
    * struct, to avoid dangling-pointer problems.
@@ -1377,8 +1388,8 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   struct jpeg_error_mgr jerr;
   /* More stuff */
   JSAMPARRAY buffer;		/* Output row buffer */
-  int row_stride;		/* physical row width in output buffer */
-  int pixelcount;
+  unsigned row_stride;		/* physical row width in output buffer */
+  unsigned pixelcount;
   unsigned char *out, *out_converted;
   byte	*fbuffer;
   byte  *bbuf;
@@ -1442,6 +1453,14 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
   pixelcount = cinfo.output_width * cinfo.output_height;
   row_stride = cinfo.output_width * cinfo.output_components;
+
+
+  if(!cinfo.output_width || !cinfo.output_height
+      || pixelcount > 0x1FFFFFFF || cinfo.output_components > 4) // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
+  {
+    ri.Error (ERR_DROP, "LoadJPG: %s has an invalid image size\n", filename);
+  }
+
   out = ri.Malloc(pixelcount * 4);
 
   *width = cinfo.output_width;
