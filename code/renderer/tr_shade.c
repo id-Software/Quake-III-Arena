@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_shade.c
 
 #include "tr_local.h"
+#if idppc_altivec
+#include <altivec.h>
+#endif
 
 /*
 
@@ -409,10 +412,10 @@ static void ProjectDlightTexture( void ) {
 	vector short colorShort;
 	vector signed int colorInt;
 	vector unsigned char floatColorVecPerm, modulatePerm, colorChar;
-	vector unsigned char vSel = (vector unsigned char)(0x00, 0x00, 0x00, 0xff,
+	vector unsigned char vSel = (vector unsigned char){0x00, 0x00, 0x00, 0xff,
 							   0x00, 0x00, 0x00, 0xff,
 							   0x00, 0x00, 0x00, 0xff,
-							   0x00, 0x00, 0x00, 0xff);
+							   0x00, 0x00, 0x00, 0xff};
 #else
 	vec3_t	origin;
 #endif

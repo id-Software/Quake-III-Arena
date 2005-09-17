@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // snd_mix.c -- portable code to mix sounds for snd_dma.c
 
 #include "snd_local.h"
+#if idppc_altivec
+#include <altivec.h>
+#endif
 
 static portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
 static int snd_vol;
@@ -301,9 +304,9 @@ static void S_PaintChannelFrom16( channel_t *ch, const sfx_t *sc, int count, int
 				vector signed int merge0, merge1;
 				vector signed int d0, d1, d2, d3;				
 				vector unsigned char samplePermute0 = 
-					(vector unsigned char)(0, 1, 4, 5, 0, 1, 4, 5, 2, 3, 6, 7, 2, 3, 6, 7);
+					(vector unsigned char){0, 1, 4, 5, 0, 1, 4, 5, 2, 3, 6, 7, 2, 3, 6, 7};
 				vector unsigned char samplePermute1 = 
-					(vector unsigned char)(8, 9, 12, 13, 8, 9, 12, 13, 10, 11, 14, 15, 10, 11, 14, 15);
+					(vector unsigned char){8, 9, 12, 13, 8, 9, 12, 13, 10, 11, 14, 15, 10, 11, 14, 15};
 				vector unsigned char loadPermute0, loadPermute1;
 				
 				// Rather than permute the vectors after we load them to do the sample

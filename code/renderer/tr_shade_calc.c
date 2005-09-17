@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_shade_calc.c
 
 #include "tr_local.h"
+#if idppc_altivec
+#include <altivec.h>
+#endif
 
 
 #define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ myftol( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
@@ -1106,10 +1109,10 @@ void RB_CalcDiffuseColor( unsigned char *colors )
 	vec3_t			directedLight;
 	int				numVertexes;
 #if idppc_altivec
-	vector unsigned char vSel = (vector unsigned char)(0x00, 0x00, 0x00, 0xff,
+	vector unsigned char vSel = (vector unsigned char){0x00, 0x00, 0x00, 0xff,
 							   0x00, 0x00, 0x00, 0xff,
 							   0x00, 0x00, 0x00, 0xff,
-							   0x00, 0x00, 0x00, 0xff);
+							   0x00, 0x00, 0x00, 0xff};
 	vector float ambientLightVec;
 	vector float directedLightVec;
 	vector float lightDirVec;
