@@ -821,7 +821,8 @@ typedef struct
 
 static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 {
-	int		columns, rows, numPixels;
+	int		columns, rows;
+	unsigned	numPixels;
 	byte	*pixbuf;
 	int		row, column;
 	byte	*buf_p;
@@ -901,7 +902,8 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 		rows = -rows;
 	numPixels = columns * rows;
 
-	if(!columns || !rows || numPixels > 0x1FFFFFFF) // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
+	if(columns <= 0 || !rows || numPixels > 0x1FFFFFFF // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
+	    || ((numPixels * 4) / columns) / 4 != rows)
 	{
 	  ri.Error (ERR_DROP, "LoadBMP: %s has an invalid image size\n", name);
 	}
@@ -1192,7 +1194,7 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 	if (height)
 		*height = rows;
 
-	if(!columns || !rows || numPixels > 0x7FFFFFFF)
+	if(!columns || !rows || numPixels > 0x7FFFFFFF || numPixels / columns / 4 != rows)
 	{
 		ri.Error (ERR_DROP, "LoadTGA: %s has an invalid image size\n", name);
 	}
@@ -1456,9 +1458,11 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 
 
   if(!cinfo.output_width || !cinfo.output_height
+      || ((pixelcount * 4) / cinfo.output_width) / 4 != cinfo.output_height
       || pixelcount > 0x1FFFFFFF || cinfo.output_components > 4) // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
   {
-    ri.Error (ERR_DROP, "LoadJPG: %s has an invalid image size\n", filename);
+    ri.Error (ERR_DROP, "LoadJPG: %s has an invalid image size: %dx%d*4=%d, components: %d\n", filename,
+		    cinfo.output_width, cinfo.output_height, pixelcount * 4, cinfo.output_components);
   }
 
   out = ri.Malloc(pixelcount * 4);
