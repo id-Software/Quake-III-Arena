@@ -438,9 +438,11 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	sv_gametype->modified = qfalse;
 
 	// run a few frames to allow everything to settle
-	for ( i = 0 ;i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-		SV_BotFrame( svs.time );
+	for (i = 0;i < 3; i++)
+	{
+		VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+		SV_BotFrame (sv.time);
+		sv.time += 100;
 		svs.time += 100;
 	}
 
@@ -495,8 +497,9 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	}	
 
 	// run another frame to allow things to look at all the players
-	VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-	SV_BotFrame( svs.time );
+	VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+	SV_BotFrame (sv.time);
+	sv.time += 100;
 	svs.time += 100;
 
 	if ( sv_pure->integer ) {

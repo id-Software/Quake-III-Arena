@@ -272,8 +272,10 @@ static void SV_MapRestart_f( void ) {
 	SV_RestartGameProgs();
 
 	// run a few frames to allow everything to settle
-	for ( i = 0 ;i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+	for (i = 0; i < 3; i++)
+	{
+		VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+		sv.time += 100;
 		svs.time += 100;
 	}
 
@@ -314,7 +316,8 @@ static void SV_MapRestart_f( void ) {
 	}	
 
 	// run another frame to allow things to look at all the players
-	VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+	VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+	sv.time += 100;
 	svs.time += 100;
 }
 

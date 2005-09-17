@@ -785,7 +785,7 @@ void SV_Frame( int msec ) {
 
 	sv.timeResidual += msec;
 
-	if (!com_dedicated->integer) SV_BotFrame( svs.time + sv.timeResidual );
+	if (!com_dedicated->integer) SV_BotFrame (sv.time + sv.timeResidual);
 
 	if ( com_dedicated->integer && sv.timeResidual < frameMsec ) {
 		// NET_Sleep will give the OS time slices until either get a packet
@@ -835,15 +835,16 @@ void SV_Frame( int msec ) {
 	// update ping based on the all received frames
 	SV_CalcPings();
 
-	if (com_dedicated->integer) SV_BotFrame( svs.time );
+	if (com_dedicated->integer) SV_BotFrame (sv.time);
 
 	// run the game simulation in chunks
 	while ( sv.timeResidual >= frameMsec ) {
 		sv.timeResidual -= frameMsec;
 		svs.time += frameMsec;
+		sv.time += frameMsec;
 
 		// let everything in the world think and move
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+		VM_Call (gvm, GAME_RUN_FRAME, sv.time);
 	}
 
 	if ( com_speeds->integer ) {

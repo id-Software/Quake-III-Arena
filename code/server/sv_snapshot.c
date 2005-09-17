@@ -160,7 +160,7 @@ static void SV_WriteSnapshotToClient( client_t *client, msg_t *msg ) {
 
 	// send over the current server time so the client can drift
 	// its view of time to try to match
-	MSG_WriteLong (msg, svs.time);
+	MSG_WriteLong (msg, sv.time);
 
 	// what we are delta'ing from
 	MSG_WriteByte (msg, lastframe);
