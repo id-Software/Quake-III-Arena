@@ -42,7 +42,7 @@ int			chat_playerNum;
 
 qboolean	key_overstrikeMode;
 
-qboolean	anykeydown;
+int				anykeydown;
 qkey_t		keys[MAX_KEYS];
 
 
@@ -1238,7 +1238,7 @@ void Key_ClearStates (void)
 {
 	int		i;
 
-	anykeydown = qfalse;
+	anykeydown = 0;
 
 	for ( i=0 ; i < MAX_KEYS ; i++ ) {
 		if ( keys[i].down ) {

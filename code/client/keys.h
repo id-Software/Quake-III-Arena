@@ -43,7 +43,7 @@ extern	field_t	historyEditLines[COMMAND_HISTORY];
 
 extern	field_t	g_consoleField;
 extern	field_t	chatField;
-extern	qboolean	anykeydown;
+extern	int				anykeydown;
 extern	qboolean	chat_team;
 extern	int			chat_playerNum;
 
