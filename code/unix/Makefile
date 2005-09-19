@@ -67,7 +67,7 @@ JPDIR=$(MOUNT_DIR)/jpeg-6
 SPLNDIR=$(MOUNT_DIR)/splines
 
 # extract version info
-VERSION=$(shell ./extract_ver.pl)
+VERSION=$(shell cat ../game/q_shared.h | grep Q3_VERSION | sed -e 's/.*Q3\ \(.*\)"/\1/')
 RPM_RELEASE=1
 
 # NOTE: used by dcp rcp targets, not referenced
@@ -128,13 +128,6 @@ ifeq ($(PLATFORM),linux)
 
   GL_CFLAGS = -I/usr/X11R6/include
 
-  # bk001204 - need -O for -Wall for uninitialized
-  # bk001205 - took out -O to get assertions (NDEBUG)
-  # bk001206 - MALLOC_CHECK in addition to ZONE_DEBUG
-  # TTimo 03/30/2001 temporary took out -Werror for initial merge
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g
-  DEBUG_CFLAGS += -DNO_MOUSEGRAB
-  DEBUG_CFLAGS += -O0
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer -fno-strict-aliasing
   ifeq ($(ARCH),x86_64)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fstrength-reduce -fno-strict-aliasing
@@ -150,6 +143,12 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
+  # bk001204 - need -O for -Wall for uninitialized
+  # bk001205 - took out -O to get assertions (NDEBUG)
+  # bk001206 - MALLOC_CHECK in addition to ZONE_DEBUG
+  # TTimo 03/30/2001 temporary took out -Werror for initial merge
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -DNO_MOUSEGRAB -O0
+	
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   LIBEXT=a
@@ -174,7 +173,7 @@ ifeq ($(PLATFORM),linux)
   endif
 
   ifeq ($(strip $(USE_SDL)),true)
-    LDFLAGS+=$(shell sdl-config --libs)
+    GLLDFLAGS+=$(shell sdl-config --libs)
   endif
 
   ifeq ($(ARCH),i386)
