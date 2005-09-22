@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define MAX_TEAMNAME 32
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 #pragma warning(disable : 4018)     // signed/unsigned mismatch
 #pragma warning(disable : 4032)
@@ -90,7 +90,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 //#pragma intrinsic( memset, memcpy )
 
@@ -134,6 +134,7 @@ float	FloatSwap (const float *f);
 #define	QDECL	__cdecl
 
 // buildstring will be incorporated into the version string
+#ifdef _MSC_VER
 #ifdef NDEBUG
 #ifdef _M_IX86
 #define	CPUSTRING	"win-x86"
@@ -147,14 +148,25 @@ float	FloatSwap (const float *f);
 #define	CPUSTRING	"win-AXP-debug"
 #endif
 #endif
+#elif defined __MINGW32__
+#ifdef NDEBUG
+#ifdef __i386__
+#define	CPUSTRING	"mingw-x86"
+#endif
+#else
+#ifdef __i386__
+#define	CPUSTRING	"mingw-x86-debug"
+#endif
+#endif
+#endif
 
 #define ID_INLINE __inline 
 
 static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
-static ID_INLINE int BigLong(int l) { LongSwap(l); }
+static ID_INLINE int BigLong(int l) { return LongSwap(l); }
 #define LittleLong
-static ID_INLINE float BigFloat(const float l) { FloatSwap(&l); }
+static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
 #define LittleFloat
 
 #define	PATH_SEP '\\'

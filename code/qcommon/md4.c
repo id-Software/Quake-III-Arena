@@ -1,7 +1,7 @@
 /* GLOBAL.H - RSAREF types and constants */
 
 #include <string.h>
-#if defined(_WIN32)
+#ifdef _MSC_VER
 #pragma warning(disable : 4711)		// selected for automatic inline expansion
 #endif
 

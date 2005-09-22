@@ -1,32 +1,38 @@
 TODO: the Mac port seems stable, but outputs a bunch of warnings..
-2005-09-?? 
-- SDL Stuff (icculus)
-- x86_64 (ludwig von angstenheimer)
-- patches from a casth of thousands
-	
-2004-05-22
-- updated the xcode project from Apple's version
-  now with the latest vm_ppc code
-	
+2005-09-22 Tim Angus <tim@ngus.net>
+	+ MinGW port
+
+2005-09-??
+	+ SDL Stuff (icculus)
+	+ x86_64 (ludwig von angstenheimer)
+	+ patches from a cast of thousands
+
+2004-05-22 Timothee Besset <ttimo@idsoftware.com>
+	+ updated the xcode project from Apple's version
+		now with the latest vm_ppc code
+
 2004-05-21 Timothee Besset <ttimo@idsoftware.com>
-- fixed the Linux build to compile again on sid (glext.h and gcc3 warnings)
-- 2 weeks ago, hacked up the source to compile on panther / xcode 1.1
-  several cleanups were needed, and VM support seems broke (hangs or crashes)
-- got altivec optimisations from Apple (Kenneth Dyke)
-  merged back in
-- looks like with the new code merge the VM support is back in and working
-	
+	+ fixed the Linux build to compile again on sid (glext.h and gcc3 warnings)
+	+ 2 weeks ago, hacked up the source to compile on panther / xcode 1.1
+		several cleanups were needed, and VM support seems broke (hangs or crashes)
+	+ got altivec optimisations from Apple (Kenneth Dyke)
+		merged back in
+	+ looks like with the new code merge the VM support is back in and working
+
 2003-09-15 Timothee Besset <ttimo@idsoftware.com>
-- import Q3 java master code, cleanups on monster
+	+ import Q3 java master code, cleanups on monster
 
 2003-08-31 Timothee Besset <ttimo@idsoftware.com>
-+ loki_setup hell
-  https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=626
-  http://zerowing.idsoftware.com/linux/q3a/index.html#glibc
-  text mode installer in loki_setup image built on Mandrake 7.2 crashes on some glibc 2.3 systems such as RH9 etc.
-  need to move to a different version of the installer, and update old installers to keep them still 'installing'
-  moving to build the setup binaries on Debian Woody systems (glibc 2.2, text mode installer will no longer work on 2.1 systems)
-  hacked together a new setup, using setup tree from RTCW. would need a complete revamp if a new full setup with new binaries is needed
+	+ loki_setup hell
+		https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=626
+		http://zerowing.idsoftware.com/linux/q3a/index.html#glibc
+		text mode installer in loki_setup image built on Mandrake 7.2 crashes on
+		some glibc 2.3 systems such as RH9 etc.  need to move to a different
+		version of the installer, and update old installers to keep them still
+		'installing' moving to build the setup binaries on Debian Woody systems
+		(glibc 2.2, text mode installer will no longer work on 2.1 systems) hacked
+		together a new setup, using setup tree from RTCW. would need a complete
+		revamp if a new full setup with new binaries is needed
 
 2003-07-17 Timothee Besset <ttimo@idsoftware.com>
 	+ new cvsreport, testing per-module config

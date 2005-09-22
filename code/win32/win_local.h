@@ -73,7 +73,7 @@ LONG WINAPI MainWndProc (
 void Conbuf_AppendText( const char *msg );
 
 void SNDDMA_Activate( void );
-int  SNDDMA_InitDS ();
+int  SNDDMA_InitDS (void);
 
 typedef struct
 {

@@ -1592,7 +1592,7 @@ qboolean GLimp_SpawnRenderThread( void (*function)( void ) ) {
 	   (LPTHREAD_START_ROUTINE)GLimp_RenderThreadWrapper,	// LPTHREAD_START_ROUTINE lpStartAddr,
 	   0,			// LPVOID lpvThreadParm,
 	   0,			//   DWORD fdwCreate,
-	   &renderThreadId );
+	   (long *)&renderThreadId );
 
 	if ( !renderThreadHandle ) {
 		return qfalse;

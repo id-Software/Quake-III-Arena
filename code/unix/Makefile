@@ -17,7 +17,7 @@
 # GNU Make required
 #
 
-PLATFORM=$(shell uname|tr A-Z a-z)
+PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
 ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
 ifndef COPYDIR
@@ -42,6 +42,9 @@ BUILD_NAME=quake3
 
 BUILD_FREETYPE=0
 
+# Used for building with mingw
+DXSDK_DIR=C:/DXSDK
+
 #############################################################################
 ##
 ## You shouldn't have to touch anything below here
@@ -55,6 +58,7 @@ SDIR=$(MOUNT_DIR)/server
 RDIR=$(MOUNT_DIR)/renderer
 CMDIR=$(MOUNT_DIR)/qcommon
 UDIR=$(MOUNT_DIR)/unix
+W32DIR=$(MOUNT_DIR)/win32
 GDIR=$(MOUNT_DIR)/game
 CGDIR=$(MOUNT_DIR)/cgame
 BAIDIR=$(GDIR)
@@ -210,6 +214,84 @@ ifeq ($(PLATFORM),linux)
 else # ifeq Linux
 
 #############################################################################
+# SETUP AND BUILD -- MINGW32
+#############################################################################
+
+ifeq ($(PLATFORM),mingw32)
+
+  GLIBC=-mingw
+  CC=gcc
+  CXX=g++
+  WINDRES=windres
+
+ifeq ($(ARCH),i386)
+  ARCH=x86
+endif
+
+  RPMARCH=$(ARCH)
+
+  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  
+  ifeq ($(strip $(DLL_ONLY)),true)
+    BASE_CFLAGS += -DDLL_ONLY
+  endif
+
+  DX_CFLAGS = -I$(DXSDK_DIR)/Include
+
+  GL_CFLAGS =
+  MINGW_CFLAGS = -DDONT_TYPEDEF_INT32
+
+  OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+  BASE_CFLAGS += -DHAVE_VM_NATIVE -DHAVE_VM_COMPILED
+
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
+
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
+
+  LIBEXT=lib
+
+  SHLIBEXT=dll
+  SHLIBCFLAGS=
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+
+  AR=ar
+  ARFLAGS=rv
+  RANLIB=ranlib
+
+  THREAD_LDFLAGS=-lpthread
+  LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
+  GLLDFLAGS=
+
+  ifeq ($(BUILD_FREETYPE),1)
+    RELEASE_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
+    DEBUG_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
+    LDFLAGS += $(shell pkg-config --libs freetype2)
+  endif
+
+  ifeq ($(ARCH),x86)
+    # build 32bit
+    BASE_CFLAGS += -m32
+    LDFLAGS+=-m32
+  endif
+
+  TARGETS=\
+	$(B)/$(PLATFORM)quake3 \
+	$(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+	$(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+	$(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+	$(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+	$(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+	$(B)/missionpack/ui$(ARCH).$(SHLIBEXT)
+#	$(B)/baseq3/vm/qagame.qvm \
+#	$(B)/baseq3/vm/cgame.qvm \
+#	$(B)/baseq3/vm/ui.qvm \
+#	$(B)/missionpack/vm/qagame.qvm \
+#	$(B)/missionpack/vm/cgame.qvm \
+#	$(B)/missionpack/vm/ui.qvm
+
+else # ifeq mingw32
+
+#############################################################################
 # SETUP AND BUILD -- FREEBSD
 #############################################################################
 
@@ -334,6 +416,7 @@ TARGETS=\
 	$(B)/$(PLATFORM)q3ded
 
 endif #Linux
+endif #mingw32
 endif #FreeBSD
 endif #IRIX
 
@@ -351,6 +434,7 @@ DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 DO_NASM=nasm -f elf -o $@  $<
 DO_DED_CC=$(CC) -DDEDICATED -DC_ONLY $(CFLAGS) -o $@ -c $<
+DO_WINDRES=$(WINDRES) -i $< -o $@ 
 
 #DO_LCC=$(LCC) -o $@ -S -Wf-target=bytecode -Wf-g -DQ3_VM -I$(CGDIR) -I$(GDIR)  -I$(UIDIR)  $< 
 
@@ -532,12 +616,13 @@ Q3OBJ = \
 	$(B)/client/tr_sky.o \
 	$(B)/client/tr_surface.o \
 	$(B)/client/tr_world.o \
-	\
-	$(B)/client/unix_main.o \
-	$(B)/client/unix_net.o \
-	$(B)/client/unix_shared.o \
+
 
     ifeq ($(ARCH),i386)
+	  Q3OBJ += $(B)/client/vm_x86.o
+    endif
+
+    ifeq ($(ARCH),x86)
 	  Q3OBJ += $(B)/client/vm_x86.o
     endif
 
@@ -556,6 +641,9 @@ Q3OBJ = \
 #platform specific objects
 ifeq ($(PLATFORM),freebsd)
 	Q3POBJ=\
+		$(B)/client/unix_main.o \
+		$(B)/client/unix_net.o \
+		$(B)/client/unix_shared.o \
 		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
@@ -570,15 +658,38 @@ ifeq ($(PLATFORM),freebsd)
 else
 ifeq ($(PLATFORM),irix)
 	Q3POBJ=\
+		$(B)/client/unix_main.o \
+		$(B)/client/unix_net.o \
+		$(B)/client/unix_shared.o \
 		$(B)/client/irix_qgl.o \
 		$(B)/client/irix_glimp.o \
 		$(B)/client/irix_snd.o
+else
+ifeq ($(PLATFORM),mingw32)
+	Q3POBJ=\
+		$(B)/client/linux_common.o \
+		$(B)/client/snd_mixa.o \
+		$(B)/client/matha.o \
+		$(B)/client/win_gamma.o \
+		$(B)/client/win_glimp.o \
+		$(B)/client/win_input.o \
+		$(B)/client/win_main.o \
+		$(B)/client/win_net.o \
+		$(B)/client/win_qgl.o \
+		$(B)/client/win_shared.o \
+		$(B)/client/win_snd.o \
+		$(B)/client/win_syscon.o \
+		$(B)/client/win_wndproc.o \
+		$(B)/client/win_resource.o
 else
 ifeq ($(PLATFORM),linux)
 ifeq ($(ARCH),axp)
 	Q3POBJ=
 else
 	Q3POBJ=\
+		$(B)/client/unix_main.o \
+		$(B)/client/unix_net.o \
+		$(B)/client/unix_shared.o \
 		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
@@ -591,6 +702,9 @@ else
 		$(B)/client/matha.o \
 
 	Q3POBJ_SMP=\
+		$(B)/client/unix_main.o \
+		$(B)/client/unix_net.o \
+		$(B)/client/unix_shared.o \
 		$(B)/client/linux_signals.o \
 		$(B)/client/linux_common.o \
 		$(B)/client/linux_qgl.o \
@@ -606,10 +720,11 @@ else
 		Q3POBJ_SMP += $(B)/client/ftol.o $(B)/client/snapvector.o
     endif
 
-endif
+endif #Linux-axp
 endif #Linux
-endif #FreeBSD
+endif #mingw32
 endif #IRIX
+endif #FreeBSD
 
 $(B)/$(PLATFORM)quake3 : $(Q3OBJ) $(Q3POBJ)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS) 
@@ -719,10 +834,10 @@ $(B)/client/jdmaster.o : $(JPDIR)/jdmaster.c; $(DO_CC)
 $(B)/client/jdpostct.o : $(JPDIR)/jdpostct.c; $(DO_CC) 
 $(B)/client/jdsample.o : $(JPDIR)/jdsample.c; $(DO_CC) 
 $(B)/client/jdtrans.o : $(JPDIR)/jdtrans.c; $(DO_CC) 
-$(B)/client/jerror.o : $(JPDIR)/jerror.c; $(DO_CC) $(GL_CFLAGS) 
+$(B)/client/jerror.o : $(JPDIR)/jerror.c; $(DO_CC) $(GL_CFLAGS) $(MINGW_CFLAGS)
 $(B)/client/jidctflt.o : $(JPDIR)/jidctflt.c; $(DO_CC) 
 $(B)/client/jmemmgr.o : $(JPDIR)/jmemmgr.c; $(DO_CC) 
-$(B)/client/jmemnobs.o : $(JPDIR)/jmemnobs.c; $(DO_CC)  $(GL_CFLAGS) 
+$(B)/client/jmemnobs.o : $(JPDIR)/jmemnobs.c; $(DO_CC)  $(GL_CFLAGS) $(MINGW_CFLAGS)
 $(B)/client/jutils.o : $(JPDIR)/jutils.c; $(DO_CC) 
 
 $(B)/client/tr_bsp.o : $(RDIR)/tr_bsp.c; $(DO_CC)  $(GL_CFLAGS) 
@@ -732,7 +847,7 @@ $(B)/client/tr_cmds.o : $(RDIR)/tr_cmds.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/tr_curve.o : $(RDIR)/tr_curve.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/tr_flares.o : $(RDIR)/tr_flares.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/tr_font.o : $(RDIR)/tr_font.c; $(DO_CC)   $(GL_CFLAGS) 
-$(B)/client/tr_image.o : $(RDIR)/tr_image.c; $(DO_CC)   $(GL_CFLAGS) 
+$(B)/client/tr_image.o : $(RDIR)/tr_image.c; $(DO_CC)   $(GL_CFLAGS) $(MINGW_CFLAGS) 
 $(B)/client/tr_init.o : $(RDIR)/tr_init.c; $(DO_CC)    $(GL_CFLAGS) 
 $(B)/client/tr_light.o : $(RDIR)/tr_light.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/tr_main.o : $(RDIR)/tr_main.c; $(DO_CC)   $(GL_CFLAGS) 
@@ -773,9 +888,25 @@ $(B)/client/sdl_snd.o : $(UDIR)/sdl_snd.c; $(DO_CC)
 $(B)/client/snd_mixa.o : $(UDIR)/snd_mixa.s; $(DO_AS) 
 $(B)/client/matha.o : $(UDIR)/matha.s; $(DO_AS) 
 
+$(B)/client/win_gamma.o : $(W32DIR)/win_gamma.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_glimp.o : $(W32DIR)/win_glimp.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_input.o : $(W32DIR)/win_input.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_main.o : $(W32DIR)/win_main.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_net.o : $(W32DIR)/win_net.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_qgl.o : $(W32DIR)/win_qgl.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_shared.o : $(W32DIR)/win_shared.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_snd.o : $(W32DIR)/win_snd.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_syscon.o : $(W32DIR)/win_syscon.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_wndproc.o : $(W32DIR)/win_wndproc.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_resource.o : $(W32DIR)/winquake.rc; $(DO_WINDRES)
+
 ifeq ($(ARCH),i386)
 $(B)/client/ftol.o : $(UDIR)/ftol.nasm; $(DO_NASM)
 $(B)/client/snapvector.o : $(UDIR)/snapvector.nasm; $(DO_NASM)
+$(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC) 
+endif
+
+ifeq ($(ARCH),x86)
 $(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC) 
 endif
 
@@ -944,6 +1075,7 @@ $(B)/ded/linux_common.o : $(UDIR)/linux_common.c; $(DO_DED_CC)
 $(B)/ded/unix_main.o : $(UDIR)/unix_main.c; $(DO_DED_CC) 
 $(B)/ded/unix_net.o : $(UDIR)/unix_net.c; $(DO_DED_CC) 
 $(B)/ded/unix_shared.o : $(UDIR)/unix_shared.c; $(DO_DED_CC) 
+
 $(B)/ded/null_client.o : $(NDIR)/null_client.c; $(DO_DED_CC) 
 $(B)/ded/null_input.o : $(NDIR)/null_input.c; $(DO_DED_CC) 
 $(B)/ded/null_snddma.o : $(NDIR)/null_snddma.c; $(DO_DED_CC) 

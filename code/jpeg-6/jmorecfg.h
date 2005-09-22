@@ -149,7 +149,9 @@ typedef unsigned short UINT16;
 typedef unsigned int UINT16;
 #endif /* HAVE_UNSIGNED_SHORT */
 
+#ifndef DONT_TYPEDEF_INT32
 typedef long INT32;
+#endif
 
 /* INT16 must hold at least the values -32768..32767. */
 

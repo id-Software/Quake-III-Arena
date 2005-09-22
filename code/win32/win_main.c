@@ -56,7 +56,7 @@ void Spk_Open(char *name)
   fh = open( name, O_TRUNC | O_CREAT | O_WRONLY, S_IREAD | S_IWRITE );
 };
 
-void Spk_Close()
+void Spk_Close(void)
 {
   if (!fh)
     return;
@@ -526,7 +526,7 @@ extern char		*FS_BuildOSPath( const char *base, const char *game, const char *qp
 // fqpath param added 7/20/02 by T.Ray - Sys_LoadDll is only called in vm.c at this time
 // fqpath will be empty if dll not loaded, otherwise will hold fully qualified path of dll module loaded
 // fqpath buffersize must be at least MAX_QPATH+1 bytes long
-void * QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoint)(int, ...),
+void * QDECL Sys_LoadDll( const char *name, char *fqpath , long (QDECL **entryPoint)(long, ...),
 				  long (QDECL *systemcalls)(long, ...) ) {
 	static int	lastWarning = 0;
 	HINSTANCE	libHandle;
@@ -1100,7 +1100,11 @@ void Sys_Init( void ) {
 	{
 		Com_Printf( "...detecting CPU, found " );
 
+#ifndef __MINGW32__
 		cpuid = Sys_GetProcessorId();
+#else // See comments in win_shared.c
+		cpuid = CPUID_GENERIC;
+#endif
 
 		switch ( cpuid )
 		{

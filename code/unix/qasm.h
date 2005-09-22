@@ -22,6 +22,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __ASM_I386__
 #define __ASM_I386__
 
+#ifdef __MINGW32__
+#undef ELF
+#endif
+
 #ifdef ELF
 #define C(label) label
 #else

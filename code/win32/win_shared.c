@@ -59,14 +59,19 @@ Sys_SnapVector
 ================
 */
 long fastftol( float f ) {
+#ifndef __MINGW32__
 	static int tmp;
 	__asm fld f
 	__asm fistp tmp
 	__asm mov eax, tmp
+#else
+	return (long)f;
+#endif
 }
 
 void Sys_SnapVector( float *v )
 {
+#ifndef __MINGW32__
 	int i;
 	float f;
 
@@ -91,6 +96,11 @@ void Sys_SnapVector( float *v )
 	v++;
 	*v = fastftol(*v);
 	*/
+#else
+	v[0] = rint(v[0]);
+	v[1] = rint(v[1]);
+	v[2] = rint(v[2]);
+#endif
 }
 
 
@@ -99,8 +109,13 @@ void Sys_SnapVector( float *v )
 ** Disable all optimizations temporarily so this code works correctly!
 **
 */
+#ifdef _MSC_VER
 #pragma optimize( "", off )
+#endif
 
+// If you fancy porting this stuff to AT&T then feel free... :)
+// It's not actually used functionally though, so it may be a waste of effort
+#ifndef __MINGW32__
 /*
 ** --------------------------------------------------------------------------------
 **
@@ -268,13 +283,16 @@ int Sys_GetProcessorId( void )
 
 #endif
 }
+#endif
 
 /*
 **
 ** Re-enable optimizations back to what they were
 **
 */
+#ifdef _MSC_VER
 #pragma optimize( "", on )
+#endif
 
 //============================================
 

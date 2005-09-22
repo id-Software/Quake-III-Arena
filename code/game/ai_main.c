@@ -55,7 +55,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "inv.h"
 #include "syn.h"
 
+#ifndef MAX_PATH
 #define MAX_PATH		144
+#endif
 
 
 //bot states

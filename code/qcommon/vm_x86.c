@@ -60,8 +60,13 @@ int _ftol( float );
 static	int		ftolPtr = (int)_ftol;
 #endif
 
+#ifndef __MINGW32__
 void AsmCall( void );
 static	int		asmCallPtr = (int)AsmCall;
+#else
+void doAsmCall( void );
+static	int		asmCallPtr = (int)doAsmCall;
+#endif
 
 #else // _WIN32
 
@@ -105,7 +110,7 @@ static	ELastCommand	LastCommand;
 AsmCall
 =================
 */
-#ifdef _WIN32
+#ifdef _MSC_VER
 __declspec( naked ) void AsmCall( void ) {
 int		programStack;
 int		*opStack;
@@ -168,7 +173,7 @@ _asm {
 
 }
 
-#else //!_WIN32
+#else //!_MSC_VER
 
 static	int		callProgramStack;
 static	int		*callOpStack;
@@ -185,13 +190,14 @@ void callAsmCall(void)
 	// save the stack to allow recursive VM entry
 	currentVM->programStack = callProgramStack - 4;
 	*(int *)((byte *)currentVM->dataBase + callProgramStack + 4) = callSyscallNum;
-//VM_LogSyscalls(  (int *)((byte *)currentVM->dataBase + programStack + 4) );
+	//VM_LogSyscalls((int *)((byte *)currentVM->dataBase + callProgramStack + 4) );
 	*(callOpStack2+1) = currentVM->systemCall( (int *)((byte *)currentVM->dataBase + callProgramStack + 4) );
 
  	currentVM = savedVM;
 }
 
 void AsmCall( void ) {
+#ifndef __MINGW32__
 	__asm__("doAsmCall:      			\n\t" \
 			"	movl (%%edi),%%eax			\n\t" \
 			"	subl $4,%%edi				\n\t" \
@@ -223,6 +229,42 @@ void AsmCall( void ) {
 			: "rm" (instructionPointers) \
 			: "ax", "di", "si", "cx" \
 	);
+#else
+	// The only difference is _ added to the C symbols. It seems mingw
+	// mangles all symbols this way, like linux gcc does when producing
+	// a.out instead of elf
+	__asm__("_doAsmCall:      			\n\t" \
+			"	movl (%%edi),%%eax			\n\t" \
+			"	subl $4,%%edi				\n\t" \
+			"   orl %%eax,%%eax				\n\t" \
+			"	jl systemCall				\n\t" \
+			"	shll $2,%%eax				\n\t" \
+			"	addl %3,%%eax				\n\t" \
+			"	call *(%%eax)				\n\t" \
+		  " movl (%%edi),%%eax   \n\t" \
+	    " andl _callMask, %%eax \n\t" \
+			"	jmp doret					   \n\t" \
+			"systemCall:					\n\t" \
+			"	negl %%eax					\n\t" \
+			"	decl %%eax					\n\t" \
+			"	movl %%eax,%0				\n\t" \
+			"	movl %%esi,%1				\n\t" \
+			"	movl %%edi,%2				\n\t" \
+			"	pushl %%ecx					\n\t" \
+			"	pushl %%esi					\n\t" \
+			"	pushl %%edi					\n\t" \
+			"	call _callAsmCall			\n\t" \
+			"	popl %%edi					\n\t" \
+			"	popl %%esi					\n\t" \
+			"	popl %%ecx					\n\t" \
+			"	addl $4,%%edi				\n\t" \
+			"doret:							\n\t" \
+			"	ret							\n\t" \
+			: "=rm" (callSyscallNum), "=rm" (callProgramStack), "=rm" (callOpStack) \
+			: "rm" (instructionPointers) \
+			: "ax", "di", "si", "cx" \
+	);
+#endif
 }
 #endif
 
@@ -1140,7 +1182,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	entryPoint = vm->codeBase;
 	opStack = &stack;
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 	__asm  {
 		pushad
 		mov		esi, programStack;

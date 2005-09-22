@@ -311,12 +311,12 @@ typedef union {
 
 float readFloat( void ) {
 	poor	me;
-#if __WORD_ORDER == __BIG_ENDIAN
+#if defined BigFloat
 	me.fred[0] = fdFile[fdOffset+3];
 	me.fred[1] = fdFile[fdOffset+2];
 	me.fred[2] = fdFile[fdOffset+1];
 	me.fred[3] = fdFile[fdOffset+0];
-#else
+#elif defined LittleFloat
 	me.fred[0] = fdFile[fdOffset+0];
 	me.fred[1] = fdFile[fdOffset+1];
 	me.fred[2] = fdFile[fdOffset+2];

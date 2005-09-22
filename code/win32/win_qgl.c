@@ -3220,8 +3220,12 @@ static qboolean GlideIsValid( void )
 	return qfalse;
 } 
 
+#ifdef _MSC_VER
 #	pragma warning (disable : 4113 4133 4047 )
 #	define GPA( a ) GetProcAddress( glw_state.hinstOpenGL, a )
+#else
+#	define GPA( a ) (void *)GetProcAddress( glw_state.hinstOpenGL, a )
+#endif
 
 /*
 ** QGL_Init
@@ -4368,7 +4372,9 @@ void QGL_EnableLogging( qboolean enable )
 	}
 }
 
+#ifdef _MSC_VER
 #pragma warning (default : 4113 4133 4047 )
+#endif
 
 
 

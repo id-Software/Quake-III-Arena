@@ -195,7 +195,7 @@ DIRECT INPUT MOUSE CONTROL
 #undef DEFINE_GUID
 
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        EXTERN_C const GUID name \
+        const GUID name \
                 = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 
 DEFINE_GUID(GUID_SysMouse,   0x6F1D2B60,0xD5A0,0x11CF,0xBF,0xC7,0x44,0x45,0x53,0x54,0x00,0x00);
@@ -279,7 +279,7 @@ qboolean IN_InitDIMouse( void ) {
 	}
 
 	if (!pDirectInputCreate) {
-		pDirectInputCreate = (long (__stdcall *)(void *,unsigned long ,struct IDirectInputA ** ,struct IUnknown *))
+		pDirectInputCreate = (HRESULT (WINAPI *)(HINSTANCE, DWORD, LPDIRECTINPUT *, LPUNKNOWN))
 			GetProcAddress(hInstDI,"DirectInputCreateA");
 
 		if (!pDirectInputCreate) {
@@ -403,7 +403,6 @@ void IN_DIMouse( int *mx, int *my ) {
 	DWORD				dwElements;
 	HRESULT				hr;
   int value;
-	static float		oldSysTime;
 
 	if ( !g_pMouse ) {
 		return;
@@ -929,7 +928,7 @@ void IN_JoyMove( void ) {
 
 	if ( joyGetPosEx (joy.id, &joy.ji) != JOYERR_NOERROR ) {
 		// read error occurred
-		// turning off the joystick seems too harsh for 1 read error,\
+		// turning off the joystick seems too harsh for 1 read error,
 		// but what should be done?
 		// Com_Printf ("IN_ReadJoystick: no response\n");
 		// joy.avail = false;
