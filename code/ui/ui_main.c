@@ -981,7 +981,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 	trap_PC_FreeSource( handle );
 }
 
-void UI_Load() {
+void UI_Load(void) {
 	char lastName[1024];
   menuDef_t *menu = Menu_GetFocused();
 	char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
@@ -1414,7 +1414,7 @@ static void UI_DrawTierGameType(rectDef_t *rect, float scale, vec4_t color, int 
 
 
 #ifndef MISSIONPACK // bk001206
-static const char *UI_OpponentLeaderName() {
+static const char *UI_OpponentLeaderName(void) {
   int i = UI_TeamIndexFromName(UI_Cvar_VariableString("ui_opponentName"));
 	return uiInfo.teamList[i].teamMembers[0];
 }
@@ -1456,14 +1456,14 @@ static const int UI_AIIndexFromName(const char *name) {
 
 
 #ifndef MISSIONPACK // bk001206
-static const char *UI_OpponentLeaderHead() {
+static const char *UI_OpponentLeaderHead(void) {
 	const char *leader = UI_OpponentLeaderName();
 	return UI_AIFromName(leader);
 }
 #endif
 
 #ifndef MISSIONPACK // bk001206
-static const char *UI_OpponentLeaderModel() {
+static const char *UI_OpponentLeaderModel(void) {
 	int i;
 	const char *head = UI_OpponentLeaderHead();
 	for (i = 0; i < uiInfo.characterCount; i++) {
@@ -2769,7 +2769,7 @@ void UI_ServersSort(int column, qboolean force) {
 }
 
 /*
-static void UI_StartSinglePlayer() {
+static void UI_StartSinglePlayer(void) {
 	int i,j, k, skill;
 	char buff[1024];
 	i = trap_Cvar_VariableValue( "ui_currentTier" );
@@ -2955,7 +2955,7 @@ static void UI_StartSkirmish(qboolean next) {
 		UI_SelectedMap(index, &actual);
 		if (UI_SetNextMap(actual, index)) {
 		} else {
-			UI_GameType_HandleKey(0, 0, K_MOUSE1, qfalse);
+			UI_GameType_HandleKey(0, NULL, K_MOUSE1, qfalse);
 			UI_MapCountByGameType(qtrue);
 			Menu_SetFeederSelection(NULL, FEEDER_MAPS, 0, "skirmish");
 		}
@@ -3220,8 +3220,8 @@ static void UI_RunMenuScript(char **args) {
 			ui_mapIndex.integer = UI_GetIndexFromSelection(ui_currentMap.integer);
 			trap_Cvar_Set("ui_mapIndex", va("%d", ui_mapIndex.integer));
 			Menu_SetFeederSelection(NULL, FEEDER_MAPS, ui_mapIndex.integer, "skirmish");
-			UI_GameType_HandleKey(0, 0, K_MOUSE1, qfalse);
-			UI_GameType_HandleKey(0, 0, K_MOUSE2, qfalse);
+			UI_GameType_HandleKey(0, NULL, K_MOUSE1, qfalse);
+			UI_GameType_HandleKey(0, NULL, K_MOUSE2, qfalse);
 		} else if (Q_stricmp(name, "resetDefaults") == 0) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, "exec default.cfg\n");
 			trap_Cmd_ExecuteText( EXEC_APPEND, "cvar_restart\n");
@@ -3576,12 +3576,12 @@ qboolean UI_hasSkinForBase(const char *base, const char *team) {
 	
 	Com_sprintf( test, sizeof( test ), "models/players/%s/%s/lower_default.skin", base, team );
 
-	if (trap_FS_FOpenFile(test, 0, FS_READ)) {
+	if (trap_FS_FOpenFile(test, NULL, FS_READ)) {
 		return qtrue;
 	}
 	Com_sprintf( test, sizeof( test ), "models/players/characters/%s/%s/lower_default.skin", base, team );
 
-	if (trap_FS_FOpenFile(test, 0, FS_READ)) {
+	if (trap_FS_FOpenFile(test, NULL, FS_READ)) {
 		return qtrue;
 	}
 	return qfalse;
@@ -3592,7 +3592,7 @@ qboolean UI_hasSkinForBase(const char *base, const char *team) {
 UI_MapCountByTeam
 ==================
 */
-static int UI_HeadCountByTeam() {
+static int UI_HeadCountByTeam(void) {
 	static int init = 0;
 	int i, j, k, c, tIndex;
 	

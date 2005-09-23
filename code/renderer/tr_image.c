@@ -1374,7 +1374,7 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
    */
-  struct jpeg_decompress_struct cinfo = {0};
+  struct jpeg_decompress_struct cinfo = {NULL};
   /* We use our private extension JPEG error handler.
    * Note that this struct must live as long as the main JPEG parameter
    * struct, to avoid dangling-pointer problems.

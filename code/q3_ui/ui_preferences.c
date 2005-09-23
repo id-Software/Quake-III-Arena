@@ -86,7 +86,7 @@ static const char *teamoverlay_names[] =
 	"upper right",
 	"lower right",
 	"lower left",
-	0
+	NULL
 };
 
 static void Preferences_SetMenuItems( void ) {

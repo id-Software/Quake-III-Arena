@@ -3407,17 +3407,17 @@ qboolean QGL_Init( const char *dllname )
 	qglXCopyContext              =  GPA("glXCopyContext");
 	qglXSwapBuffers              =  GPA("glXSwapBuffers");
 
-	qglLockArraysEXT = 0;
-	qglUnlockArraysEXT = 0;
-	qglPointParameterfEXT = 0;
-	qglPointParameterfvEXT = 0;
-	qglColorTableEXT = 0;
-	qgl3DfxSetPaletteEXT = 0;
-	qglSelectTextureSGIS = 0;
-	qglMTexCoord2fSGIS = 0;
-	qglActiveTextureARB = 0;
-	qglClientActiveTextureARB = 0;
-	qglMultiTexCoord2fARB = 0;
+	qglLockArraysEXT = NULL;
+	qglUnlockArraysEXT = NULL;
+	qglPointParameterfEXT = NULL;
+	qglPointParameterfvEXT = NULL;
+	qglColorTableEXT = NULL;
+	qgl3DfxSetPaletteEXT = NULL;
+	qglSelectTextureSGIS = NULL;
+	qglMTexCoord2fSGIS = NULL;
+	qglActiveTextureARB = NULL;
+	qglClientActiveTextureARB = NULL;
+	qglMultiTexCoord2fARB = NULL;
 
 	return qtrue;
 }

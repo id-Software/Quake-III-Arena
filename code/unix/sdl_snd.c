@@ -169,13 +169,13 @@ qboolean SNDDMA_Init(void)
 
     if (!SDL_WasInit(SDL_INIT_AUDIO))
     {
-        Com_Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_AUDIO)...\n");
+        Com_Printf("Calling SDL_Init(SDL_INIT_AUDIO)...\n");
         if (SDL_Init(SDL_INIT_AUDIO) == -1)
         {
-		    Com_Printf( PRINT_ALL, "SDL_Init(SDL_INIT_AUDIO) failed: %s\n", SDL_GetError());
+		    Com_Printf("SDL_Init(SDL_INIT_AUDIO) failed: %s\n", SDL_GetError());
             return qfalse;
         }
-        Com_Printf( PRINT_ALL, "SDL_Init(SDL_INIT_AUDIO) passed.\n");
+        Com_Printf("SDL_Init(SDL_INIT_AUDIO) passed.\n");
     }
 
     if (SDL_AudioDriverName(drivername, sizeof (drivername)) == NULL)

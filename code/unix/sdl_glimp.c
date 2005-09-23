@@ -1316,13 +1316,13 @@ void IN_StartupJoystick( void )
 
   if (!SDL_WasInit(SDL_INIT_JOYSTICK))
   {
-      Com_Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_JOYSTICK)...\n");
+      Com_Printf("Calling SDL_Init(SDL_INIT_JOYSTICK)...\n");
       if (SDL_Init(SDL_INIT_JOYSTICK) == -1)
       {
           Com_Printf("SDL_Init(SDL_INIT_JOYSTICK) failed: %s\n", SDL_GetError());
           return;
       }
-      Com_Printf( PRINT_ALL, "SDL_Init(SDL_INIT_JOYSTICK) passed.\n");
+      Com_Printf("SDL_Init(SDL_INIT_JOYSTICK) passed.\n");
   }
 
   total = SDL_NumJoysticks();

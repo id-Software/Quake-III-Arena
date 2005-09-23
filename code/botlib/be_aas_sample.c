@@ -1388,7 +1388,7 @@ int AAS_AreaInfo( int areanum, aas_areainfo_t *info )
 //===========================================================================
 aas_plane_t *AAS_PlaneFromNum(int planenum)
 {
-	if (!aasworld.loaded) return 0;
+	if (!aasworld.loaded) return NULL;
 
 	return &aasworld.planes[planenum];
 } //end of the function AAS_PlaneFromNum

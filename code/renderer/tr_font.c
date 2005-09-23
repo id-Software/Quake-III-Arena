@@ -527,7 +527,7 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 
 
 
-void R_InitFreeType() {
+void R_InitFreeType(void) {
 #ifdef BUILD_FREETYPE
   if (FT_Init_FreeType( &ftLibrary )) {
     ri.Printf(PRINT_ALL, "R_InitFreeType: Unable to initialize FreeType.\n");
@@ -537,7 +537,7 @@ void R_InitFreeType() {
 }
 
 
-void R_DoneFreeType() {
+void R_DoneFreeType(void) {
 #ifdef BUILD_FREETYPE
   if (ftLibrary) {
     FT_Done_FreeType( ftLibrary );

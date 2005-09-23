@@ -242,7 +242,7 @@ static const char *s_drivers[] =
 {
 	OPENGL_DRIVER_NAME,
 	_3DFX_DRIVER_NAME,
-	0
+	NULL
 };
 
 #define ID_BACK2		101
@@ -723,7 +723,7 @@ void GraphicsOptions_MenuInit( void )
 	{
 		"Default",
 		"Voodoo",
-		0
+		NULL
 	};
 
 	static const char *tq_names[] =
@@ -731,7 +731,7 @@ void GraphicsOptions_MenuInit( void )
 		"Default",
 		"16 bit",
 		"32 bit",
-		0
+		NULL
 	};
 
 	static const char *s_graphics_options_names[] =
@@ -741,14 +741,14 @@ void GraphicsOptions_MenuInit( void )
 		"Fast",
 		"Fastest",
 		"Custom",
-		0
+		NULL
 	};
 
 	static const char *lighting_names[] =
 	{
 		"Lightmap",
 		"Vertex",
-		0
+		NULL
 	};
 
 	static const char *colordepth_names[] =
@@ -756,7 +756,7 @@ void GraphicsOptions_MenuInit( void )
 		"Default",
 		"16 bit",
 		"32 bit",
-		0
+		NULL
 	};
 
 	static const char *resolutions[] = 
@@ -773,26 +773,26 @@ void GraphicsOptions_MenuInit( void )
 		"1600x1200",
 		"2048x1536",
 		"856x480 wide screen",
-		0
+		NULL
 	};
 	static const char *filter_names[] =
 	{
 		"Bilinear",
 		"Trilinear",
-		0
+		NULL
 	};
 	static const char *quality_names[] =
 	{
 		"Low",
 		"Medium",
 		"High",
-		0
+		NULL
 	};
 	static const char *enabled_names[] =
 	{
 		"Off",
 		"On",
-		0
+		NULL
 	};
 
 	int y;

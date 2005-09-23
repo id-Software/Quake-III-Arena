@@ -305,7 +305,7 @@ char *AAS_LoadAASLump(fileHandle_t fp, int offset, int length, int *lastoffset, 
 			AAS_Error("can't seek to aas lump\n");
 			AAS_DumpAASData();
 			botimport.FS_FCloseFile(fp);
-			return 0;
+			return NULL;
 		} //end if
 	} //end if
 	//allocate memory

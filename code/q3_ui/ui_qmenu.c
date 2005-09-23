@@ -1554,7 +1554,7 @@ Menu_ItemAtCursor
 void *Menu_ItemAtCursor( menuframework_s *m )
 {
 	if ( m->cursor < 0 || m->cursor >= m->nitems )
-		return 0;
+		return NULL;
 
 	return m->items[m->cursor];
 }

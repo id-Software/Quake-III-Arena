@@ -266,7 +266,7 @@ spawn_t	spawns[] = {
 #endif
 	{"item_botroam", SP_item_botroam},
 
-	{0, 0}
+	{NULL, NULL}
 };
 
 /*

@@ -101,7 +101,7 @@ static const char *master_items[] = {
 	"Local",
 	"Internet",
 	"Favorites",
-	0
+	NULL
 };
 
 static const char *servertype_items[] = {
@@ -110,7 +110,7 @@ static const char *servertype_items[] = {
 	"Team Deathmatch",
 	"Tournament",
 	"Capture the Flag",
-	0
+	NULL
 };
 
 static const char *sortkey_items[] = {
@@ -119,7 +119,7 @@ static const char *sortkey_items[] = {
 	"Open Player Spots",
 	"Game Type",
 	"Ping Time",
-	0
+	NULL
 };
 
 static char* gamenames[] = {
@@ -136,7 +136,7 @@ static char* gamenames[] = {
 	"Urban Terror",		// Urban Terror
 	"OSP",						// Orange Smoothie Productions
 	"???",			// unknown
-	0
+	NULL
 };
 
 static char* netnames[] = {

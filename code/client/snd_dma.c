@@ -938,7 +938,7 @@ void S_ByteSwapRawSamples( int samples, int width, int s_channels, const byte *d
 	}
 }
 
-portable_samplepair_t *S_GetRawSamplePointer() {
+portable_samplepair_t *S_GetRawSamplePointer( void ) {
 	return s_rawsamples;
 }
 
@@ -1605,7 +1605,7 @@ S_FreeOldestSound
 ======================
 */
 
-void S_FreeOldestSound() {
+void S_FreeOldestSound( void ) {
 	int	i, oldest, used;
 	sfx_t	*sfx;
 	sndBuffer	*buffer, *nbuffer;

@@ -180,7 +180,7 @@ void UI_LoadBestScores(const char *map, int game) {
 UI_ClearScores
 ===============
 */
-void UI_ClearScores() {
+void UI_ClearScores(void) {
 	char	gameList[4096];
 	char *gameFile;
 	int		i, len, count, size;

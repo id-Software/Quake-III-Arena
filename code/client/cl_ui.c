@@ -47,7 +47,7 @@ static void GetClientState( uiClientState_t *state ) {
 LAN_LoadCachedServers
 ====================
 */
-void LAN_LoadCachedServers( ) {
+void LAN_LoadCachedServers( void ) {
 	int size;
 	fileHandle_t fileIn;
 	cls.numglobalservers = cls.nummplayerservers = cls.numfavoriteservers = 0;
@@ -74,7 +74,7 @@ void LAN_LoadCachedServers( ) {
 LAN_SaveServersToCache
 ====================
 */
-void LAN_SaveServersToCache( ) {
+void LAN_SaveServersToCache( void ) {
 	int size;
 	fileHandle_t fileOut = FS_SV_FOpenFileWrite("servercache.dat");
 	FS_Write(&cls.numglobalservers, sizeof(int), fileOut);
@@ -134,7 +134,7 @@ static int LAN_AddServer(int source, const char *name, const char *address) {
 	netadr_t adr;
 	serverInfo_t *servers = NULL;
 	max = MAX_OTHER_SERVERS;
-	count = 0;
+	count = NULL;
 
 	switch (source) {
 		case AS_LOCAL :
@@ -182,7 +182,7 @@ LAN_RemoveServer
 static void LAN_RemoveServer(int source, const char *addr) {
 	int *count, i;
 	serverInfo_t *servers = NULL;
-	count = 0;
+	count = NULL;
 	switch (source) {
 		case AS_LOCAL :
 			count = &cls.numlocalservers;
@@ -1173,7 +1173,7 @@ void CL_InitUI( void ) {
 	}
 }
 
-qboolean UI_usesUniqueCDKey() {
+qboolean UI_usesUniqueCDKey( void ) {
 	if (uivm) {
 		return (VM_Call( uivm, UI_HASUNIQUECDKEY) == qtrue);
 	} else {

@@ -321,7 +321,7 @@ FS_Initialized
 ==============
 */
 
-qboolean FS_Initialized() {
+qboolean FS_Initialized( void ) {
 	return (fs_searchpaths != NULL);
 }
 
@@ -354,7 +354,7 @@ FS_LoadStack
 return load stack
 =================
 */
-int FS_LoadStack()
+int FS_LoadStack( void )
 {
 	return fs_loadStack;
 }

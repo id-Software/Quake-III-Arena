@@ -241,18 +241,18 @@ static const char *skillNames[] = {
 	"Hurt Me Plenty",
 	"Hardcore",
 	"Nightmare!",
-	0
+	NULL
 };
 
 static const char *teamNames1[] = {
 	"Free",
-	0
+	NULL
 };
 
 static const char *teamNames2[] = {
 	"Red",
 	"Blue",
-	0
+	NULL
 };
 
 static void UI_AddBotsMenu_Init( void ) {

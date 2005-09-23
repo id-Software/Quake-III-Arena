@@ -48,7 +48,7 @@ SOUND OPTIONS MENU
 
 
 static const char *quality_items[] = {
-	"Low", "High", 0
+	"Low", "High", NULL
 };
 
 typedef struct {

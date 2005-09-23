@@ -253,7 +253,7 @@ char **Sys_ListFiles( const char *directory, const char *extension, char *filter
 		nfiles = 0;
 		Sys_ListFilteredFiles( directory, "", filter, list, &nfiles );
 
-		list[ nfiles ] = 0;
+		list[ nfiles ] = NULL;
 		*numfiles = nfiles;
 
 		if (!nfiles)
@@ -309,7 +309,7 @@ char **Sys_ListFiles( const char *directory, const char *extension, char *filter
 		nfiles++;
 	}
 
-	list[ nfiles ] = 0;
+	list[ nfiles ] = NULL;
 
 	closedir(fdir);
 
@@ -428,7 +428,7 @@ char *Sys_GetCurrentUser( void )
 #if defined(__linux__)
 // TTimo 
 // sysconf() in libc, POSIX.1 compliant
-unsigned int Sys_ProcessorCount()
+unsigned int Sys_ProcessorCount(void)
 {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }

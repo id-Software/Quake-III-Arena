@@ -98,7 +98,7 @@ static const char *gametype_items[] = {
 	"Team Deathmatch",
 	"Tournament",
 	"Capture the Flag",
-	0
+	NULL
 };
 
 static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_TOURNAMENT, GT_CTF};
@@ -665,20 +665,20 @@ static const char *dedicated_list[] = {
 	"No",
 	"LAN",
 	"Internet",
-	0
+	NULL
 };
 
 static const char *playerType_list[] = {
 	"Open",
 	"Bot",
 	"----",
-	0
+	NULL
 };
 
 static const char *playerTeam_list[] = {
 	"Blue",
 	"Red",
-	0
+	NULL
 };
 
 static const char *botSkill_list[] = {
@@ -687,7 +687,7 @@ static const char *botSkill_list[] = {
 	"Hurt Me Plenty",
 	"Hardcore",
 	"Nightmare!",
-	0
+	NULL
 };
 
 

@@ -907,7 +907,7 @@ UI_FileExists
 static qboolean	UI_FileExists(const char *filename) {
 	int len;
 
-	len = trap_FS_FOpenFile( filename, 0, FS_READ );
+	len = trap_FS_FOpenFile( filename, NULL, FS_READ );
 	if (len>0) {
 		return qtrue;
 	}
