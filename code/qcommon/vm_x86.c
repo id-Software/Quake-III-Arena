@@ -53,20 +53,15 @@ static	int		*instructionPointers = NULL;
 
 #define FTOL_PTR
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 #if defined( FTOL_PTR )
 int _ftol( float );
 static	int		ftolPtr = (int)_ftol;
 #endif
 
-#ifndef __MINGW32__
-void AsmCall( void );
-static	int		asmCallPtr = (int)AsmCall;
-#else
 void doAsmCall( void );
 static	int		asmCallPtr = (int)doAsmCall;
-#endif
 
 #else // _WIN32
 
@@ -175,6 +170,12 @@ _asm {
 
 #else //!_MSC_VER
 
+#ifdef __MINGW32__ // _ is prepended to compiled symbols
+#define CMANG(sym) "_"#sym
+#else
+#define CMANG(sym) #sym
+#endif
+
 static	int		callProgramStack;
 static	int		*callOpStack;
 static	int		callSyscallNum;
@@ -197,74 +198,37 @@ void callAsmCall(void)
 }
 
 void AsmCall( void ) {
-#ifndef __MINGW32__
-	__asm__("doAsmCall:      			\n\t" \
-			"	movl (%%edi),%%eax			\n\t" \
-			"	subl $4,%%edi				\n\t" \
-			"   orl %%eax,%%eax				\n\t" \
-			"	jl systemCall				\n\t" \
-			"	shll $2,%%eax				\n\t" \
-			"	addl %3,%%eax				\n\t" \
-			"	call *(%%eax)				\n\t" \
-		  " movl (%%edi),%%eax   \n\t" \
-	    " andl callMask, %%eax \n\t" \
-			"	jmp doret					   \n\t" \
-			"systemCall:					\n\t" \
-			"	negl %%eax					\n\t" \
-			"	decl %%eax					\n\t" \
-			"	movl %%eax,%0				\n\t" \
-			"	movl %%esi,%1				\n\t" \
-			"	movl %%edi,%2				\n\t" \
-			"	pushl %%ecx					\n\t" \
-			"	pushl %%esi					\n\t" \
-			"	pushl %%edi					\n\t" \
-			"	call callAsmCall			\n\t" \
-			"	popl %%edi					\n\t" \
-			"	popl %%esi					\n\t" \
-			"	popl %%ecx					\n\t" \
-			"	addl $4,%%edi				\n\t" \
-			"doret:							\n\t" \
-			"	ret							\n\t" \
-			: "=rm" (callSyscallNum), "=rm" (callProgramStack), "=rm" (callOpStack) \
-			: "rm" (instructionPointers) \
-			: "ax", "di", "si", "cx" \
+	asm( CMANG(doAsmCall) ":				\n\t" \
+		"	movl (%%edi),%%eax			\n\t" \
+		"	subl $4,%%edi				\n\t" \
+		"	orl %%eax,%%eax				\n\t" \
+		"	jl systemCall				\n\t" \
+		"	shll $2,%%eax				\n\t" \
+		"	addl %3,%%eax				\n\t" \
+		"	call *(%%eax)				\n\t" \
+		"	movl (%%edi),%%eax			\n\t" \
+		"	andl " CMANG(callMask) ", %%eax		\n\t" \
+		"	jmp doret				\n\t" \
+		"systemCall:					\n\t" \
+		"	negl %%eax				\n\t" \
+		"	decl %%eax				\n\t" \
+		"	movl %%eax,%0				\n\t" \
+		"	movl %%esi,%1				\n\t" \
+		"	movl %%edi,%2				\n\t" \
+		"	pushl %%ecx				\n\t" \
+		"	pushl %%esi				\n\t" \
+		"	pushl %%edi				\n\t" \
+		"	call " CMANG(callAsmCall) "		\n\t" \
+		"	popl %%edi				\n\t" \
+		"	popl %%esi				\n\t" \
+		"	popl %%ecx				\n\t" \
+		"	addl $4,%%edi				\n\t" \
+		"doret:						\n\t" \
+		"	ret					\n\t" \
+		: "=rm" (callSyscallNum), "=rm" (callProgramStack), "=rm" (callOpStack) \
+		: "rm" (instructionPointers) \
+		: "ax", "di", "si", "cx" \
 	);
-#else
-	// The only difference is _ added to the C symbols. It seems mingw
-	// mangles all symbols this way, like linux gcc does when producing
-	// a.out instead of elf
-	__asm__("_doAsmCall:      			\n\t" \
-			"	movl (%%edi),%%eax			\n\t" \
-			"	subl $4,%%edi				\n\t" \
-			"   orl %%eax,%%eax				\n\t" \
-			"	jl systemCall				\n\t" \
-			"	shll $2,%%eax				\n\t" \
-			"	addl %3,%%eax				\n\t" \
-			"	call *(%%eax)				\n\t" \
-		  " movl (%%edi),%%eax   \n\t" \
-	    " andl _callMask, %%eax \n\t" \
-			"	jmp doret					   \n\t" \
-			"systemCall:					\n\t" \
-			"	negl %%eax					\n\t" \
-			"	decl %%eax					\n\t" \
-			"	movl %%eax,%0				\n\t" \
-			"	movl %%esi,%1				\n\t" \
-			"	movl %%edi,%2				\n\t" \
-			"	pushl %%ecx					\n\t" \
-			"	pushl %%esi					\n\t" \
-			"	pushl %%edi					\n\t" \
-			"	call _callAsmCall			\n\t" \
-			"	popl %%edi					\n\t" \
-			"	popl %%esi					\n\t" \
-			"	popl %%ecx					\n\t" \
-			"	addl $4,%%edi				\n\t" \
-			"doret:							\n\t" \
-			"	ret							\n\t" \
-			: "=rm" (callSyscallNum), "=rm" (callProgramStack), "=rm" (callOpStack) \
-			: "rm" (instructionPointers) \
-			: "ax", "di", "si", "cx" \
-	);
-#endif
 }
 #endif
 

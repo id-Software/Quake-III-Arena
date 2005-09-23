@@ -1040,7 +1040,7 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		}
 	}
 
-#ifdef __linux__
+#ifndef _WIN32
   if (key == K_ENTER)
   {
     if (down)

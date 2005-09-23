@@ -34,8 +34,8 @@ int*     snd_p;
 int      snd_linear_count;
 short*   snd_out;
 
-#if !( (defined __linux__ || defined __FreeBSD__ || defined __MINGW32__ ) && (defined __i386__) ) // rb010123
-#if	!id386
+#if !( (defined __GNUC__) && (defined __i386__) ) // if not a GNU x86 target
+#if	!id386                                        // if configured not to use asm
 
 void S_WriteLinearBlastStereo16 (void)
 {

@@ -565,11 +565,7 @@ float Q_rsqrt( float number )
 	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
 //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
 
-#ifndef Q3_VM
-#ifdef __linux__
-	assert( !isnan(y) ); // bk010122 - FPE?
-#endif
-#endif
+	//assert( !isnan(y) ); // bk010122 - FPE?
 	return y;
 }
 
@@ -740,7 +736,8 @@ int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 ==================
 */
 
-#if !( (defined __linux__ || __FreeBSD__ || __MINGW32__) && (defined __i386__) && (!defined C_ONLY)) // rb010123
+// if not GNU x86 and configured to use asm
+#if !( (defined __GNUC__) && (defined __i386__) && (!defined C_ONLY))
 
 #if defined __LCC__ || defined C_ONLY || !id386 || defined __VECTORC
 

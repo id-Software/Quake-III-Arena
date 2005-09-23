@@ -269,9 +269,6 @@ char *strstr( const char *string, const char *strCharSet ) {
 }
 #endif // bk001211
 
-// bk001120 - presumably needed for Mac
-//#if !defined(_MSC_VER) && !defined(__linux__)
-// bk001127 - undid undo
 #if defined ( Q3_VM )
 int tolower( int c ) {
 	if ( c >= 'A' && c <= 'Z' ) {
@@ -914,10 +911,6 @@ double _atof( const char **stringPtr ) {
 }
 
 
-// bk001120 - presumably needed for Mac
-//#if !defined ( _MSC_VER ) && ! defined ( __linux__ )
-
-// bk001127 - undid undo
 #if defined ( Q3_VM )
 int atoi( const char *string ) {
 	int		sign;

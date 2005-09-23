@@ -330,7 +330,7 @@ Dlls will call this directly
 ============
 */
 long QDECL VM_DllSyscall( long arg, ... ) {
-#if ((defined __linux__) && !(defined __i386__))
+#if ((defined __GNUC__) && !(defined __i386__))
   // rcg010206 - see commentary above
   long args[16];
   int i;

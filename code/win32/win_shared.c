@@ -53,25 +53,14 @@ int Sys_Milliseconds (void)
 	return sys_curtime;
 }
 
+#ifndef __GNUC__ //see snapvectora.s
 /*
 ================
 Sys_SnapVector
 ================
 */
-long fastftol( float f ) {
-#ifndef __MINGW32__
-	static int tmp;
-	__asm fld f
-	__asm fistp tmp
-	__asm mov eax, tmp
-#else
-	return (long)f;
-#endif
-}
-
 void Sys_SnapVector( float *v )
 {
-#ifndef __MINGW32__
 	int i;
 	float f;
 
@@ -89,19 +78,8 @@ void Sys_SnapVector( float *v )
 	__asm	fld		f;
 	__asm	fistp	i;
 	*v = i;
-	/*
-	*v = fastftol(*v);
-	v++;
-	*v = fastftol(*v);
-	v++;
-	*v = fastftol(*v);
-	*/
-#else
-	v[0] = rint(v[0]);
-	v[1] = rint(v[1]);
-	v[2] = rint(v[2]);
-#endif
 }
+#endif
 
 
 /*

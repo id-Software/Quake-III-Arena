@@ -261,7 +261,6 @@ ifeq ($(PLATFORM),mingw32)
   ARFLAGS=rv
   RANLIB=ranlib
 
-  THREAD_LDFLAGS=-lpthread
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
 
@@ -626,7 +625,6 @@ Q3OBJ = \
 ifeq ($(ARCH),i386)
   Q3OBJ += $(B)/client/vm_x86.o
 endif
-
 ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
 endif
@@ -673,6 +671,8 @@ ifeq ($(PLATFORM),mingw32)
     $(B)/client/linux_common.o \
     $(B)/client/snd_mixa.o \
     $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o \
     $(B)/client/win_gamma.o \
     $(B)/client/win_glimp.o \
     $(B)/client/win_input.o \
