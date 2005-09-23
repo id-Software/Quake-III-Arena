@@ -1391,10 +1391,10 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   /* More stuff */
   JSAMPARRAY buffer;		/* Output row buffer */
   unsigned row_stride;		/* physical row width in output buffer */
-  unsigned pixelcount;
-  unsigned char *out, *out_converted;
+  unsigned pixelcount, memcount;
+  unsigned char *out;
   byte	*fbuffer;
-  byte  *bbuf;
+  byte  *buf;
 
   /* In this example we want to open the input file before doing anything else,
    * so that the setjmp() error recovery below can assume the file is open.
@@ -1454,8 +1454,6 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
   /* JSAMPLEs per row in output buffer */
 
   pixelcount = cinfo.output_width * cinfo.output_height;
-  row_stride = cinfo.output_width * cinfo.output_components;
-
 
   if(!cinfo.output_width || !cinfo.output_height
       || ((pixelcount * 4) / cinfo.output_width) / 4 != cinfo.output_height
@@ -1465,7 +1463,10 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
 		    cinfo.output_width, cinfo.output_height, pixelcount * 4, cinfo.output_components);
   }
 
-  out = ri.Malloc(pixelcount * 4);
+  memcount = pixelcount * 4;
+  row_stride = cinfo.output_width * cinfo.output_components;
+
+  out = ri.Malloc(memcount);
 
   *width = cinfo.output_width;
   *height = cinfo.output_height;
@@ -1481,45 +1482,42 @@ static void LoadJPG( const char *filename, unsigned char **pic, int *width, int 
      * Here the array is only one element long, but you could ask for
      * more than one scanline at a time if that's more convenient.
      */
-	bbuf = ((out+(row_stride*cinfo.output_scanline)));
-	buffer = &bbuf;
+	buf = ((out+(row_stride*cinfo.output_scanline)));
+	buffer = &buf;
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
   }
   
+  buf = out;
+
   // If we are processing an 8-bit JPEG (greyscale), we'll have to convert
   // the greyscale values to RGBA.
   if(cinfo.output_components == 1)
   {
-  	int sindex, dindex = 0;
+  	int sindex = pixelcount, dindex = memcount;
 	unsigned char greyshade;
 
-	// allocate a new buffer for the transformed image
-  	out_converted = ri.Malloc(pixelcount*4);
-
-	for(sindex = 0; sindex < pixelcount; sindex++)
+	// Only pixelcount number of bytes have been written.
+	// Expand the color values over the rest of the buffer, starting
+	// from the end.
+	do
 	{
-		greyshade = out[sindex];
-		out_converted[dindex++] = greyshade;
-		out_converted[dindex++] = greyshade;
-		out_converted[dindex++] = greyshade;
-		out_converted[dindex++] = 255;		
-	}
-	
-	ri.Free(out);
-	out = out_converted;
+		greyshade = buf[--sindex];
+
+		buf[--dindex] = 255;
+		buf[--dindex] = greyshade;
+		buf[--dindex] = greyshade;
+		buf[--dindex] = greyshade;
+	} while(sindex);
   }
   else
   {
-	  // clear all the alphas to 255
-	  int	i, j;
-		byte	*buf;
+	// clear all the alphas to 255
+	int	i;
 
-		buf = out;
-
-	  j = cinfo.output_width * cinfo.output_height * 4;
-	  for ( i = 3 ; i < j ; i+=4 ) {
-		  buf[i] = 255;
-	  }
+	for ( i = 3 ; i < memcount ; i+=4 )
+	{
+		buf[i] = 255;
+	}
   }
 
   *pic = out;

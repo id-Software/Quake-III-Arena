@@ -2746,7 +2746,6 @@ qhandle_t RE_RegisterShaderNoMip( const char *name ) {
 	return sh->index;
 }
 
-
 /*
 ====================
 R_GetShaderByHandle

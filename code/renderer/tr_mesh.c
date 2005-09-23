@@ -168,6 +168,10 @@ int R_ComputeLOD( trRefEntity_t *ent ) {
 	float flod, lodscale;
 	float projectedRadius;
 	md3Frame_t *frame;
+#ifdef RAVENMD4
+	mdrHeader_t *mdr;
+	mdrFrame_t *mdrframe;
+#endif
 	int lod;
 
 	if ( tr.currentModel->numLods < 2 )
@@ -180,11 +184,28 @@ int R_ComputeLOD( trRefEntity_t *ent ) {
 		// multiple LODs exist, so compute projected bounding sphere
 		// and use that as a criteria for selecting LOD
 
-		frame = ( md3Frame_t * ) ( ( ( unsigned char * ) tr.currentModel->md3[0] ) + tr.currentModel->md3[0]->ofsFrames );
+#ifdef RAVENMD4
+		// This is an MDR model.
+		
+		if(tr.currentModel->md4)
+		{
+			int frameSize;
+			mdr = (mdrHeader_t *) tr.currentModel->md4;
+			frameSize = (size_t) (&((mdrFrame_t *)0)->bones[mdr->numBones]);
+			
+			mdrframe = (mdrFrame_t *) ((byte *) mdr + mdr->ofsFrames + frameSize * ent->e.frame);
+			
+			radius = RadiusFromBounds(mdrframe->bounds[0], mdrframe->bounds[1]);
+		}
+		else
+#endif
+		{
+			frame = ( md3Frame_t * ) ( ( ( unsigned char * ) tr.currentModel->md3[0] ) + tr.currentModel->md3[0]->ofsFrames );
 
-		frame += ent->e.frame;
+			frame += ent->e.frame;
 
-		radius = RadiusFromBounds( frame->bounds[0], frame->bounds[1] );
+			radius = RadiusFromBounds( frame->bounds[0], frame->bounds[1] );
+		}
 
 		if ( ( projectedRadius = ProjectRadius( radius, ent->e.origin ) ) != 0 )
 		{
