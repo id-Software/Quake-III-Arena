@@ -213,6 +213,8 @@ qboolean SNDDMA_Init(void)
     desired.channels = (int) sndchannels->value;
     desired.callback = sdl_audio_callback;
 
+    print_audiospec("Format we requested from SDL audio device", &desired);
+
     if (SDL_OpenAudio(&desired, &obtained) == -1)
     {
         Com_Printf("SDL_OpenAudio() failed: %s\n", SDL_GetError());
@@ -220,7 +222,6 @@ qboolean SNDDMA_Init(void)
         return qfalse;
     } // if
 
-    print_audiospec("Format we requested from SDL audio device", &desired);
     print_audiospec("Format we actually got", &obtained);
 
     // dma.samples needs to be big, or id's mixer will just refuse to
@@ -240,7 +241,6 @@ qboolean SNDDMA_Init(void)
         while (val < tmp)
             val <<= 1;
 
-        val >>= 1;
         Com_Printf("WARNING: sdlmixsamps wasn't a power of two (%d),"
                    " so we made it one (%d).\n", tmp, val);
         tmp = val;
