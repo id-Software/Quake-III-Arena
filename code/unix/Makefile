@@ -1528,64 +1528,6 @@ $(B)/missionpack/ui/bg_lib.o : $(GDIR)/bg_lib.c; $(DO_SHLIB_CC)  -DMISSIONPACK
 $(B)/missionpack/ui/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)     -DMISSIONPACK
 $(B)/missionpack/ui/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)  -DMISSIONPACK
 
-
-#############################################################################
-# RPM
-#############################################################################
-
-TMPDIR=/var/tmp
-TARDIR=$(TMPDIR)/$(BUILD_NAME)
-TARFILE = $(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(ARCH).tar
-
-tar:
-	if [ ! -d archives ];then mkdir archives;chmod 755 archives;fi
-	$(MAKE) copyfiles COPYDIR=$(TARDIR)
-	cd $(TARDIR); tar cvf $(TARFILE) * && gzip -9 $(TARFILE)
-	mv $(TARDIR)/$(TARFILE).gz archives/.
-	rm -rf $(TARDIR)
-
-# Make RPMs.  You need to be root to make this work
-RPMROOT=/usr/src/redhat
-RPM = rpm
-RPMFLAGS = -bb
-INSTALLDIR = /usr/local/games/$(BUILD_NAME)
-RPMDIR = $(TMPDIR)/$(BUILD_NAME)-$(VERSION)
-DESTDIR= $(RPMDIR)/$(INSTALLDIR)
-
-rpm: $(BUILD_NAME).spec
-	touch $(RPMROOT)/SOURCES/$(BUILD_NAME)-$(VERSION).tar.gz
-	if [ ! -d archives ];then mkdir archives;fi
-	$(MAKE) copyfiles COPYDIR=$(DESTDIR)
-	cp $(UDIR)/quake3.gif $(RPMROOT)/SOURCES/.
-	cp $(BUILD_NAME).spec $(RPMROOT)/SPECS/.
-	cd $(RPMROOT)/SPECS; $(RPM) $(RPMFLAGS) $(BUILD_NAME).spec
-	rm -rf $(RPMDIR)
-	mv $(RPMROOT)/RPMS/$(RPMARCH)/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm archives/$(BUILD_NAME)-$(VERSION)-$(RPM_RELEASE).$(RPMARCH).rpm
-
-copyfiles:
-	@if [ ! -d $(COPYDIR) ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
-	-mkdir -p -m 0755 $(COPYDIR)
-	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
-#	install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
-	install -s -m 0755 $(BR)/linuxq3ded $(COPYDIR)/q3ded
-	-mkdir -p -m 0755 $(COPYDIR)/baseq3
-	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/baseq3/.
-	install -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/baseq3/.
-	install -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/baseq3/.
-	-mkdir -p -m 0755 $(COPYDIR)/missionpack
-	install -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/missionpack/.
-	install -s -m 0755 $(BR)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/missionpack/.
-	install -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-		$(COPYDIR)/missionpack/.
-
-$(BUILD_NAME).spec : $(UDIR)/$(BUILD_NAME).spec.sh Makefile
-	sh $< $(VERSION) $(RPM_RELEASE) $(ARCH) $(INSTALLDIR) > $@
-
 #############################################################################
 # MISC
 #############################################################################
@@ -1620,9 +1562,4 @@ clean-debug:
 
 clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(DEBUG_CFLAGS)"
-
-# TTimo: for the setups it's easier to shell out to a script
-
-setup: release
-	./build_setup.sh $(VERSION)
 
