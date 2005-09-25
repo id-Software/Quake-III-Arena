@@ -317,15 +317,15 @@ ifeq ($(PLATFORM),freebsd)
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -Werror
 
   ifeq ($(ARCH),axp)
-    CC=pgcc
+    CC=gcc
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
       -fomit-frame-pointer -fexpensive-optimizations
   else
-    CC=pgcc
+    CC=gcc
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro \
       -march=pentium -fomit-frame-pointer -pipe -ffast-math \
-      -malign-loops=2 -malign-jumps=2 -malign-functions=2 \
-      -fno-strict-aliasing - fstrength-reduce
+      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+      -fno-strict-aliasing -fstrength-reduce
   endif
 
   LIBEXT=a
@@ -410,12 +410,6 @@ else # ifeq IRIX
 
   ARFLAGS=ar rv
   RANLIB=ranlib
-
-  ifeq ($(PLATFORM),freebsd)
-    LDFLAGS=-lm
-  else
-    LDFLAGS=-ldl -lm
-  endif # ifeq freebsd
 
   TARGETS=\
     $(B)/$(PLATFORM)q3ded
@@ -641,6 +635,9 @@ endif
 
 #platform specific objects
 ifeq ($(PLATFORM),freebsd)
+ifeq ($(ARCH),axp)
+  Q3POBJ=
+else
   Q3POBJ=\
     $(B)/client/unix_main.o \
     $(B)/client/unix_net.o \
@@ -653,9 +650,14 @@ ifeq ($(PLATFORM),freebsd)
     $(B)/client/linux_snd.o \
     $(B)/client/sdl_snd.o \
     $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o   \
-    $(B)/client/ftol.o \
-    $(B)/client/snapvector.o
+    $(B)/client/matha.o
+
+  ifeq ($(ARCH),i386)
+    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
+    Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
+  endif
+
+endif # FreeBSD-axp
 else
 ifeq ($(PLATFORM),irix)
   Q3POBJ=\
@@ -880,7 +882,7 @@ $(B)/client/irix_glimp.o : $(UDIR)/irix_glimp.c; $(DO_CC)
 $(B)/client/irix_glimp_smp.o : $(UDIR)/irix_glimp.c; $(DO_SMP_CC)
 $(B)/client/irix_snd.o : $(UDIR)/irix_snd.c; $(DO_CC)
 $(B)/client/irix_input.o : $(UDIR)/irix_input.c; $(DO_CC)
-$(B)/client/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_CC)
+$(B)/client/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_CC) $(GL_CFLAGS)
 $(B)/client/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
 $(B)/client/linux_glimp.o : $(UDIR)/linux_glimp.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/sdl_glimp.o : $(UDIR)/sdl_glimp.c; $(DO_CC)  $(GL_CFLAGS)

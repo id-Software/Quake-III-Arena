@@ -48,19 +48,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "macosx_glimp.h"
 
-#elif defined( __linux__ )
+#elif defined( __linux__ ) || defined(__FreeBSD__)
 
 #include <GL/gl.h>
 #include <GL/glx.h>
 // bk001129 - from cvs1.17 (mkv)
-#if defined(__FX__)
-#include <GL/fxmesa.h>
-#endif
-
-#elif defined( __FreeBSD__ ) // rb010123
-
-#include <GL/gl.h>
-#include <GL/glx.h>
 #if defined(__FX__)
 #include <GL/fxmesa.h>
 #endif

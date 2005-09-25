@@ -1002,7 +1002,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		case OP_CVFI:
 #ifndef FTOL_PTR // WHENHELLISFROZENOVER  // bk001213 - was used in 1.17
 			// not IEEE complient, but simple and fast
-		  EmitString( "D9 07" );		// fld dword ptr [edi]
+			EmitString( "D9 07" );		// fld dword ptr [edi]
 			EmitString( "DB 1F" );		// fistp dword ptr [edi]
 #else // FTOL_PTR
 			// call the library conversion function

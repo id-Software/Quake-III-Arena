@@ -228,6 +228,34 @@ void Sys_PumpEvents( void );
 
 #endif
 
+//======================= FreeBSD DEFINES =====================
+/* Adapted from game/q_shared.h */
+#ifdef __FreeBSD__ // rb010123
+
+#define stricmp strcasecmp
+
+#define MAC_STATIC
+#define ID_INLINE inline 
+
+#ifdef __i386__
+#define CPUSTRING       "freebsd-i386"
+#elif defined __axp__
+#define CPUSTRING       "freebsd-alpha"
+#else
+#define CPUSTRING       "freebsd-other"
+#endif
+
+#define	PATH_SEP '/'
+
+#ifdef Q3_STATIC
+#define	GAME_HARD_LINKED
+#define	CGAME_HARD_LINKED
+#define	UI_HARD_LINKED
+#define	BOTLIB_HARD_LINKED
+#endif
+
+#endif
+
 //=============================================================
 
 

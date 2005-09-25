@@ -216,6 +216,37 @@ void Sys_PumpEvents( void );
 
 #endif
 
+//======================= FreeBSD DEFINES =================================
+
+// the mac compiler can't handle >32k of locals, so we
+// just waste space and make big arrays static...
+#ifdef __FreeBSD__
+
+// bk001205 - from Makefile
+#define stricmp strcasecmp
+
+#define	MAC_STATIC // bk: FIXME
+
+#ifdef __i386__
+#define	CPUSTRING	"freebsd-i386"
+#elif defined __axp__
+#define	CPUSTRING	"freebsd-alpha"
+#else
+#define	CPUSTRING	"freebsd-other"
+#endif
+
+#define	PATH_SEP '/'
+
+// bk001205 - try
+#ifdef Q3_STATIC
+#define	GAME_HARD_LINKED
+#define	CGAME_HARD_LINKED
+#define	UI_HARD_LINKED
+#define	BOTLIB_HARD_LINKED
+#endif
+
+#endif
+
 //=============================================================
 
 
