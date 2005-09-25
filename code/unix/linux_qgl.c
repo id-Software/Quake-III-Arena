@@ -2651,6 +2651,24 @@ void QGL_Shutdown( void )
 {
 	if ( glw_state.OpenGLLib )
 	{
+		// 25/09/05 Tim Angus <tim@ngus.net>
+		// Certain combinations of hardware and software, specifically
+		// Linux/SMP/Nvidia/agpgart (OK, OK. MY combination of hardware and
+		// software), seem to cause a catastrophic (hard reboot required) crash
+		// when libGL is dynamically unloaded. I'm unsure of the precise cause,
+		// suffice to say I don't see anything in the Q3 code that could cause it.
+		// I suspect it's an Nvidia driver bug, but without the source or means to
+		// debug I obviously can't prove (or disprove) this. Interestingly (though
+		// perhaps not suprisingly), Enemy Territory and Doom 3 both exhibit the
+		// same problem.
+		//
+		// After many, many reboots and prodding here and there, it seems that a
+		// placing a short delay before libGL is unloaded works around the problem.
+		// This delay is changable via the r_GLlibCoolDownMsec cvar (nice name
+		// huh?), and it defaults to 0. For me, 500 seems to work.
+		if( r_GLlibCoolDownMsec->integer )
+			usleep( r_GLlibCoolDownMsec->integer * 1000 );
+
 		dlclose ( glw_state.OpenGLLib );
 		glw_state.OpenGLLib = NULL;
 	}

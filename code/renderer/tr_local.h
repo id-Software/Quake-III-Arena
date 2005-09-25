@@ -1091,6 +1091,8 @@ extern	cvar_t	*r_debugSort;
 extern	cvar_t	*r_printShaders;
 extern	cvar_t	*r_saveFontData;
 
+extern	cvar_t	*r_GLlibCoolDownMsec;
+
 //====================================================================
 
 float R_NoiseGet4f( float x, float y, float z, float t );
