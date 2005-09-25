@@ -171,7 +171,6 @@ ifeq ($(PLATFORM),linux)
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
-  GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
 
   DEBUG_CFLAGS += -DHAVE_EXECINFO_H
   ifeq ($(BUILD_FREETYPE),1)
@@ -181,7 +180,9 @@ ifeq ($(PLATFORM),linux)
   endif
 
   ifeq ($(strip $(USE_SDL)),true)
-    GLLDFLAGS+=$(shell sdl-config --libs)
+    GLLDFLAGS=$(shell sdl-config --libs)
+  else
+    GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
   endif
 
   ifeq ($(ARCH),i386)
