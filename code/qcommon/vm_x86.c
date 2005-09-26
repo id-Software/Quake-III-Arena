@@ -79,8 +79,8 @@ int qftol0F7F( void );
 static	int		ftolPtr = (int)qftol0F7F;
 #endif // FTOL_PTR
 
-void AsmCall( void );
-static	int		asmCallPtr = (int)AsmCall;
+void doAsmCall( void );
+static	int		asmCallPtr = (int)doAsmCall;
 #endif // !_WIN32
 
 
@@ -197,8 +197,11 @@ void callAsmCall(void)
  	currentVM = savedVM;
 }
 
+// Note the C space function AsmCall is never actually called, and is in fact
+// arbitarily named (though this is not true for the MSC version).  When a vm
+// makes a system call, control jumps straight to the doAsmCall label.
 void AsmCall( void ) {
-	asm( CMANG(AsmCall) ":				\n\t" \
+	asm( CMANG(doAsmCall) ":				\n\t" \
 		"	movl (%%edi),%%eax			\n\t" \
 		"	subl $4,%%edi				\n\t" \
 		"	orl %%eax,%%eax				\n\t" \
