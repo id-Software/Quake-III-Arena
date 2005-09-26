@@ -1101,7 +1101,7 @@ This function is called directly by the generated code
 ==============
 */
 #ifndef DLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
-int	VM_CallCompiled( vm_t *vm, long *args ) {
+int	VM_CallCompiled( vm_t *vm, int *args ) {
 	int		stack[1024];
 	int		programCounter;
 	int		programStack;

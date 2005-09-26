@@ -718,11 +718,12 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
                             args[12], args[13], args[14], args[15]);
 #if defined(HAVE_VM_COMPILED)
 	} else if ( vm->compiled ) {
-		r = VM_CallCompiled( vm, &callnum );
+		// only used on 32bit machines so this cast is fine
+		r = VM_CallCompiled( vm, (int*)&callnum );
 #endif
 	} else {
 		struct {
-			long callnum;
+			int callnum;
 			int args[16];
 		} a;
 		va_list ap;
@@ -852,7 +853,7 @@ void VM_LogSyscalls( int *args ) {
 		f = fopen("syscalls.log", "w" );
 	}
 	callnum++;
-	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, (long)( args - (int *)currentVM->dataBase ),
+	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, (long)(args - (int *)currentVM->dataBase),
 		args[0], args[1], args[2], args[3], args[4] );
 }
 
