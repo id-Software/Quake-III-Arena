@@ -1161,7 +1161,7 @@ VM_CallCompiled
 This function is called directly by the generated code
 ==============
 */
-int	VM_CallCompiled( vm_t *vm, int *args ) {
+int	VM_CallCompiled( vm_t *vm, long *args ) {
 	int		stack[1024];
 	int		programStack;
 	int		stackOnEntry;
