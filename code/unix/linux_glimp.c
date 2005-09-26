@@ -1290,7 +1290,7 @@ static void GLW_InitExtensions( void )
 
 }
 
-static void GLW_InitGamma()
+static void GLW_InitGamma(void)
 {
   /* Minimum extension version required */
   #define GAMMA_MINMAJOR 2
