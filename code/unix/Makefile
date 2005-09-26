@@ -116,7 +116,7 @@ ifeq ($(PLATFORM),linux)
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
   # bk001205: no mo'  -Dstricmp=strcasecmp, see q_shared.h
-  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes -Werror
   #BASE_CFLAGS += -Werror # Disabled due to #warning usage.
   # rcg010216: DLL_ONLY for PPC
   ifeq ($(strip $(DLL_ONLY)),true)
@@ -1534,6 +1534,27 @@ $(B)/missionpack/ui/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)  -DMISSIONPA
 #############################################################################
 # MISC
 #############################################################################
+
+copyfiles:
+	@if [ ! -d $(COPYDIR) ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
+	-mkdir -p -m 0755 $(COPYDIR)
+	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
+	#install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
+	install -s -m 0755 $(BR)/linuxq3ded $(COPYDIR)/q3ded
+	-mkdir -p -m 0755 $(COPYDIR)/baseq3
+	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/baseq3/.
+	install -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/baseq3/.
+	install -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/baseq3/.
+	-mkdir -p -m 0755 $(COPYDIR)/missionpack
+	install -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/missionpack/.
+	install -s -m 0755 $(BR)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/missionpack/.
+	install -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+					$(COPYDIR)/missionpack/.
 
 # TTimo: FIXME: doesn't clean the binary and .so
 
