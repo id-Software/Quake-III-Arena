@@ -722,7 +722,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 #endif
 	} else {
 		struct {
-			int callnum;
+			long callnum;
 			int args[16];
 		} a;
 		va_list ap;
@@ -852,7 +852,7 @@ void VM_LogSyscalls( int *args ) {
 		f = fopen("syscalls.log", "w" );
 	}
 	callnum++;
-	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, args - (int *)currentVM->dataBase,
+	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, (long)( args - (int *)currentVM->dataBase ),
 		args[0], args[1], args[2], args[3], args[4] );
 }
 

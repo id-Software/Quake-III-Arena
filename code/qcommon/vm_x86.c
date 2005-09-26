@@ -81,7 +81,7 @@ static	int		ftolPtr = (int)qftol0F7F;
 
 void doAsmCall( void );
 static	int		asmCallPtr = (int)doAsmCall;
-#endif // !_WIN32
+#endif
 
 
 static	int		callMask = 0; // bk001213 - init
@@ -192,13 +192,13 @@ void callAsmCall(void)
 	currentVM->programStack = callProgramStack - 4;
 	*(int *)((byte *)currentVM->dataBase + callProgramStack + 4) = callSyscallNum;
 	//VM_LogSyscalls((int *)((byte *)currentVM->dataBase + callProgramStack + 4) );
-	*(callOpStack2+1) = currentVM->systemCall( (int *)((byte *)currentVM->dataBase + callProgramStack + 4) );
+	*(callOpStack2+1) = currentVM->systemCall( (long *)((byte *)currentVM->dataBase + callProgramStack + 4) );
 
  	currentVM = savedVM;
 }
 
 // Note the C space function AsmCall is never actually called, and is in fact
-// arbitarily named (though this is not true for the MSC version).  When a vm
+// arbitrarily named (though this is not true for the MSC version).  When a vm
 // makes a system call, control jumps straight to the doAsmCall label.
 void AsmCall( void ) {
 	asm( CMANG(doAsmCall) ":				\n\t" \
@@ -1101,7 +1101,7 @@ This function is called directly by the generated code
 ==============
 */
 #ifndef DLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
-int	VM_CallCompiled( vm_t *vm, int *args ) {
+int	VM_CallCompiled( vm_t *vm, long *args ) {
 	int		stack[1024];
 	int		programCounter;
 	int		programStack;
