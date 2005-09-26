@@ -2839,7 +2839,6 @@ static void FS_SetRestrictions( void ) {
 	searchpath_t	*path;
 	char			*productId;
 
-	Com_Printf("smells like demo data, continueing anyways\n");
 	return;
 
 #ifndef PRE_RELEASE_DEMO
