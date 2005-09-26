@@ -73,7 +73,6 @@ SPLNDIR=$(MOUNT_DIR)/splines
 # extract version info
 VERSION=$(shell grep Q3_VERSION ../game/q_shared.h | \
   sed -e 's/.*Q3\ \(.*\)"/\1/')
-RPM_RELEASE=1
 
 #############################################################################
 # SETUP AND BUILD -- LINUX
@@ -93,7 +92,6 @@ ifeq ($(PLATFORM),linux)
   CC=gcc
   CXX=g++
 
-  RPMARCH=$(ARCH)
   ifeq ($(ARCH),alpha)
     ARCH=axp
   else
@@ -231,8 +229,6 @@ ifeq ($(PLATFORM),mingw32)
     ARCH=x86
   endif
 
-  RPMARCH=$(ARCH)
-
   BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
 
   ifeq ($(strip $(DLL_ONLY)),true)
@@ -304,18 +300,16 @@ ifeq ($(PLATFORM),freebsd)
 
   ifneq (,$(findstring alpha,$(shell uname -m)))
     ARCH=axp
-    RPMARCH=alpha
   else #default to i386
     ARCH=i386
-    RPMARCH=i386
   endif #alpha test
 
 
-  BASE_CFLAGS =  -pipe
+  BASE_CFLAGS =  -pipe -Wall
 
   GL_CFLAGS = -I/usr/X11R6/include
 
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -Werror
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
   ifeq ($(ARCH),axp)
     CC=gcc

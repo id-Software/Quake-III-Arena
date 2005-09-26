@@ -333,9 +333,9 @@ inline static float LittleFloat (const float l) { return FloatSwap(&l); }
 #if !idppc
 static short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
-static int BigLong(int l) { LongSwap(l); }
+static int BigLong(int l) { return LongSwap(l); }
 #define LittleLong
-static float BigFloat(const float l) { FloatSwap(&l); }
+static float BigFloat(const float l) { return FloatSwap(&l); }
 #define LittleFloat
 #else
 #define BigShort
