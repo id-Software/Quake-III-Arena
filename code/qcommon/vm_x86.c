@@ -60,10 +60,10 @@ int _ftol( float );
 static	int		ftolPtr = (int)_ftol;
 #endif
 
-void doAsmCall( void );
-static	int		asmCallPtr = (int)doAsmCall;
+void AsmCall( void );
+static	int		asmCallPtr = (int)AsmCall;
 
-#else // _WIN32
+#else // _MSC_VER
 
 #if defined( FTOL_PTR )
 // bk001213 - BEWARE: does not work! UI menu etc. broken - stack!
@@ -79,8 +79,8 @@ int qftol0F7F( void );
 static	int		ftolPtr = (int)qftol0F7F;
 #endif // FTOL_PTR
 
-void doAsmCall( void );
-static	int		asmCallPtr = (int)doAsmCall;
+void AsmCall( void );
+static	int		asmCallPtr = (int)AsmCall;
 #endif // !_WIN32
 
 
@@ -198,7 +198,7 @@ void callAsmCall(void)
 }
 
 void AsmCall( void ) {
-	asm( CMANG(doAsmCall) ":				\n\t" \
+	asm( CMANG(AsmCall) ":				\n\t" \
 		"	movl (%%edi),%%eax			\n\t" \
 		"	subl $4,%%edi				\n\t" \
 		"	orl %%eax,%%eax				\n\t" \

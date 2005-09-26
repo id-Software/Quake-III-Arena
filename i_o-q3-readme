@@ -4,6 +4,9 @@ Hello and welcome to the Quake 3 source repository on icculus.org
 I'll be your maintainer, zakk@icculus.org, please send all your patches to 
 the bugzilla: https://bugzilla.icculus.org, or join the mailing list 
 (quake3-subscribe@icculus.org) and submit your patch there.
+Best case scenario is you subscribe to the ml, submit your patch to
+bugzilla, and then post the url to the mailing list.
+
 If you're too lazy for either method, then I would rather
 you e-mailed your patches to me directly than not at all.
 
@@ -85,7 +88,7 @@ follows:
    >  #endif // UNICODE
       typedef const DIDEVICEINSTANCE  *LPCDIDEVICEINSTANCE;
 
-   ...and comment out/remove the duplicated code (go Microsoft!) marked by '>'.
+   ...and comment out/remove the duplicated code marked by '>'.
 
 4. If you didn't install the DirectX SDK in C:\DXSDK\, edit DXSDK_DIR in
    code/unix/Makefile to reflect the new location.

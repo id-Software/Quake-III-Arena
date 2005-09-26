@@ -180,9 +180,9 @@ qhandle_t RE_RegisterModel( const char *name ) {
 
 	for ( lod = MD3_MAX_LODS - 1 ; lod >= 0 ; lod-- ) {
 		if ( lod )
-			snprintf(namebuf, sizeof(namebuf), "%s_%d.%s", filename, lod, fext);
+			Com_sprintf(namebuf, sizeof(namebuf), "%s_%d.%s", filename, lod, fext);
 		else
-			snprintf(namebuf, sizeof(namebuf), "%s.%s", filename, fext);
+			Com_sprintf(namebuf, sizeof(namebuf), "%s.%s", filename, fext);
 
 		ri.FS_ReadFile( namebuf, (void **)&buf );
 		if ( !buf ) {
