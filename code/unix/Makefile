@@ -20,35 +20,39 @@
 PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
 ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
+
+#############################################################################
+#
+# If you require a different configuration from the defaults below, create a
+# new file name "Makefile.local" in the same directory as this file and define
+# your parameters there. This allows you change configuration without causing
+# problems with keeping up to date with the repository.
+#
+#############################################################################
+-include Makefile.local
+
 ifndef COPYDIR
 COPYDIR="/usr/local/games/quake3"
 endif
 
-###
-### These paths are where you probably want to change things
-###
-
 # Where we are building from (where the source code should be!)
+ifndef MOUNT_DIR
 MOUNT_DIR=..
+endif
 
-# Where we are building to, libMesaVoodooGL.so.3.3 should be here, etc.
-# the demo pk3 file should be here in demoq3/pak0.pk3 or baseq3/pak0.pk3
-BDIR=$(MOUNT_DIR)/../run
-
-
-# Build name
-# BUILD_NAME=$(BUILD_NAME)
-BUILD_NAME=quake3
-
+ifndef BUILD_FREETYPE
 BUILD_FREETYPE=0
+endif
+
+ifndef GENERATE_DEPENDANCIES
+GENERATE_DEPENDANCIES=1
+endif
 
 # Used for building with mingw
+ifndef DXSDK_DIR
 DXSDK_DIR=C:/DXSDK
+endif
 
-#############################################################################
-##
-## You shouldn't have to touch anything below here
-##
 #############################################################################
 
 BD=debug$(ARCH)$(GLIBC)
@@ -114,7 +118,7 @@ ifeq ($(PLATFORM),linux)
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
   # bk001205: no mo'  -Dstricmp=strcasecmp, see q_shared.h
-  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes -Werror
+  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
   #BASE_CFLAGS += -Werror # Disabled due to #warning usage.
   # rcg010216: DLL_ONLY for PPC
   ifeq ($(strip $(DLL_ONLY)),true)
@@ -418,6 +422,12 @@ ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
 endif
 
+ifeq ($(GENERATE_DEPENDANCIES),1)
+  ifeq ($(CC),gcc)
+    DEPEND_CFLAGS=-MMD
+  endif
+endif
+
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<
 DO_SMP_CC=$(CC) $(CFLAGS) -DSMP -o $@ -c $<
@@ -439,11 +449,11 @@ release: build_release
 
 build_debug: B=$(BD)
 build_debug: makedirs
-	$(MAKE)  targets B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
+	$(MAKE)  targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS) $(DEPEND_CFLAGS)"
 
 build_release: B=$(BR)
 build_release: makedirs
-	$(MAKE)  targets B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
+	$(MAKE)  targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS) $(DEPEND_CFLAGS)"
 
 #Build both debug and release builds
 all:build_debug build_release
@@ -1574,6 +1584,7 @@ clean-bins:
 	rm -f $(B)/missionpack/vm/cgame.qvm
 	rm -f $(B)/missionpack/vm/qagame.qvm
 	rm -f $(B)/missionpack/vm/ui.qvm
+	if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
 
 clean-debug:
 	$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
@@ -1581,3 +1592,8 @@ clean-debug:
 clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(DEBUG_CFLAGS)"
 
+#############################################################################
+# DEPENDANCIES
+#############################################################################
+
+include $(shell find -name "*.d")
