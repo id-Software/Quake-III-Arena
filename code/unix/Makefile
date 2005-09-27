@@ -24,9 +24,9 @@ ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
 #############################################################################
 #
 # If you require a different configuration from the defaults below, create a
-# new file name "Makefile.local" in the same directory as this file and define
-# your parameters there. This allows you change configuration without causing
-# problems with keeping up to date with the repository.
+# new file named "Makefile.local" in the same directory as this file and define
+# your parameters there. This allows you to change configuration without
+# causing problems with keeping up to date with the repository.
 #
 #############################################################################
 -include Makefile.local
@@ -116,21 +116,19 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  # bk001205: no mo'  -I/usr/include/glide, no FX
-  # bk001205: no mo'  -Dstricmp=strcasecmp, see q_shared.h
   BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
-  #BASE_CFLAGS += -Werror # Disabled due to #warning usage.
+
   # rcg010216: DLL_ONLY for PPC
   ifeq ($(strip $(DLL_ONLY)),true)
     BASE_CFLAGS += -DDLL_ONLY
   endif
 
-  # !!! FIXME: make this a build option? Make it coexist with X11 glimp?
   ifeq ($(strip $(USE_SDL)),true)
     BASE_CFLAGS += -DUSE_SDL=1 $(shell sdl-config --cflags)
+    GL_CFLAGS =
+  else
+    GL_CFLAGS = -I/usr/X11R6/include
   endif
-
-  GL_CFLAGS = -I/usr/X11R6/include
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
     -fno-strict-aliasing
@@ -153,23 +151,13 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  # bk001204 - need -O for -Wall for uninitialized
-  # bk001205 - took out -O to get assertions (NDEBUG)
-  # bk001206 - MALLOC_CHECK in addition to ZONE_DEBUG
-  # TTimo 03/30/2001 temporary took out -Werror for initial merge
   DEBUG_CFLAGS = $(BASE_CFLAGS) -g -DNO_MOUSEGRAB -O0
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
-  LIBEXT=a
-
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
-
-  AR=ar
-  ARFLAGS=rv
-  RANLIB=ranlib
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
@@ -252,15 +240,9 @@ ifeq ($(PLATFORM),mingw32)
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
-  LIBEXT=lib
-
   SHLIBEXT=dll
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared $(LDFLAGS)
-
-  AR=ar
-  ARFLAGS=rv
-  RANLIB=ranlib
 
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
@@ -327,21 +309,14 @@ ifeq ($(PLATFORM),freebsd)
       -fno-strict-aliasing -fstrength-reduce
   endif
 
-  LIBEXT=a
-
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
-
-  ARFLAGS=ar rv
-  RANLIB=ranlib
 
   THREAD_LDFLAGS=-lpthread
   # don't need -ldl (FreeBSD)
   LDFLAGS=-lm
 
-  #GLLDFLAGS=-L/usr/X11R6/lib -L$(MESADIR)/lib -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
-  #GLLDFLAGS=-L/usr/X11/lib -lGL -lX11 -lXext -lm
   GLLDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
 
   ifeq ($(ARCH),axp)
@@ -375,14 +350,9 @@ ifeq ($(PLATFORM),irix)
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
-  LIBEXT=a
-
   SHLIBEXT=so
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared
-
-  ARFLAGS=ar rv
-  RANLIB=ranlib
 
   LDFLAGS=-ldl -lm
   GLLDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
@@ -396,19 +366,14 @@ else # ifeq IRIX
 # SETUP AND BUILD -- GENERIC
 #############################################################################
 
-#CC=egcs
-#BASE_CFLAGS=-Dstricmp=strcasecmp
-#DEBUG_CFLAGS=$(BASE_CFLAGS) -g
-#RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3
-
-  LIBEXT=a
+  CC=cc
+  BASE_CFLAGS=
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared
-
-  ARFLAGS=ar rv
-  RANLIB=ranlib
 
   TARGETS=\
     $(B)/$(PLATFORM)q3ded
