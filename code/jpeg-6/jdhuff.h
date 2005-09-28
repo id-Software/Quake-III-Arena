@@ -100,7 +100,7 @@ typedef struct {		/* Bitreading working state within an MCU */
 #define BITREAD_STATE_VARS  \
 	register bit_buf_type get_buffer;  \
 	register int bits_left;  \
-	bitread_working_state br_state
+	bitread_working_state br_state = {0}
 
 #define BITREAD_LOAD_STATE(cinfop,permstate)  \
 	br_state.cinfo = cinfop; \
