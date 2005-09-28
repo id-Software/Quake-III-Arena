@@ -1021,6 +1021,8 @@ or moved to a new level based on the "nextmap" cvar
 void ExitLevel (void) {
 	int		i;
 	gclient_t *cl;
+	char nextmap[MAX_STRING_CHARS];
+	char d1[MAX_STRING_CHARS];
 
 	//bot interbreeding
 	BotInterbreedEndMatch();
@@ -1038,8 +1040,16 @@ void ExitLevel (void) {
 		return;	
 	}
 
+	trap_Cvar_VariableStringBuffer( "nextmap", nextmap, sizeof(nextmap) );
+	trap_Cvar_VariableStringBuffer( "d1", d1, sizeof(d1) );
 
-	trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
+	if( !Q_stricmp( nextmap, "map_restart 0" ) && Q_stricmp( d1, "" ) ) {
+		trap_Cvar_Set( "nextmap", "vstr d2" );
+		trap_SendConsoleCommand( EXEC_APPEND, "vstr d1\n" );
+	} else {
+		trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
+	}
+
 	level.changemap = NULL;
 	level.intermissiontime = 0;
 
@@ -1436,7 +1446,12 @@ void CheckTournament( void ) {
 		if ( level.warmupTime < 0 ) {
 			if ( level.numPlayingClients == 2 ) {
 				// fudge by -1 to account for extra delays
-				level.warmupTime = level.time + ( g_warmup.integer - 1 ) * 1000;
+				if ( g_warmup.integer > 1 ) {
+					level.warmupTime = level.time + ( g_warmup.integer - 1 ) * 1000;
+				} else {
+					level.warmupTime = 0;
+				}
+
 				trap_SetConfigstring( CS_WARMUP, va("%i", level.warmupTime) );
 			}
 			return;
