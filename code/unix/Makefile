@@ -44,8 +44,8 @@ ifndef BUILD_FREETYPE
 BUILD_FREETYPE=0
 endif
 
-ifndef GENERATE_DEPENDANCIES
-GENERATE_DEPENDANCIES=1
+ifndef GENERATE_DEPENDENCIES
+GENERATE_DEPENDENCIES=1
 endif
 
 # Used for building with mingw
@@ -387,7 +387,7 @@ ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
 endif
 
-ifeq ($(GENERATE_DEPENDANCIES),1)
+ifeq ($(GENERATE_DEPENDENCIES),1)
   ifeq ($(CC),gcc)
     DEPEND_CFLAGS=-MMD
   endif
@@ -1558,7 +1558,7 @@ clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(DEBUG_CFLAGS)"
 
 #############################################################################
-# DEPENDANCIES
+# DEPENDENCIES
 #############################################################################
 
 -include $(shell find -name "*.d")
