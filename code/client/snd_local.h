@@ -72,6 +72,8 @@ typedef struct {
 
 #define START_SAMPLE_IMMEDIATE	0x7fffffff
 
+#define MAX_DOPPLER_SCALE 50.0f //arbitrary
+
 typedef struct loopSound_s {
 	vec3_t		origin;
 	vec3_t		velocity;
