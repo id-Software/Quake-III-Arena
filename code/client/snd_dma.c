@@ -781,6 +781,9 @@ void S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocit
 		if (loopSounds[entityNum].dopplerScale<=1.0) {
 			loopSounds[entityNum].doppler = qfalse;			// don't bother doing the math
 		}
+		else if (loopSounds[entityNum].dopplerScale>(float)SND_CHUNK_SIZE) {
+			loopSounds[entityNum].dopplerScale = (float)SND_CHUNK_SIZE;
+		}
 	}
 
 	loopSounds[entityNum].framenum = cls.framecount;
