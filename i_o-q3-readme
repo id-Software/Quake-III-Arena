@@ -23,7 +23,20 @@ so as to prevent confusion.
 
 Refer to the web-site for updated status, enjoy!
 
-Compiling
+Compiling (Under Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run Space Visual Dot Net 2040 Extra Entropy Edition under your BeOS emulator.
+Open the quake3.vcproj file in the win32 directory.
+Build.
+Copy the resultant Quake3.exe to your quake 3 directory, make a backup if you want to keep
+your original.
+
+Copy the resultant dlls to your baseq3 directory, backup etc.
+
+Run, enjoy!
+
+
+Compiling (Under Linux)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 cd code/unix && make
 
@@ -94,3 +107,6 @@ follows:
    code/unix/Makefile to reflect the new location.
 5. Perform the usual precompilation sacrificial ritual.
 6. Open an MSys terminal, and follow the instructions for compiling on Linux.
+7. Steal underpants
+8. ???
+9. Profit!
