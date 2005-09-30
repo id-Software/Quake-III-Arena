@@ -233,7 +233,7 @@ qboolean SNDDMA_Init(void)
     //  reasonable...this is why I let the user override.
     tmp = sdlmixsamps->value;
     if (!tmp)
-        tmp = (obtained.samples * obtained.channels) * 4;
+        tmp = (obtained.samples * obtained.channels) * 10;
 
     if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
     {
