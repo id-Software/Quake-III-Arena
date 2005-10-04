@@ -3,7 +3,14 @@ HOSTFILE=etc/linux.c
 TEMPDIR=/tmp
 A=.a
 O=.o
-E=
+
+PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
+ifeq ($(PLATFORM),mingw32)
+  E=.exe
+else
+  E=
+endif
+
 CC=gcc
 CFLAGS=-O2 -Wall -fno-strict-aliasing
 LDFLAGS=
