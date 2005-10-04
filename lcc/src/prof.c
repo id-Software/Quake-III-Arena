@@ -203,7 +203,7 @@ void prof_init(int argc, char *argv[]) {
 		return;
 	inited = 1;
 	type_init(argc, argv);
-	if (IR)
+	if (IR) {
 		for (i = 1; i < argc; i++)
 			if (strncmp(argv[i], "-a", 2) == 0) {
 				if (ncalled == -1
@@ -224,4 +224,5 @@ void prof_init(int argc, char *argv[]) {
 					attach((Apply)bbincr, YYcounts, &events.points);
 				}
 			}
+  }
 }

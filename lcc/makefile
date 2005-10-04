@@ -5,7 +5,7 @@ A=.a
 O=.o
 E=
 CC=cc
-CFLAGS=-g -Wall
+CFLAGS=-O2 -Wall -fno-strict-aliasing
 LDFLAGS=
 LD=cc
 AR=ar ruv
@@ -13,9 +13,8 @@ RANLIB=ranlib
 DIFF=diff
 RM=rm -f
 RMDIR=rmdir
+BUILDDIR=build
 TSTDIR=$(BUILDDIR)/$(TARGET)/tst
-CUSTOM=custom.mk
-include $(CUSTOM)
 B=$(BUILDDIR)/
 T=$(TSTDIR)/
 
@@ -24,14 +23,18 @@ T=$(TSTDIR)/
 what:
 	-@echo make all q3rcc lburg q3cpp q3lcc bprint liblcc triple clean clobber
 
+makedirs:
+	@if [ ! -d $(B) ];then mkdir $(B);fi
+	@if [ ! -d $(T) ];then mkdir $(T);fi
+	
 all::	q3rcc lburg q3cpp q3lcc bprint liblcc
 
-q3rcc:	$Bq3rcc$E
-lburg:	$Blburg$E
-q3cpp:	$Bq3cpp$E
-q3lcc:	$Bq3lcc$E
-bprint:	$Bbprint$E
-liblcc:	$Bliblcc$A
+q3rcc:	makedirs $Bq3rcc$E
+lburg:	makedirs $Blburg$E
+q3cpp:	makedirs $Bq3cpp$E
+q3lcc:	makedirs $Bq3lcc$E
+bprint:	makedirs $Bbprint$E
+liblcc:	makedirs $Bliblcc$A
 
 RCCOBJS=$Balloc$O \
 	$Bbind$O \
@@ -61,13 +64,7 @@ RCCOBJS=$Balloc$O \
 	$Bnull$O \
 	$Bsymbolic$O \
 	$Bgen$O \
-	$Bbytecode$O \
-	$Balpha$O \
-	$Bmips$O \
-	$Bsparc$O \
-	$Bstab$O \
-	$Bx86$O \
-	$Bx86linux$O
+	$Bbytecode$O
 
 $Bq3rcc$E::	$Bmain$O $Blibrcc$A $(EXTRAOBJS)
 		$(LD) $(LDFLAGS) -o $@ $Bmain$O $(EXTRAOBJS) $Blibrcc$A $(EXTRALIBS)

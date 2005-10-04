@@ -11,6 +11,7 @@ static char rcsid[] = "Id: dummy rcsid";
 #include <assert.h>
 #include <ctype.h>
 #include <signal.h>
+#include <unistd.h>
 
 #ifndef TEMPDIR
 #define TEMPDIR "/tmp"
@@ -47,7 +48,6 @@ extern char *stringf(const char *, ...);
 extern int suffix(char *, char *[], int);
 extern char *tempname(char *);
 
-extern int access(char *, int);
 extern int getpid(void);
 
 extern char *cpp[], *include[], *com[], *as[],*ld[], inputs[], *suffixes[];
@@ -71,7 +71,7 @@ char *tempdir = TEMPDIR;	/* directory for temporary files */
 static char *progname;
 static List lccinputs;		/* list of input directories */
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	int i, j, nf;
 	
 	progname = argv[0];
@@ -93,7 +93,7 @@ main(int argc, char *argv[]) {
 		tempdir = getenv("TMPDIR");
 	assert(tempdir);
 	i = strlen(tempdir);
-	for (; i > 0 && tempdir[i-1] == '/' || tempdir[i-1] == '\\'; i--)
+	for (; (i > 0 && tempdir[i-1] == '/') || tempdir[i-1] == '\\'; i--)
 		tempdir[i-1] = '\0';
 	if (argc <= 1) {
 		help();
@@ -149,7 +149,7 @@ main(int argc, char *argv[]) {
 			char *name = exists(argv[i]);
 			if (name) {
 				if (strcmp(name, argv[i]) != 0
-				|| nf > 1 && suffix(name, suffixes, 3) >= 0)
+				|| (nf > 1 && suffix(name, suffixes, 3) >= 0))
 					fprintf(stderr, "%s:\n", name);
 				filename(name, 0);
 			} else
@@ -214,7 +214,6 @@ char *basepath(char *name) {
 #define _P_WAIT 0
 extern int fork(void);
 extern int wait(int *);
-extern void execv(const char *, char *[]);
 
 static int _spawnvp(int mode, const char *cmdname, char *argv[]) {
 	int pid, n, status;
@@ -261,7 +260,7 @@ static int callsys(char **av) {
 	}
 	for (i = 0; status == 0 && av[i] != NULL; ) {
 		int j = 0;
-		char *s;
+		char *s = NULL;
 		for ( ; av[i] != NULL && (s = strchr(av[i], '\n')) == NULL; i++)
 			argv[j++] = av[i];
 		if (s != NULL) {
@@ -319,7 +318,7 @@ static void compose(char *cmd[], List a, List b, List c) {
 		if (s && isdigit(s[1])) {
 			int k = s[1] - '0';
 			assert(k >=1 && k <= 3);
-			if (b = lists[k-1]) {
+			if ((b = lists[k-1])) {
 				b = b->link;
 				av[j] = alloc(strlen(cmd[i]) + strlen(b->str) - 1);
 				strncpy(av[j], cmd[i], s - cmd[i]);
@@ -452,7 +451,7 @@ static int filename(char *name, char *base) {
 static List find(char *str, List list) {
 	List b;
 	
-	if (b = list)
+	if ((b = list))
 		do {
 			if (strcmp(str, b->str) == 0)
 				return b;
@@ -508,7 +507,7 @@ static void help(void) {
 		if (strncmp("-tempdir", msgs[i], 8) == 0 && tempdir)
 			fprintf(stderr, "; default=%s", tempdir);
 	}
-#define xx(v) if (s = getenv(#v)) fprintf(stderr, #v "=%s\n", s)
+#define xx(v) if ((s = getenv(#v))) fprintf(stderr, #v "=%s\n", s)
 	xx(LCCINPUTS);
 	xx(LCCDIR);
 #ifdef WIN32
@@ -521,13 +520,13 @@ static void help(void) {
 /* initinputs - if LCCINPUTS or include is defined, use them to initialize various lists */
 static void initinputs(void) {
 	char *s = getenv("LCCINPUTS");
-	List list, b;
+	List b;
 
 	if (s == 0 || (s = inputs)[0] == 0)
 		s = ".";
 	if (s) {
 		lccinputs = path2list(s);
-		if (b = lccinputs)
+		if ((b = lccinputs))
 			do {
 				b = b->link;
 				if (strcmp(b->str, ".") != 0) {
@@ -701,7 +700,7 @@ static List path2list(const char *path) {
 		sep = ';';
 	while (*path) {
 		char *p, buf[512];
-		if (p = strchr(path, sep)) {
+		if ((p = strchr(path, sep))) {
 			assert(p - path < sizeof buf);
 			strncpy(buf, path, p - path);
 			buf[p-path] = '\0';
@@ -767,7 +766,7 @@ int suffix(char *name, char *tails[], int n) {
 
 	for (i = 0; i < n; i++) {
 		char *s = tails[i], *t;
-		for ( ; t = strchr(s, ';'); s = t + 1) {
+		for ( ; (t = strchr(s, ';')); s = t + 1) {
 			int m = t - s;
 			if (len > m && strncmp(&name[len-m], s, m) == 0)
 				return i;

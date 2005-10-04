@@ -150,9 +150,9 @@ int findcount(char *file, int x, int y) {
 		struct count *c = cursor->counts;
 		for (l = 0, u = cursor->count - 1; l <= u; ) {
 			int k = (l + u)/2;
-			if (c[k].y > y || c[k].y == y && c[k].x > x)
+			if (c[k].y > y || (c[k].y == y && c[k].x > x))
 				u = k - 1;
-			else if (c[k].y < y || c[k].y == y && c[k].x < x)
+			else if (c[k].y < y || (c[k].y == y && c[k].x < x))
 				l = k + 1;
 			else
 				return c[k].count;

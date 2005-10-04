@@ -18,9 +18,9 @@ YYCONST static char yysccsid[] = "@(#)yaccpar	1.8 (Berkeley +Cygnus.28) 01/20/91
 #ifndef YYDONT_INCLUDE_STDIO
 #include <stdio.h>
 #endif
-#ifdef __cplusplus
+//#ifdef __cplusplus TA <tim@ngus.net> stdlib.h applies to C too
 #include <stdlib.h> /* for malloc/realloc/free */
-#endif
+//#endif
 #line 2 "lburg/gram.y"
 #include <stdio.h>
 #include "lburg.h"
@@ -227,7 +227,9 @@ inline
 #endif
 yygrow ()
 {
+#if YYDEBUG
     int old_stacksize = yystacksize;
+#endif
     short *new_yyss;
     YYSTYPE *new_yyvs;
 
@@ -469,7 +471,7 @@ yypush:
     *++yyvsp = yyval;
 
 yyloop:
-    if (yyn = yydefred[yystate]) goto yyreduce;
+    if ((yyn = yydefred[yystate])) goto yyreduce;
     yyn = yysindex[yystate];
     if (yychar < 0)
     {
@@ -509,13 +511,13 @@ yyloop:
     if (yyerrflag) goto yyinrecovery;
 #ifdef lint
     goto yynewerror;
-#endif
 yynewerror:
+#endif
     yyerror("syntax error");
 #ifdef lint
     goto yyerrlab;
-#endif
 yyerrlab:
+#endif
     ++yynerrs;
 yyinrecovery:
     if (yyerrflag < 3)

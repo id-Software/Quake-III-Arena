@@ -100,7 +100,7 @@ control(Tokenrow *trp)
 			error(ERROR, "Unidentifiable control line");
 		return;			/* else empty line */
 	}
-	if ((np = lookup(tp, 0))==NULL || (np->flag&ISKW)==0 && !skipping) {
+	if ((np = lookup(tp, 0))==NULL || ((np->flag&ISKW)==0 && !skipping)) {
 		error(WARNING, "Unknown preprocessor control %t", tp);
 		return;
 	}
@@ -215,7 +215,7 @@ control(Tokenrow *trp)
 		tp = trp->bp+2;
 	kline:
 		if (tp+1>=trp->lp || tp->type!=NUMBER || tp+3<trp->lp
-		 || (tp+3==trp->lp && ((tp+1)->type!=STRING)||*(tp+1)->t=='L')){
+		 || ((tp+3==trp->lp && ((tp+1)->type!=STRING))||*(tp+1)->t=='L')){
 			error(ERROR, "Syntax error in #line");
 			return;
 		}

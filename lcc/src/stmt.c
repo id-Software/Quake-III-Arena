@@ -37,7 +37,6 @@ Code code(int kind) {
 	return cp;
 }
 int reachable(int kind) {
-	Code cp;
 
 	if (kind > Start) {
 		Code cp;

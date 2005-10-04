@@ -296,7 +296,6 @@ Symbol mksymbol(int sclass, const char *name, Type ty) {
 
 /* vtoa - return string for the constant v of type ty */
 char *vtoa(Type ty, Value v) {
-	char buf[50];
 
 	ty = unqual(ty);
 	switch (ty->op) {

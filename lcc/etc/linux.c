@@ -2,8 +2,6 @@
 
 #include <string.h>
 
-static char rcsid[] = "Dummy rcsid";
-
 /*
 TTimo - 10-18-2001
 our binaries are named q3lcc q3rcc and q3cpp
@@ -26,7 +24,7 @@ char *cpp[] = { LCCDIR "q3cpp",
 	"$1", "$2", "$3", 0 };
 char *include[] = {"-I" LCCDIR "include", "-I" LCCDIR "gcc/include", "-I/usr/include",
 		   "-I" SYSTEM "include", 0 };
-char *com[] = {LCCDIR "q3rcc", "-target=x86/linux", "$1", "$2", "$3", 0 };
+char *com[] = {LCCDIR "q3rcc", "-target=bytecode", "$1", "$2", "$3", 0 };
 char *as[] = { "/usr/bin/as", "-o", "$3", "$1", "$2", 0 };
 // NOTE TTimo I don't think we have any use with the native linkage
 // our target is always bytecode..

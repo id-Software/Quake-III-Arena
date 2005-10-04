@@ -1,7 +1,7 @@
 # yeah, couldn't do more simple really
 
 CC=gcc
-CFLAGS=-g -Wall
+CFLAGS=-O2 -Wall -Werror -fno-strict-aliasing
 
 default:	q3asm
 

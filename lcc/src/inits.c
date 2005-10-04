@@ -4,5 +4,4 @@ void init(int argc, char *argv[]) {
 	{extern void prof_init(int, char *[]); prof_init(argc, argv);}
 	{extern void trace_init(int, char *[]); trace_init(argc, argv);}
 	{extern void type_init(int, char *[]); type_init(argc, argv);}
-	{extern void x86linux_init(int, char *[]); x86linux_init(argc, argv);}
 }

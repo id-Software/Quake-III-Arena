@@ -55,7 +55,7 @@ static void profout(struct _bbdata *p, FILE *fp) {
 	for (i = 0; p->files[i]; i++)
 		fprintf(fp, "%s\n", p->files[i]);
 	for (i = 0, f = p->funcs; f; i++, f = f->link)
-		if (q = f->callers)
+		if ((q = f->callers))
 			for (i--; q; q = q->link)
 				i++;
 	fprintf(fp, "%d\n", i);

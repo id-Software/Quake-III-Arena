@@ -1,11 +1,11 @@
 #include	<stdio.h>
+#include	<string.h>
 #define EPR                 fprintf(stderr,
 #define ERR(str, chr)       if(opterr){EPR "%s%c\n", str, chr);}
 int     opterr = 1;
 int     optind = 1;
 int	optopt;
 char    *optarg;
-char    *strchr();
 
 int
 getopt (int argc, char *const argv[], const char *opts)
@@ -14,7 +14,7 @@ getopt (int argc, char *const argv[], const char *opts)
 	int c;
 	char *cp;
 
-	if (sp == 1)
+	if (sp == 1) {
 		if (optind >= argc ||
 		   argv[optind][0] != '-' || argv[optind][1] == '\0')
 			return -1;
@@ -22,6 +22,7 @@ getopt (int argc, char *const argv[], const char *opts)
 			optind++;
 			return -1;
 		}
+	}
 	optopt = c = argv[optind][sp];
 	if (c == ':' || (cp=strchr(opts, c)) == 0) {
 		ERR (": illegal option -- ", c);

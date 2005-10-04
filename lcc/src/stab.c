@@ -201,9 +201,7 @@ void stabblock(int brace, int lev, Symbol *p) {
 	if (brace == '{')
 		while (*p)
 			stabsym(*p++);
-	if (IR == &sparcIR)
-		print(".stabd 0x%x,0,%d\n", brace == '{' ? N_LBRAC : N_RBRAC, lev);
-	else {
+	{
 		int lab = genlabel(1);
 		print(".stabn 0x%x,0,%d,%s%d-%s\n", brace == '{' ? N_LBRAC : N_RBRAC, lev,
 			stabprefix, lab, cfunc->x.name);
@@ -252,9 +250,7 @@ void stabline(Coordinate *cp) {
 		print("%s%d:\n", stabprefix, lab);
 		currentfile = cp->file;
 	}
-	if (IR == &sparcIR)
-		print(".stabd 0x%x,0,%d\n", N_SLINE, cp->y);
-	else {
+	{
 		int lab = genlabel(1);
 		print(".stabn 0x%x,0,%d,%s%d-%s\n", N_SLINE, cp->y,
 			stabprefix, lab, cfunc->x.name);
@@ -280,7 +276,7 @@ void stabsym(Symbol p) {
 		sz = p->type->type->size;
 	} else
 		tc = dbxtype(p->type);
-	if (p->sclass == AUTO && p->scope == GLOBAL || p->sclass == EXTERN) {
+	if ((p->sclass == AUTO && p->scope == GLOBAL) || p->sclass == EXTERN) {
 		print(".stabs \"%s:G", p->name);
 		code = N_GSYM;
 	} else if (p->sclass == STATIC) {

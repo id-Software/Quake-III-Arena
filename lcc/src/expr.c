@@ -230,13 +230,13 @@ static Tree unary(void) {
 			pty = p->type;
 			if (isenum(pty))
 				pty = pty->type;
-			if (isarith(pty) && isarith(ty)
-			||  isptr(pty)   && isptr(ty)) {
+			if ((isarith(pty) && isarith(ty))
+			||  (isptr(pty)   && isptr(ty))) {
 				explicitCast++;
 				p = cast(p, ty);
 				explicitCast--;
-			} else if (isptr(pty) && isint(ty)
-			||       isint(pty) && isptr(ty)) {
+			} else if ((isptr(pty) && isint(ty))
+			||       (isint(pty) && isptr(ty))) {
 				if (Aflag >= 1 && ty->size < pty->size)
 					warning("conversion from `%t' to `%t' is compiler dependent\n", p->type, ty);
 
@@ -278,11 +278,12 @@ static Tree postfix(Tree p) {
 			    	Tree q;
 			    	t = gettok();
 			    	q = expr(']');
-			    	if (YYnull)
+			    	if (YYnull) {
 			    		if (isptr(p->type))
 			    			p = nullcheck(p);
 			    		else if (isptr(q->type))
 			    			q = nullcheck(q);
+			    	}
 			    	p = (*optree['+'])(ADD, pointer(p), pointer(q));
 			    	if (isptr(p->type) && isarray(p->type->type))
 			    		p = retype(p, p->type->type);
@@ -497,12 +498,13 @@ Type binary(Type xty, Type yty) {
 	xx(unsignedlonglong);
 	xx(longlong);
 	xx(unsignedlong);
-	if (xty == longtype     && yty == unsignedtype
-	||  xty == unsignedtype && yty == longtype)
+	if ((xty == longtype     && yty == unsignedtype)
+	||  (xty == unsignedtype && yty == longtype)) {
 		if (longtype->size > unsignedtype->size)
 			return longtype;
 		else
 			return unsignedlong;
+	}
 	xx(longtype);
 	xx(unsignedtype);
 	return inttype;
@@ -618,8 +620,8 @@ Tree cast(Tree p, Type type) {
 		if (src->op != dst->op)
 			p = simplify(CVP, dst, p, NULL);
 		else {
-			if (isfunc(src->type) && !isfunc(dst->type)
-			|| !isfunc(src->type) &&  isfunc(dst->type))
+			if ((isfunc(src->type) && !isfunc(dst->type))
+			|| (!isfunc(src->type) &&  isfunc(dst->type)))
 				warning("conversion from `%t' to `%t' is compiler dependent\n", p->type, type);
 
 			if (src->size != dst->size)

@@ -59,7 +59,7 @@ doinclude(Tokenrow *trp)
 		if ((fd = open(iname, 0)) >= 0)
 			break;
 	}
-	if ( Mflag>1 || !angled&&Mflag==1 ) {
+	if ( Mflag>1 || (!angled&&Mflag==1) ) {
 		write(1,objname,strlen(objname));
 		write(1,iname,strlen(iname));
 		write(1,"\n",1);

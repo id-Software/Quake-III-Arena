@@ -1,1 +1,0 @@
-BUILDDIR=.obj
