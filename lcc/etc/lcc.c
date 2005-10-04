@@ -280,7 +280,11 @@ static int callsys(char **av) {
 			fprintf(stderr, "\n");
 		}
 		if (verbose < 2)
+#ifndef WIN32
 			status = _spawnvp(_P_WAIT, argv[0], argv);
+#else
+			status = _spawnvp(_P_WAIT, argv[0], (const char* const*)argv);
+#endif
 		if (status == -1) {
 			fprintf(stderr, "%s: ", progname);
 			perror(argv[0]);
@@ -521,6 +525,9 @@ static void help(void) {
 static void initinputs(void) {
 	char *s = getenv("LCCINPUTS");
 	List b;
+#ifdef WIN32
+	List list;
+#endif
 
 	if (s == 0 || (s = inputs)[0] == 0)
 		s = ".";
@@ -538,7 +545,7 @@ static void initinputs(void) {
 			} while (b != lccinputs);
 	}
 #ifdef WIN32
-	if (list = b = path2list(getenv("include")))
+	if ((list = b = path2list(getenv("include"))))
 		do {
 			b = b->link;
 			ilist = append(stringf("-I\"%s\"", b->str), ilist);

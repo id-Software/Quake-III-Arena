@@ -636,9 +636,10 @@ int Q_filelength (FILE *f)
 	return end;
 }
 
-#ifndef MAXPATH
-#define MAX_PATH 4096
+#ifdef MAX_PATH
+#undef MAX_PATH
 #endif
+#define MAX_PATH 4096
 static FILE* myfopen(const char* filename, const char* mode)
 {
 	char* p;
