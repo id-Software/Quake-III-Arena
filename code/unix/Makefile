@@ -1089,9 +1089,9 @@ $(B)/missionpack/vm/ui.qvm:
 #############################################################################
 
 Q3CGOBJ = \
-  $(B)/baseq3/cgame/bg_misc.o \
-  $(B)/baseq3/cgame/bg_pmove.o \
-  $(B)/baseq3/cgame/bg_slidemove.o \
+  $(B)/baseq3/game/bg_misc.o \
+  $(B)/baseq3/game/bg_pmove.o \
+  $(B)/baseq3/game/bg_slidemove.o \
   $(B)/baseq3/cgame/cg_consolecmds.o \
   $(B)/baseq3/cgame/cg_draw.o \
   $(B)/baseq3/cgame/cg_drawtools.o \
@@ -1111,45 +1111,20 @@ Q3CGOBJ = \
   $(B)/baseq3/cgame/cg_syscalls.o \
   $(B)/baseq3/cgame/cg_view.o \
   $(B)/baseq3/cgame/cg_weapons.o \
-  $(B)/baseq3/cgame/q_math.o \
-  $(B)/baseq3/cgame/q_shared.o
+  $(B)/baseq3/game/q_math.o \
+  $(B)/baseq3/game/q_shared.o
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
-
-$(B)/baseq3/cgame/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/bg_pmove.o : $(GDIR)/bg_pmove.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/bg_slidemove.o : $(GDIR)/bg_slidemove.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_consolecmds.o : $(CGDIR)/cg_consolecmds.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_draw.o : $(CGDIR)/cg_draw.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_drawtools.o : $(CGDIR)/cg_drawtools.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_effects.o : $(CGDIR)/cg_effects.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_ents.o : $(CGDIR)/cg_ents.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_event.o : $(CGDIR)/cg_event.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_info.o : $(CGDIR)/cg_info.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_localents.o : $(CGDIR)/cg_localents.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_main.o : $(CGDIR)/cg_main.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_marks.o : $(CGDIR)/cg_marks.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_players.o : $(CGDIR)/cg_players.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_playerstate.o : $(CGDIR)/cg_playerstate.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_predict.o : $(CGDIR)/cg_predict.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_scoreboard.o : $(CGDIR)/cg_scoreboard.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_servercmds.o : $(CGDIR)/cg_servercmds.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_snapshot.o : $(CGDIR)/cg_snapshot.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_syscalls.o : $(CGDIR)/cg_syscalls.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_view.o : $(CGDIR)/cg_view.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/cg_weapons.o : $(CGDIR)/cg_weapons.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)
-$(B)/baseq3/cgame/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)
 
 #############################################################################
 ## MISSIONPACK CGAME
 #############################################################################
 
 MPCGOBJ = \
-  $(B)/missionpack/cgame/bg_misc.o \
-  $(B)/missionpack/cgame/bg_pmove.o \
-  $(B)/missionpack/cgame/bg_slidemove.o \
+  $(B)/missionpack/game/bg_misc.o \
+  $(B)/missionpack/game/bg_pmove.o \
+  $(B)/missionpack/game/bg_slidemove.o \
   $(B)/missionpack/cgame/cg_consolecmds.o \
   $(B)/missionpack/cgame/cg_newdraw.o \
   $(B)/missionpack/cgame/cg_draw.o \
@@ -1170,39 +1145,12 @@ MPCGOBJ = \
   $(B)/missionpack/cgame/cg_syscalls.o \
   $(B)/missionpack/cgame/cg_view.o \
   $(B)/missionpack/cgame/cg_weapons.o \
-  $(B)/missionpack/cgame/q_math.o \
-  $(B)/missionpack/cgame/q_shared.o \
-  $(B)/missionpack/cgame/ui_shared.o
+  $(B)/missionpack/game/q_math.o \
+  $(B)/missionpack/game/q_shared.o \
+  $(B)/missionpack/ui/ui_shared.o
 
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
-
-$(B)/missionpack/cgame/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)     -DMISSIONPACK
-$(B)/missionpack/cgame/bg_pmove.o : $(GDIR)/bg_pmove.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/cgame/bg_slidemove.o : $(GDIR)/bg_slidemove.c; $(DO_SHLIB_CC)   -DMISSIONPACK
-$(B)/missionpack/cgame/cg_consolecmds.o : $(CGDIR)/cg_consolecmds.c; $(DO_SHLIB_CC)   -DMISSIONPACK
-$(B)/missionpack/cgame/cg_newdraw.o : $(CGDIR)/cg_newdraw.c; $(DO_SHLIB_CC)         -DMISSIONPACK
-$(B)/missionpack/cgame/cg_draw.o : $(CGDIR)/cg_draw.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/cgame/cg_drawtools.o : $(CGDIR)/cg_drawtools.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/cgame/cg_effects.o : $(CGDIR)/cg_effects.c; $(DO_SHLIB_CC)       -DMISSIONPACK
-$(B)/missionpack/cgame/cg_ents.o : $(CGDIR)/cg_ents.c; $(DO_SHLIB_CC)           -DMISSIONPACK
-$(B)/missionpack/cgame/cg_event.o : $(CGDIR)/cg_event.c; $(DO_SHLIB_CC)        -DMISSIONPACK
-$(B)/missionpack/cgame/cg_info.o : $(CGDIR)/cg_info.c; $(DO_SHLIB_CC)           -DMISSIONPACK
-$(B)/missionpack/cgame/cg_localents.o : $(CGDIR)/cg_localents.c; $(DO_SHLIB_CC)   -DMISSIONPACK
-$(B)/missionpack/cgame/cg_main.o : $(CGDIR)/cg_main.c; $(DO_SHLIB_CC)             -DMISSIONPACK
-$(B)/missionpack/cgame/cg_marks.o : $(CGDIR)/cg_marks.c; $(DO_SHLIB_CC)          -DMISSIONPACK
-$(B)/missionpack/cgame/cg_players.o : $(CGDIR)/cg_players.c; $(DO_SHLIB_CC)       -DMISSIONPACK
-$(B)/missionpack/cgame/cg_playerstate.o : $(CGDIR)/cg_playerstate.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/cgame/cg_predict.o : $(CGDIR)/cg_predict.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/cgame/cg_scoreboard.o : $(CGDIR)/cg_scoreboard.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/cgame/cg_servercmds.o : $(CGDIR)/cg_servercmds.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/cgame/cg_snapshot.o : $(CGDIR)/cg_snapshot.c; $(DO_SHLIB_CC)       -DMISSIONPACK
-$(B)/missionpack/cgame/cg_syscalls.o : $(CGDIR)/cg_syscalls.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/cgame/cg_view.o : $(CGDIR)/cg_view.c; $(DO_SHLIB_CC)               -DMISSIONPACK
-$(B)/missionpack/cgame/cg_weapons.o : $(CGDIR)/cg_weapons.c; $(DO_SHLIB_CC)        -DMISSIONPACK
-$(B)/missionpack/cgame/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)                 -DMISSIONPACK
-$(B)/missionpack/cgame/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)             -DMISSIONPACK
-$(B)/missionpack/cgame/ui_shared.o : $(UIDIR)/ui_shared.c; $(DO_SHLIB_CC)             -DMISSIONPACK
 
 
 
@@ -1249,41 +1197,6 @@ Q3GOBJ = \
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
-$(B)/baseq3/game/ai_chat.o : $(GDIR)/ai_chat.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_cmd.o : $(GDIR)/ai_cmd.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_dmnet.o : $(GDIR)/ai_dmnet.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_dmq3.o : $(GDIR)/ai_dmq3.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_main.o : $(GDIR)/ai_main.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_team.o : $(GDIR)/ai_team.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/ai_vcmd.o : $(GDIR)/ai_vcmd.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/bg_pmove.o : $(GDIR)/bg_pmove.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/bg_slidemove.o : $(GDIR)/bg_slidemove.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_active.o : $(GDIR)/g_active.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_arenas.o : $(GDIR)/g_arenas.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_bot.o : $(GDIR)/g_bot.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_client.o : $(GDIR)/g_client.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_cmds.o : $(GDIR)/g_cmds.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_combat.o : $(GDIR)/g_combat.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_items.o : $(GDIR)/g_items.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_main.o : $(GDIR)/g_main.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_mem.o : $(GDIR)/g_mem.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_misc.o : $(GDIR)/g_misc.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_missile.o : $(GDIR)/g_missile.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_mover.o : $(GDIR)/g_mover.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_session.o : $(GDIR)/g_session.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_spawn.o : $(GDIR)/g_spawn.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_svcmds.o : $(GDIR)/g_svcmds.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_syscalls.o : $(GDIR)/g_syscalls.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_target.o : $(GDIR)/g_target.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_team.o : $(GDIR)/g_team.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_trigger.o : $(GDIR)/g_trigger.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_utils.o : $(GDIR)/g_utils.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/g_weapon.o : $(GDIR)/g_weapon.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)
-$(B)/baseq3/game/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)
-
-
 #############################################################################
 ## MISSIONPACK GAME
 #############################################################################
@@ -1327,40 +1240,6 @@ MPGOBJ = \
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
 
-$(B)/missionpack/game/ai_chat.o : $(GDIR)/ai_chat.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/ai_cmd.o : $(GDIR)/ai_cmd.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/ai_dmnet.o : $(GDIR)/ai_dmnet.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/game/ai_dmq3.o : $(GDIR)/ai_dmq3.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/ai_main.o : $(GDIR)/ai_main.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/ai_team.o : $(GDIR)/ai_team.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/ai_vcmd.o : $(GDIR)/ai_vcmd.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/bg_pmove.o : $(GDIR)/bg_pmove.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/bg_slidemove.o : $(GDIR)/bg_slidemove.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/game/g_active.o : $(GDIR)/g_active.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/g_arenas.o : $(GDIR)/g_arenas.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/g_bot.o : $(GDIR)/g_bot.c; $(DO_SHLIB_CC)           -DMISSIONPACK
-$(B)/missionpack/game/g_client.o : $(GDIR)/g_client.c; $(DO_SHLIB_CC)     -DMISSIONPACK
-$(B)/missionpack/game/g_cmds.o : $(GDIR)/g_cmds.c; $(DO_SHLIB_CC)         -DMISSIONPACK
-$(B)/missionpack/game/g_combat.o : $(GDIR)/g_combat.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/g_items.o : $(GDIR)/g_items.c; $(DO_SHLIB_CC)         -DMISSIONPACK
-$(B)/missionpack/game/g_main.o : $(GDIR)/g_main.c; $(DO_SHLIB_CC)          -DMISSIONPACK
-$(B)/missionpack/game/g_mem.o : $(GDIR)/g_mem.c; $(DO_SHLIB_CC)             -DMISSIONPACK
-$(B)/missionpack/game/g_misc.o : $(GDIR)/g_misc.c; $(DO_SHLIB_CC)            -DMISSIONPACK
-$(B)/missionpack/game/g_missile.o : $(GDIR)/g_missile.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/g_mover.o : $(GDIR)/g_mover.c; $(DO_SHLIB_CC)        -DMISSIONPACK
-$(B)/missionpack/game/g_session.o : $(GDIR)/g_session.c; $(DO_SHLIB_CC)     -DMISSIONPACK
-$(B)/missionpack/game/g_spawn.o : $(GDIR)/g_spawn.c; $(DO_SHLIB_CC)         -DMISSIONPACK
-$(B)/missionpack/game/g_svcmds.o : $(GDIR)/g_svcmds.c; $(DO_SHLIB_CC)       -DMISSIONPACK
-$(B)/missionpack/game/g_syscalls.o : $(GDIR)/g_syscalls.c; $(DO_SHLIB_CC)   -DMISSIONPACK
-$(B)/missionpack/game/g_target.o : $(GDIR)/g_target.c; $(DO_SHLIB_CC)       -DMISSIONPACK
-$(B)/missionpack/game/g_team.o : $(GDIR)/g_team.c; $(DO_SHLIB_CC)         -DMISSIONPACK
-$(B)/missionpack/game/g_trigger.o : $(GDIR)/g_trigger.c; $(DO_SHLIB_CC)    -DMISSIONPACK
-$(B)/missionpack/game/g_utils.o : $(GDIR)/g_utils.c; $(DO_SHLIB_CC)        -DMISSIONPACK
-$(B)/missionpack/game/g_weapon.o : $(GDIR)/g_weapon.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-$(B)/missionpack/game/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)          -DMISSIONPACK
-$(B)/missionpack/game/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)      -DMISSIONPACK
-
 
 
 #############################################################################
@@ -1368,102 +1247,53 @@ $(B)/missionpack/game/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)      -DMIS
 #############################################################################
 
 Q3UIOBJ = \
-        $(B)/baseq3/ui/bg_misc.o \
-        $(B)/baseq3/ui/ui_addbots.o \
-        $(B)/baseq3/ui/ui_atoms.o \
-        $(B)/baseq3/ui/ui_cdkey.o \
-        $(B)/baseq3/ui/ui_cinematics.o \
-        $(B)/baseq3/ui/ui_confirm.o \
-        $(B)/baseq3/ui/ui_connect.o \
-        $(B)/baseq3/ui/ui_controls2.o \
-        $(B)/baseq3/ui/ui_credits.o \
-        $(B)/baseq3/ui/ui_demo2.o \
-        $(B)/baseq3/ui/ui_display.o \
-        $(B)/baseq3/ui/ui_gameinfo.o \
-        $(B)/baseq3/ui/ui_ingame.o \
-        $(B)/baseq3/ui/ui_loadconfig.o \
-        $(B)/baseq3/ui/ui_main.o \
-        $(B)/baseq3/ui/ui_menu.o \
-        $(B)/baseq3/ui/ui_mfield.o \
-        $(B)/baseq3/ui/ui_mods.o \
-        $(B)/baseq3/ui/ui_network.o \
-        $(B)/baseq3/ui/ui_options.o \
-        $(B)/baseq3/ui/ui_playermodel.o \
-        $(B)/baseq3/ui/ui_players.o \
-        $(B)/baseq3/ui/ui_playersettings.o \
-        $(B)/baseq3/ui/ui_preferences.o \
-        $(B)/baseq3/ui/ui_qmenu.o \
-        $(B)/baseq3/ui/ui_removebots.o \
-        $(B)/baseq3/ui/ui_saveconfig.o \
-        $(B)/baseq3/ui/ui_serverinfo.o \
-        $(B)/baseq3/ui/ui_servers2.o \
-        $(B)/baseq3/ui/ui_setup.o \
-        $(B)/baseq3/ui/ui_sound.o \
-        $(B)/baseq3/ui/ui_sparena.o \
-        $(B)/baseq3/ui/ui_specifyserver.o \
-        $(B)/baseq3/ui/ui_splevel.o \
-        $(B)/baseq3/ui/ui_sppostgame.o \
-        $(B)/baseq3/ui/ui_spskill.o \
-        $(B)/baseq3/ui/ui_startserver.o \
-        $(B)/baseq3/ui/ui_syscalls.o \
-        $(B)/baseq3/ui/ui_team.o \
-        $(B)/baseq3/ui/ui_teamorders.o \
-        $(B)/baseq3/ui/ui_video.o \
-        \
-        $(B)/baseq3/ui/q_math.o \
-        $(B)/baseq3/ui/q_shared.o
+	$(B)/baseq3/game/bg_misc.o \
+	$(B)/baseq3/ui/ui_addbots.o \
+	$(B)/baseq3/ui/ui_atoms.o \
+	$(B)/baseq3/ui/ui_cdkey.o \
+	$(B)/baseq3/ui/ui_cinematics.o \
+	$(B)/baseq3/ui/ui_confirm.o \
+	$(B)/baseq3/ui/ui_connect.o \
+	$(B)/baseq3/ui/ui_controls2.o \
+	$(B)/baseq3/ui/ui_credits.o \
+	$(B)/baseq3/ui/ui_demo2.o \
+	$(B)/baseq3/ui/ui_display.o \
+	$(B)/baseq3/ui/ui_gameinfo.o \
+	$(B)/baseq3/ui/ui_ingame.o \
+	$(B)/baseq3/ui/ui_loadconfig.o \
+	$(B)/baseq3/ui/ui_main.o \
+	$(B)/baseq3/ui/ui_menu.o \
+	$(B)/baseq3/ui/ui_mfield.o \
+	$(B)/baseq3/ui/ui_mods.o \
+	$(B)/baseq3/ui/ui_network.o \
+	$(B)/baseq3/ui/ui_options.o \
+	$(B)/baseq3/ui/ui_playermodel.o \
+	$(B)/baseq3/ui/ui_players.o \
+	$(B)/baseq3/ui/ui_playersettings.o \
+	$(B)/baseq3/ui/ui_preferences.o \
+	$(B)/baseq3/ui/ui_qmenu.o \
+	$(B)/baseq3/ui/ui_removebots.o \
+	$(B)/baseq3/ui/ui_saveconfig.o \
+	$(B)/baseq3/ui/ui_serverinfo.o \
+	$(B)/baseq3/ui/ui_servers2.o \
+	$(B)/baseq3/ui/ui_setup.o \
+	$(B)/baseq3/ui/ui_sound.o \
+	$(B)/baseq3/ui/ui_sparena.o \
+	$(B)/baseq3/ui/ui_specifyserver.o \
+	$(B)/baseq3/ui/ui_splevel.o \
+	$(B)/baseq3/ui/ui_sppostgame.o \
+	$(B)/baseq3/ui/ui_spskill.o \
+	$(B)/baseq3/ui/ui_startserver.o \
+	$(B)/missionpack/ui/ui_syscalls.o \
+	$(B)/baseq3/ui/ui_team.o \
+	$(B)/baseq3/ui/ui_teamorders.o \
+	$(B)/baseq3/ui/ui_video.o \
+	\
+	$(B)/baseq3/game/q_math.o \
+	$(B)/baseq3/game/q_shared.o
 
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) : $(Q3UIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
-
-$(B)/baseq3/ui/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_addbots.o : $(Q3UIDIR)/ui_addbots.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_atoms.o : $(Q3UIDIR)/ui_atoms.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_cinematics.o : $(Q3UIDIR)/ui_cinematics.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_cdkey.o : $(Q3UIDIR)/ui_cdkey.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_confirm.o : $(Q3UIDIR)/ui_confirm.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_connect.o : $(Q3UIDIR)/ui_connect.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_controls2.o : $(Q3UIDIR)/ui_controls2.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_credits.o : $(Q3UIDIR)/ui_credits.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_demo2.o : $(Q3UIDIR)/ui_demo2.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_display.o : $(Q3UIDIR)/ui_display.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_gameinfo.o : $(Q3UIDIR)/ui_gameinfo.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_ingame.o : $(Q3UIDIR)/ui_ingame.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_loadconfig.o : $(Q3UIDIR)/ui_loadconfig.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_main.o : $(Q3UIDIR)/ui_main.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_menu.o : $(Q3UIDIR)/ui_menu.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_mfield.o : $(Q3UIDIR)/ui_mfield.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_mods.o : $(Q3UIDIR)/ui_mods.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_network.o : $(Q3UIDIR)/ui_network.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_options.o : $(Q3UIDIR)/ui_options.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_playermodel.o : $(Q3UIDIR)/ui_playermodel.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_players.o : $(Q3UIDIR)/ui_players.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_playersettings.o : $(Q3UIDIR)/ui_playersettings.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_preferences.o : $(Q3UIDIR)/ui_preferences.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_qmenu.o : $(Q3UIDIR)/ui_qmenu.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_quit.o : $(Q3UIDIR)/ui_quit.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_removebots.o : $(Q3UIDIR)/ui_removebots.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_saveconfig.o : $(Q3UIDIR)/ui_saveconfig.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_serverinfo.o : $(Q3UIDIR)/ui_serverinfo.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_servers2.o : $(Q3UIDIR)/ui_servers2.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_setup.o : $(Q3UIDIR)/ui_setup.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_sound.o : $(Q3UIDIR)/ui_sound.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_sparena.o : $(Q3UIDIR)/ui_sparena.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_specifyserver.o : $(Q3UIDIR)/ui_specifyserver.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_splevel.o : $(Q3UIDIR)/ui_splevel.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_sppostgame.o : $(Q3UIDIR)/ui_sppostgame.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_spskill.o : $(Q3UIDIR)/ui_spskill.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_startserver.o : $(Q3UIDIR)/ui_startserver.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_team.o : $(Q3UIDIR)/ui_team.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_teamorders.o : $(Q3UIDIR)/ui_teamorders.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_syscalls.o : $(UIDIR)/ui_syscalls.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/ui_video.o : $(Q3UIDIR)/ui_video.c; $(DO_SHLIB_CC)
-
-# bk001205 - these wre the only SHLIB compiles in 1.17
-$(B)/baseq3/ui/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)
-$(B)/baseq3/ui/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)
-
-
 
 #############################################################################
 ## MISSIONPACK UI
@@ -1478,27 +1308,39 @@ MPUIOBJ = \
   $(B)/missionpack/ui/ui_util.o \
   $(B)/missionpack/ui/ui_shared.o \
   \
-  $(B)/missionpack/ui/bg_misc.o \
+  $(B)/missionpack/game/bg_misc.o \
   \
-  $(B)/missionpack/ui/q_math.o \
-  $(B)/missionpack/ui/q_shared.o
+  $(B)/missionpack/game/q_math.o \
+  $(B)/missionpack/game/q_shared.o
 
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
 
-$(B)/missionpack/ui/ui_atoms.o : $(UIDIR)/ui_atoms.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_gameinfo.o : $(UIDIR)/ui_gameinfo.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_main.o : $(UIDIR)/ui_main.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_players.o : $(UIDIR)/ui_players.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_syscalls.o : $(UIDIR)/ui_syscalls.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_util.o : $(UIDIR)/ui_util.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/ui_shared.o : $(UIDIR)/ui_shared.c; $(DO_SHLIB_CC)  -DMISSIONPACK
 
-$(B)/missionpack/ui/bg_misc.o : $(GDIR)/bg_misc.c; $(DO_SHLIB_CC)  -DMISSIONPACK
-$(B)/missionpack/ui/bg_lib.o : $(GDIR)/bg_lib.c; $(DO_SHLIB_CC)  -DMISSIONPACK
 
-$(B)/missionpack/ui/q_math.o : $(GDIR)/q_math.c; $(DO_SHLIB_CC)     -DMISSIONPACK
-$(B)/missionpack/ui/q_shared.o : $(GDIR)/q_shared.c; $(DO_SHLIB_CC)  -DMISSIONPACK
+#############################################################################
+## GAME MODULE RULES
+#############################################################################
+
+$(B)/baseq3/cgame/%.o: $(CGDIR)/%.c
+	$(DO_SHLIB_CC)
+
+$(B)/missionpack/cgame/%.o: $(CGDIR)/%.c
+	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/baseq3/game/%.o: $(GDIR)/%.c
+	$(DO_SHLIB_CC)
+
+$(B)/missionpack/game/%.o: $(GDIR)/%.c
+	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/baseq3/ui/%.o: $(Q3UIDIR)/%.c
+	$(DO_SHLIB_CC)
+
+$(B)/missionpack/ui/%.o: $(UIDIR)/%.c
+	$(DO_SHLIB_CC) -DMISSIONPACK
+
+
 
 #############################################################################
 # MISC
