@@ -194,12 +194,12 @@ ifeq ($(PLATFORM),linux)
       $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
       $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
       $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-#      $(B)/baseq3/vm/qagame.qvm \
-#      $(B)/baseq3/vm/cgame.qvm \
-#      $(B)/baseq3/vm/ui.qvm \
-#      $(B)/missionpack/vm/qagame.qvm \
-#      $(B)/missionpack/vm/cgame.qvm \
-#      $(B)/missionpack/vm/ui.qvm
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
 #      $(B)/$(PLATFORM)quake3-smp \
 
   endif
@@ -244,6 +244,8 @@ ifeq ($(PLATFORM),mingw32)
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
+  BINEXT=.exe
+
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
 
@@ -266,13 +268,13 @@ ifeq ($(PLATFORM),mingw32)
     $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
     $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
     $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-    $(B)/missionpack/ui$(ARCH).$(SHLIBEXT)
-#    $(B)/baseq3/vm/qagame.qvm \
-#    $(B)/baseq3/vm/cgame.qvm \
-#    $(B)/baseq3/vm/ui.qvm \
-#    $(B)/missionpack/vm/qagame.qvm \
-#    $(B)/missionpack/vm/cgame.qvm \
-#    $(B)/missionpack/vm/ui.qvm
+    $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+    $(B)/baseq3/vm/cgame.qvm \
+    $(B)/baseq3/vm/qagame.qvm \
+    $(B)/baseq3/vm/ui.qvm \
+    $(B)/missionpack/vm/qagame.qvm \
+    $(B)/missionpack/vm/cgame.qvm \
+    $(B)/missionpack/vm/ui.qvm
 
 else # ifeq mingw32
 
@@ -325,12 +327,19 @@ ifeq ($(PLATFORM),freebsd)
   else
     TARGETS=\
       $(B)/$(PLATFORM)quake3 \
+      $(B)/$(PLATFORM)q3ded \
       $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
       $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
       $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
       $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
       $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT)
+      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
   endif
 
 else # ifeq freebsd
@@ -357,8 +366,8 @@ ifeq ($(PLATFORM),irix)
   LDFLAGS=-ldl -lm
   GLLDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
 
-  TARGETS=$(B)/sgiquake3 \
-    $(B)/q3ded
+  TARGETS=$(B)/$(PLATFORM)quake3 \
+    $(B)/$(PLATFORM)q3ded
 
 else # ifeq IRIX
 
@@ -404,9 +413,25 @@ DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 DO_DED_CC=$(CC) -DDEDICATED -DC_ONLY $(CFLAGS) -o $@ -c $<
 DO_WINDRES=$(WINDRES) -i $< -o $@
 
-#DO_LCC=$(LCC) -o $@ -S -Wf-target=bytecode -Wf-g -DQ3_VM -I$(CGDIR) -I$(GDIR)  -I$(UIDIR)  $<
+#############################################################################
+# QVM BUILD TOOLS
+#############################################################################
 
-#### DEFAULT TARGET
+Q3LCC=../tools/q3lcc$(BINEXT)
+Q3ASM=../tools/q3asm$(BINEXT)
+
+$(Q3LCC):
+	$(MAKE) -C ../tools/lcc install
+
+$(Q3ASM):
+	$(MAKE) -C ../tools/asm install
+
+DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) $<
+
+#############################################################################
+# MAIN TARGETS
+#############################################################################
+
 default:build_release
 
 debug: build_debug
@@ -1054,41 +1079,13 @@ $(B)/ded/vm_none.o : $(CMDIR)/vm_none.c; $(DO_DED_CC)
 $(B)/ded/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_DED_CC)
 
 
-#############################################################################
-## QVM
-#############################################################################
-
-$(B)/baseq3/vm/cgame.qvm:
-	cd $(CGDIR) && ./cgame.sh
-	mv /tmp/quake3/baseq3/vm/cgame.qvm $@
-
-$(B)/baseq3/vm/ui.qvm:
-	cd $(Q3UIDIR) && ./q3_ui.sh
-	mv /tmp/quake3/baseq3/vm/ui.qvm $@
-
-$(B)/baseq3/vm/qagame.qvm:
-	cd $(GDIR) && ./game.sh
-	mv /tmp/quake3/baseq3/vm/qagame.qvm $@
-
-$(B)/missionpack/vm/cgame.qvm:
-	cd $(CGDIR) && ./cgame_ta.sh
-	mv /tmp/quake3/missionpack/vm/cgame.qvm $@
-
-$(B)/missionpack/vm/qagame.qvm:
-	cd $(GDIR) && ./game_ta.sh
-	mv /tmp/quake3/missionpack/vm/qagame.qvm $@
-
-$(B)/missionpack/vm/ui.qvm:
-	cd $(UIDIR) && ./ui.sh
-	mv /tmp/quake3/missionpack/vm/ui.qvm $@
-
-
 
 #############################################################################
 ## BASEQ3 CGAME
 #############################################################################
 
-Q3CGOBJ = \
+Q3CGOBJ_ = \
+  $(B)/baseq3/cgame/cg_main.o \
   $(B)/baseq3/game/bg_misc.o \
   $(B)/baseq3/game/bg_pmove.o \
   $(B)/baseq3/game/bg_slidemove.o \
@@ -1100,7 +1097,6 @@ Q3CGOBJ = \
   $(B)/baseq3/cgame/cg_event.o \
   $(B)/baseq3/cgame/cg_info.o \
   $(B)/baseq3/cgame/cg_localents.o \
-  $(B)/baseq3/cgame/cg_main.o \
   $(B)/baseq3/cgame/cg_marks.o \
   $(B)/baseq3/cgame/cg_players.o \
   $(B)/baseq3/cgame/cg_playerstate.o \
@@ -1108,20 +1104,26 @@ Q3CGOBJ = \
   $(B)/baseq3/cgame/cg_scoreboard.o \
   $(B)/baseq3/cgame/cg_servercmds.o \
   $(B)/baseq3/cgame/cg_snapshot.o \
-  $(B)/baseq3/cgame/cg_syscalls.o \
   $(B)/baseq3/cgame/cg_view.o \
   $(B)/baseq3/cgame/cg_weapons.o \
   $(B)/baseq3/game/q_math.o \
   $(B)/baseq3/game/q_shared.o
 
+Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
+Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
+
+$(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK CGAME
 #############################################################################
 
-MPCGOBJ = \
+MPCGOBJ_ = \
+  $(B)/missionpack/cgame/cg_main.o \
   $(B)/missionpack/game/bg_misc.o \
   $(B)/missionpack/game/bg_pmove.o \
   $(B)/missionpack/game/bg_slidemove.o \
@@ -1134,7 +1136,6 @@ MPCGOBJ = \
   $(B)/missionpack/cgame/cg_event.o \
   $(B)/missionpack/cgame/cg_info.o \
   $(B)/missionpack/cgame/cg_localents.o \
-  $(B)/missionpack/cgame/cg_main.o \
   $(B)/missionpack/cgame/cg_marks.o \
   $(B)/missionpack/cgame/cg_players.o \
   $(B)/missionpack/cgame/cg_playerstate.o \
@@ -1142,15 +1143,20 @@ MPCGOBJ = \
   $(B)/missionpack/cgame/cg_scoreboard.o \
   $(B)/missionpack/cgame/cg_servercmds.o \
   $(B)/missionpack/cgame/cg_snapshot.o \
-  $(B)/missionpack/cgame/cg_syscalls.o \
   $(B)/missionpack/cgame/cg_view.o \
   $(B)/missionpack/cgame/cg_weapons.o \
   $(B)/missionpack/game/q_math.o \
   $(B)/missionpack/game/q_shared.o \
   $(B)/missionpack/ui/ui_shared.o
 
+MPCGOBJ = $(MPCGOBJ_) $(B)/missionpack/cgame/cg_syscalls.o
+MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
+
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
+
+$(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 
 
@@ -1158,7 +1164,8 @@ $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
 ## BASEQ3 GAME
 #############################################################################
 
-Q3GOBJ = \
+Q3GOBJ_ = \
+  $(B)/baseq3/game/g_main.o \
   $(B)/baseq3/game/ai_chat.o \
   $(B)/baseq3/game/ai_cmd.o \
   $(B)/baseq3/game/ai_dmnet.o \
@@ -1176,7 +1183,6 @@ Q3GOBJ = \
   $(B)/baseq3/game/g_cmds.o \
   $(B)/baseq3/game/g_combat.o \
   $(B)/baseq3/game/g_items.o \
-  $(B)/baseq3/game/g_main.o \
   $(B)/baseq3/game/g_mem.o \
   $(B)/baseq3/game/g_misc.o \
   $(B)/baseq3/game/g_missile.o \
@@ -1184,7 +1190,6 @@ Q3GOBJ = \
   $(B)/baseq3/game/g_session.o \
   $(B)/baseq3/game/g_spawn.o \
   $(B)/baseq3/game/g_svcmds.o \
-  $(B)/baseq3/game/g_syscalls.o \
   $(B)/baseq3/game/g_target.o \
   $(B)/baseq3/game/g_team.o \
   $(B)/baseq3/game/g_trigger.o \
@@ -1194,14 +1199,21 @@ Q3GOBJ = \
   $(B)/baseq3/game/q_math.o \
   $(B)/baseq3/game/q_shared.o
 
+Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
+Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
+
+$(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK GAME
 #############################################################################
 
-MPGOBJ = \
+MPGOBJ_ = \
+  $(B)/missionpack/game/g_main.o \
   $(B)/missionpack/game/ai_chat.o \
   $(B)/missionpack/game/ai_cmd.o \
   $(B)/missionpack/game/ai_dmnet.o \
@@ -1219,7 +1231,6 @@ MPGOBJ = \
   $(B)/missionpack/game/g_cmds.o \
   $(B)/missionpack/game/g_combat.o \
   $(B)/missionpack/game/g_items.o \
-  $(B)/missionpack/game/g_main.o \
   $(B)/missionpack/game/g_mem.o \
   $(B)/missionpack/game/g_misc.o \
   $(B)/missionpack/game/g_missile.o \
@@ -1227,7 +1238,6 @@ MPGOBJ = \
   $(B)/missionpack/game/g_session.o \
   $(B)/missionpack/game/g_spawn.o \
   $(B)/missionpack/game/g_svcmds.o \
-  $(B)/missionpack/game/g_syscalls.o \
   $(B)/missionpack/game/g_target.o \
   $(B)/missionpack/game/g_team.o \
   $(B)/missionpack/game/g_trigger.o \
@@ -1237,8 +1247,14 @@ MPGOBJ = \
   $(B)/missionpack/game/q_math.o \
   $(B)/missionpack/game/q_shared.o
 
+MPGOBJ = $(MPGOBJ_) $(B)/missionpack/game/g_syscalls.o
+MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
+
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
+
+$(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
 
 
 
@@ -1246,65 +1262,69 @@ $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
 ## BASEQ3 UI
 #############################################################################
 
-Q3UIOBJ = \
-	$(B)/baseq3/game/bg_misc.o \
-	$(B)/baseq3/ui/ui_addbots.o \
-	$(B)/baseq3/ui/ui_atoms.o \
-	$(B)/baseq3/ui/ui_cdkey.o \
-	$(B)/baseq3/ui/ui_cinematics.o \
-	$(B)/baseq3/ui/ui_confirm.o \
-	$(B)/baseq3/ui/ui_connect.o \
-	$(B)/baseq3/ui/ui_controls2.o \
-	$(B)/baseq3/ui/ui_credits.o \
-	$(B)/baseq3/ui/ui_demo2.o \
-	$(B)/baseq3/ui/ui_display.o \
-	$(B)/baseq3/ui/ui_gameinfo.o \
-	$(B)/baseq3/ui/ui_ingame.o \
-	$(B)/baseq3/ui/ui_loadconfig.o \
-	$(B)/baseq3/ui/ui_main.o \
-	$(B)/baseq3/ui/ui_menu.o \
-	$(B)/baseq3/ui/ui_mfield.o \
-	$(B)/baseq3/ui/ui_mods.o \
-	$(B)/baseq3/ui/ui_network.o \
-	$(B)/baseq3/ui/ui_options.o \
-	$(B)/baseq3/ui/ui_playermodel.o \
-	$(B)/baseq3/ui/ui_players.o \
-	$(B)/baseq3/ui/ui_playersettings.o \
-	$(B)/baseq3/ui/ui_preferences.o \
-	$(B)/baseq3/ui/ui_qmenu.o \
-	$(B)/baseq3/ui/ui_removebots.o \
-	$(B)/baseq3/ui/ui_saveconfig.o \
-	$(B)/baseq3/ui/ui_serverinfo.o \
-	$(B)/baseq3/ui/ui_servers2.o \
-	$(B)/baseq3/ui/ui_setup.o \
-	$(B)/baseq3/ui/ui_sound.o \
-	$(B)/baseq3/ui/ui_sparena.o \
-	$(B)/baseq3/ui/ui_specifyserver.o \
-	$(B)/baseq3/ui/ui_splevel.o \
-	$(B)/baseq3/ui/ui_sppostgame.o \
-	$(B)/baseq3/ui/ui_spskill.o \
-	$(B)/baseq3/ui/ui_startserver.o \
-	$(B)/missionpack/ui/ui_syscalls.o \
-	$(B)/baseq3/ui/ui_team.o \
-	$(B)/baseq3/ui/ui_teamorders.o \
-	$(B)/baseq3/ui/ui_video.o \
-	\
-	$(B)/baseq3/game/q_math.o \
-	$(B)/baseq3/game/q_shared.o
+Q3UIOBJ_ = \
+  $(B)/baseq3/ui/ui_main.o \
+  $(B)/baseq3/game/bg_misc.o \
+  $(B)/baseq3/ui/ui_addbots.o \
+  $(B)/baseq3/ui/ui_atoms.o \
+  $(B)/baseq3/ui/ui_cdkey.o \
+  $(B)/baseq3/ui/ui_cinematics.o \
+  $(B)/baseq3/ui/ui_confirm.o \
+  $(B)/baseq3/ui/ui_connect.o \
+  $(B)/baseq3/ui/ui_controls2.o \
+  $(B)/baseq3/ui/ui_credits.o \
+  $(B)/baseq3/ui/ui_demo2.o \
+  $(B)/baseq3/ui/ui_display.o \
+  $(B)/baseq3/ui/ui_gameinfo.o \
+  $(B)/baseq3/ui/ui_ingame.o \
+  $(B)/baseq3/ui/ui_loadconfig.o \
+  $(B)/baseq3/ui/ui_menu.o \
+  $(B)/baseq3/ui/ui_mfield.o \
+  $(B)/baseq3/ui/ui_mods.o \
+  $(B)/baseq3/ui/ui_network.o \
+  $(B)/baseq3/ui/ui_options.o \
+  $(B)/baseq3/ui/ui_playermodel.o \
+  $(B)/baseq3/ui/ui_players.o \
+  $(B)/baseq3/ui/ui_playersettings.o \
+  $(B)/baseq3/ui/ui_preferences.o \
+  $(B)/baseq3/ui/ui_qmenu.o \
+  $(B)/baseq3/ui/ui_removebots.o \
+  $(B)/baseq3/ui/ui_saveconfig.o \
+  $(B)/baseq3/ui/ui_serverinfo.o \
+  $(B)/baseq3/ui/ui_servers2.o \
+  $(B)/baseq3/ui/ui_setup.o \
+  $(B)/baseq3/ui/ui_sound.o \
+  $(B)/baseq3/ui/ui_sparena.o \
+  $(B)/baseq3/ui/ui_specifyserver.o \
+  $(B)/baseq3/ui/ui_splevel.o \
+  $(B)/baseq3/ui/ui_sppostgame.o \
+  $(B)/baseq3/ui/ui_spskill.o \
+  $(B)/baseq3/ui/ui_startserver.o \
+  $(B)/baseq3/ui/ui_team.o \
+  $(B)/baseq3/ui/ui_teamorders.o \
+  $(B)/baseq3/ui/ui_video.o \
+  \
+  $(B)/baseq3/game/q_math.o \
+  $(B)/baseq3/game/q_shared.o
+
+Q3UIOBJ = $(Q3UIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
+Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) : $(Q3UIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
+
+$(B)/baseq3/vm/ui.qvm: $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK UI
 #############################################################################
 
-MPUIOBJ = \
+MPUIOBJ_ = \
+  $(B)/missionpack/ui/ui_main.o \
   $(B)/missionpack/ui/ui_atoms.o \
   $(B)/missionpack/ui/ui_gameinfo.o \
-  $(B)/missionpack/ui/ui_main.o \
   $(B)/missionpack/ui/ui_players.o \
-  $(B)/missionpack/ui/ui_syscalls.o \
   $(B)/missionpack/ui/ui_util.o \
   $(B)/missionpack/ui/ui_shared.o \
   \
@@ -1313,8 +1333,14 @@ MPUIOBJ = \
   $(B)/missionpack/game/q_math.o \
   $(B)/missionpack/game/q_shared.o
 
+MPUIOBJ = $(MPUIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
+MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
+
+$(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
+	$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 
 
@@ -1325,20 +1351,40 @@ $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
 $(B)/baseq3/cgame/%.o: $(CGDIR)/%.c
 	$(DO_SHLIB_CC)
 
+$(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC) 
+	$(DO_Q3LCC)
+
 $(B)/missionpack/cgame/%.o: $(CGDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/missionpack/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC) -DMISSIONPACK
+
 
 $(B)/baseq3/game/%.o: $(GDIR)/%.c
 	$(DO_SHLIB_CC)
 
+$(B)/baseq3/game/%.asm: $(GDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC)
+
 $(B)/missionpack/game/%.o: $(GDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/missionpack/game/%.asm: $(GDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC) -DMISSIONPACK
+
 
 $(B)/baseq3/ui/%.o: $(Q3UIDIR)/%.c
 	$(DO_SHLIB_CC)
 
+$(B)/baseq3/ui/%.asm: $(Q3UIDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC)
+
 $(B)/missionpack/ui/%.o: $(UIDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/missionpack/ui/%.asm: $(UIDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC) -DMISSIONPACK
 
 
 
@@ -1367,37 +1413,24 @@ copyfiles:
 	install -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
 
-# TTimo: FIXME: doesn't clean the binary and .so
-
 clean:clean-debug clean-release
 
-clean2: clean-bins
-	rm -f $(Q3OBJ) $(Q3POBJ) $(Q3POBJ_SMP) $(Q3DOBJ) $(MPGOBJ) $(Q3GOBJ) $(Q3CGOBJ) $(MPCGOBJ) $(Q3UIOBJ) $(MPUIOBJ)
-	rm -f $(CGDIR)/vm/*.asm
-	rm -f $(GDIR)/vm/*.asm
-	rm -f $(UIDIR)/vm/*.asm
-	rm -f $(Q3UIDIR)/vm/*.asm
-
-# TTimo: linuxq3ded linuxquake3 linuxquake3-smp .. hardcoded the names .. maybe not such a good thing
-# FIXME: also, removing the *.so is crappy .. I just want to avoid rm -rf debugi386-glibc to save the symlinks to pk3's for testing
-clean-bins:
-	if [ -d $(B) ];then (find $(B) -name '*.so' -exec rm {} \;)fi
-	rm -f $(B)/linuxq3ded
-	rm -f $(B)/linuxquake3
-	rm -f $(B)/linuxquake3-smp
-	rm -f $(B)/baseq3/vm/cgame.qvm
-	rm -f $(B)/baseq3/vm/ui.qvm
-	rm -f $(B)/baseq3/vm/qagame.qvm
-	rm -f $(B)/missionpack/vm/cgame.qvm
-	rm -f $(B)/missionpack/vm/qagame.qvm
-	rm -f $(B)/missionpack/vm/ui.qvm
+clean2:
 	if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
+	rm -f $(Q3OBJ) $(Q3POBJ) $(Q3POBJ_SMP) $(Q3DOBJ) \
+		$(MPGOBJ) $(Q3GOBJ) $(Q3CGOBJ) $(MPCGOBJ) $(Q3UIOBJ) $(MPUIOBJ) \
+		$(MPGVMOBJ) $(Q3GVMOBJ) $(Q3CGVMOBJ) $(MPCGVMOBJ) $(Q3UIVMOBJ) $(MPUIVMOBJ)
+	rm -f $(TARGETS)
 
 clean-debug:
 	$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
 
 clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(DEBUG_CFLAGS)"
+
+distclean: clean
+	$(MAKE) -C ../tools/asm clean uninstall
+	$(MAKE) -C ../tools/lcc clean uninstall
 
 #############################################################################
 # DEPENDENCIES
