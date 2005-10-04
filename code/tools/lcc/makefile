@@ -231,22 +231,14 @@ testclean:
 	$(RM) $Tyacc$E $Tyacc.s $Tyacc.2 $Tyacc.1
 
 install::	all
-		install -d /usr/local/lib/lcc
-		install -d /usr/local/lib/lcc/gcc
-		install $Bq3lcc$E /usr/local/bin
-		install $Bq3cpp$E /usr/local/lib/lcc/gcc
-		install $Bq3rcc$E /usr/local/lib/lcc
-		install $Bliblcc$A /usr/local/lib/lcc
-		install $Blibrcc$A /usr/local/lib/lcc
+	install -s -m 0755 $Bq3lcc$E ../
+	install -s -m 0755 $Bq3cpp$E ../
+	install -s -m 0755 $Bq3rcc$E ../
 
 uninstall::
-		$(RM) /usr/local/lib/lcc/librcc$A
-		$(RM) /usr/local/lib/lcc/liblcc$A
-		$(RM) /usr/local/lib/lcc/q3rcc$E
-		$(RM) /usr/local/lib/lcc/gcc/q3cpp$E
-		$(RM) /usr/local/bin/lcc$E
-		$(RMDIR) /usr/local/lib/lcc/gcc
-		$(RMDIR) /usr/local/lib/lcc
+	-$(RM) ../q3lcc$E
+	-$(RM) ../q3cpp$E
+	-$(RM) ../q3rcc$E
 
 clean::		testclean
 		$(RM) $B*$O

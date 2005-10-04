@@ -11,3 +11,8 @@ q3asm:	q3asm.c cmdlib.c
 clean:
 	rm -f q3asm *~ *.o
 
+install: default
+	install -s -m 0755 q3asm ../
+
+uninstall:
+	-rm ../q3asm
