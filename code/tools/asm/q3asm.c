@@ -925,6 +925,7 @@ void Assemble( void ) {
 			currentFileName = asmFileNames[ i ];
 			currentFileLine = 0;
 			printf("pass %i: %s\n", passNumber, currentFileName );
+			fflush( NULL );
 			ptr = asmFiles[i];
 			while ( ptr ) {
 				ptr = ExtractLine( ptr );

@@ -1,10 +1,10 @@
 # $Id: makefile 145 2001-10-17 21:53:10Z timo $
+PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 HOSTFILE=etc/linux.c
 TEMPDIR=/tmp
 A=.a
 O=.o
 
-PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 ifeq ($(PLATFORM),mingw32)
   E=.exe
 else
@@ -43,80 +43,80 @@ q3lcc:	makedirs $(BD)q3lcc$(E)
 bprint:	makedirs $(BD)bprint$(E)
 liblcc:	makedirs $(BD)liblcc$(A)
 
-RCCOBJS=$(BD)alloc$O \
-	$(BD)bind$O \
-	$(BD)dag$O \
-	$(BD)dagcheck$O \
-	$(BD)decl$O \
-	$(BD)enode$O \
-	$(BD)error$O \
-	$(BD)expr$O \
-	$(BD)event$O \
-	$(BD)init$O \
-	$(BD)inits$O \
-	$(BD)input$O \
-	$(BD)lex$O \
-	$(BD)list$O \
-	$(BD)main$O \
-	$(BD)output$O \
-	$(BD)prof$O \
-	$(BD)profio$O \
-	$(BD)simp$O \
-	$(BD)stmt$O \
-	$(BD)string$O \
-	$(BD)sym$O \
-	$(BD)trace$O \
-	$(BD)tree$O \
-	$(BD)types$O \
-	$(BD)null$O \
-	$(BD)symbolic$O \
-	$(BD)gen$O \
-	$(BD)bytecode$O
+RCCOBJS=$(BD)alloc$(O) \
+	$(BD)bind$(O) \
+	$(BD)dag$(O) \
+	$(BD)dagcheck$(O) \
+	$(BD)decl$(O) \
+	$(BD)enode$(O) \
+	$(BD)error$(O) \
+	$(BD)expr$(O) \
+	$(BD)event$(O) \
+	$(BD)init$(O) \
+	$(BD)inits$(O) \
+	$(BD)input$(O) \
+	$(BD)lex$(O) \
+	$(BD)list$(O) \
+	$(BD)main$(O) \
+	$(BD)output$(O) \
+	$(BD)prof$(O) \
+	$(BD)profio$(O) \
+	$(BD)simp$(O) \
+	$(BD)stmt$(O) \
+	$(BD)string$(O) \
+	$(BD)sym$(O) \
+	$(BD)trace$(O) \
+	$(BD)tree$(O) \
+	$(BD)types$(O) \
+	$(BD)null$(O) \
+	$(BD)symbolic$(O) \
+	$(BD)gen$(O) \
+	$(BD)bytecode$(O)
 
-$(BD)q3rcc$(E)::	$(BD)main$O $(BD)librcc$(A) $(EXTRAOBJS)
-		$(LD) $(LDFLAGS) -o $@ $(BD)main$O $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
+$(BD)q3rcc$(E)::	$(BD)main$(O) $(BD)librcc$(A) $(EXTRAOBJS)
+		$(LD) $(LDFLAGS) -o $@ $(BD)main$(O) $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
 
 $(BD)librcc$(A):	$(RCCOBJS)
 		$(AR) $@ $(RCCOBJS); $(RANLIB) $@ || true
 
 $(RCCOBJS):	src/c.h src/token.h src/config.h
 
-$(BD)alloc$O:	src/alloc.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/alloc.c
-$(BD)bind$O:	src/bind.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/bind.c
-$(BD)dag$O:	src/dag.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/dag.c
-$(BD)decl$O:	src/decl.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/decl.c
-$(BD)enode$O:	src/enode.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/enode.c
-$(BD)error$O:	src/error.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/error.c
-$(BD)event$O:	src/event.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/event.c
-$(BD)expr$O:	src/expr.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/expr.c
-$(BD)gen$O:	src/gen.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/gen.c
-$(BD)init$O:	src/init.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/init.c
-$(BD)inits$O:	src/inits.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/inits.c
-$(BD)input$O:	src/input.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/input.c
-$(BD)lex$O:	src/lex.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/lex.c
-$(BD)list$O:	src/list.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/list.c
-$(BD)main$O:	src/main.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/main.c
-$(BD)null$O:	src/null.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/null.c
-$(BD)output$O:	src/output.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/output.c
-$(BD)prof$O:	src/prof.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/prof.c
-$(BD)profio$O:	src/profio.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/profio.c
-$(BD)simp$O:	src/simp.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/simp.c
-$(BD)stmt$O:	src/stmt.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/stmt.c
-$(BD)string$O:	src/string.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/string.c
-$(BD)sym$O:	src/sym.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/sym.c
-$(BD)symbolic$O:	src/symbolic.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/symbolic.c
-$(BD)bytecode$O:	src/bytecode.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/bytecode.c
-$(BD)trace$O:	src/trace.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/trace.c
-$(BD)tree$O:	src/tree.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/tree.c
-$(BD)types$O:	src/types.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/types.c
-$(BD)stab$O:	src/stab.c src/stab.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/stab.c
+$(BD)alloc$(O):	src/alloc.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/alloc.c
+$(BD)bind$(O):	src/bind.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/bind.c
+$(BD)dag$(O):	src/dag.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/dag.c
+$(BD)decl$(O):	src/decl.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/decl.c
+$(BD)enode$(O):	src/enode.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/enode.c
+$(BD)error$(O):	src/error.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/error.c
+$(BD)event$(O):	src/event.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/event.c
+$(BD)expr$(O):	src/expr.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/expr.c
+$(BD)gen$(O):	src/gen.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/gen.c
+$(BD)init$(O):	src/init.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/init.c
+$(BD)inits$(O):	src/inits.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/inits.c
+$(BD)input$(O):	src/input.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/input.c
+$(BD)lex$(O):	src/lex.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/lex.c
+$(BD)list$(O):	src/list.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/list.c
+$(BD)main$(O):	src/main.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/main.c
+$(BD)null$(O):	src/null.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/null.c
+$(BD)output$(O):	src/output.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/output.c
+$(BD)prof$(O):	src/prof.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/prof.c
+$(BD)profio$(O):	src/profio.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/profio.c
+$(BD)simp$(O):	src/simp.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/simp.c
+$(BD)stmt$(O):	src/stmt.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/stmt.c
+$(BD)string$(O):	src/string.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/string.c
+$(BD)sym$(O):	src/sym.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/sym.c
+$(BD)symbolic$(O):	src/symbolic.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/symbolic.c
+$(BD)bytecode$(O):	src/bytecode.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/bytecode.c
+$(BD)trace$(O):	src/trace.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/trace.c
+$(BD)tree$(O):	src/tree.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/tree.c
+$(BD)types$(O):	src/types.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/types.c
+$(BD)stab$(O):	src/stab.c src/stab.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/stab.c
 
-$(BD)dagcheck$O:	$(BD)dagcheck.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)dagcheck.c
-$(BD)alpha$O:	$(BD)alpha.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)alpha.c
-$(BD)mips$O:	$(BD)mips.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)mips.c
-$(BD)sparc$O:	$(BD)sparc.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)sparc.c
-$(BD)x86$O:	$(BD)x86.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86.c
-$(BD)x86linux$O:	$(BD)x86linux.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86linux.c
+$(BD)dagcheck$(O):	$(BD)dagcheck.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)dagcheck.c
+$(BD)alpha$(O):	$(BD)alpha.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)alpha.c
+$(BD)mips$(O):	$(BD)mips.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)mips.c
+$(BD)sparc$(O):	$(BD)sparc.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)sparc.c
+$(BD)x86$(O):	$(BD)x86.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86.c
+$(BD)x86linux$(O):	$(BD)x86linux.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86linux.c
 
 $(BD)dagcheck.c:	$(BD)lburg$(E) src/dagcheck.md; $(BD)lburg src/dagcheck.md $@
 $(BD)alpha.c:	$(BD)lburg$(E) src/alpha.md;    $(BD)lburg src/alpha.md    $@
@@ -126,58 +126,58 @@ $(BD)x86.c:	$(BD)lburg$(E) src/x86.md;      $(BD)lburg src/x86.md      $@
 $(BD)x86linux.c:	$(BD)lburg$(E) src/x86linux.md; $(BD)lburg src/x86linux.md $@
 
 $(BD)q3rcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $(BD) src/rcc.asdl
-$(BD)q3rcc$O:	$(BD)rcc.h;			$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ $(BD)rcc.c
-$(BD)asdl$O:	src/asdl.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/asdl.c
-$(BD)pass2$O:	src/pass2.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/pass2.c
-$(BD)2html$O:	src/2html.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/2html.c
+$(BD)q3rcc$(O):	$(BD)rcc.h;			$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ $(BD)rcc.c
+$(BD)asdl$(O):	src/asdl.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/asdl.c
+$(BD)pass2$(O):	src/pass2.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/pass2.c
+$(BD)2html$(O):	src/2html.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/2html.c
 
-$(BD)pass2$(E):	$(BD)pass2$O $(EXTRAOBJS) $(BD)librcc$(A);	$(LD) $(LDFLAGS) -o $@ $(BD)pass2$O $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
-$(BD)2html$(E):	$(BD)2html$O $(BD)q3rcc$O;			$(LD) $(LDFLAGS) -o $@ $(BD)2html$O $(BD)q3rcc$O $(EXTRALIBS)
+$(BD)pass2$(E):	$(BD)pass2$(O) $(EXTRAOBJS) $(BD)librcc$(A);	$(LD) $(LDFLAGS) -o $@ $(BD)pass2$(O) $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
+$(BD)2html$(E):	$(BD)2html$(O) $(BD)q3rcc$(O);			$(LD) $(LDFLAGS) -o $@ $(BD)2html$(O) $(BD)q3rcc$(O) $(EXTRALIBS)
 
-$(BD)bprint$(E):	$(BD)bprint$O;		$(LD) $(LDFLAGS) -o $@ $(BD)bprint$O 
+$(BD)bprint$(E):	$(BD)bprint$(O);		$(LD) $(LDFLAGS) -o $@ $(BD)bprint$(O) 
 
-$(BD)bprint$O:	etc/bprint.c;		$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ etc/bprint.c
+$(BD)bprint$(O):	etc/bprint.c;		$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ etc/bprint.c
 
-$(BD)q3lcc$(E):	$(BD)q3lcc$O $(BD)host$O;	$(LD) $(LDFLAGS) -o $@ $(BD)q3lcc$O $(BD)host$O 
+$(BD)q3lcc$(E):	$(BD)q3lcc$(O) $(BD)host$(O);	$(LD) $(LDFLAGS) -o $@ $(BD)q3lcc$(O) $(BD)host$(O) 
 
 SYSTEM=$(shell cc -print-search-dirs | head -n 1 | cut -b 10-)
 
-$(BD)q3lcc$O:	etc/lcc.c;	$(CC) $(LCC_CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
-$(BD)host$O:	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"$(SYSTEM)\" -o $@ $(HOSTFILE)
+$(BD)q3lcc$(O):	etc/lcc.c;	$(CC) $(LCC_CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
+$(BD)host$(O):	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"$(SYSTEM)\" -o $@ $(HOSTFILE)
 
-LIBOBJS=$(BD)assert$O $(BD)bbexit$O $(BD)yynull$O
+LIBOBJS=$(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O)
 
-$(BD)liblcc$(A):	$(LIBOBJS);	$(AR) $@ $(BD)assert$O $(BD)bbexit$O $(BD)yynull$O; $(RANLIB) $@ || true
+$(BD)liblcc$(A):	$(LIBOBJS);	$(AR) $@ $(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O); $(RANLIB) $@ || true
 
-$(BD)assert$O:	lib/assert.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/assert.c
-$(BD)yynull$O:	lib/yynull.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/yynull.c
-$(BD)bbexit$O:	lib/bbexit.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/bbexit.c
+$(BD)assert$(O):	lib/assert.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/assert.c
+$(BD)yynull$(O):	lib/yynull.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/yynull.c
+$(BD)bbexit$(O):	lib/bbexit.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/bbexit.c
 
-$(BD)lburg$(E):	$(BD)lburg$O $(BD)gram$O;	$(LD) $(LDFLAGS) -o $@ $(BD)lburg$O $(BD)gram$O 
+$(BD)lburg$(E):	$(BD)lburg$(O) $(BD)gram$(O);	$(LD) $(LDFLAGS) -o $@ $(BD)lburg$(O) $(BD)gram$(O) 
 
-$(BD)lburg$O $(BD)gram$O:	lburg/lburg.h
+$(BD)lburg$(O) $(BD)gram$(O):	lburg/lburg.h
 
-$(BD)lburg$O:	lburg/lburg.c;	$(CC) $(LCC_CFLAGS) -c -Ilburg -o $@ lburg/lburg.c
-$(BD)gram$O:	lburg/gram.c;	$(CC) $(LCC_CFLAGS) -c -Ilburg -o $@ lburg/gram.c
+$(BD)lburg$(O):	lburg/lburg.c;	$(CC) $(LCC_CFLAGS) -c -Ilburg -o $@ lburg/lburg.c
+$(BD)gram$(O):	lburg/gram.c;	$(CC) $(LCC_CFLAGS) -c -Ilburg -o $@ lburg/gram.c
 
-CPPOBJS=$(BD)q3cpp$O $(BD)lexer$O $(BD)nlist$O $(BD)tokens$O $(BD)macro$O $(BD)eval$O \
-	$(BD)include$O $(BD)hideset$O $(BD)getopt$O $(BD)unix$O
+CPPOBJS=$(BD)q3cpp$(O) $(BD)lexer$(O) $(BD)nlist$(O) $(BD)tokens$(O) $(BD)macro$(O) $(BD)eval$(O) \
+	$(BD)include$(O) $(BD)hideset$(O) $(BD)getopt$(O) $(BD)unix$(O)
 
 $(BD)q3cpp$(E):	$(CPPOBJS)
 		$(LD) $(LDFLAGS) -o $@ $(CPPOBJS) 
 
 $(CPPOBJS):	cpp/cpp.h
 
-$(BD)q3cpp$O:	cpp/cpp.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/cpp.c
-$(BD)lexer$O:	cpp/lex.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/lex.c
-$(BD)nlist$O:	cpp/nlist.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/nlist.c
-$(BD)tokens$O:	cpp/tokens.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/tokens.c
-$(BD)macro$O:	cpp/macro.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/macro.c
-$(BD)eval$O:	cpp/eval.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/eval.c
-$(BD)include$O:	cpp/include.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/include.c
-$(BD)hideset$O:	cpp/hideset.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/hideset.c
-$(BD)getopt$O:	cpp/getopt.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/getopt.c
-$(BD)unix$O:	cpp/unix.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/unix.c
+$(BD)q3cpp$(O):	cpp/cpp.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/cpp.c
+$(BD)lexer$(O):	cpp/lex.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/lex.c
+$(BD)nlist$(O):	cpp/nlist.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/nlist.c
+$(BD)tokens$(O):	cpp/tokens.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/tokens.c
+$(BD)macro$(O):	cpp/macro.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/macro.c
+$(BD)eval$(O):	cpp/eval.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/eval.c
+$(BD)include$(O):	cpp/include.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/include.c
+$(BD)hideset$(O):	cpp/hideset.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/hideset.c
+$(BD)getopt$(O):	cpp/getopt.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/getopt.c
+$(BD)unix$(O):	cpp/unix.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/unix.c
 
 test:	$(T)8q.s \
 	$(T)array.s \
@@ -248,7 +248,7 @@ uninstall::
 	-$(RM) ../q3rcc$(E)
 
 clean::		testclean
-		$(RM) $(BD)*$O
+		$(RM) $(BD)*$(O)
 		$(RM) $(BD)dagcheck.c $(BD)alpha.c $(BD)mips.c $(BD)x86.c $(BD)sparc.c $(BD)x86linux.c $(BD)gram.c
 		$(RM) $(BD)rcc.c $(BD)rcc.h
 		$(RM) $(BD)rcc1$(E) $(BD)rcc1$(E) $(BD)1rcc$(E) $(BD)2rcc$(E)

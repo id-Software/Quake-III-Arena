@@ -14,17 +14,23 @@ removed __linux__ preprocessor define (confuses the preprocessor, we are doing b
 //#define LCCDIR "/usr/local/lib/lcc/"
 #endif
 
+#ifdef _WIN32
+#define BINEXT ".exe"
+#else
+#define BINEXT ""
+#endif
+
 char *suffixes[] = { ".c", ".i", ".asm", ".o", ".out", 0 };
 char inputs[256] = "";
 // TTimo experimental: do not compile with the __linux__ define, we are doing bytecode!
-char *cpp[] = { LCCDIR "q3cpp",
+char *cpp[] = { LCCDIR "q3cpp" BINEXT,
 	"-U__GNUC__", "-D_POSIX_SOURCE", "-D__STDC__=1", "-D__STRICT_ANSI__",
 	"-Dunix", "-Di386", "-Dlinux",
 	"-D__unix__", "-D__i386__", "-D__signed__=signed",
 	"$1", "$2", "$3", 0 };
 char *include[] = {"-I" LCCDIR "include", "-I" LCCDIR "gcc/include", "-I/usr/include",
 		   "-I" SYSTEM "include", 0 };
-char *com[] = {LCCDIR "q3rcc", "-target=bytecode", "$1", "$2", "$3", 0 };
+char *com[] = {LCCDIR "q3rcc" BINEXT, "-target=bytecode", "$1", "$2", "$3", 0 };
 char *as[] = { "/usr/bin/as", "-o", "$3", "$1", "$2", 0 };
 // NOTE TTimo I don't think we have any use with the native linkage
 // our target is always bytecode..

@@ -262,7 +262,7 @@ ifeq ($(PLATFORM),mingw32)
   endif
 
   TARGETS=\
-    $(B)/$(PLATFORM)quake3 \
+    $(B)/$(PLATFORM)quake3$(BINEXT) \
     $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
     $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
     $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
@@ -726,14 +726,14 @@ endif #mingw32
 endif #IRIX
 endif #FreeBSD
 
-$(B)/$(PLATFORM)quake3 : $(Q3OBJ) $(Q3POBJ)
+$(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS)
 
 # TTimo: splines code requires C++ linking, but splines have
 # not been officially included in the codebase
 #	$(CXX)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS)
 
-$(B)/$(PLATFORM)quake3-smp : $(Q3OBJ) $(Q3POBJ_SMP)
+$(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(GLLDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS)
 
@@ -1001,7 +1001,7 @@ ifeq ($(ARCH),ppc)
   endif
 endif
 
-$(B)/$(PLATFORM)q3ded : $(Q3DOBJ)
+$(B)/$(PLATFORM)q3ded$(BINEXT): $(Q3DOBJ)
 	$(CC)  -o $@ $(Q3DOBJ) $(LDFLAGS)
 
 $(B)/ded/sv_bot.o : $(SDIR)/sv_bot.c; $(DO_DED_CC)
