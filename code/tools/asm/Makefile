@@ -8,12 +8,12 @@ else
 endif
 
 CC=gcc
-CFLAGS=-O2 -Wall -Werror -fno-strict-aliasing
+Q3ASM_CFLAGS=-O2 -Wall -Werror -fno-strict-aliasing
 
 default:	q3asm
 
 q3asm:	q3asm.c cmdlib.c
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(Q3ASM_CFLAGS) -o $@ $^
 
 clean:
 	rm -f q3asm *~ *.o
