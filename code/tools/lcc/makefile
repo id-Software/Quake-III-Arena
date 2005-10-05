@@ -31,7 +31,7 @@ what:
 	-@echo make all q3rcc lburg q3cpp q3lcc bprint liblcc triple clean clobber
 
 makedirs:
-	@if [ ! -d $(B) ];then mkdir $(B);fi
+	@if [ ! -d $(BD) ];then mkdir $(BD);fi
 	@if [ ! -d $(T) ];then mkdir $(T);fi
 	
 all::	q3rcc lburg q3cpp q3lcc bprint liblcc
