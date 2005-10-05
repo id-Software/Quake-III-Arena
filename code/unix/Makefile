@@ -1425,7 +1425,7 @@ clean-debug:
 	$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
 
 clean-release:
-	$(MAKE) clean2 B=$(BR) CFLAGS="$(DEBUG_CFLAGS)"
+	$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
 
 distclean: clean
 	$(MAKE) -C ../tools/asm clean uninstall
@@ -1435,4 +1435,8 @@ distclean: clean
 # DEPENDENCIES
 #############################################################################
 
--include $(shell find -name "*.d")
+D_FILES=$(shell find -name "*.d")
+
+ifneq ($(strip $(D_FILES)),)
+  include $(D_FILES)
+endif
