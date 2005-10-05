@@ -821,10 +821,10 @@ void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 		UI_MainMenu();
 		return;
 	case UIMENU_NEED_CD:
-		UI_ConfirmMenu( "Insert the CD", (voidfunc_f)NULL, NeedCDAction );
+		UI_ConfirmMenu( "Insert the CD", 0, NeedCDAction );
 		return;
 	case UIMENU_BAD_CD_KEY:
-		UI_ConfirmMenu( "Bad CD Key", (voidfunc_f)NULL, NeedCDKeyAction );
+		UI_ConfirmMenu( "Bad CD Key", 0, NeedCDKeyAction );
 		return;
 	case UIMENU_INGAME:
 		/*

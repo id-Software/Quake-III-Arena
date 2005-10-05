@@ -1325,7 +1325,6 @@ MPUIOBJ_ = \
   $(B)/missionpack/ui/ui_atoms.o \
   $(B)/missionpack/ui/ui_gameinfo.o \
   $(B)/missionpack/ui/ui_players.o \
-  $(B)/missionpack/ui/ui_util.o \
   $(B)/missionpack/ui/ui_shared.o \
   \
   $(B)/missionpack/game/bg_misc.o \

@@ -542,7 +542,7 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 	// events such as ctf flags
 	if ( respawn <= 0 ) {
 		ent->nextthink = 0;
-		ent->think = NULL;
+		ent->think = 0;
 	} else {
 		ent->nextthink = level.time + respawn * 1000;
 		ent->think = RespawnItem;

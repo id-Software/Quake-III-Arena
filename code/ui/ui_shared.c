@@ -42,7 +42,7 @@ typedef struct scrollInfo_s {
 
 static scrollInfo_t scrollInfo;
 
-static void (*captureFunc) (void *p) = NULL;
+static void (*captureFunc) (void *p) = 0;
 static void *captureData = NULL;
 static itemDef_t *itemCapture = NULL;   // item that has the mouse captured ( if any )
 
@@ -2371,7 +2371,7 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
 	if (itemCapture) {
 		Item_StopCapture(itemCapture);
 		itemCapture = NULL;
-		captureFunc = NULL;
+		captureFunc = 0;
 		captureData = NULL;
 	} else {
 	  // bk001206 - parentheses
@@ -5134,7 +5134,7 @@ keywordHash_t itemParseKeywords[] = {
 	{"hideCvar", ItemParse_hideCvar, NULL},
 	{"cinematic", ItemParse_cinematic, NULL},
 	{"doubleclick", ItemParse_doubleClick, NULL},
-	{NULL, NULL, NULL}
+	{NULL, 0, NULL}
 };
 
 keywordHash_t *itemParseKeywordHash[KEYWORDHASH_SIZE];
@@ -5535,7 +5535,7 @@ keywordHash_t menuParseKeywords[] = {
 	{"fadeClamp", MenuParse_fadeClamp, NULL},
 	{"fadeCycle", MenuParse_fadeCycle, NULL},
 	{"fadeAmount", MenuParse_fadeAmount, NULL},
-	{NULL, NULL, NULL}
+	{NULL, 0, NULL}
 };
 
 keywordHash_t *menuParseKeywordHash[KEYWORDHASH_SIZE];

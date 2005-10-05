@@ -288,7 +288,7 @@ void Use_Shooter( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 
 static void InitShooter_Finish( gentity_t *ent ) {
 	ent->enemy = G_PickTarget( ent->target );
-	ent->think = NULL;
+	ent->think = 0;
 	ent->nextthink = 0;
 }
 

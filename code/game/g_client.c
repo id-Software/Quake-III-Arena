@@ -1004,8 +1004,8 @@ void ClientBegin( int clientNum ) {
 		trap_UnlinkEntity( ent );
 	}
 	G_InitGentity( ent );
-	ent->touch = NULL;
-	ent->pain = NULL;
+	ent->touch = 0;
+	ent->pain = 0;
 	ent->client = client;
 
 	client->pers.connected = CON_CONNECTED;

@@ -67,7 +67,7 @@ void multi_trigger( gentity_t *ent, gentity_t *activator ) {
 	} else {
 		// we can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
-		ent->touch = NULL;
+		ent->touch = 0;
 		ent->nextthink = level.time + FRAMETIME;
 		ent->think = G_FreeEntity;
 	}

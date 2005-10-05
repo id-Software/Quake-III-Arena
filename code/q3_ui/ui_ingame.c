@@ -120,11 +120,11 @@ void InGame_Event( void *ptr, int notification ) {
 		break;
 
 	case ID_RESTART:
-		UI_ConfirmMenu( "RESTART ARENA?", (voidfunc_f)NULL, InGame_RestartAction );
+		UI_ConfirmMenu( "RESTART ARENA?", 0, InGame_RestartAction );
 		break;
 
 	case ID_QUIT:
-		UI_ConfirmMenu( "EXIT GAME?",  (voidfunc_f)NULL, InGame_QuitAction );
+		UI_ConfirmMenu( "EXIT GAME?",  0, InGame_QuitAction );
 		break;
 
 	case ID_SERVERINFO:
