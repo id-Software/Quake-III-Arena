@@ -71,34 +71,49 @@ char *tempdir = TEMPDIR;	/* directory for temporary files */
 static char *progname;
 static List lccinputs;		/* list of input directories */
 
-int main(int argc, char *argv[]) {
-	int i, j, nf;
-	
-#ifdef _WIN32
-	// Tim Angus <tim@ngus.net> 05/09/05
-	// Append the base path of this file to the PATH
-	// There are probably (much) cleaner ways of doing this, but
-	// IANAWD (Windows Developer)
-	{
-		char basepath[ 1024 ];
-		char path[ 4096 ];
-		char *p;
+/*
+===============
+AddLCCDirToPath
 
-		strncpy( basepath, argv[ 0 ], 1024 );
+Append the base path of this file to the PATH so that q3lcc can find q3cpp and
+q3rcc in its own directory.  There are probably (much) cleaner ways of doing
+this.
+Tim Angus <tim@ngus.net> 05/09/05
+===============
+*/
+void AddLCCDirToPath( const char *lccBinary )
+{
+	char basepath[ 1024 ];
+	char path[ 4096 ];
+	char *p;
+
+	strncpy( basepath, lccBinary, 1024 );
+	p = strrchr( basepath, '/' );
+	if( !p )
 		p = strrchr( basepath, '\\' );
 
-		if( p )
-		{
-			*p = '\0';
-			strncpy( path, "PATH=", 4096 );
-			strncat( path, getenv( "PATH" ), 4096 );
-			strncat( path, ";", 4096 );
-			strncat( path, basepath, 4096 );
-			_putenv( path );
-		}
-	}
+	if( p )
+	{
+		*p = '\0';
+		strncpy( path, "PATH=", 4096 );
+		strncat( path, getenv( "PATH" ), 4096 );
+#ifdef _WIN32
+		strncat( path, ";", 4096 );
+		strncat( path, basepath, 4096 );
+		_putenv( path );
+#else
+		strncat( path, ":", 4096 );
+		strncat( path, basepath, 4096 );
+		putenv( path );
 #endif
-	
+	}
+}
+
+int main(int argc, char *argv[]) {
+	int i, j, nf;
+
+	AddLCCDirToPath( argv[ 0 ] );
+
 	progname = argv[0];
 	ac = argc + 50;
 	av = alloc(ac*sizeof(char *));
