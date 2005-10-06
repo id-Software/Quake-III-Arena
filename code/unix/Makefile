@@ -1435,7 +1435,7 @@ distclean: clean
 # DEPENDENCIES
 #############################################################################
 
-D_FILES=$(shell find -name "*.d")
+D_FILES=$(shell find . -name '*.d')
 
 ifneq ($(strip $(D_FILES)),)
   include $(D_FILES)
