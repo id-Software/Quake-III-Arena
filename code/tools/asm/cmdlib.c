@@ -28,14 +28,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WIN32
 #include <direct.h>
 #include <windows.h>
-#endif
-
-#ifdef __linux
-#include <unistd.h>
-#endif
-
-#ifdef NeXT
+#elif defined(NeXT)
 #include <libc.h>
+#else
+#include <unistd.h>
 #endif
 
 #define	BASEDIRNAME	"quake"		// assumed to have a 2 or 3 following

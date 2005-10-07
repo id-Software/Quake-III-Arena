@@ -140,10 +140,8 @@ $(BD)bprint$(O):	etc/bprint.c;		$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ etc/bprint.c
 
 $(BD)q3lcc$(E):	$(BD)q3lcc$(O) $(BD)host$(O);	$(LD) $(LDFLAGS) -o $@ $(BD)q3lcc$(O) $(BD)host$(O) 
 
-SYSTEM=$(shell cc -print-search-dirs | head -n 1 | cut -b 10-)
-
 $(BD)q3lcc$(O):	etc/lcc.c;	$(CC) $(LCC_CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
-$(BD)host$(O):	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"$(SYSTEM)\" -o $@ $(HOSTFILE)
+$(BD)host$(O):	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"\" -o $@ $(HOSTFILE)
 
 LIBOBJS=$(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O)
 
