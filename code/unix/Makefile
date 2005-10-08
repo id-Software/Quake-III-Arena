@@ -414,21 +414,6 @@ DO_DED_CC=$(CC) -DDEDICATED -DC_ONLY $(CFLAGS) -o $@ -c $<
 DO_WINDRES=$(WINDRES) -i $< -o $@
 
 #############################################################################
-# QVM BUILD TOOLS
-#############################################################################
-
-Q3LCC=../tools/q3lcc$(BINEXT)
-Q3ASM=../tools/q3asm$(BINEXT)
-
-$(Q3LCC):
-	$(MAKE) -C ../tools/lcc install
-
-$(Q3ASM):
-	$(MAKE) -C ../tools/asm install
-
-DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) $<
-
-#############################################################################
 # MAIN TARGETS
 #############################################################################
 
@@ -467,6 +452,21 @@ makedirs:
 	@if [ ! -d $(B)/missionpack/ui ];then mkdir $(B)/missionpack/ui;fi
 	@if [ ! -d $(B)/missionpack/vm ];then mkdir $(B)/missionpack/vm;fi
 	@if [ ! -d $(B)/q3static ];then mkdir $(B)/q3static;fi
+
+#############################################################################
+# QVM BUILD TOOLS
+#############################################################################
+
+Q3LCC=../tools/q3lcc$(BINEXT)
+Q3ASM=../tools/q3asm$(BINEXT)
+
+$(Q3LCC):
+	$(MAKE) -C ../tools/lcc install
+
+$(Q3ASM):
+	$(MAKE) -C ../tools/asm install
+
+DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) $<
 
 #############################################################################
 # CLIENT/SERVER

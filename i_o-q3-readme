@@ -38,7 +38,8 @@ Run, enjoy!
 
 Compiling (Under Linux)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cd code/unix && make
+1. If not already there, change to the directory containing this readme
+2. Run 'make'
 
 Installing under Linux
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +71,6 @@ to accept and return long instead of int.
 
 Compiling under windows using MinGW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 It is possible to compile ioQ3 using the MinGW (Minimalist GNU for Windows)
 toolset. It's a little more involved than compiling for linux; steps are as
 follows:
