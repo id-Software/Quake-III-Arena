@@ -558,12 +558,13 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 		Com_Printf("Architecture doesn't have a bytecode compiler, using interpreter\n");
 		interpret = VMI_BYTECODE;
 	}
-#endif
-
+#else
 	if ( interpret >= VMI_COMPILED ) {
 		vm->compiled = qtrue;
 		VM_Compile( vm, header );
-	} else {
+	} else
+#endif
+	{
 		vm->compiled = qfalse;
 		VM_PrepareInterpreter( vm, header );
 	}
