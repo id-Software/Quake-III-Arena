@@ -85,6 +85,7 @@ VERSION=$(shell grep Q3_VERSION ../game/q_shared.h | \
 ## Defaults
 DLL_ONLY=false
 USE_SDL=true
+VM_PPC=
 
 # bk010215 - TODO - add all defaults / kill Ryan
 
@@ -107,10 +108,6 @@ ifeq ($(PLATFORM),linux)
   else
   ifeq ($(ARCH),s390x)
     LIB=lib64
-  else
-  ifeq ($(ARCH),ppc)
-    VM_PPC=vm_none
-  endif
   endif
   endif
   endif
@@ -132,21 +129,23 @@ ifeq ($(PLATFORM),linux)
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
     -fno-strict-aliasing
+  BASE_CFLAGS += -DHAVE_VM_NATIVE
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -fno-strict-aliasing
-    BASE_CFLAGS += -DHAVE_VM_NATIVE
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -fno-strict-aliasing -fstrength-reduce
-    BASE_CFLAGS += -DHAVE_VM_NATIVE -DHAVE_VM_COMPILED
+    BASE_CFLAGS += -DHAVE_VM_COMPILED
   else
   ifeq ($(ARCH),ppc)
-    BASE_CFLAGS += -DHAVE_VM_NATIVE
+    ifneq ($(VM_PPC),)
+      BASE_CFLAGS += -DHAVE_VM_COMPILED
+    endif
   endif
   endif
   endif
@@ -618,12 +617,8 @@ ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
 endif
 
-ifeq ($(ARCH),x86_64)
-  Q3OBJ += $(B)/client/vm_none.o
-endif
-
 ifeq ($(ARCH),ppc)
-  ifeq ($(DLL_ONLY),false)
+  ifneq ($(VM_PPC),)
     Q3OBJ += $(B)/client/$(VM_PPC).o
   endif
 endif
@@ -905,8 +900,9 @@ $(B)/client/win_wndproc.o : $(W32DIR)/win_wndproc.c; $(DO_CC) $(DX_CFLAGS)
 $(B)/client/win_resource.o : $(W32DIR)/winquake.rc; $(DO_WINDRES)
 
 $(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC)
-$(B)/client/vm_none.o : $(CMDIR)/vm_none.c; $(DO_CC)
+ifneq ($(VM_PPC),)
 $(B)/client/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_CC)
+endif
 
 $(B)/client/unzip.o : $(CMDIR)/unzip.c; $(DO_CC)
 $(B)/client/vm.o : $(CMDIR)/vm.c; $(DO_CC)
@@ -991,12 +987,8 @@ ifeq ($(ARCH),i386)
   Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftola.o $(B)/ded/snapvectora.o
 endif
 
-ifeq ($(ARCH),x86_64)
-  Q3DOBJ += $(B)/ded/vm_none.o
-endif
-
 ifeq ($(ARCH),ppc)
-  ifeq ($(DLL_ONLY),false)
+  ifneq ($(VM_PPC),)
     Q3DOBJ += $(B)/ded/$(VM_PPC).o
   endif
 endif
@@ -1075,8 +1067,9 @@ $(B)/ded/ftola.o : $(UDIR)/ftola.s; $(DO_AS)
 $(B)/ded/snapvectora.o : $(UDIR)/snapvectora.s; $(DO_AS)
 
 $(B)/ded/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_DED_CC)
-$(B)/ded/vm_none.o : $(CMDIR)/vm_none.c; $(DO_DED_CC)
+ifneq ($(VM_PPC),)
 $(B)/ded/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_DED_CC)
+endif
 
 
 
