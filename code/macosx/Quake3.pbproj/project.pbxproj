@@ -3049,140 +3049,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		012ADAA400868211C697A10E = {
-			children = (
-				012ADAA500868211C697A10E,
-				012ADAA600868211C697A10E,
-				012ADAA700868211C697A10E,
-				012ADAA800868211C697A10E,
-				012ADAA900868211C697A10E,
-				012ADAAA00868211C697A10E,
-				012ADAAB00868211C697A10E,
-				012ADAAC00868211C697A10E,
-				012ADAAD00868211C697A10E,
-				012ADAAE00868211C697A10E,
-				012ADAAF00868211C697A10E,
-				012ADAB000868211C697A10E,
-				012ADAB100868211C697A10E,
-				012ADAB200868211C697A10E,
-			);
-			isa = PBXGroup;
-			path = mac;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAA500868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_console.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAA600868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_event.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAA700868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_glimp2.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAA800868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_input.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAA900868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = mac_local.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAA00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_main.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAB00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_net.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAC00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = mac_snddma.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAD00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = MacGamma.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAE00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = MacGamma.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAAF00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = macprefix.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAB000868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.rez;
-			path = q3.r;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAB100868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = SetupGL.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADAB200868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = SetupGL.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		012ADAB300868211C697A10E = {
 			children = (
 				012ADAB400868211C697A10E,
@@ -4453,7 +4319,6 @@
 				012ADB4800868211C697A10E,
 				012ADB4900868211C697A10E,
 				012ADB4A00868211C697A10E,
-				012ADB4B00868211C697A10E,
 			);
 			isa = PBXGroup;
 			path = ui;
@@ -4537,14 +4402,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.c;
 			path = ui_syscalls.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		012ADB4B00868211C697A10E = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = ui_util.c;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -4995,7 +4852,6 @@
 		016EAE0A00B4BDD1C697A10E = {
 			buildActionMask = 2147483647;
 			files = (
-				016EAE0B00B4BDD1C697A10E,
 				016EAE0C00B4BDD1C697A10E,
 				016EAE0D00B4BDD1C697A10E,
 				016EAE0E00B4BDD1C697A10E,
@@ -5009,12 +4865,6 @@
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		016EAE0B00B4BDD1C697A10E = {
-			fileRef = 012ADB4B00868211C697A10E;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		016EAE0C00B4BDD1C697A10E = {
 			fileRef = 012ADB4A00868211C697A10E;
@@ -8216,7 +8066,6 @@
 				012AD9A500868211C697A10E,
 				012ADA2400868211C697A10E,
 				012ADA6500868211C697A10E,
-				012ADAA400868211C697A10E,
 				012ADAB300868211C697A10E,
 				012ADABB00868211C697A10E,
 				012ADAEC00868211C697A10E,

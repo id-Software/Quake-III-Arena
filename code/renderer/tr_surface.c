@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 // tr_surf.c
 #include "tr_local.h"
-#if idppc_altivec
+#if idppc_altivec && !defined(MACOS_X)
 #include <altivec.h>
 #endif
 
