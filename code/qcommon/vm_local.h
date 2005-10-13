@@ -161,6 +161,9 @@ struct vm_s {
 
 // fqpath member added 7/20/02 by T.Ray
 	char		fqpath[MAX_QPATH+1] ;
+
+	byte		*jumpTableTargets;
+	int			numJumpTableTargets;
 };
 
 

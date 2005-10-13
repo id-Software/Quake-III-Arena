@@ -381,7 +381,7 @@ vm_t *VM_Restart( vm_t *vm ) {
 	// load the image
 	Com_Printf( "VM_Restart()\n", filename );
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
-	Com_Printf( "Loading vm file %s.\n", filename );
+	Com_Printf( "Loading vm file %s...\n", filename );
 	length = FS_ReadFile( filename, (void **)&header );
 	if ( !header ) {
 		Com_Error( ERR_DROP, "VM_Restart failed.\n" );
@@ -392,14 +392,28 @@ vm_t *VM_Restart( vm_t *vm ) {
 		((int *)header)[i] = LittleLong( ((int *)header)[i] );
 	}
 
-	// validate
-	if ( header->vmMagic != VM_MAGIC
-		|| header->bssLength < 0 
-		|| header->dataLength < 0 
-		|| header->litLength < 0 
-		|| header->codeLength <= 0 ) {
-		VM_Free( vm );
-		Com_Error( ERR_FATAL, "%s has bad header", filename );
+	if( header->vmMagic == VM_MAGIC_VER2 ) {
+		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
+		// validate
+		if ( header->vmMagic != VM_MAGIC_VER2
+			|| header->jtrgLength < 0 
+			|| header->bssLength < 0 
+			|| header->dataLength < 0 
+			|| header->litLength < 0 
+			|| header->codeLength <= 0 ) {
+			VM_Free( vm );
+			Com_Error( ERR_FATAL, "%s has bad header", filename );
+		}
+	} else {
+		// validate
+		if ( header->vmMagic != VM_MAGIC
+			|| header->bssLength < 0 
+			|| header->dataLength < 0 
+			|| header->litLength < 0 
+			|| header->codeLength <= 0 ) {
+			VM_Free( vm );
+			Com_Error( ERR_FATAL, "%s has bad header", filename );
+		}
 	}
 
 	// round up to next power of 2 so all data operations can
@@ -418,6 +432,19 @@ vm_t *VM_Restart( vm_t *vm ) {
 	// byte swap the longs
 	for ( i = 0 ; i < header->dataLength ; i += 4 ) {
 		*(int *)(vm->dataBase + i) = LittleLong( *(int *)(vm->dataBase + i ) );
+	}
+
+	if( header->vmMagic == VM_MAGIC_VER2 ) {
+		vm->numJumpTableTargets = header->jtrgLength >> 2;
+		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
+		Com_Memset( vm->jumpTableTargets, 0, header->jtrgLength );
+		Com_Memcpy( vm->jumpTableTargets, (byte *)header + header->dataOffset +
+				header->dataLength + header->litLength, header->jtrgLength );
+
+		// byte swap the longs
+		for ( i = 0 ; i < header->jtrgLength ; i += 4 ) {
+			*(int *)(vm->jumpTableTargets + i) = LittleLong( *(int *)(vm->jumpTableTargets + i ) );
+		}
 	}
 
 	// free the original file
@@ -504,7 +531,7 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 
 	// load the image
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
-	Com_Printf( "Loading vm file %s.\n", filename );
+	Com_Printf( "Loading vm file %s...\n", filename );
 	length = FS_ReadFile( filename, (void **)&header );
 	if ( !header ) {
 		Com_Printf( "Failed.\n" );
@@ -517,14 +544,28 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 		((int *)header)[i] = LittleLong( ((int *)header)[i] );
 	}
 
-	// validate
-	if ( header->vmMagic != VM_MAGIC
-		|| header->bssLength < 0 
-		|| header->dataLength < 0 
-		|| header->litLength < 0 
-		|| header->codeLength <= 0 ) {
-		VM_Free( vm );
-		Com_Error( ERR_FATAL, "%s has bad header", filename );
+	if( header->vmMagic == VM_MAGIC_VER2 ) {
+		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
+		// validate
+		if ( header->vmMagic != VM_MAGIC_VER2
+			|| header->jtrgLength < 0 
+			|| header->bssLength < 0 
+			|| header->dataLength < 0 
+			|| header->litLength < 0 
+			|| header->codeLength <= 0 ) {
+			VM_Free( vm );
+			Com_Error( ERR_FATAL, "%s has bad header", filename );
+		}
+	} else {
+		// validate
+		if ( header->vmMagic != VM_MAGIC
+			|| header->bssLength < 0 
+			|| header->dataLength < 0 
+			|| header->litLength < 0 
+			|| header->codeLength <= 0 ) {
+			VM_Free( vm );
+			Com_Error( ERR_FATAL, "%s has bad header", filename );
+		}
 	}
 
 	// round up to next power of 2 so all data operations can
@@ -544,6 +585,19 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 	// byte swap the longs
 	for ( i = 0 ; i < header->dataLength ; i += 4 ) {
 		*(int *)(vm->dataBase + i) = LittleLong( *(int *)(vm->dataBase + i ) );
+	}
+
+	if( header->vmMagic == VM_MAGIC_VER2 ) {
+		vm->numJumpTableTargets = header->jtrgLength >> 2;
+		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
+		vm->jumpTableTargets = Hunk_Alloc( header->jtrgLength, h_high );
+		Com_Memcpy( vm->jumpTableTargets, (byte *)header + header->dataOffset +
+				header->dataLength + header->litLength, header->jtrgLength );
+
+		// byte swap the longs
+		for ( i = 0 ; i < header->jtrgLength ; i += 4 ) {
+			*(int *)(vm->jumpTableTargets + i) = LittleLong( *(int *)(vm->jumpTableTargets + i ) );
+		}
 	}
 
 	// allocate space for the jump targets, which will be filled in by the compile/prep functions

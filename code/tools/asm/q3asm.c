@@ -135,6 +135,7 @@ typedef enum {
 	DATASEG,	// initialized 32 bit data, will be byte swapped
 	LITSEG,		// strings
 	BSSSEG,		// 0 filled
+	JTRGSEG,	// psuedo-segment that contains only jump table targets
 	NUM_SEGMENTS
 } segmentName_t;
 
@@ -989,6 +990,8 @@ STAT("ADDRESS");
 /* Addresses are 32 bits wide, and therefore go into data segment. */
 		HackToSegment( DATASEG );
 		EmitInt( currentSegment, v );
+		if( passNumber == 1 && token[ 0 ] == '$' ) // crude test for labels
+			EmitInt( &segment[ JTRGSEG ], v );
 		return 1;
 	}
 	return 0;
@@ -1375,7 +1378,7 @@ void WriteVmFile( void ) {
 		return;
 	}
 
-	header.vmMagic = VM_MAGIC;
+	header.vmMagic = VM_MAGIC_VER2;
 	header.instructionCount = instructionCount;
 	header.codeOffset = sizeof( header );
 	header.codeLength = segment[CODESEG].imageUsed;
@@ -1383,6 +1386,7 @@ void WriteVmFile( void ) {
 	header.dataLength = segment[DATASEG].imageUsed;
 	header.litLength = segment[LITSEG].imageUsed;
 	header.bssLength = segment[BSSSEG].imageUsed;
+	header.jtrgLength = segment[JTRGSEG].imageUsed;
 
 	report( "Writing to %s\n", imageName );
 
@@ -1392,6 +1396,7 @@ void WriteVmFile( void ) {
 	SafeWrite( f, &segment[CODESEG].image, segment[CODESEG].imageUsed );
 	SafeWrite( f, &segment[DATASEG].image, segment[DATASEG].imageUsed );
 	SafeWrite( f, &segment[LITSEG].image, segment[LITSEG].imageUsed );
+	SafeWrite( f, &segment[JTRGSEG].image, segment[JTRGSEG].imageUsed );
 	fclose( f );
 }
 
@@ -1417,6 +1422,7 @@ void Assemble( void ) {
 	for ( passNumber = 0 ; passNumber < 2 ; passNumber++ ) {
 		segment[LITSEG].segmentBase = segment[DATASEG].imageUsed;
 		segment[BSSSEG].segmentBase = segment[LITSEG].segmentBase + segment[LITSEG].imageUsed;
+		segment[JTRGSEG].segmentBase = segment[BSSSEG].segmentBase + segment[BSSSEG].imageUsed;
 		for ( i = 0 ; i < NUM_SEGMENTS ; i++ ) {
 			segment[i].imageUsed = 0;
 		}

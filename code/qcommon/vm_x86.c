@@ -419,6 +419,12 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	
 	Com_Memset(jused, 0, header->instructionCount+2);
 
+	// ensure that the optimisation pass knows about all the jump
+	// table targets
+	for( i = 0; i < vm->numJumpTableTargets; i++ ) {
+		jused[ *(int *)(vm->jumpTableTargets + ( i * sizeof( int ) ) ) ] = 1;
+	}
+
 	for(pass=0;pass<2;pass++) {
 	oc0 = -23423;
 	oc1 = -234354;
