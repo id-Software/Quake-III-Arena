@@ -351,40 +351,25 @@ long QDECL VM_DllSyscall( long arg, ... ) {
 
 /*
 =================
-VM_Restart
+VM_LoadQVM
 
-Reload the data, but leave everything else in place
-This allows a server to do a map_restart without changing memory allocation
+Load a .qvm file
 =================
 */
-vm_t *VM_Restart( vm_t *vm ) {
-	vmHeader_t	*header;
+vmHeader_t *VM_LoadQVM( vm_t *vm, vmHeader_t *header, qboolean alloc ) {
 	int			length;
 	int			dataLength;
 	int			i;
 	char		filename[MAX_QPATH];
 
-	// DLL's can't be restarted in place
-	if ( vm->dllHandle ) {
-		char	name[MAX_QPATH];
-		long	(*systemCall)( long *parms );
-		
-		systemCall = vm->systemCall;	
-		Q_strncpyz( name, vm->name, sizeof( name ) );
-
-		VM_Free( vm );
-
-		vm = VM_Create( name, systemCall, VMI_NATIVE );
-		return vm;
-	}
-
 	// load the image
-	Com_Printf( "VM_Restart()\n", filename );
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
 	Com_Printf( "Loading vm file %s...\n", filename );
 	length = FS_ReadFile( filename, (void **)&header );
 	if ( !header ) {
-		Com_Error( ERR_DROP, "VM_Restart failed.\n" );
+		Com_Printf( "Failed.\n" );
+		VM_Free( vm );
+		return NULL;
 	}
 
 	// byte swap the header
@@ -423,8 +408,14 @@ vm_t *VM_Restart( vm_t *vm ) {
 	}
 	dataLength = 1 << i;
 
-	// clear the data
-	Com_Memset( vm->dataBase, 0, dataLength );
+	if( alloc ) {
+		// allocate zero filled space for initialized and uninitialized data
+		vm->dataBase = Hunk_Alloc( dataLength, h_high );
+		vm->dataMask = dataLength - 1;
+	} else {
+		// clear the data
+		Com_Memset( vm->dataBase, 0, dataLength );
+	}
 
 	// copy the intialized data
 	Com_Memcpy( vm->dataBase, (byte *)header + header->dataOffset, header->dataLength + header->litLength );
@@ -437,7 +428,13 @@ vm_t *VM_Restart( vm_t *vm ) {
 	if( header->vmMagic == VM_MAGIC_VER2 ) {
 		vm->numJumpTableTargets = header->jtrgLength >> 2;
 		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
-		Com_Memset( vm->jumpTableTargets, 0, header->jtrgLength );
+
+		if( alloc ) {
+			vm->jumpTableTargets = Hunk_Alloc( header->jtrgLength, h_high );
+		} else {
+			Com_Memset( vm->jumpTableTargets, 0, header->jtrgLength );
+		}
+
 		Com_Memcpy( vm->jumpTableTargets, (byte *)header + header->dataOffset +
 				header->dataLength + header->litLength, header->jtrgLength );
 
@@ -445,6 +442,42 @@ vm_t *VM_Restart( vm_t *vm ) {
 		for ( i = 0 ; i < header->jtrgLength ; i += 4 ) {
 			*(int *)(vm->jumpTableTargets + i) = LittleLong( *(int *)(vm->jumpTableTargets + i ) );
 		}
+	}
+
+	return header;
+}
+
+/*
+=================
+VM_Restart
+
+Reload the data, but leave everything else in place
+This allows a server to do a map_restart without changing memory allocation
+=================
+*/
+vm_t *VM_Restart( vm_t *vm ) {
+	vmHeader_t	*header;
+
+	// DLL's can't be restarted in place
+	if ( vm->dllHandle ) {
+		char	name[MAX_QPATH];
+		long	(*systemCall)( long *parms );
+		
+		systemCall = vm->systemCall;	
+		Q_strncpyz( name, vm->name, sizeof( name ) );
+
+		VM_Free( vm );
+
+		vm = VM_Create( name, systemCall, VMI_NATIVE );
+		return vm;
+	}
+
+	// load the image
+	Com_Printf( "VM_Restart()\n" );
+
+	if( !( header = VM_LoadQVM( vm, header, qfalse ) ) ) {
+		Com_Error( ERR_DROP, "VM_Restart failed.\n" );
+		return NULL;
 	}
 
 	// free the original file
@@ -468,10 +501,7 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 				vmInterpret_t interpret ) {
 	vm_t		*vm;
 	vmHeader_t	*header;
-	int			length;
-	int			dataLength;
 	int			i, remaining;
-	char		filename[MAX_QPATH];
 
 	if ( !module || !module[0] || !systemCalls ) {
 		Com_Error( ERR_FATAL, "VM_Create: bad parms" );
@@ -530,74 +560,8 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 #endif
 
 	// load the image
-	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
-	Com_Printf( "Loading vm file %s...\n", filename );
-	length = FS_ReadFile( filename, (void **)&header );
-	if ( !header ) {
-		Com_Printf( "Failed.\n" );
-		VM_Free( vm );
+	if( !( header = VM_LoadQVM( vm, header, qtrue ) ) ) {
 		return NULL;
-	}
-
-	// byte swap the header
-	for ( i = 0 ; i < sizeof( *header ) / 4 ; i++ ) {
-		((int *)header)[i] = LittleLong( ((int *)header)[i] );
-	}
-
-	if( header->vmMagic == VM_MAGIC_VER2 ) {
-		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
-		// validate
-		if ( header->vmMagic != VM_MAGIC_VER2
-			|| header->jtrgLength < 0 
-			|| header->bssLength < 0 
-			|| header->dataLength < 0 
-			|| header->litLength < 0 
-			|| header->codeLength <= 0 ) {
-			VM_Free( vm );
-			Com_Error( ERR_FATAL, "%s has bad header", filename );
-		}
-	} else {
-		// validate
-		if ( header->vmMagic != VM_MAGIC
-			|| header->bssLength < 0 
-			|| header->dataLength < 0 
-			|| header->litLength < 0 
-			|| header->codeLength <= 0 ) {
-			VM_Free( vm );
-			Com_Error( ERR_FATAL, "%s has bad header", filename );
-		}
-	}
-
-	// round up to next power of 2 so all data operations can
-	// be mask protected
-	dataLength = header->dataLength + header->litLength + header->bssLength;
-	for ( i = 0 ; dataLength > ( 1 << i ) ; i++ ) {
-	}
-	dataLength = 1 << i;
-
-	// allocate zero filled space for initialized and uninitialized data
-	vm->dataBase = Hunk_Alloc( dataLength, h_high );
-	vm->dataMask = dataLength - 1;
-
-	// copy the intialized data
-	Com_Memcpy( vm->dataBase, (byte *)header + header->dataOffset, header->dataLength + header->litLength );
-
-	// byte swap the longs
-	for ( i = 0 ; i < header->dataLength ; i += 4 ) {
-		*(int *)(vm->dataBase + i) = LittleLong( *(int *)(vm->dataBase + i ) );
-	}
-
-	if( header->vmMagic == VM_MAGIC_VER2 ) {
-		vm->numJumpTableTargets = header->jtrgLength >> 2;
-		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
-		vm->jumpTableTargets = Hunk_Alloc( header->jtrgLength, h_high );
-		Com_Memcpy( vm->jumpTableTargets, (byte *)header + header->dataOffset +
-				header->dataLength + header->litLength, header->jtrgLength );
-
-		// byte swap the longs
-		for ( i = 0 ; i < header->jtrgLength ; i += 4 ) {
-			*(int *)(vm->jumpTableTargets + i) = LittleLong( *(int *)(vm->jumpTableTargets + i ) );
-		}
 	}
 
 	// allocate space for the jump targets, which will be filled in by the compile/prep functions
