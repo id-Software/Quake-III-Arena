@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "cmdlib.h"
 #include "mathlib.h"
-#include "qfiles.h"
+#include "../../qcommon/qfiles.h"
 
 /* MSVC-ism fix. */
 #ifdef _WIN32
@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 /* 19079 total symbols in FI, 2002 Jan 23 */
-#define Q3ASM_TURBO
 #define DEFAULT_HASHTABLE_SIZE 2048
 
 char	outputFilename[MAX_OS_PATH];
@@ -155,7 +154,6 @@ typedef struct symbol_s {
 	int		value;
 } symbol_t;
 
-#ifdef Q3ASM_TURBO
 typedef struct hashchain_s {
   void *data;
   struct hashchain_s *next;
@@ -169,7 +167,6 @@ typedef struct hashtable_s {
 int symtablelen = DEFAULT_HASHTABLE_SIZE;
 hashtable_t *symtable;
 hashtable_t *optable;
-#endif /* Q3ASM_TURBO */
 
 segment_t	segment[NUM_SEGMENTS];
 segment_t	*currentSegment;
@@ -225,7 +222,6 @@ sourceOps_t		sourceOps[] = {
 int		opcodesHash[ NUM_SOURCE_OPS ];
 
 
-#ifdef Q3ASM_TURBO
 
 int
 vreport (const char* fmt, va_list vp)
@@ -463,24 +459,12 @@ ThingToConvertDecimalIntoSigned32SoThatAtoiDoesntCapAt7FFFFFFF (const char *s)
 #endif
 
 
-#endif /* Q3ASM_TURBO */
 
 /*
 =============
 HashString
 =============
 */
-#ifndef Q3ASM_TURBO
-int	HashString( char *s ) {
-	int		v = 0;
-
-	while ( *s ) {
-		v += *s;
-		s++;
-	}
-	return v;
-}
-#else /* Q3ASM_TURBO */
 /* Default hash function of Kazlib 1.19, slightly modified. */
 unsigned int HashString (const char *key)
 {
@@ -504,7 +488,6 @@ unsigned int HashString (const char *key)
     }
     return abs(acc);
 }
-#endif /* Q3ASM_TURBO */
 
 
 /*
@@ -561,57 +544,6 @@ Symbols can only be defined on pass 0
 ============
 */
 void DefineSymbol( char *sym, int value ) {
-#ifndef Q3ASM_TURBO
-	symbol_t	*s, *after;
-	char		expanded[MAX_LINE_LENGTH];
-	int			hash;
-
-	if ( passNumber == 1 ) {
-		return;
-	}
-
-  // TTimo
-  // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=381
-  // as a security, bail out if vmMain entry point is not first
-  if (!Q_stricmp(sym, "vmMain"))
-    if (value)
-      Error( "vmMain must be the first symbol in the qvm (got offset %d)\n", value );
-
-	// add the file prefix to local symbols to guarantee unique
-	if ( sym[0] == '$' ) {
-		sprintf( expanded, "%s_%i", sym, currentFileIndex );
-		sym = expanded;
-	}
-
-	hash = HashString( sym );
-
-	for ( s = symbols ; s ; s = s->next ) {
-		if ( hash == s->hash && !strcmp( sym, s->name ) ) {
-			CodeError( "Multiple definitions for %s\n", sym );
-			return;
-		}
-	}
-
-	s = malloc( sizeof( *s ) );
-	s->name = copystring( sym );
-	s->hash = hash;
-	s->value = value;
-	s->segment = currentSegment;
-
-	lastSymbol = s;	/* for the move-to-lit-segment byteswap hack */
-
-	// insert it in order
-	if ( !symbols || s->value < symbols->value ) {
-		s->next = symbols;
-		symbols = s;
-		return;
-	}
-
-	for ( after = symbols ; after->next && after->next->value < value ; after = after->next ) {
-	}
-	s->next = after->next;
-	after->next = s;
-#else /* Q3ASM_TURBO */
 	/* Hand optimization by PhaethonH */
 	symbol_t	*s;
 	char		expanded[MAX_LINE_LENGTH];
@@ -657,7 +589,6 @@ void DefineSymbol( char *sym, int value ) {
 		lastSymbol->next = s;
 		lastSymbol = s;
 	}
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -669,34 +600,6 @@ Symbols can only be evaluated on pass 1
 ============
 */
 int LookupSymbol( char *sym ) {
-#ifndef Q3ASM_TURBO
-	symbol_t	*s;
-	char		expanded[MAX_LINE_LENGTH];
-	int			hash;
-
-	if ( passNumber == 0 ) {
-		return 0;
-	}
-
-	// add the file prefix to local symbols to guarantee unique
-	if ( sym[0] == '$' ) {
-		sprintf( expanded, "%s_%i", sym, currentFileIndex );
-		sym = expanded;
-	}
-
-	hash = HashString( sym );
-	for ( s = symbols ; s ; s = s->next ) {
-		if ( hash == s->hash && !strcmp( sym, s->name ) ) {
-			return s->segment->segmentBase + s->value;
-		}
-	}
-
-	CodeError( "ERROR: symbol %s undefined\n", sym );
-	passNumber = 0;
-	DefineSymbol( sym, 0 );	// so more errors aren't printed
-	passNumber = 1;
-	return 0;
-#else /* Q3ASM_TURBO */
 	symbol_t	*s;
 	char		expanded[MAX_LINE_LENGTH];
 	int			hash;
@@ -732,7 +635,6 @@ int LookupSymbol( char *sym ) {
 	DefineSymbol( sym, 0 );	// so more errors aren't printed
 	passNumber = 1;
 	return 0;
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -746,38 +648,10 @@ Otherwise returns the updated parse pointer
 ===============
 */
 char *ExtractLine( char *data ) {
-#ifndef Q3ASM_TURBO
-	int			i;
-
-	currentFileLine++;
-	lineParseOffset = 0;
-	token[0] = 0;
-
-	if ( data[0] == 0 ) {
-		lineBuffer[0] = 0;
-		return NULL;
-	}
-
-	for ( i = 0 ; i < MAX_LINE_LENGTH ; i++ ) {
-		if ( data[i] == 0 || data[i] == '\n' ) {
-			break;
-		}
-	}
-	if ( i == MAX_LINE_LENGTH ) {
-		CodeError( "MAX_LINE_LENGTH" );
-		return data;
-	}
-	memcpy( lineBuffer, data, i );
-	lineBuffer[i] = 0;
-	data += i;
-	if ( data[0] == '\n' ) {
-		data++;
-	}
-	return data;
-#else /* Q3ASM_TURBO */
 /* Goal:
-  Given a string `data', extract one text line into buffer `lineBuffer' that is no longer than MAX_LINE_LENGTH characters long.
-  Return value is remainder of `data' that isn't part of `lineBuffer'.
+	 Given a string `data', extract one text line into buffer `lineBuffer' that
+	 is no longer than MAX_LINE_LENGTH characters long.  Return value is
+	 remainder of `data' that isn't part of `lineBuffer'.
  -PH
 */
 	/* Hand-optimized by PhaethonH */
@@ -805,7 +679,6 @@ char *ExtractLine( char *data ) {
 	lineBuffer[(p - data)] = 0;
 	p += (*p == '\n') ? 1 : 0;  /* Skip over final newline. */
 	return p;
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -817,39 +690,6 @@ Parse a token out of linebuffer
 ==============
 */
 qboolean Parse( void ) {
-#ifndef Q3ASM_TURBO
-	int		c;
-	int		len;
-	
-	len = 0;
-	token[0] = 0;
-	
-	// skip whitespace
-	while ( lineBuffer[ lineParseOffset ] <= ' ' ) {
-		if ( lineBuffer[ lineParseOffset ] == 0 ) {
-			return qfalse;
-		}
-		lineParseOffset++;
-	}
-
-	// skip ; comments
-	c = lineBuffer[ lineParseOffset ];
-	if ( c == ';' ) {
-		return qfalse;
-	}
-	
-
-	// parse a regular word
-	do {
-		token[len] = c;
-		len++;
-		lineParseOffset++;
-		c = lineBuffer[ lineParseOffset ];
-	} while (c>32);
-	
-	token[len] = 0;
-	return qtrue;
-#else /* Q3ASM_TURBO */
 	/* Hand-optimized by PhaethonH */
 	const char 	*p, *q;
 
@@ -877,7 +717,6 @@ qboolean Parse( void ) {
 	lineParseOffset = p - lineBuffer;
 
 	return qtrue;
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -898,54 +737,6 @@ ParseExpression
 ==============
 */
 int	ParseExpression(void) {
-#ifndef Q3ASM_TURBO
-	int		i, j;
-	char	sym[MAX_LINE_LENGTH];
-	int		v;
-
-	if ( token[0] == '-' ) {
-		i = 1;
-	} else {
-		i = 0;
-	}
-
-	for ( ; i < MAX_LINE_LENGTH ; i++ ) {
-		if ( token[i] == '+' || token[i] == '-' || token[i] == 0 ) {
-			break;
-		}
-	}
-
-	memcpy( sym, token, i );
-	sym[i] = 0;
-
-	if ( ( sym[0] >= '0' && sym[0] <= '9' ) || sym[0] == '-' ) {
-		v = atoi( sym );
-	} else {
-		v = LookupSymbol( sym );
-	}
-
-	// parse add / subtract offsets
-	while ( token[i] != 0 ) {
-		for ( j = i + 1 ; j < MAX_LINE_LENGTH ; j++ ) {
-			if ( token[j] == '+' || token[j] == '-' || token[j] == 0 ) {
-				break;
-			}
-		}
-
-		memcpy( sym, token+i+1, j-i-1 );
-		sym[j-i-1] = 0;
-
-		if ( token[i] == '+' ) {
-			v += atoi( sym );
-		}
-		if ( token[i] == '-' ) {
-			v -= atoi( sym );
-		}
-		i = j;
-	}
-
-	return v;
-#else /* Q3ASM_TURBO */
 	/* Hand optimization, PhaethonH */
 	int		i, j;
 	char	sym[MAX_LINE_LENGTH];
@@ -997,7 +788,6 @@ int	ParseExpression(void) {
 	}
 
 	return v;
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -1034,8 +824,6 @@ void HackToSegment( segmentName_t seg ) {
 
 
 
-
-#ifdef Q3ASM_TURBO
 
 //#define STAT(L) report("STAT " L "\n");
 #define STAT(L)
@@ -1370,25 +1158,6 @@ STAT("LABEL");
 
 
 
-#endif /* Q3ASM_TURBO */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 ==============
 AssembleLine
@@ -1396,12 +1165,8 @@ AssembleLine
 ==============
 */
 void AssembleLine( void ) {
-#ifndef Q3ASM_TURBO
-	int		v, v2;
-#else /* Q3ASM_TURBO */
 	hashchain_t *hc;
 	sourceOps_t *op;
-#endif /* Q3ASM_TURBO */
 	int		i;
 	int		hash;
 
@@ -1412,249 +1177,6 @@ void AssembleLine( void ) {
 
 	hash = HashString( token );
 
-#ifndef Q3ASM_TURBO
-	for ( i = 0 ; i < NUM_SOURCE_OPS ; i++ ) {
-		if ( hash == opcodesHash[i] && !strcmp( token, sourceOps[i].name ) ) {
-			int		opcode;
-			int		expression;
-
-			if ( sourceOps[i].opcode == OP_UNDEF ) {
-				CodeError( "Undefined opcode: %s\n", token );
-			}
-			if ( sourceOps[i].opcode == OP_IGNORE ) {
-				return;		// we ignore most conversions
-			}
-
-			// sign extensions need to check next parm
-			opcode = sourceOps[i].opcode;
-			if ( opcode == OP_SEX8 ) {
-				Parse();
-				if ( token[0] == '1' ) {
-					opcode = OP_SEX8;
-				} else if ( token[0] == '2' ) {
-					opcode = OP_SEX16;
-				} else {
-					CodeError( "Bad sign extension: %s\n", token );
-					return;
-				}
-			}
-
-			// check for expression
-			Parse();
-			if ( token[0] && sourceOps[i].opcode != OP_CVIF
-					&& sourceOps[i].opcode != OP_CVFI ) {
-				expression = ParseExpression();
-
-				// code like this can generate non-dword block copies:
-				// auto char buf[2] = " ";
-				// we are just going to round up.  This might conceivably
-				// be incorrect if other initialized chars follow.
-				if ( opcode == OP_BLOCK_COPY ) {
-					expression = ( expression + 3 ) & ~3;
-				}
-
-				EmitByte( &segment[CODESEG], opcode );
-				EmitInt( &segment[CODESEG], expression );
-			} else {
-				EmitByte( &segment[CODESEG], opcode );
-			}
-
-			instructionCount++;
-			return;
-		}
-	}
-
-	// call instructions reset currentArgOffset
-	if ( !strncmp( token, "CALL", 4 ) ) {
-		EmitByte( &segment[CODESEG], OP_CALL );
-		instructionCount++;
-		currentArgOffset = 0;
-		return;
-	}
-
-	// arg is converted to a reversed store
-	if ( !strncmp( token, "ARG", 3 ) ) {
-		EmitByte( &segment[CODESEG], OP_ARG );
-		instructionCount++;
-		if ( 8 + currentArgOffset >= 256 ) {
-			CodeError( "currentArgOffset >= 256" );
-			return;
-		}
-		EmitByte( &segment[CODESEG], 8 + currentArgOffset );
-		currentArgOffset += 4;
-		return;
-	}
-
-	// ret just leaves something on the op stack
-	if ( !strncmp( token, "RET", 3 ) ) {
-		EmitByte( &segment[CODESEG], OP_LEAVE );
-		instructionCount++;
-		EmitInt( &segment[CODESEG], 8 + currentLocals + currentArgs );
-		return;
-	}
-
-	// pop is needed to discard the return value of 
-	// a function
-	if ( !strncmp( token, "pop", 3 ) ) {
-		EmitByte( &segment[CODESEG], OP_POP );
-		instructionCount++;
-		return;
-	}
-
-	// address of a parameter is converted to OP_LOCAL
-	if ( !strncmp( token, "ADDRF", 5 ) ) {
-		instructionCount++;
-		Parse();
-		v = ParseExpression();
-		v = 16 + currentArgs + currentLocals + v;
-		EmitByte( &segment[CODESEG], OP_LOCAL );
-		EmitInt( &segment[CODESEG], v );
-		return;
-	}
-
-	// address of a local is converted to OP_LOCAL
-	if ( !strncmp( token, "ADDRL", 5 ) ) {
-		instructionCount++;
-		Parse();
-		v = ParseExpression();
-		v = 8 + currentArgs + v;
-		EmitByte( &segment[CODESEG], OP_LOCAL );
-		EmitInt( &segment[CODESEG], v );
-		return;
-	}
-
-	if ( !strcmp( token, "proc" ) ) {
-		char	name[1024];
-
-		Parse();					// function name
-		strcpy( name, token );
-
-		DefineSymbol( token, instructionCount ); // segment[CODESEG].imageUsed );
-
-		currentLocals = ParseValue();	// locals
-		currentLocals = ( currentLocals + 3 ) & ~3;
-		currentArgs = ParseValue();		// arg marshalling
-		currentArgs = ( currentArgs + 3 ) & ~3;
-
-		if ( 8 + currentLocals + currentArgs >= 32767 ) {
-			CodeError( "Locals > 32k in %s\n", name );
-		}
-
-		instructionCount++;
-		EmitByte( &segment[CODESEG], OP_ENTER );
-		EmitInt( &segment[CODESEG], 8 + currentLocals + currentArgs );
-		return;
-	}
-	if ( !strcmp( token, "endproc" ) ) {
-		Parse();				// skip the function name
-		v = ParseValue();		// locals
-		v2 = ParseValue();		// arg marshalling
-
-		// all functions must leave something on the opstack
-		instructionCount++;
-		EmitByte( &segment[CODESEG], OP_PUSH );
-
-		instructionCount++;
-		EmitByte( &segment[CODESEG], OP_LEAVE );
-		EmitInt( &segment[CODESEG], 8 + currentLocals + currentArgs );
-
-		return;
-	}
-
-
-	if ( !strcmp( token, "address" ) ) {
-		Parse();
-		v = ParseExpression();
-
-		HackToSegment( DATASEG );
-		EmitInt( currentSegment, v );
-		return;
-	}
-	if ( !strcmp( token, "export" ) ) {
-		return;
-	}
-	if ( !strcmp( token, "import" ) ) {
-		return;
-	}
-	if ( !strcmp( token, "code" ) ) {
-		currentSegment = &segment[CODESEG];
-		return;
-	}
-	if ( !strcmp( token, "bss" ) ) {
-		currentSegment = &segment[BSSSEG];
-		return;
-	}
-	if ( !strcmp( token, "data" ) ) {
-		currentSegment = &segment[DATASEG];
-		return;
-	}
-	if ( !strcmp( token, "lit" ) ) {
-		currentSegment = &segment[LITSEG];
-		return;
-	}
-	if ( !strcmp( token, "line" ) ) {
-		return;
-	}
-	if ( !strcmp( token, "file" ) ) {
-		return;
-	}
-
-	if ( !strcmp( token, "equ" ) ) {
-		char	name[1024];
-
-		Parse();
-		strcpy( name, token );
-		Parse();
-		DefineSymbol( name, atoi(token) );
-		return;
-	}
-
-	if ( !strcmp( token, "align" ) ) {
-		v = ParseValue();
-		currentSegment->imageUsed = (currentSegment->imageUsed + v - 1 ) & ~( v - 1 );
-		return;
-	}
-
-	if ( !strcmp( token, "skip" ) ) {
-		v = ParseValue();
-		currentSegment->imageUsed += v;
-		return;
-	}
-
-	if ( !strcmp( token, "byte" ) ) {
-		v = ParseValue();
-		v2 = ParseValue();
-
-		if ( v == 1 ) {
-			HackToSegment( LITSEG );
-		} else if ( v == 4 ) {
-			HackToSegment( DATASEG );
-		} else if ( v == 2 ) {
-			CodeError( "16 bit initialized data not supported" );
-		}
-
-		// emit little endien
-		for ( i = 0 ; i < v ; i++ ) {
-			EmitByte( currentSegment, v2 );
-			v2 >>= 8;
-		}
-		return;
-	}
-
-	// code labels are emited as instruction counts, not byte offsets,
-	// because the physical size of the code will change with
-	// different run time compilers and we want to minimize the
-	// size of the required translation table
-	if ( !strncmp( token, "LABEL", 5 ) ) {
-		Parse();
-		if ( currentSegment == &segment[CODESEG] ) {
-			DefineSymbol( token, instructionCount );
-		} else {
-			DefineSymbol( token, currentSegment->imageUsed );
-		}
-		return;
-	}
-#else /* Q3ASM_TURBO */
 /*
   Opcode search using hash table.
   Since the opcodes stays mostly fixed, this may benefit even more from a tree.
@@ -1771,8 +1293,6 @@ Empirical frequency statistics from FI 2001.01.23:
 	ASM(BSS)
 	ASM(DATA)
 
-#endif /* Q3ASM_TURBO */
-
 	CodeError( "Unknown token: %s\n", token );
 }
 
@@ -1782,13 +1302,6 @@ InitTables
 ==============
 */
 void InitTables( void ) {
-#ifndef Q3ASM_TURBO
-	int		i;
-
-	for ( i = 0 ; i < NUM_SOURCE_OPS ; i++ ) {
-		opcodesHash[i] = HashString( sourceOps[i].name );
-	}
-#else /* Q3ASM_TURBO */
 	int i;
 
 	symtable = hashtable_new(symtablelen);
@@ -1798,7 +1311,6 @@ void InitTables( void ) {
 		opcodesHash[i] = HashString( sourceOps[i].name );
 		hashtable_add(optable, opcodesHash[i], sourceOps + i);
 	}
-#endif /* Q3ASM_TURBO */
 }
 
 
@@ -1928,11 +1440,9 @@ void Assemble( void ) {
 		for ( i = 0 ; i < NUM_SEGMENTS ; i++ ) {
 			segment[i].imageUsed = (segment[i].imageUsed + 3) & ~3;
 		}
-#ifdef Q3ASM_TURBO
 		if (passNumber == 0) {
 			sort_symbols();
 		}
-#endif /* Q3ASM_TURBO */
 	}
 
 	// reserve the stack in bss
@@ -1996,9 +1506,6 @@ int main( int argc, char **argv ) {
 //	_chdir( "/quake3/jccode/cgame/lccout" );	// hack for vc profiler
 
 	if ( argc < 2 ) {
-#ifndef Q3ASM_TURBO
-		Error( "usage: q3asm [-o output] <files> or q3asm -f <listfile>\n" );
-#else /* Q3ASM_TURBO */
 		Error("Usage: %s [OPTION]... [FILES]...\n\
 Assemble LCC bytecode assembly to Q3VM bytecode.\n\
 \n\
@@ -2007,13 +1514,9 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
     -b BUCKETS     Set symbol hash table to BUCKETS buckets\n\
     -v             Verbose compilation report\n\
 ", argv[0]);
-#endif /* Q3ASM_TURBO */
 	}
 
 	start = I_FloatTime ();
-#ifndef Q3ASM_TURBO
-	InitTables();
-#endif /* !Q3ASM_TURBO */
 
 	// default filename is "q3asm"
 	strcpy( outputFilename, "q3asm" );
@@ -2042,7 +1545,6 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
 			continue;
 		}
 
-#ifdef Q3ASM_TURBO
 		if (!strcmp(argv[i], "-b")) {
 			if (i == argc - 1) {
 				Error("-b requires an argument");
@@ -2051,7 +1553,6 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
 			symtablelen = atoi(argv[i]);
 			continue;
 		}
-#endif /* Q3ASM_TURBO */
 
 		if( !strcmp( argv[ i ], "-v" ) ) {
 /* Verbosity option added by Timbo, 2002.09.14.
@@ -2077,12 +1578,9 @@ Motivation: not wanting to scrollback for pages to find asm error.
 		numAsmFiles++;
 	}
 
-#ifdef Q3ASM_TURBO
 	InitTables();
-#endif /* Q3ASM_TURBO */
 	Assemble();
 
-#ifdef Q3ASM_TURBO
 	{
 		symbol_t *s;
 
@@ -2095,7 +1593,6 @@ Motivation: not wanting to scrollback for pages to find asm error.
 			hashtable_stats(optable);
 		}
 	}
-#endif /* Q3ASM_TURBO */
 
 	end = I_FloatTime ();
 	report ("%5.0f seconds elapsed\n", end-start);
