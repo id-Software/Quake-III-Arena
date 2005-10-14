@@ -320,10 +320,6 @@ static void HandleEvents(void)
     case SDL_MOUSEMOTION:
       if (mouse_active)
       {
-        if (abs(e.motion.xrel) > 1)
-          e.motion.xrel *= 2;
-        if (abs(e.motion.yrel) > 1)
-          e.motion.yrel *= 2;
         Sys_QueEvent( t, SE_MOUSE, e.motion.xrel, e.motion.yrel, 0, NULL );
       }
       break;
@@ -1203,6 +1199,8 @@ void IN_Init(void) {
   // bk001130 - changed this to match win32
   in_joystickDebug = Cvar_Get ("in_debugjoystick", "0", CVAR_TEMP);
   joy_threshold = Cvar_Get ("joy_threshold", "0.15", CVAR_ARCHIVE); // FIXME: in_joythreshold
+
+  Cvar_Set( "cl_platformSensitivity", "2.0" );
 
   if (in_mouse->value)
     mouse_avail = qtrue;

@@ -573,14 +573,8 @@ static void HandleEvents(void)
       {
         if (in_dgamouse->value)
         {
-          if (abs(event.xmotion.x_root) > 1)
-            mx += event.xmotion.x_root * 2;
-          else
-            mx += event.xmotion.x_root;
-          if (abs(event.xmotion.y_root) > 1)
-            my += event.xmotion.y_root * 2;
-          else
-            my += event.xmotion.y_root;
+          mx += event.xmotion.x_root;
+          my += event.xmotion.y_root;
           if (t - mouseResetTime > MOUSE_RESET_DELAY )
           {
             Sys_QueEvent( t, SE_MOUSE, mx, my, 0, NULL );
@@ -604,14 +598,8 @@ static void HandleEvents(void)
 
           dx = ((int)event.xmotion.x - mwx);
           dy = ((int)event.xmotion.y - mwy);
-          if (abs(dx) > 1)
-            mx += dx * 2;
-          else
-            mx += dx;
-          if (abs(dy) > 1)
-            my += dy * 2;
-          else
-            my += dy;
+					mx += dx;
+					my += dy;
 
           mwx = event.xmotion.x;
           mwy = event.xmotion.y;
@@ -1724,6 +1712,8 @@ void IN_Init(void) {
   // bk001130 - changed this to match win32
   in_joystickDebug = Cvar_Get ("in_debugjoystick", "0", CVAR_TEMP);
   joy_threshold = Cvar_Get ("joy_threshold", "0.15", CVAR_ARCHIVE); // FIXME: in_joythreshold
+
+  Cvar_Set( "cl_platformSensitivity", "2.0" );
 
   if (in_mouse->value)
     mouse_avail = qtrue;
