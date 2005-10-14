@@ -356,11 +356,12 @@ VM_LoadQVM
 Load a .qvm file
 =================
 */
-vmHeader_t *VM_LoadQVM( vm_t *vm, vmHeader_t *header, qboolean alloc ) {
-	int			length;
-	int			dataLength;
-	int			i;
-	char		filename[MAX_QPATH];
+vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
+	int					length;
+	int					dataLength;
+	int					i;
+	char				filename[MAX_QPATH];
+	vmHeader_t	*header;
 
 	// load the image
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
@@ -475,7 +476,7 @@ vm_t *VM_Restart( vm_t *vm ) {
 	// load the image
 	Com_Printf( "VM_Restart()\n" );
 
-	if( !( header = VM_LoadQVM( vm, header, qfalse ) ) ) {
+	if( !( header = VM_LoadQVM( vm, qfalse ) ) ) {
 		Com_Error( ERR_DROP, "VM_Restart failed.\n" );
 		return NULL;
 	}
@@ -560,7 +561,7 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 #endif
 
 	// load the image
-	if( !( header = VM_LoadQVM( vm, header, qtrue ) ) ) {
+	if( !( header = VM_LoadQVM( vm, qtrue ) ) ) {
 		return NULL;
 	}
 
