@@ -176,8 +176,14 @@ int		passNumber;
 
 int		numSymbols;
 int		errorCount;
-qboolean  optionVerbose = qfalse;
-qboolean  optionWriteMapFile = qfalse;
+
+typedef struct options_s {
+	qboolean verbose;
+	qboolean writeMapFile;
+	qboolean vanillaQ3Compatibility;
+} options_t;
+
+options_t options = { 0 };
 
 symbol_t	*symbols;
 symbol_t	*lastSymbol = 0;  /* Most recent symbol defined. */
@@ -227,7 +233,7 @@ int		opcodesHash[ NUM_SOURCE_OPS ];
 int
 vreport (const char* fmt, va_list vp)
 {
-  if (optionVerbose != qtrue)
+  if (options.verbose != qtrue)
       return 0;
   return vprintf(fmt, vp);
 }
@@ -1358,6 +1364,7 @@ void WriteVmFile( void ) {
 	char	imageName[MAX_OS_PATH];
 	vmHeader_t	header;
 	FILE	*f;
+	int		headerSize;
 
 	report( "%i total errors\n", errorCount );
 
@@ -1378,9 +1385,21 @@ void WriteVmFile( void ) {
 		return;
 	}
 
-	header.vmMagic = VM_MAGIC_VER2;
+	if( !options.vanillaQ3Compatibility ) {
+		header.vmMagic = VM_MAGIC_VER2;
+		headerSize = sizeof( header );
+	} else {
+		header.vmMagic = VM_MAGIC;
+
+		// Don't write the VM_MAGIC_VER2 bits when maintaining 1.32b compatibility.
+		// (I know this isn't strictly correct due to padding, but then platforms
+		// that pad wouldn't be able to write a correct header anyway).  Note: if
+		// vmHeader_t changes, this needs to be adjusted too.
+		headerSize = sizeof( header ) - sizeof( header.jtrgLength );
+	}
+
 	header.instructionCount = instructionCount;
-	header.codeOffset = sizeof( header );
+	header.codeOffset = headerSize;
 	header.codeLength = segment[CODESEG].imageUsed;
 	header.dataOffset = header.codeOffset + segment[CODESEG].imageUsed;
 	header.dataLength = segment[DATASEG].imageUsed;
@@ -1392,11 +1411,15 @@ void WriteVmFile( void ) {
 
 	CreatePath( imageName );
 	f = SafeOpenWrite( imageName );
-	SafeWrite( f, &header, sizeof( header ) );
+	SafeWrite( f, &header, headerSize );
 	SafeWrite( f, &segment[CODESEG].image, segment[CODESEG].imageUsed );
 	SafeWrite( f, &segment[DATASEG].image, segment[DATASEG].imageUsed );
 	SafeWrite( f, &segment[LITSEG].image, segment[LITSEG].imageUsed );
-	SafeWrite( f, &segment[JTRGSEG].image, segment[JTRGSEG].imageUsed );
+
+	if( !options.vanillaQ3Compatibility ) {
+		SafeWrite( f, &segment[JTRGSEG].image, segment[JTRGSEG].imageUsed );
+	}
+
 	fclose( f );
 }
 
@@ -1460,7 +1483,7 @@ void Assemble( void ) {
 	WriteVmFile();
 
 	// write the map file even if there were errors
-	if( optionWriteMapFile ) {
+	if( options.writeMapFile ) {
 		WriteMapFile();
 	}
 }
@@ -1519,6 +1542,7 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
     -f LISTFILE    Read options and list of files to assemble from LISTFILE\n\
     -b BUCKETS     Set symbol hash table to BUCKETS buckets\n\
     -v             Verbose compilation report\n\
+    -vq3           Produce a qvm file compatible with Q3 1.32b\n\
 ", argv[0]);
 	}
 
@@ -1566,12 +1590,17 @@ By default (no -v option), q3asm remains silent except for critical errors.
 Verbosity turns on all messages, error or not.
 Motivation: not wanting to scrollback for pages to find asm error.
 */
-			optionVerbose = qtrue;
+			options.verbose = qtrue;
 			continue;
 		}
 
 		if( !strcmp( argv[ i ], "-m" ) ) {
-			optionWriteMapFile = qtrue;
+			options.writeMapFile = qtrue;
+			continue;
+		}
+
+		if( !strcmp( argv[ i ], "-vq3" ) ) {
+			options.vanillaQ3Compatibility = qtrue;
 			continue;
 		}
 
@@ -1592,7 +1621,7 @@ Motivation: not wanting to scrollback for pages to find asm error.
 
 		for ( i = 0, s = symbols ; s ; s = s->next, i++ ) /* nop */ ;
 
-		if (optionVerbose)
+		if (options.verbose)
 		{
 			report("%d symbols defined\n", i);
 			hashtable_stats(symtable);

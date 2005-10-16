@@ -110,3 +110,12 @@ follows:
 7. Steal underpants
 8. ???
 9. Profit!
+
+Creating mods compatible with Q3 1.32b
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you're using this package to create mods for the last official release of
+Q3, it is necessary to pass the commandline option '-vq3' to your invocation
+of q3asm. This is because by default q3asm outputs an updated qvm format that
+is necessary to fix a bug involving the optimising pass of the x86 vm JIT
+compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it still
+exists when you read this) for more details.
