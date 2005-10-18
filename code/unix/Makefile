@@ -4,7 +4,7 @@
 # Currently build for the following:
 # Linux i386 (full client)
 # Linux Alpha (dedicated server only) (TTimo: dropped)
-# FreeBSD i386 (dedicated server only) (TTimo: maybe worth updating)
+# FreeBSD i386 (full client)
 # SGI IRIX (full client) (TTimo: who's in charge - dropped otherwise)
 #   Linux PPC (full client) (TTimo: dropped)
 #
