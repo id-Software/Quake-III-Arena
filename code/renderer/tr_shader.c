@@ -1438,6 +1438,13 @@ static qboolean ParseShader( char **text )
 			}
 			stages[s].active = qtrue;
 			s++;
+
+			// 20051019 misantropia -- fix buffer overrun.
+			if ( s >= MAX_SHADER_STAGES ) {
+				ri.Printf( PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name );
+				return qfalse;
+			}
+
 			continue;
 		}
 		// skip stuff that only the QuakeEdRadient needs
