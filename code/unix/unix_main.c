@@ -85,6 +85,9 @@ static struct termios tty_tc;
 
 static field_t tty_con;
 
+static cvar_t *ttycon_ansicolor = NULL;
+static qboolean ttycon_color_on = qfalse;
+
 // history
 // NOTE TTimo this is a bit duplicate of the graphical console history
 //   but it's safer and faster to write our own here
@@ -519,6 +522,12 @@ void Sys_ConsoleInputInit( void )
     tc.c_cc[VTIME] = 0;
     tcsetattr (0, TCSADRAIN, &tc);    
     ttycon_on = qtrue;
+
+    ttycon_ansicolor = Cvar_Get( "ttycon_ansicolor", "0", CVAR_ARCHIVE );
+    if( ttycon_ansicolor && ttycon_ansicolor->value )
+    {
+      ttycon_color_on = qtrue;
+    }
   } else
     ttycon_on = qfalse;
 }
@@ -1178,13 +1187,89 @@ char *Sys_GetClipboardData(void)
   return NULL;
 }
 
+static struct Q3ToAnsiColorTable_s
+{
+  char Q3color;
+  char *ANSIcolor;
+} tty_colorTable[ ] =
+{
+  { COLOR_BLACK,    "30" },
+  { COLOR_RED,      "31" },
+  { COLOR_GREEN,    "32" },
+  { COLOR_YELLOW,   "33" },
+  { COLOR_BLUE,     "34" },
+  { COLOR_CYAN,     "36" },
+  { COLOR_MAGENTA,  "35" },
+  { COLOR_WHITE,    "0" }
+};
+
+static int tty_colorTableSize =
+  sizeof( tty_colorTable ) / sizeof( tty_colorTable[ 0 ] );
+
+void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
+{
+  int   msgLength, pos;
+  int   i, j;
+  char  *escapeCode;
+
+  if( !msg || !buffer )
+    return;
+
+  msgLength = strlen( msg );
+  pos = 0;
+  i = 0;
+  buffer[ 0 ] = '\0';
+
+  while( i < msgLength )
+  {
+    if( msg[ i ] == '\n' )
+    {
+      strncat( buffer, va( "%c[0m\n", 0x1B ), bufferSize );
+      i++;
+    }
+    else if( msg[ i ] == Q_COLOR_ESCAPE )
+    {
+      i++;
+
+      if( i < msgLength )
+      {
+        escapeCode = NULL;
+        for( j = 0; j < tty_colorTableSize; j++ )
+        {
+          if( msg[ i ] == tty_colorTable[ j ].Q3color )
+          {
+            escapeCode = tty_colorTable[ j ].ANSIcolor;
+            break;
+          }
+        }
+
+        if( escapeCode )
+          strncat( buffer, va( "%c[%sm", 0x1B, escapeCode ), bufferSize );
+
+        i++;
+      }
+    }
+    else
+      strncat( buffer, va( "%c", msg[ i++ ] ), bufferSize );
+  }
+}
+
 void  Sys_Print( const char *msg )
 {
   if (ttycon_on)
   {
     tty_Hide();
   }
-  fputs(msg, stderr);
+
+  if( ttycon_on && ttycon_color_on )
+  {
+    char ansiColorString[ MAXPRINTMSG ];
+    Sys_ANSIColorify( msg, ansiColorString, MAXPRINTMSG );
+    fputs( ansiColorString, stderr );
+  }
+  else
+    fputs(msg, stderr);
+
   if (ttycon_on)
   {
     tty_Show();
