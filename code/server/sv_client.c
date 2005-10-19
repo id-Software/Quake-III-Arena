@@ -1153,8 +1153,8 @@ void SV_UserinfoChanged( client_t *cl ) {
 		i = atoi(val);
 		if ( i < 1 ) {
 			i = 1;
-		} else if ( i > 30 ) {
-			i = 30;
+		} else if ( i > sv_fps->integer ) {
+			i = sv_fps->integer;
 		}
 		cl->snapshotMsec = 1000/i;
 	} else {
