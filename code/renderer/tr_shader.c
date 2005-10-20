@@ -1432,18 +1432,18 @@ static qboolean ParseShader( char **text )
 		// stage definition
 		else if ( token[0] == '{' )
 		{
+			// 20051019 misantropia -- fix buffer overrun.
+			if ( s >= MAX_SHADER_STAGES ) {
+				ri.Printf( PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name );
+				return qfalse;
+			}
+
 			if ( !ParseStage( &stages[s], text ) )
 			{
 				return qfalse;
 			}
 			stages[s].active = qtrue;
 			s++;
-
-			// 20051019 misantropia -- fix buffer overrun.
-			if ( s >= MAX_SHADER_STAGES ) {
-				ri.Printf( PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name );
-				return qfalse;
-			}
 
 			continue;
 		}
