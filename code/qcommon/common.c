@@ -3209,11 +3209,23 @@ static void FindMatches( const char *s ) {
 
 /*
 ===============
-PrintMatches
+PrintCmdMatches
 
 ===============
 */
-static void PrintMatches( const char *s ) {
+static void PrintCmdMatches( const char *s ) {
+	if ( !Q_stricmpn( s, shortestMatch, strlen( shortestMatch ) ) ) {
+		Com_Printf( "    %s\n", s );
+	}
+}
+
+/*
+===============
+PrintCvarMatches
+
+===============
+*/
+static void PrintCvarMatches( const char *s ) {
 	if ( !Q_stricmpn( s, shortestMatch, strlen( shortestMatch ) ) ) {
 		Com_Printf( "    %s = \"%s\"\n", s, Cvar_VariableString( s ) );
 	}
@@ -3309,6 +3321,6 @@ void Field_CompleteCommand( field_t *field ) {
 	Com_Printf( "]%s\n", completionField->buffer );
 
 	// run through again, printing matches
-	Cmd_CommandCompletion( PrintMatches );
-	Cvar_CommandCompletion( PrintMatches );
+	Cmd_CommandCompletion( PrintCmdMatches );
+	Cvar_CommandCompletion( PrintCvarMatches );
 }
