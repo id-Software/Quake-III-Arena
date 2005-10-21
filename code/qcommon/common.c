@@ -3215,7 +3215,7 @@ PrintMatches
 */
 static void PrintMatches( const char *s ) {
 	if ( !Q_stricmpn( s, shortestMatch, strlen( shortestMatch ) ) ) {
-		Com_Printf( "    %s\n", s );
+		Com_Printf( "    %s = \"%s\"\n", s, Cvar_VariableString( s ) );
 	}
 }
 
