@@ -214,7 +214,6 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   case SDLK_KP_MINUS: *key = K_KP_MINUS; break;
   case SDLK_KP_DIVIDE: *key = K_KP_SLASH; break;
 
-  case SDLK_WORLD_18: *key = '~'; break; // hack for french keyboards
   default: break;
   } 
 
