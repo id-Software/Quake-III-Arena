@@ -327,66 +327,24 @@ static void HandleEvents(void)
       break;
 
     case SDL_MOUSEBUTTONDOWN:
-      if (e.button.button == 4)
-      {
-        Sys_QueEvent( t, SE_KEY, K_MWHEELUP, qtrue, 0, NULL );
-      } else if (e.button.button == 5)
-      {
-        Sys_QueEvent( t, SE_KEY, K_MWHEELDOWN, qtrue, 0, NULL );
-      } else
-      {
-        // NOTE TTimo there seems to be a weird mapping for K_MOUSE1 K_MOUSE2 K_MOUSE3 ..
-        b=-1;
-        if (e.button.button == 1)
-        {
-          b = 0; // K_MOUSE1
-        } else if (e.button.button == 2)
-        {
-          b = 2; // K_MOUSE3
-        } else if (e.button.button == 3)
-        {
-          b = 1; // K_MOUSE2
-        } else if (e.button.button == 6)
-        {
-          b = 3; // K_MOUSE4
-        } else if (e.button.button == 7)
-        {
-          b = 4; // K_MOUSE5
-        };
-
-        Sys_QueEvent( t, SE_KEY, K_MOUSE1 + b, qtrue, 0, NULL );
-      }
-      break;
-
     case SDL_MOUSEBUTTONUP:
-      if (e.button.button == 4)
       {
-        Sys_QueEvent( t, SE_KEY, K_MWHEELUP, qfalse, 0, NULL );
-      } else if (e.button.button == 5)
-      {
-        Sys_QueEvent( t, SE_KEY, K_MWHEELDOWN, qfalse, 0, NULL );
-      } else
-      {
-        b=-1;
-        if (e.button.button == 1)
-        {
-          b = 0;
-        } else if (e.button.button == 2)
-        {
-          b = 2;
-        } else if (e.button.button == 3)
-        {
-          b = 1;
-        } else if (e.button.button == 6)
-        {
-          b = 3; // K_MOUSE4
-        } else if (e.button.button == 7)
-        {
-          b = 4; // K_MOUSE5
-        };
-        Sys_QueEvent( t, SE_KEY, K_MOUSE1 + b, qfalse, 0, NULL );
+	unsigned char b;
+	switch (e.button.button)
+	{
+	  case  1: b = K_MOUSE1; break;
+	  case  2: b = K_MOUSE3; break;
+	  case  3: b = K_MOUSE2; break;
+	  case  4: b = K_MWHEELUP; break;
+	  case  5: b = K_MWHEELDOWN; break;
+	  case  6: b = K_MOUSE4; break;
+	  case  7: b = K_MOUSE5; break;
+	  default: b = K_AUX1 + (e.button.button - 8)%16; break;
+	}
+	Sys_QueEvent( t, SE_KEY, b, (e.type == SDL_MOUSEBUTTONDOWN?qtrue:qfalse), 0, NULL );
       }
       break;
+
     case SDL_QUIT:
       Sys_Quit();
       break;
