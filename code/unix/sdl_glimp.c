@@ -271,7 +271,6 @@ static void HandleEvents(void)
   SDL_Event e;
   const char *p = NULL;
   int key = 0;
-  int b = 0;
 
   if (screen == NULL)
     return;  // no SDL context.
@@ -1410,6 +1409,7 @@ void IN_JoyMove( void )
 #endif  // USE_SDL
 
 // end of linux_glimp_sdl.c ...
+
 
 
 
