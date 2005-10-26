@@ -22,4 +22,4 @@ install: default
 	install -s -m 0755 q3asm$(BINEXT) ../
 
 uninstall:
-	-rm ../q3asm$(BINEXT)
+	rm -f ../q3asm$(BINEXT)

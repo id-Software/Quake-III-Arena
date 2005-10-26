@@ -252,6 +252,7 @@ clean::		testclean
 		$(RM) $(BD)rcc.c $(BD)rcc.h
 		$(RM) $(BD)rcc1$(E) $(BD)rcc1$(E) $(BD)1rcc$(E) $(BD)2rcc$(E)
 		$(RM) $(BD)*.ilk
+		$(RM) -r $(BD)
 
 clobber::	clean
 		$(RM) $(BD)q3rcc$(E) $(BD)2html$(E) $(BD)pass2$(E) $(BD)lburg$(E) $(BD)q3cpp$(E) $(BD)q3lcc$(E) $(BD)bprint$(E) $(BD)*$(A)
