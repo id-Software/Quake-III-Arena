@@ -368,6 +368,16 @@ void Sys_Init(void)
   Cvar_Set( "arch", "linux alpha" );
 #  elif defined __sparc__
   Cvar_Set( "arch", "linux sparc" );
+#  elif defined __arm__
+  Cvar_Set( "arch", "linux arm" );
+#  elif defined __cris__
+  Cvar_Set( "arch", "linux cris" );
+#  elif defined __hppa__
+  Cvar_Set( "arch", "linux hppa" );
+#  elif defined __mips__
+  Cvar_Set( "arch", "linux mips" );
+#  elif defined __sh__
+  Cvar_Set( "arch", "linux sh" );
 # else
 # error unsupported architecture
 #endif
@@ -780,10 +790,18 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   snprintf (fname, sizeof(fname), "%ss390x.so", name);
 #elif defined __ia64__
   snprintf (fname, sizeof(fname), "%sia64.so", name);
-#elif defined __axp__
+#elif defined __alpha__
   snprintf (fname, sizeof(fname), "%saxp.so", name);
 #elif defined __mips__
   snprintf (fname, sizeof(fname), "%smips.so", name);
+#elif defined __arm__
+  snprintf (fname, sizeof(fname), "%sarm.so", name);
+#elif defined __cris__
+  snprintf (fname, sizeof(fname), "%scris.so", name);
+#elif defined __hppa__
+  snprintf (fname, sizeof(fname), "%shppa.so", name);
+#elif defined __sh__
+  snprintf (fname, sizeof(fname), "%ssh.so", name);
 #else
 #error Unknown arch
 #endif
