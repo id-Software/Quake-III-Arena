@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../botlib/aasfile.h"		//aas_bbox_t
 #include "aas_store.h"				//AAS_MAX_BBOXES
 #include "aas_cfg.h"
-#include "../game/surfaceflags.h"
+#include "../qcommon/surfaceflags.h"
 
 #define SPAWNFLAG_NOT_EASY			0x00000100
 #define SPAWNFLAG_NOT_MEDIUM		0x00000200

@@ -75,7 +75,7 @@ JPDIR=$(MOUNT_DIR)/jpeg-6
 SPLNDIR=$(MOUNT_DIR)/splines
 
 # extract version info
-VERSION=$(shell grep Q3_VERSION ../game/q_shared.h | \
+VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
   sed -e 's/.*Q3\ \(.*\)"/\1/')
 
 #############################################################################
@@ -444,11 +444,13 @@ makedirs:
 	@if [ ! -d $(B)/baseq3/cgame ];then mkdir $(B)/baseq3/cgame;fi
 	@if [ ! -d $(B)/baseq3/game ];then mkdir $(B)/baseq3/game;fi
 	@if [ ! -d $(B)/baseq3/ui ];then mkdir $(B)/baseq3/ui;fi
+	@if [ ! -d $(B)/baseq3/qcommon ];then mkdir $(B)/baseq3/qcommon;fi
 	@if [ ! -d $(B)/baseq3/vm ];then mkdir $(B)/baseq3/vm;fi
 	@if [ ! -d $(B)/missionpack ];then mkdir $(B)/missionpack;fi
 	@if [ ! -d $(B)/missionpack/cgame ];then mkdir $(B)/missionpack/cgame;fi
 	@if [ ! -d $(B)/missionpack/game ];then mkdir $(B)/missionpack/game;fi
 	@if [ ! -d $(B)/missionpack/ui ];then mkdir $(B)/missionpack/ui;fi
+	@if [ ! -d $(B)/missionpack/qcommon ];then mkdir $(B)/missionpack/qcommon;fi
 	@if [ ! -d $(B)/missionpack/vm ];then mkdir $(B)/missionpack/vm;fi
 	@if [ ! -d $(B)/q3static ];then mkdir $(B)/q3static;fi
 
@@ -465,7 +467,7 @@ $(Q3LCC):
 $(Q3ASM):
 	$(MAKE) -C ../tools/asm install
 
-DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) $<
+DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) -I$(CMDIR) $<
 
 #############################################################################
 # CLIENT/SERVER
@@ -769,8 +771,8 @@ $(B)/client/md4.o : $(CMDIR)/md4.c; $(DO_CC)
 $(B)/client/msg.o : $(CMDIR)/msg.c; $(DO_CC)
 $(B)/client/net_chan.o : $(CMDIR)/net_chan.c; $(DO_CC)
 $(B)/client/huffman.o : $(CMDIR)/huffman.c; $(DO_CC)
-$(B)/client/q_shared.o : $(GDIR)/q_shared.c; $(DO_CC)
-$(B)/client/q_math.o : $(GDIR)/q_math.c; $(DO_CC)
+$(B)/client/q_shared.o : $(CMDIR)/q_shared.c; $(DO_CC)
+$(B)/client/q_math.o : $(CMDIR)/q_math.c; $(DO_CC)
 
 $(B)/client/be_aas_bspq3.o : $(BLIBDIR)/be_aas_bspq3.c; $(DO_BOT_CC)
 $(B)/client/be_aas_cluster.o : $(BLIBDIR)/be_aas_cluster.c; $(DO_BOT_CC)
@@ -1018,8 +1020,8 @@ $(B)/ded/md4.o : $(CMDIR)/md4.c; $(DO_DED_CC)
 $(B)/ded/msg.o : $(CMDIR)/msg.c; $(DO_DED_CC)
 $(B)/ded/net_chan.o : $(CMDIR)/net_chan.c; $(DO_DED_CC)
 $(B)/ded/huffman.o : $(CMDIR)/huffman.c; $(DO_DED_CC)
-$(B)/ded/q_shared.o : $(GDIR)/q_shared.c; $(DO_DED_CC)
-$(B)/ded/q_math.o : $(GDIR)/q_math.c; $(DO_DED_CC)
+$(B)/ded/q_shared.o : $(CMDIR)/q_shared.c; $(DO_DED_CC)
+$(B)/ded/q_math.o : $(CMDIR)/q_math.c; $(DO_DED_CC)
 
 $(B)/ded/be_aas_bspq3.o : $(BLIBDIR)/be_aas_bspq3.c; $(DO_BOT_CC)
 $(B)/ded/be_aas_cluster.o : $(BLIBDIR)/be_aas_cluster.c; $(DO_BOT_CC)
@@ -1099,8 +1101,9 @@ Q3CGOBJ_ = \
   $(B)/baseq3/cgame/cg_snapshot.o \
   $(B)/baseq3/cgame/cg_view.o \
   $(B)/baseq3/cgame/cg_weapons.o \
-  $(B)/baseq3/game/q_math.o \
-  $(B)/baseq3/game/q_shared.o
+  \
+  $(B)/baseq3/qcommon/q_math.o \
+  $(B)/baseq3/qcommon/q_shared.o
 
 Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
 Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
@@ -1138,9 +1141,10 @@ MPCGOBJ_ = \
   $(B)/missionpack/cgame/cg_snapshot.o \
   $(B)/missionpack/cgame/cg_view.o \
   $(B)/missionpack/cgame/cg_weapons.o \
-  $(B)/missionpack/game/q_math.o \
-  $(B)/missionpack/game/q_shared.o \
-  $(B)/missionpack/ui/ui_shared.o
+  $(B)/missionpack/ui/ui_shared.o \
+  \
+  $(B)/missionpack/qcommon/q_math.o \
+  $(B)/missionpack/qcommon/q_shared.o
 
 MPCGOBJ = $(MPCGOBJ_) $(B)/missionpack/cgame/cg_syscalls.o
 MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
@@ -1189,8 +1193,8 @@ Q3GOBJ_ = \
   $(B)/baseq3/game/g_utils.o \
   $(B)/baseq3/game/g_weapon.o \
   \
-  $(B)/baseq3/game/q_math.o \
-  $(B)/baseq3/game/q_shared.o
+  $(B)/baseq3/qcommon/q_math.o \
+  $(B)/baseq3/qcommon/q_shared.o
 
 Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
 Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
@@ -1237,8 +1241,8 @@ MPGOBJ_ = \
   $(B)/missionpack/game/g_utils.o \
   $(B)/missionpack/game/g_weapon.o \
   \
-  $(B)/missionpack/game/q_math.o \
-  $(B)/missionpack/game/q_shared.o
+  $(B)/missionpack/qcommon/q_math.o \
+  $(B)/missionpack/qcommon/q_shared.o
 
 MPGOBJ = $(MPGOBJ_) $(B)/missionpack/game/g_syscalls.o
 MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
@@ -1297,8 +1301,8 @@ Q3UIOBJ_ = \
   $(B)/baseq3/ui/ui_teamorders.o \
   $(B)/baseq3/ui/ui_video.o \
   \
-  $(B)/baseq3/game/q_math.o \
-  $(B)/baseq3/game/q_shared.o
+  $(B)/baseq3/qcommon/q_math.o \
+  $(B)/baseq3/qcommon/q_shared.o
 
 Q3UIOBJ = $(Q3UIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
@@ -1322,8 +1326,8 @@ MPUIOBJ_ = \
   \
   $(B)/missionpack/game/bg_misc.o \
   \
-  $(B)/missionpack/game/q_math.o \
-  $(B)/missionpack/game/q_shared.o
+  $(B)/missionpack/qcommon/q_math.o \
+  $(B)/missionpack/qcommon/q_shared.o
 
 MPUIOBJ = $(MPUIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
@@ -1378,6 +1382,18 @@ $(B)/missionpack/ui/%.o: $(UIDIR)/%.c
 $(B)/missionpack/ui/%.asm: $(UIDIR)/%.c $(Q3LCC)
 	$(DO_Q3LCC) -DMISSIONPACK
 
+
+$(B)/baseq3/qcommon/%.o: $(CMDIR)/%.c
+	$(DO_SHLIB_CC)
+
+$(B)/baseq3/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC)
+
+$(B)/missionpack/qcommon/%.o: $(CMDIR)/%.c
+	$(DO_SHLIB_CC) -DMISSIONPACK
+
+$(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
+	$(DO_Q3LCC) -DMISSIONPACK
 
 
 #############################################################################

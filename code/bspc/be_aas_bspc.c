@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../bspc/l_log.h"
 #include "../bspc/l_qfiles.h"
 #include "../botlib/l_memory.h"
@@ -28,8 +28,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../botlib/l_precomp.h"
 #include "../botlib/l_struct.h"
 #include "../botlib/aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "../botlib/botlib.h"
+#include "../botlib/be_aas.h"
 #include "../botlib/be_aas_def.h"
 #include "../qcommon/cm_public.h"
 

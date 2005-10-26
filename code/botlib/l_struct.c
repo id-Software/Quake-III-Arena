@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *****************************************************************************/
 
 #ifdef BOTLIB
-#include "../game/q_shared.h"
-#include "../game/botlib.h"				//for the include of be_interface.h
+#include "../qcommon/q_shared.h"
+#include "botlib.h"				//for the include of be_interface.h
 #include "l_script.h"
 #include "l_precomp.h"
 #include "l_struct.h"

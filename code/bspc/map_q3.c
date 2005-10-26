@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "aas_map.h"			//AAS_CreateMapBrushes
 #include "l_bsp_q3.h"
 #include "../qcommon/cm_patch.h"
-#include "../game/surfaceflags.h"
+#include "../qcommon/surfaceflags.h"
 
 #define NODESTACKSIZE		1024
 
