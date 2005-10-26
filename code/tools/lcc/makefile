@@ -15,7 +15,8 @@ CC=gcc
 LCC_CFLAGS=-O2 -Wall -fno-strict-aliasing
 LDFLAGS=
 LD=gcc
-AR=ar ruv
+AR=ar
+ARFLAGS=cru
 RANLIB=ranlib
 DIFF=diff
 RM=rm -f
@@ -77,7 +78,7 @@ $(BD)q3rcc$(E)::	$(BD)main$(O) $(BD)librcc$(A) $(EXTRAOBJS)
 		$(LD) $(LDFLAGS) -o $@ $(BD)main$(O) $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
 
 $(BD)librcc$(A):	$(RCCOBJS)
-		$(AR) $@ $(RCCOBJS); $(RANLIB) $@ || true
+		$(AR) $(ARFLAGS) $@ $(RCCOBJS); $(RANLIB) $@ || true
 
 $(RCCOBJS):	src/c.h src/token.h src/config.h
 
@@ -145,7 +146,7 @@ $(BD)host$(O):	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"\" -o $@ $(HOSTFIL
 
 LIBOBJS=$(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O)
 
-$(BD)liblcc$(A):	$(LIBOBJS);	$(AR) $@ $(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O); $(RANLIB) $@ || true
+$(BD)liblcc$(A):	$(LIBOBJS);	$(AR) $(ARFLAGS) $@ $(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O); $(RANLIB) $@ || true
 
 $(BD)assert$(O):	lib/assert.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/assert.c
 $(BD)yynull$(O):	lib/yynull.c;	$(CC) $(LCC_CFLAGS) -c -o $@ lib/yynull.c
