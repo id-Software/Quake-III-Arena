@@ -155,9 +155,9 @@ extern	Nlist *kwdefined;
 extern	Includelist includelist[NINCLUDE];
 extern	char wd[];
 
-extern int creat(char *, int);
-extern int open(char *, int);
-extern int close(int);
-extern int dup2(int, int);
-extern int write(int, char *, size_t);
-extern int read(int, char *, size_t);
+#ifndef _WIN32
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
+#include <fcntl.h>
