@@ -373,33 +373,42 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 		return NULL;
 	}
 
-	// byte swap the header
-	for ( i = 0 ; i < sizeof( *header ) / 4 ; i++ ) {
-		((int *)header)[i] = LittleLong( ((int *)header)[i] );
-	}
-
-	if( header->vmMagic == VM_MAGIC_VER2 ) {
+	if( LittleLong( header->vmMagic ) == VM_MAGIC_VER2 ) {
 		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
+
+		// byte swap the header
+		for ( i = 0 ; i < sizeof( vmHeader_t ) / 4 ; i++ ) {
+			((int *)header)[i] = LittleLong( ((int *)header)[i] );
+		}
+
 		// validate
-		if ( header->vmMagic != VM_MAGIC_VER2
-			|| header->jtrgLength < 0 
-			|| header->bssLength < 0 
-			|| header->dataLength < 0 
-			|| header->litLength < 0 
+		if ( header->jtrgLength < 0
+			|| header->bssLength < 0
+			|| header->dataLength < 0
+			|| header->litLength < 0
+			|| header->codeLength <= 0 ) {
+			VM_Free( vm );
+			Com_Error( ERR_FATAL, "%s has bad header", filename );
+		}
+	} else if( LittleLong( header->vmMagic ) == VM_MAGIC ) {
+		// byte swap the header
+		// sizeof( vmHeader_t ) - sizeof( int ) is the 1.32b vm header size
+		for ( i = 0 ; i < ( sizeof( vmHeader_t ) - sizeof( int ) ) / 4 ; i++ ) {
+			((int *)header)[i] = LittleLong( ((int *)header)[i] );
+		}
+
+		// validate
+		if ( header->bssLength < 0
+			|| header->dataLength < 0
+			|| header->litLength < 0
 			|| header->codeLength <= 0 ) {
 			VM_Free( vm );
 			Com_Error( ERR_FATAL, "%s has bad header", filename );
 		}
 	} else {
-		// validate
-		if ( header->vmMagic != VM_MAGIC
-			|| header->bssLength < 0 
-			|| header->dataLength < 0 
-			|| header->litLength < 0 
-			|| header->codeLength <= 0 ) {
-			VM_Free( vm );
-			Com_Error( ERR_FATAL, "%s has bad header", filename );
-		}
+		VM_Free( vm );
+		Com_Error( ERR_FATAL, "%s does not have a recognisable "
+				"magic number in its header", filename );
 	}
 
 	// round up to next power of 2 so all data operations can
