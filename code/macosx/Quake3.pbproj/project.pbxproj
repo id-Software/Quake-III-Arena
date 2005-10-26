@@ -34,6 +34,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = "-bundle -undefined error";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = qagame;
 				PROFILE_FLAGS = "";
 				SECTORDER_FLAGS = "";
@@ -170,6 +171,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = "-bundle -undefined error";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = cgame;
 				PROFILE_FLAGS = "";
 				SECTORDER_FLAGS = "";
@@ -4764,6 +4766,7 @@
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-bundle -undefined error";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = ui;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
@@ -4977,6 +4980,7 @@
 				OTHER_CFLAGS = "-DDEDICATED -DMACOS_X -DBOTLIB -DMISSIONPACK -force_cpusubtype_ALL -Wno-long-double";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = Q3DedicatedServer;
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
@@ -7716,8 +7720,8 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O2";
 				OTHER_CFLAGS = "-DMACOS_X -DBOTLIB -DMISSIONPACK -DSMP -force_cpusubtype_ALL";
-				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = Quake3;
 				SECTORDER_FLAGS = "";
 				USE_GCC3_PFE_SUPPORT = NO;
@@ -8758,6 +8762,7 @@
 				OTHER_CFLAGS = "-DMACOS_X -DBOTLIB -DMISSIONPACK -DSMP -force_cpusubtype_ALL -faltivec";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = "Quake3 G4";
 				SECTORDER_FLAGS = "";
 				USE_GCC3_PFE_SUPPORT = NO;
@@ -10327,6 +10332,7 @@
 				OTHER_CFLAGS = "-DMACOS_X -DBOTLIB -DMISSIONPACK -DSMP -force_cpusubtype_ALL -faltivec -falign-loops=16 -falign-jumps=16 -fstrict-aliasing ";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
 				PRODUCT_NAME = Q3DedicatedServer;
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";

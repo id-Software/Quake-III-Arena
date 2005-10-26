@@ -84,7 +84,7 @@ qboolean GLimp_SpawnRenderThread( void (*function)( void ) )
 // The command buffer returned might be NULL, indicating that the rendering thread should exit.
 void *GLimp_RendererSleep(void)
 {
-    void *data;
+    volatile void *data;
     
     GLSTAMP("GLimp_RendererSleep start", 0);
 

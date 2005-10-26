@@ -232,7 +232,6 @@ void Sys_SetScreenFade(glwgamma_t *table, float fraction)
 void Sys_FadeScreens()
 {
     CGDisplayCount displayIndex;
-    int stepIndex;
     glwgamma_t *table;
     NSTimeInterval start, current;
     float time;
@@ -261,7 +260,6 @@ void Sys_FadeScreen(CGDirectDisplayID display)
 {
     CGDisplayCount displayIndex;
     glwgamma_t *table;
-    int stepIndex;
     
     if (!glConfig.deviceSupportsGamma)
         return;
@@ -295,7 +293,6 @@ void Sys_FadeScreen(CGDirectDisplayID display)
 void Sys_UnfadeScreens()
 {
     CGDisplayCount displayIndex;
-    int stepIndex;
     glwgamma_t *table;
     NSTimeInterval start, current;
     float time;
@@ -323,7 +320,6 @@ void Sys_UnfadeScreens()
 void Sys_UnfadeScreen(CGDirectDisplayID display, glwgamma_t *table)
 {
     CGDisplayCount displayIndex;
-    int stepIndex;
     
     if (!glConfig.deviceSupportsGamma)
         return;

@@ -85,8 +85,8 @@ extern char		*FS_BuildOSPath( const char *base, const char *game, const char *qp
 void    * QDECL Sys_LoadDll( const char *name, char *fqpath , long (QDECL **entryPoint)(long, ...),
                                  long (QDECL *systemcalls)(long, ...) ) {
     void *libHandle;
-    void	(*dllEntry)( int (*syscallptr)(int, ...) );
-    NSString *bundlePath, *libraryPath;
+    void	(*dllEntry)( long (*syscallptr)(long, ...) );
+    NSString *libraryPath;
     const char *path;
     
 	// TTimo
@@ -320,7 +320,7 @@ qboolean Sys_ObjectIsCDRomDevice(io_object_t object)
 {
     CFStringRef value;
     kern_return_t krc;
-    CFDictionaryRef properties;
+    CFMutableDictionaryRef properties;
     qboolean isCDROM = qfalse;
     io_iterator_t parentIterator;
     io_object_t parent;
