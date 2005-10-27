@@ -56,6 +56,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma warning(disable : 4220)		// varargs matches remaining parameters
 #endif
 
+//Ignore __attribute__ on non-gcc platforms
+#ifndef __GNUC__
+#define __attribute__(x)
+#endif
+
 /**********************************************************************
   VM Considerations
 
