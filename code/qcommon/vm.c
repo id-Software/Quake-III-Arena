@@ -749,10 +749,10 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 #ifdef __i386__ // i386 calling convention doesn't need conversion
 #if defined(HAVE_VM_COMPILED)
 		if ( vm->compiled )
-			r = VM_CallCompiled( vm, (int*)callnum );
+			r = VM_CallCompiled( vm, (int*)&callnum );
 		else
 #endif
-			r = VM_CallInterpreted( vm, (int*)callnum );
+			r = VM_CallInterpreted( vm, (int*)&callnum );
 #else
 		struct {
 			int callnum;
