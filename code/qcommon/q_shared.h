@@ -58,7 +58,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__
+#ifndef __attribute__
 #define __attribute__(x)
+#endif
 #endif
 
 /**********************************************************************
