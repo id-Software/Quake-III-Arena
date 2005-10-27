@@ -135,6 +135,8 @@ ifeq ($(PLATFORM),linux)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -fno-strict-aliasing
+# experimental! you need as
+#    BASE_CFLAGS += -DHAVE_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
@@ -404,7 +406,7 @@ endif
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<
 DO_SMP_CC=$(CC) $(CFLAGS) -DSMP -o $@ -c $<
-DO_BOT_CC=$(CC) $(CFLAGS) -DBOTLIB  -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
+DO_BOT_CC=$(CC) $(CFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
 DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
@@ -617,6 +619,9 @@ ifeq ($(ARCH),i386)
 endif
 ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
+endif
+ifeq ($(ARCH),x86_64)
+  Q3OBJ += $(B)/client/vm_x86_64.o
 endif
 
 ifeq ($(ARCH),ppc)
@@ -902,6 +907,7 @@ $(B)/client/win_wndproc.o : $(W32DIR)/win_wndproc.c; $(DO_CC) $(DX_CFLAGS)
 $(B)/client/win_resource.o : $(W32DIR)/winquake.rc; $(DO_WINDRES)
 
 $(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC)
+$(B)/client/vm_x86_64.o : $(CMDIR)/vm_x86_64.c; $(DO_CC)
 ifneq ($(VM_PPC),)
 $(B)/client/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_CC)
 endif
@@ -989,6 +995,10 @@ ifeq ($(ARCH),i386)
   Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftola.o $(B)/ded/snapvectora.o
 endif
 
+ifeq ($(ARCH),x86_64)
+  Q3DOBJ += $(B)/ded/vm_x86_64.o
+endif
+
 ifeq ($(ARCH),ppc)
   ifneq ($(VM_PPC),)
     Q3DOBJ += $(B)/ded/$(VM_PPC).o
@@ -1069,6 +1079,7 @@ $(B)/ded/ftola.o : $(UDIR)/ftola.s; $(DO_AS)
 $(B)/ded/snapvectora.o : $(UDIR)/snapvectora.s; $(DO_AS)
 
 $(B)/ded/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_DED_CC)
+$(B)/ded/vm_x86_64.o : $(CMDIR)/vm_x86_64.c; $(DO_DED_CC)
 ifneq ($(VM_PPC),)
 $(B)/ded/$(VM_PPC).o : $(CMDIR)/$(VM_PPC).c; $(DO_DED_CC)
 endif

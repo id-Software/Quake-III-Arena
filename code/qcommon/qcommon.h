@@ -547,6 +547,8 @@ void	FS_FreeFileList( char **list );
 
 qboolean FS_FileExists( const char *file );
 
+char   *FS_BuildOSPath( const char *base, const char *game, const char *qpath );
+
 int		FS_LoadStack( void );
 
 int		FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
@@ -603,7 +605,7 @@ int		FS_FTell( fileHandle_t f );
 
 void	FS_Flush( fileHandle_t f );
 
-void 	QDECL FS_Printf( fileHandle_t f, const char *fmt, ... );
+void 	QDECL FS_Printf( fileHandle_t f, const char *fmt, ... ) __attribute__ ((format (printf, 2, 3)));
 // like fprintf
 
 int		FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );

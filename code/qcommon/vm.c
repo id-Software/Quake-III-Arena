@@ -745,12 +745,15 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9], args[10], args[11],
                             args[12], args[13], args[14], args[15]);
-#if defined(HAVE_VM_COMPILED)
-	} else if ( vm->compiled ) {
-		// only used on 32bit machines so this cast is fine
-		r = VM_CallCompiled( vm, (int*)&callnum );
-#endif
 	} else {
+#ifdef __i386__ // i386 calling convention doesn't need conversion
+#if defined(HAVE_VM_COMPILED)
+		if ( vm->compiled )
+			r = VM_CallCompiled( vm, (int*)callnum );
+		else
+#endif
+			r = VM_CallInterpreted( vm, (int*)callnum );
+#else
 		struct {
 			int callnum;
 			int args[16];
@@ -763,7 +766,13 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 			a.args[i] = va_arg(ap, long);
 		}
 		va_end(ap);
-		r = VM_CallInterpreted( vm, &a.callnum );
+#if defined(HAVE_VM_COMPILED)
+		if ( vm->compiled )
+			r = VM_CallCompiled( vm, &a.callnum );
+		else
+#endif
+			r = VM_CallInterpreted( vm, &a.callnum );
+#endif
 	}
 
 	if ( oldVM != NULL ) // bk001220 - assert(currentVM!=NULL) for oldVM==NULL

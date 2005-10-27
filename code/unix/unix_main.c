@@ -730,7 +730,6 @@ changed the load procedure to match VFS logic, and allow developer use
 #3 look in fs_basepath
 =================
 */
-extern char   *FS_BuildOSPath( const char *base, const char *game, const char *qpath );
 
 static void* try_dlopen(const char* base, const char* gamedir, const char* fname, char* fqpath )
 {

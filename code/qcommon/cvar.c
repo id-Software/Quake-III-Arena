@@ -286,7 +286,7 @@ Cvar_Set2
 cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force ) {
 	cvar_t	*var;
 
-	Com_DPrintf( "Cvar_Set2: %s %s\n", var_name, value );
+//	Com_DPrintf( "Cvar_Set2: %s %s\n", var_name, value );
 
 	if ( !Cvar_ValidateString( var_name ) ) {
 		Com_Printf("invalid cvar name string: %s\n", var_name );
