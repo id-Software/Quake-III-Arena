@@ -121,8 +121,6 @@ static client_t *SV_GetPlayerByNum( void ) {
 		return NULL;
 	}
 	return cl;
-
-	return NULL;
 }
 
 //=========================================================
