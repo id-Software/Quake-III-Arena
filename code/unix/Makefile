@@ -123,23 +123,25 @@ ifeq ($(PLATFORM),linux)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -fno-strict-aliasing
-    # comment out below line to enable the
     # experimental x86_64 jit compiler! you need as
-    BASE_CFLAGS += -DNO_VM_COMPILED
+    #HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -fno-strict-aliasing -fstrength-reduce
+    HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),ppc)
-    ifeq ($(VM_PPC),)
-      BASE_CFLAGS += -DNO_VM_COMPILED
+    ifneq ($(VM_PPC),)
+      HAVE_VM_COMPILED=true
     endif
-  else
+  endif
+  endif
+  endif
+
+  ifneq ($(HAVE_VM_COMPILED),true)
     BASE_CFLAGS += -DNO_VM_COMPILED
-  endif
-  endif
   endif
 
   DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
