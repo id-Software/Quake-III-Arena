@@ -136,6 +136,8 @@ ifeq ($(PLATFORM),linux)
     ifeq ($(VM_PPC),)
       BASE_CFLAGS += -DNO_VM_COMPILED
     endif
+  else
+    BASE_CFLAGS += -DNO_VM_COMPILED
   endif
   endif
   endif
@@ -276,11 +278,15 @@ ifeq ($(PLATFORM),freebsd)
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
       -fomit-frame-pointer -fexpensive-optimizations
   else
+  ifeq ($(ARCH),i386)
     CC=gcc
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro \
       -march=pentium -fomit-frame-pointer -pipe -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -fno-strict-aliasing -fstrength-reduce
+  else
+    BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
   endif
 
   SHLIBEXT=so
