@@ -1,0 +1,19 @@
+Things to bear in mind when reading/updating this file:
+  * The status column refers only to the latest information we are given, so it may be out of date
+  * "working" doesn't necessarily mean "usable", see the notes column
+  * Status is one of "working", "broken" or "unknown"
+  * In the case of "broken" or "unknown" LKWR refers to the last known working revision
+
+Platform | Arch       | Status  | LKWR    | Notes
+---------+------------+---------+---------+------
+Linux    | gcc-x86    | working |         |
+         | gcc-x86_64 | working |         | x86_64 JIT bytecode compiler disabled by default
+         | gcc-ppc    | working |         | Dedicated server crashes in VM interpreter
+---------+------------+---------+---------+------
+Windows  | mingw-x86  | working |         |
+         | MSVC-x86   | unknown | 180ish? |
+---------+------------+---------+---------+------
+Mac OSX  | xcode-G3   | working |         |
+         | xcode-G4   | working |         | Client has severe graphical glitches
+---------+------------+---------+---------+------
+FreeBSD  | gcc-x86    | working |         |

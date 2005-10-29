@@ -1,4 +1,15 @@
-TODO: the Mac port seems stable, but outputs a bunch of warnings..
+2005-10-29 Various contributors
+	+ nasm syntax asm ported to gas
+	+ Disabled-by-default MD4 support
+	+ cons build system removed
+	+ Better FreeBSD support
+	+ Makefile generates dependencies
+	+ Some SDL sound tweaks
+	+ qvm build tools and qvms are now built with the rest of the binaries
+	+ q3asm-turbo from Phaethon
+	+ Moved various displaced c and h files into more appropriate places
+	+ A shitload (can I say shit?) of bug fixes -- see the svn log for details
+
 2005-09-22 Tim Angus <tim@ngus.net>
 	+ MinGW port
 

@@ -1,0 +1,5 @@
+* OpenAL patch
+* IPV6 support?
+* Clean platform specific stuff from lcc
+* Merge exotic ports from various kind contributors
+* Try and find a way to remove the DirectX SDK dependancy from the mingw build
