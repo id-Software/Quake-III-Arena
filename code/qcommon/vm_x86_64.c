@@ -59,8 +59,14 @@ long printsyscall(long* args)
 			args[4]);
 
 	switch( args[0] ) {
+	case 0:
 	case 1:
-		fputs((VMA(1)?VMA(1):"(NULL)\n"), stderr);
+		{
+			char * s = VMA(1)?VMA(1):"(NULL)\n";
+			fputs(s, stderr);
+			if(s[strlen(s)-1] != '\n')
+				putc('\n', stderr);
+		}
 		return 0;
 	case 999:
 		{
@@ -166,7 +172,7 @@ static long callAsmCall(long callProgramStack, long callSyscallNum)
 	vm_t *savedVM;
 	long ret = 0x77;
 	long args[11];
-	int iargs[11];
+//	int iargs[11];
 	int i;
 
 //	Dfprintf(stderr, "callAsmCall(%ld, %ld)\n", callProgramStack, callSyscallNum);
@@ -178,10 +184,10 @@ static long callAsmCall(long callProgramStack, long callSyscallNum)
 	currentVM->programStack = callProgramStack - 4;
 
 	args[0] = callSyscallNum;
-	iargs[0] = callSyscallNum;
+//	iargs[0] = callSyscallNum;
 	for(i = 0; i < 10; ++i)
 	{
-		iargs[i+1] = *(int *)((byte *)currentVM->dataBase + callProgramStack + 8 + 4*i);
+//		iargs[i+1] = *(int *)((byte *)currentVM->dataBase + callProgramStack + 8 + 4*i);
 		args[i+1] = *(int *)((byte *)currentVM->dataBase + callProgramStack + 8 + 4*i);
 	}
 	ret = currentVM->systemCall(args);
@@ -433,7 +439,7 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 	buf = FS_BuildOSPath(homedir->string, NULL, out);
 	strcpy(rout, buf);
 
-	Com_Printf("running assembler\n");
+	Com_Printf("running assembler < %s > %s\n", rin, rout);
 	pid = fork();
 	if(pid == -1)
 		Com_Error(ERR_FATAL, "can't fork\n");
@@ -496,6 +502,24 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 	return -1;
 }
 
+static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
+{
+	unsigned dataMask = currentVM->dataMask;
+
+	if ((dest & dataMask) != dest
+	|| (src & dataMask) != src
+	|| ((dest+count) & dataMask) != dest + count
+	|| ((src+count) & dataMask) != src + count)
+	{
+		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!\n");
+	}
+
+//	Com_Printf("OP_BLOCK_COPY %s %x %x %d\n", currentVM->name, dest, src, count);
+//	__asm__ __volatile__ ("int3");
+
+	memcpy(currentVM->dataBase+dest, currentVM->dataBase+src, count);
+}
+
 /*
 =================
 VM_Compile
@@ -510,8 +534,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	unsigned char barg = 0;
 	void* entryPoint;
 
-	char fn_s[MAX_QPATH]; // output file for assembler code
-	char fn_o[MAX_QPATH]; // file written by as
+	char fn_s[2*MAX_QPATH]; // output file for assembler code
+	char fn_o[2*MAX_QPATH]; // file written by as
 #ifdef DEBUG_VM
 	char fn_d[MAX_QPATH]; // disassembled
 #endif
@@ -627,7 +651,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("decl %%eax");
 				                           // first argument already in rdi
 				emit("movq %%rax, %%rsi"); // second argument in rsi
-				emit("movq $%ld, %%rax", (unsigned long)callAsmCall);
+				emit("movq $%lu, %%rax", (unsigned long)callAsmCall);
 				emit("callq *%%rax");
 				emit("pop %%r10");
 				emit("pop %%r9");
@@ -774,52 +798,23 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl %%eax, 0(%%r8,%%rbx, 1)"); // store in args space
 				break;
 			case OP_BLOCK_COPY:
-				if(iarg % 4) Com_Error(ERR_DROP,
-						"argument to OP_BLOCK_COPY not multiple of 4\n");
 
 				emit("subq $8, %%rsi");
-				emit("movl 8(%%rsi), %%ebx"); // get pointer from stack
-
-				emit("movl %%ebx, %%ecx");
-				RANGECHECK(ecx);
-				emit("cmp %%ebx, %%ecx");
-				emit("jne broken%d", instruction);
-
-				emit("movl %%ecx, %%edx");
-				emit("addl $%d, %%edx", iarg);
-				emit("addl $%d, %%ecx", iarg);
-				RANGECHECK(edx);
-				emit("cmp %%ecx, %%edx");
-				emit("jne broken%d", instruction);
-
-				emit("movl 4(%%rsi), %%eax"); // get pointer from stack
-
-				emit("movl %%eax, %%ecx");
-				RANGECHECK(ecx);
-				emit("cmp %%eax, %%ecx");
-				emit("jne broken%d", instruction);
-
-				emit("movl %%ecx, %%edx");
-				emit("addl $%d, %%edx", iarg);
-				emit("addl $%d, %%ecx", iarg);
-				RANGECHECK(edx);
-				emit("cmp %%ecx, %%edx");
-				emit("jne broken%d", instruction);
-
-				emit("addq %%r8, %%rax");     // calc real address
-				emit("addq %%r8, %%rbx");     // calc real address
-				emit("movl $%d, %%ecx", iarg);
-				emit("shrl $2, %%ecx");
-				emit("block_copy_loop_%d:", instruction);
-				emit("decl %%ecx");
-				emit("movl 0(%%rbx, %%rcx, 4), %%edx");
-				emit("movl %%edx, 0(%%rax, %%rcx, 4)");
-				emit("orl %%ecx, %%ecx");
-				emit("jnz block_copy_loop_%d", instruction);
-				emit("jmp i_%08x", instruction+1);
-
-				emit("broken%d:", instruction);
-				emit("int3");
+				emit("push %%rsi");
+				emit("push %%rdi");
+				emit("push %%r8");
+				emit("push %%r9");
+				emit("push %%r10");
+				emit("movl 4(%%rsi), %%edi");  // 1st argument dest
+				emit("movl 8(%%rsi), %%esi");  // 2nd argument src
+				emit("movl $%d, %%edx", iarg); // 3rd argument count
+				emit("movq $%lu, %%rax", (unsigned long)block_copy_vm);
+				emit("callq *%%rax");
+				emit("pop %%r10");
+				emit("pop %%r9");
+				emit("pop %%r8");
+				emit("pop %%rdi");
+				emit("pop %%rsi");
 
 				break;
 			case OP_SEX8:
@@ -1010,6 +1005,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 #endif
 
 	Com_Printf( "VM file %s compiled to %i bytes of code (0x%lx - 0x%lx)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
+
+#if 0
+	if(!com_developer->integer)
+	{
+		unlink(fn_o);
+		unlink(fn_s);
+	}
+#endif
 }
 
 /*
@@ -1112,7 +1115,7 @@ int testops(vm_t* vm)
 	int i1, i2, vmres;
 	int i;
 	float f1, f2, fres, fvmres;
-	int numitests = 26;
+	int numitests = 32;
 	int numftests = 11;
 	int ret = 0;
 	int testno;
@@ -1209,14 +1212,10 @@ void VM_VmInfo_f( void );
 
 int main(int argc, char* argv[])
 {
-	size_t size;
-	vmHeader_t *header;
 	vm_t* vm[3];
-	unsigned dataLength;
 	int i;
 	long args[11] = {0};
 	int ret = 0xDEADBEEF;
-	char* mem;
 
 	char* file = argv[1];
 
@@ -1229,8 +1228,6 @@ int main(int argc, char* argv[])
 	*strchr(module, '.') = '\0';
 
 	vm[0] = VM_Create( module, printsyscall, interpret );
-	vm[1] = VM_Create( module, printsyscall, interpret );
-	vm[2] = VM_Create( module, printsyscall, interpret );
 
 	VM_VmInfo_f();
 
@@ -1242,16 +1239,10 @@ int main(int argc, char* argv[])
 		}
 
 		ret  = VM_Call(vm[0], args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		ret += VM_Call(vm[1], args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		ret += VM_Call(vm[2], args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 	}
 	else
 	{
 		ret = testops(vm[0]);
-		ret += testops(vm[1]);
-		ret += testops(vm[2]);
-		ret += testops(vm[1]);
-		ret += testops(vm[0]);
 	}
 
 
