@@ -153,7 +153,7 @@ float	Q_crandom( int *seed ) {
 	return 2.0 * ( Q_random( seed ) - 0.5 );
 }
 
-#ifdef __LCC__
+#ifdef Q3_VM
 
 int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2]) {
@@ -739,7 +739,7 @@ int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 // if not GNU x86 and configured to use asm
 #if !( (defined __GNUC__) && (defined __i386__) && (!defined C_ONLY))
 
-#if defined __LCC__ || defined C_ONLY || !id386 || defined __VECTORC
+#if defined Q3_VM || defined C_ONLY || !id386 || defined __VECTORC
 
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {

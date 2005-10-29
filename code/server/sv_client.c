@@ -231,7 +231,7 @@ void SV_DirectConnect( netadr_t from ) {
 	char		userinfo[MAX_INFO_STRING];
 	int			i;
 	client_t	*cl, *newcl;
-	MAC_STATIC client_t	temp;
+	client_t	temp;
 	sharedEntity_t *ent;
 	int			clientNum;
 	int			version;

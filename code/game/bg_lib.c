@@ -1257,7 +1257,7 @@ reswitch:
 			break;
 		case 'f':
 			AddFloat( &buf_p, *(double *)arg, width, prec );
-#ifdef __LCC__
+#ifdef Q3_VM
 			arg += 1;	// everything is 32 bit in my compiler
 #else
 			arg += 2;

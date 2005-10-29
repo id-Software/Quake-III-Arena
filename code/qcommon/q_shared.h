@@ -105,7 +105,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 // this is the define for determining if we have an asm version of a C function
-#if (defined _M_IX86 || defined __i386__) && !defined __sun  && !defined __LCC__
+#if (defined _M_IX86 || defined __i386__) && !defined __sun  && !defined Q3_VM
 #define id386	1
 #else
 #define id386	0
@@ -134,8 +134,6 @@ float	FloatSwap (const float *f);
 //======================= WIN32 DEFINES =================================
 
 #ifdef WIN32
-
-#define	MAC_STATIC
 
 #undef QDECL
 #define	QDECL	__cdecl
@@ -184,7 +182,6 @@ static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
 
 #if defined(MACOS_X)
 
-#define MAC_STATIC
 #define __cdecl
 #define __declspec(x)
 #define stricmp strcasecmp
@@ -239,7 +236,6 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 #ifdef __MACOS__
 
 #include <MacTypes.h>
-#define	MAC_STATIC
 #define ID_INLINE inline 
 
 #define	CPUSTRING	"MacOS-PPC"
@@ -266,7 +262,6 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 // bk001205 - from Makefile
 #define stricmp strcasecmp
 
-#define	MAC_STATIC // bk: FIXME
 #define ID_INLINE inline 
 
 #ifdef __i386__
@@ -291,14 +286,6 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 
 #define	PATH_SEP '/'
 
-// bk001205 - try
-#ifdef Q3_STATIC
-#define	GAME_HARD_LINKED
-#define	CGAME_HARD_LINKED
-#define	UI_HARD_LINKED
-#define	BOTLIB_HARD_LINKED
-#endif
-
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
 inline static short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
@@ -322,7 +309,6 @@ inline static float LittleFloat (const float l) { return FloatSwap(&l); }
 
 #define stricmp strcasecmp
 
-#define MAC_STATIC
 #define ID_INLINE inline 
 
 #ifdef __i386__
@@ -364,7 +350,6 @@ static float LittleFloat (const float l) { return FloatSwap(&l); }
 // bk001205 - from Makefile
 #define stricmp strcasecmp
 
-#define MAC_STATIC
 #define ID_INLINE inline 
 
 #ifdef __i386__
@@ -374,14 +359,6 @@ static float LittleFloat (const float l) { return FloatSwap(&l); }
 #endif
 
 #define	PATH_SEP '/'
-
-// bk001205 - try
-#ifdef Q3_STATIC
-#define	GAME_HARD_LINKED
-#define	CGAME_HARD_LINKED
-#define	UI_HARD_LINKED
-#define	BOTLIB_HARD_LINKED
-#endif
 
 #if defined(_LITTLE_ENDIAN)
 inline static short BigShort( short l) { return ShortSwap(l); }
@@ -703,7 +680,7 @@ void ByteToDir( int b, vec3_t dir );
 
 #endif
 
-#ifdef __LCC__
+#ifdef Q3_VM
 #ifdef VectorCopy
 #undef VectorCopy
 // this is a little hack to get more efficient copies in our interpreter
@@ -738,7 +715,7 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs );
 void ClearBounds( vec3_t mins, vec3_t maxs );
 void AddPointToBounds( const vec3_t v, vec3_t mins, vec3_t maxs );
 
-#ifndef __LCC__
+#ifndef Q3_VM
 static ID_INLINE int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2]) {
 		return 0;
