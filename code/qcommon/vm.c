@@ -543,7 +543,6 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 	Q_strncpyz( vm->name, module, sizeof( vm->name ) );
 	vm->systemCall = systemCalls;
 
-#if defined(HAVE_VM_NATIVE)
 	// never allow dll loading with a demo
 	if ( interpret == VMI_NATIVE ) {
 		if ( Cvar_VariableValue( "fs_restrict" ) ) {
@@ -562,12 +561,6 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 		Com_Printf( "Failed to load dll, looking for qvm.\n" );
 		interpret = VMI_COMPILED;
 	}
-#else
-	if ( interpret == VMI_NATIVE ) {
-		Com_Printf("Architecture doesn't support native dll's, using qvm\n");
-		interpret = VMI_COMPILED;
-	}
-#endif
 
 	// load the image
 	if( !( header = VM_LoadQVM( vm, qtrue ) ) ) {
@@ -581,7 +574,7 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 	// copy or compile the instructions
 	vm->codeLength = header->codeLength;
 
-#if !defined(HAVE_VM_COMPILED)
+#ifdef NO_VM_COMPILED
 	if(interpret >= VMI_COMPILED) {
 		Com_Printf("Architecture doesn't have a bytecode compiler, using interpreter\n");
 		interpret = VMI_BYTECODE;
@@ -747,7 +740,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
                             args[12], args[13], args[14], args[15]);
 	} else {
 #ifdef __i386__ // i386 calling convention doesn't need conversion
-#if defined(HAVE_VM_COMPILED)
+#ifndef NO_VM_COMPILED
 		if ( vm->compiled )
 			r = VM_CallCompiled( vm, (int*)&callnum );
 		else
@@ -766,7 +759,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 			a.args[i] = va_arg(ap, long);
 		}
 		va_end(ap);
-#if defined(HAVE_VM_COMPILED)
+#ifndef NO_VM_COMPILED
 		if ( vm->compiled )
 			r = VM_CallCompiled( vm, &a.callnum );
 		else
@@ -894,13 +887,3 @@ void VM_LogSyscalls( int *args ) {
 	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, (long)(args - (int *)currentVM->dataBase),
 		args[0], args[1], args[2], args[3], args[4] );
 }
-
-
-
-#ifdef DLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
-int	VM_CallCompiled( vm_t *vm, int *args ) {
-  return(0); 
-}
-
-void VM_Compile( vm_t *vm, vmHeader_t *header ) {}
-#endif // DLL_ONLY

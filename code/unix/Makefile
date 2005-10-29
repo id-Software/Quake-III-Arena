@@ -40,10 +40,6 @@ ifndef MOUNT_DIR
 MOUNT_DIR=..
 endif
 
-ifndef BUILD_FREETYPE
-BUILD_FREETYPE=0
-endif
-
 ifndef GENERATE_DEPENDENCIES
 GENERATE_DEPENDENCIES=1
 endif
@@ -70,7 +66,6 @@ BLIBDIR=$(MOUNT_DIR)/botlib
 NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
-#FTDIR=$(MOUNT_DIR)/ft2
 JPDIR=$(MOUNT_DIR)/jpeg-6
 SPLNDIR=$(MOUNT_DIR)/splines
 
@@ -83,7 +78,6 @@ VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
 #############################################################################
 
 ## Defaults
-DLL_ONLY=false
 USE_SDL=true
 VM_PPC=
 
@@ -115,11 +109,6 @@ ifeq ($(PLATFORM),linux)
 
   BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
 
-  # rcg010216: DLL_ONLY for PPC
-  ifeq ($(strip $(DLL_ONLY)),true)
-    BASE_CFLAGS += -DDLL_ONLY
-  endif
-
   ifeq ($(strip $(USE_SDL)),true)
     BASE_CFLAGS += -DUSE_SDL=1 $(shell sdl-config --cflags)
     GL_CFLAGS =
@@ -129,30 +118,29 @@ ifeq ($(PLATFORM),linux)
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
     -fno-strict-aliasing
-  BASE_CFLAGS += -DHAVE_VM_NATIVE
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -fno-strict-aliasing
-# experimental! you need as
-#    BASE_CFLAGS += -DHAVE_VM_COMPILED
+    # comment out below line to enable the
+    # experimental x86_64 jit compiler! you need as
+    BASE_CFLAGS += -DNO_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -fno-strict-aliasing -fstrength-reduce
-    BASE_CFLAGS += -DHAVE_VM_COMPILED
   else
   ifeq ($(ARCH),ppc)
-    ifneq ($(VM_PPC),)
-      BASE_CFLAGS += -DHAVE_VM_COMPILED
+    ifeq ($(VM_PPC),)
+      BASE_CFLAGS += -DNO_VM_COMPILED
     endif
   endif
   endif
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -DNO_MOUSEGRAB -O0
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
@@ -162,13 +150,6 @@ ifeq ($(PLATFORM),linux)
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
-
-  DEBUG_CFLAGS += -DHAVE_EXECINFO_H
-  ifeq ($(BUILD_FREETYPE),1)
-    RELEASE_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
-    DEBUG_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
-    LDFLAGS += $(shell pkg-config --libs freetype2)
-  endif
 
   ifeq ($(strip $(USE_SDL)),true)
     GLLDFLAGS=$(shell sdl-config --libs)
@@ -224,10 +205,6 @@ ifeq ($(PLATFORM),mingw32)
 
   BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
 
-  ifeq ($(strip $(DLL_ONLY)),true)
-    BASE_CFLAGS += -DDLL_ONLY
-  endif
-
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
 
   GL_CFLAGS =
@@ -235,7 +212,6 @@ ifeq ($(PLATFORM),mingw32)
 
   OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 \
     -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
-  BASE_CFLAGS += -DHAVE_VM_NATIVE -DHAVE_VM_COMPILED
 
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
 
@@ -249,12 +225,6 @@ ifeq ($(PLATFORM),mingw32)
 
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
-
-  ifeq ($(BUILD_FREETYPE),1)
-    RELEASE_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
-    DEBUG_CFLAGS += $(shell pkg-config --cflags freetype2) -DBUILD_FREETYPE
-    LDFLAGS += $(shell pkg-config --libs freetype2)
-  endif
 
   ifeq ($(ARCH),x86)
     # build 32bit
@@ -302,6 +272,7 @@ ifeq ($(PLATFORM),freebsd)
 
   ifeq ($(ARCH),axp)
     CC=gcc
+    BASE_CFLAGS += -DNO_VM_COMPILED
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
       -fomit-frame-pointer -fexpensive-optimizations
   else
@@ -356,7 +327,7 @@ ifeq ($(PLATFORM),irix)
 
   CC=cc
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 -mips3 \
-    -nostdinc -I. -I$(ROOT)/usr/include
+    -nostdinc -I. -I$(ROOT)/usr/include -DNO_VM_COMPILED
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
@@ -377,7 +348,7 @@ else # ifeq IRIX
 #############################################################################
 
   CC=cc
-  BASE_CFLAGS=
+  BASE_CFLAGS=-DNO_VM_COMPILED
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3
 
@@ -441,7 +412,6 @@ makedirs:
 	@if [ ! -d $(B)/client ];then mkdir $(B)/client;fi
 	@if [ ! -d $(B)/ded ];then mkdir $(B)/ded;fi
 	@if [ ! -d $(B)/ref ];then mkdir $(B)/ref;fi
-	@if [ ! -d $(B)/ft2 ];then mkdir $(B)/ft2;fi
 	@if [ ! -d $(B)/baseq3 ];then mkdir $(B)/baseq3;fi
 	@if [ ! -d $(B)/baseq3/cgame ];then mkdir $(B)/baseq3/cgame;fi
 	@if [ ! -d $(B)/baseq3/game ];then mkdir $(B)/baseq3/game;fi
@@ -1358,7 +1328,7 @@ $(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
 $(B)/baseq3/cgame/%.o: $(CGDIR)/%.c
 	$(DO_SHLIB_CC)
 
-$(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC) 
+$(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
 	$(DO_Q3LCC)
 
 $(B)/missionpack/cgame/%.o: $(CGDIR)/%.c

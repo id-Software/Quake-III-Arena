@@ -1106,7 +1106,6 @@ VM_CallCompiled
 This function is called directly by the generated code
 ==============
 */
-#ifndef DLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
 int	VM_CallCompiled( vm_t *vm, int *args ) {
 	int		stack[1024];
 	int		programCounter;
@@ -1206,6 +1205,3 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 
 	return *(int *)opStack;
 }
-#endif // !DLL_ONLY
-
-
