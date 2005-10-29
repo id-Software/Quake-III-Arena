@@ -7,6 +7,12 @@ else
   BINEXT=
 endif
 
+ifeq ($(PLATFORM),SunOS)
+  INSTALL=ginstall
+else
+  INSTALL=install
+endif
+
 CC=gcc
 Q3ASM_CFLAGS=-O2 -Wall -Werror -fno-strict-aliasing
 
@@ -19,7 +25,7 @@ clean:
 	rm -f q3asm *~ *.o
 
 install: default
-	install -s -m 0755 q3asm$(BINEXT) ../
+	$(INSTALL) -s -m 0755 q3asm$(BINEXT) ../
 
 uninstall:
 	rm -f ../q3asm$(BINEXT)

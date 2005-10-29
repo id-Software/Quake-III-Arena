@@ -45,6 +45,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #import <net/if_dl.h>         // for 'struct sockaddr_dl'
 #endif
 
+#ifdef __sun
+#include <sys/filio.h>
+#endif
+
 static cvar_t	*noudp;
 
 netadr_t	net_local_adr;

@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 **
 */
 
-#if !USE_SDL
+#if !USE_SDL_VIDEO
 
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -68,8 +68,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
+#if !defined(__sun)
 #include <X11/extensions/xf86dga.h>
 #include <X11/extensions/xf86vmode.h>
+#endif
+
+#if defined(__sun)
+#include <X11/Sunkeysym.h>
+#endif
+
+#ifdef _XF86DGA_H_
+#define HAVE_XF86DGA
+#endif
 
 #define	WINDOW_CLASS_NAME	"Quake III: Arena"
 
@@ -121,14 +131,18 @@ cvar_t  *r_allowSoftwareGL;   // don't abort out if the pixelformat claims softw
 cvar_t  *r_previousglDriver;
 
 qboolean vidmode_ext = qfalse;
+#ifdef HAVE_XF86DGA
 static int vidmode_MajorVersion = 0, vidmode_MinorVersion = 0; // major and minor of XF86VidExtensions
 
 // gamma value of the X display before we start playing with it
 static XF86VidModeGamma vidmode_InitialGamma;
+#endif /* HAVE_XF86DGA */
 
 static int win_x, win_y;
 
+#ifdef HAVE_XF86DGA
 static XF86VidModeModeInfo **vidmodes;
+#endif /* HAVE_XF86DGA */
 //static int default_dotclock_vidmode; // bk001204 - unused
 static int num_vidmodes;
 static qboolean vidmode_active = qfalse;
@@ -398,6 +412,7 @@ static void install_grabs(void)
 
   if (in_dgamouse->value)
   {
+#ifdef HAVE_XF86DGA
     int MajorVersion, MinorVersion;
 
     if (!XF86DGAQueryVersion(dpy, &MajorVersion, &MinorVersion))
@@ -410,6 +425,7 @@ static void install_grabs(void)
       XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
       XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
     }
+#endif /* HAVE_XF86DGA */
   } else
   {
     mwx = glConfig.vidWidth / 2;
@@ -431,7 +447,9 @@ static void uninstall_grabs(void)
   {
 		if (com_developer->value)
 			ri.Printf( PRINT_ALL, "DGA Mouse - Disabling DGA DirectVideo\n" );
+#ifdef HAVE_XF86DGA
     XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
+#endif /* HAVE_XF86DGA */
   }
 
   XChangePointerControl(dpy, qtrue, qtrue, mouse_accel_numerator, 
@@ -741,6 +759,7 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 {
   // NOTE TTimo we get the gamma value from cvar, because we can't work with the s_gammatable
   //   the API wasn't changed to avoid breaking other OSes
+#ifdef HAVE_XF86DGA
   float g = Cvar_Get("r_gamma", "1.0", 0)->value;
   XF86VidModeGamma gamma;
   assert(glConfig.deviceSupportsGamma);
@@ -748,6 +767,7 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
   gamma.green = g;
   gamma.blue = g;
   XF86VidModeSetGamma(dpy, scrnum, &gamma);
+#endif /* HAVE_XF86DGA */
 }
 
 /*
@@ -773,12 +793,14 @@ void GLimp_Shutdown( void )
       qglXDestroyContext(dpy, ctx);
     if (win)
       XDestroyWindow(dpy, win);
+#ifdef HAVE_XF86DGA
     if (vidmode_active)
       XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
     if (glConfig.deviceSupportsGamma)
     {
       XF86VidModeSetGamma(dpy, scrnum, &vidmode_InitialGamma);
     }
+#endif /* HAVE_XF86DGA */
     // NOTE TTimo opening/closing the display should be necessary only once per run
     //   but it seems QGL_Shutdown gets called in a lot of occasion
     //   in some cases, this XCloseDisplay is known to raise some X errors
@@ -909,18 +931,23 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
   actualHeight = glConfig.vidHeight;
 
   // Get video mode list
+#ifdef HAVE_XF86DGA
   if (!XF86VidModeQueryVersion(dpy, &vidmode_MajorVersion, &vidmode_MinorVersion))
   {
+#endif /* HAVE_XF86DGA */
     vidmode_ext = qfalse;
+#ifdef HAVE_XF86DGA
   } else
   {
     ri.Printf(PRINT_ALL, "Using XFree86-VidModeExtension Version %d.%d\n",
               vidmode_MajorVersion, vidmode_MinorVersion);
     vidmode_ext = qtrue;
   }
+#endif /* HAVE_XF86DGA */
 
   // Check for DGA	
   dga_MajorVersion = 0, dga_MinorVersion = 0;
+#ifdef HAVE_XF86DGA
   if (in_dgamouse->value)
   {
     if (!XF86DGAQueryVersion(dpy, &dga_MajorVersion, &dga_MinorVersion))
@@ -934,7 +961,9 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
                  dga_MajorVersion, dga_MinorVersion);
     }
   }
+#endif /* HAVE_XF86DGA */      
 
+#ifdef HAVE_XF86DGA
   if (vidmode_ext)
   {
     int best_fit, best_dist, dist, x, y;
@@ -988,6 +1017,7 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
       ri.Printf(PRINT_ALL, "XFree86-VidModeExtension:  Ignored on non-fullscreen/Voodoo\n");
     }
   }
+#endif /* HAVE_XF86DGA */
 
 
   if (!r_colorbits->value)
@@ -1286,6 +1316,7 @@ static void GLW_InitGamma(void)
   
   glConfig.deviceSupportsGamma = qfalse;
 
+#ifdef HAVE_XF86DGA
   if (vidmode_ext)
   {
     if (vidmode_MajorVersion < GAMMA_MINMAJOR || 
@@ -1297,6 +1328,7 @@ static void GLW_InitGamma(void)
     ri.Printf( PRINT_ALL, "XF86 Gamma extension initialized\n");
     glConfig.deviceSupportsGamma = qtrue;
   }
+#endif /* HAVE_XF86DGA */
 }
 
 /*
@@ -1768,10 +1800,10 @@ void Sys_SendKeyEvents (void) {
 // bk010216 - added stubs for non-Linux UNIXes here
 // FIXME - use NO_JOYSTICK or something else generic
 
-#if defined( __FreeBSD__ ) // rb010123
+#if (defined( __FreeBSD__ ) || defined( __sun)) // rb010123
 void IN_StartupJoystick( void ) {}
 void IN_JoyMove( void ) {}
 #endif
 
-#endif  // !USE_SDL
+#endif  // !USE_SDL_VIDEO
 

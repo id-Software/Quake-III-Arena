@@ -49,6 +49,10 @@ ifndef DXSDK_DIR
 DXSDK_DIR=C:/DXSDK
 endif
 
+ifndef USE_SDL
+USE_SDL=true
+endif
+
 #############################################################################
 
 BD=debug$(ARCH)$(GLIBC)
@@ -78,11 +82,7 @@ VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
 #############################################################################
 
 ## Defaults
-USE_SDL=true
 VM_PPC=
-
-# bk010215 - TODO - add all defaults / kill Ryan
-
 
 LIB=lib
 ifeq ($(PLATFORM),linux)
@@ -110,7 +110,7 @@ ifeq ($(PLATFORM),linux)
   BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
 
   ifeq ($(strip $(USE_SDL)),true)
-    BASE_CFLAGS += -DUSE_SDL=1 $(shell sdl-config --cflags)
+    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
     GL_CFLAGS =
   else
     GL_CFLAGS = -I/usr/X11R6/include
@@ -352,6 +352,117 @@ ifeq ($(PLATFORM),irix)
 else # ifeq IRIX
 
 #############################################################################
+# SETUP AND BUILD -- SunOS
+#############################################################################
+
+ifeq ($(PLATFORM),SunOS)
+
+  GLIBC= #libc is irrelevant
+  CC=gcc
+  CXX=g++
+  COPYDIR="/usr/local/share/games/quake3"
+
+  ifneq (,$(findstring i86pc,$(shell uname -m)))
+    ARCH=i386
+  else #default to sparc
+    ARCH=sparc
+  endif
+
+  ifneq ($(ARCH),i386)
+    ifneq ($(ARCH),sparc)
+      $(error arch $(ARCH) is currently not supported)
+    endif
+  endif
+
+
+  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+
+  ifeq ($(strip $(USE_SDL)),true)
+    BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
+    GL_CFLAGS =
+  else
+    GL_CFLAGS = -I/usr/openwin/include
+  endif
+
+  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
+    -fno-strict-aliasing
+  BASE_CFLAGS += -DNO_VM_COMPILED
+
+  ifeq ($(ARCH),sparc)
+    OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
+      -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
+      -fno-strict-aliasing
+  else
+  ifeq ($(ARCH),i386)
+    OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
+      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+      -fno-strict-aliasing -fstrength-reduce
+  endif
+  endif
+
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
+
+  SHLIBEXT=so
+  SHLIBCFLAGS=-fPIC
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+
+  THREAD_LDFLAGS=-lpthread
+  LDFLAGS=-lsocket -lnsl -ldl -lm
+
+  ifeq ($(strip $(USE_SDL)),true)
+    GLLDFLAGS=$(shell sdl-config --libs) -lGLU -lX11 -lXext
+  else
+    GLLDFLAGS=-L/usr/openwin/$(LIB) -lGLU -lX11 -lXext
+  endif
+
+  ifeq ($(ARCH),i386)
+    # linux32 make ...
+    BASE_CFLAGS += -m32
+    LDFLAGS+=-m32
+  endif
+
+  ifeq ($(ARCH),sparc)
+    TARGETS=\
+      $(B)/$(PLATFORM)quake3 \
+      $(B)/$(PLATFORM)q3ded \
+      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
+#      $(B)/$(PLATFORM)quake3-smp
+  else
+    TARGETS=\
+      $(B)/$(PLATFORM)quake3 \
+      $(B)/$(PLATFORM)q3ded \
+      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
+#      $(B)/$(PLATFORM)quake3-smp
+
+  endif
+
+else # ifeq SunOS
+
+#############################################################################
 # SETUP AND BUILD -- GENERIC
 #############################################################################
 
@@ -371,6 +482,7 @@ endif #Linux
 endif #mingw32
 endif #FreeBSD
 endif #IRIX
+endif #SunOS
 
 ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
@@ -699,8 +811,41 @@ else
     Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
     Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
   endif
-
 endif #Linux-axp
+else
+ifeq ($(PLATFORM),SunOS)
+  Q3POBJ=\
+    $(B)/client/unix_main.o \
+    $(B)/client/unix_net.o \
+    $(B)/client/unix_shared.o \
+    $(B)/client/linux_signals.o \
+    $(B)/client/linux_common.o \
+    $(B)/client/linux_qgl.o \
+    $(B)/client/linux_glimp.o \
+    $(B)/client/linux_snd.o \
+    $(B)/client/sdl_snd.o \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+
+  Q3POBJ_SMP=\
+    $(B)/client/unix_main.o \
+    $(B)/client/unix_net.o \
+    $(B)/client/unix_shared.o \
+    $(B)/client/linux_signals.o \
+    $(B)/client/linux_common.o \
+    $(B)/client/linux_qgl.o \
+    $(B)/client/linux_glimp_smp.o \
+    $(B)/client/linux_snd.o \
+    $(B)/client/sdl_snd.o \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o
+
+  ifeq ($(ARCH),i386)
+    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
+    Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
+  endif
+
+endif #SunOS
 endif #Linux
 endif #mingw32
 endif #IRIX

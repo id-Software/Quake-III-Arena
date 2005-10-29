@@ -76,7 +76,7 @@ int Sys_Milliseconds (void)
 	return curtime;
 }
 
-#if (defined(__linux__) || defined(__FreeBSD__)) && !defined(DEDICATED)
+#if (defined(__linux__) || defined(__FreeBSD__) || defined(__sun)) && !defined(DEDICATED)
 /*
 ================
 Sys_XTimeToSysTime

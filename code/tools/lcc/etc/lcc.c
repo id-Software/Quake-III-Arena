@@ -48,7 +48,9 @@ extern char *stringf(const char *, ...);
 extern int suffix(char *, char *[], int);
 extern char *tempname(char *);
 
+#ifndef __sun
 extern int getpid(void);
+#endif
 
 extern char *cpp[], *include[], *com[], *as[],*ld[], inputs[], *suffixes[];
 extern int option(char *);
@@ -95,15 +97,14 @@ void AddLCCDirToPath( const char *lccBinary )
 	if( p )
 	{
 		*p = '\0';
-		strncpy( path, "PATH=", 4096 );
-		strncat( path, getenv( "PATH" ), 4096 );
 #ifdef _WIN32
+		strncpy( path, "PATH=", 4096 );
 		strncat( path, ";", 4096 );
 		strncat( path, basepath, 4096 );
 		_putenv( path );
 #else
-		strncat( path, ":", 4096 );
-		strncat( path, basepath, 4096 );
+/* Ugly workaround against execvp problem/limitation on Solaris 10 */
+		snprintf( path, 4096, "PATH=%s:%s", basepath, getenv( "PATH" ) );
 		putenv( path );
 #endif
 	}
@@ -252,7 +253,9 @@ char *basepath(char *name) {
 #include <process.h>
 #else
 #define _P_WAIT 0
+#ifndef __sun
 extern int fork(void);
+#endif
 extern int wait(int *);
 
 static int _spawnvp(int mode, const char *cmdname, char *argv[]) {

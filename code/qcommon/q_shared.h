@@ -105,7 +105,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 // this is the define for determining if we have an asm version of a C function
-#if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
+#if (defined _M_IX86 || defined __i386__) && !defined __sun  && !defined __LCC__
 #define id386	1
 #else
 #define id386	0
@@ -351,6 +351,52 @@ static short LittleShort(short l) { return ShortSwap(l); }
 static int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
 static float LittleFloat (const float l) { return FloatSwap(&l); }
+#endif
+
+#endif
+
+//======================= SUNOS DEFINES =================================
+
+#ifdef __sun
+
+#include <sys/isa_defs.h>
+
+// bk001205 - from Makefile
+#define stricmp strcasecmp
+
+#define MAC_STATIC
+#define ID_INLINE inline 
+
+#ifdef __i386__
+#define	CPUSTRING	"Solaris-i386"
+#elif defined __sparc
+#define	CPUSTRING	"Solaris-sparc"
+#endif
+
+#define	PATH_SEP '/'
+
+// bk001205 - try
+#ifdef Q3_STATIC
+#define	GAME_HARD_LINKED
+#define	CGAME_HARD_LINKED
+#define	UI_HARD_LINKED
+#define	BOTLIB_HARD_LINKED
+#endif
+
+#if defined(_LITTLE_ENDIAN)
+inline static short BigShort( short l) { return ShortSwap(l); }
+#define LittleShort
+inline static int BigLong(int l) { return LongSwap(l); }
+#define LittleLong
+inline static float BigFloat(const float l) { return FloatSwap(&l); }
+#define LittleFloat
+#else /* Must be _BIG_ENDIAN */
+#define BigShort
+inline static short LittleShort(short l) { return ShortSwap(l); }
+#define BigLong
+inline static int LittleLong (int l) { return LongSwap(l); }
+#define BigFloat
+inline static float LittleFloat (const float l) { return FloatSwap(&l); }
 #endif
 
 #endif

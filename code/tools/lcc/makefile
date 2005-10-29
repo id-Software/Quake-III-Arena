@@ -25,6 +25,12 @@ BUILDDIR=build
 TSTDIR=$(BUILDDIR)/$(TARGET)/tst
 BD=$(BUILDDIR)/
 T=$(TSTDIR)/
+ifeq ($(PLATFORM),SunOS)
+  INSTALL=ginstall
+HOSTFILE=etc/gcc-solaris.c
+else
+  INSTALL=install
+endif
 
 # $Id: makefile 145 2001-10-17 21:53:10Z timo $
 
@@ -237,9 +243,9 @@ testclean:
 	$(RM) $(T)yacc$(E) $(T)yacc.s $(T)yacc.2 $(T)yacc.1
 
 install::	all
-	install -s -m 0755 $(BD)q3lcc$(E) ../
-	install -s -m 0755 $(BD)q3cpp$(E) ../
-	install -s -m 0755 $(BD)q3rcc$(E) ../
+	$(INSTALL) -s -m 0755 $(BD)q3lcc$(E) ../
+	$(INSTALL) -s -m 0755 $(BD)q3cpp$(E) ../
+	$(INSTALL) -s -m 0755 $(BD)q3rcc$(E) ../
 
 uninstall::
 	-$(RM) ../q3lcc$(E)

@@ -1,4 +1,4 @@
-#if USE_SDL
+#if USE_SDL_SOUND
 
 /*
  * SDL implementation for Quake 3: Arena's GPL source release.
@@ -298,7 +298,7 @@ void SNDDMA_BeginPainting (void)
     SDL_LockAudio();
 }
 
-#endif  // USE_SDL
+#endif  // USE_SDL_SOUND
 
 // end of linux_snd_sdl.c ...
 

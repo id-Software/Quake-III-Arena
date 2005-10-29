@@ -47,6 +47,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #include <fpu_control.h> // bk001213 - force dumps on divide by zero
 #endif
 
+#if defined(__sun)
+  #include <sys/file.h>
+#endif
+
 // FIXME TTimo should we gard this? most *nix system should comply?
 #include <termios.h>
 
@@ -391,7 +395,7 @@ void Sys_Init(void)
 #else
   Cvar_Set( "arch", "freebsd unknown" );
 #endif
-#elif defined __sun__
+#elif defined(__sun)
 #if defined __i386__
   Cvar_Set( "arch", "solaris x86" );
 #elif defined __sparc__
@@ -801,6 +805,8 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   snprintf (fname, sizeof(fname), "%shppa.so", name);
 #elif defined __sh__
   snprintf (fname, sizeof(fname), "%ssh.so", name);
+#elif defined __sparc__
+  snprintf (fname, sizeof(fname), "%ssparc.so", name);
 #else
 #error Unknown arch
 #endif

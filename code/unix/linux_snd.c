@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#if !USE_SDL
+#if !USE_SDL_SOUND
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -290,5 +290,5 @@ void SNDDMA_BeginPainting (void)
 {
 }
 
-#endif // !USE_SDL
+#endif // !USE_SDL_SOUND
 

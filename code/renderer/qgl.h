@@ -57,6 +57,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <GL/fxmesa.h>
 #endif
 
+#elif defined( __sun )
+#include <GL/gl.h>
+#include <GL/glx.h>
+
 #else
 
 #include <gl.h>
@@ -76,6 +80,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /*
 ** multitexture extension definitions
 */
+#if !defined(__sun)
 #define GL_ACTIVE_TEXTURE_ARB               0x84E0
 #define GL_CLIENT_ACTIVE_TEXTURE_ARB        0x84E1
 #define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
@@ -84,9 +89,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GL_TEXTURE1_ARB                     0x84C1
 #define GL_TEXTURE2_ARB                     0x84C2
 #define GL_TEXTURE3_ARB                     0x84C3
+#else
+#define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
+#endif /* defined(__sun) */
 
 // NOTE: some Linux platforms would need those prototypes
-#if defined(MACOS_X)
+#if defined(MACOS_X) || defined(__sun)
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1DARBPROC) (GLenum target, GLdouble s);
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1DVARBPROC) (GLenum target, const GLdouble *v);
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1FARBPROC) (GLenum target, GLfloat s);
@@ -152,7 +160,7 @@ extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 //===========================================================================
 
 // non-windows systems will just redefine qgl* to gl*
-#if !defined( _WIN32 ) && !defined(MACOS_X) && !defined( __linux__ ) && !defined( __FreeBSD__ ) // rb010123
+#if !defined( _WIN32 ) && !defined(MACOS_X) && !defined( __linux__ ) && !defined( __FreeBSD__ ) && !defined(__sun) // rb010123
 
 #include "qgl_linked.h"
 
@@ -539,7 +547,7 @@ extern BOOL ( WINAPI * qwglSwapIntervalEXT)( int interval );
 
 #endif	// _WIN32
 
-#if ( (defined __linux__ )  || (defined __FreeBSD__ ) ) // rb010123
+#if ( (defined __linux__ )  || (defined __FreeBSD__ ) || (defined __sun) ) // rb010123
 
 //FX Mesa Functions
 // bk001129 - from cvs1.17 (mkv)
@@ -560,7 +568,7 @@ extern Bool (*qglXMakeCurrent)( Display *dpy, GLXDrawable drawable, GLXContext c
 extern void (*qglXCopyContext)( Display *dpy, GLXContext src, GLXContext dst, GLuint mask );
 extern void (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
 
-#endif // __linux__ || __FreeBSD__ // rb010123
+#endif // __linux__ || __FreeBSD__ || __sun // rb010123
 
 #endif	// _WIN32 && __linux__
 

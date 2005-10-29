@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "q_shared.h"
 #include "qcommon.h"
 #include <setjmp.h>
-#if defined __linux__ || defined MACOS_X || defined __FreeBSD__
+#if defined __linux__ || defined MACOS_X || defined __FreeBSD__ || defined __sun
 #include <netinet/in.h>
 #else
 #include <winsock.h>

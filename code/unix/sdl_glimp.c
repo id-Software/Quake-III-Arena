@@ -1,5 +1,5 @@
 
-#if USE_SDL
+#if USE_SDL_VIDEO
 
 /*
  * SDL implementation for Quake 3: Arena's GPL source release.
@@ -1406,7 +1406,7 @@ void IN_JoyMove( void )
     stick_state.oldaxes = axes;
 }
 
-#endif  // USE_SDL
+#endif  // USE_SDL_VIDEO
 
 // end of linux_glimp_sdl.c ...
 
