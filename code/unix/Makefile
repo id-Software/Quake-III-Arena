@@ -854,10 +854,6 @@ endif #FreeBSD
 $(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS)
 
-# TTimo: splines code requires C++ linking, but splines have
-# not been officially included in the codebase
-#	$(CXX)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS)
-
 $(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(GLLDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS)
@@ -1534,12 +1530,11 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
 # MISC
 #############################################################################
 
-copyfiles:
-	@if [ ! -d $(COPYDIR) ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
-	-mkdir -p -m 0755 $(COPYDIR)
-	install -s -m 0755 $(BR)/linuxquake3 $(COPYDIR)/quake3
-	#install -s -m 0755 $(BR)/linuxquake3-smp $(COPYDIR)/quake3-smp
-	install -s -m 0755 $(BR)/linuxq3ded $(COPYDIR)/q3ded
+copyfiles: build_release
+	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
+	install -s -m 0755 $(BR)/$(PLATFORM)quake3$(BINEXT) $(COPYDIR)/quake3
+	#install -s -m 0755 $(BR)/$(PLATFORM)quake3-smp$(BINEXT) $(COPYDIR)/quake3-smp
+	install -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded
 	-mkdir -p -m 0755 $(COPYDIR)/baseq3
 	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
