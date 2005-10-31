@@ -8,7 +8,7 @@ Platform | Arch       | Status  | LKWR    | Notes
 ---------+------------+---------+---------+------
 Linux    | gcc-x86    | working |         |
          | gcc-x86_64 | working |         | x86_64 JIT bytecode compiler disabled by default
-         | gcc-ppc    | working |         | Dedicated server crashes in VM interpreter
+         | gcc-ppc    | working |         |
 ---------+------------+---------+---------+------
 Windows  | mingw-x86  | working |         |
          | MSVC-x86   | unknown | 180ish? |
@@ -17,3 +17,8 @@ Mac OSX  | xcode-G3   | working |         |
          | xcode-G4   | working |         | Client has severe graphical glitches
 ---------+------------+---------+---------+------
 FreeBSD  | gcc-x86    | working |         |
+---------+------------+---------+---------+------
+Solaris  | gcc-x86    | broken  |         |
+         | gcc-sparc  | broken  |         |
+---------+------------+---------+---------+------
+IRIX     | cc-*       | broken  |         | Doesn't exist, should we drop it?
