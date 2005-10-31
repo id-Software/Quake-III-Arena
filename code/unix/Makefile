@@ -85,6 +85,10 @@ VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
 VM_PPC=
 
 LIB=lib
+
+INSTALL=install
+MKDIR=mkdir
+
 ifeq ($(PLATFORM),linux)
 
   GLIBC=-glibc
@@ -360,6 +364,8 @@ ifeq ($(PLATFORM),SunOS)
   GLIBC= #libc is irrelevant
   CC=gcc
   CXX=g++
+  INSTALL=ginstall
+  MKDIR=gmkdir
   COPYDIR="/usr/local/share/games/quake3"
 
   ifneq (,$(findstring i86pc,$(shell uname -m)))
@@ -528,23 +534,23 @@ all:build_debug build_release
 targets: $(TARGETS)
 
 makedirs:
-	@if [ ! -d $(B) ];then mkdir $(B);fi
-	@if [ ! -d $(B)/client ];then mkdir $(B)/client;fi
-	@if [ ! -d $(B)/ded ];then mkdir $(B)/ded;fi
-	@if [ ! -d $(B)/ref ];then mkdir $(B)/ref;fi
-	@if [ ! -d $(B)/baseq3 ];then mkdir $(B)/baseq3;fi
-	@if [ ! -d $(B)/baseq3/cgame ];then mkdir $(B)/baseq3/cgame;fi
-	@if [ ! -d $(B)/baseq3/game ];then mkdir $(B)/baseq3/game;fi
-	@if [ ! -d $(B)/baseq3/ui ];then mkdir $(B)/baseq3/ui;fi
-	@if [ ! -d $(B)/baseq3/qcommon ];then mkdir $(B)/baseq3/qcommon;fi
-	@if [ ! -d $(B)/baseq3/vm ];then mkdir $(B)/baseq3/vm;fi
-	@if [ ! -d $(B)/missionpack ];then mkdir $(B)/missionpack;fi
-	@if [ ! -d $(B)/missionpack/cgame ];then mkdir $(B)/missionpack/cgame;fi
-	@if [ ! -d $(B)/missionpack/game ];then mkdir $(B)/missionpack/game;fi
-	@if [ ! -d $(B)/missionpack/ui ];then mkdir $(B)/missionpack/ui;fi
-	@if [ ! -d $(B)/missionpack/qcommon ];then mkdir $(B)/missionpack/qcommon;fi
-	@if [ ! -d $(B)/missionpack/vm ];then mkdir $(B)/missionpack/vm;fi
-	@if [ ! -d $(B)/q3static ];then mkdir $(B)/q3static;fi
+	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
+	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
+	@if [ ! -d $(B)/ded ];then $(MKDIR) $(B)/ded;fi
+	@if [ ! -d $(B)/ref ];then $(MKDIR) $(B)/ref;fi
+	@if [ ! -d $(B)/baseq3 ];then $(MKDIR) $(B)/baseq3;fi
+	@if [ ! -d $(B)/baseq3/cgame ];then $(MKDIR) $(B)/baseq3/cgame;fi
+	@if [ ! -d $(B)/baseq3/game ];then $(MKDIR) $(B)/baseq3/game;fi
+	@if [ ! -d $(B)/baseq3/ui ];then $(MKDIR) $(B)/baseq3/ui;fi
+	@if [ ! -d $(B)/baseq3/qcommon ];then $(MKDIR) $(B)/baseq3/qcommon;fi
+	@if [ ! -d $(B)/baseq3/vm ];then $(MKDIR) $(B)/baseq3/vm;fi
+	@if [ ! -d $(B)/missionpack ];then $(MKDIR) $(B)/missionpack;fi
+	@if [ ! -d $(B)/missionpack/cgame ];then $(MKDIR) $(B)/missionpack/cgame;fi
+	@if [ ! -d $(B)/missionpack/game ];then $(MKDIR) $(B)/missionpack/game;fi
+	@if [ ! -d $(B)/missionpack/ui ];then $(MKDIR) $(B)/missionpack/ui;fi
+	@if [ ! -d $(B)/missionpack/qcommon ];then $(MKDIR) $(B)/missionpack/qcommon;fi
+	@if [ ! -d $(B)/missionpack/vm ];then $(MKDIR) $(B)/missionpack/vm;fi
+	@if [ ! -d $(B)/q3static ];then $(MKDIR) $(B)/q3static;fi
 
 #############################################################################
 # QVM BUILD TOOLS
@@ -823,9 +829,7 @@ ifeq ($(PLATFORM),SunOS)
     $(B)/client/linux_qgl.o \
     $(B)/client/linux_glimp.o \
     $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
+    $(B)/client/sdl_snd.o
 
   Q3POBJ_SMP=\
     $(B)/client/unix_main.o \
@@ -836,12 +840,10 @@ ifeq ($(PLATFORM),SunOS)
     $(B)/client/linux_qgl.o \
     $(B)/client/linux_glimp_smp.o \
     $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o
+    $(B)/client/sdl_snd.o
 
   ifeq ($(ARCH),i386)
-    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
+    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o $(B)/client/snd_mixa.o $(B)/client/matha.o
     Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
   endif
 
@@ -1532,22 +1534,22 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
 
 copyfiles: build_release
 	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
-	install -s -m 0755 $(BR)/$(PLATFORM)quake3$(BINEXT) $(COPYDIR)/quake3
-	#install -s -m 0755 $(BR)/$(PLATFORM)quake3-smp$(BINEXT) $(COPYDIR)/quake3-smp
-	install -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded
-	-mkdir -p -m 0755 $(COPYDIR)/baseq3
-	install -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+	$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)quake3$(BINEXT) $(COPYDIR)/quake3
+	#$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)quake3-smp$(BINEXT) $(COPYDIR)/quake3-smp
+	$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
+	$(INSTALL) -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
-	install -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+	$(INSTALL) -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
-	install -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
+	$(INSTALL) -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
-	-mkdir -p -m 0755 $(COPYDIR)/missionpack
-	install -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack
+	$(INSTALL) -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
-	install -s -m 0755 $(BR)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+	$(INSTALL) -s -m 0755 $(BR)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
-	install -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+	$(INSTALL) -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
 
 clean:clean-debug clean-release
