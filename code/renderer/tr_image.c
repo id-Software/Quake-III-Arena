@@ -1154,11 +1154,11 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 	
 	memcpy(&targa_header.colormap_index, &buf_p[3], 2);
 	memcpy(&targa_header.colormap_length, &buf_p[5], 2);
-	targa_header.colormap_size = buf_p[8];
-	memcpy(&targa_header.x_origin, &buf_p[9], 2);
-	memcpy(&targa_header.y_origin, &buf_p[11], 2);
-	memcpy(&targa_header.width, &buf_p[13], 2);
-	memcpy(&targa_header.height, &buf_p[15], 2);
+	targa_header.colormap_size = buf_p[7];
+	memcpy(&targa_header.x_origin, &buf_p[8], 2);
+	memcpy(&targa_header.y_origin, &buf_p[10], 2);
+	memcpy(&targa_header.width, &buf_p[12], 2);
+	memcpy(&targa_header.height, &buf_p[14], 2);
 	targa_header.pixel_size = buf_p[16];
 	targa_header.attributes = buf_p[17];
 
