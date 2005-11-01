@@ -124,7 +124,11 @@ static char	*opnames[256] = {
 	#define loadWord(addr) __lwbrx(addr,0)
     #endif
 #else
-	#define	loadWord(addr) LittleLong(*((int *)addr))
+    static inline int loadWord(void *addr) {
+	int word;
+	memcpy(&word, addr, 4);
+	return LittleLong(word);
+    }
 #endif
 
 char *VM_Indent( vm_t *vm ) {
