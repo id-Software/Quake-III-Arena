@@ -418,13 +418,13 @@ ifeq ($(PLATFORM),SunOS)
   LDFLAGS=-lsocket -lnsl -ldl -lm
 
   ifeq ($(strip $(USE_SDL)),true)
-    GLLDFLAGS=$(shell sdl-config --libs) -lGLU -lX11 -lXext
+    GLLDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
   else
-    GLLDFLAGS=-L/usr/openwin/$(LIB) -lGLU -lX11 -lXext
+    GLLDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
   endif
 
   ifeq ($(ARCH),i386)
-    # linux32 make ...
+    # Solarix x86 make ...
     BASE_CFLAGS += -m32
     LDFLAGS+=-m32
   endif

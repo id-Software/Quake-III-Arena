@@ -1,4 +1,4 @@
-/* x86s running Linux */
+/* Solaris with GNU Compilers */
 
 #include <string.h>
 
@@ -25,7 +25,7 @@ char inputs[256] = "";
 // TTimo experimental: do not compile with the __linux__ define, we are doing bytecode!
 char *cpp[] = { LCCDIR "q3cpp" BINEXT,
 	"-U__GNUC__", "-D_POSIX_SOURCE", "-D__STDC__=1", "-D__STRICT_ANSI__",
-	"-Dunix", "-Di386", "-Dlinux",
+	"-Dunix", "-Di386", "-Dsun",
 	"-D__unix__", "-D__i386__", "-D__signed__=signed",
 	"$1", "$2", "$3", 0 };
 char *include[] = {"-I" LCCDIR "include", "-I" LCCDIR "gcc/include", "-I/usr/include",

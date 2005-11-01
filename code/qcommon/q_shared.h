@@ -346,6 +346,7 @@ static float LittleFloat (const float l) { return FloatSwap(&l); }
 #ifdef __sun
 
 #include <sys/isa_defs.h>
+#include <sys/byteorder.h>
 
 // bk001205 - from Makefile
 #define stricmp strcasecmp
@@ -360,20 +361,24 @@ static float LittleFloat (const float l) { return FloatSwap(&l); }
 
 #define	PATH_SEP '/'
 
-#if defined(_LITTLE_ENDIAN)
-inline static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-inline static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-inline static float BigFloat(const float l) { return FloatSwap(&l); }
-#define LittleFloat
-#else /* Must be _BIG_ENDIAN */
+#if defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
 #define BigShort
 inline static short LittleShort(short l) { return ShortSwap(l); }
 #define BigLong
 inline static int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
 inline static float LittleFloat (const float l) { return FloatSwap(&l); }
+
+#elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
+inline static short BigShort( short l) { return ShortSwap(l); }
+#define LittleShort
+inline static int BigLong(int l) { return LongSwap(l); }
+#define LittleLong
+inline static float BigFloat(const float l) { return FloatSwap(&l); }
+#define LittleFloat
+
+#else
+#error "Either _BIG_ENDIAN or _LITTLE_ENDIAN must be #defined, but not both."
 #endif
 
 #endif

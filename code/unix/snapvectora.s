@@ -76,7 +76,7 @@ C(Sys_SnapVector):
 
 // void Sys_SnapVectorCW( float *v, unsigned short int cw )
 .global C(Sys_SnapVectorCW)
-C(Sys_SnapVector_cw):
+C(Sys_SnapVectorCW):
         pushl   %eax
         pushl   %ebp
         movl    %esp,%ebp
