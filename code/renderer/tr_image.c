@@ -1148,25 +1148,28 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 
 	buf_p = buffer;
 
-	targa_header.id_length = *buf_p++;
-	targa_header.colormap_type = *buf_p++;
-	targa_header.image_type = *buf_p++;
+	targa_header.id_length = buf_p[0];
+	targa_header.colormap_type = buf_p[1];
+	targa_header.image_type = buf_p[2];
 	
-	targa_header.colormap_index = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.colormap_length = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.colormap_size = *buf_p++;
-	targa_header.x_origin = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.y_origin = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.width = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.height = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.pixel_size = *buf_p++;
-	targa_header.attributes = *buf_p++;
+	memcpy(&targa_header.colormap_index, &buf_p[3], 2);
+	memcpy(&targa_header.colormap_length, &buf_p[5], 2);
+	targa_header.colormap_size = buf_p[8];
+	memcpy(&targa_header.x_origin, &buf_p[9], 2);
+	memcpy(&targa_header.y_origin, &buf_p[11], 2);
+	memcpy(&targa_header.width, &buf_p[13], 2);
+	memcpy(&targa_header.height, &buf_p[15], 2);
+	targa_header.pixel_size = buf_p[16];
+	targa_header.attributes = buf_p[17];
+
+	targa_header.colormap_index = LittleShort(targa_header.colormap_index);
+	targa_header.colormap_length = LittleShort(targa_header.colormap_length);
+	targa_header.x_origin = LittleShort(targa_header.x_origin);
+	targa_header.y_origin = LittleShort(targa_header.y_origin);
+	targa_header.width = LittleShort(targa_header.width);
+	targa_header.height = LittleShort(targa_header.height);
+
+	buf_p += 18;
 
 	if (targa_header.image_type!=2 
 		&& targa_header.image_type!=10
