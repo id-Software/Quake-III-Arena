@@ -25,7 +25,7 @@ struct list {		/* circular list nodes: */
 
 static void *alloc(int);
 static List append(char *,List);
-extern char *basepath(char *);
+extern char *basename(char *);
 static int callsys(char *[]);
 extern char *concat(char *, char *);
 static int compile(char *, char *);
@@ -57,7 +57,7 @@ extern int option(char *);
 
 static int errcnt;		/* number of errors */
 static int Eflag;		/* -E specified */
-static int Sflag;		/* -S specified */
+static int Sflag = 1;		/* -S specified */ //for Q3 we always generate asm
 static int cflag;		/* -c specified */
 static int verbose;		/* incremented for each -v */
 static List llist[2];		/* loader files, flags */
@@ -73,49 +73,15 @@ char *tempdir = TEMPDIR;	/* directory for temporary files */
 static char *progname;
 static List lccinputs;		/* list of input directories */
 
-/*
-===============
-AddLCCDirToPath
-
-Append the base path of this file to the PATH so that q3lcc can find q3cpp and
-q3rcc in its own directory.  There are probably (much) cleaner ways of doing
-this.
-Tim Angus <tim@ngus.net> 05/09/05
-===============
-*/
-void AddLCCDirToPath( const char *lccBinary )
-{
-	char basepath[ 1024 ];
-	char path[ 4096 ];
-	char *p;
-
-	strncpy( basepath, lccBinary, 1024 );
-	p = strrchr( basepath, '/' );
-	if( !p )
-		p = strrchr( basepath, '\\' );
-
-	if( p )
-	{
-		*p = '\0';
-#ifdef _WIN32
-		strncpy( path, "PATH=", 4096 );
-		strncat( path, ";", 4096 );
-		strncat( path, basepath, 4096 );
-		_putenv( path );
-#else
-/* Ugly workaround against execvp problem/limitation on Solaris 10 */
-		snprintf( path, 4096, "PATH=%s:%s", basepath, getenv( "PATH" ) );
-		putenv( path );
-#endif
-	}
-}
+extern void UpdatePaths( const char *lccBinary );
 
 int main(int argc, char *argv[]) {
 	int i, j, nf;
 
-	AddLCCDirToPath( argv[ 0 ] );
-
 	progname = argv[0];
+
+	UpdatePaths( progname );
+
 	ac = argc + 50;
 	av = alloc(ac*sizeof(char *));
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -233,8 +199,8 @@ static List append(char *str, List list) {
 	return p;
 }
 
-/* basepath - return base name for name, e.g. /usr/drh/foo.c => foo */
-char *basepath(char *name) {
+/* basename - return base name for name, e.g. /usr/drh/foo.c => foo */
+char *basename(char *name) {
 	char *s, *b, *t = 0;
 
 	for (b = s = name; *s; s++)
@@ -437,7 +403,7 @@ static int filename(char *name, char *base) {
 	static char *stemp, *itemp;
 
 	if (base == 0)
-		base = basepath(name);
+		base = basename(name);
 	switch (suffix(name, suffixes, 4)) {
 	case 0:	/* C source files */
 		compose(cpp, plist, append(name, 0), 0);
@@ -719,14 +685,14 @@ static void opt(char *arg) {
 			cflag++;
 			return;
 		case 'N':
-			if (strcmp(basepath(cpp[0]), "gcc-cpp") == 0)
+			if (strcmp(basename(cpp[0]), "gcc-cpp") == 0)
 				plist = append("-nostdinc", plist);
 			include[0] = 0;
 			ilist = 0;
 			return;
 		case 'v':
 			if (verbose++ == 0) {
-				if (strcmp(basepath(cpp[0]), "gcc-cpp") == 0)
+				if (strcmp(basename(cpp[0]), "gcc-cpp") == 0)
 					plist = append(arg, plist);
 				clist = append(arg, clist);
 				fprintf(stderr, "%s %s\n", progname, rcsid);

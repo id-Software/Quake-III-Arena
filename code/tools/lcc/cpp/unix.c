@@ -29,15 +29,7 @@ setup(int argc, char **argv)
 					includelist[i].deleted = 1;
 			break;
 		case 'I':
-			for (i=NINCLUDE-2; i>=0; i--) {
-				if (includelist[i].file==NULL) {
-					includelist[i].always = 1;
-					includelist[i].file = optarg;
-					break;
-				}
-			}
-			if (i<0)
-				error(FATAL, "Too many -I directives");
+			appendDirToIncludeList( optarg );
 			break;
 		case 'D':
 		case 'U':
@@ -66,11 +58,7 @@ setup(int argc, char **argv)
 	fp = "<stdin>";
 	fd = 0;
 	if (optind<argc) {
-		if ((fp = strrchr(argv[optind], '/')) != NULL) {
-			int len = fp - argv[optind];
-			dp = (char*)newstring((uchar*)argv[optind], len+1, 0);
-			dp[len] = '\0';
-		}
+		dp = basepath( argv[optind] );
 		fp = (char*)newstring((uchar*)argv[optind], strlen(argv[optind]), 0);
 		if ((fd = open(fp, 0)) <= 0)
 			error(FATAL, "Can't open input file %s", fp);
@@ -89,6 +77,18 @@ setup(int argc, char **argv)
 }
 
 
+char *basepath( char *fname )
+{
+	char *dp = ".";
+	char *p;
+	if ((p = strrchr(fname, '/')) != NULL) {
+		int dlen = p - fname;
+		dp = (char*)newstring((uchar*)fname, dlen+1, 0);
+		dp[dlen] = '\0';
+	}
+
+	return dp;
+}
 
 /* memmove is defined here because some vendors don't provide it at
    all and others do a terrible job (like calling malloc) */

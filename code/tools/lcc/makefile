@@ -1,6 +1,5 @@
 # $Id: makefile 145 2001-10-17 21:53:10Z timo $
 PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
-HOSTFILE=etc/linux.c
 TEMPDIR=/tmp
 A=.a
 O=.o
@@ -27,7 +26,6 @@ BD=$(BUILDDIR)/
 T=$(TSTDIR)/
 ifeq ($(PLATFORM),SunOS)
   INSTALL=ginstall
-HOSTFILE=etc/gcc-solaris.c
 else
   INSTALL=install
 endif
@@ -148,7 +146,7 @@ $(BD)bprint$(O):	etc/bprint.c;		$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ etc/bprint.c
 $(BD)q3lcc$(E):	$(BD)q3lcc$(O) $(BD)host$(O);	$(LD) $(LDFLAGS) -o $@ $(BD)q3lcc$(O) $(BD)host$(O) 
 
 $(BD)q3lcc$(O):	etc/lcc.c;	$(CC) $(LCC_CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -o $@ etc/lcc.c
-$(BD)host$(O):	$(HOSTFILE);	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"\" -o $@ $(HOSTFILE)
+$(BD)host$(O):	etc/bytecode.c;	$(CC) $(LCC_CFLAGS) -c -DSYSTEM=\"\" -o $@ etc/bytecode.c
 
 LIBOBJS=$(BD)assert$(O) $(BD)bbexit$(O) $(BD)yynull$(O)
 

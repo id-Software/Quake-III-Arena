@@ -565,7 +565,7 @@ $(Q3LCC):
 $(Q3ASM):
 	$(MAKE) -C ../tools/asm install
 
-DO_Q3LCC=$(Q3LCC) -o $@ -S -DQ3_VM -I$(CGDIR) -I$(GDIR) -I$(UIDIR) -I$(CMDIR) $<
+DO_Q3LCC=$(Q3LCC) -o $@ $<
 
 #############################################################################
 # CLIENT/SERVER
