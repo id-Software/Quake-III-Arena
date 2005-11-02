@@ -675,6 +675,7 @@ bot_synonymlist_t *BotLoadSynonyms(char *filename)
 					lastsynonym = NULL;
 					while(1)
 					{
+						size_t len;
 						if (!PC_ExpectTokenString(source, "(") ||
 							!PC_ExpectTokenType(source, TT_STRING, 0, &token))
 						{
@@ -688,13 +689,14 @@ bot_synonymlist_t *BotLoadSynonyms(char *filename)
 							FreeSource(source);
 							return NULL;
 						} //end if
-						size += sizeof(bot_synonym_t) + strlen(token.string) + 1;
+						len = (strlen(token.string) + 1 +sizeof(void*)-1) & ~(sizeof(void*)-1);
+						size += sizeof(bot_synonym_t) + len;
 						if (pass)
 						{
 							synonym = (bot_synonym_t *) ptr;
 							ptr += sizeof(bot_synonym_t);
 							synonym->string = ptr;
-							ptr += strlen(token.string) + 1;
+							ptr += len;
 							strcpy(synonym->string, token.string);
 							//
 							if (lastsynonym) lastsynonym->next = synonym;
