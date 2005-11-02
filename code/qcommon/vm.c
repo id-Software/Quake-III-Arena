@@ -332,7 +332,7 @@ Dlls will call this directly
 long QDECL VM_DllSyscall( long arg, ... ) {
 #if ((defined __GNUC__) && !(defined __i386__))
   // rcg010206 - see commentary above
-  long args[16];
+  long args[10];
   int i;
   va_list ap;
   
@@ -726,7 +726,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
 		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
-		long args[16];
+		long args[10];
 		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < sizeof (args) / sizeof (args[i]); i++) {
