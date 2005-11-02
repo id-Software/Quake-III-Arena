@@ -1,7 +1,0 @@
-tst/switch.c:55: warning: missing return value
-tst/switch.c:73: warning: missing return value
-tst/switch.c:97: warning: missing return value
-tst/switch.c:101: warning: overflow in converting constant expression from `int' to `unsigned int'
-tst/switch.c:102: warning: overflow in converting constant expression from `int' to `unsigned int'
-tst/switch.c:112: warning: missing return value
-tst/switch.c:137: warning: missing return value

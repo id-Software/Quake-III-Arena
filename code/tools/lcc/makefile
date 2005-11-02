@@ -21,9 +21,7 @@ DIFF=diff
 RM=rm -f
 RMDIR=rmdir
 BUILDDIR=build
-TSTDIR=$(BUILDDIR)/$(TARGET)/tst
 BD=$(BUILDDIR)/
-T=$(TSTDIR)/
 ifeq ($(PLATFORM),SunOS)
   INSTALL=ginstall
 else
@@ -37,7 +35,6 @@ what:
 
 makedirs:
 	@if [ ! -d $(BD) ];then mkdir $(BD);fi
-	@if [ ! -d $(T) ];then mkdir $(T);fi
 	
 all::	q3rcc lburg q3cpp q3lcc bprint liblcc
 
@@ -117,18 +114,8 @@ $(BD)types$(O):	src/types.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/types.c
 $(BD)stab$(O):	src/stab.c src/stab.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ src/stab.c
 
 $(BD)dagcheck$(O):	$(BD)dagcheck.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)dagcheck.c
-$(BD)alpha$(O):	$(BD)alpha.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)alpha.c
-$(BD)mips$(O):	$(BD)mips.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)mips.c
-$(BD)sparc$(O):	$(BD)sparc.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)sparc.c
-$(BD)x86$(O):	$(BD)x86.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86.c
-$(BD)x86linux$(O):	$(BD)x86linux.c;	$(CC) $(LCC_CFLAGS) -c -Isrc -o $@ $(BD)x86linux.c
 
 $(BD)dagcheck.c:	$(BD)lburg$(E) src/dagcheck.md; $(BD)lburg src/dagcheck.md $@
-$(BD)alpha.c:	$(BD)lburg$(E) src/alpha.md;    $(BD)lburg src/alpha.md    $@
-$(BD)mips.c:	$(BD)lburg$(E) src/mips.md;     $(BD)lburg src/mips.md     $@
-$(BD)sparc.c:	$(BD)lburg$(E) src/sparc.md;    $(BD)lburg src/sparc.md    $@
-$(BD)x86.c:	$(BD)lburg$(E) src/x86.md;      $(BD)lburg src/x86.md      $@
-$(BD)x86linux.c:	$(BD)lburg$(E) src/x86linux.md; $(BD)lburg src/x86linux.md $@
 
 $(BD)q3rcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $(BD) src/rcc.asdl
 $(BD)q3rcc$(O):	$(BD)rcc.h;			$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ $(BD)rcc.c
@@ -182,64 +169,6 @@ $(BD)hideset$(O):	cpp/hideset.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/hideset.
 $(BD)getopt$(O):	cpp/getopt.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/getopt.c
 $(BD)unix$(O):	cpp/unix.c;	$(CC) $(LCC_CFLAGS) -c -Icpp -o $@ cpp/unix.c
 
-test:	$(T)8q.s \
-	$(T)array.s \
-	$(T)cf.s \
-	$(T)cq.s \
-	$(T)cvt.s \
-	$(T)fields.s \
-	$(T)front.s \
-	$(T)incr.s \
-	$(T)init.s \
-	$(T)limits.s \
-	$(T)paranoia.s \
-	$(T)sort.s \
-	$(T)spill.s \
-	$(T)stdarg.s \
-	$(T)struct.s \
-	$(T)switch.s \
-	$(T)wf1.s \
-	$(T)yacc.s
-
-$(T)8q.s:	tst/8q.c tst/8q.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)array.s:	tst/array.c tst/array.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)cf.s:	tst/cf.c tst/cf.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)cq.s:	tst/cq.c tst/cq.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)cvt.s:	tst/cvt.c tst/cvt.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)fields.s:	tst/fields.c tst/fields.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)front.s:	tst/front.c tst/front.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)incr.s:	tst/incr.c tst/incr.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)init.s:	tst/init.c tst/init.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)limits.s:	tst/limits.c tst/limits.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)paranoia.s:	tst/paranoia.c tst/paranoia.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)sort.s:	tst/sort.c tst/sort.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)spill.s:	tst/spill.c tst/spill.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)stdarg.s:	tst/stdarg.c tst/stdarg.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)struct.s:	tst/struct.c tst/struct.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)switch.s:	tst/switch.c tst/switch.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)wf1.s:	tst/wf1.c tst/wf1.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-$(T)yacc.s:	tst/yacc.c tst/yacc.0 all;	@env BUILDDIR=$(BUILDDIR) TSTDIR=$(TSTDIR) src/run.sh $@
-
-testclean:
-	$(RM) $(T)8q$(E) $(T)8q.s $(T)8q.2 $(T)8q.1
-	$(RM) $(T)array$(E) $(T)array.s $(T)array.2 $(T)array.1
-	$(RM) $(T)cf$(E) $(T)cf.s $(T)cf.2 $(T)cf.1
-	$(RM) $(T)cq$(E) $(T)cq.s $(T)cq.2 $(T)cq.1
-	$(RM) $(T)cvt$(E) $(T)cvt.s $(T)cvt.2 $(T)cvt.1
-	$(RM) $(T)fields$(E) $(T)fields.s $(T)fields.2 $(T)fields.1
-	$(RM) $(T)front$(E) $(T)front.s $(T)front.2 $(T)front.1
-	$(RM) $(T)incr$(E) $(T)incr.s $(T)incr.2 $(T)incr.1
-	$(RM) $(T)init$(E) $(T)init.s $(T)init.2 $(T)init.1
-	$(RM) $(T)limits$(E) $(T)limits.s $(T)limits.2 $(T)limits.1
-	$(RM) $(T)paranoia$(E) $(T)paranoia.s $(T)paranoia.2 $(T)paranoia.1
-	$(RM) $(T)sort$(E) $(T)sort.s $(T)sort.2 $(T)sort.1
-	$(RM) $(T)spill$(E) $(T)spill.s $(T)spill.2 $(T)spill.1
-	$(RM) $(T)stdarg$(E) $(T)stdarg.s $(T)stdarg.2 $(T)stdarg.1
-	$(RM) $(T)struct$(E) $(T)struct.s $(T)struct.2 $(T)struct.1
-	$(RM) $(T)switch$(E) $(T)switch.s $(T)switch.2 $(T)switch.1
-	$(RM) $(T)wf1$(E) $(T)wf1.s $(T)wf1.2 $(T)wf1.1
-	$(RM) $(T)yacc$(E) $(T)yacc.s $(T)yacc.2 $(T)yacc.1
-
 install::	all
 	$(INSTALL) -s -m 0755 $(BD)q3lcc$(E) ../
 	$(INSTALL) -s -m 0755 $(BD)q3cpp$(E) ../
@@ -250,9 +179,9 @@ uninstall::
 	-$(RM) ../q3cpp$(E)
 	-$(RM) ../q3rcc$(E)
 
-clean::		testclean
+clean::
 		$(RM) $(BD)*$(O)
-		$(RM) $(BD)dagcheck.c $(BD)alpha.c $(BD)mips.c $(BD)x86.c $(BD)sparc.c $(BD)x86linux.c $(BD)gram.c
+		$(RM) $(BD)dagcheck.c $(BD)gram.c
 		$(RM) $(BD)rcc.c $(BD)rcc.h
 		$(RM) $(BD)rcc1$(E) $(BD)rcc1$(E) $(BD)1rcc$(E) $(BD)2rcc$(E)
 		$(RM) $(BD)*.ilk
