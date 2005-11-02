@@ -256,6 +256,7 @@ static int callsys(char **av) {
 	int i, status = 0;
 	static char **argv;
 	static int argc;
+	char *executable;
 
 	for (i = 0; av[i] != NULL; i++)
 		;
@@ -281,6 +282,8 @@ static int callsys(char **av) {
 				i++;
 		}
 		argv[j] = NULL;
+		executable = strsave( argv[0] );
+		argv[0] = stringf( "\"%s\"", argv[0] );
 		if (verbose > 0) {
 			int k;
 			fprintf(stderr, "%s", argv[0]);
@@ -290,9 +293,9 @@ static int callsys(char **av) {
 		}
 		if (verbose < 2)
 #ifndef WIN32
-			status = _spawnvp(_P_WAIT, argv[0], argv);
+			status = _spawnvp(_P_WAIT, executable, argv);
 #else
-			status = _spawnvp(_P_WAIT, argv[0], (const char* const*)argv);
+			status = _spawnvp(_P_WAIT, executable, (const char* const*)argv);
 #endif
 		if (status == -1) {
 			fprintf(stderr, "%s: ", progname);
