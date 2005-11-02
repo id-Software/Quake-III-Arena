@@ -332,7 +332,7 @@ Dlls will call this directly
 long QDECL VM_DllSyscall( long arg, ... ) {
 #if ((defined __GNUC__) && !(defined __i386__))
   // rcg010206 - see commentary above
-  long args[10];
+  long args[16];
   int i;
   va_list ap;
   
