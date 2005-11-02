@@ -120,10 +120,8 @@ $(BD)dagcheck.c:	$(BD)lburg$(E) src/dagcheck.md; $(BD)lburg src/dagcheck.md $@
 $(BD)q3rcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $(BD) src/rcc.asdl
 $(BD)q3rcc$(O):	$(BD)rcc.h;			$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ $(BD)rcc.c
 $(BD)asdl$(O):	src/asdl.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/asdl.c
-$(BD)pass2$(O):	src/pass2.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/pass2.c
 $(BD)2html$(O):	src/2html.c $(BD)rcc.h src/c.h;	$(CC) $(LCC_CFLAGS) -c -Isrc -I$(BD) -I$(ASDL_HOME)/include/asdlGen -o $@ src/2html.c
 
-$(BD)pass2$(E):	$(BD)pass2$(O) $(EXTRAOBJS) $(BD)librcc$(A);	$(LD) $(LDFLAGS) -o $@ $(BD)pass2$(O) $(EXTRAOBJS) $(BD)librcc$(A) $(EXTRALIBS)
 $(BD)2html$(E):	$(BD)2html$(O) $(BD)q3rcc$(O);			$(LD) $(LDFLAGS) -o $@ $(BD)2html$(O) $(BD)q3rcc$(O) $(EXTRALIBS)
 
 $(BD)bprint$(E):	$(BD)bprint$(O);		$(LD) $(LDFLAGS) -o $@ $(BD)bprint$(O) 
@@ -188,7 +186,7 @@ clean::
 		$(RM) -r $(BD)
 
 clobber::	clean
-		$(RM) $(BD)q3rcc$(E) $(BD)2html$(E) $(BD)pass2$(E) $(BD)lburg$(E) $(BD)q3cpp$(E) $(BD)q3lcc$(E) $(BD)bprint$(E) $(BD)*$(A)
+		$(RM) $(BD)q3rcc$(E) $(BD)2html$(E) $(BD)lburg$(E) $(BD)q3cpp$(E) $(BD)q3lcc$(E) $(BD)bprint$(E) $(BD)*$(A)
 		$(RM) $(BD)*.pdb $(BD)*.pch
 
 RCCSRCS=src/alloc.c \
@@ -220,12 +218,7 @@ RCCSRCS=src/alloc.c \
 	src/bytecode.c \
 	src/gen.c \
 	src/stab.c \
-	$(BD)dagcheck.c \
-	$(BD)alpha.c \
-	$(BD)mips.c \
-	$(BD)sparc.c \
-	$(BD)x86linux.c \
-	$(BD)x86.c
+	$(BD)dagcheck.c
 
 C=$(BD)q3lcc -A -d0.6 -Wo-lccdir=$(BUILDDIR) -Isrc -I$(BUILDDIR)
 triple:	$(BD)q3rcc$(E) $(BD)q3lcc$(E) $(BD)q3cpp$(E)
