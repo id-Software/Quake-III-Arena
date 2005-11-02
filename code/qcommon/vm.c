@@ -736,8 +736,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 
 		r = vm->entryPoint( callnum,  args[0],  args[1],  args[2], args[3],
                             args[4],  args[5],  args[6], args[7],
-                            args[8],  args[9], args[10], args[11],
-                            args[12], args[13], args[14], args[15]);
+                            args[8],  args[9]);
 	} else {
 #ifdef __i386__ // i386 calling convention doesn't need conversion
 #ifndef NO_VM_COMPILED
@@ -749,7 +748,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 #else
 		struct {
 			int callnum;
-			int args[16];
+			int args[10];
 		} a;
 		va_list ap;
 
