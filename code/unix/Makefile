@@ -111,7 +111,7 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
   ifeq ($(strip $(USE_SDL)),true)
     BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
@@ -120,20 +120,19 @@ ifeq ($(PLATFORM),linux)
     GL_CFLAGS = -I/usr/X11R6/include
   endif
 
-  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
-    -fno-strict-aliasing
+  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
 
   ifeq ($(ARCH),x86_64)
-    OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
-      -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
-      -fno-strict-aliasing
+    OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -funroll-loops \
+      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+      -fstrength-reduce
     # experimental x86_64 jit compiler! you need as
     #HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
-      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
-      -fno-strict-aliasing -fstrength-reduce
+      -funroll-loops -falign-loops=2 -falign-jumps=2 \
+      -falign-functions=2 -fstrength-reduce
     HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),ppc)
@@ -211,7 +210,7 @@ ifeq ($(PLATFORM),mingw32)
     ARCH=x86
   endif
 
-  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
 
@@ -219,7 +218,7 @@ ifeq ($(PLATFORM),mingw32)
   MINGW_CFLAGS = -DDONT_TYPEDEF_INT32
 
   OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 \
-    -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce
+    -funroll-loops -falign-jumps=2 -falign-functions=2 -fstrength-reduce
 
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
 
@@ -272,7 +271,7 @@ ifeq ($(PLATFORM),freebsd)
   endif #alpha test
 
 
-  BASE_CFLAGS =  -pipe -Wall
+  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
   GL_CFLAGS = -I/usr/X11R6/include
 
@@ -289,7 +288,7 @@ ifeq ($(PLATFORM),freebsd)
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro \
       -march=pentium -fomit-frame-pointer -pipe -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
-      -fno-strict-aliasing -fstrength-reduce
+      -funroll-loops -fstrength-reduce
   else
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
@@ -381,7 +380,7 @@ ifeq ($(PLATFORM),SunOS)
   endif
 
 
-  BASE_CFLAGS =  -pipe -Wall -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
   ifeq ($(strip $(USE_SDL)),true)
     BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
@@ -390,19 +389,18 @@ ifeq ($(PLATFORM),SunOS)
     GL_CFLAGS = -I/usr/openwin/include
   endif
 
-  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer \
-    -fno-strict-aliasing
+  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
   BASE_CFLAGS += -DNO_VM_COMPILED
 
   ifeq ($(ARCH),sparc)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
-      -fno-strict-aliasing
+      -funroll-loops
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
-      -fno-strict-aliasing -fstrength-reduce
+      -funroll-loops -fstrength-reduce
   endif
   endif
 
