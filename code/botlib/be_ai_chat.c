@@ -20,13 +20,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#if 0
+#if 1
 #define ALIGN(x) \
 	do { \
-		size_t oldx = x; \
 		x = (x+sizeof(void*)-1) & ~(sizeof(void*)-1L); \
-		if(x != oldx) \
-			botimport.Print(PRT_MESSAGE, "size %zd -> %zd\n", oldx, x); \
 	} while(0)
 #else
 #define ALIGN(x) 
@@ -2128,14 +2125,16 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 						//read the chat messages
 						while(!PC_CheckTokenString(source, "}"))
 						{
+							size_t len;
 							if (!BotLoadChatMessage(source, chatmessagestring))
 							{
 								FreeSource(source);
 								return NULL;
 							} //end if
+							len = strlen(chatmessagestring) + 1;
+							ALIGN(len);
 							if (pass)
 							{
-								size_t len;
 								chatmessage = (bot_chatmessage_t *) ptr;
 								chatmessage->time = -2*CHATMESSAGE_RECENTTIME;
 								//put the chat message in the list
@@ -2145,13 +2144,11 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 								ptr += sizeof(bot_chatmessage_t);
 								chatmessage->chatmessage = ptr;
 								strcpy(chatmessage->chatmessage, chatmessagestring);
-								len = strlen(chatmessagestring) + 1;
-								ALIGN(len);
 								ptr += len;
 								//the number of chat messages increased
 								chattype->numchatmessages++;
 							} //end if
-							size += sizeof(bot_chatmessage_t) + strlen(chatmessagestring) + 1;
+							size += sizeof(bot_chatmessage_t) + len;
 						} //end if
 					} //end while
 				} //end if
