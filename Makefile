@@ -1,6 +1,6 @@
 VERSION=1.33_SVN$(shell LANG=C svnversion .)
 
-release debug clean distclean:
+release debug clean distclean copyfiles:
 	$(MAKE) -C code/unix $@
 
 dist:
