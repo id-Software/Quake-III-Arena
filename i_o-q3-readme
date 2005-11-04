@@ -43,12 +43,12 @@ Compiling (Under Linux)
 
 Installing under Linux
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In code/unix edit the Makefile's COPYDIR variable to be where you installed
-quake 3 to. By default it will be set to /usr/local/games/quake3 if you
+Set the COPYDIR variable in the shell to be where you installed
+Quake 3 to. By default it will be /usr/local/games/quake3 if you
 haven't set it.
 
 Then run "make copyfiles", beware that this will overwrite any binaries
-installed previously, even id ones.
+installed previously, even official id ones.
 
 Using shared libraries instead of qvm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
