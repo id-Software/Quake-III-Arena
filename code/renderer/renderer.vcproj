@@ -1379,7 +1379,7 @@
 				RelativePath="..\win32\glw_win.h">
 			</File>
 			<File
-				RelativePath="..\game\q_shared.h">
+				RelativePath="..\qcommon\q_shared.h">
 			</File>
 			<File
 				RelativePath="..\qcommon\qcommon.h">
@@ -1391,7 +1391,7 @@
 				RelativePath="qgl.h">
 			</File>
 			<File
-				RelativePath="..\game\surfaceflags.h">
+				RelativePath="..\qcommon\surfaceflags.h">
 			</File>
 			<File
 				RelativePath="tr_local.h">

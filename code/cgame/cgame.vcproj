@@ -1088,70 +1088,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\game\q_math.c">
-				<FileConfiguration
-					Name="Release TA|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;MISSIONPACK;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug TA|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;MISSIONPACK;$(NoInherit)"
-						BrowseInformation="1"/>
-				</FileConfiguration>
+				RelativePath="..\qcommon\q_math.c">
 			</File>
 			<File
-				RelativePath="..\game\q_shared.c">
-				<FileConfiguration
-					Name="Release TA|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;MISSIONPACK;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug TA|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;MISSIONPACK;$(NoInherit)"
-						BrowseInformation="1"/>
-				</FileConfiguration>
+				RelativePath="..\qcommon\q_shared.c">
 			</File>
 			<File
 				RelativePath="..\ui\ui_shared.c">
@@ -1200,10 +1140,10 @@
 				RelativePath="cg_public.h">
 			</File>
 			<File
-				RelativePath="..\game\q_shared.h">
+				RelativePath="..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="..\game\surfaceflags.h">
+				RelativePath="..\qcommon\surfaceflags.h">
 			</File>
 		</Filter>
 		<File

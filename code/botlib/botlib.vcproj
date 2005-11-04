@@ -1538,7 +1538,7 @@
 				RelativePath="l_utils.h">
 			</File>
 			<File
-				RelativePath="..\game\q_shared.h">
+				RelativePath="..\qcommon\q_shared.h">
 			</File>
 			<File
 				RelativePath="..\qcommon\qcommon.h">
@@ -1550,7 +1550,7 @@
 				RelativePath="..\server\server.h">
 			</File>
 			<File
-				RelativePath="..\game\surfaceflags.h">
+				RelativePath="..\qcommon\surfaceflags.h">
 			</File>
 		</Filter>
 	</Files>
