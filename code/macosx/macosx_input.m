@@ -356,7 +356,7 @@ static qboolean maybeHide()
     return Sys_Hide();
 }
 
-static inline void sendEventForCharacter(NSEvent *event, unichar character, qboolean keyDownFlag, int currentTime)
+static ID_INLINE void sendEventForCharacter(NSEvent *event, unichar character, qboolean keyDownFlag, int currentTime)
 {
     if (in_showevents->integer)
         Com_Printf("CHARACTER: 0x%02x down=%d\n", character, keyDownFlag);
@@ -563,7 +563,7 @@ static inline void sendEventForCharacter(NSEvent *event, unichar character, qboo
     }
 }
 
-static inline void processKeyEvent(NSEvent *keyEvent, qboolean keyDownFlag, int currentTime)
+static ID_INLINE void processKeyEvent(NSEvent *keyEvent, qboolean keyDownFlag, int currentTime)
 {
     NSEventType eventType;
     NSString *characters;
@@ -578,7 +578,7 @@ static inline void processKeyEvent(NSEvent *keyEvent, qboolean keyDownFlag, int 
     }
 }
 
-static inline void sendEventForMaskChangeInFlags(int quakeKey, unsigned int modifierMask, unsigned int newModifierFlags, int currentTime)
+static ID_INLINE void sendEventForMaskChangeInFlags(int quakeKey, unsigned int modifierMask, unsigned int newModifierFlags, int currentTime)
 {
     BOOL oldHadModifier, newHasModifier;
 
@@ -590,7 +590,7 @@ static inline void sendEventForMaskChangeInFlags(int quakeKey, unsigned int modi
     }
 }
 
-static inline void processFlagsChangedEvent(NSEvent *flagsChangedEvent, int currentTime)
+static ID_INLINE void processFlagsChangedEvent(NSEvent *flagsChangedEvent, int currentTime)
 {
     int newModifierFlags;
 
@@ -603,7 +603,7 @@ static inline void processFlagsChangedEvent(NSEvent *flagsChangedEvent, int curr
     currentModifierFlags = newModifierFlags;
 }
 
-static inline void processSystemDefinedEvent(NSEvent *systemDefinedEvent, int currentTime)
+static ID_INLINE void processSystemDefinedEvent(NSEvent *systemDefinedEvent, int currentTime)
 {
     static int oldButtons = 0;
     int buttonsDelta;
@@ -666,7 +666,7 @@ static inline void processSystemDefinedEvent(NSEvent *systemDefinedEvent, int cu
     }
 }
 
-static inline void processEvent(NSEvent *event, int currentTime)
+static ID_INLINE void processEvent(NSEvent *event, int currentTime)
 {
     NSEventType eventType;
 

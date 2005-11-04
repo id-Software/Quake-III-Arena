@@ -30,12 +30,12 @@ extern void QGLCheckError(const char *message);
 extern unsigned int QGLBeginStarted;
 
 // This has to be done to avoid infinite recursion between our glGetError wrapper and QGLCheckError()
-static inline GLenum _glGetError(void) {
+static ID_INLINE GLenum _glGetError(void) {
     return glGetError();
 }
 
 // void glAccum (GLenum op, GLfloat value);
-static inline void qglAccum(GLenum op, GLfloat value)
+static ID_INLINE void qglAccum(GLenum op, GLfloat value)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -49,7 +49,7 @@ static inline void qglAccum(GLenum op, GLfloat value)
 }
 
 // void glAlphaFunc (GLenum func, GLclampf ref);
-static inline void qglAlphaFunc(GLenum func, GLclampf ref)
+static ID_INLINE void qglAlphaFunc(GLenum func, GLclampf ref)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -63,7 +63,7 @@ static inline void qglAlphaFunc(GLenum func, GLclampf ref)
 }
 
 // GLboolean glAreTexturesResident (GLsizei n, const GLuint *textures, GLboolean *residences);
-static inline GLboolean qglAreTexturesResident(GLsizei n, const GLuint *textures, GLboolean *residences)
+static ID_INLINE GLboolean qglAreTexturesResident(GLsizei n, const GLuint *textures, GLboolean *residences)
 {
     GLboolean returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -79,7 +79,7 @@ static inline GLboolean qglAreTexturesResident(GLsizei n, const GLuint *textures
 }
 
 // void glArrayElement (GLint i);
-static inline void qglArrayElement(GLint i)
+static ID_INLINE void qglArrayElement(GLint i)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -93,7 +93,7 @@ static inline void qglArrayElement(GLint i)
 }
 
 // void glBegin (GLenum mode);
-static inline void qglBegin(GLenum mode)
+static ID_INLINE void qglBegin(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -108,7 +108,7 @@ static inline void qglBegin(GLenum mode)
 }
 
 // void glBindTexture (GLenum target, GLuint texture);
-static inline void qglBindTexture(GLenum target, GLuint texture)
+static ID_INLINE void qglBindTexture(GLenum target, GLuint texture)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -122,7 +122,7 @@ static inline void qglBindTexture(GLenum target, GLuint texture)
 }
 
 // void glBitmap (GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap);
-static inline void qglBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap)
+static ID_INLINE void qglBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -136,7 +136,7 @@ static inline void qglBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLflo
 }
 
 // void glBlendFunc (GLenum sfactor, GLenum dfactor);
-static inline void qglBlendFunc(GLenum sfactor, GLenum dfactor)
+static ID_INLINE void qglBlendFunc(GLenum sfactor, GLenum dfactor)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -150,7 +150,7 @@ static inline void qglBlendFunc(GLenum sfactor, GLenum dfactor)
 }
 
 // void glCallList (GLuint list);
-static inline void qglCallList(GLuint list)
+static ID_INLINE void qglCallList(GLuint list)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -164,7 +164,7 @@ static inline void qglCallList(GLuint list)
 }
 
 // void glCallLists (GLsizei n, GLenum type, const GLvoid *lists);
-static inline void qglCallLists(GLsizei n, GLenum type, const GLvoid *lists)
+static ID_INLINE void qglCallLists(GLsizei n, GLenum type, const GLvoid *lists)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -178,7 +178,7 @@ static inline void qglCallLists(GLsizei n, GLenum type, const GLvoid *lists)
 }
 
 // void glClear (GLbitfield mask);
-static inline void qglClear(GLbitfield mask)
+static ID_INLINE void qglClear(GLbitfield mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -192,7 +192,7 @@ static inline void qglClear(GLbitfield mask)
 }
 
 // void glClearAccum (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-static inline void qglClearAccum(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+static ID_INLINE void qglClearAccum(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -206,7 +206,7 @@ static inline void qglClearAccum(GLfloat red, GLfloat green, GLfloat blue, GLflo
 }
 
 // void glClearColor (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-static inline void qglClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
+static ID_INLINE void qglClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -220,7 +220,7 @@ static inline void qglClearColor(GLclampf red, GLclampf green, GLclampf blue, GL
 }
 
 // void glClearDepth (GLclampd depth);
-static inline void qglClearDepth(GLclampd depth)
+static ID_INLINE void qglClearDepth(GLclampd depth)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -234,7 +234,7 @@ static inline void qglClearDepth(GLclampd depth)
 }
 
 // void glClearIndex (GLfloat c);
-static inline void qglClearIndex(GLfloat c)
+static ID_INLINE void qglClearIndex(GLfloat c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -248,7 +248,7 @@ static inline void qglClearIndex(GLfloat c)
 }
 
 // void glClearStencil (GLint s);
-static inline void qglClearStencil(GLint s)
+static ID_INLINE void qglClearStencil(GLint s)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -262,7 +262,7 @@ static inline void qglClearStencil(GLint s)
 }
 
 // void glClipPlane (GLenum plane, const GLdouble *equation);
-static inline void qglClipPlane(GLenum plane, const GLdouble *equation)
+static ID_INLINE void qglClipPlane(GLenum plane, const GLdouble *equation)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -276,7 +276,7 @@ static inline void qglClipPlane(GLenum plane, const GLdouble *equation)
 }
 
 // void glColor3b (GLbyte red, GLbyte green, GLbyte blue);
-static inline void qglColor3b(GLbyte red, GLbyte green, GLbyte blue)
+static ID_INLINE void qglColor3b(GLbyte red, GLbyte green, GLbyte blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -290,7 +290,7 @@ static inline void qglColor3b(GLbyte red, GLbyte green, GLbyte blue)
 }
 
 // void glColor3bv (const GLbyte *v);
-static inline void qglColor3bv(const GLbyte *v)
+static ID_INLINE void qglColor3bv(const GLbyte *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -304,7 +304,7 @@ static inline void qglColor3bv(const GLbyte *v)
 }
 
 // void glColor3d (GLdouble red, GLdouble green, GLdouble blue);
-static inline void qglColor3d(GLdouble red, GLdouble green, GLdouble blue)
+static ID_INLINE void qglColor3d(GLdouble red, GLdouble green, GLdouble blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -318,7 +318,7 @@ static inline void qglColor3d(GLdouble red, GLdouble green, GLdouble blue)
 }
 
 // void glColor3dv (const GLdouble *v);
-static inline void qglColor3dv(const GLdouble *v)
+static ID_INLINE void qglColor3dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -332,7 +332,7 @@ static inline void qglColor3dv(const GLdouble *v)
 }
 
 // void glColor3f (GLfloat red, GLfloat green, GLfloat blue);
-static inline void qglColor3f(GLfloat red, GLfloat green, GLfloat blue)
+static ID_INLINE void qglColor3f(GLfloat red, GLfloat green, GLfloat blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -346,7 +346,7 @@ static inline void qglColor3f(GLfloat red, GLfloat green, GLfloat blue)
 }
 
 // void glColor3fv (const GLfloat *v);
-static inline void qglColor3fv(const GLfloat *v)
+static ID_INLINE void qglColor3fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -360,7 +360,7 @@ static inline void qglColor3fv(const GLfloat *v)
 }
 
 // void glColor3i (GLint red, GLint green, GLint blue);
-static inline void qglColor3i(GLint red, GLint green, GLint blue)
+static ID_INLINE void qglColor3i(GLint red, GLint green, GLint blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -374,7 +374,7 @@ static inline void qglColor3i(GLint red, GLint green, GLint blue)
 }
 
 // void glColor3iv (const GLint *v);
-static inline void qglColor3iv(const GLint *v)
+static ID_INLINE void qglColor3iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -388,7 +388,7 @@ static inline void qglColor3iv(const GLint *v)
 }
 
 // void glColor3s (GLshort red, GLshort green, GLshort blue);
-static inline void qglColor3s(GLshort red, GLshort green, GLshort blue)
+static ID_INLINE void qglColor3s(GLshort red, GLshort green, GLshort blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -402,7 +402,7 @@ static inline void qglColor3s(GLshort red, GLshort green, GLshort blue)
 }
 
 // void glColor3sv (const GLshort *v);
-static inline void qglColor3sv(const GLshort *v)
+static ID_INLINE void qglColor3sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -416,7 +416,7 @@ static inline void qglColor3sv(const GLshort *v)
 }
 
 // void glColor3ub (GLubyte red, GLubyte green, GLubyte blue);
-static inline void qglColor3ub(GLubyte red, GLubyte green, GLubyte blue)
+static ID_INLINE void qglColor3ub(GLubyte red, GLubyte green, GLubyte blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -430,7 +430,7 @@ static inline void qglColor3ub(GLubyte red, GLubyte green, GLubyte blue)
 }
 
 // void glColor3ubv (const GLubyte *v);
-static inline void qglColor3ubv(const GLubyte *v)
+static ID_INLINE void qglColor3ubv(const GLubyte *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -444,7 +444,7 @@ static inline void qglColor3ubv(const GLubyte *v)
 }
 
 // void glColor3ui (GLuint red, GLuint green, GLuint blue);
-static inline void qglColor3ui(GLuint red, GLuint green, GLuint blue)
+static ID_INLINE void qglColor3ui(GLuint red, GLuint green, GLuint blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -458,7 +458,7 @@ static inline void qglColor3ui(GLuint red, GLuint green, GLuint blue)
 }
 
 // void glColor3uiv (const GLuint *v);
-static inline void qglColor3uiv(const GLuint *v)
+static ID_INLINE void qglColor3uiv(const GLuint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -472,7 +472,7 @@ static inline void qglColor3uiv(const GLuint *v)
 }
 
 // void glColor3us (GLushort red, GLushort green, GLushort blue);
-static inline void qglColor3us(GLushort red, GLushort green, GLushort blue)
+static ID_INLINE void qglColor3us(GLushort red, GLushort green, GLushort blue)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -486,7 +486,7 @@ static inline void qglColor3us(GLushort red, GLushort green, GLushort blue)
 }
 
 // void glColor3usv (const GLushort *v);
-static inline void qglColor3usv(const GLushort *v)
+static ID_INLINE void qglColor3usv(const GLushort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -500,7 +500,7 @@ static inline void qglColor3usv(const GLushort *v)
 }
 
 // void glColor4b (GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha);
-static inline void qglColor4b(GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha)
+static ID_INLINE void qglColor4b(GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -514,7 +514,7 @@ static inline void qglColor4b(GLbyte red, GLbyte green, GLbyte blue, GLbyte alph
 }
 
 // void glColor4bv (const GLbyte *v);
-static inline void qglColor4bv(const GLbyte *v)
+static ID_INLINE void qglColor4bv(const GLbyte *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -528,7 +528,7 @@ static inline void qglColor4bv(const GLbyte *v)
 }
 
 // void glColor4d (GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha);
-static inline void qglColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha)
+static ID_INLINE void qglColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -542,7 +542,7 @@ static inline void qglColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdou
 }
 
 // void glColor4dv (const GLdouble *v);
-static inline void qglColor4dv(const GLdouble *v)
+static ID_INLINE void qglColor4dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -556,7 +556,7 @@ static inline void qglColor4dv(const GLdouble *v)
 }
 
 // void glColor4f (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-static inline void qglColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+static ID_INLINE void qglColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -570,7 +570,7 @@ static inline void qglColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat 
 }
 
 // void glColor4fv (const GLfloat *v);
-static inline void qglColor4fv(const GLfloat *v)
+static ID_INLINE void qglColor4fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -584,7 +584,7 @@ static inline void qglColor4fv(const GLfloat *v)
 }
 
 // void glColor4i (GLint red, GLint green, GLint blue, GLint alpha);
-static inline void qglColor4i(GLint red, GLint green, GLint blue, GLint alpha)
+static ID_INLINE void qglColor4i(GLint red, GLint green, GLint blue, GLint alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -598,7 +598,7 @@ static inline void qglColor4i(GLint red, GLint green, GLint blue, GLint alpha)
 }
 
 // void glColor4iv (const GLint *v);
-static inline void qglColor4iv(const GLint *v)
+static ID_INLINE void qglColor4iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -612,7 +612,7 @@ static inline void qglColor4iv(const GLint *v)
 }
 
 // void glColor4s (GLshort red, GLshort green, GLshort blue, GLshort alpha);
-static inline void qglColor4s(GLshort red, GLshort green, GLshort blue, GLshort alpha)
+static ID_INLINE void qglColor4s(GLshort red, GLshort green, GLshort blue, GLshort alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -626,7 +626,7 @@ static inline void qglColor4s(GLshort red, GLshort green, GLshort blue, GLshort 
 }
 
 // void glColor4sv (const GLshort *v);
-static inline void qglColor4sv(const GLshort *v)
+static ID_INLINE void qglColor4sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -640,7 +640,7 @@ static inline void qglColor4sv(const GLshort *v)
 }
 
 // void glColor4ub (GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha);
-static inline void qglColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
+static ID_INLINE void qglColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -654,7 +654,7 @@ static inline void qglColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte
 }
 
 // void glColor4ubv (const GLubyte *v);
-static inline void qglColor4ubv(const GLubyte *v)
+static ID_INLINE void qglColor4ubv(const GLubyte *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -668,7 +668,7 @@ static inline void qglColor4ubv(const GLubyte *v)
 }
 
 // void glColor4ui (GLuint red, GLuint green, GLuint blue, GLuint alpha);
-static inline void qglColor4ui(GLuint red, GLuint green, GLuint blue, GLuint alpha)
+static ID_INLINE void qglColor4ui(GLuint red, GLuint green, GLuint blue, GLuint alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -682,7 +682,7 @@ static inline void qglColor4ui(GLuint red, GLuint green, GLuint blue, GLuint alp
 }
 
 // void glColor4uiv (const GLuint *v);
-static inline void qglColor4uiv(const GLuint *v)
+static ID_INLINE void qglColor4uiv(const GLuint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -696,7 +696,7 @@ static inline void qglColor4uiv(const GLuint *v)
 }
 
 // void glColor4us (GLushort red, GLushort green, GLushort blue, GLushort alpha);
-static inline void qglColor4us(GLushort red, GLushort green, GLushort blue, GLushort alpha)
+static ID_INLINE void qglColor4us(GLushort red, GLushort green, GLushort blue, GLushort alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -710,7 +710,7 @@ static inline void qglColor4us(GLushort red, GLushort green, GLushort blue, GLus
 }
 
 // void glColor4usv (const GLushort *v);
-static inline void qglColor4usv(const GLushort *v)
+static ID_INLINE void qglColor4usv(const GLushort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -724,7 +724,7 @@ static inline void qglColor4usv(const GLushort *v)
 }
 
 // void glColorMask (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-static inline void qglColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
+static ID_INLINE void qglColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -738,7 +738,7 @@ static inline void qglColorMask(GLboolean red, GLboolean green, GLboolean blue, 
 }
 
 // void glColorMaterial (GLenum face, GLenum mode);
-static inline void qglColorMaterial(GLenum face, GLenum mode)
+static ID_INLINE void qglColorMaterial(GLenum face, GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -752,7 +752,7 @@ static inline void qglColorMaterial(GLenum face, GLenum mode)
 }
 
 // void glColorPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-static inline void qglColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -766,7 +766,7 @@ static inline void qglColorPointer(GLint size, GLenum type, GLsizei stride, cons
 }
 
 // void glCopyPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum type);
-static inline void qglCopyPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum type)
+static ID_INLINE void qglCopyPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum type)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -780,7 +780,7 @@ static inline void qglCopyPixels(GLint x, GLint y, GLsizei width, GLsizei height
 }
 
 // void glCopyTexImage1D (GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border);
-static inline void qglCopyTexImage1D(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border)
+static ID_INLINE void qglCopyTexImage1D(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -794,7 +794,7 @@ static inline void qglCopyTexImage1D(GLenum target, GLint level, GLenum internal
 }
 
 // void glCopyTexImage2D (GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-static inline void qglCopyTexImage2D(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+static ID_INLINE void qglCopyTexImage2D(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -808,7 +808,7 @@ static inline void qglCopyTexImage2D(GLenum target, GLint level, GLenum internal
 }
 
 // void glCopyTexSubImage1D (GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width);
-static inline void qglCopyTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width)
+static ID_INLINE void qglCopyTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -822,7 +822,7 @@ static inline void qglCopyTexSubImage1D(GLenum target, GLint level, GLint xoffse
 }
 
 // void glCopyTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
-static inline void qglCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+static ID_INLINE void qglCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -836,7 +836,7 @@ static inline void qglCopyTexSubImage2D(GLenum target, GLint level, GLint xoffse
 }
 
 // void glCullFace (GLenum mode);
-static inline void qglCullFace(GLenum mode)
+static ID_INLINE void qglCullFace(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -850,7 +850,7 @@ static inline void qglCullFace(GLenum mode)
 }
 
 // void glDeleteLists (GLuint list, GLsizei range);
-static inline void qglDeleteLists(GLuint list, GLsizei range)
+static ID_INLINE void qglDeleteLists(GLuint list, GLsizei range)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -864,7 +864,7 @@ static inline void qglDeleteLists(GLuint list, GLsizei range)
 }
 
 // void glDeleteTextures (GLsizei n, const GLuint *textures);
-static inline void qglDeleteTextures(GLsizei n, const GLuint *textures)
+static ID_INLINE void qglDeleteTextures(GLsizei n, const GLuint *textures)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -878,7 +878,7 @@ static inline void qglDeleteTextures(GLsizei n, const GLuint *textures)
 }
 
 // void glDepthFunc (GLenum func);
-static inline void qglDepthFunc(GLenum func)
+static ID_INLINE void qglDepthFunc(GLenum func)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -892,7 +892,7 @@ static inline void qglDepthFunc(GLenum func)
 }
 
 // void glDepthMask (GLboolean flag);
-static inline void qglDepthMask(GLboolean flag)
+static ID_INLINE void qglDepthMask(GLboolean flag)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -906,7 +906,7 @@ static inline void qglDepthMask(GLboolean flag)
 }
 
 // void glDepthRange (GLclampd zNear, GLclampd zFar);
-static inline void qglDepthRange(GLclampd zNear, GLclampd zFar)
+static ID_INLINE void qglDepthRange(GLclampd zNear, GLclampd zFar)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -920,7 +920,7 @@ static inline void qglDepthRange(GLclampd zNear, GLclampd zFar)
 }
 
 // void glDisable (GLenum cap);
-static inline void qglDisable(GLenum cap)
+static ID_INLINE void qglDisable(GLenum cap)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -934,7 +934,7 @@ static inline void qglDisable(GLenum cap)
 }
 
 // void glDisableClientState (GLenum array);
-static inline void qglDisableClientState(GLenum array)
+static ID_INLINE void qglDisableClientState(GLenum array)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -948,7 +948,7 @@ static inline void qglDisableClientState(GLenum array)
 }
 
 // void glDrawArrays (GLenum mode, GLint first, GLsizei count);
-static inline void qglDrawArrays(GLenum mode, GLint first, GLsizei count)
+static ID_INLINE void qglDrawArrays(GLenum mode, GLint first, GLsizei count)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -962,7 +962,7 @@ static inline void qglDrawArrays(GLenum mode, GLint first, GLsizei count)
 }
 
 // void glDrawBuffer (GLenum mode);
-static inline void qglDrawBuffer(GLenum mode)
+static ID_INLINE void qglDrawBuffer(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -976,7 +976,7 @@ static inline void qglDrawBuffer(GLenum mode)
 }
 
 // void glDrawElements (GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
-static inline void qglDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices)
+static ID_INLINE void qglDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -990,7 +990,7 @@ static inline void qglDrawElements(GLenum mode, GLsizei count, GLenum type, cons
 }
 
 // void glDrawPixels (GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-static inline void qglDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
+static ID_INLINE void qglDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1004,7 +1004,7 @@ static inline void qglDrawPixels(GLsizei width, GLsizei height, GLenum format, G
 }
 
 // void glEdgeFlag (GLboolean flag);
-static inline void qglEdgeFlag(GLboolean flag)
+static ID_INLINE void qglEdgeFlag(GLboolean flag)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1018,7 +1018,7 @@ static inline void qglEdgeFlag(GLboolean flag)
 }
 
 // void glEdgeFlagPointer (GLsizei stride, const GLvoid *pointer);
-static inline void qglEdgeFlagPointer(GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglEdgeFlagPointer(GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1032,7 +1032,7 @@ static inline void qglEdgeFlagPointer(GLsizei stride, const GLvoid *pointer)
 }
 
 // void glEdgeFlagv (const GLboolean *flag);
-static inline void qglEdgeFlagv(const GLboolean *flag)
+static ID_INLINE void qglEdgeFlagv(const GLboolean *flag)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1046,7 +1046,7 @@ static inline void qglEdgeFlagv(const GLboolean *flag)
 }
 
 // void glEnable (GLenum cap);
-static inline void qglEnable(GLenum cap)
+static ID_INLINE void qglEnable(GLenum cap)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1060,7 +1060,7 @@ static inline void qglEnable(GLenum cap)
 }
 
 // void glEnableClientState (GLenum array);
-static inline void qglEnableClientState(GLenum array)
+static ID_INLINE void qglEnableClientState(GLenum array)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1074,7 +1074,7 @@ static inline void qglEnableClientState(GLenum array)
 }
 
 // void glEnd (void);
-static inline void qglEnd(void)
+static ID_INLINE void qglEnd(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1089,7 +1089,7 @@ static inline void qglEnd(void)
 }
 
 // void glEndList (void);
-static inline void qglEndList(void)
+static ID_INLINE void qglEndList(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1103,7 +1103,7 @@ static inline void qglEndList(void)
 }
 
 // void glEvalCoord1d (GLdouble u);
-static inline void qglEvalCoord1d(GLdouble u)
+static ID_INLINE void qglEvalCoord1d(GLdouble u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1117,7 +1117,7 @@ static inline void qglEvalCoord1d(GLdouble u)
 }
 
 // void glEvalCoord1dv (const GLdouble *u);
-static inline void qglEvalCoord1dv(const GLdouble *u)
+static ID_INLINE void qglEvalCoord1dv(const GLdouble *u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1131,7 +1131,7 @@ static inline void qglEvalCoord1dv(const GLdouble *u)
 }
 
 // void glEvalCoord1f (GLfloat u);
-static inline void qglEvalCoord1f(GLfloat u)
+static ID_INLINE void qglEvalCoord1f(GLfloat u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1145,7 +1145,7 @@ static inline void qglEvalCoord1f(GLfloat u)
 }
 
 // void glEvalCoord1fv (const GLfloat *u);
-static inline void qglEvalCoord1fv(const GLfloat *u)
+static ID_INLINE void qglEvalCoord1fv(const GLfloat *u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1159,7 +1159,7 @@ static inline void qglEvalCoord1fv(const GLfloat *u)
 }
 
 // void glEvalCoord2d (GLdouble u, GLdouble v);
-static inline void qglEvalCoord2d(GLdouble u, GLdouble v)
+static ID_INLINE void qglEvalCoord2d(GLdouble u, GLdouble v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1173,7 +1173,7 @@ static inline void qglEvalCoord2d(GLdouble u, GLdouble v)
 }
 
 // void glEvalCoord2dv (const GLdouble *u);
-static inline void qglEvalCoord2dv(const GLdouble *u)
+static ID_INLINE void qglEvalCoord2dv(const GLdouble *u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1187,7 +1187,7 @@ static inline void qglEvalCoord2dv(const GLdouble *u)
 }
 
 // void glEvalCoord2f (GLfloat u, GLfloat v);
-static inline void qglEvalCoord2f(GLfloat u, GLfloat v)
+static ID_INLINE void qglEvalCoord2f(GLfloat u, GLfloat v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1201,7 +1201,7 @@ static inline void qglEvalCoord2f(GLfloat u, GLfloat v)
 }
 
 // void glEvalCoord2fv (const GLfloat *u);
-static inline void qglEvalCoord2fv(const GLfloat *u)
+static ID_INLINE void qglEvalCoord2fv(const GLfloat *u)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1215,7 +1215,7 @@ static inline void qglEvalCoord2fv(const GLfloat *u)
 }
 
 // void glEvalMesh1 (GLenum mode, GLint i1, GLint i2);
-static inline void qglEvalMesh1(GLenum mode, GLint i1, GLint i2)
+static ID_INLINE void qglEvalMesh1(GLenum mode, GLint i1, GLint i2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1229,7 +1229,7 @@ static inline void qglEvalMesh1(GLenum mode, GLint i1, GLint i2)
 }
 
 // void glEvalMesh2 (GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2);
-static inline void qglEvalMesh2(GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2)
+static ID_INLINE void qglEvalMesh2(GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1243,7 +1243,7 @@ static inline void qglEvalMesh2(GLenum mode, GLint i1, GLint i2, GLint j1, GLint
 }
 
 // void glEvalPoint1 (GLint i);
-static inline void qglEvalPoint1(GLint i)
+static ID_INLINE void qglEvalPoint1(GLint i)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1257,7 +1257,7 @@ static inline void qglEvalPoint1(GLint i)
 }
 
 // void glEvalPoint2 (GLint i, GLint j);
-static inline void qglEvalPoint2(GLint i, GLint j)
+static ID_INLINE void qglEvalPoint2(GLint i, GLint j)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1271,7 +1271,7 @@ static inline void qglEvalPoint2(GLint i, GLint j)
 }
 
 // void glFeedbackBuffer (GLsizei size, GLenum type, GLfloat *buffer);
-static inline void qglFeedbackBuffer(GLsizei size, GLenum type, GLfloat *buffer)
+static ID_INLINE void qglFeedbackBuffer(GLsizei size, GLenum type, GLfloat *buffer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1285,7 +1285,7 @@ static inline void qglFeedbackBuffer(GLsizei size, GLenum type, GLfloat *buffer)
 }
 
 // void glFinish (void);
-static inline void qglFinish(void)
+static ID_INLINE void qglFinish(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1299,7 +1299,7 @@ static inline void qglFinish(void)
 }
 
 // void glFlush (void);
-static inline void qglFlush(void)
+static ID_INLINE void qglFlush(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1313,7 +1313,7 @@ static inline void qglFlush(void)
 }
 
 // void glFogf (GLenum pname, GLfloat param);
-static inline void qglFogf(GLenum pname, GLfloat param)
+static ID_INLINE void qglFogf(GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1327,7 +1327,7 @@ static inline void qglFogf(GLenum pname, GLfloat param)
 }
 
 // void glFogfv (GLenum pname, const GLfloat *params);
-static inline void qglFogfv(GLenum pname, const GLfloat *params)
+static ID_INLINE void qglFogfv(GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1341,7 +1341,7 @@ static inline void qglFogfv(GLenum pname, const GLfloat *params)
 }
 
 // void glFogi (GLenum pname, GLint param);
-static inline void qglFogi(GLenum pname, GLint param)
+static ID_INLINE void qglFogi(GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1355,7 +1355,7 @@ static inline void qglFogi(GLenum pname, GLint param)
 }
 
 // void glFogiv (GLenum pname, const GLint *params);
-static inline void qglFogiv(GLenum pname, const GLint *params)
+static ID_INLINE void qglFogiv(GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1369,7 +1369,7 @@ static inline void qglFogiv(GLenum pname, const GLint *params)
 }
 
 // void glFrontFace (GLenum mode);
-static inline void qglFrontFace(GLenum mode)
+static ID_INLINE void qglFrontFace(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1383,7 +1383,7 @@ static inline void qglFrontFace(GLenum mode)
 }
 
 // void glFrustum (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
-static inline void qglFrustum(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
+static ID_INLINE void qglFrustum(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1397,7 +1397,7 @@ static inline void qglFrustum(GLdouble left, GLdouble right, GLdouble bottom, GL
 }
 
 // GLuint glGenLists (GLsizei range);
-static inline GLuint qglGenLists(GLsizei range)
+static ID_INLINE GLuint qglGenLists(GLsizei range)
 {
     GLuint returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -1413,7 +1413,7 @@ static inline GLuint qglGenLists(GLsizei range)
 }
 
 // void glGenTextures (GLsizei n, GLuint *textures);
-static inline void qglGenTextures(GLsizei n, GLuint *textures)
+static ID_INLINE void qglGenTextures(GLsizei n, GLuint *textures)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1427,7 +1427,7 @@ static inline void qglGenTextures(GLsizei n, GLuint *textures)
 }
 
 // void glGetBooleanv (GLenum pname, GLboolean *params);
-static inline void qglGetBooleanv(GLenum pname, GLboolean *params)
+static ID_INLINE void qglGetBooleanv(GLenum pname, GLboolean *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1441,7 +1441,7 @@ static inline void qglGetBooleanv(GLenum pname, GLboolean *params)
 }
 
 // void glGetClipPlane (GLenum plane, GLdouble *equation);
-static inline void qglGetClipPlane(GLenum plane, GLdouble *equation)
+static ID_INLINE void qglGetClipPlane(GLenum plane, GLdouble *equation)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1455,7 +1455,7 @@ static inline void qglGetClipPlane(GLenum plane, GLdouble *equation)
 }
 
 // void glGetDoublev (GLenum pname, GLdouble *params);
-static inline void qglGetDoublev(GLenum pname, GLdouble *params)
+static ID_INLINE void qglGetDoublev(GLenum pname, GLdouble *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1469,7 +1469,7 @@ static inline void qglGetDoublev(GLenum pname, GLdouble *params)
 }
 
 // GLenum glGetError (void);
-static inline GLenum qglGetError(void)
+static ID_INLINE GLenum qglGetError(void)
 {
     GLenum returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -1485,7 +1485,7 @@ static inline GLenum qglGetError(void)
 }
 
 // void glGetFloatv (GLenum pname, GLfloat *params);
-static inline void qglGetFloatv(GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetFloatv(GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1499,7 +1499,7 @@ static inline void qglGetFloatv(GLenum pname, GLfloat *params)
 }
 
 // void glGetIntegerv (GLenum pname, GLint *params);
-static inline void qglGetIntegerv(GLenum pname, GLint *params)
+static ID_INLINE void qglGetIntegerv(GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1513,7 +1513,7 @@ static inline void qglGetIntegerv(GLenum pname, GLint *params)
 }
 
 // void glGetLightfv (GLenum light, GLenum pname, GLfloat *params);
-static inline void qglGetLightfv(GLenum light, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetLightfv(GLenum light, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1527,7 +1527,7 @@ static inline void qglGetLightfv(GLenum light, GLenum pname, GLfloat *params)
 }
 
 // void glGetLightiv (GLenum light, GLenum pname, GLint *params);
-static inline void qglGetLightiv(GLenum light, GLenum pname, GLint *params)
+static ID_INLINE void qglGetLightiv(GLenum light, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1541,7 +1541,7 @@ static inline void qglGetLightiv(GLenum light, GLenum pname, GLint *params)
 }
 
 // void glGetMapdv (GLenum target, GLenum query, GLdouble *v);
-static inline void qglGetMapdv(GLenum target, GLenum query, GLdouble *v)
+static ID_INLINE void qglGetMapdv(GLenum target, GLenum query, GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1555,7 +1555,7 @@ static inline void qglGetMapdv(GLenum target, GLenum query, GLdouble *v)
 }
 
 // void glGetMapfv (GLenum target, GLenum query, GLfloat *v);
-static inline void qglGetMapfv(GLenum target, GLenum query, GLfloat *v)
+static ID_INLINE void qglGetMapfv(GLenum target, GLenum query, GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1569,7 +1569,7 @@ static inline void qglGetMapfv(GLenum target, GLenum query, GLfloat *v)
 }
 
 // void glGetMapiv (GLenum target, GLenum query, GLint *v);
-static inline void qglGetMapiv(GLenum target, GLenum query, GLint *v)
+static ID_INLINE void qglGetMapiv(GLenum target, GLenum query, GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1583,7 +1583,7 @@ static inline void qglGetMapiv(GLenum target, GLenum query, GLint *v)
 }
 
 // void glGetMaterialfv (GLenum face, GLenum pname, GLfloat *params);
-static inline void qglGetMaterialfv(GLenum face, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetMaterialfv(GLenum face, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1597,7 +1597,7 @@ static inline void qglGetMaterialfv(GLenum face, GLenum pname, GLfloat *params)
 }
 
 // void glGetMaterialiv (GLenum face, GLenum pname, GLint *params);
-static inline void qglGetMaterialiv(GLenum face, GLenum pname, GLint *params)
+static ID_INLINE void qglGetMaterialiv(GLenum face, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1611,7 +1611,7 @@ static inline void qglGetMaterialiv(GLenum face, GLenum pname, GLint *params)
 }
 
 // void glGetPixelMapfv (GLenum map, GLfloat *values);
-static inline void qglGetPixelMapfv(GLenum map, GLfloat *values)
+static ID_INLINE void qglGetPixelMapfv(GLenum map, GLfloat *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1625,7 +1625,7 @@ static inline void qglGetPixelMapfv(GLenum map, GLfloat *values)
 }
 
 // void glGetPixelMapuiv (GLenum map, GLuint *values);
-static inline void qglGetPixelMapuiv(GLenum map, GLuint *values)
+static ID_INLINE void qglGetPixelMapuiv(GLenum map, GLuint *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1639,7 +1639,7 @@ static inline void qglGetPixelMapuiv(GLenum map, GLuint *values)
 }
 
 // void glGetPixelMapusv (GLenum map, GLushort *values);
-static inline void qglGetPixelMapusv(GLenum map, GLushort *values)
+static ID_INLINE void qglGetPixelMapusv(GLenum map, GLushort *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1653,7 +1653,7 @@ static inline void qglGetPixelMapusv(GLenum map, GLushort *values)
 }
 
 // void glGetPointerv (GLenum pname, GLvoid* *params);
-static inline void qglGetPointerv(GLenum pname, GLvoid* *params)
+static ID_INLINE void qglGetPointerv(GLenum pname, GLvoid* *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1667,7 +1667,7 @@ static inline void qglGetPointerv(GLenum pname, GLvoid* *params)
 }
 
 // void glGetPolygonStipple (GLubyte *mask);
-static inline void qglGetPolygonStipple(GLubyte *mask)
+static ID_INLINE void qglGetPolygonStipple(GLubyte *mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1681,7 +1681,7 @@ static inline void qglGetPolygonStipple(GLubyte *mask)
 }
 
 // const GLubyte * glGetString (GLenum name);
-static inline const GLubyte * qglGetString(GLenum name)
+static ID_INLINE const GLubyte * qglGetString(GLenum name)
 {
     const GLubyte * returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -1697,7 +1697,7 @@ static inline const GLubyte * qglGetString(GLenum name)
 }
 
 // void glGetTexEnvfv (GLenum target, GLenum pname, GLfloat *params);
-static inline void qglGetTexEnvfv(GLenum target, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetTexEnvfv(GLenum target, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1711,7 +1711,7 @@ static inline void qglGetTexEnvfv(GLenum target, GLenum pname, GLfloat *params)
 }
 
 // void glGetTexEnviv (GLenum target, GLenum pname, GLint *params);
-static inline void qglGetTexEnviv(GLenum target, GLenum pname, GLint *params)
+static ID_INLINE void qglGetTexEnviv(GLenum target, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1725,7 +1725,7 @@ static inline void qglGetTexEnviv(GLenum target, GLenum pname, GLint *params)
 }
 
 // void glGetTexGendv (GLenum coord, GLenum pname, GLdouble *params);
-static inline void qglGetTexGendv(GLenum coord, GLenum pname, GLdouble *params)
+static ID_INLINE void qglGetTexGendv(GLenum coord, GLenum pname, GLdouble *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1739,7 +1739,7 @@ static inline void qglGetTexGendv(GLenum coord, GLenum pname, GLdouble *params)
 }
 
 // void glGetTexGenfv (GLenum coord, GLenum pname, GLfloat *params);
-static inline void qglGetTexGenfv(GLenum coord, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetTexGenfv(GLenum coord, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1753,7 +1753,7 @@ static inline void qglGetTexGenfv(GLenum coord, GLenum pname, GLfloat *params)
 }
 
 // void glGetTexGeniv (GLenum coord, GLenum pname, GLint *params);
-static inline void qglGetTexGeniv(GLenum coord, GLenum pname, GLint *params)
+static ID_INLINE void qglGetTexGeniv(GLenum coord, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1767,7 +1767,7 @@ static inline void qglGetTexGeniv(GLenum coord, GLenum pname, GLint *params)
 }
 
 // void glGetTexImage (GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels);
-static inline void qglGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels)
+static ID_INLINE void qglGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1781,7 +1781,7 @@ static inline void qglGetTexImage(GLenum target, GLint level, GLenum format, GLe
 }
 
 // void glGetTexLevelParameterfv (GLenum target, GLint level, GLenum pname, GLfloat *params);
-static inline void qglGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1795,7 +1795,7 @@ static inline void qglGetTexLevelParameterfv(GLenum target, GLint level, GLenum 
 }
 
 // void glGetTexLevelParameteriv (GLenum target, GLint level, GLenum pname, GLint *params);
-static inline void qglGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params)
+static ID_INLINE void qglGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1809,7 +1809,7 @@ static inline void qglGetTexLevelParameteriv(GLenum target, GLint level, GLenum 
 }
 
 // void glGetTexParameterfv (GLenum target, GLenum pname, GLfloat *params);
-static inline void qglGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params)
+static ID_INLINE void qglGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1823,7 +1823,7 @@ static inline void qglGetTexParameterfv(GLenum target, GLenum pname, GLfloat *pa
 }
 
 // void glGetTexParameteriv (GLenum target, GLenum pname, GLint *params);
-static inline void qglGetTexParameteriv(GLenum target, GLenum pname, GLint *params)
+static ID_INLINE void qglGetTexParameteriv(GLenum target, GLenum pname, GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1837,7 +1837,7 @@ static inline void qglGetTexParameteriv(GLenum target, GLenum pname, GLint *para
 }
 
 // void glHint (GLenum target, GLenum mode);
-static inline void qglHint(GLenum target, GLenum mode)
+static ID_INLINE void qglHint(GLenum target, GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1851,7 +1851,7 @@ static inline void qglHint(GLenum target, GLenum mode)
 }
 
 // void glIndexMask (GLuint mask);
-static inline void qglIndexMask(GLuint mask)
+static ID_INLINE void qglIndexMask(GLuint mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1865,7 +1865,7 @@ static inline void qglIndexMask(GLuint mask)
 }
 
 // void glIndexPointer (GLenum type, GLsizei stride, const GLvoid *pointer);
-static inline void qglIndexPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglIndexPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1879,7 +1879,7 @@ static inline void qglIndexPointer(GLenum type, GLsizei stride, const GLvoid *po
 }
 
 // void glIndexd (GLdouble c);
-static inline void qglIndexd(GLdouble c)
+static ID_INLINE void qglIndexd(GLdouble c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1893,7 +1893,7 @@ static inline void qglIndexd(GLdouble c)
 }
 
 // void glIndexdv (const GLdouble *c);
-static inline void qglIndexdv(const GLdouble *c)
+static ID_INLINE void qglIndexdv(const GLdouble *c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1907,7 +1907,7 @@ static inline void qglIndexdv(const GLdouble *c)
 }
 
 // void glIndexf (GLfloat c);
-static inline void qglIndexf(GLfloat c)
+static ID_INLINE void qglIndexf(GLfloat c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1921,7 +1921,7 @@ static inline void qglIndexf(GLfloat c)
 }
 
 // void glIndexfv (const GLfloat *c);
-static inline void qglIndexfv(const GLfloat *c)
+static ID_INLINE void qglIndexfv(const GLfloat *c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1935,7 +1935,7 @@ static inline void qglIndexfv(const GLfloat *c)
 }
 
 // void glIndexi (GLint c);
-static inline void qglIndexi(GLint c)
+static ID_INLINE void qglIndexi(GLint c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1949,7 +1949,7 @@ static inline void qglIndexi(GLint c)
 }
 
 // void glIndexiv (const GLint *c);
-static inline void qglIndexiv(const GLint *c)
+static ID_INLINE void qglIndexiv(const GLint *c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1963,7 +1963,7 @@ static inline void qglIndexiv(const GLint *c)
 }
 
 // void glIndexs (GLshort c);
-static inline void qglIndexs(GLshort c)
+static ID_INLINE void qglIndexs(GLshort c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1977,7 +1977,7 @@ static inline void qglIndexs(GLshort c)
 }
 
 // void glIndexsv (const GLshort *c);
-static inline void qglIndexsv(const GLshort *c)
+static ID_INLINE void qglIndexsv(const GLshort *c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -1991,7 +1991,7 @@ static inline void qglIndexsv(const GLshort *c)
 }
 
 // void glIndexub (GLubyte c);
-static inline void qglIndexub(GLubyte c)
+static ID_INLINE void qglIndexub(GLubyte c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2005,7 +2005,7 @@ static inline void qglIndexub(GLubyte c)
 }
 
 // void glIndexubv (const GLubyte *c);
-static inline void qglIndexubv(const GLubyte *c)
+static ID_INLINE void qglIndexubv(const GLubyte *c)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2019,7 +2019,7 @@ static inline void qglIndexubv(const GLubyte *c)
 }
 
 // void glInitNames (void);
-static inline void qglInitNames(void)
+static ID_INLINE void qglInitNames(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2033,7 +2033,7 @@ static inline void qglInitNames(void)
 }
 
 // void glInterleavedArrays (GLenum format, GLsizei stride, const GLvoid *pointer);
-static inline void qglInterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglInterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2047,7 +2047,7 @@ static inline void qglInterleavedArrays(GLenum format, GLsizei stride, const GLv
 }
 
 // GLboolean glIsEnabled (GLenum cap);
-static inline GLboolean qglIsEnabled(GLenum cap)
+static ID_INLINE GLboolean qglIsEnabled(GLenum cap)
 {
     GLboolean returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -2063,7 +2063,7 @@ static inline GLboolean qglIsEnabled(GLenum cap)
 }
 
 // GLboolean glIsList (GLuint list);
-static inline GLboolean qglIsList(GLuint list)
+static ID_INLINE GLboolean qglIsList(GLuint list)
 {
     GLboolean returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -2079,7 +2079,7 @@ static inline GLboolean qglIsList(GLuint list)
 }
 
 // GLboolean glIsTexture (GLuint texture);
-static inline GLboolean qglIsTexture(GLuint texture)
+static ID_INLINE GLboolean qglIsTexture(GLuint texture)
 {
     GLboolean returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -2095,7 +2095,7 @@ static inline GLboolean qglIsTexture(GLuint texture)
 }
 
 // void glLightModelf (GLenum pname, GLfloat param);
-static inline void qglLightModelf(GLenum pname, GLfloat param)
+static ID_INLINE void qglLightModelf(GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2109,7 +2109,7 @@ static inline void qglLightModelf(GLenum pname, GLfloat param)
 }
 
 // void glLightModelfv (GLenum pname, const GLfloat *params);
-static inline void qglLightModelfv(GLenum pname, const GLfloat *params)
+static ID_INLINE void qglLightModelfv(GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2123,7 +2123,7 @@ static inline void qglLightModelfv(GLenum pname, const GLfloat *params)
 }
 
 // void glLightModeli (GLenum pname, GLint param);
-static inline void qglLightModeli(GLenum pname, GLint param)
+static ID_INLINE void qglLightModeli(GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2137,7 +2137,7 @@ static inline void qglLightModeli(GLenum pname, GLint param)
 }
 
 // void glLightModeliv (GLenum pname, const GLint *params);
-static inline void qglLightModeliv(GLenum pname, const GLint *params)
+static ID_INLINE void qglLightModeliv(GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2151,7 +2151,7 @@ static inline void qglLightModeliv(GLenum pname, const GLint *params)
 }
 
 // void glLightf (GLenum light, GLenum pname, GLfloat param);
-static inline void qglLightf(GLenum light, GLenum pname, GLfloat param)
+static ID_INLINE void qglLightf(GLenum light, GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2165,7 +2165,7 @@ static inline void qglLightf(GLenum light, GLenum pname, GLfloat param)
 }
 
 // void glLightfv (GLenum light, GLenum pname, const GLfloat *params);
-static inline void qglLightfv(GLenum light, GLenum pname, const GLfloat *params)
+static ID_INLINE void qglLightfv(GLenum light, GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2179,7 +2179,7 @@ static inline void qglLightfv(GLenum light, GLenum pname, const GLfloat *params)
 }
 
 // void glLighti (GLenum light, GLenum pname, GLint param);
-static inline void qglLighti(GLenum light, GLenum pname, GLint param)
+static ID_INLINE void qglLighti(GLenum light, GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2193,7 +2193,7 @@ static inline void qglLighti(GLenum light, GLenum pname, GLint param)
 }
 
 // void glLightiv (GLenum light, GLenum pname, const GLint *params);
-static inline void qglLightiv(GLenum light, GLenum pname, const GLint *params)
+static ID_INLINE void qglLightiv(GLenum light, GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2207,7 +2207,7 @@ static inline void qglLightiv(GLenum light, GLenum pname, const GLint *params)
 }
 
 // void glLineStipple (GLint factor, GLushort pattern);
-static inline void qglLineStipple(GLint factor, GLushort pattern)
+static ID_INLINE void qglLineStipple(GLint factor, GLushort pattern)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2221,7 +2221,7 @@ static inline void qglLineStipple(GLint factor, GLushort pattern)
 }
 
 // void glLineWidth (GLfloat width);
-static inline void qglLineWidth(GLfloat width)
+static ID_INLINE void qglLineWidth(GLfloat width)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2235,7 +2235,7 @@ static inline void qglLineWidth(GLfloat width)
 }
 
 // void glListBase (GLuint base);
-static inline void qglListBase(GLuint base)
+static ID_INLINE void qglListBase(GLuint base)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2249,7 +2249,7 @@ static inline void qglListBase(GLuint base)
 }
 
 // void glLoadIdentity (void);
-static inline void qglLoadIdentity(void)
+static ID_INLINE void qglLoadIdentity(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2263,7 +2263,7 @@ static inline void qglLoadIdentity(void)
 }
 
 // void glLoadMatrixd (const GLdouble *m);
-static inline void qglLoadMatrixd(const GLdouble *m)
+static ID_INLINE void qglLoadMatrixd(const GLdouble *m)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2277,7 +2277,7 @@ static inline void qglLoadMatrixd(const GLdouble *m)
 }
 
 // void glLoadMatrixf (const GLfloat *m);
-static inline void qglLoadMatrixf(const GLfloat *m)
+static ID_INLINE void qglLoadMatrixf(const GLfloat *m)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2291,7 +2291,7 @@ static inline void qglLoadMatrixf(const GLfloat *m)
 }
 
 // void glLoadName (GLuint name);
-static inline void qglLoadName(GLuint name)
+static ID_INLINE void qglLoadName(GLuint name)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2305,7 +2305,7 @@ static inline void qglLoadName(GLuint name)
 }
 
 // void glLogicOp (GLenum opcode);
-static inline void qglLogicOp(GLenum opcode)
+static ID_INLINE void qglLogicOp(GLenum opcode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2319,7 +2319,7 @@ static inline void qglLogicOp(GLenum opcode)
 }
 
 // void glMap1d (GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble *points);
-static inline void qglMap1d(GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble *points)
+static ID_INLINE void qglMap1d(GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble *points)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2333,7 +2333,7 @@ static inline void qglMap1d(GLenum target, GLdouble u1, GLdouble u2, GLint strid
 }
 
 // void glMap1f (GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat *points);
-static inline void qglMap1f(GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat *points)
+static ID_INLINE void qglMap1f(GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat *points)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2347,7 +2347,7 @@ static inline void qglMap1f(GLenum target, GLfloat u1, GLfloat u2, GLint stride,
 }
 
 // void glMap2d (GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble *points);
-static inline void qglMap2d(GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble *points)
+static ID_INLINE void qglMap2d(GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble *points)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2361,7 +2361,7 @@ static inline void qglMap2d(GLenum target, GLdouble u1, GLdouble u2, GLint ustri
 }
 
 // void glMap2f (GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat *points);
-static inline void qglMap2f(GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat *points)
+static ID_INLINE void qglMap2f(GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat *points)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2375,7 +2375,7 @@ static inline void qglMap2f(GLenum target, GLfloat u1, GLfloat u2, GLint ustride
 }
 
 // void glMapGrid1d (GLint un, GLdouble u1, GLdouble u2);
-static inline void qglMapGrid1d(GLint un, GLdouble u1, GLdouble u2)
+static ID_INLINE void qglMapGrid1d(GLint un, GLdouble u1, GLdouble u2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2389,7 +2389,7 @@ static inline void qglMapGrid1d(GLint un, GLdouble u1, GLdouble u2)
 }
 
 // void glMapGrid1f (GLint un, GLfloat u1, GLfloat u2);
-static inline void qglMapGrid1f(GLint un, GLfloat u1, GLfloat u2)
+static ID_INLINE void qglMapGrid1f(GLint un, GLfloat u1, GLfloat u2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2403,7 +2403,7 @@ static inline void qglMapGrid1f(GLint un, GLfloat u1, GLfloat u2)
 }
 
 // void glMapGrid2d (GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2);
-static inline void qglMapGrid2d(GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2)
+static ID_INLINE void qglMapGrid2d(GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2417,7 +2417,7 @@ static inline void qglMapGrid2d(GLint un, GLdouble u1, GLdouble u2, GLint vn, GL
 }
 
 // void glMapGrid2f (GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2);
-static inline void qglMapGrid2f(GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2)
+static ID_INLINE void qglMapGrid2f(GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2431,7 +2431,7 @@ static inline void qglMapGrid2f(GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfl
 }
 
 // void glMaterialf (GLenum face, GLenum pname, GLfloat param);
-static inline void qglMaterialf(GLenum face, GLenum pname, GLfloat param)
+static ID_INLINE void qglMaterialf(GLenum face, GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2445,7 +2445,7 @@ static inline void qglMaterialf(GLenum face, GLenum pname, GLfloat param)
 }
 
 // void glMaterialfv (GLenum face, GLenum pname, const GLfloat *params);
-static inline void qglMaterialfv(GLenum face, GLenum pname, const GLfloat *params)
+static ID_INLINE void qglMaterialfv(GLenum face, GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2459,7 +2459,7 @@ static inline void qglMaterialfv(GLenum face, GLenum pname, const GLfloat *param
 }
 
 // void glMateriali (GLenum face, GLenum pname, GLint param);
-static inline void qglMateriali(GLenum face, GLenum pname, GLint param)
+static ID_INLINE void qglMateriali(GLenum face, GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2473,7 +2473,7 @@ static inline void qglMateriali(GLenum face, GLenum pname, GLint param)
 }
 
 // void glMaterialiv (GLenum face, GLenum pname, const GLint *params);
-static inline void qglMaterialiv(GLenum face, GLenum pname, const GLint *params)
+static ID_INLINE void qglMaterialiv(GLenum face, GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2487,7 +2487,7 @@ static inline void qglMaterialiv(GLenum face, GLenum pname, const GLint *params)
 }
 
 // void glMatrixMode (GLenum mode);
-static inline void qglMatrixMode(GLenum mode)
+static ID_INLINE void qglMatrixMode(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2501,7 +2501,7 @@ static inline void qglMatrixMode(GLenum mode)
 }
 
 // void glMultMatrixd (const GLdouble *m);
-static inline void qglMultMatrixd(const GLdouble *m)
+static ID_INLINE void qglMultMatrixd(const GLdouble *m)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2515,7 +2515,7 @@ static inline void qglMultMatrixd(const GLdouble *m)
 }
 
 // void glMultMatrixf (const GLfloat *m);
-static inline void qglMultMatrixf(const GLfloat *m)
+static ID_INLINE void qglMultMatrixf(const GLfloat *m)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2529,7 +2529,7 @@ static inline void qglMultMatrixf(const GLfloat *m)
 }
 
 // void glNewList (GLuint list, GLenum mode);
-static inline void qglNewList(GLuint list, GLenum mode)
+static ID_INLINE void qglNewList(GLuint list, GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2543,7 +2543,7 @@ static inline void qglNewList(GLuint list, GLenum mode)
 }
 
 // void glNormal3b (GLbyte nx, GLbyte ny, GLbyte nz);
-static inline void qglNormal3b(GLbyte nx, GLbyte ny, GLbyte nz)
+static ID_INLINE void qglNormal3b(GLbyte nx, GLbyte ny, GLbyte nz)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2557,7 +2557,7 @@ static inline void qglNormal3b(GLbyte nx, GLbyte ny, GLbyte nz)
 }
 
 // void glNormal3bv (const GLbyte *v);
-static inline void qglNormal3bv(const GLbyte *v)
+static ID_INLINE void qglNormal3bv(const GLbyte *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2571,7 +2571,7 @@ static inline void qglNormal3bv(const GLbyte *v)
 }
 
 // void glNormal3d (GLdouble nx, GLdouble ny, GLdouble nz);
-static inline void qglNormal3d(GLdouble nx, GLdouble ny, GLdouble nz)
+static ID_INLINE void qglNormal3d(GLdouble nx, GLdouble ny, GLdouble nz)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2585,7 +2585,7 @@ static inline void qglNormal3d(GLdouble nx, GLdouble ny, GLdouble nz)
 }
 
 // void glNormal3dv (const GLdouble *v);
-static inline void qglNormal3dv(const GLdouble *v)
+static ID_INLINE void qglNormal3dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2599,7 +2599,7 @@ static inline void qglNormal3dv(const GLdouble *v)
 }
 
 // void glNormal3f (GLfloat nx, GLfloat ny, GLfloat nz);
-static inline void qglNormal3f(GLfloat nx, GLfloat ny, GLfloat nz)
+static ID_INLINE void qglNormal3f(GLfloat nx, GLfloat ny, GLfloat nz)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2613,7 +2613,7 @@ static inline void qglNormal3f(GLfloat nx, GLfloat ny, GLfloat nz)
 }
 
 // void glNormal3fv (const GLfloat *v);
-static inline void qglNormal3fv(const GLfloat *v)
+static ID_INLINE void qglNormal3fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2627,7 +2627,7 @@ static inline void qglNormal3fv(const GLfloat *v)
 }
 
 // void glNormal3i (GLint nx, GLint ny, GLint nz);
-static inline void qglNormal3i(GLint nx, GLint ny, GLint nz)
+static ID_INLINE void qglNormal3i(GLint nx, GLint ny, GLint nz)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2641,7 +2641,7 @@ static inline void qglNormal3i(GLint nx, GLint ny, GLint nz)
 }
 
 // void glNormal3iv (const GLint *v);
-static inline void qglNormal3iv(const GLint *v)
+static ID_INLINE void qglNormal3iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2655,7 +2655,7 @@ static inline void qglNormal3iv(const GLint *v)
 }
 
 // void glNormal3s (GLshort nx, GLshort ny, GLshort nz);
-static inline void qglNormal3s(GLshort nx, GLshort ny, GLshort nz)
+static ID_INLINE void qglNormal3s(GLshort nx, GLshort ny, GLshort nz)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2669,7 +2669,7 @@ static inline void qglNormal3s(GLshort nx, GLshort ny, GLshort nz)
 }
 
 // void glNormal3sv (const GLshort *v);
-static inline void qglNormal3sv(const GLshort *v)
+static ID_INLINE void qglNormal3sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2683,7 +2683,7 @@ static inline void qglNormal3sv(const GLshort *v)
 }
 
 // void glNormalPointer (GLenum type, GLsizei stride, const GLvoid *pointer);
-static inline void qglNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2697,7 +2697,7 @@ static inline void qglNormalPointer(GLenum type, GLsizei stride, const GLvoid *p
 }
 
 // void glOrtho (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
-static inline void qglOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
+static ID_INLINE void qglOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2711,7 +2711,7 @@ static inline void qglOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdo
 }
 
 // void glPassThrough (GLfloat token);
-static inline void qglPassThrough(GLfloat token)
+static ID_INLINE void qglPassThrough(GLfloat token)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2725,7 +2725,7 @@ static inline void qglPassThrough(GLfloat token)
 }
 
 // void glPixelMapfv (GLenum map, GLsizei mapsize, const GLfloat *values);
-static inline void qglPixelMapfv(GLenum map, GLsizei mapsize, const GLfloat *values)
+static ID_INLINE void qglPixelMapfv(GLenum map, GLsizei mapsize, const GLfloat *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2739,7 +2739,7 @@ static inline void qglPixelMapfv(GLenum map, GLsizei mapsize, const GLfloat *val
 }
 
 // void glPixelMapuiv (GLenum map, GLsizei mapsize, const GLuint *values);
-static inline void qglPixelMapuiv(GLenum map, GLsizei mapsize, const GLuint *values)
+static ID_INLINE void qglPixelMapuiv(GLenum map, GLsizei mapsize, const GLuint *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2753,7 +2753,7 @@ static inline void qglPixelMapuiv(GLenum map, GLsizei mapsize, const GLuint *val
 }
 
 // void glPixelMapusv (GLenum map, GLsizei mapsize, const GLushort *values);
-static inline void qglPixelMapusv(GLenum map, GLsizei mapsize, const GLushort *values)
+static ID_INLINE void qglPixelMapusv(GLenum map, GLsizei mapsize, const GLushort *values)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2767,7 +2767,7 @@ static inline void qglPixelMapusv(GLenum map, GLsizei mapsize, const GLushort *v
 }
 
 // void glPixelStoref (GLenum pname, GLfloat param);
-static inline void qglPixelStoref(GLenum pname, GLfloat param)
+static ID_INLINE void qglPixelStoref(GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2781,7 +2781,7 @@ static inline void qglPixelStoref(GLenum pname, GLfloat param)
 }
 
 // void glPixelStorei (GLenum pname, GLint param);
-static inline void qglPixelStorei(GLenum pname, GLint param)
+static ID_INLINE void qglPixelStorei(GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2795,7 +2795,7 @@ static inline void qglPixelStorei(GLenum pname, GLint param)
 }
 
 // void glPixelTransferf (GLenum pname, GLfloat param);
-static inline void qglPixelTransferf(GLenum pname, GLfloat param)
+static ID_INLINE void qglPixelTransferf(GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2809,7 +2809,7 @@ static inline void qglPixelTransferf(GLenum pname, GLfloat param)
 }
 
 // void glPixelTransferi (GLenum pname, GLint param);
-static inline void qglPixelTransferi(GLenum pname, GLint param)
+static ID_INLINE void qglPixelTransferi(GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2823,7 +2823,7 @@ static inline void qglPixelTransferi(GLenum pname, GLint param)
 }
 
 // void glPixelZoom (GLfloat xfactor, GLfloat yfactor);
-static inline void qglPixelZoom(GLfloat xfactor, GLfloat yfactor)
+static ID_INLINE void qglPixelZoom(GLfloat xfactor, GLfloat yfactor)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2837,7 +2837,7 @@ static inline void qglPixelZoom(GLfloat xfactor, GLfloat yfactor)
 }
 
 // void glPointSize (GLfloat size);
-static inline void qglPointSize(GLfloat size)
+static ID_INLINE void qglPointSize(GLfloat size)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2851,7 +2851,7 @@ static inline void qglPointSize(GLfloat size)
 }
 
 // void glPolygonMode (GLenum face, GLenum mode);
-static inline void qglPolygonMode(GLenum face, GLenum mode)
+static ID_INLINE void qglPolygonMode(GLenum face, GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2865,7 +2865,7 @@ static inline void qglPolygonMode(GLenum face, GLenum mode)
 }
 
 // void glPolygonOffset (GLfloat factor, GLfloat units);
-static inline void qglPolygonOffset(GLfloat factor, GLfloat units)
+static ID_INLINE void qglPolygonOffset(GLfloat factor, GLfloat units)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2879,7 +2879,7 @@ static inline void qglPolygonOffset(GLfloat factor, GLfloat units)
 }
 
 // void glPolygonStipple (const GLubyte *mask);
-static inline void qglPolygonStipple(const GLubyte *mask)
+static ID_INLINE void qglPolygonStipple(const GLubyte *mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2893,7 +2893,7 @@ static inline void qglPolygonStipple(const GLubyte *mask)
 }
 
 // void glPopAttrib (void);
-static inline void qglPopAttrib(void)
+static ID_INLINE void qglPopAttrib(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2907,7 +2907,7 @@ static inline void qglPopAttrib(void)
 }
 
 // void glPopClientAttrib (void);
-static inline void qglPopClientAttrib(void)
+static ID_INLINE void qglPopClientAttrib(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2921,7 +2921,7 @@ static inline void qglPopClientAttrib(void)
 }
 
 // void glPopMatrix (void);
-static inline void qglPopMatrix(void)
+static ID_INLINE void qglPopMatrix(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2935,7 +2935,7 @@ static inline void qglPopMatrix(void)
 }
 
 // void glPopName (void);
-static inline void qglPopName(void)
+static ID_INLINE void qglPopName(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2949,7 +2949,7 @@ static inline void qglPopName(void)
 }
 
 // void glPrioritizeTextures (GLsizei n, const GLuint *textures, const GLclampf *priorities);
-static inline void qglPrioritizeTextures(GLsizei n, const GLuint *textures, const GLclampf *priorities)
+static ID_INLINE void qglPrioritizeTextures(GLsizei n, const GLuint *textures, const GLclampf *priorities)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2963,7 +2963,7 @@ static inline void qglPrioritizeTextures(GLsizei n, const GLuint *textures, cons
 }
 
 // void glPushAttrib (GLbitfield mask);
-static inline void qglPushAttrib(GLbitfield mask)
+static ID_INLINE void qglPushAttrib(GLbitfield mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2977,7 +2977,7 @@ static inline void qglPushAttrib(GLbitfield mask)
 }
 
 // void glPushClientAttrib (GLbitfield mask);
-static inline void qglPushClientAttrib(GLbitfield mask)
+static ID_INLINE void qglPushClientAttrib(GLbitfield mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -2991,7 +2991,7 @@ static inline void qglPushClientAttrib(GLbitfield mask)
 }
 
 // void glPushMatrix (void);
-static inline void qglPushMatrix(void)
+static ID_INLINE void qglPushMatrix(void)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3005,7 +3005,7 @@ static inline void qglPushMatrix(void)
 }
 
 // void glPushName (GLuint name);
-static inline void qglPushName(GLuint name)
+static ID_INLINE void qglPushName(GLuint name)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3019,7 +3019,7 @@ static inline void qglPushName(GLuint name)
 }
 
 // void glRasterPos2d (GLdouble x, GLdouble y);
-static inline void qglRasterPos2d(GLdouble x, GLdouble y)
+static ID_INLINE void qglRasterPos2d(GLdouble x, GLdouble y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3033,7 +3033,7 @@ static inline void qglRasterPos2d(GLdouble x, GLdouble y)
 }
 
 // void glRasterPos2dv (const GLdouble *v);
-static inline void qglRasterPos2dv(const GLdouble *v)
+static ID_INLINE void qglRasterPos2dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3047,7 +3047,7 @@ static inline void qglRasterPos2dv(const GLdouble *v)
 }
 
 // void glRasterPos2f (GLfloat x, GLfloat y);
-static inline void qglRasterPos2f(GLfloat x, GLfloat y)
+static ID_INLINE void qglRasterPos2f(GLfloat x, GLfloat y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3061,7 +3061,7 @@ static inline void qglRasterPos2f(GLfloat x, GLfloat y)
 }
 
 // void glRasterPos2fv (const GLfloat *v);
-static inline void qglRasterPos2fv(const GLfloat *v)
+static ID_INLINE void qglRasterPos2fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3075,7 +3075,7 @@ static inline void qglRasterPos2fv(const GLfloat *v)
 }
 
 // void glRasterPos2i (GLint x, GLint y);
-static inline void qglRasterPos2i(GLint x, GLint y)
+static ID_INLINE void qglRasterPos2i(GLint x, GLint y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3089,7 +3089,7 @@ static inline void qglRasterPos2i(GLint x, GLint y)
 }
 
 // void glRasterPos2iv (const GLint *v);
-static inline void qglRasterPos2iv(const GLint *v)
+static ID_INLINE void qglRasterPos2iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3103,7 +3103,7 @@ static inline void qglRasterPos2iv(const GLint *v)
 }
 
 // void glRasterPos2s (GLshort x, GLshort y);
-static inline void qglRasterPos2s(GLshort x, GLshort y)
+static ID_INLINE void qglRasterPos2s(GLshort x, GLshort y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3117,7 +3117,7 @@ static inline void qglRasterPos2s(GLshort x, GLshort y)
 }
 
 // void glRasterPos2sv (const GLshort *v);
-static inline void qglRasterPos2sv(const GLshort *v)
+static ID_INLINE void qglRasterPos2sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3131,7 +3131,7 @@ static inline void qglRasterPos2sv(const GLshort *v)
 }
 
 // void glRasterPos3d (GLdouble x, GLdouble y, GLdouble z);
-static inline void qglRasterPos3d(GLdouble x, GLdouble y, GLdouble z)
+static ID_INLINE void qglRasterPos3d(GLdouble x, GLdouble y, GLdouble z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3145,7 +3145,7 @@ static inline void qglRasterPos3d(GLdouble x, GLdouble y, GLdouble z)
 }
 
 // void glRasterPos3dv (const GLdouble *v);
-static inline void qglRasterPos3dv(const GLdouble *v)
+static ID_INLINE void qglRasterPos3dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3159,7 +3159,7 @@ static inline void qglRasterPos3dv(const GLdouble *v)
 }
 
 // void glRasterPos3f (GLfloat x, GLfloat y, GLfloat z);
-static inline void qglRasterPos3f(GLfloat x, GLfloat y, GLfloat z)
+static ID_INLINE void qglRasterPos3f(GLfloat x, GLfloat y, GLfloat z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3173,7 +3173,7 @@ static inline void qglRasterPos3f(GLfloat x, GLfloat y, GLfloat z)
 }
 
 // void glRasterPos3fv (const GLfloat *v);
-static inline void qglRasterPos3fv(const GLfloat *v)
+static ID_INLINE void qglRasterPos3fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3187,7 +3187,7 @@ static inline void qglRasterPos3fv(const GLfloat *v)
 }
 
 // void glRasterPos3i (GLint x, GLint y, GLint z);
-static inline void qglRasterPos3i(GLint x, GLint y, GLint z)
+static ID_INLINE void qglRasterPos3i(GLint x, GLint y, GLint z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3201,7 +3201,7 @@ static inline void qglRasterPos3i(GLint x, GLint y, GLint z)
 }
 
 // void glRasterPos3iv (const GLint *v);
-static inline void qglRasterPos3iv(const GLint *v)
+static ID_INLINE void qglRasterPos3iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3215,7 +3215,7 @@ static inline void qglRasterPos3iv(const GLint *v)
 }
 
 // void glRasterPos3s (GLshort x, GLshort y, GLshort z);
-static inline void qglRasterPos3s(GLshort x, GLshort y, GLshort z)
+static ID_INLINE void qglRasterPos3s(GLshort x, GLshort y, GLshort z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3229,7 +3229,7 @@ static inline void qglRasterPos3s(GLshort x, GLshort y, GLshort z)
 }
 
 // void glRasterPos3sv (const GLshort *v);
-static inline void qglRasterPos3sv(const GLshort *v)
+static ID_INLINE void qglRasterPos3sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3243,7 +3243,7 @@ static inline void qglRasterPos3sv(const GLshort *v)
 }
 
 // void glRasterPos4d (GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-static inline void qglRasterPos4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
+static ID_INLINE void qglRasterPos4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3257,7 +3257,7 @@ static inline void qglRasterPos4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w
 }
 
 // void glRasterPos4dv (const GLdouble *v);
-static inline void qglRasterPos4dv(const GLdouble *v)
+static ID_INLINE void qglRasterPos4dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3271,7 +3271,7 @@ static inline void qglRasterPos4dv(const GLdouble *v)
 }
 
 // void glRasterPos4f (GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-static inline void qglRasterPos4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
+static ID_INLINE void qglRasterPos4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3285,7 +3285,7 @@ static inline void qglRasterPos4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 }
 
 // void glRasterPos4fv (const GLfloat *v);
-static inline void qglRasterPos4fv(const GLfloat *v)
+static ID_INLINE void qglRasterPos4fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3299,7 +3299,7 @@ static inline void qglRasterPos4fv(const GLfloat *v)
 }
 
 // void glRasterPos4i (GLint x, GLint y, GLint z, GLint w);
-static inline void qglRasterPos4i(GLint x, GLint y, GLint z, GLint w)
+static ID_INLINE void qglRasterPos4i(GLint x, GLint y, GLint z, GLint w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3313,7 +3313,7 @@ static inline void qglRasterPos4i(GLint x, GLint y, GLint z, GLint w)
 }
 
 // void glRasterPos4iv (const GLint *v);
-static inline void qglRasterPos4iv(const GLint *v)
+static ID_INLINE void qglRasterPos4iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3327,7 +3327,7 @@ static inline void qglRasterPos4iv(const GLint *v)
 }
 
 // void glRasterPos4s (GLshort x, GLshort y, GLshort z, GLshort w);
-static inline void qglRasterPos4s(GLshort x, GLshort y, GLshort z, GLshort w)
+static ID_INLINE void qglRasterPos4s(GLshort x, GLshort y, GLshort z, GLshort w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3341,7 +3341,7 @@ static inline void qglRasterPos4s(GLshort x, GLshort y, GLshort z, GLshort w)
 }
 
 // void glRasterPos4sv (const GLshort *v);
-static inline void qglRasterPos4sv(const GLshort *v)
+static ID_INLINE void qglRasterPos4sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3355,7 +3355,7 @@ static inline void qglRasterPos4sv(const GLshort *v)
 }
 
 // void glReadBuffer (GLenum mode);
-static inline void qglReadBuffer(GLenum mode)
+static ID_INLINE void qglReadBuffer(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3369,7 +3369,7 @@ static inline void qglReadBuffer(GLenum mode)
 }
 
 // void glReadPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels);
-static inline void qglReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels)
+static ID_INLINE void qglReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3383,7 +3383,7 @@ static inline void qglReadPixels(GLint x, GLint y, GLsizei width, GLsizei height
 }
 
 // void glRectd (GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2);
-static inline void qglRectd(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2)
+static ID_INLINE void qglRectd(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3397,7 +3397,7 @@ static inline void qglRectd(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2)
 }
 
 // void glRectdv (const GLdouble *v1, const GLdouble *v2);
-static inline void qglRectdv(const GLdouble *v1, const GLdouble *v2)
+static ID_INLINE void qglRectdv(const GLdouble *v1, const GLdouble *v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3411,7 +3411,7 @@ static inline void qglRectdv(const GLdouble *v1, const GLdouble *v2)
 }
 
 // void glRectf (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
-static inline void qglRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
+static ID_INLINE void qglRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3425,7 +3425,7 @@ static inline void qglRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
 }
 
 // void glRectfv (const GLfloat *v1, const GLfloat *v2);
-static inline void qglRectfv(const GLfloat *v1, const GLfloat *v2)
+static ID_INLINE void qglRectfv(const GLfloat *v1, const GLfloat *v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3439,7 +3439,7 @@ static inline void qglRectfv(const GLfloat *v1, const GLfloat *v2)
 }
 
 // void glRecti (GLint x1, GLint y1, GLint x2, GLint y2);
-static inline void qglRecti(GLint x1, GLint y1, GLint x2, GLint y2)
+static ID_INLINE void qglRecti(GLint x1, GLint y1, GLint x2, GLint y2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3453,7 +3453,7 @@ static inline void qglRecti(GLint x1, GLint y1, GLint x2, GLint y2)
 }
 
 // void glRectiv (const GLint *v1, const GLint *v2);
-static inline void qglRectiv(const GLint *v1, const GLint *v2)
+static ID_INLINE void qglRectiv(const GLint *v1, const GLint *v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3467,7 +3467,7 @@ static inline void qglRectiv(const GLint *v1, const GLint *v2)
 }
 
 // void glRects (GLshort x1, GLshort y1, GLshort x2, GLshort y2);
-static inline void qglRects(GLshort x1, GLshort y1, GLshort x2, GLshort y2)
+static ID_INLINE void qglRects(GLshort x1, GLshort y1, GLshort x2, GLshort y2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3481,7 +3481,7 @@ static inline void qglRects(GLshort x1, GLshort y1, GLshort x2, GLshort y2)
 }
 
 // void glRectsv (const GLshort *v1, const GLshort *v2);
-static inline void qglRectsv(const GLshort *v1, const GLshort *v2)
+static ID_INLINE void qglRectsv(const GLshort *v1, const GLshort *v2)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3495,7 +3495,7 @@ static inline void qglRectsv(const GLshort *v1, const GLshort *v2)
 }
 
 // GLint glRenderMode (GLenum mode);
-static inline GLint qglRenderMode(GLenum mode)
+static ID_INLINE GLint qglRenderMode(GLenum mode)
 {
     GLint returnValue;
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
@@ -3511,7 +3511,7 @@ static inline GLint qglRenderMode(GLenum mode)
 }
 
 // void glRotated (GLdouble angle, GLdouble x, GLdouble y, GLdouble z);
-static inline void qglRotated(GLdouble angle, GLdouble x, GLdouble y, GLdouble z)
+static ID_INLINE void qglRotated(GLdouble angle, GLdouble x, GLdouble y, GLdouble z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3525,7 +3525,7 @@ static inline void qglRotated(GLdouble angle, GLdouble x, GLdouble y, GLdouble z
 }
 
 // void glRotatef (GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
-static inline void qglRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+static ID_INLINE void qglRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3539,7 +3539,7 @@ static inline void qglRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 }
 
 // void glScaled (GLdouble x, GLdouble y, GLdouble z);
-static inline void qglScaled(GLdouble x, GLdouble y, GLdouble z)
+static ID_INLINE void qglScaled(GLdouble x, GLdouble y, GLdouble z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3553,7 +3553,7 @@ static inline void qglScaled(GLdouble x, GLdouble y, GLdouble z)
 }
 
 // void glScalef (GLfloat x, GLfloat y, GLfloat z);
-static inline void qglScalef(GLfloat x, GLfloat y, GLfloat z)
+static ID_INLINE void qglScalef(GLfloat x, GLfloat y, GLfloat z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3567,7 +3567,7 @@ static inline void qglScalef(GLfloat x, GLfloat y, GLfloat z)
 }
 
 // void glScissor (GLint x, GLint y, GLsizei width, GLsizei height);
-static inline void qglScissor(GLint x, GLint y, GLsizei width, GLsizei height)
+static ID_INLINE void qglScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3581,7 +3581,7 @@ static inline void qglScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 }
 
 // void glSelectBuffer (GLsizei size, GLuint *buffer);
-static inline void qglSelectBuffer(GLsizei size, GLuint *buffer)
+static ID_INLINE void qglSelectBuffer(GLsizei size, GLuint *buffer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3595,7 +3595,7 @@ static inline void qglSelectBuffer(GLsizei size, GLuint *buffer)
 }
 
 // void glShadeModel (GLenum mode);
-static inline void qglShadeModel(GLenum mode)
+static ID_INLINE void qglShadeModel(GLenum mode)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3609,7 +3609,7 @@ static inline void qglShadeModel(GLenum mode)
 }
 
 // void glStencilFunc (GLenum func, GLint ref, GLuint mask);
-static inline void qglStencilFunc(GLenum func, GLint ref, GLuint mask)
+static ID_INLINE void qglStencilFunc(GLenum func, GLint ref, GLuint mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3623,7 +3623,7 @@ static inline void qglStencilFunc(GLenum func, GLint ref, GLuint mask)
 }
 
 // void glStencilMask (GLuint mask);
-static inline void qglStencilMask(GLuint mask)
+static ID_INLINE void qglStencilMask(GLuint mask)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3637,7 +3637,7 @@ static inline void qglStencilMask(GLuint mask)
 }
 
 // void glStencilOp (GLenum fail, GLenum zfail, GLenum zpass);
-static inline void qglStencilOp(GLenum fail, GLenum zfail, GLenum zpass)
+static ID_INLINE void qglStencilOp(GLenum fail, GLenum zfail, GLenum zpass)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3651,7 +3651,7 @@ static inline void qglStencilOp(GLenum fail, GLenum zfail, GLenum zpass)
 }
 
 // void glTexCoord1d (GLdouble s);
-static inline void qglTexCoord1d(GLdouble s)
+static ID_INLINE void qglTexCoord1d(GLdouble s)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3665,7 +3665,7 @@ static inline void qglTexCoord1d(GLdouble s)
 }
 
 // void glTexCoord1dv (const GLdouble *v);
-static inline void qglTexCoord1dv(const GLdouble *v)
+static ID_INLINE void qglTexCoord1dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3679,7 +3679,7 @@ static inline void qglTexCoord1dv(const GLdouble *v)
 }
 
 // void glTexCoord1f (GLfloat s);
-static inline void qglTexCoord1f(GLfloat s)
+static ID_INLINE void qglTexCoord1f(GLfloat s)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3693,7 +3693,7 @@ static inline void qglTexCoord1f(GLfloat s)
 }
 
 // void glTexCoord1fv (const GLfloat *v);
-static inline void qglTexCoord1fv(const GLfloat *v)
+static ID_INLINE void qglTexCoord1fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3707,7 +3707,7 @@ static inline void qglTexCoord1fv(const GLfloat *v)
 }
 
 // void glTexCoord1i (GLint s);
-static inline void qglTexCoord1i(GLint s)
+static ID_INLINE void qglTexCoord1i(GLint s)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3721,7 +3721,7 @@ static inline void qglTexCoord1i(GLint s)
 }
 
 // void glTexCoord1iv (const GLint *v);
-static inline void qglTexCoord1iv(const GLint *v)
+static ID_INLINE void qglTexCoord1iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3735,7 +3735,7 @@ static inline void qglTexCoord1iv(const GLint *v)
 }
 
 // void glTexCoord1s (GLshort s);
-static inline void qglTexCoord1s(GLshort s)
+static ID_INLINE void qglTexCoord1s(GLshort s)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3749,7 +3749,7 @@ static inline void qglTexCoord1s(GLshort s)
 }
 
 // void glTexCoord1sv (const GLshort *v);
-static inline void qglTexCoord1sv(const GLshort *v)
+static ID_INLINE void qglTexCoord1sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3763,7 +3763,7 @@ static inline void qglTexCoord1sv(const GLshort *v)
 }
 
 // void glTexCoord2d (GLdouble s, GLdouble t);
-static inline void qglTexCoord2d(GLdouble s, GLdouble t)
+static ID_INLINE void qglTexCoord2d(GLdouble s, GLdouble t)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3777,7 +3777,7 @@ static inline void qglTexCoord2d(GLdouble s, GLdouble t)
 }
 
 // void glTexCoord2dv (const GLdouble *v);
-static inline void qglTexCoord2dv(const GLdouble *v)
+static ID_INLINE void qglTexCoord2dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3791,7 +3791,7 @@ static inline void qglTexCoord2dv(const GLdouble *v)
 }
 
 // void glTexCoord2f (GLfloat s, GLfloat t);
-static inline void qglTexCoord2f(GLfloat s, GLfloat t)
+static ID_INLINE void qglTexCoord2f(GLfloat s, GLfloat t)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3805,7 +3805,7 @@ static inline void qglTexCoord2f(GLfloat s, GLfloat t)
 }
 
 // void glTexCoord2fv (const GLfloat *v);
-static inline void qglTexCoord2fv(const GLfloat *v)
+static ID_INLINE void qglTexCoord2fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3819,7 +3819,7 @@ static inline void qglTexCoord2fv(const GLfloat *v)
 }
 
 // void glTexCoord2i (GLint s, GLint t);
-static inline void qglTexCoord2i(GLint s, GLint t)
+static ID_INLINE void qglTexCoord2i(GLint s, GLint t)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3833,7 +3833,7 @@ static inline void qglTexCoord2i(GLint s, GLint t)
 }
 
 // void glTexCoord2iv (const GLint *v);
-static inline void qglTexCoord2iv(const GLint *v)
+static ID_INLINE void qglTexCoord2iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3847,7 +3847,7 @@ static inline void qglTexCoord2iv(const GLint *v)
 }
 
 // void glTexCoord2s (GLshort s, GLshort t);
-static inline void qglTexCoord2s(GLshort s, GLshort t)
+static ID_INLINE void qglTexCoord2s(GLshort s, GLshort t)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3861,7 +3861,7 @@ static inline void qglTexCoord2s(GLshort s, GLshort t)
 }
 
 // void glTexCoord2sv (const GLshort *v);
-static inline void qglTexCoord2sv(const GLshort *v)
+static ID_INLINE void qglTexCoord2sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3875,7 +3875,7 @@ static inline void qglTexCoord2sv(const GLshort *v)
 }
 
 // void glTexCoord3d (GLdouble s, GLdouble t, GLdouble r);
-static inline void qglTexCoord3d(GLdouble s, GLdouble t, GLdouble r)
+static ID_INLINE void qglTexCoord3d(GLdouble s, GLdouble t, GLdouble r)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3889,7 +3889,7 @@ static inline void qglTexCoord3d(GLdouble s, GLdouble t, GLdouble r)
 }
 
 // void glTexCoord3dv (const GLdouble *v);
-static inline void qglTexCoord3dv(const GLdouble *v)
+static ID_INLINE void qglTexCoord3dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3903,7 +3903,7 @@ static inline void qglTexCoord3dv(const GLdouble *v)
 }
 
 // void glTexCoord3f (GLfloat s, GLfloat t, GLfloat r);
-static inline void qglTexCoord3f(GLfloat s, GLfloat t, GLfloat r)
+static ID_INLINE void qglTexCoord3f(GLfloat s, GLfloat t, GLfloat r)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3917,7 +3917,7 @@ static inline void qglTexCoord3f(GLfloat s, GLfloat t, GLfloat r)
 }
 
 // void glTexCoord3fv (const GLfloat *v);
-static inline void qglTexCoord3fv(const GLfloat *v)
+static ID_INLINE void qglTexCoord3fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3931,7 +3931,7 @@ static inline void qglTexCoord3fv(const GLfloat *v)
 }
 
 // void glTexCoord3i (GLint s, GLint t, GLint r);
-static inline void qglTexCoord3i(GLint s, GLint t, GLint r)
+static ID_INLINE void qglTexCoord3i(GLint s, GLint t, GLint r)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3945,7 +3945,7 @@ static inline void qglTexCoord3i(GLint s, GLint t, GLint r)
 }
 
 // void glTexCoord3iv (const GLint *v);
-static inline void qglTexCoord3iv(const GLint *v)
+static ID_INLINE void qglTexCoord3iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3959,7 +3959,7 @@ static inline void qglTexCoord3iv(const GLint *v)
 }
 
 // void glTexCoord3s (GLshort s, GLshort t, GLshort r);
-static inline void qglTexCoord3s(GLshort s, GLshort t, GLshort r)
+static ID_INLINE void qglTexCoord3s(GLshort s, GLshort t, GLshort r)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3973,7 +3973,7 @@ static inline void qglTexCoord3s(GLshort s, GLshort t, GLshort r)
 }
 
 // void glTexCoord3sv (const GLshort *v);
-static inline void qglTexCoord3sv(const GLshort *v)
+static ID_INLINE void qglTexCoord3sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -3987,7 +3987,7 @@ static inline void qglTexCoord3sv(const GLshort *v)
 }
 
 // void glTexCoord4d (GLdouble s, GLdouble t, GLdouble r, GLdouble q);
-static inline void qglTexCoord4d(GLdouble s, GLdouble t, GLdouble r, GLdouble q)
+static ID_INLINE void qglTexCoord4d(GLdouble s, GLdouble t, GLdouble r, GLdouble q)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4001,7 +4001,7 @@ static inline void qglTexCoord4d(GLdouble s, GLdouble t, GLdouble r, GLdouble q)
 }
 
 // void glTexCoord4dv (const GLdouble *v);
-static inline void qglTexCoord4dv(const GLdouble *v)
+static ID_INLINE void qglTexCoord4dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4015,7 +4015,7 @@ static inline void qglTexCoord4dv(const GLdouble *v)
 }
 
 // void glTexCoord4f (GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-static inline void qglTexCoord4f(GLfloat s, GLfloat t, GLfloat r, GLfloat q)
+static ID_INLINE void qglTexCoord4f(GLfloat s, GLfloat t, GLfloat r, GLfloat q)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4029,7 +4029,7 @@ static inline void qglTexCoord4f(GLfloat s, GLfloat t, GLfloat r, GLfloat q)
 }
 
 // void glTexCoord4fv (const GLfloat *v);
-static inline void qglTexCoord4fv(const GLfloat *v)
+static ID_INLINE void qglTexCoord4fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4043,7 +4043,7 @@ static inline void qglTexCoord4fv(const GLfloat *v)
 }
 
 // void glTexCoord4i (GLint s, GLint t, GLint r, GLint q);
-static inline void qglTexCoord4i(GLint s, GLint t, GLint r, GLint q)
+static ID_INLINE void qglTexCoord4i(GLint s, GLint t, GLint r, GLint q)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4057,7 +4057,7 @@ static inline void qglTexCoord4i(GLint s, GLint t, GLint r, GLint q)
 }
 
 // void glTexCoord4iv (const GLint *v);
-static inline void qglTexCoord4iv(const GLint *v)
+static ID_INLINE void qglTexCoord4iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4071,7 +4071,7 @@ static inline void qglTexCoord4iv(const GLint *v)
 }
 
 // void glTexCoord4s (GLshort s, GLshort t, GLshort r, GLshort q);
-static inline void qglTexCoord4s(GLshort s, GLshort t, GLshort r, GLshort q)
+static ID_INLINE void qglTexCoord4s(GLshort s, GLshort t, GLshort r, GLshort q)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4085,7 +4085,7 @@ static inline void qglTexCoord4s(GLshort s, GLshort t, GLshort r, GLshort q)
 }
 
 // void glTexCoord4sv (const GLshort *v);
-static inline void qglTexCoord4sv(const GLshort *v)
+static ID_INLINE void qglTexCoord4sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4099,7 +4099,7 @@ static inline void qglTexCoord4sv(const GLshort *v)
 }
 
 // void glTexCoordPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-static inline void qglTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4113,7 +4113,7 @@ static inline void qglTexCoordPointer(GLint size, GLenum type, GLsizei stride, c
 }
 
 // void glTexEnvf (GLenum target, GLenum pname, GLfloat param);
-static inline void qglTexEnvf(GLenum target, GLenum pname, GLfloat param)
+static ID_INLINE void qglTexEnvf(GLenum target, GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4127,7 +4127,7 @@ static inline void qglTexEnvf(GLenum target, GLenum pname, GLfloat param)
 }
 
 // void glTexEnvfv (GLenum target, GLenum pname, const GLfloat *params);
-static inline void qglTexEnvfv(GLenum target, GLenum pname, const GLfloat *params)
+static ID_INLINE void qglTexEnvfv(GLenum target, GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4141,7 +4141,7 @@ static inline void qglTexEnvfv(GLenum target, GLenum pname, const GLfloat *param
 }
 
 // void glTexEnvi (GLenum target, GLenum pname, GLint param);
-static inline void qglTexEnvi(GLenum target, GLenum pname, GLint param)
+static ID_INLINE void qglTexEnvi(GLenum target, GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4155,7 +4155,7 @@ static inline void qglTexEnvi(GLenum target, GLenum pname, GLint param)
 }
 
 // void glTexEnviv (GLenum target, GLenum pname, const GLint *params);
-static inline void qglTexEnviv(GLenum target, GLenum pname, const GLint *params)
+static ID_INLINE void qglTexEnviv(GLenum target, GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4169,7 +4169,7 @@ static inline void qglTexEnviv(GLenum target, GLenum pname, const GLint *params)
 }
 
 // void glTexGend (GLenum coord, GLenum pname, GLdouble param);
-static inline void qglTexGend(GLenum coord, GLenum pname, GLdouble param)
+static ID_INLINE void qglTexGend(GLenum coord, GLenum pname, GLdouble param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4183,7 +4183,7 @@ static inline void qglTexGend(GLenum coord, GLenum pname, GLdouble param)
 }
 
 // void glTexGendv (GLenum coord, GLenum pname, const GLdouble *params);
-static inline void qglTexGendv(GLenum coord, GLenum pname, const GLdouble *params)
+static ID_INLINE void qglTexGendv(GLenum coord, GLenum pname, const GLdouble *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4197,7 +4197,7 @@ static inline void qglTexGendv(GLenum coord, GLenum pname, const GLdouble *param
 }
 
 // void glTexGenf (GLenum coord, GLenum pname, GLfloat param);
-static inline void qglTexGenf(GLenum coord, GLenum pname, GLfloat param)
+static ID_INLINE void qglTexGenf(GLenum coord, GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4211,7 +4211,7 @@ static inline void qglTexGenf(GLenum coord, GLenum pname, GLfloat param)
 }
 
 // void glTexGenfv (GLenum coord, GLenum pname, const GLfloat *params);
-static inline void qglTexGenfv(GLenum coord, GLenum pname, const GLfloat *params)
+static ID_INLINE void qglTexGenfv(GLenum coord, GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4225,7 +4225,7 @@ static inline void qglTexGenfv(GLenum coord, GLenum pname, const GLfloat *params
 }
 
 // void glTexGeni (GLenum coord, GLenum pname, GLint param);
-static inline void qglTexGeni(GLenum coord, GLenum pname, GLint param)
+static ID_INLINE void qglTexGeni(GLenum coord, GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4239,7 +4239,7 @@ static inline void qglTexGeni(GLenum coord, GLenum pname, GLint param)
 }
 
 // void glTexGeniv (GLenum coord, GLenum pname, const GLint *params);
-static inline void qglTexGeniv(GLenum coord, GLenum pname, const GLint *params)
+static ID_INLINE void qglTexGeniv(GLenum coord, GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4253,7 +4253,7 @@ static inline void qglTexGeniv(GLenum coord, GLenum pname, const GLint *params)
 }
 
 // void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-static inline void qglTexImage1D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
+static ID_INLINE void qglTexImage1D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4267,7 +4267,7 @@ static inline void qglTexImage1D(GLenum target, GLint level, GLint internalforma
 }
 
 // void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-static inline void qglTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
+static ID_INLINE void qglTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4281,7 +4281,7 @@ static inline void qglTexImage2D(GLenum target, GLint level, GLint internalforma
 }
 
 // void glTexParameterf (GLenum target, GLenum pname, GLfloat param);
-static inline void qglTexParameterf(GLenum target, GLenum pname, GLfloat param)
+static ID_INLINE void qglTexParameterf(GLenum target, GLenum pname, GLfloat param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4295,7 +4295,7 @@ static inline void qglTexParameterf(GLenum target, GLenum pname, GLfloat param)
 }
 
 // void glTexParameterfv (GLenum target, GLenum pname, const GLfloat *params);
-static inline void qglTexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
+static ID_INLINE void qglTexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4309,7 +4309,7 @@ static inline void qglTexParameterfv(GLenum target, GLenum pname, const GLfloat 
 }
 
 // void glTexParameteri (GLenum target, GLenum pname, GLint param);
-static inline void qglTexParameteri(GLenum target, GLenum pname, GLint param)
+static ID_INLINE void qglTexParameteri(GLenum target, GLenum pname, GLint param)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4323,7 +4323,7 @@ static inline void qglTexParameteri(GLenum target, GLenum pname, GLint param)
 }
 
 // void glTexParameteriv (GLenum target, GLenum pname, const GLint *params);
-static inline void qglTexParameteriv(GLenum target, GLenum pname, const GLint *params)
+static ID_INLINE void qglTexParameteriv(GLenum target, GLenum pname, const GLint *params)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4337,7 +4337,7 @@ static inline void qglTexParameteriv(GLenum target, GLenum pname, const GLint *p
 }
 
 // void glTexSubImage1D (GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels);
-static inline void qglTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels)
+static ID_INLINE void qglTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4351,7 +4351,7 @@ static inline void qglTexSubImage1D(GLenum target, GLint level, GLint xoffset, G
 }
 
 // void glTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-static inline void qglTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
+static ID_INLINE void qglTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4365,7 +4365,7 @@ static inline void qglTexSubImage2D(GLenum target, GLint level, GLint xoffset, G
 }
 
 // void glTranslated (GLdouble x, GLdouble y, GLdouble z);
-static inline void qglTranslated(GLdouble x, GLdouble y, GLdouble z)
+static ID_INLINE void qglTranslated(GLdouble x, GLdouble y, GLdouble z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4379,7 +4379,7 @@ static inline void qglTranslated(GLdouble x, GLdouble y, GLdouble z)
 }
 
 // void glTranslatef (GLfloat x, GLfloat y, GLfloat z);
-static inline void qglTranslatef(GLfloat x, GLfloat y, GLfloat z)
+static ID_INLINE void qglTranslatef(GLfloat x, GLfloat y, GLfloat z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4393,7 +4393,7 @@ static inline void qglTranslatef(GLfloat x, GLfloat y, GLfloat z)
 }
 
 // void glVertex2d (GLdouble x, GLdouble y);
-static inline void qglVertex2d(GLdouble x, GLdouble y)
+static ID_INLINE void qglVertex2d(GLdouble x, GLdouble y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4407,7 +4407,7 @@ static inline void qglVertex2d(GLdouble x, GLdouble y)
 }
 
 // void glVertex2dv (const GLdouble *v);
-static inline void qglVertex2dv(const GLdouble *v)
+static ID_INLINE void qglVertex2dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4421,7 +4421,7 @@ static inline void qglVertex2dv(const GLdouble *v)
 }
 
 // void glVertex2f (GLfloat x, GLfloat y);
-static inline void qglVertex2f(GLfloat x, GLfloat y)
+static ID_INLINE void qglVertex2f(GLfloat x, GLfloat y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4435,7 +4435,7 @@ static inline void qglVertex2f(GLfloat x, GLfloat y)
 }
 
 // void glVertex2fv (const GLfloat *v);
-static inline void qglVertex2fv(const GLfloat *v)
+static ID_INLINE void qglVertex2fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4449,7 +4449,7 @@ static inline void qglVertex2fv(const GLfloat *v)
 }
 
 // void glVertex2i (GLint x, GLint y);
-static inline void qglVertex2i(GLint x, GLint y)
+static ID_INLINE void qglVertex2i(GLint x, GLint y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4463,7 +4463,7 @@ static inline void qglVertex2i(GLint x, GLint y)
 }
 
 // void glVertex2iv (const GLint *v);
-static inline void qglVertex2iv(const GLint *v)
+static ID_INLINE void qglVertex2iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4477,7 +4477,7 @@ static inline void qglVertex2iv(const GLint *v)
 }
 
 // void glVertex2s (GLshort x, GLshort y);
-static inline void qglVertex2s(GLshort x, GLshort y)
+static ID_INLINE void qglVertex2s(GLshort x, GLshort y)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4491,7 +4491,7 @@ static inline void qglVertex2s(GLshort x, GLshort y)
 }
 
 // void glVertex2sv (const GLshort *v);
-static inline void qglVertex2sv(const GLshort *v)
+static ID_INLINE void qglVertex2sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4505,7 +4505,7 @@ static inline void qglVertex2sv(const GLshort *v)
 }
 
 // void glVertex3d (GLdouble x, GLdouble y, GLdouble z);
-static inline void qglVertex3d(GLdouble x, GLdouble y, GLdouble z)
+static ID_INLINE void qglVertex3d(GLdouble x, GLdouble y, GLdouble z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4519,7 +4519,7 @@ static inline void qglVertex3d(GLdouble x, GLdouble y, GLdouble z)
 }
 
 // void glVertex3dv (const GLdouble *v);
-static inline void qglVertex3dv(const GLdouble *v)
+static ID_INLINE void qglVertex3dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4533,7 +4533,7 @@ static inline void qglVertex3dv(const GLdouble *v)
 }
 
 // void glVertex3f (GLfloat x, GLfloat y, GLfloat z);
-static inline void qglVertex3f(GLfloat x, GLfloat y, GLfloat z)
+static ID_INLINE void qglVertex3f(GLfloat x, GLfloat y, GLfloat z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4547,7 +4547,7 @@ static inline void qglVertex3f(GLfloat x, GLfloat y, GLfloat z)
 }
 
 // void glVertex3fv (const GLfloat *v);
-static inline void qglVertex3fv(const GLfloat *v)
+static ID_INLINE void qglVertex3fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4561,7 +4561,7 @@ static inline void qglVertex3fv(const GLfloat *v)
 }
 
 // void glVertex3i (GLint x, GLint y, GLint z);
-static inline void qglVertex3i(GLint x, GLint y, GLint z)
+static ID_INLINE void qglVertex3i(GLint x, GLint y, GLint z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4575,7 +4575,7 @@ static inline void qglVertex3i(GLint x, GLint y, GLint z)
 }
 
 // void glVertex3iv (const GLint *v);
-static inline void qglVertex3iv(const GLint *v)
+static ID_INLINE void qglVertex3iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4589,7 +4589,7 @@ static inline void qglVertex3iv(const GLint *v)
 }
 
 // void glVertex3s (GLshort x, GLshort y, GLshort z);
-static inline void qglVertex3s(GLshort x, GLshort y, GLshort z)
+static ID_INLINE void qglVertex3s(GLshort x, GLshort y, GLshort z)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4603,7 +4603,7 @@ static inline void qglVertex3s(GLshort x, GLshort y, GLshort z)
 }
 
 // void glVertex3sv (const GLshort *v);
-static inline void qglVertex3sv(const GLshort *v)
+static ID_INLINE void qglVertex3sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4617,7 +4617,7 @@ static inline void qglVertex3sv(const GLshort *v)
 }
 
 // void glVertex4d (GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-static inline void qglVertex4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
+static ID_INLINE void qglVertex4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4631,7 +4631,7 @@ static inline void qglVertex4d(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
 }
 
 // void glVertex4dv (const GLdouble *v);
-static inline void qglVertex4dv(const GLdouble *v)
+static ID_INLINE void qglVertex4dv(const GLdouble *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4645,7 +4645,7 @@ static inline void qglVertex4dv(const GLdouble *v)
 }
 
 // void glVertex4f (GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-static inline void qglVertex4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
+static ID_INLINE void qglVertex4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4659,7 +4659,7 @@ static inline void qglVertex4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 }
 
 // void glVertex4fv (const GLfloat *v);
-static inline void qglVertex4fv(const GLfloat *v)
+static ID_INLINE void qglVertex4fv(const GLfloat *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4673,7 +4673,7 @@ static inline void qglVertex4fv(const GLfloat *v)
 }
 
 // void glVertex4i (GLint x, GLint y, GLint z, GLint w);
-static inline void qglVertex4i(GLint x, GLint y, GLint z, GLint w)
+static ID_INLINE void qglVertex4i(GLint x, GLint y, GLint z, GLint w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4687,7 +4687,7 @@ static inline void qglVertex4i(GLint x, GLint y, GLint z, GLint w)
 }
 
 // void glVertex4iv (const GLint *v);
-static inline void qglVertex4iv(const GLint *v)
+static ID_INLINE void qglVertex4iv(const GLint *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4701,7 +4701,7 @@ static inline void qglVertex4iv(const GLint *v)
 }
 
 // void glVertex4s (GLshort x, GLshort y, GLshort z, GLshort w);
-static inline void qglVertex4s(GLshort x, GLshort y, GLshort z, GLshort w)
+static ID_INLINE void qglVertex4s(GLshort x, GLshort y, GLshort z, GLshort w)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4715,7 +4715,7 @@ static inline void qglVertex4s(GLshort x, GLshort y, GLshort z, GLshort w)
 }
 
 // void glVertex4sv (const GLshort *v);
-static inline void qglVertex4sv(const GLshort *v)
+static ID_INLINE void qglVertex4sv(const GLshort *v)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4729,7 +4729,7 @@ static inline void qglVertex4sv(const GLshort *v)
 }
 
 // void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-static inline void qglVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+static ID_INLINE void qglVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)
@@ -4743,7 +4743,7 @@ static inline void qglVertexPointer(GLint size, GLenum type, GLsizei stride, con
 }
 
 // void glViewport (GLint x, GLint y, GLsizei width, GLsizei height);
-static inline void qglViewport(GLint x, GLint y, GLsizei width, GLsizei height)
+static ID_INLINE void qglViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 #if !defined(NDEBUG) && defined(QGL_LOG_GL_CALLS)
     if (QGLLogGLCalls)

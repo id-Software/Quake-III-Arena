@@ -645,7 +645,7 @@ static unsigned short yuv_to_rgb( long y, long u, long v )
 ******************************************************************************/
 #if defined(MACOS_X)
 
-static inline unsigned int yuv_to_rgb24( long y, long u, long v )
+static ID_INLINE unsigned int yuv_to_rgb24( long y, long u, long v )
 { 
 	long r,g,b,YY;
         

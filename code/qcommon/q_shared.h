@@ -236,13 +236,8 @@ void Snd_Memset (void* dest, const int val, const size_t count);
 #define Snd_Memset Com_Memset
 #endif
 
-#if !( defined __VECTORC )
 void Com_Memset (void* dest, const int val, const size_t count);
 void Com_Memcpy (void* dest, const void* src, const size_t count);
-#else
-#define Com_Memset memset
-#define Com_Memcpy memcpy
-#endif
 
 #define CIN_system	1
 #define CIN_loop	2
@@ -346,7 +341,7 @@ extern	vec3_t	axisDefault[3];
 
 #if idppc
 
-static inline float Q_rsqrt( float number ) {
+static ID_INLINE float Q_rsqrt( float number ) {
 		float x = 0.5f * number;
                 float y;
 #ifdef __GNUC__            
@@ -358,7 +353,7 @@ static inline float Q_rsqrt( float number ) {
 	}
 
 #ifdef __GNUC__            
-static inline float Q_fabs(float x) {
+static ID_INLINE float Q_fabs(float x) {
     float abs_x;
     
     asm("fabs %0,%1" : "=f" (abs_x) : "f" (x));
@@ -410,7 +405,6 @@ typedef struct {
 	float	v[3];
 } vec3struct_t;
 #define VectorCopy(a,b)	(*(vec3struct_t *)b=*(vec3struct_t *)a)
-#define ID_INLINE static
 #endif
 #endif
 
@@ -437,7 +431,7 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs );
 void ClearBounds( vec3_t mins, vec3_t maxs );
 void AddPointToBounds( const vec3_t v, vec3_t mins, vec3_t maxs );
 
-#ifndef Q3_VM
+#if !defined( Q3_VM ) || ( defined( Q3_VM ) && defined( __Q3_VM_MATH ) )
 static ID_INLINE int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2]) {
 		return 0;

@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // math.s
 // x86 assembly-language math routines.
 
-#define GLQUAKE	1	// don't include unneeded defs
 #include "qasm.h"
 
 

@@ -506,7 +506,7 @@ DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
-DO_DED_CC=$(CC) -DDEDICATED -DC_ONLY $(CFLAGS) -o $@ -c $<
+DO_DED_CC=$(CC) -DDEDICATED $(CFLAGS) -o $@ -c $<
 DO_WINDRES=$(WINDRES) -i $< -o $@
 
 #############################################################################
@@ -1111,7 +1111,8 @@ Q3DOBJ = \
   $(B)/ded/null_snddma.o
 
 ifeq ($(ARCH),i386)
-  Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftola.o $(B)/ded/snapvectora.o
+  Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftola.o \
+      $(B)/ded/snapvectora.o $(B)/ded/matha.o
 endif
 
 ifeq ($(ARCH),x86_64)
@@ -1196,6 +1197,7 @@ $(B)/ded/vm_interpreted.o : $(CMDIR)/vm_interpreted.c; $(DO_DED_CC)
 
 $(B)/ded/ftola.o : $(UDIR)/ftola.s; $(DO_AS)
 $(B)/ded/snapvectora.o : $(UDIR)/snapvectora.s; $(DO_AS)
+$(B)/ded/matha.o : $(UDIR)/matha.s; $(DO_AS)
 
 $(B)/ded/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_DED_CC)
 $(B)/ded/vm_x86_64.o : $(CMDIR)/vm_x86_64.c; $(DO_DED_CC)

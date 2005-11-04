@@ -330,7 +330,7 @@ Dlls will call this directly
 ============
 */
 long QDECL VM_DllSyscall( long arg, ... ) {
-#if ((defined __GNUC__) && !(defined __i386__))
+#if !id386
   // rcg010206 - see commentary above
   long args[16];
   int i;
@@ -738,7 +738,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9]);
 	} else {
-#ifdef __i386__ // i386 calling convention doesn't need conversion
+#if id386 // i386 calling convention doesn't need conversion
 #ifndef NO_VM_COMPILED
 		if ( vm->compiled )
 			r = VM_CallCompiled( vm, (int*)&callnum );

@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // 23/09/05 Ported to gas by intel2gas, best supporting actor Tim Angus
 // <tim@ngus.net>
 
-#define GLQUAKE 1 // don't include unneeded defs
 #include "qasm.h"
 
 #ifdef id386

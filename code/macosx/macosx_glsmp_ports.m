@@ -80,7 +80,7 @@ enum {
     RenderCompletedMsg = 2,
 };
 
-static /*inline*/ void MsgPortInit(MsgPort *port)
+static /*ID_INLINE*/ void MsgPortInit(MsgPort *port)
 {
 #if USE_MACH_PORTS  
     port->nsPort = [[NSMachPort alloc] init];
@@ -106,7 +106,7 @@ static /*inline*/ void MsgPortInit(MsgPort *port)
 #endif    
 }
 
-static /*inline*/ void _SendMsg(MsgPort *port, unsigned int msgCode, void *msgData, 
+static /*ID_INLINE*/ void _SendMsg(MsgPort *port, unsigned int msgCode, void *msgData, 
                          const char *functionName, const char *portName, const char *msgName)
 {
     int rc;
@@ -173,7 +173,7 @@ static /*inline*/ void _SendMsg(MsgPort *port, unsigned int msgCode, void *msgDa
 #endif            
 }
 
-static /*inline*/ void _WaitMsg(MsgPort *port, unsigned int *msgCode, void **msgData, 
+static /*ID_INLINE*/ void _WaitMsg(MsgPort *port, unsigned int *msgCode, void **msgData, 
                                 const char *functionName, const char *portName)
 {
     int rc;

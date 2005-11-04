@@ -1022,7 +1022,7 @@ void RB_CalcRotateTexCoords( float degsPerSecond, float *st )
 
 
 
-#if id386 && !( (defined __GNUC__ ) && (defined __i386__ ) ) // rb010123
+#if id386 && !defined(__GNUC__)
 
 long myftol( float f ) {
 	static int tmp;

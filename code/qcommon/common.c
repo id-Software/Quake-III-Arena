@@ -2812,9 +2812,8 @@ void Com_Shutdown (void) {
 
 }
 
-#if !( defined __VECTORC )
 #if !( defined __GNUC__ )  // GNU versions in linux_common.c
-#if ((!id386) && (!defined __i386__)) // rcg010212 - for PPC
+#if !id386
 
 void Com_Memcpy (void* dest, const void* src, const size_t count)
 {
@@ -3126,7 +3125,6 @@ skipClamp:
 }
 #endif
 #endif 
-#endif // bk001208 - memset/memcpy assembly, Q_acos needed (RC4)
 //------------------------------------------------------------------------
 
 

@@ -34,7 +34,6 @@ int*     snd_p;
 int      snd_linear_count;
 short*   snd_out;
 
-#if !( (defined __GNUC__) && (defined __i386__) ) // if not a GNU x86 target
 #if	!id386                                        // if configured not to use asm
 
 void S_WriteLinearBlastStereo16 (void)
@@ -61,6 +60,9 @@ void S_WriteLinearBlastStereo16 (void)
 			snd_out[i+1] = val;
 	}
 }
+#elif defined(__GNUC__)
+// uses snd_mixa.s
+void S_WriteLinearBlastStereo16 (void);
 #else
 
 __declspec( naked ) void S_WriteLinearBlastStereo16 (void)
@@ -107,10 +109,6 @@ LClampDone2:
 	}
 }
 
-#endif
-#else
-// forward declare, implementation somewhere else
-void S_WriteLinearBlastStereo16 (void);
 #endif
 
 void S_TransferStereo16 (unsigned long *pbuf, int endtime)

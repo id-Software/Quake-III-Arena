@@ -114,7 +114,7 @@ static char	*opnames[256] = {
 
 #if idppc
     #if defined(__GNUC__)
-        static inline unsigned int loadWord(void *addr) {
+        static ID_INLINE unsigned int loadWord(void *addr) {
             unsigned int word;
             
             asm("lwbrx %0,0,%1" : "=r" (word) : "r" (addr));
@@ -124,7 +124,7 @@ static char	*opnames[256] = {
 	#define loadWord(addr) __lwbrx(addr,0)
     #endif
 #else
-    static inline int loadWord(void *addr) {
+    static ID_INLINE int loadWord(void *addr) {
 	int word;
 	memcpy(&word, addr, 4);
 	return LittleLong(word);
