@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qasm.h"
 
-#ifdef id386
+#if id386
 .data
 
 fpucw:  .long   0
