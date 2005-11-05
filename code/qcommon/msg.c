@@ -813,7 +813,7 @@ netField_t	entityStateFields[] =
 { NETF(origin[1]), 0 },
 { NETF(origin[2]), 0 },
 { NETF(solid), 24 },
-{ NETF(powerups), 16 },
+{ NETF(powerups), MAX_POWERUPS },
 { NETF(modelindex), 8 },
 { NETF(otherEntityNum2), GENTITYNUM_BITS },
 { NETF(loopSound), 8 },
@@ -1231,25 +1231,25 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 	// send the arrays
 	//
 	statsbits = 0;
-	for (i=0 ; i<16 ; i++) {
+	for (i=0 ; i<MAX_STATS ; i++) {
 		if (to->stats[i] != from->stats[i]) {
 			statsbits |= 1<<i;
 		}
 	}
 	persistantbits = 0;
-	for (i=0 ; i<16 ; i++) {
+	for (i=0 ; i<MAX_PERSISTANT ; i++) {
 		if (to->persistant[i] != from->persistant[i]) {
 			persistantbits |= 1<<i;
 		}
 	}
 	ammobits = 0;
-	for (i=0 ; i<16 ; i++) {
+	for (i=0 ; i<MAX_WEAPONS ; i++) {
 		if (to->ammo[i] != from->ammo[i]) {
 			ammobits |= 1<<i;
 		}
 	}
 	powerupbits = 0;
-	for (i=0 ; i<16 ; i++) {
+	for (i=0 ; i<MAX_POWERUPS ; i++) {
 		if (to->powerups[i] != from->powerups[i]) {
 			powerupbits |= 1<<i;
 		}
@@ -1264,8 +1264,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	if ( statsbits ) {
 		MSG_WriteBits( msg, 1, 1 );	// changed
-		MSG_WriteShort( msg, statsbits );
-		for (i=0 ; i<16 ; i++)
+		MSG_WriteBits( msg, statsbits, MAX_STATS );
+		for (i=0 ; i<MAX_STATS ; i++)
 			if (statsbits & (1<<i) )
 				MSG_WriteShort (msg, to->stats[i]);
 	} else {
@@ -1275,8 +1275,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	if ( persistantbits ) {
 		MSG_WriteBits( msg, 1, 1 );	// changed
-		MSG_WriteShort( msg, persistantbits );
-		for (i=0 ; i<16 ; i++)
+		MSG_WriteBits( msg, persistantbits, MAX_PERSISTANT );
+		for (i=0 ; i<MAX_PERSISTANT ; i++)
 			if (persistantbits & (1<<i) )
 				MSG_WriteShort (msg, to->persistant[i]);
 	} else {
@@ -1286,8 +1286,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	if ( ammobits ) {
 		MSG_WriteBits( msg, 1, 1 );	// changed
-		MSG_WriteShort( msg, ammobits );
-		for (i=0 ; i<16 ; i++)
+		MSG_WriteBits( msg, ammobits, MAX_WEAPONS );
+		for (i=0 ; i<MAX_WEAPONS ; i++)
 			if (ammobits & (1<<i) )
 				MSG_WriteShort (msg, to->ammo[i]);
 	} else {
@@ -1297,8 +1297,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	if ( powerupbits ) {
 		MSG_WriteBits( msg, 1, 1 );	// changed
-		MSG_WriteShort( msg, powerupbits );
-		for (i=0 ; i<16 ; i++)
+		MSG_WriteBits( msg, powerupbits, MAX_POWERUPS );
+		for (i=0 ; i<MAX_POWERUPS ; i++)
 			if (powerupbits & (1<<i) )
 				MSG_WriteLong( msg, to->powerups[i] );
 	} else {
@@ -1395,8 +1395,8 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		// parse stats
 		if ( MSG_ReadBits( msg, 1 ) ) {
 			LOG("PS_STATS");
-			bits = MSG_ReadShort (msg);
-			for (i=0 ; i<16 ; i++) {
+			bits = MSG_ReadBits (msg, MAX_STATS);
+			for (i=0 ; i<MAX_STATS ; i++) {
 				if (bits & (1<<i) ) {
 					to->stats[i] = MSG_ReadShort(msg);
 				}
@@ -1406,8 +1406,8 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		// parse persistant stats
 		if ( MSG_ReadBits( msg, 1 ) ) {
 			LOG("PS_PERSISTANT");
-			bits = MSG_ReadShort (msg);
-			for (i=0 ; i<16 ; i++) {
+			bits = MSG_ReadBits (msg, MAX_PERSISTANT);
+			for (i=0 ; i<MAX_PERSISTANT ; i++) {
 				if (bits & (1<<i) ) {
 					to->persistant[i] = MSG_ReadShort(msg);
 				}
@@ -1417,8 +1417,8 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		// parse ammo
 		if ( MSG_ReadBits( msg, 1 ) ) {
 			LOG("PS_AMMO");
-			bits = MSG_ReadShort (msg);
-			for (i=0 ; i<16 ; i++) {
+			bits = MSG_ReadBits (msg, MAX_WEAPONS);
+			for (i=0 ; i<MAX_WEAPONS ; i++) {
 				if (bits & (1<<i) ) {
 					to->ammo[i] = MSG_ReadShort(msg);
 				}
@@ -1428,8 +1428,8 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		// parse powerups
 		if ( MSG_ReadBits( msg, 1 ) ) {
 			LOG("PS_POWERUPS");
-			bits = MSG_ReadShort (msg);
-			for (i=0 ; i<16 ; i++) {
+			bits = MSG_ReadBits (msg, MAX_POWERUPS);
+			for (i=0 ; i<MAX_POWERUPS ; i++) {
 				if (bits & (1<<i) ) {
 					to->powerups[i] = MSG_ReadLong(msg);
 				}

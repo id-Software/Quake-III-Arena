@@ -1489,7 +1489,7 @@ void CG_DrawWeaponSelect( void ) {
 	// count the number of weapons owned
 	bits = cg.snap->ps.stats[ STAT_WEAPONS ];
 	count = 0;
-	for ( i = 1 ; i < 16 ; i++ ) {
+	for ( i = 1 ; i < MAX_WEAPONS ; i++ ) {
 		if ( bits & ( 1 << i ) ) {
 			count++;
 		}
@@ -1498,7 +1498,7 @@ void CG_DrawWeaponSelect( void ) {
 	x = 320 - count * 20;
 	y = 380;
 
-	for ( i = 1 ; i < 16 ; i++ ) {
+	for ( i = 1 ; i < MAX_WEAPONS ; i++ ) {
 		if ( !( bits & ( 1 << i ) ) ) {
 			continue;
 		}
@@ -1570,9 +1570,9 @@ void CG_NextWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
-	for ( i = 0 ; i < 16 ; i++ ) {
+	for ( i = 0 ; i < MAX_WEAPONS ; i++ ) {
 		cg.weaponSelect++;
-		if ( cg.weaponSelect == 16 ) {
+		if ( cg.weaponSelect == MAX_WEAPONS ) {
 			cg.weaponSelect = 0;
 		}
 		if ( cg.weaponSelect == WP_GAUNTLET ) {
@@ -1582,7 +1582,7 @@ void CG_NextWeapon_f( void ) {
 			break;
 		}
 	}
-	if ( i == 16 ) {
+	if ( i == MAX_WEAPONS ) {
 		cg.weaponSelect = original;
 	}
 }
@@ -1606,10 +1606,10 @@ void CG_PrevWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
-	for ( i = 0 ; i < 16 ; i++ ) {
+	for ( i = 0 ; i < MAX_WEAPONS ; i++ ) {
 		cg.weaponSelect--;
 		if ( cg.weaponSelect == -1 ) {
-			cg.weaponSelect = 15;
+			cg.weaponSelect = MAX_WEAPONS - 1;
 		}
 		if ( cg.weaponSelect == WP_GAUNTLET ) {
 			continue;		// never cycle to gauntlet
@@ -1618,7 +1618,7 @@ void CG_PrevWeapon_f( void ) {
 			break;
 		}
 	}
-	if ( i == 16 ) {
+	if ( i == MAX_WEAPONS ) {
 		cg.weaponSelect = original;
 	}
 }
@@ -1640,7 +1640,7 @@ void CG_Weapon_f( void ) {
 
 	num = atoi( CG_Argv( 1 ) );
 
-	if ( num < 1 || num > 15 ) {
+	if ( num < 1 || num > MAX_WEAPONS-1 ) {
 		return;
 	}
 
@@ -1665,7 +1665,7 @@ void CG_OutOfAmmoChange( void ) {
 
 	cg.weaponSelectTime = cg.time;
 
-	for ( i = 15 ; i > 0 ; i-- ) {
+	for ( i = MAX_WEAPONS-1 ; i > 0 ; i-- ) {
 		if ( CG_WeaponSelectable( i ) ) {
 			cg.weaponSelect = i;
 			break;
