@@ -50,7 +50,15 @@ DXSDK_DIR=C:/DXSDK
 endif
 
 ifndef USE_SDL
-USE_SDL=true
+USE_SDL=1
+endif
+
+ifndef BUILD_CLIENT
+BUILD_CLIENT=1
+endif
+
+ifndef BUILD_SERVER
+BUILD_SERVER=1
 endif
 
 #############################################################################
@@ -113,7 +121,7 @@ ifeq ($(PLATFORM),linux)
 
   BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
-  ifeq ($(strip $(USE_SDL)),true)
+  ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
     GL_CFLAGS =
   else
@@ -158,7 +166,7 @@ ifeq ($(PLATFORM),linux)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
 
-  ifeq ($(strip $(USE_SDL)),true)
+  ifeq ($(USE_SDL),1)
     GLLDFLAGS=$(shell sdl-config --libs)
   else
     GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
@@ -382,7 +390,7 @@ ifeq ($(PLATFORM),SunOS)
 
   BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
 
-  ifeq ($(strip $(USE_SDL)),true)
+  ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
     GL_CFLAGS =
   else
@@ -415,7 +423,7 @@ ifeq ($(PLATFORM),SunOS)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-lsocket -lnsl -ldl -lm
 
-  ifeq ($(strip $(USE_SDL)),true)
+  ifeq ($(USE_SDL),1)
     GLLDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
   else
     GLLDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
@@ -487,6 +495,24 @@ endif #mingw32
 endif #FreeBSD
 endif #IRIX
 endif #SunOS
+
+ifneq ($(BUILD_SERVER),1)
+  TARGETS := $(subst $(B)/$(PLATFORM)q3ded,,$(TARGETS))
+endif
+
+ifneq ($(BUILD_CLIENT),1)
+  TARGETS := \
+	$(subst $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT),,\
+	$(subst $(B)/baseq3/ui$(ARCH).$(SHLIBEXT),,\
+	$(subst $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT),,\
+	$(subst $(B)/missionpack/ui$(ARCH).$(SHLIBEXT),,\
+	$(subst $(B)/baseq3/vm/cgame.qvm,,\
+	$(subst $(B)/baseq3/vm/ui.qvm,,\
+	$(subst $(B)/missionpack/vm/cgame.qvm,,\
+	$(subst $(B)/missionpack/vm/ui.qvm,,\
+	$(subst $(B)/$(PLATFORM)quake3-smp$(BINEXT),,\
+	$(subst $(B)/$(PLATFORM)quake3$(BINEXT),,$(TARGETS) ))))))))))
+endif
 
 ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
