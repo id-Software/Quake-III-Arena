@@ -20,15 +20,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#if 1
-#define ALIGN(x) \
-	do { \
-		x = (x+sizeof(void*)-1) & ~(sizeof(void*)-1L); \
-	} while(0)
-#else
-#define ALIGN(x) 
-#endif
-
 /*****************************************************************************
  * name:		be_ai_chat.c
  *
@@ -699,7 +690,7 @@ bot_synonymlist_t *BotLoadSynonyms(char *filename)
 							return NULL;
 						} //end if
 						len = strlen(token.string) + 1;
-						ALIGN(len);
+						len = ALIGN(len);
 						size += sizeof(bot_synonym_t) + len;
 						if (pass)
 						{
@@ -998,7 +989,7 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 				return NULL;
 			} //end if
 			len = strlen(token.string) + 1;
-			ALIGN(len);
+			len = ALIGN(len);
 			size += sizeof(bot_randomlist_t) + len;
 			if (pass)
 			{
@@ -1029,7 +1020,7 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 					return NULL;
 				} //end if
 				len = strlen(chatmessagestring) + 1;
-				ALIGN(len);
+				len = ALIGN(len);
 				size += sizeof(bot_randomstring_t) + len;
 				if (pass)
 				{
@@ -2132,7 +2123,7 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 								return NULL;
 							} //end if
 							len = strlen(chatmessagestring) + 1;
-							ALIGN(len);
+							len = ALIGN(len);
 							if (pass)
 							{
 								chatmessage = (bot_chatmessage_t *) ptr;

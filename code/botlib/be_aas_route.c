@@ -521,7 +521,7 @@ void AAS_CalculateAreaTravelTimes(void)
 		//
 		size += settings->numreachableareas * sizeof(unsigned short *);
 		//
-		size += settings->numreachableareas * revreach->numlinks * sizeof(unsigned short);
+		size += settings->numreachableareas * ALIGN(revreach->numlinks) * sizeof(unsigned short);
 	} //end for
 	//allocate memory for the area travel times
 	ptr = (char *) GetClearedMemory(size);
@@ -541,7 +541,7 @@ void AAS_CalculateAreaTravelTimes(void)
 		for (l = 0; l < settings->numreachableareas; l++)
 		{
 			aasworld.areatraveltimes[i][l] = (unsigned short *) ptr;
-			ptr += revreach->numlinks * sizeof(unsigned short);
+			ptr += ALIGN(revreach->numlinks) * sizeof(unsigned short);
 			//reachability link
 			reach = &aasworld.reachability[settings->firstreachablearea + l];
 			//

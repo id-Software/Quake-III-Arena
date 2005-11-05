@@ -111,6 +111,7 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#define ALIGN(x) ((x+sizeof(long)-1) & ~(sizeof(long)-1))
 
 #ifndef NULL
 #define NULL ((void *)0)
