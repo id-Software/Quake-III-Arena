@@ -311,6 +311,8 @@ static float LittleFloat(const float l) { return FloatSwap(&l); }
 #define ARCH_STRING "i386"
 #elif defined __sparc
 #define ARCH_STRING "sparc"
+#else
+#error "Unsupported architecture"
 #endif
 
 #define PATH_SEP '/'
