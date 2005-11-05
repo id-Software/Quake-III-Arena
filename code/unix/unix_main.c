@@ -353,65 +353,7 @@ void Sys_Init(void)
 {
   Cmd_AddCommand ("in_restart", Sys_In_Restart_f);
 
-#if defined __linux__
-#  if defined __i386__
-  Cvar_Set( "arch", "linux i386" );
-#  elif defined __x86_64__
-  Cvar_Set( "arch", "linux x86_64" );
-#  elif defined __powerpc64__
-  Cvar_Set( "arch", "linux ppc64" );
-#  elif defined __powerpc__
-  Cvar_Set( "arch", "linux ppc" );
-#  elif defined __s390__
-  Cvar_Set( "arch", "linux s390" );
-#  elif defined __s390x__
-  Cvar_Set( "arch", "linux s390x" );
-#  elif defined __ia64__
-  Cvar_Set( "arch", "linux ia64" );
-#  elif defined __alpha__
-  Cvar_Set( "arch", "linux alpha" );
-#  elif defined __sparc__
-  Cvar_Set( "arch", "linux sparc" );
-#  elif defined __arm__
-  Cvar_Set( "arch", "linux arm" );
-#  elif defined __cris__
-  Cvar_Set( "arch", "linux cris" );
-#  elif defined __hppa__
-  Cvar_Set( "arch", "linux hppa" );
-#  elif defined __mips__
-  Cvar_Set( "arch", "linux mips" );
-#  elif defined __sh__
-  Cvar_Set( "arch", "linux sh" );
-# else
-# error unsupported architecture
-#endif
-
-#elif defined __FreeBSD__
-
-#if defined __i386__ // FreeBSD
-  Cvar_Set( "arch", "freebsd i386" );
-#elif defined __alpha__
-  Cvar_Set( "arch", "freebsd alpha" );
-#else
-  Cvar_Set( "arch", "freebsd unknown" );
-#endif
-#elif defined(__sun)
-#if defined __i386__
-  Cvar_Set( "arch", "solaris x86" );
-#elif defined __sparc__
-  Cvar_Set( "arch", "solaris sparc" );
-#else
-  Cvar_Set( "arch", "solaris unknown" );
-#endif
-#elif defined __sgi__
-#if defined __mips__
-  Cvar_Set( "arch", "sgi mips" );
-#else
-  Cvar_Set( "arch", "sgi unknown" );
-#endif
-#else
-  Cvar_Set( "arch", "unknown" );
-#endif
+  Cvar_Set( "arch", OS_STRING " " ARCH_STRING );
 
   Cvar_Set( "username", Sys_GetCurrentUser() );
 
@@ -779,37 +721,7 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   assert( name );
 
   getcwd(curpath, sizeof(curpath));
-#if defined __i386__
-  snprintf (fname, sizeof(fname), "%si386.so", name);
-#elif defined __x86_64__
-  snprintf (fname, sizeof(fname), "%sx86_64.so", name);
-#elif defined __powerpc64__
-  snprintf (fname, sizeof(fname), "%sppc64.so", name);
-#elif defined __powerpc__   //rcg010207 - PPC support.
-  snprintf (fname, sizeof(fname), "%sppc.so", name);
-#elif defined __s390__
-  snprintf (fname, sizeof(fname), "%ss390.so", name);
-#elif defined __s390x__
-  snprintf (fname, sizeof(fname), "%ss390x.so", name);
-#elif defined __ia64__
-  snprintf (fname, sizeof(fname), "%sia64.so", name);
-#elif defined __alpha__
-  snprintf (fname, sizeof(fname), "%saxp.so", name);
-#elif defined __mips__
-  snprintf (fname, sizeof(fname), "%smips.so", name);
-#elif defined __arm__
-  snprintf (fname, sizeof(fname), "%sarm.so", name);
-#elif defined __cris__
-  snprintf (fname, sizeof(fname), "%scris.so", name);
-#elif defined __hppa__
-  snprintf (fname, sizeof(fname), "%shppa.so", name);
-#elif defined __sh__
-  snprintf (fname, sizeof(fname), "%ssh.so", name);
-#elif defined __sparc__
-  snprintf (fname, sizeof(fname), "%ssparc.so", name);
-#else
-#error Unknown arch
-#endif
+  snprintf (fname, sizeof(fname), "%s" ARCH_STRING ".so", name);
 
   // TODO: use fs_searchpaths from files.c
   pwdpath = Sys_Cwd();

@@ -71,32 +71,30 @@ float	FloatSwap (const float *f);
 #undef QDECL
 #define QDECL __cdecl
 
-// buildstring will be incorporated into the version string
 #ifdef _MSC_VER
-#ifdef NDEBUG
+#define OS_STRING "win_msvc"
+
 #ifdef _M_IX86
-#define CPUSTRING "win-x86"
+#define ARCH_STRING "x86"
 #elif defined _M_ALPHA
-#define CPUSTRING "win-AXP"
-#endif
+#define ARCH_STRING "AXP"
 #else
-#ifdef _M_IX86
-#define CPUSTRING "win-x86-debug"
-#elif defined _M_ALPHA
-#define CPUSTRING "win-AXP-debug"
+#error "Unsupported architecture"
 #endif
-#endif
+
 #elif defined __MINGW32__
-#ifdef NDEBUG
+#define OS_STRING "win_mingw"
+
 #ifdef __i386__
-#define CPUSTRING "mingw-x86"
-#endif
+#define ARCH_STRING "x86"
 #else
-#ifdef __i386__
-#define CPUSTRING "mingw-x86-debug"
+#error "Unsupported architecture"
 #endif
+
+#else
+#error "Unsupported compiler"
 #endif
-#endif
+
 
 #define ID_INLINE __inline
 
@@ -120,12 +118,14 @@ static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
 #define stricmp strcasecmp
 #define ID_INLINE inline
 
+#define OS_STRING "macosx"
+
 #ifdef __ppc__
-#define CPUSTRING "MacOSX-ppc"
+#define ARCH_STRING "ppc"
 #elif defined __i386__
-#define CPUSTRING "MacOSX-i386"
+#define ARCH_STRING "i386"
 #else
-#define CPUSTRING "MacOSX-other"
+#error "Unsupported architecture"
 #endif
 
 #define PATH_SEP '/'
@@ -174,7 +174,8 @@ static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
 #include <MacTypes.h>
 #define ID_INLINE inline
 
-#define CPUSTRING "MacOS-PPC"
+#define OS_STRING "macos"
+#define ARCH_STRING "ppc"
 
 #define PATH_SEP ':'
 
@@ -200,24 +201,38 @@ static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
 
 #define ID_INLINE inline
 
-#ifdef __i386__
-#define CPUSTRING "linux-i386"
-#elif defined __axp__
-#define CPUSTRING "linux-alpha"
+#define OS_STRING "linux"
+
+#if defined __i386__
+#define ARCH_STRING "i386"
 #elif defined __x86_64__
-#define CPUSTRING "linux-x86_64"
+#define ARCH_STRING "x86_64"
 #elif defined __powerpc64__
-#define CPUSTRING "linux-ppc64"
+#define ARCH_STRING "ppc64"
 #elif defined __powerpc__
-#define CPUSTRING "linux-ppc"
+#define ARCH_STRING "ppc"
 #elif defined __s390__
-#define CPUSTRING "linux-s390"
+#define ARCH_STRING "s390"
 #elif defined __s390x__
-#define CPUSTRING "linux-s390x"
+#define ARCH_STRING "s390x"
 #elif defined __ia64__
-#define CPUSTRING "linux-ia64"
+#define ARCH_STRING "ia64"
+#elif defined __alpha__
+#define ARCH_STRING "alpha"
+#elif defined __sparc__
+#define ARCH_STRING "sparc"
+#elif defined __arm__
+#define ARCH_STRING "arm"
+#elif defined __cris__
+#define ARCH_STRING "cris"
+#elif defined __hppa__
+#define ARCH_STRING "hppa"
+#elif defined __mips__
+#define ARCH_STRING "mips"
+#elif defined __sh__
+#define ARCH_STRING "sh"
 #else
-#define CPUSTRING "linux-other"
+#error "Unsupported architecture"
 #endif
 
 #define PATH_SEP '/'
@@ -248,12 +263,14 @@ ID_INLINE static float LittleFloat(const float l) { return FloatSwap(&l); }
 
 #define ID_INLINE inline
 
+#define OS_STRING "freebsd"
+
 #ifdef __i386__
-#define CPUSTRING "freebsd-i386"
+#define ARCH_STRING "i386"
 #elif defined __axp__
-#define CPUSTRING "freebsd-alpha"
+#define ARCH_STRING "alpha"
 #else
-#define CPUSTRING "freebsd-other"
+#error "Unsupported architecture"
 #endif
 
 #define PATH_SEP '/'
@@ -288,10 +305,12 @@ static float LittleFloat(const float l) { return FloatSwap(&l); }
 
 #define ID_INLINE inline
 
+#define OS_STRING "solaris"
+
 #ifdef __i386__
-#define CPUSTRING "Solaris-i386"
+#define ARCH_STRING "i386"
 #elif defined __sparc
-#define CPUSTRING "Solaris-sparc"
+#define ARCH_STRING "sparc"
 #endif
 
 #define PATH_SEP '/'
@@ -324,7 +343,8 @@ ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
 
 #define ID_INLINE
 
-#define CPUSTRING "q3vm"
+#define OS_STRING "q3vm"
+#define ARCH_STRING "bytecode"
 
 #define PATH_SEP '/'
 
@@ -340,8 +360,8 @@ ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
 //===========================================================================
 
 //catch missing defines in above blocks
-#ifndef CPUSTRING
-#error "CPUSTRING not defined"
+#if !defined( OS_STRING ) || !defined( ARCH_STRING )
+#error "OS_STRING or ARCH_STRING not defined"
 #endif
 
 #ifndef ID_INLINE
@@ -354,6 +374,12 @@ ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
 
 #if !defined(BigLong) && !defined(LittleLong)
 #error "Endianness not defined"
+#endif
+
+#ifdef NDEBUG
+#define PLATFORM_STRING OS_STRING "-" ARCH_STRING
+#else
+#define PLATFORM_STRING OS_STRING "-" ARCH_STRING "-debug"
 #endif
 
 #endif
