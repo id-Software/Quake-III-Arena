@@ -398,12 +398,12 @@ ifeq ($(PLATFORM),SunOS)
   endif
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
-  BASE_CFLAGS += -DNO_VM_COMPILED
 
   ifeq ($(ARCH),sparc)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -funroll-loops
+    BASE_CFLAGS += -DNO_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \

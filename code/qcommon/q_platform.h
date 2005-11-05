@@ -32,8 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #else
 
-#if (defined _M_IX86 || defined __i386__) && \
-		!defined __sun && !defined(C_ONLY)
+#if (defined _M_IX86 || defined __i386__) && !defined(C_ONLY)
 #define id386 1
 #else
 #define id386 0
