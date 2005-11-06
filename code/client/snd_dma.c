@@ -1157,7 +1157,7 @@ void S_Update( void ) {
 	channel_t	*ch;
 
 	if ( !s_soundStarted || s_soundMuted ) {
-		Com_DPrintf ("not started or muted\n");
+//		Com_DPrintf ("not started or muted\n");
 		return;
 	}
 
