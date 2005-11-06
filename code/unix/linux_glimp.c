@@ -410,9 +410,9 @@ static void install_grabs(void)
 
   mouseResetTime = Sys_Milliseconds ();
 
+#ifdef HAVE_XF86DGA
   if (in_dgamouse->value)
   {
-#ifdef HAVE_XF86DGA
     int MajorVersion, MinorVersion;
 
     if (!XF86DGAQueryVersion(dpy, &MajorVersion, &MinorVersion))
@@ -425,8 +425,8 @@ static void install_grabs(void)
       XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
       XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
     }
-#endif /* HAVE_XF86DGA */
   } else
+#endif /* HAVE_XF86DGA */
   {
     mwx = glConfig.vidWidth / 2;
     mwy = glConfig.vidHeight / 2;
@@ -443,14 +443,14 @@ static void install_grabs(void)
 
 static void uninstall_grabs(void)
 {
+#ifdef HAVE_XF86DGA
   if (in_dgamouse->value)
   {
 		if (com_developer->value)
 			ri.Printf( PRINT_ALL, "DGA Mouse - Disabling DGA DirectVideo\n" );
-#ifdef HAVE_XF86DGA
     XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
-#endif /* HAVE_XF86DGA */
   }
+#endif /* HAVE_XF86DGA */
 
   XChangePointerControl(dpy, qtrue, qtrue, mouse_accel_numerator, 
                         mouse_accel_denominator, mouse_threshold);
@@ -589,6 +589,7 @@ static void HandleEvents(void)
 			t = Sys_XTimeToSysTime(event.xkey.time);
       if (mouse_active)
       {
+#ifdef HAVE_XF86DGA
         if (in_dgamouse->value)
         {
           mx += event.xmotion.x_root;
@@ -599,6 +600,7 @@ static void HandleEvents(void)
           }
           mx = my = 0;
         } else
+#endif /* HAVE_XF86DGA */
         {
           // If it's a center motion, we've just returned from our warp
           if (event.xmotion.x == glConfig.vidWidth/2 &&
@@ -952,7 +954,7 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
   {
     if (!XF86DGAQueryVersion(dpy, &dga_MajorVersion, &dga_MinorVersion))
     {
-      // unable to query, probalby not supported
+      // unable to query, probably not supported
       ri.Printf( PRINT_ALL, "Failed to detect XF86DGA Mouse\n" );
       ri.Cvar_Set( "in_dgamouse", "0" );
     } else
@@ -961,7 +963,7 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
                  dga_MajorVersion, dga_MinorVersion);
     }
   }
-#endif /* HAVE_XF86DGA */      
+#endif /* HAVE_XF86DGA */
 
 #ifdef HAVE_XF86DGA
   if (vidmode_ext)
