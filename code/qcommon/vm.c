@@ -574,6 +574,8 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 	// copy or compile the instructions
 	vm->codeLength = header->codeLength;
 
+	vm->compiled = qfalse;
+
 #ifdef NO_VM_COMPILED
 	if(interpret >= VMI_COMPILED) {
 		Com_Printf("Architecture doesn't have a bytecode compiler, using interpreter\n");
@@ -583,10 +585,11 @@ vm_t *VM_Create( const char *module, long (*systemCalls)(long *),
 	if ( interpret >= VMI_COMPILED ) {
 		vm->compiled = qtrue;
 		VM_Compile( vm, header );
-	} else
+	}
 #endif
+	// VM_Compile may have reset vm->compiled if compilation failed
+	if (!vm->compiled)
 	{
-		vm->compiled = qfalse;
 		VM_PrepareInterpreter( vm, header );
 	}
 
