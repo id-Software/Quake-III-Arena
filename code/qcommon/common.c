@@ -24,8 +24,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "q_shared.h"
 #include "qcommon.h"
 #include <setjmp.h>
-#if defined __linux__ || defined MACOS_X || defined __FreeBSD__ || defined __sun
+#ifndef _WIN32
 #include <netinet/in.h>
+#include <sys/stat.h> // umask
 #else
 #include <winsock.h>
 #endif
@@ -2312,6 +2313,9 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	fileHandle_t	f;
 	char			fbuffer[MAX_OSPATH];
 	char			key[17];
+#ifndef _WIN32
+	mode_t			savedumask;
+#endif
 
 
 	sprintf(fbuffer, "%s/q3key", filename);
@@ -2323,10 +2327,13 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 		return;
 	}
 
+#ifndef _WIN32
+	savedumask = umask(0077);
+#endif
 	f = FS_SV_FOpenFileWrite( fbuffer );
 	if ( !f ) {
-		Com_Printf ("Couldn't write %s.\n", filename );
-		return;
+		Com_Printf ("Couldn't write CD key to %s.\n", fbuffer );
+		goto out;
 	}
 
 	FS_Write( key, 16, f );
@@ -2336,6 +2343,11 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	FS_Printf( f, "// id Software and Activision will NOT ask you to send this file to them.\r\n");
 
 	FS_FCloseFile( f );
+out:
+#ifndef _WIN32
+	umask(savedumask);
+#endif
+	return;
 }
 #endif
 
