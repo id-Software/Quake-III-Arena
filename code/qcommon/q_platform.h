@@ -56,12 +56,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __ASM_I386__ // don't include the C bits if included from qasm.h
 
 // for windows fastcall option
-
 #define QDECL
-
-short	ShortSwap (short l);
-int		LongSwap (int l);
-float	FloatSwap (const float *f);
 
 //================================================================= WIN32 ===
 
@@ -70,41 +65,22 @@ float	FloatSwap (const float *f);
 #undef QDECL
 #define QDECL __cdecl
 
-#ifdef _MSC_VER
+#if defined( _MSC_VER )
 #define OS_STRING "win_msvc"
+#elif defined __MINGW32__
+#define OS_STRING "win_mingw"
+#endif
 
-#ifdef _M_IX86
+#define ID_INLINE __inline
+#define PATH_SEP '\\'
+
+#if defined( _M_IX86 ) || defined( __i386__ )
 #define ARCH_STRING "x86"
 #elif defined _M_ALPHA
 #define ARCH_STRING "AXP"
-#else
-#error "Unsupported architecture"
 #endif
 
-#elif defined __MINGW32__
-#define OS_STRING "win_mingw"
-
-#ifdef __i386__
-#define ARCH_STRING "x86"
-#else
-#error "Unsupported architecture"
-#endif
-
-#else
-#error "Unsupported compiler"
-#endif
-
-
-#define ID_INLINE __inline
-
-static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-static ID_INLINE int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
-#define LittleFloat
-
-#define PATH_SEP '\\'
+#define Q3_LITTLE_ENDIAN
 
 #endif
 
@@ -112,57 +88,17 @@ static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
 
 #if defined(MACOS_X)
 
-#define __cdecl
-#define __declspec(x)
-#define stricmp strcasecmp
-#define ID_INLINE inline
-
 #define OS_STRING "macosx"
+#define ID_INLINE inline
+#define PATH_SEP '/'
 
 #ifdef __ppc__
 #define ARCH_STRING "ppc"
 #elif defined __i386__
 #define ARCH_STRING "i386"
-#else
-#error "Unsupported architecture"
 #endif
 
-#define PATH_SEP '/'
-
-#define __rlwimi(out, in, shift, maskBegin, maskEnd) \
-	asm("rlwimi %0,%1,%2,%3,%4" : "=r" (out) : "r" (in), \
-			"i" (shift), "i" (maskBegin), "i" (maskEnd))
-#define __dcbt(addr, offset) asm("dcbt %0,%1" : : "b" (addr), "r" (offset))
-
-static ID_INLINE unsigned int __lwbrx(register void *addr,
-		register int offset) {
-	register unsigned int word;
-
-	asm("lwbrx %0,%2,%1" : "=r" (word) : "r" (addr), "b" (offset));
-	return word;
-}
-
-static ID_INLINE unsigned short __lhbrx(register void *addr,
-		register int offset) {
-	register unsigned short halfword;
-
-	asm("lhbrx %0,%2,%1" : "=r" (halfword) : "r" (addr), "b" (offset));
-	return halfword;
-}
-
-static ID_INLINE float __fctiw(register float f) {
-	register float fi;
-
-	asm("fctiw %0,%1" : "=f" (fi) : "f" (f));
-	return fi;
-}
-
-#define BigShort
-static ID_INLINE short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static ID_INLINE int LittleLong(int l) { return LongSwap(l); }
-#define BigFloat
-static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
+#define Q3_BIG_ENDIAN
 
 #endif
 
@@ -171,36 +107,26 @@ static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
 #ifdef __MACOS__
 
 #include <MacTypes.h>
-#define ID_INLINE inline
 
 #define OS_STRING "macos"
-#define ARCH_STRING "ppc"
-
+#define ID_INLINE inline
 #define PATH_SEP ':'
+
+#define ARCH_STRING "ppc"
 
 void Sys_PumpEvents( void );
 
-#define BigShort
-static ID_INLINE short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static ID_INLINE int LittleLong(int l) { return LongSwap(l); }
-#define BigFloat
-static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
+#define Q3_BIG_ENDIAN
 
 #endif
 
 //================================================================= LINUX ===
 
-// the mac compiler can't handle >32k of locals, so we
-// just waste space and make big arrays static...
 #ifdef __linux__
 
-// bk001205 - from Makefile
-#define stricmp strcasecmp
-
-#define ID_INLINE inline
-
 #define OS_STRING "linux"
+#define ID_INLINE inline
+#define PATH_SEP '/'
 
 #if defined __i386__
 #define ARCH_STRING "i386"
@@ -230,26 +156,12 @@ static ID_INLINE float LittleFloat(const float l) { return FloatSwap(&l); }
 #define ARCH_STRING "mips"
 #elif defined __sh__
 #define ARCH_STRING "sh"
-#else
-#error "Unsupported architecture"
 #endif
 
-#define PATH_SEP '/'
-
-#if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
-ID_INLINE static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-ID_INLINE static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
-#define LittleFloat
+#if __FLOAT_WORD_ORDER == __BIG_ENDIAN
+#define Q3_BIG_ENDIAN
 #else
-#define BigShort
-ID_INLINE static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-ID_INLINE static int LittleLong(int l) { return LongSwap(l); }
-#define BigFloat
-ID_INLINE static float LittleFloat(const float l) { return FloatSwap(&l); }
+#define Q3_LITTLE_ENDIAN
 #endif
 
 #endif
@@ -258,36 +170,22 @@ ID_INLINE static float LittleFloat(const float l) { return FloatSwap(&l); }
 
 #ifdef __FreeBSD__ // rb010123
 
-#define stricmp strcasecmp
-
-#define ID_INLINE inline
+#include <machine/endian.h>
 
 #define OS_STRING "freebsd"
+#define ID_INLINE inline
+#define PATH_SEP '/'
 
 #ifdef __i386__
 #define ARCH_STRING "i386"
 #elif defined __axp__
 #define ARCH_STRING "alpha"
-#else
-#error "Unsupported architecture"
 #endif
 
-#define PATH_SEP '/'
-
-#if !idppc
-static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-static float BigFloat(const float l) { return FloatSwap(&l); }
-#define LittleFloat
+#if BYTE_ORDER == BIG_ENDIAN
+#define Q3_BIG_ENDIAN
 #else
-#define BigShort
-static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static int LittleLong(int l) { return LongSwap(l); }
-#define BigFloat
-static float LittleFloat(const float l) { return FloatSwap(&l); }
+#define Q3_LITTLE_ENDIAN
 #endif
 
 #endif
@@ -299,41 +197,20 @@ static float LittleFloat(const float l) { return FloatSwap(&l); }
 #include <sys/isa_defs.h>
 #include <sys/byteorder.h>
 
-// bk001205 - from Makefile
-#define stricmp strcasecmp
-
-#define ID_INLINE inline
-
 #define OS_STRING "solaris"
+#define ID_INLINE inline
+#define PATH_SEP '/'
 
 #ifdef __i386__
 #define ARCH_STRING "i386"
 #elif defined __sparc
 #define ARCH_STRING "sparc"
-#else
-#error "Unsupported architecture"
 #endif
 
-#define PATH_SEP '/'
-
-#if defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
-#define BigShort
-ID_INLINE static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-ID_INLINE static int LittleLong(int l) { return LongSwap(l); }
-#define BigFloat
-ID_INLINE static float LittleFloat(const float l) { return FloatSwap(&l); }
-
-#elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
-ID_INLINE static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-ID_INLINE static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
-#define LittleFloat
-
-#else
-#error "Either _BIG_ENDIAN or _LITTLE_ENDIAN must be #defined, but not both."
+#if defined( _BIG_ENDIAN )
+#define Q3_BIG_ENDIAN
+#elif defined( _LITTLE_ENDIAN )
+#define Q3_LITTLE_ENDIAN
 #endif
 
 #endif
@@ -342,27 +219,23 @@ ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
 
 #ifdef Q3_VM
 
-#define ID_INLINE
-
 #define OS_STRING "q3vm"
-#define ARCH_STRING "bytecode"
-
+#define ID_INLINE
 #define PATH_SEP '/'
 
-#define LittleShort
-#define LittleLong
-#define LittleFloat
-#define BigShort
-#define BigLong
-#define BigFloat
+#define ARCH_STRING "bytecode"
 
 #endif
 
 //===========================================================================
 
 //catch missing defines in above blocks
-#if !defined( OS_STRING ) || !defined( ARCH_STRING )
-#error "OS_STRING or ARCH_STRING not defined"
+#if !defined( OS_STRING )
+#error "Operating system not supported"
+#endif
+
+#if !defined( ARCH_STRING )
+#error "Architecture not supported"
 #endif
 
 #ifndef ID_INLINE
@@ -373,10 +246,47 @@ ID_INLINE static float BigFloat(const float l) { return FloatSwap(&l); }
 #error "PATH_SEP not defined"
 #endif
 
-#if !defined(BigLong) && !defined(LittleLong)
+
+//endianness
+short ShortSwap (short l);
+int LongSwap (int l);
+float FloatSwap (const float *f);
+
+#if defined( Q3_BIG_ENDIAN ) && defined( Q3_LITTLE_ENDIAN )
+#error "Endianness defined as both big and little"
+#elif defined( Q3_BIG_ENDIAN )
+
+#define LittleShort(x) ShortSwap(x)
+#define LittleLong(x) LongSwap(x)
+#define LittleFloat(x) FloatSwap(&x)
+#define BigShort
+#define BigLong
+#define BigFloat
+
+#elif defined( Q3_LITTLE_ENDIAN )
+
+#define LittleShort
+#define LittleLong
+#define LittleFloat
+#define BigShort(x) ShortSwap(x)
+#define BigLong(x) LongSwap(x)
+#define BigFloat(x) FloatSwap(&x)
+
+#elif defined( Q3_VM )
+
+#define LittleShort
+#define LittleLong
+#define LittleFloat
+#define BigShort
+#define BigLong
+#define BigFloat
+
+#else
 #error "Endianness not defined"
 #endif
 
+
+//platform string
 #ifdef NDEBUG
 #define PLATFORM_STRING OS_STRING "-" ARCH_STRING
 #else

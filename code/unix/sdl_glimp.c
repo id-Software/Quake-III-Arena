@@ -995,7 +995,7 @@ void GLimp_Init( void )
 void GLimp_EndFrame (void)
 {
   // don't flip if drawing to front buffer
-  if ( stricmp( r_drawBuffer->string, "GL_FRONT" ) != 0 )
+  if ( Q_stricmp( r_drawBuffer->string, "GL_FRONT" ) != 0 )
   {
     SDL_GL_SwapBuffers();
   }

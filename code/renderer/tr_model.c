@@ -147,7 +147,7 @@ qhandle_t RE_RegisterModel( const char *name ) {
 	}
 
 #ifdef RAVENMD4
-	if(!stricmp(fext, "mdr"))
+	if(!Q_stricmp(fext, "mdr"))
 	{
 		int filesize;
 		
