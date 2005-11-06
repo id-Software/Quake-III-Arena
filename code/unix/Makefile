@@ -1,18 +1,12 @@
 #
 # Quake3 Unix Makefile
 #
-# Currently build for the following:
-# Linux i386 (full client)
-# Linux Alpha (dedicated server only) (TTimo: dropped)
-# FreeBSD i386 (full client)
-# SGI IRIX (full client) (TTimo: who's in charge - dropped otherwise)
-#   Linux PPC (full client) (TTimo: dropped)
-#
 # Nov '98 by Zoid <zoid@idsoftware.com>
 #
 # Loki Hacking by Bernd Kreimeier
 #  and a little more by Ryan C. Gordon.
 #  and a little more by Rafael Barrero
+#  and a little more by the ioq3 cr3w
 #
 # GNU Make required
 #
@@ -541,8 +535,8 @@ DO_WINDRES=$(WINDRES) -i $< -o $@
 
 default:build_release
 
-debug: build_debug
-release: build_release
+debug: tools build_debug
+release: tools build_release
 
 build_debug: B=$(BD)
 build_debug: makedirs
@@ -583,10 +577,8 @@ makedirs:
 Q3LCC=../tools/q3lcc$(BINEXT)
 Q3ASM=../tools/q3asm$(BINEXT)
 
-$(Q3LCC):
+tools:
 	$(MAKE) -C ../tools/lcc install
-
-$(Q3ASM):
 	$(MAKE) -C ../tools/asm install
 
 DO_Q3LCC=$(Q3LCC) -o $@ $<
@@ -1269,7 +1261,7 @@ Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
 
-$(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
+$(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 	$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 #############################################################################
@@ -1310,7 +1302,7 @@ MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
 
-$(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
+$(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
 	$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 
@@ -1360,7 +1352,7 @@ Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
 	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
-$(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
+$(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 	$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 
 #############################################################################
@@ -1408,7 +1400,7 @@ MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
 	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
 
-$(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
+$(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
 	$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
 
 
@@ -1468,7 +1460,7 @@ Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) : $(Q3UIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
 
-$(B)/baseq3/vm/ui.qvm: $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
+$(B)/baseq3/vm/ui.qvm: $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
 	$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 #############################################################################
@@ -1493,7 +1485,7 @@ MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
 
-$(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
+$(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 	$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 
@@ -1505,52 +1497,52 @@ $(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
 $(B)/baseq3/cgame/%.o: $(CGDIR)/%.c
 	$(DO_SHLIB_CC)
 
-$(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
+$(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/cgame/%.o: $(CGDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
 
-$(B)/missionpack/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
+$(B)/missionpack/cgame/%.asm: $(CGDIR)/%.c
 	$(DO_Q3LCC) -DMISSIONPACK
 
 
 $(B)/baseq3/game/%.o: $(GDIR)/%.c
 	$(DO_SHLIB_CC)
 
-$(B)/baseq3/game/%.asm: $(GDIR)/%.c $(Q3LCC)
+$(B)/baseq3/game/%.asm: $(GDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/game/%.o: $(GDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
 
-$(B)/missionpack/game/%.asm: $(GDIR)/%.c $(Q3LCC)
+$(B)/missionpack/game/%.asm: $(GDIR)/%.c
 	$(DO_Q3LCC) -DMISSIONPACK
 
 
 $(B)/baseq3/ui/%.o: $(Q3UIDIR)/%.c
 	$(DO_SHLIB_CC)
 
-$(B)/baseq3/ui/%.asm: $(Q3UIDIR)/%.c $(Q3LCC)
+$(B)/baseq3/ui/%.asm: $(Q3UIDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/ui/%.o: $(UIDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
 
-$(B)/missionpack/ui/%.asm: $(UIDIR)/%.c $(Q3LCC)
+$(B)/missionpack/ui/%.asm: $(UIDIR)/%.c
 	$(DO_Q3LCC) -DMISSIONPACK
 
 
 $(B)/baseq3/qcommon/%.o: $(CMDIR)/%.c
 	$(DO_SHLIB_CC)
 
-$(B)/baseq3/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
+$(B)/baseq3/qcommon/%.asm: $(CMDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/qcommon/%.o: $(CMDIR)/%.c
 	$(DO_SHLIB_CC) -DMISSIONPACK
 
-$(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
+$(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 	$(DO_Q3LCC) -DMISSIONPACK
 
 
