@@ -554,12 +554,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("push %%r8");
 				emit("push %%r9");
 				emit("push %%r10");
+				emit("push %%r10"); // align!
 				emit("negl %%eax");        // convert to actual number
 				emit("decl %%eax");
 				                           // first argument already in rdi
 				emit("movq %%rax, %%rsi"); // second argument in rsi
 				emit("movq $%lu, %%rax", (unsigned long)callAsmCall);
 				emit("callq *%%rax");
+				emit("pop %%r10");
 				emit("pop %%r10");
 				emit("pop %%r9");
 				emit("pop %%r8");
