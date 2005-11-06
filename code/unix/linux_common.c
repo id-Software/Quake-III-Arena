@@ -1,3 +1,4 @@
+#if 0 // not used anymore
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
@@ -341,4 +342,5 @@ void Com_Prefetch (const void *s, const unsigned int bytes, e_prefetch type)
 	}
 }
 
+#endif
 #endif

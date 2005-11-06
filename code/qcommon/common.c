@@ -2824,9 +2824,7 @@ void Com_Shutdown (void) {
 
 }
 
-#if !( defined __GNUC__ )  // GNU versions in linux_common.c
-#if !id386
-
+#if I_WANT_A_CUSTOM_MEMCPY && !defined(_WIN32)
 void Com_Memcpy (void* dest, const void* src, const size_t count)
 {
 	memcpy(dest, src, count);
@@ -2837,7 +2835,7 @@ void Com_Memset (void* dest, const int val, const size_t count)
 	memset(dest, val, count);
 }
 
-#else
+#elif I_WANT_A_CUSTOM_MEMCPY && defined(_WIN32)
 
 typedef enum
 {
@@ -3136,7 +3134,6 @@ skipClamp:
 	}
 }
 #endif
-#endif 
 //------------------------------------------------------------------------
 
 
