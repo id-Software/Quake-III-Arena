@@ -32,120 +32,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef VM_X86_64_STANDALONE
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-static vmInterpret_t interpret = VMI_COMPILED;
-
-#define DEBUG_VM
-
-static FILE* _asout;
-vm_t* currentVM;
-
-static cvar_t _com_developer;
-cvar_t	*com_developer = &_com_developer;
-
-char* mmapfile(const char* fn, size_t* size);
-
-long printsyscall(long* args)
-{
-	printf("callnr %ld, args: %ld %ld %ld %ld\n",
-			args[0],
-			args[1],
-			args[2],
-			args[3],
-			args[4]);
-
-	switch( args[0] ) {
-	case 0:
-	case 1:
-		{
-			char * s = VMA(1)?VMA(1):"(NULL)\n";
-			fputs(s, stderr);
-			if(s[strlen(s)-1] != '\n')
-				putc('\n', stderr);
-		}
-		return 0;
-	case 999:
-		{
-			int a[5];
-			a[0] = 3;
-			a[1] = args[1];
-			a[2] = args[2];
-			a[3] = args[3];
-			a[4] = args[4];
-			if(!currentVM->compiled)
-				return VM_CallInterpreted(currentVM, a);
-			else
-				return VM_CallCompiled(currentVM, a);
-		}
-	case 1000:
-		{
-			int a[5];
-			a[0] = 4;
-			a[1] = args[1];
-			a[2] = args[2];
-			a[3] = args[3];
-			a[4] = args[4];
-			if(!currentVM->compiled)
-				return VM_CallInterpreted(currentVM, a);
-			else
-				return VM_CallCompiled(currentVM, a);
-		}
-	case 1001:
-		printf("got buffer with content '%s', length %d\n", (char*)VMA(1), (int)args[2]);
-		strncpy(VMA(1), "blah\n", args[2]);
-		return 0;
-	}
-
-	return 0x66;
-}
-
-fileHandle_t FS_FOpenFileWrite( const char *filename )
-{
-	_asout = fopen(filename, "w");
-	return 0;
-}
-
-int FS_Write( const void *buffer, int len, fileHandle_t h )
-{
-	return fwrite(buffer, 1, len, _asout);
-}
-
-void FS_Printf( fileHandle_t h, const char *fmt, ... )
-{
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(_asout, fmt, ap);
-	va_end(ap);
-}
-
-void	FS_Flush( fileHandle_t f )
-{
-	fflush(_asout);
-}
-
-void	FS_FCloseFile( fileHandle_t f )
-{
-	fclose(_asout);
-}
-
-char *FS_BuildOSPath( const char *base, const char *game, const char *qpath )
-{
-	static char buf[4096];
-	strcpy(buf, "./");
-	strcat(buf, qpath);
-	return buf;
-}
-
-cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
-	static cvar_t c = { .string = "" };
-	return &c;
-}
-#endif // VM_X86_64_STANDALONE
-
 #ifdef DEBUG_VM
 #define Dfprintf(fd, args...) fprintf(fd, ##args)
 static FILE* qdasmout;
@@ -386,7 +272,7 @@ static unsigned char op_argsize[256] =
 	do { Com_Error(ERR_DROP, "instruction not implemented: %s\n", opnames[x]); } while(0)
 #else
 #define NOTIMPL(x) \
-	do { Com_Error(ERR_DROP, "instruction not implemented: %x\n", x); } while(0)
+	do { Com_Printf(S_COLOR_RED "instruction not implemented: %x\n", x); vm->compiled = qfalse; return; } while(0)
 #endif
 
 static void* getentrypoint(vm_t* vm)
@@ -442,7 +328,10 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 	Com_Printf("running assembler < %s > %s\n", rin, rout);
 	pid = fork();
 	if(pid == -1)
-		Com_Error(ERR_FATAL, "can't fork\n");
+	{
+		Com_Printf(S_COLOR_RED "can't fork\n");
+		return -1;
+	}
 
 	if(!pid)
 	{
@@ -461,23 +350,38 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 	{
 		int status;
 		if(waitpid(pid, &status, 0) == -1)
-			Com_Error(ERR_FATAL, "can't wait for as: %s\n", strerror(errno));
+		{
+			Com_Printf(S_COLOR_RED "can't wait for as: %s\n", strerror(errno));
+			return -1;
+		}
 
 		if(!WIFEXITED(status))
-			Com_Error(ERR_FATAL, "as died\n");
+		{
+			Com_Printf(S_COLOR_RED "as died\n");
+			return -1;
+		}
 		if(WEXITSTATUS(status))
-			Com_Error(ERR_FATAL, "as failed with status %d\n", WEXITSTATUS(status));
+		{
+			Com_Printf(S_COLOR_RED "as failed with status %d\n", WEXITSTATUS(status));
+			return -1;
+		}
 	}
 
 	Com_Printf("done\n");
 
 	mem = mmapfile(rout, &size);
 	if(!mem)
-		Com_Error(ERR_FATAL, "can't mmap object file %s: %s\n", rout, strerror(errno));
+	{
+		Com_Printf(S_COLOR_RED "can't mmap object file %s: %s\n", rout, strerror(errno));
+		return -1;
+	}
 
 	ps = sysconf(_SC_PAGE_SIZE);
 	if(ps == -1)
-		Com_Error(ERR_FATAL, "can't determine page size: %s\n", strerror(errno));
+	{
+		Com_Printf(S_COLOR_RED "can't determine page size: %s\n", strerror(errno));
+		return -1;
+	}
 
 	--ps;
 
@@ -494,7 +398,9 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 	{
 #ifdef VM_X86_64_STANDALONE // no idea why
 		if(mprotect(buf, allocsize, PROT_READ|PROT_EXEC) == -1)
+		{
 			Com_Error(ERR_FATAL, "mprotect failed on %p+%x: %s\n", buf, allocsize, strerror(errno));
+		}
 #endif
 		return size;
 	}
@@ -513,9 +419,6 @@ static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
 	{
 		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!\n");
 	}
-
-//	Com_Printf("OP_BLOCK_COPY %s %x %x %d\n", currentVM->name, dest, src, count);
-//	__asm__ __volatile__ ("int3");
 
 	memcpy(currentVM->dataBase+dest, currentVM->dataBase+src, count);
 }
@@ -558,7 +461,11 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	fh_s = FS_FOpenFileWrite(fn_s);
 	if(fh_s == -1)
-		Com_Error(ERR_DROP, "can't write %s\n", fn_s);
+	{
+		Com_Printf(S_COLOR_RED "can't write %s\n", fn_s);
+		vm->compiled = qfalse;
+		return;
+	}
 
 	// translate all instructions
 	pc = 0;
@@ -979,6 +886,11 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	FS_FCloseFile(fh_s);
 
 	compiledsize = doas(fn_s, fn_o, &compiledcode);
+	if(compiledsize == -1)
+	{
+		vm->compiled = qfalse;
+		return;
+	}
 
 	vm->codeBase   = compiledcode; // remember to skip ELF header!
 	vm->codeLength = compiledsize;
@@ -1105,151 +1017,3 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 
 	return *(int *)opStack;
 }
-
-#ifdef VM_X86_64_STANDALONE
-
-#include <tests.c>
-
-int testops(vm_t* vm)
-{
-	int i1, i2, vmres;
-	int i;
-	float f1, f2, fres, fvmres;
-	int numitests = 32;
-	int numftests = 11;
-	int ret = 0;
-	int testno;
-	int res = 0xC0DEDBAD;
-
-	srand(time(NULL));
-
-	i1 = 1 + (int) (1000.0 * (rand() / (RAND_MAX + 1.0)));
-	i2 = 1 + (int) (1000.0 * (rand() / (RAND_MAX + 1.0)));
-
-	if(i1 < i2)
-	{
-		i = i1;
-		i1 = i2;
-		i2 = i;
-	}
-
-	f1 = i1/1.5;
-	f2 = i2/1.5;
-
-	if(!i2) i2=i1;
-	if(!f2) f2=f1;
-
-	printf("i1: %d i2: %d\n", i1, i2);
-	printf("f1: %f f2: %f\n", f1, f2);
-
-testintops:
-	for (testno = 1; testno < numitests; ++testno)
-	{
-		printf("int test %d ... ", testno);
-		fflush(stdout);
-
-		res = test(testno, i1, i2);
-		vmres = VM_Call(vm, testno, i1, i2);
-
-		if(vmres == res)
-		{
-			printf("ok: %d == %d\n", res, vmres);
-		}
-		else
-		{
-			printf("failed: %d != %d\n", res, vmres);
-			ret = 1;
-		}
-	}
-	if(i1 != i2)
-	{
-		i2 = i1;
-		goto testintops;
-	}
-
-testfops:
-	i1 = *(int*)&f1;
-	i2 = *(int*)&f2;
-
-	for (testno = 100; testno < 100+numftests; ++testno)
-	{
-		printf("float test %d ... ", testno);
-		fflush(stdout);
-
-		res = test(testno, i1, i2);
-		vmres = VM_Call(vm, testno, i1, i2);
-
-		fres = *(float*)&res;
-		fvmres = *(float*)&vmres;
-
-		if(fvmres == fres)
-		{
-			printf("ok: %f == %f\n", fres, fvmres);
-		}
-		else
-		{
-			printf("failed: %f != %f\n", fres, fvmres);
-			ret = 1;
-		}
-	}
-	if(f1 > f2)
-	{
-		float t = f1;
-		f1 = f2;
-		f2 = t;
-		goto testfops;
-	}
-	else if(f1 < f2)
-	{
-		f2 = f1;
-		goto testfops;
-	}
-
-	return ret;
-}
-
-void VM_VmInfo_f( void );
-
-int main(int argc, char* argv[])
-{
-	vm_t* vm[3];
-	int i;
-	long args[11] = {0};
-	int ret = 0xDEADBEEF;
-
-	char* file = argv[1];
-
-	char module[128];
-
-	if(argc < 2)
-		return -1;
-
-	strcpy(module, file);
-	*strchr(module, '.') = '\0';
-
-	vm[0] = VM_Create( module, printsyscall, interpret );
-
-	VM_VmInfo_f();
-
-	if(argc > 2)
-	{
-		for(i = 2; i < argc; ++i)
-		{
-			args[i-2] = strtol(argv[i],NULL,0);
-		}
-
-		ret  = VM_Call(vm[0], args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-	}
-	else
-	{
-		ret = testops(vm[0]);
-	}
-
-
-#ifdef DEBUG_VM
-	printf("ret: %d [%X]\n", ret, ret);
-#endif
-
-	return 0;
-}
-#endif
