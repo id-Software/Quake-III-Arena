@@ -535,15 +535,15 @@ DO_WINDRES=$(WINDRES) -i $< -o $@
 
 default:build_release
 
-debug: tools build_debug
-release: tools build_release
+debug: build_debug
+release: build_release
 
 build_debug: B=$(BD)
-build_debug: makedirs
+build_debug: makedirs tools
 	$(MAKE)  targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS) $(DEPEND_CFLAGS)"
 
 build_release: B=$(BR)
-build_release: makedirs
+build_release: makedirs tools
 	$(MAKE)  targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS) $(DEPEND_CFLAGS)"
 
 #Build both debug and release builds
