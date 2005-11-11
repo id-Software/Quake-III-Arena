@@ -113,7 +113,7 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
@@ -212,7 +212,7 @@ ifeq ($(PLATFORM),mingw32)
     ARCH=x86
   endif
 
-  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
 
@@ -273,7 +273,7 @@ ifeq ($(PLATFORM),freebsd)
   endif #alpha test
 
 
-  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   GL_CFLAGS = -I/usr/X11R6/include
 
@@ -382,7 +382,7 @@ ifeq ($(PLATFORM),SunOS)
   endif
 
 
-  BASE_CFLAGS = -pipe -Wall -fno-strict-aliasing
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
