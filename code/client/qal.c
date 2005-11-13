@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qal.h"
 
-#ifdef USE_OPENAL_DLOPEN
+#if USE_OPENAL_DLOPEN
 #if defined _WIN32
 #include <windows.h>
 #define OBJTYPE HMODULE
@@ -341,7 +341,7 @@ void QAL_Shutdown( void )
 	qalcGetString = NULL;
 	qalcGetIntegerv = NULL;
 }
-#endif
+#else
 qboolean QAL_Init(const char *libname)
 {
 	return qtrue;
@@ -349,4 +349,5 @@ qboolean QAL_Init(const char *libname)
 void QAL_Shutdown( void )
 {
 }
+#endif
 #endif

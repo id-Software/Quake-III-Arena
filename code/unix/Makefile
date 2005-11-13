@@ -234,7 +234,7 @@ ifeq ($(PLATFORM),mingw32)
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1
+    BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN=1
   endif
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
