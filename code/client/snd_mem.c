@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *****************************************************************************/
 
 #include "snd_local.h"
+#include "snd_codec.h"
 
 #define DEF_COMSOUNDMEGS "8"
 
@@ -98,137 +99,6 @@ void SND_setup(void) {
 
 	Com_Printf("Sound memory manager started\n");
 }
-
-/*
-===============================================================================
-
-WAV loading
-
-===============================================================================
-*/
-
-static	byte	*data_p;
-static	byte 	*iff_end;
-static	byte 	*last_chunk;
-static	byte 	*iff_data;
-static	int 	iff_chunk_len;
-
-static short GetLittleShort(void)
-{
-	short val = 0;
-	val = *data_p;
-	val = val + (*(data_p+1)<<8);
-	data_p += 2;
-	return val;
-}
-
-static int GetLittleLong(void)
-{
-	int val = 0;
-	val = *data_p;
-	val = val + (*(data_p+1)<<8);
-	val = val + (*(data_p+2)<<16);
-	val = val + (*(data_p+3)<<24);
-	data_p += 4;
-	return val;
-}
-
-static void FindNextChunk(char *name)
-{
-	while (1)
-	{
-		data_p=last_chunk;
-
-		if (data_p >= iff_end)
-		{	// didn't find the chunk
-			data_p = NULL;
-			return;
-		}
-		
-		data_p += 4;
-		iff_chunk_len = GetLittleLong();
-		if (iff_chunk_len < 0)
-		{
-			data_p = NULL;
-			return;
-		}
-		data_p -= 8;
-		last_chunk = data_p + 8 + ( (iff_chunk_len + 1) & ~1 );
-		if (!strncmp((char *)data_p, name, 4))
-			return;
-	}
-}
-
-static void FindChunk(char *name)
-{
-	last_chunk = iff_data;
-	FindNextChunk (name);
-}
-
-/*
-============
-GetWavinfo
-============
-*/
-static wavinfo_t GetWavinfo (char *name, byte *wav, int wavlength)
-{
-	wavinfo_t	info;
-
-	Com_Memset (&info, 0, sizeof(info));
-
-	if (!wav)
-		return info;
-		
-	iff_data = wav;
-	iff_end = wav + wavlength;
-
-// find "RIFF" chunk
-	FindChunk("RIFF");
-	if (!(data_p && !strncmp((char *)data_p+8, "WAVE", 4)))
-	{
-		Com_Printf("Missing RIFF/WAVE chunks\n");
-		return info;
-	}
-
-// get "fmt " chunk
-	iff_data = data_p + 12;
-// DumpChunks ();
-
-	FindChunk("fmt ");
-	if (!data_p)
-	{
-		Com_Printf("Missing fmt chunk\n");
-		return info;
-	}
-	data_p += 8;
-	info.format = GetLittleShort();
-	info.channels = GetLittleShort();
-	info.rate = GetLittleLong();
-	data_p += 4+2;
-	info.width = GetLittleShort() / 8;
-
-	if (info.format != 1)
-	{
-		Com_Printf("Microsoft PCM format only\n");
-		return info;
-	}
-
-
-// find data chunk
-	FindChunk("data");
-	if (!data_p)
-	{
-		Com_Printf("Missing data chunk\n");
-		return info;
-	}
-
-	data_p += 4;
-	info.samples = GetLittleLong () / info.width;
-	info.dataofs = data_p - wav;
-
-	return info;
-}
-
 
 /*
 ================
@@ -315,7 +185,6 @@ static int ResampleSfxRaw( short *sfx, int inrate, int inwidth, int samples, byt
 	return outcount;
 }
 
-
 //=============================================================================
 
 /*
@@ -330,8 +199,8 @@ qboolean S_LoadSound( sfx_t *sfx )
 {
 	byte	*data;
 	short	*samples;
-	wavinfo_t	info;
-	int		size;
+	snd_info_t	info;
+//	int		size;
 
 	// player specific sounds are never directly loaded
 	if ( sfx->soundName[0] == '*') {
@@ -339,17 +208,9 @@ qboolean S_LoadSound( sfx_t *sfx )
 	}
 
 	// load it in
-	size = FS_ReadFile( sfx->soundName, (void **)&data );
-	if ( !data ) {
+	data = S_CodecLoad(sfx->soundName, &info);
+	if(!data)
 		return qfalse;
-	}
-
-	info = GetWavinfo( sfx->soundName, data, size );
-	if ( info.channels != 1 ) {
-		Com_Printf ("%s is a stereo wav file\n", sfx->soundName);
-		FS_FreeFile (data);
-		return qfalse;
-	}
 
 	if ( info.width == 1 ) {
 		Com_DPrintf(S_COLOR_YELLOW "WARNING: %s is a 8 bit wav file\n", sfx->soundName);
@@ -372,7 +233,7 @@ qboolean S_LoadSound( sfx_t *sfx )
 	if( sfx->soundCompressed == qtrue) {
 		sfx->soundCompressionMethod = 1;
 		sfx->soundData = NULL;
-		sfx->soundLength = ResampleSfxRaw( samples, info.rate, info.width, info.samples, (data + info.dataofs) );
+		sfx->soundLength = ResampleSfxRaw( samples, info.rate, info.width, info.samples, data + info.dataofs );
 		S_AdpcmEncodeSound(sfx, samples);
 #if 0
 	} else if (info.samples>(SND_CHUNK_SIZE*16) && info.width >1) {
@@ -394,7 +255,7 @@ qboolean S_LoadSound( sfx_t *sfx )
 	}
 	
 	Hunk_FreeTempMemory(samples);
-	FS_FreeFile( data );
+	Z_Free(data);
 
 	return qtrue;
 }

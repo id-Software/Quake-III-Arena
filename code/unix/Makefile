@@ -47,6 +47,10 @@ ifndef USE_SDL
 USE_SDL=1
 endif
 
+ifndef USE_OPENAL
+USE_OPENAL=1
+endif
+
 ifndef BUILD_CLIENT
 BUILD_CLIENT=1
 endif
@@ -114,6 +118,10 @@ ifeq ($(PLATFORM),linux)
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+
+  ifeq ($(USE_OPENAL),1)
+    BASE_CFLAGS += -DUSE_OPENAL=1
+  endif
 
   ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
@@ -213,6 +221,10 @@ ifeq ($(PLATFORM),mingw32)
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+
+  ifeq ($(USE_OPENAL),1)
+    BASE_CFLAGS += -DUSE_OPENAL=1
+  endif
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
 
@@ -620,6 +632,13 @@ Q3OBJ = \
   $(B)/client/snd_mix.o \
   $(B)/client/snd_wavelet.o \
   \
+  $(B)/client/snd_main.o \
+  $(B)/client/snd_codec.o \
+  $(B)/client/snd_codec_wav.o \
+  \
+  $(B)/client/qal.o \
+  $(B)/client/snd_openal.o \
+  \
   $(B)/client/sv_bot.o \
   $(B)/client/sv_ccmds.o \
   $(B)/client/sv_client.o \
@@ -891,6 +910,14 @@ $(B)/client/snd_dma.o : $(CDIR)/snd_dma.c; $(DO_CC)
 $(B)/client/snd_mem.o : $(CDIR)/snd_mem.c; $(DO_CC)
 $(B)/client/snd_mix.o : $(CDIR)/snd_mix.c; $(DO_CC)
 $(B)/client/snd_wavelet.o : $(CDIR)/snd_wavelet.c; $(DO_CC)
+
+$(B)/client/snd_main.o : $(CDIR)/snd_main.c; $(DO_CC)
+$(B)/client/snd_codec.o : $(CDIR)/snd_codec.c; $(DO_CC)
+$(B)/client/snd_codec_wav.o : $(CDIR)/snd_codec_wav.c; $(DO_CC)
+
+$(B)/client/qal.o : $(CDIR)/qal.c; $(DO_CC)
+$(B)/client/snd_openal.o : $(CDIR)/snd_openal.c; $(DO_CC)
+
 $(B)/client/sv_bot.o : $(SDIR)/sv_bot.c; $(DO_CC)
 $(B)/client/sv_client.o : $(SDIR)/sv_client.c; $(DO_CC)
 $(B)/client/sv_ccmds.o : $(SDIR)/sv_ccmds.c; $(DO_CC)
