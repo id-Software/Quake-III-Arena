@@ -51,6 +51,10 @@ ifndef USE_OPENAL
 USE_OPENAL=1
 endif
 
+ifndef USE_OPENAL_DLOPEN
+USE_OPENAL_DLOPEN=0
+endif
+
 ifndef BUILD_CLIENT
 BUILD_CLIENT=1
 endif
@@ -121,6 +125,9 @@ ifeq ($(PLATFORM),linux)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+    endif
   endif
 
   ifeq ($(USE_SDL),1)
@@ -167,6 +174,10 @@ ifeq ($(PLATFORM),linux)
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
+
+  ifneq ($(USE_OPENAL_DLOPEN),1)
+    LDFLAGS += -lopenal
+  endif
 
   ifeq ($(USE_SDL),1)
     GLLDFLAGS=$(shell sdl-config --libs)
@@ -224,6 +235,9 @@ ifeq ($(PLATFORM),mingw32)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+    endif
   endif
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
@@ -246,6 +260,10 @@ ifeq ($(PLATFORM),mingw32)
 
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
+
+  ifneq ($(USE_OPENAL_DLOPEN),1)
+    LDFLAGS += -lopenal
+  endif
 
   ifeq ($(ARCH),x86)
     # build 32bit
