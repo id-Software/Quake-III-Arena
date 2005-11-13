@@ -42,6 +42,7 @@ Compiling (Under Linux)
 2. Run 'make'
 
 For distro maintainers, you can set some make variables:
+ OPTIMIZE        - use this for custom CFLAGS
  DEFAULT_BASEDIR - extra path to search for baseq3 and such
  BUILD_SERVER    - build the 'q3ded' server binary (1 = build it, default = 1)
  BUILD_CLIENT    - build the 'quake3' client binary (1 = build it, default = 1)
