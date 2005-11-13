@@ -1,0 +1,2 @@
+- On Solaris/SPARC gcc optimizations higher than -O0 currently lead
+  to a segfault
