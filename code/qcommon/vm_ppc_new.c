@@ -24,8 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "vm_local.h"
 
-#pragma opt_pointer_analysis off
-
 #define DEBUG_VM 0
 
 #if DEBUG_VM
@@ -523,37 +521,6 @@ static vm_t *tvm;
 static int instruction;
 static byte *jused;
 
-static void ltop() {
-//    if (rtopped == qfalse) {
-//	InstImm( PPC_LWZ, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-//    }
-}
-
-static void ltopandsecond() {
-#if 0
-    if (pass>=0 && buf[compiledOfs-1] == (PPC_STWU |  R_TOP<<21 | R_OPSTACK<<16 | 4 ) && jused[instruction]==0 ) {
-	compiledOfs--;
-	if (!pass) {
-	    tvm->instructionPointers[instruction] = compiledOfs * 4;
-	}
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-    } else if (pass>=0 && buf[compiledOfs-1] == (PPC_STW |  R_TOP<<21 | R_OPSTACK<<16 | 0 )  && jused[instruction]==0 ) {
-	compiledOfs--;
-	if (!pass) {
-	    tvm->instructionPointers[instruction] = compiledOfs * 4;
-	}
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, -4 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -8 );
-    } else {
-	ltop();		// get value from opstack
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, -4 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -8 );
-    }
-    rtopped = qfalse;
-#endif
-}
-
 static void spillOpStack(int depth)
 {
 	// Store out each register on the operand stack to it's correct location.
@@ -591,38 +558,6 @@ static void loadOpStack(int depth)
 		InstImm( "lwz", PPC_LWZ, opStackIntRegisters[i], R_OPSTACK, i*4+4);
 		opStackRegType[i] = 1;
 	}	
-}
-
-static void makeInteger(int depth)
-{
-	// This should really never be necessary...
-	assert(opStackRegType[depth] == 1);
-	//assert(opStackRegType[depth] == 2);
-	if(opStackRegType[depth] == 2)
-	{
-		unsigned instruction;
-		assert(opStackLoadInstructionAddr[depth]);
-		
-		printf("patching float load at %p to int load\n",opStackLoadInstructionAddr[depth]);
-		// Repatch load instruction to use LFS instead of LWZ
-		instruction = *opStackLoadInstructionAddr[depth];
-		instruction &= ~PPC_LFSX;
-		instruction |=  PPC_LWZX;
-		*opStackLoadInstructionAddr[depth] = instruction;
-		opStackLoadInstructionAddr[depth] = 0;
-		opStackRegType[depth] = 1;
-		#if 0
-		InstImm( "stfs", PPC_STFS, opStackFloatRegisters[depth], R_OPSTACK, depth*4+4);
-		// For XXX make sure we force enough NOPs to get the load into
-		// another dispatch group to avoid pipeline flush.
-		Inst( "ori", PPC_ORI,  0, 0, 0 );
-		Inst( "ori", PPC_ORI,  0, 0, 0 );
-		Inst( "ori", PPC_ORI,  0, 0, 0 );
-		Inst( "ori", PPC_ORI,  0, 0, 0 );
-		InstImm( "lwz", PPC_LWZ, opStackIntRegisters[depth], R_OPSTACK, depth*4+4);
-		opStackRegType[depth] = 1;
-		#endif
-	}
 }
 
 static void makeFloat(int depth)
