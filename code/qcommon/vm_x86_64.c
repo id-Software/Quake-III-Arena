@@ -201,8 +201,8 @@ static unsigned char op_argsize[256] =
 };
 
 #define emit(x...) \
-	do { FS_Printf(fh_s, ##x); FS_Write("\n", 1, fh_s); } while(0)
-
+	do { fprintf(fh_s, ##x); fputc('\n', fh_s); } while(0)
+ 
 // integer compare and jump
 #define IJ(op) \
 	emit("subq $8, %%rsi"); \
@@ -306,26 +306,15 @@ out:
 	return mem;
 }
 
-static int doas(const char* in, const char* out, unsigned char** compiledcode)
+static int doas(char* in, char* out, unsigned char** compiledcode)
 {
-	char rin[4096];
-	char rout[4096];
 	char* buf;
 	char* mem;
-	cvar_t* homedir;
 	size_t size = -1, allocsize;
 	int ps;
 	pid_t pid;
 
-	homedir = Cvar_Get("fs_homepath", "", 0);
-
-	buf = FS_BuildOSPath(homedir->string, NULL, in);
-	strcpy(rin, buf);
-
-	buf = FS_BuildOSPath(homedir->string, NULL, out);
-	strcpy(rout, buf);
-
-	Com_Printf("running assembler < %s > %s\n", rin, rout);
+	Com_Printf("running assembler < %s > %s\n", in, out);
 	pid = fork();
 	if(pid == -1)
 	{
@@ -338,8 +327,8 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 		char* const argv[] = {
 			"as",
 			"-o",
-			rout,
-			rin,
+			out,
+			in,
 			NULL
 		};
 
@@ -369,10 +358,10 @@ static int doas(const char* in, const char* out, unsigned char** compiledcode)
 
 	Com_Printf("done\n");
 
-	mem = mmapfile(rout, &size);
+	mem = mmapfile(out, &size);
 	if(!mem)
 	{
-		Com_Printf(S_COLOR_RED "can't mmap object file %s: %s\n", rout, strerror(errno));
+		Com_Printf(S_COLOR_RED "can't mmap object file %s: %s\n", out, strerror(errno));
 		return -1;
 	}
 
@@ -442,16 +431,29 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 #ifdef DEBUG_VM
 	char fn_d[MAX_QPATH]; // disassembled
 #endif
-	fileHandle_t fh_s;
+	FILE* fh_s;
+	int fd_s, fd_o;
 	byte* compiledcode;
 	int   compiledsize;
 
 	Com_Printf("compiling %s\n", vm->name);
 
-	strcpy(fn_s,vm->name);
-	strcpy(fn_o,vm->name);
-	strcat(fn_s, ".s");
-	strcat(fn_o, ".o");
+	snprintf(fn_s, sizeof(fn_s), "/tmp/%.63s.s_XXXXXX", vm->name);
+	snprintf(fn_o, sizeof(fn_o), "/tmp/%.63s.o_XXXXXX", vm->name);
+	fd_s = mkstemp(fn_s);
+	fd_o = mkstemp(fn_o);
+	if(fd_s == -1 || fd_o == -1)
+	{
+		if(fd_s != -1) close(fd_s);
+		if(fd_o != -1) close(fd_o);
+		unlink(fn_s);
+		unlink(fn_o);
+
+		Com_Printf(S_COLOR_RED "can't create temporary files for vm\n", fn_s);
+		vm->compiled = qfalse;
+		return;
+	}
+
 #ifdef DEBUG_VM
 	strcpy(fn_d,vm->name);
 	strcat(fn_d, ".qdasm");
@@ -459,8 +461,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	qdasmout = fopen(fn_d, "w");
 #endif
 
-	fh_s = FS_FOpenFileWrite(fn_s);
-	if(fh_s == -1)
+	fh_s = fdopen(fd_s, "wb");
+	if(!fh_s)
 	{
 		Com_Printf(S_COLOR_RED "can't write %s\n", fn_s);
 		vm->compiled = qfalse;
@@ -884,14 +886,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		}
 	}
 
-	FS_Flush(fh_s);
-	FS_FCloseFile(fh_s);
+	fflush(fh_s);
+	fclose(fh_s);
 
 	compiledsize = doas(fn_s, fn_o, &compiledcode);
 	if(compiledsize == -1)
 	{
 		vm->compiled = qfalse;
-		return;
+		goto out;
 	}
 
 	vm->codeBase   = compiledcode; // remember to skip ELF header!
@@ -920,13 +922,13 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	Com_Printf( "VM file %s compiled to %i bytes of code (0x%lx - 0x%lx)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
 
-#if 0
+out:
+	close(fd_o);
 	if(!com_developer->integer)
 	{
 		unlink(fn_o);
 		unlink(fn_s);
 	}
-#endif
 }
 
 /*
