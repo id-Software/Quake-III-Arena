@@ -235,9 +235,6 @@ ifeq ($(PLATFORM),mingw32)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
-    ifeq ($(USE_OPENAL_DLOPEN),1)
-      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
-    endif
   endif
 
   DX_CFLAGS = -I$(DXSDK_DIR)/Include
@@ -260,10 +257,6 @@ ifeq ($(PLATFORM),mingw32)
 
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
   GLLDFLAGS=
-
-  ifneq ($(USE_OPENAL_DLOPEN),1)
-    LDFLAGS += -lopenal
-  endif
 
   ifeq ($(ARCH),x86)
     # build 32bit
