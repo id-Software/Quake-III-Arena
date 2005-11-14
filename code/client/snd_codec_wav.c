@@ -163,7 +163,7 @@ static qboolean S_ReadWavHeader(fileHandle_t file, snd_info_t *info)
 	if(fmtlen > 16)
 	{
 		fmtlen -= 16;
-		S_SkipChunk(file, fmtlen);
+		FS_Seek( file, fmtlen, FS_SEEK_CUR );
 	}
 
 	// Scan for the data chunk
