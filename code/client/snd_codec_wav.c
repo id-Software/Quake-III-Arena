@@ -79,25 +79,6 @@ static int S_ReadChunkInfo(fileHandle_t f, char *name)
 
 /*
 =================
-S_SkipChunk
-=================
-*/
-static void S_SkipChunk(fileHandle_t f, int length)
-{
-	byte buffer[32*1024];
-
-	while(length > 0)
-	{
-		int toread = length;
-		if(toread > sizeof(buffer))
-			toread = sizeof(buffer);
-		FS_Read(buffer, toread, f);
-		length -= toread;
-	}
-}
-
-/*
-=================
 S_FindWavChunk
 
 Returns the length of the data in the chunk, or 0 if not found
@@ -121,7 +102,7 @@ static int S_FindWavChunk( fileHandle_t f, char *chunk ) {
 			return len;
 
 		// Not the right chunk - skip it
-		S_SkipChunk(f, len);
+		FS_Seek( f, len, FS_SEEK_CUR );
 	}
 }
 
