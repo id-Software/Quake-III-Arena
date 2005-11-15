@@ -175,14 +175,14 @@ ifeq ($(PLATFORM),linux)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
 
-  ifneq ($(USE_OPENAL_DLOPEN),1)
-    CLIENT_LDFLAGS += -lopenal
-  endif
-
   ifeq ($(USE_SDL),1)
     CLIENT_LDFLAGS=$(shell sdl-config --libs)
   else
     CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
+  endif
+
+  ifneq ($(USE_OPENAL_DLOPEN),1)
+    CLIENT_LDFLAGS += -lopenal
   endif
 
   ifeq ($(ARCH),i386)
