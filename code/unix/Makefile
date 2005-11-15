@@ -176,13 +176,13 @@ ifeq ($(PLATFORM),linux)
   LDFLAGS=-ldl -lm
 
   ifneq ($(USE_OPENAL_DLOPEN),1)
-    LDFLAGS += -lopenal
+    CLIENT_LDFLAGS += -lopenal
   endif
 
   ifeq ($(USE_SDL),1)
-    GLLDFLAGS=$(shell sdl-config --libs)
+    CLIENT_LDFLAGS=$(shell sdl-config --libs)
   else
-    GLLDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
+    CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
   endif
 
   ifeq ($(ARCH),i386)
@@ -256,7 +256,7 @@ ifeq ($(PLATFORM),mingw32)
   BINEXT=.exe
 
   LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
-  GLLDFLAGS=
+  CLIENT_LDFLAGS=
 
   ifeq ($(ARCH),x86)
     # build 32bit
@@ -327,7 +327,7 @@ ifeq ($(PLATFORM),freebsd)
   # don't need -ldl (FreeBSD)
   LDFLAGS=-lm
 
-  GLLDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
+  CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
 
   ifeq ($(ARCH),axp)
     TARGETS=\
@@ -372,7 +372,7 @@ ifeq ($(PLATFORM),irix)
   SHLIBLDFLAGS=-shared
 
   LDFLAGS=-ldl -lm
-  GLLDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
+  CLIENT_LDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
 
   TARGETS=$(B)/$(PLATFORM)quake3 \
     $(B)/$(PLATFORM)q3ded
@@ -441,9 +441,9 @@ ifeq ($(PLATFORM),SunOS)
   LDFLAGS=-lsocket -lnsl -ldl -lm
 
   ifeq ($(USE_SDL),1)
-    GLLDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
+    CLIENT_LDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
   else
-    GLLDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
+    CLIENT_LDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
   endif
 
   ifeq ($(ARCH),i386)
@@ -900,10 +900,10 @@ endif #IRIX
 endif #FreeBSD
 
 $(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ)
-	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(GLLDFLAGS) $(LDFLAGS)
+	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) $(LDFLAGS)
 
 $(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP)
-	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(GLLDFLAGS) \
+	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS)
 
 $(B)/client/cl_cgame.o : $(CDIR)/cl_cgame.c; $(DO_CC)
