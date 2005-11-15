@@ -24,11 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "mathlib.h"
 #include "../../qcommon/qfiles.h"
 
-/* MSVC-ism fix. */
-#ifdef _WIN32
-#define atoi(s) strtoul(s,NULL,10)
-#endif
-
 /* 19079 total symbols in FI, 2002 Jan 23 */
 #define DEFAULT_HASHTABLE_SIZE 2048
 
@@ -425,32 +420,33 @@ sort_symbols ()
 }
 
 
-
+#ifdef _MSC_VER
+#define INT64 __int64
+#define atoi64 _atoi64
+#else
+#define INT64 long long int
+#define atoi64 atoll
+#endif
 
 /*
  Problem:
-  BYTE values are specified as signed decimal string.
-  A properly functional atoi() will cap large signed values at 0x7FFFFFFF.
-  Negative word values are often specified as very large decimal values by lcc.
-  Therefore, values that should be between 0x7FFFFFFF and 0xFFFFFFFF come out as 0x7FFFFFFF when using atoi().
-  Bad.
+	BYTE values are specified as signed decimal string.  A properly functional
+	atoip() will cap large signed values at 0x7FFFFFFF.  Negative word values are
+	often specified as very large decimal values by lcc.  Therefore, values that
+	should be between 0x7FFFFFFF and 0xFFFFFFFF come out as 0x7FFFFFFF when using
+	atoi().  Bad.
 
  This function is one big evil hack to work around this problem.
 */
-/* FIXME: Find out maximum token length for VC++  -PH */
-int
-ThingToConvertDecimalIntoSigned32SoThatAtoiDoesntCapAt7FFFFFFF (const char *s)
+int atoiNoCap (const char *s)
 {
-  /* Variable `l' should be an integer variant larger than 32 bits.
-     On gnu-x86, "long long" is 64 bits.  -PH
-  */
-  long long int l;
+  INT64 l;
   union {
     unsigned int u;
     signed int i;
   } retval;
 
-  l = atoll(s);
+  l = atoi64(s);
   /* Now smash to signed 32 bits accordingly. */
   if (l < 0) {
     retval.i = (int)l;
@@ -459,11 +455,6 @@ ThingToConvertDecimalIntoSigned32SoThatAtoiDoesntCapAt7FFFFFFF (const char *s)
   }
   return retval.i;  /* <- union hackage.  I feel dirty with this.  -PH */
 }
-
-/* Programmer Attribute #1: laziness */
-#ifndef _WIN32
-#define atoi ThingToConvertDecimalIntoSigned32SoThatAtoiDoesntCapAt7FFFFFFF 
-#endif
 
 
 
@@ -734,7 +725,7 @@ ParseValue
 */
 int	ParseValue( void ) {
 	Parse();
-	return atoi( token );
+	return atoiNoCap( token );
 }
 
 
@@ -764,7 +755,7 @@ int	ParseExpression(void) {
 		case '-':
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			v = atoi(sym);
+			v = atoiNoCap(sym);
 			break;
 		default:
 			v = LookupSymbol(sym);
@@ -784,10 +775,10 @@ int	ParseExpression(void) {
 
 		switch (token[i]) {
 			case '+':
-				v += atoi(sym);
+				v += atoiNoCap(sym);
 				break;
 			case '-':
-				v -= atoi(sym);
+				v -= atoiNoCap(sym);
 				break;
 		}
 
@@ -1087,7 +1078,7 @@ STAT("EQU");
 		Parse();
 		strcpy( name, token );
 		Parse();
-		DefineSymbol( name, atoi(token) );
+		DefineSymbol( name, atoiNoCap(token) );
 		return 1;
 	}
 	return 0;
@@ -1580,7 +1571,7 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
 				Error("-b requires an argument");
 			}
 			i++;
-			symtablelen = atoi(argv[i]);
+			symtablelen = atoiNoCap(argv[i]);
 			continue;
 		}
 
