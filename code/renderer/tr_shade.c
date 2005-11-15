@@ -473,54 +473,73 @@ static void ProjectDlightTexture( void ) {
 		floatColorVec0 = vec_perm(floatColorVec0,floatColorVec0,floatColorVecPerm);
 #endif
 		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors += 4 ) {
+			int		clip = 0;
 #if idppc_altivec
+#define DIST0 dist0
+#define DIST1 dist1
+#define DIST2 dist2
+#define TEXCOORDS0 texCoords0
+#define TEXCOORDS1 texCoords1
 			vec_t dist0, dist1, dist2;
-#else
-			vec3_t	dist;
-#endif
-			int		clip;
-
-			backEnd.pc.c_dlightVertexes++;
-
-#if idppc_altivec
-			//VectorSubtract( origin, tess.xyz[i], dist );
+			
 			dist0 = origin0 - tess.xyz[i][0];
 			dist1 = origin1 - tess.xyz[i][1];
 			dist2 = origin2 - tess.xyz[i][2];
-			texCoords0 = 0.5f + dist0 * scale;
-			texCoords1 = 0.5f + dist1 * scale;
-
-			clip = 0;
-			if ( texCoords0 < 0.0f ) {
-				clip |= 1;
-			} else if ( texCoords0 > 1.0f ) {
-				clip |= 2;
-			}
-			if ( texCoords1 < 0.0f ) {
-				clip |= 4;
-			} else if ( texCoords1 > 1.0f ) {
-				clip |= 8;
-			}
-			texCoords[0] = texCoords0;
-			texCoords[1] = texCoords1;
+#else
+#define DIST0 dist[0]
+#define DIST1 dist[1]
+#define DIST2 dist[2]
+#define TEXCOORDS0 texCoords[0]
+#define TEXCOORDS1 texCoords[1]
+			vec3_t	dist;
 			
-			// modulate the strength based on the height and color
-			if ( dist2 > radius ) {
-				clip |= 16;
-				modulate = 0.0f;
-			} else if ( dist2 < -radius ) {
-				clip |= 32;
-				modulate = 0.0f;
+			VectorSubtract( origin, tess.xyz[i], dist );
+#endif
+
+			backEnd.pc.c_dlightVertexes++;
+
+			TEXCOORDS0 = 0.5f + DIST0 * scale;
+			TEXCOORDS1 = 0.5f + DIST1 * scale;
+
+			if( !r_dlightBacks->integer &&
+					// dist . tess.normal[i]
+					( DIST0 * tess.normal[i][0] +
+					DIST1 * tess.normal[i][1] +
+					DIST2 * tess.normal[i][2] ) < 0.0f ) {
+				clip = 63;
 			} else {
-				dist2 = Q_fabs(dist2);
-				if ( dist2 < radius * 0.5f ) {
-					modulate = 1.0f;
+				if ( TEXCOORDS0 < 0.0f ) {
+					clip |= 1;
+				} else if ( TEXCOORDS0 > 1.0f ) {
+					clip |= 2;
+				}
+				if ( TEXCOORDS1 < 0.0f ) {
+					clip |= 4;
+				} else if ( TEXCOORDS1 > 1.0f ) {
+					clip |= 8;
+				}
+				texCoords[0] = TEXCOORDS0;
+				texCoords[1] = TEXCOORDS1;
+
+				// modulate the strength based on the height and color
+				if ( DIST2 > radius ) {
+					clip |= 16;
+					modulate = 0.0f;
+				} else if ( DIST2 < -radius ) {
+					clip |= 32;
+					modulate = 0.0f;
 				} else {
-					modulate = 2.0f * (radius - dist2) * scale;
+					DIST2 = Q_fabs(DIST2);
+					if ( DIST2 < radius * 0.5f ) {
+						modulate = 1.0f;
+					} else {
+						modulate = 2.0f * (radius - DIST2) * scale;
+					}
 				}
 			}
 			clipBits[i] = clip;
 
+#if idppc_altivec
 			modulateVec = vec_ld(0,(float *)&modulate);
 			modulateVec = vec_perm(modulateVec,modulateVec,modulatePerm);
 			colorVec = vec_madd(floatColorVec0,modulateVec,zero);
@@ -530,44 +549,17 @@ static void ProjectDlightTexture( void ) {
 			colorChar = vec_sel(colorChar,vSel,vSel);		// RGBARGBARGBARGBA replace alpha with 255
 			vec_ste((vector unsigned int)colorChar,0,(unsigned int *)colors);	// store color
 #else
-			VectorSubtract( origin, tess.xyz[i], dist );
-			texCoords[0] = 0.5f + dist[0] * scale;
-			texCoords[1] = 0.5f + dist[1] * scale;
-
-			clip = 0;
-			if ( texCoords[0] < 0.0f ) {
-				clip |= 1;
-			} else if ( texCoords[0] > 1.0f ) {
-				clip |= 2;
-			}
-			if ( texCoords[1] < 0.0f ) {
-				clip |= 4;
-			} else if ( texCoords[1] > 1.0f ) {
-				clip |= 8;
-			}
-			// modulate the strength based on the height and color
-			if ( dist[2] > radius ) {
-				clip |= 16;
-				modulate = 0.0f;
-			} else if ( dist[2] < -radius ) {
-				clip |= 32;
-				modulate = 0.0f;
-			} else {
-				dist[2] = Q_fabs(dist[2]);
-				if ( dist[2] < radius * 0.5f ) {
-					modulate = 1.0f;
-				} else {
-					modulate = 2.0f * (radius - dist[2]) * scale;
-				}
-			}
-			clipBits[i] = clip;
-
 			colors[0] = myftol(floatColor[0] * modulate);
 			colors[1] = myftol(floatColor[1] * modulate);
 			colors[2] = myftol(floatColor[2] * modulate);
 			colors[3] = 255;
 #endif
 		}
+#undef DIST0
+#undef DIST1
+#undef DIST2
+#undef TEXCOORDS0
+#undef TEXCOORDS1
 
 		// build a list of triangles that need light
 		numIndexes = 0;
