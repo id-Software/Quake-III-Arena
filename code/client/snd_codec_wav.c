@@ -66,44 +66,38 @@ static int S_ReadChunkInfo(fileHandle_t f, char *name)
 		return 0;
 
 	len = FGetLittleLong(f);
-	if(len < 0 || len > 0xffffffff)
+	if( len < 0 ) {
+		Com_Printf( S_COLOR_YELLOW "WARNING: Negative chunk length\n" );
 		return 0;
-
-	//FIXME: 11/11/05 <tim@ngus.net>
-	// I'm not sure I understand why this needs to be padded.
-	// Surely this results in reading past the end of the data?
-	//len = (len + 1 ) & ~1;		// pad to word boundary
+	}
 
 	return len;
 }
 
 /*
 =================
-S_FindWavChunk
+S_FindRIFFChunk
 
 Returns the length of the data in the chunk, or 0 if not found
 =================
 */
-static int S_FindWavChunk( fileHandle_t f, char *chunk ) {
+static int S_FindRIFFChunk( fileHandle_t f, char *chunk ) {
 	char	name[5];
 	int		len;
 
-	// This is a bit dangerous...
-	while(1)
+	while( ( len = S_ReadChunkInfo(f, name) ) )
 	{
-		len = S_ReadChunkInfo(f, name);
-
-		// Read failure?
-		if(len == 0)
-			return 0;
-
 		// If this is the right chunk, return
-		if(!strcmp(name, chunk))
+		if( !Q_strncmp( name, chunk, 4 ) )
 			return len;
+
+		len = (len + 1 ) & ~1; // pad to word boundary
 
 		// Not the right chunk - skip it
 		FS_Seek( f, len, FS_SEEK_CUR );
 	}
+
+	return 0;
 }
 
 /*
@@ -131,10 +125,10 @@ static void S_ByteSwapRawSamples( int samples, int width, int s_channels, const 
 
 /*
 =================
-S_ReadWavHeader
+S_ReadRIFFHeader
 =================
 */
-static qboolean S_ReadWavHeader(fileHandle_t file, snd_info_t *info)
+static qboolean S_ReadRIFFHeader(fileHandle_t file, snd_info_t *info)
 {
 	char dump[16];
 	int wav_format;
@@ -144,9 +138,9 @@ static qboolean S_ReadWavHeader(fileHandle_t file, snd_info_t *info)
 	FS_Read(dump, 12, file);
 
 	// Scan for the format chunk
-	if((fmtlen = S_FindWavChunk(file, "fmt ")) == 0)
+	if((fmtlen = S_FindRIFFChunk(file, "fmt ")) == 0)
 	{
-		Com_Printf("No fmt chunk\n");
+		Com_Printf( S_COLOR_RED "ERROR: Couldn't find \"fmt\" chunk\n");
 		return qfalse;
 	}
 
@@ -167,9 +161,9 @@ static qboolean S_ReadWavHeader(fileHandle_t file, snd_info_t *info)
 	}
 
 	// Scan for the data chunk
-	if( (info->size = S_FindWavChunk(file, "data")) == 0)
+	if( (info->size = S_FindRIFFChunk(file, "data")) == 0)
 	{
-		Com_Printf("No data chunk\n");
+		Com_Printf( S_COLOR_RED "ERROR: Couldn't find \"data\" chunk\n");
 		return qfalse;
 	}
 	info->samples = (info->size / info->width) / info->channels;
@@ -202,15 +196,17 @@ void *S_WAV_CodecLoad(const char *filename, snd_info_t *info)
 	FS_FOpenFileRead(filename, &file, qtrue);
 	if(!file)
 	{
-		Com_Printf("Can't read sound file %s\n", filename);
+		Com_Printf( S_COLOR_RED "ERROR: Could not open \"%s\"\n",
+				filename);
 		return NULL;
 	}
 
 	// Read the RIFF header
-	if(!S_ReadWavHeader(file, info))
+	if(!S_ReadRIFFHeader(file, info))
 	{
 		FS_FCloseFile(file);
-		Com_Printf("Can't understand wav file %s\n", filename);
+		Com_Printf( S_COLOR_RED "ERROR: Incorrect/unsupported format in \"%s\"\n",
+				filename);
 		return NULL;
 	}
 
@@ -219,7 +215,8 @@ void *S_WAV_CodecLoad(const char *filename, snd_info_t *info)
 	if(!buffer)
 	{
 		FS_FCloseFile(file);
-		Com_Printf("Out of memory reading %s\n", filename);
+		Com_Printf( S_COLOR_RED "ERROR: Out of memory reading \"%s\"\n",
+				filename);
 		return NULL;
 	}
 
@@ -247,7 +244,7 @@ snd_stream_t *S_WAV_CodecOpenStream(const char *filename)
 		return NULL;
 
 	// Read the RIFF header
-	if(!S_ReadWavHeader(rv->file, &rv->info))
+	if(!S_ReadRIFFHeader(rv->file, &rv->info))
 	{
 		S_CodecUtilClose(rv);
 		return NULL;
