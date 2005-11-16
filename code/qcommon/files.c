@@ -1384,8 +1384,8 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 	}
 
 	if (fsh[f].zipFile == qtrue) {
-    //FIXME: this is incomplete and really, really
-    //crappy (but better than what was here before)
+		//FIXME: this is incomplete and really, really
+		//crappy (but better than what was here before)
 		byte	buffer[PK3_SEEK_BUFFER_SIZE];
 		int		remainder = offset;
 
