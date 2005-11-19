@@ -1389,7 +1389,6 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 		byte	buffer[PK3_SEEK_BUFFER_SIZE];
 		int		remainder = offset;
 
-		Com_Printf( S_COLOR_YELLOW "%s %d %d\n", fsh[f].name, offset, origin );
 		if( offset < 0 || origin == FS_SEEK_END ) {
 			Com_Error( ERR_FATAL, "Negative offsets and FS_SEEK_END not implemented "
 					"for FS_Seek on pk3 file contents\n" );
