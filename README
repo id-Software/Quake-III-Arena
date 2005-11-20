@@ -41,7 +41,7 @@ Compiling (Under Linux)
 1. If not already there, change to the directory containing this readme
 2. Run 'make'
 
-For distro maintainers, you can set some make variables:
+For distrib maintainers, you can set some make variables:
  OPTIMIZE        - use this for custom CFLAGS
  DEFAULT_BASEDIR - extra path to search for baseq3 and such
  BUILD_SERVER    - build the 'q3ded' server binary (1 = build it, default = 1)
@@ -125,6 +125,6 @@ Creating mods compatible with Q3 1.32b
 If you're using this package to create mods for the last official release of
 Q3, it is necessary to pass the commandline option '-vq3' to your invocation
 of q3asm. This is because by default q3asm outputs an updated qvm format that
-is necessary to fix a bug involving the optimising pass of the x86 vm JIT
+is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
 compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it still
 exists when you read this) for more details.
