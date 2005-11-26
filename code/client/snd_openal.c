@@ -847,8 +847,8 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 
 	// Set up the position and velocity
 	VectorScale(entityList[entnum].origin, POSITION_SCALE, sorigin);
-	qalSourcefv(srcList[src].source, AL_POSITION, sorigin);
-	qalSourcefv(srcList[src].source, AL_VELOCITY, velocity);
+	qalSourcefv(srcList[src].source, AL_POSITION, (ALfloat *)sorigin);
+	qalSourcefv(srcList[src].source, AL_VELOCITY, (ALfloat *)velocity);
 
 	// Flag it
 	entityList[entnum].touched = qtrue;
@@ -1067,7 +1067,7 @@ void S_AL_RawSamples(int samples, int rate, int width, int channels, const byte 
 
 	// Create a buffer, and stuff the data into it
 	qalGenBuffers(1, &buffer);
-	qalBufferData(buffer, format, data, (samples * width * channels), rate);
+	qalBufferData(buffer, format, (ALvoid *)data, (samples * width * channels), rate);
 
 	// Shove the data onto the streamSource
 	qalSourceQueueBuffers(streamSource, 1, &buffer);
@@ -1384,7 +1384,7 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 
 	// Set OpenAL listener paramaters
 	VectorScale(origin, POSITION_SCALE, sorigin);
-	qalListenerfv(AL_POSITION, origin);
+	qalListenerfv(AL_POSITION, (ALfloat *)origin);
 	qalListenerfv(AL_VELOCITY, velocity);
 	qalListenerfv(AL_ORIENTATION, orientation);
 }

@@ -463,11 +463,6 @@ static void ProjectDlightTexture_altivec( void ) {
 		floatColorVec0 = vec_perm(floatColorVec0,floatColorVec0,floatColorVecPerm);
 		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors += 4 ) {
 			int		clip = 0;
-#define DIST0 dist0
-#define DIST1 dist1
-#define DIST2 dist2
-#define TEXCOORDS0 texCoords0
-#define TEXCOORDS1 texCoords1
 			vec_t dist0, dist1, dist2;
 			
 			dist0 = origin0 - tess.xyz[i][0];
@@ -476,42 +471,42 @@ static void ProjectDlightTexture_altivec( void ) {
 
 			backEnd.pc.c_dlightVertexes++;
 
-			TEXCOORDS0 = 0.5f + DIST0 * scale;
-			TEXCOORDS1 = 0.5f + DIST1 * scale;
+			texCoords0 = 0.5f + dist0 * scale;
+			texCoords1 = 0.5f + dist1 * scale;
 
 			if( !r_dlightBacks->integer &&
 					// dist . tess.normal[i]
-					( DIST0 * tess.normal[i][0] +
-					DIST1 * tess.normal[i][1] +
-					DIST2 * tess.normal[i][2] ) < 0.0f ) {
+					( dist0 * tess.normal[i][0] +
+					dist1 * tess.normal[i][1] +
+					dist2 * tess.normal[i][2] ) < 0.0f ) {
 				clip = 63;
 			} else {
-				if ( TEXCOORDS0 < 0.0f ) {
+				if ( texCoords0 < 0.0f ) {
 					clip |= 1;
-				} else if ( TEXCOORDS0 > 1.0f ) {
+				} else if ( texCoords0 > 1.0f ) {
 					clip |= 2;
 				}
-				if ( TEXCOORDS1 < 0.0f ) {
+				if ( texCoords1 < 0.0f ) {
 					clip |= 4;
-				} else if ( TEXCOORDS1 > 1.0f ) {
+				} else if ( texCoords1 > 1.0f ) {
 					clip |= 8;
 				}
-				texCoords[0] = TEXCOORDS0;
-				texCoords[1] = TEXCOORDS1;
+				texCoords[0] = texCoords0;
+				texCoords[1] = texCoords1;
 
 				// modulate the strength based on the height and color
-				if ( DIST2 > radius ) {
+				if ( dist2 > radius ) {
 					clip |= 16;
 					modulate = 0.0f;
-				} else if ( DIST2 < -radius ) {
+				} else if ( dist2 < -radius ) {
 					clip |= 32;
 					modulate = 0.0f;
 				} else {
-					DIST2 = Q_fabs(DIST2);
-					if ( DIST2 < radius * 0.5f ) {
+					dist2 = Q_fabs(dist2);
+					if ( dist2 < radius * 0.5f ) {
 						modulate = 1.0f;
 					} else {
-						modulate = 2.0f * (radius - DIST2) * scale;
+						modulate = 2.0f * (radius - dist2) * scale;
 					}
 				}
 			}
@@ -526,11 +521,6 @@ static void ProjectDlightTexture_altivec( void ) {
 			colorChar = vec_sel(colorChar,vSel,vSel);		// RGBARGBARGBARGBA replace alpha with 255
 			vec_ste((vector unsigned int)colorChar,0,(unsigned int *)colors);	// store color
 		}
-#undef DIST0
-#undef DIST1
-#undef DIST2
-#undef TEXCOORDS0
-#undef TEXCOORDS1
 
 		// build a list of triangles that need light
 		numIndexes = 0;
@@ -614,53 +604,48 @@ static void ProjectDlightTexture_scalar( void ) {
 		floatColor[2] = dl->color[2] * 255.0f;
 		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors += 4 ) {
 			int		clip = 0;
-#define DIST0 dist[0]
-#define DIST1 dist[1]
-#define DIST2 dist[2]
-#define TEXCOORDS0 texCoords[0]
-#define TEXCOORDS1 texCoords[1]
 			vec3_t	dist;
 			
 			VectorSubtract( origin, tess.xyz[i], dist );
 
 			backEnd.pc.c_dlightVertexes++;
 
-			TEXCOORDS0 = 0.5f + DIST0 * scale;
-			TEXCOORDS1 = 0.5f + DIST1 * scale;
+			texCoords[0] = 0.5f + dist[0] * scale;
+			texCoords[1] = 0.5f + dist[1] * scale;
 
 			if( !r_dlightBacks->integer &&
 					// dist . tess.normal[i]
-					( DIST0 * tess.normal[i][0] +
-					DIST1 * tess.normal[i][1] +
-					DIST2 * tess.normal[i][2] ) < 0.0f ) {
+					( dist[0] * tess.normal[i][0] +
+					dist[1] * tess.normal[i][1] +
+					dist[2] * tess.normal[i][2] ) < 0.0f ) {
 				clip = 63;
 			} else {
-				if ( TEXCOORDS0 < 0.0f ) {
+				if ( texCoords[0] < 0.0f ) {
 					clip |= 1;
-				} else if ( TEXCOORDS0 > 1.0f ) {
+				} else if ( texCoords[0] > 1.0f ) {
 					clip |= 2;
 				}
-				if ( TEXCOORDS1 < 0.0f ) {
+				if ( texCoords[1] < 0.0f ) {
 					clip |= 4;
-				} else if ( TEXCOORDS1 > 1.0f ) {
+				} else if ( texCoords[1] > 1.0f ) {
 					clip |= 8;
 				}
-				texCoords[0] = TEXCOORDS0;
-				texCoords[1] = TEXCOORDS1;
+				texCoords[0] = texCoords[0];
+				texCoords[1] = texCoords[1];
 
 				// modulate the strength based on the height and color
-				if ( DIST2 > radius ) {
+				if ( dist[2] > radius ) {
 					clip |= 16;
 					modulate = 0.0f;
-				} else if ( DIST2 < -radius ) {
+				} else if ( dist[2] < -radius ) {
 					clip |= 32;
 					modulate = 0.0f;
 				} else {
-					DIST2 = Q_fabs(DIST2);
-					if ( DIST2 < radius * 0.5f ) {
+					dist[2] = Q_fabs(dist[2]);
+					if ( dist[2] < radius * 0.5f ) {
 						modulate = 1.0f;
 					} else {
-						modulate = 2.0f * (radius - DIST2) * scale;
+						modulate = 2.0f * (radius - dist[2]) * scale;
 					}
 				}
 			}
@@ -670,11 +655,6 @@ static void ProjectDlightTexture_scalar( void ) {
 			colors[2] = myftol(floatColor[2] * modulate);
 			colors[3] = 255;
 		}
-#undef DIST0
-#undef DIST1
-#undef DIST2
-#undef TEXCOORDS0
-#undef TEXCOORDS1
 
 		// build a list of triangles that need light
 		numIndexes = 0;
@@ -719,15 +699,14 @@ static void ProjectDlightTexture_scalar( void ) {
 }
 
 static void ProjectDlightTexture( void ) {
-    #if idppc_altivec
-    extern cvar_t *com_altivec;
-    if (com_altivec->integer) {
-        // must be in a seperate function or G3 systems will crash.
-        ProjectDlightTexture_altivec();
-        return;
-    }
-    #endif
-    ProjectDlightTexture_scalar();
+#if idppc_altivec
+	if (com_altivec->integer) {
+		// must be in a seperate function or G3 systems will crash.
+		ProjectDlightTexture_altivec();
+		return;
+	}
+#endif
+	ProjectDlightTexture_scalar();
 }
 
 

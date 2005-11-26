@@ -364,24 +364,22 @@ void Sys_Quit (void) {
 
 static void Sys_DetectAltivec(void)
 {
-  extern cvar_t	*com_altivec;
-
   // Only detect if user hasn't forcibly disabled it.
   if (com_altivec->integer) {
-    #if idppc_altivec
-      #if MACOS_X
-      {
-        long feat = 0;
-        OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
-        if ((err==noErr) && ((1 << gestaltPowerPCHasVectorInstructions) & feat))
-          com_altivec->integer = 1;
-      }
-      #else // !!! FIXME: PowerPC Linux, etc: how to detect?
-        com_altivec->integer = 1;
-      #endif
-    #else
-      com_altivec->integer = 0;  // not an Altivec system, so never use it.
-    #endif
+#if idppc_altivec
+#ifdef MACOS_X
+    long feat = 0;
+    OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
+    if ((err==noErr) && ((1 << gestaltPowerPCHasVectorInstructions) & feat)) {
+      Cvar_Set( "com_altivec", "1" );
+    }
+#else // !!! FIXME: PowerPC Linux, etc: how to detect?
+    Cvar_Set( "com_altivec", "1" );
+#endif
+#else
+    // not an Altivec system, so never use it.
+    Cvar_Set( "com_altivec", "0" );
+#endif
   }
 }
 
@@ -705,9 +703,9 @@ void Sys_UnloadDll( void *dllHandle ) {
     return;
   }
 
-  #if USE_SDL_VIDEO
+#if USE_SDL_VIDEO
   SDL_UnloadObject(dllHandle);
-  #else
+#else
   dlclose( dllHandle );
   {
     const char* err; // rb010123 - now const
@@ -715,7 +713,7 @@ void Sys_UnloadDll( void *dllHandle ) {
     if ( err != NULL )
       Com_Printf ( "Sys_UnloadGame failed on dlclose: \"%s\"!\n", err );
   }
-  #endif
+#endif
 }
 
 
@@ -745,11 +743,11 @@ static void* try_dlopen(const char* base, const char* gamedir, const char* fname
   fn = FS_BuildOSPath( base, gamedir, fname );
   Com_Printf( "Sys_LoadDll(%s)... \n", fn );
 
-  #if USE_SDL_VIDEO
+#if USE_SDL_VIDEO
   libHandle = SDL_LoadObject(fn);
-  #else
+#else
   libHandle = dlopen( fn, Q_RTLD );
-  #endif
+#endif
 
   if(!libHandle) {
     Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, do_dlerror() );
@@ -827,14 +825,15 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 #else
     Com_Printf ( "Sys_LoadDll(%s) failed dlsym(vmMain):\n\"%s\" !\n", name, err );
 #endif
-    #if USE_SDL_VIDEO
+#if USE_SDL_VIDEO
     SDL_UnloadObject(libHandle);
-    #else
+#else
     dlclose( libHandle );
     err = do_dlerror();
-    if ( err != NULL )
+    if ( err != NULL ) {
       Com_Printf ( "Sys_LoadDll(%s) failed dlcose:\n\"%s\"\n", name, err );
-    #endif
+    }
+#endif
 
     return NULL;
   }

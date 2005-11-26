@@ -54,7 +54,7 @@ DXSDK_DIR=C:/DXSDK
 endif
 
 ifndef USE_CCACHE
-USE_CCACHE=1
+USE_CCACHE=0
 endif
 export USE_CCACHE
 
@@ -118,7 +118,6 @@ ifeq ($(PLATFORM),linux)
 
   GLIBC=-glibc
   CC=gcc
-  CXX=g++
 
   ifeq ($(ARCH),alpha)
     ARCH=axp
@@ -137,9 +136,6 @@ ifeq ($(PLATFORM),linux)
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -pipe
-
-  # Always include debug symbols...you can strip the binary later...
-  BASE_CFLAGS += -gfull
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
@@ -244,12 +240,11 @@ else # ifeq Linux
 ifeq ($(PLATFORM),darwin)
   GLIBC=
   CC=gcc
-  CXX=g++
 
   VM_PPC=vm_ppc_new
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
-  BASE_CFLAGS += -DMACOS_X=1 -fno-common -pipe
+  BASE_CFLAGS += -DMACOS_X -fno-common -pipe
 
   # Always include debug symbols...you can strip the binary later...
   BASE_CFLAGS += -gfull
@@ -269,7 +264,7 @@ ifeq ($(PLATFORM),darwin)
   OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -falign-loops=16
 
   ifeq ($(ARCH),ppc)
-	BASE_CFLAGS += -faltivec
+  BASE_CFLAGS += -faltivec
     ifneq ($(VM_PPC),)
       HAVE_VM_COMPILED=true
     endif
@@ -300,7 +295,7 @@ ifeq ($(PLATFORM),darwin)
   ifeq ($(USE_SDL),1)
     # We copy sdlmain before ranlib'ing it so that subversion doesn't think
     #  the file has been modified by each build.
-	LIBSDLMAIN=$(B)/libSDLmain.a
+    LIBSDLMAIN=$(B)/libSDLmain.a
     LIBSDLMAINSRC=../libs/macosx/libSDLmain.a
     CLIENT_LDFLAGS=-framework Cocoa -framework OpenGL ../libs/macosx/libSDL-1.2.0.dylib
   else
@@ -345,7 +340,6 @@ ifeq ($(PLATFORM),mingw32)
 
   GLIBC=-mingw
   CC=gcc
-  CXX=g++
   WINDRES=windres
 
   ifeq ($(ARCH),i386)
@@ -508,7 +502,6 @@ ifeq ($(PLATFORM),SunOS)
 
   GLIBC= #libc is irrelevant
   CC=gcc
-  CXX=g++
   INSTALL=ginstall
   MKDIR=gmkdir
   COPYDIR="/usr/local/share/games/quake3"
@@ -636,7 +629,6 @@ endif #SunOS
 
 ifeq ($(USE_CCACHE),1)
   CC := ccache $(CC)
-  CXX := ccache $(CXX)
 endif
 
 ifneq ($(BUILD_SERVER),1)
@@ -668,7 +660,6 @@ ifeq ($(GENERATE_DEPENDENCIES),1)
 endif
 
 DO_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
-DO_CXX=$(CXX) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 DO_SMP_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
 DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
 DO_DEBUG_CC=$(CC) $(NOTSHLIBCFLAGS) $(DEBUG_CFLAGS) -o $@ -c $<
@@ -1007,11 +998,11 @@ ifeq ($(PLATFORM),darwin)
     $(B)/client/sdl_snd.o \
 
   ifeq ($(ARCH),i386)
-	I386OBJS := \
-		$(B)/client/ftola.o \
-		$(B)/client/snapvectora.o \
-		$(B)/client/snd_mixa.o \
-        $(B)/client/matha.o \
+    I386OBJS := \
+      $(B)/client/ftola.o \
+      $(B)/client/snapvectora.o \
+      $(B)/client/snd_mixa.o \
+      $(B)/client/matha.o \
 
     Q3POBJ += $(I386OBJS)
     Q3POBJ_SMP += $(I386OBJS)
@@ -1344,7 +1335,7 @@ ifeq ($(ARCH),ppc)
 endif
 
 $(B)/$(PLATFORM)q3ded$(BINEXT): $(Q3DOBJ)
-	$(CC)  -o $@ $(Q3DOBJ) $(LDFLAGS)
+	$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
 
 $(B)/ded/sv_bot.o : $(SDIR)/sv_bot.c; $(DO_DED_CC)
 $(B)/ded/sv_client.o : $(SDIR)/sv_client.c; $(DO_DED_CC)
@@ -1459,7 +1450,7 @@ Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
 Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
-	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
+	$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
 
 $(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 	$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
@@ -1550,7 +1541,7 @@ Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
 Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
-	$(CC)  $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
+	$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
 $(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 	$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm

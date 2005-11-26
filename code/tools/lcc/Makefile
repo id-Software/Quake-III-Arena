@@ -22,17 +22,8 @@ RMDIR=rmdir
 BUILDDIR=build
 BD=$(BUILDDIR)/
 
-ifeq ($(PLATFORM),darwin)
-  LCC_CFLAGS += -DMACOS_X=1
-endif
-
-ifndef USE_CCACHE
-  USE_CCACHE=0
-endif
-
 ifeq ($(USE_CCACHE),1)
   CC := ccache $(CC)
-  CXX := ccache $(CXX)
 endif
 
 ifeq ($(PLATFORM),SunOS)

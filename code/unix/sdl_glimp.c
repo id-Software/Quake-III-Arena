@@ -267,10 +267,10 @@ static void install_grabs(void)
 
     // This is a bug in the current SDL/macosx...have to toggle it a few
     //  times to get the cursor to hide.
-    #if defined(MACOS_X)
+#if defined(MACOS_X)
     SDL_ShowCursor(1);
     SDL_ShowCursor(0);
-    #endif
+#endif
 }
 
 static void uninstall_grabs(void)

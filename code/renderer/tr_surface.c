@@ -838,28 +838,23 @@ static void LerpMeshVertexes_scalar(md3Surface_t *surf, float backlerp)
 
 static void LerpMeshVertexes(md3Surface_t *surf, float backlerp)
 {
-    #if idppc_altivec
-
-    // !!! FIXME: figure out what's broken and remove this.
-    #ifndef NDEBUG
-    static int already_complained = 0;
-    if (!already_complained)
-    {
-        already_complained = 1;
-        Com_Printf("WARNING! FIXME! Altivec mesh lerping broken in debug builds!\n");
-    }
-    #else
-    extern cvar_t *com_altivec;
-    if (com_altivec->integer) {
-        // must be in a seperate function or G3 systems will crash.
-        LerpMeshVertexes_altivec( surf, backlerp );
-        return;
-    }
-    #endif
-
-    #endif // idppc_altivec
-
-    LerpMeshVertexes_scalar( surf, backlerp );
+#if idppc_altivec
+	// !!! FIXME: figure out what's broken and remove this.
+#ifndef NDEBUG
+	static int already_complained = 0;
+	if (!already_complained) {
+		already_complained = 1;
+		Com_Printf("WARNING! FIXME! Altivec mesh lerping broken in debug builds!\n");
+	}
+#else
+	if (com_altivec->integer) {
+		// must be in a seperate function or G3 systems will crash.
+		LerpMeshVertexes_altivec( surf, backlerp );
+		return;
+	}
+#endif
+#endif // idppc_altivec
+	LerpMeshVertexes_scalar( surf, backlerp );
 }
 
 
