@@ -46,7 +46,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #elif defined(MACOS_X)
 
-#include "macosx_glimp.h"
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#ifndef GL_EXT_abgr
+#include <OpenGL/glext.h>
+#endif
+
+// This can be defined to use the CGLMacro.h support which avoids looking up
+// the current context.
+//#define USE_CGLMACROS
+
+#ifdef USE_CGLMACROS
+#include "macosx_local.h"
+#define cgl_ctx glw_state._cgl_ctx
+#include <OpenGL/CGLMacro.h>
+#endif
 
 #elif defined( __linux__ ) || defined(__FreeBSD__)
 
@@ -164,7 +179,7 @@ extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 
 #include "qgl_linked.h"
 
-#elif defined(MACOS_X)
+#elif (defined(MACOS_X) && !defined(USE_SDL_VIDEO))
 // This includes #ifdefs for optional logging and GL error checking after every GL call as well as #defines to prevent incorrect usage of the non-'qgl' versions of the GL API.
 #include "macosx_qgl.h"
 

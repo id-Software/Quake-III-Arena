@@ -28,14 +28,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "qal.h"
 
 #if USE_OPENAL_DLOPEN
-#if defined _WIN32
+
+#if USE_SDL_VIDEO
+#include "SDL.h"
+#include "SDL_loadso.h"
+#define OBJTYPE void *
+#define OBJLOAD(x) SDL_LoadObject(x)
+#define SYMLOAD(x,y) SDL_LoadFunction(x,y)
+#define OBJFREE(x) SDL_UnloadObject(x)
+
+#elif defined _WIN32
 #include <windows.h>
 #define OBJTYPE HMODULE
 #define OBJLOAD(x) LoadLibrary(x)
 #define SYMLOAD(x,y) GetProcAddress(x,y)
 #define OBJFREE(x) FreeLibrary(x)
 
-#elif defined __linux__ || defined __FreeBSD__
+#elif defined __linux__ || defined __FreeBSD__ || defined MACOS_X
 #include <unistd.h>
 #include <sys/types.h>
 #include <dlfcn.h>

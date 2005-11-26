@@ -6,7 +6,7 @@
  *
  * I wrote such a beast originally for Loki's port of Heavy Metal: FAKK2,
  *  and then wrote it again for the Linux client of Medal of Honor: Allied
- *  Assault. Third times a charm, so I'm rewriting this once more for the
+ *  Assault. Third time's a charm, so I'm rewriting this once more for the
  *  GPL release of Quake 3.
  *
  * Written by Ryan C. Gordon (icculus@icculus.org). Please refer to
@@ -106,6 +106,23 @@ cvar_t   *joy_threshold    = NULL;
 
 cvar_t  *r_allowSoftwareGL;   // don't abort out if the pixelformat claims software
 cvar_t  *r_previousglDriver;
+
+qboolean GLimp_sdl_init_video(void)
+{
+  if (!SDL_WasInit(SDL_INIT_VIDEO))
+  {
+    ri.Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_VIDEO)...\n");
+    if (SDL_Init(SDL_INIT_VIDEO) == -1)
+    {
+		ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) failed: %s\n", SDL_GetError());
+        return qfalse;
+    }
+    ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) passed.\n");
+  }
+
+  return qtrue;
+}
+
 
 /*
 * Find the first occurrence of find in s.
@@ -217,8 +234,12 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   default: break;
   } 
 
-  if (keysym->unicode <= 255 && keysym->unicode >= 20)  // maps to ASCII?
+  if (*key == K_BACKSPACE)
+    buf[0] = 8;
+  else
   {
+    if (keysym->unicode <= 255 && keysym->unicode >= 20)  // maps to ASCII?
+    {
       char ch = (char) keysym->unicode;
       if (ch == '~')
         *key = '~'; // console HACK
@@ -231,17 +252,25 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
       //  ch = ch - 'A' + 'a';
 
       buf[0] = ch;
-  }
-  else if(keysym->unicode == 8) // ctrl-h
+    }
+    else if(keysym->unicode == 8) // ctrl-h
       buf[0] = 8;
+  }
 
   return buf;
 }
 
 static void install_grabs(void)
 {
-    SDL_ShowCursor(0);
     SDL_WM_GrabInput(SDL_GRAB_ON);
+    SDL_ShowCursor(0);
+
+    // This is a bug in the current SDL/macosx...have to toggle it a few
+    //  times to get the cursor to hide.
+    #if defined(MACOS_X)
+    SDL_ShowCursor(1);
+    SDL_ShowCursor(0);
+    #endif
 }
 
 static void uninstall_grabs(void)
@@ -417,7 +446,6 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 void GLimp_Shutdown( void )
 {
   IN_Shutdown();
-  SDL_QuitSubSystem(SDL_INIT_VIDEO);
   screen = NULL;
 
   memset( &glConfig, 0, sizeof( glConfig ) );
@@ -448,16 +476,8 @@ static qboolean GLW_StartDriverAndSetMode( const char *drivername,
 {
   rserr_t err;
 
-  if (!SDL_WasInit(SDL_INIT_VIDEO))
-  {
-    ri.Printf( PRINT_ALL, "Calling SDL_Init(SDL_INIT_VIDEO)...\n");
-    if (SDL_Init(SDL_INIT_VIDEO) == -1)
-    {
-		ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) failed: %s\n", SDL_GetError());
-        return qfalse;
-    }
-    ri.Printf( PRINT_ALL, "SDL_Init(SDL_INIT_VIDEO) passed.\n");
-  }
+  if (GLimp_sdl_init_video() == qfalse)
+    return qfalse;
 
   // don't ever bother going into fullscreen with a voodoo card
 #if 1	// JDC: I reenabled this
@@ -714,17 +734,17 @@ static void GLW_InitExtensions( void )
   qglClientActiveTextureARB = NULL;
   if ( Q_stristr( glConfig.extensions_string, "GL_ARB_multitexture" ) )
   {
-    // !!! FIXME: Use SDL_GL_GetProcAddress instead?
     if ( r_ext_multitexture->value )
     {
-      qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) dlsym( glw_state.OpenGLLib, "glMultiTexCoord2fARB" );
-      qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) dlsym( glw_state.OpenGLLib, "glActiveTextureARB" );
-      qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) dlsym( glw_state.OpenGLLib, "glClientActiveTextureARB" );
+      qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
+      qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glActiveTextureARB" );
+      qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
 
       if ( qglActiveTextureARB )
       {
-        qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glConfig.maxActiveTextures );
-
+        GLint glint = 0;
+        qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glint );
+        glConfig.maxActiveTextures = (int) glint;
         if ( glConfig.maxActiveTextures > 1 )
         {
           ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture\n" );
@@ -751,8 +771,8 @@ static void GLW_InitExtensions( void )
     if ( r_ext_compiled_vertex_array->value )
     {
       ri.Printf( PRINT_ALL, "...using GL_EXT_compiled_vertex_array\n" );
-      qglLockArraysEXT = ( void ( APIENTRY * )( int, int ) ) dlsym( glw_state.OpenGLLib, "glLockArraysEXT" );
-      qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) dlsym( glw_state.OpenGLLib, "glUnlockArraysEXT" );
+      qglLockArraysEXT = ( void ( APIENTRY * )( GLint, GLint ) ) SDL_GL_GetProcAddress( "glLockArraysEXT" );
+      qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) SDL_GL_GetProcAddress( "glUnlockArraysEXT" );
       if (!qglLockArraysEXT || !qglUnlockArraysEXT)
       {
         ri.Error (ERR_FATAL, "bad getprocaddress");
@@ -783,7 +803,7 @@ static qboolean GLW_LoadOpenGL( const char *name )
 {
   qboolean fullscreen;
 
-  ri.Printf( PRINT_ALL, "...loading %s: ", name );
+  ri.Printf( PRINT_ALL, "...loading %s:\n", name );
 
   // disable the 3Dfx splash screen and set gamma
   // we do this all the time, but it shouldn't hurt anything

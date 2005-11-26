@@ -1265,7 +1265,9 @@ static void GLW_InitExtensions( void )
 
       if ( qglActiveTextureARB )
       {
-        qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glConfig.maxActiveTextures );
+        GLint glint = 0;
+        qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glint );
+        glConfig.maxActiveTextures = (int) glint;
 
         if ( glConfig.maxActiveTextures > 1 )
         {

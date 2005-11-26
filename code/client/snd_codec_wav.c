@@ -42,7 +42,7 @@ static int FGetLittleLong( fileHandle_t f ) {
 FGetLittleShort
 =================
 */
-static int FGetLittleShort( fileHandle_t f ) {
+static short FGetLittleShort( fileHandle_t f ) {
 	short	v;
 
 	FS_Read( &v, sizeof(v), f );

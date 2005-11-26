@@ -51,6 +51,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define idppc_altivec 0
 #endif
 
+#if (MACOS_X)  // Apple's GCC does this differently than the FSF.
+  #define VECCONST_UINT8(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) (vector unsigned char) (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
+#else
+  #define VECCONST_UINT8(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) (vector unsigned char) {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p}
+#endif
+
 #endif
 
 #ifndef __ASM_I386__ // don't include the C bits if included from qasm.h

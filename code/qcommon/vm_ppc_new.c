@@ -1820,7 +1820,7 @@ asm (
 
 #if defined(MACOS_X) && defined(__OPTIMIZE__)
     // On Mac OS X, gcc doesn't push a frame when we are optimized, so trying to tear it down results in grave disorder.
-#warning Mac OS X optimization on, not popping GCC AsmCall frame
+//#warning Mac OS X optimization on, not popping GCC AsmCall frame
 #else
     // Mac OS X Server and unoptimized compiles include a GCC AsmCall frame
     asm (

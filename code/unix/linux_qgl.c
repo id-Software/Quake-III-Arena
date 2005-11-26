@@ -45,8 +45,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#endif
 //#include <GL/glx.h> // bk010216 - FIXME: all of the above redundant? renderer/qgl.h
 
+#if defined(USE_SDL_VIDEO)
+#include "SDL.h"
+#include "SDL_loadso.h"
+#else
 #include <dlfcn.h>
-
+#endif
 
 // bk001129 - from cvs1.17 (mkv)
 #if defined(__FX__)
@@ -60,12 +64,14 @@ void (*qfxMesaSwapBuffers)(void);
 #endif
 
 //GLX Functions
+#if !defined(USE_SDL_VIDEO)
 XVisualInfo * (*qglXChooseVisual)( Display *dpy, int screen, int *attribList );
 GLXContext (*qglXCreateContext)( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct );
 void (*qglXDestroyContext)( Display *dpy, GLXContext ctx );
 Bool (*qglXMakeCurrent)( Display *dpy, GLXDrawable drawable, GLXContext ctx);
 void (*qglXCopyContext)( Display *dpy, GLXContext src, GLXContext dst, GLuint mask );
 void (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
+#endif
 
 void ( APIENTRY * qglAccum )(GLenum op, GLfloat value);
 void ( APIENTRY * qglAlphaFunc )(GLenum func, GLclampf ref);
@@ -408,7 +414,7 @@ void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t 
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
 
-void ( APIENTRY * qglLockArraysEXT)( int, int);
+void ( APIENTRY * qglLockArraysEXT)( GLint, GLint);
 void ( APIENTRY * qglUnlockArraysEXT) ( void );
 
 void ( APIENTRY * qglPointParameterfEXT)( GLenum param, GLfloat value );
@@ -763,7 +769,7 @@ static void APIENTRY logAccum(GLenum op, GLfloat value)
 
 static void APIENTRY logAlphaFunc(GLenum func, GLclampf ref)
 {
-	fprintf( glw_state.log_fp, "glAlphaFunc( 0x%x, %f )\n", func, ref );
+	fprintf( glw_state.log_fp, "glAlphaFunc( 0x%x, %f )\n", (unsigned int) func, ref );
 	dllAlphaFunc( func, ref );
 }
 
@@ -781,13 +787,13 @@ static void APIENTRY logArrayElement(GLint i)
 
 static void APIENTRY logBegin(GLenum mode)
 {
-	fprintf( glw_state.log_fp, "glBegin( 0x%x )\n", mode );
+	fprintf( glw_state.log_fp, "glBegin( 0x%x )\n", (unsigned int) mode );
 	dllBegin( mode );
 }
 
 static void APIENTRY logBindTexture(GLenum target, GLuint texture)
 {
-	fprintf( glw_state.log_fp, "glBindTexture( 0x%x, %u )\n", target, texture );
+	fprintf( glw_state.log_fp, "glBindTexture( 0x%x, %u )\n", (unsigned int) target, (unsigned int) texture );
 	dllBindTexture( target, texture );
 }
 
@@ -799,13 +805,13 @@ static void APIENTRY logBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLf
 
 static void APIENTRY logBlendFunc(GLenum sfactor, GLenum dfactor)
 {
-	fprintf( glw_state.log_fp, "glBlendFunc( 0x%x, 0x%x )\n", sfactor, dfactor );
+	fprintf( glw_state.log_fp, "glBlendFunc( 0x%x, 0x%x )\n", (unsigned int) sfactor, (unsigned int) dfactor );
 	dllBlendFunc( sfactor, dfactor );
 }
 
 static void APIENTRY logCallList(GLuint list)
 {
-	fprintf( glw_state.log_fp, "glCallList( %u )\n", list );
+	fprintf( glw_state.log_fp, "glCallList( %u )\n", (unsigned int) list );
 	dllCallList( list );
 }
 
@@ -1122,7 +1128,7 @@ static void APIENTRY logDepthRange(GLclampd zNear, GLclampd zFar)
 
 static void APIENTRY logDisable(GLenum cap)
 {
-	fprintf( glw_state.log_fp, "glDisable( 0x%x )\n", cap );
+	fprintf( glw_state.log_fp, "glDisable( 0x%x )\n", (unsigned int) cap );
 	dllDisable( cap );
 }
 
@@ -1176,7 +1182,7 @@ static void APIENTRY logEdgeFlagv(const GLboolean *flag)
 
 static void APIENTRY logEnable(GLenum cap)
 {
-	fprintf( glw_state.log_fp, "glEnable( 0x%x )\n", cap );
+	fprintf( glw_state.log_fp, "glEnable( 0x%x )\n", (unsigned int) cap );
 	dllEnable( cap );
 }
 
@@ -1504,7 +1510,7 @@ static void APIENTRY logGetTexParameteriv(GLenum target, GLenum pname, GLint *pa
 
 static void APIENTRY logHint(GLenum target, GLenum mode)
 {
-	fprintf( glw_state.log_fp, "glHint( 0x%x, 0x%x )\n", target, mode );
+	fprintf( glw_state.log_fp, "glHint( 0x%x, 0x%x )\n", (unsigned int) target, (unsigned int) mode );
 	dllHint( target, mode );
 }
 
@@ -1923,7 +1929,7 @@ static void APIENTRY logPointSize(GLfloat size)
 
 static void APIENTRY logPolygonMode(GLenum face, GLenum mode)
 {
-	fprintf( glw_state.log_fp, "glPolygonMode( 0x%x, 0x%x )\n", face, mode );
+	fprintf( glw_state.log_fp, "glPolygonMode( 0x%x, 0x%x )\n", (unsigned int) face, (unsigned int) mode );
 	dllPolygonMode( face, mode );
 }
 
@@ -2403,7 +2409,7 @@ static void APIENTRY logTexCoordPointer(GLint size, GLenum type, GLsizei stride,
 
 static void APIENTRY logTexEnvf(GLenum target, GLenum pname, GLfloat param)
 {
-	fprintf( glw_state.log_fp, "glTexEnvf( 0x%x, 0x%x, %f )\n", target, pname, param );
+	fprintf( glw_state.log_fp, "glTexEnvf( 0x%x, 0x%x, %f )\n", (unsigned int) target, (unsigned int) pname, param );
 	dllTexEnvf( target, pname, param );
 }
 
@@ -2415,7 +2421,7 @@ static void APIENTRY logTexEnvfv(GLenum target, GLenum pname, const GLfloat *par
 
 static void APIENTRY logTexEnvi(GLenum target, GLenum pname, GLint param)
 {
-	fprintf( glw_state.log_fp, "glTexEnvi( 0x%x, 0x%x, 0x%x )\n", target, pname, param );
+	fprintf( glw_state.log_fp, "glTexEnvi( 0x%x, 0x%x, 0x%x )\n", (unsigned int) target, (unsigned int) pname, (unsigned int) param );
 	dllTexEnvi( target, pname, param );
 }
 static void APIENTRY logTexEnviv(GLenum target, GLenum pname, const GLint *params)
@@ -2469,7 +2475,7 @@ static void APIENTRY logTexImage2D(GLenum target, GLint level, GLint internalfor
 
 static void APIENTRY logTexParameterf(GLenum target, GLenum pname, GLfloat param)
 {
-	fprintf( glw_state.log_fp, "glTexParameterf( 0x%x, 0x%x, %f )\n", target, pname, param );
+	fprintf( glw_state.log_fp, "glTexParameterf( 0x%x, 0x%x, %f )\n", (unsigned int) target, (unsigned int) pname, param );
 	dllTexParameterf( target, pname, param );
 }
 
@@ -2480,7 +2486,7 @@ static void APIENTRY logTexParameterfv(GLenum target, GLenum pname, const GLfloa
 }
 static void APIENTRY logTexParameteri(GLenum target, GLenum pname, GLint param)
 {
-	fprintf( glw_state.log_fp, "glTexParameteri( 0x%x, 0x%x, 0x%x )\n", target, pname, param );
+	fprintf( glw_state.log_fp, "glTexParameteri( 0x%x, 0x%x, 0x%x )\n", (unsigned int) target, (unsigned int) pname, (unsigned int) param );
 	dllTexParameteri( target, pname, param );
 }
 static void APIENTRY logTexParameteriv(GLenum target, GLenum pname, const GLint *params)
@@ -2669,11 +2675,13 @@ void QGL_Shutdown( void )
 		if( r_GLlibCoolDownMsec->integer )
 			usleep( r_GLlibCoolDownMsec->integer * 1000 );
 
+		#if USE_SDL_VIDEO
+		SDL_QuitSubSystem(SDL_INIT_VIDEO);
+		#else
 		dlclose ( glw_state.OpenGLLib );
+		#endif
 		glw_state.OpenGLLib = NULL;
 	}
-
-	glw_state.OpenGLLib = NULL;
 
 	qglAccum                     = NULL;
 	qglAlphaFunc                 = NULL;
@@ -3022,15 +3030,22 @@ void QGL_Shutdown( void )
 	qfxMesaSwapBuffers           = NULL;
 #endif
 
+#if !defined(USE_SDL_VIDEO)
 	qglXChooseVisual             = NULL;
 	qglXCreateContext            = NULL;
 	qglXDestroyContext           = NULL;
 	qglXMakeCurrent              = NULL;
 	qglXCopyContext              = NULL;
 	qglXSwapBuffers              = NULL;
+#endif
 }
 
+#if USE_SDL_VIDEO
+#define GPA( a ) SDL_GL_GetProcAddress( a )
+qboolean GLimp_sdl_init_video(void);
+#else
 #define GPA( a ) dlsym( glw_state.OpenGLLib, a )
+#endif
 
 void *qwglGetProcAddress(char *symbol)
 {
@@ -3038,6 +3053,8 @@ void *qwglGetProcAddress(char *symbol)
 		return GPA ( symbol );
 	return NULL;
 }
+
+char *do_dlerror(void);
 
 /*
 ** QGL_Init
@@ -3052,23 +3069,39 @@ void *qwglGetProcAddress(char *symbol)
 
 qboolean QGL_Init( const char *dllname )
 {
-	if ( ( glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY|RTLD_GLOBAL ) ) == 0 )
+	if (glw_state.OpenGLLib == 0)
+	{
+		#if USE_SDL_VIDEO
+		if (GLimp_sdl_init_video() == qfalse)
+			return qfalse;
+		glw_state.OpenGLLib = (void*) ((SDL_GL_LoadLibrary(dllname) == -1) ? 0 : 1);
+		#else
+		glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY|RTLD_GLOBAL );
+		#endif
+	}
+
+	if (glw_state.OpenGLLib == 0)
 	{
 		char	fn[1024];
 		// FILE *fp; // bk001204 - unused
 
 		// if we are not setuid, try current directory
-		if (1) {
+		if (dllname != NULL) {
 			getcwd(fn, sizeof(fn));
 			Q_strcat(fn, sizeof(fn), "/");
 			Q_strcat(fn, sizeof(fn), dllname);
 
-			if ( ( glw_state.OpenGLLib = dlopen( fn, RTLD_LAZY ) ) == 0 ) {
-				ri.Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf or current dir: %s\n", dllname, dlerror());
+			#if USE_SDL_VIDEO
+			glw_state.OpenGLLib = (void*) ((SDL_GL_LoadLibrary(fn) == -1) ? 0 : 1);
+			#else
+			glw_state.OpenGLLib = dlopen( fn, RTLD_LAZY );
+			#endif
+			if ( glw_state.OpenGLLib == 0 ) {
+				ri.Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf or current dir: %s\n", dllname, do_dlerror());
 				return qfalse;
 			}
 		} else {
-			ri.Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf: %s\n", dllname, dlerror());
+			ri.Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf: %s\n", dllname, do_dlerror());
 			return qfalse;
 		}
 	}
@@ -3418,12 +3451,14 @@ qboolean QGL_Init( const char *dllname )
 	qfxMesaSwapBuffers           =  GPA("fxMesaSwapBuffers");
 #endif
 
+#if !defined(USE_SDL_VIDEO)
 	qglXChooseVisual             =  GPA("glXChooseVisual");
 	qglXCreateContext            =  GPA("glXCreateContext");
 	qglXDestroyContext           =  GPA("glXDestroyContext");
 	qglXMakeCurrent              =  GPA("glXMakeCurrent");
 	qglXCopyContext              =  GPA("glXCopyContext");
 	qglXSwapBuffers              =  GPA("glXSwapBuffers");
+#endif
 
 	qglLockArraysEXT = NULL;
 	qglUnlockArraysEXT = NULL;

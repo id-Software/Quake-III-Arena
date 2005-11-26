@@ -81,6 +81,10 @@ https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371
 <TTimo> and use my own copy instead of the glibc crap
 ===============
 */
+
+#ifdef Snd_Memset
+#undef Snd_Memset
+#endif
 void Snd_Memset (void* dest, const int val, const size_t count)
 {
 	int *pDest;

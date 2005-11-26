@@ -66,6 +66,7 @@ cvar_t	*com_fixedtime;
 cvar_t	*com_dropsim;		// 0.0 to 1.0, simulated packet drops
 cvar_t	*com_journal;
 cvar_t	*com_maxfps;
+cvar_t	*com_altivec;
 cvar_t	*com_timedemo;
 cvar_t	*com_sv_running;
 cvar_t	*com_cl_running;
@@ -2425,6 +2426,7 @@ void Com_Init( char *commandLine ) {
 	//
 	// init commands and vars
 	//
+	com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
 	com_maxfps = Cvar_Get ("com_maxfps", "85", CVAR_ARCHIVE);
 	com_blood = Cvar_Get ("com_blood", "1", CVAR_ARCHIVE);
 
@@ -2507,7 +2509,12 @@ void Com_Init( char *commandLine ) {
 	Cvar_Set("ui_singlePlayerActive", "0");
 
 	com_fullyInitialized = qtrue;
-	Com_Printf ("--- Common Initialization Complete ---\n");	
+
+    #if idppc_altivec
+	Com_Printf ("Altivec support is %s\n", com_altivec->integer ? "enabled" : "disabled");
+    #endif
+
+	Com_Printf ("--- Common Initialization Complete ---\n");
 }
 
 //==================================================================

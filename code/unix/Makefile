@@ -13,7 +13,17 @@
 
 PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 PLATFORM_RELEASE=$(shell uname -r)
-ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
+
+# Apple does some things a little differently...
+ifeq ($(PLATFORM),darwin)
+  ARCH:= $(shell uname -p | sed -e s/i.86/i386/)
+else
+  ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
+endif
+
+ifeq ($(ARCH),powerpc)
+  ARCH:=ppc
+endif
 
 #############################################################################
 #
@@ -42,6 +52,11 @@ endif
 ifndef DXSDK_DIR
 DXSDK_DIR=C:/DXSDK
 endif
+
+ifndef USE_CCACHE
+USE_CCACHE=1
+endif
+export USE_CCACHE
 
 ifndef USE_SDL
 USE_SDL=1
@@ -121,7 +136,10 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -pipe
+
+  # Always include debug symbols...you can strip the binary later...
+  BASE_CFLAGS += -gfull
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
@@ -153,6 +171,7 @@ ifeq ($(PLATFORM),linux)
     HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),ppc)
+    BASE_CFLAGS += -maltivec
     ifneq ($(VM_PPC),)
       HAVE_VM_COMPILED=true
     endif
@@ -181,8 +200,10 @@ ifeq ($(PLATFORM),linux)
     CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
   endif
 
-  ifneq ($(USE_OPENAL_DLOPEN),1)
-    CLIENT_LDFLAGS += -lopenal
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LDFLAGS += -lopenal
+    endif
   endif
 
   ifeq ($(ARCH),i386)
@@ -215,6 +236,106 @@ ifeq ($(PLATFORM),linux)
   endif
 
 else # ifeq Linux
+
+#############################################################################
+# SETUP AND BUILD -- MAC OS X
+#############################################################################
+
+ifeq ($(PLATFORM),darwin)
+  GLIBC=
+  CC=gcc
+  CXX=g++
+
+  VM_PPC=vm_ppc_new
+
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS += -DMACOS_X=1 -fno-common -pipe
+
+  # Always include debug symbols...you can strip the binary later...
+  BASE_CFLAGS += -gfull
+
+  ifeq ($(USE_OPENAL),1)
+    BASE_CFLAGS += -DUSE_OPENAL=1
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+    endif
+  endif
+
+  ifeq ($(USE_SDL),1)
+    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 -I../SDL12/include
+    GL_CFLAGS =
+  endif
+
+  OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -falign-loops=16
+
+  ifeq ($(ARCH),ppc)
+	BASE_CFLAGS += -faltivec
+    ifneq ($(VM_PPC),)
+      HAVE_VM_COMPILED=true
+    endif
+  endif
+
+  ifeq ($(ARCH),i386)
+    # !!! FIXME: x86-specific flags here...
+  endif
+
+  ifneq ($(HAVE_VM_COMPILED),true)
+    BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
+
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
+
+  SHLIBEXT=dylib
+  SHLIBCFLAGS=-fPIC -fno-common
+  SHLIBLDFLAGS=-dynamiclib $(LDFLAGS)
+
+  NOTSHLIBCFLAGS=-mdynamic-no-pic
+
+  #THREAD_LDFLAGS=-lpthread
+  #LDFLAGS=-ldl -lm
+  LDFLAGS += -framework Carbon
+
+  ifeq ($(USE_SDL),1)
+    # We copy sdlmain before ranlib'ing it so that subversion doesn't think
+    #  the file has been modified by each build.
+	LIBSDLMAIN=$(B)/libSDLmain.a
+    LIBSDLMAINSRC=../libs/macosx/libSDLmain.a
+    CLIENT_LDFLAGS=-framework Cocoa -framework OpenGL ../libs/macosx/libSDL-1.2.0.dylib
+  else
+    # !!! FIXME: frameworks: OpenGL, Carbon, etc...
+    #CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
+  endif
+
+  # -framework OpenAL requires 10.4 or later...for builds shipping to the
+  #  public, you'll want to use USE_OPENAL_DLOPEN and ship your own OpenAL
+  #  library (http://openal.org/ or http://icculus.org/al_osx/)
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LDFLAGS += -framework OpenAL
+    endif
+  endif
+
+  TARGETS=\
+      $(B)/$(PLATFORM)quake3 \
+      $(B)/$(PLATFORM)q3ded \
+      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
+#      $(B)/$(PLATFORM)quake3-smp \
+
+else # ifeq darwin
+
 
 #############################################################################
 # SETUP AND BUILD -- MINGW32
@@ -494,7 +615,6 @@ else # ifeq SunOS
 #############################################################################
 # SETUP AND BUILD -- GENERIC
 #############################################################################
-
   CC=cc
   BASE_CFLAGS=-DNO_VM_COMPILED
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
@@ -508,10 +628,16 @@ else # ifeq SunOS
     $(B)/$(PLATFORM)q3ded
 
 endif #Linux
+endif #darwin
 endif #mingw32
 endif #FreeBSD
 endif #IRIX
 endif #SunOS
+
+ifeq ($(USE_CCACHE),1)
+  CC := ccache $(CC)
+  CXX := ccache $(CXX)
+endif
 
 ifneq ($(BUILD_SERVER),1)
   TARGETS := $(subst $(B)/$(PLATFORM)q3ded,,$(TARGETS))
@@ -541,15 +667,15 @@ ifeq ($(GENERATE_DEPENDENCIES),1)
   endif
 endif
 
-DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
-DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<
-DO_SMP_CC=$(CC) $(CFLAGS) -DSMP -o $@ -c $<
-DO_BOT_CC=$(CC) $(CFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
-DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
+DO_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
+DO_CXX=$(CXX) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
+DO_SMP_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
+DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
+DO_DEBUG_CC=$(CC) $(NOTSHLIBCFLAGS) $(DEBUG_CFLAGS) -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
-DO_DED_CC=$(CC) -DDEDICATED $(CFLAGS) -o $@ -c $<
+DO_DED_CC=$(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
 DO_WINDRES=$(WINDRES) -i $< -o $@
 
 #############################################################################
@@ -864,6 +990,33 @@ else
     Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
   endif
 endif #Linux-axp
+
+else
+ifeq ($(PLATFORM),darwin)
+  Q3POBJ=\
+    $(B)/client/unix_main.o \
+    $(B)/client/unix_net.o \
+    $(B)/client/unix_shared.o \
+    $(B)/client/linux_signals.o \
+    $(B)/client/linux_common.o \
+    $(B)/client/linux_qgl.o \
+    $(B)/client/linux_glimp.o \
+    $(B)/client/sdl_glimp.o \
+    $(B)/client/linux_joystick.o \
+    $(B)/client/linux_snd.o \
+    $(B)/client/sdl_snd.o \
+
+  ifeq ($(ARCH),i386)
+	I386OBJS := \
+		$(B)/client/ftola.o \
+		$(B)/client/snapvectora.o \
+		$(B)/client/snd_mixa.o \
+        $(B)/client/matha.o \
+
+    Q3POBJ += $(I386OBJS)
+    Q3POBJ_SMP += $(I386OBJS)
+  endif
+
 else
 ifeq ($(PLATFORM),SunOS)
   Q3POBJ=\
@@ -895,16 +1048,25 @@ ifeq ($(PLATFORM),SunOS)
 
 endif #SunOS
 endif #Linux
+endif #darwin
 endif #mingw32
 endif #IRIX
 endif #FreeBSD
 
-$(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ)
-	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) $(LDFLAGS)
+$(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
+	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
 
-$(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP)
+$(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
-		$(THREAD_LDFLAGS) $(LDFLAGS)
+		$(THREAD_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
+
+ifneq ($(strip $(LIBSDLMAIN)),)
+ifneq ($(strip $(LIBSDLMAINSRC)),)
+$(LIBSDLMAIN) : $(LIBSDLMAINSRC)
+	cp $< $@
+	ranlib $@
+endif
+endif
 
 $(B)/client/cl_cgame.o : $(CDIR)/cl_cgame.c; $(DO_CC)
 $(B)/client/cl_cin.o : $(CDIR)/cl_cin.c; $(DO_CC)

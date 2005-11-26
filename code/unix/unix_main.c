@@ -41,7 +41,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef __linux__ // rb010123
   #include <mntent.h>
 #endif
+
+#if (defined(DEDICATED) && defined(USE_SDL_VIDEO))
+#undef USE_SDL_VIDEO
+#endif
+
+#if USE_SDL_VIDEO
+#include "SDL.h"
+#include "SDL_loadso.h"
+#else
 #include <dlfcn.h>
+#endif
 
 #ifdef __linux__
   #include <fpu_control.h> // bk001213 - force dumps on divide by zero
@@ -60,8 +70,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "linux_local.h" // bk001204
 
-// Structure containing functions exported from refresh DLL
-refexport_t re;
+#if idppc_altivec
+  #ifdef MACOS_X
+    #include <Carbon/Carbon.h>
+  #endif
+#endif
 
 unsigned  sys_frame_time;
 
@@ -349,8 +362,33 @@ void Sys_Quit (void) {
   Sys_Exit(0);
 }
 
+static void Sys_DetectAltivec(void)
+{
+  extern cvar_t	*com_altivec;
+
+  // Only detect if user hasn't forcibly disabled it.
+  if (com_altivec->integer) {
+    #if idppc_altivec
+      #if MACOS_X
+      {
+        long feat = 0;
+        OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
+        if ((err==noErr) && ((1 << gestaltPowerPCHasVectorInstructions) & feat))
+          com_altivec->integer = 1;
+      }
+      #else // !!! FIXME: PowerPC Linux, etc: how to detect?
+        com_altivec->integer = 1;
+      #endif
+    #else
+      com_altivec->integer = 0;  // not an Altivec system, so never use it.
+    #endif
+  }
+}
+
 void Sys_Init(void)
 {
+  Sys_DetectAltivec();
+
   Cmd_AddCommand ("in_restart", Sys_In_Restart_f);
 
   Cvar_Set( "arch", OS_STRING " " ARCH_STRING );
@@ -643,6 +681,16 @@ char *Sys_ConsoleInput(void)
 
 /*****************************************************************************/
 
+char *do_dlerror(void)
+{
+#if USE_SDL_VIDEO
+    return SDL_GetError();
+#else
+    return dlerror();
+#endif
+}
+
+
 /*
 =================
 Sys_UnloadDll
@@ -651,16 +699,23 @@ Sys_UnloadDll
 */
 void Sys_UnloadDll( void *dllHandle ) {
   // bk001206 - verbose error reporting
-  const char* err; // rb010123 - now const
   if ( !dllHandle )
   {
     Com_Printf("Sys_UnloadDll(NULL)\n");
     return;
   }
+
+  #if USE_SDL_VIDEO
+  SDL_UnloadObject(dllHandle);
+  #else
   dlclose( dllHandle );
-  err = dlerror();
-  if ( err != NULL )
-    Com_Printf ( "Sys_UnloadGame failed on dlclose: \"%s\"!\n", err );
+  {
+    const char* err; // rb010123 - now const
+    err = dlerror();
+    if ( err != NULL )
+      Com_Printf ( "Sys_UnloadGame failed on dlclose: \"%s\"!\n", err );
+  }
+  #endif
 }
 
 
@@ -689,10 +744,15 @@ static void* try_dlopen(const char* base, const char* gamedir, const char* fname
 
   fn = FS_BuildOSPath( base, gamedir, fname );
   Com_Printf( "Sys_LoadDll(%s)... \n", fn );
+
+  #if USE_SDL_VIDEO
+  libHandle = SDL_LoadObject(fn);
+  #else
   libHandle = dlopen( fn, Q_RTLD );
+  #endif
 
   if(!libHandle) {
-    Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, dlerror() );
+    Com_Printf( "Sys_LoadDll(%s) failed:\n\"%s\"\n", fn, do_dlerror() );
     return NULL;
   }
 
@@ -751,20 +811,31 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
     return NULL;
   }
 
-  dllEntry = dlsym( libHandle, "dllEntry" ); 
+#if USE_SDL_VIDEO
+  dllEntry = SDL_LoadFunction( libHandle, "dllEntry" );
+  *entryPoint = SDL_LoadFunction( libHandle, "vmMain" );
+#else
+  dllEntry = dlsym( libHandle, "dllEntry" );
   *entryPoint = dlsym( libHandle, "vmMain" );
+#endif
+
   if ( !*entryPoint || !dllEntry )
   {
-    err = dlerror();
+    err = do_dlerror();
 #ifndef NDEBUG // bk001206 - in debug abort on failure
     Com_Error ( ERR_FATAL, "Sys_LoadDll(%s) failed dlsym(vmMain):\n\"%s\" !\n", name, err );
 #else
     Com_Printf ( "Sys_LoadDll(%s) failed dlsym(vmMain):\n\"%s\" !\n", name, err );
 #endif
+    #if USE_SDL_VIDEO
+    SDL_UnloadObject(libHandle);
+    #else
     dlclose( libHandle );
-    err = dlerror();
+    err = do_dlerror();
     if ( err != NULL )
       Com_Printf ( "Sys_LoadDll(%s) failed dlcose:\n\"%s\"\n", name, err );
+    #endif
+
     return NULL;
   }
   Com_Printf ( "Sys_LoadDll(%s) found **vmMain** at  %p  \n", name, *entryPoint ); // bk001212
@@ -1322,4 +1393,7 @@ int main ( int argc, char* argv[] )
 #endif
     Com_Frame ();
   }
+
+  return 0;
 }
+

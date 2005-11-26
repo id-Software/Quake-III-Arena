@@ -32,8 +32,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define AL_NO_PROTOTYPES
 #define ALC_NO_PROTOTYPES
 #endif
-#include <AL/al.h>
-#include <AL/alc.h>
+#include "../AL/al.h"
+#include "../AL/alc.h"
 
 #if USE_OPENAL_DLOPEN
 extern LPALENABLE qalEnable;
