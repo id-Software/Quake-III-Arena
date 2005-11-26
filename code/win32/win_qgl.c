@@ -405,6 +405,12 @@ void ( APIENTRY * qglVertex4sv )(const GLshort *v);
 void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
+void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
+void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
+void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+
+void ( APIENTRY * qglLockArraysEXT)( GLint, GLint);
+void ( APIENTRY * qglUnlockArraysEXT) ( void );
 
 
 static void ( APIENTRY * dllAccum )(GLenum op, GLfloat value);
