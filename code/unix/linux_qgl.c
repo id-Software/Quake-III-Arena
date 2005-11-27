@@ -3074,7 +3074,7 @@ qboolean QGL_Init( const char *dllname )
 		#if USE_SDL_VIDEO
 		if (GLimp_sdl_init_video() == qfalse)
 			return qfalse;
-		glw_state.OpenGLLib = (void*) ((SDL_GL_LoadLibrary(dllname) == -1) ? 0 : 1);
+		glw_state.OpenGLLib = (void*)(long)((SDL_GL_LoadLibrary(dllname) == -1) ? 0 : 1);
 		#else
 		glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY|RTLD_GLOBAL );
 		#endif
@@ -3092,7 +3092,7 @@ qboolean QGL_Init( const char *dllname )
 			Q_strcat(fn, sizeof(fn), dllname);
 
 			#if USE_SDL_VIDEO
-			glw_state.OpenGLLib = (void*) ((SDL_GL_LoadLibrary(fn) == -1) ? 0 : 1);
+			glw_state.OpenGLLib = (void*)(long)((SDL_GL_LoadLibrary(fn) == -1) ? 0 : 1);
 			#else
 			glw_state.OpenGLLib = dlopen( fn, RTLD_LAZY );
 			#endif
