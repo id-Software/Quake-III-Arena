@@ -1,4 +1,5 @@
-* IPV6 support?
+* IPv6 support
+* merge unix_net.c and win_net.c
 * Clean platform specific stuff from lcc
 * Merge exotic ports from various kind contributors
 * Try and find a way to remove DirectX for windows, and put in SDL.
