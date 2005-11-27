@@ -25,11 +25,9 @@ Refer to the web-site for updated status, enjoy!
 
 Compiling (Under Windows)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run Space Visual Dot Net 2040 Extra Entropy Edition under your BeOS emulator.
-Open the quake3.vcproj file in the win32 directory.
-Build.
-Copy the resultant Quake3.exe to your quake 3 directory, make a backup if you want to keep
-your original.
+Run Visual Studio, open the quake3.vcproj file in the win32
+directory. Build. Copy the resultant Quake3.exe to your quake 3
+directory, make a backup if you want to keep your original.
 
 Copy the resultant dlls to your baseq3 directory, backup etc.
 
@@ -41,7 +39,7 @@ Compiling (Under Linux)
 1. If not already there, change to the directory containing this readme
 2. Run 'make'
 
-For distrib maintainers, you can set some make variables:
+For distribution maintainers, you can set some make variables:
  OPTIMIZE        - use this for custom CFLAGS
  DEFAULT_BASEDIR - extra path to search for baseq3 and such
  BUILD_SERVER    - build the 'q3ded' server binary (1 = build it, default = 1)
@@ -51,7 +49,7 @@ Installing under Linux
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Set the COPYDIR variable in the shell to be where you installed
 Quake 3 to. By default it will be /usr/local/games/quake3 if you
-haven't set it.
+haven't set it. Which is where the id patch installs by default.
 
 Then run "make copyfiles", beware that this will overwrite any binaries
 installed previously, even official id ones.
