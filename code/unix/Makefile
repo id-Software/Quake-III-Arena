@@ -1762,6 +1762,7 @@ copyfiles: build_release
 					$(COPYDIR)/missionpack/.
 
 clean:clean-debug clean-release
+	$(MAKE) -C setup clean
 
 clean2:
 	if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
@@ -1779,6 +1780,9 @@ clean-release:
 distclean: clean
 	$(MAKE) -C ../tools/asm clean uninstall
 	$(MAKE) -C ../tools/lcc clean uninstall
+
+installer: build_release
+	$(MAKE) VERSION=$(VERSION) -C setup
 
 #############################################################################
 # DEPENDENCIES

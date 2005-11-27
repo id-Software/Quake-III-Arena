@@ -1,6 +1,6 @@
 VERSION=1.33_SVN$(shell LANG=C svnversion .)
 
-release debug clean distclean copyfiles:
+release debug clean distclean copyfiles installer:
 	$(MAKE) -C code/unix $@
 
 dist:
@@ -10,4 +10,4 @@ dist:
 	tar --force-local -cjf quake3-$(VERSION).tar.bz2 quake3-$(VERSION)
 	rm -rf quake3-$(VERSION)
 
-.PHONY: release debug clean distclean
+.PHONY: release debug clean distclean copyfiles installer

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+: ${MAKESELF:=/usr/share/loki-setup/makeself}
+: ${SETUPIMAGE:=/usr/share/loki-setup/image}
+
+: ${VERSION:=0.0_`date +%Y%m%d%H%M`}
+: ${RELEASE:=0}
+
+set -e
+set -x
+
+arch=`uname -m`
+case "$arch" in
+	i?86) arch=i386 ;;
+esac
+
+rm -rf image
+mkdir image
+
+### loki-setup files
+cp -a $SETUPIMAGE/{setup.data,setup.sh} image/
+
+### splash
+convert ../../../web/images/quake3.jpg image/setup.data/splash.xpm
+
+### binaries
+mkdir image/tmp
+pushd image/tmp
+mkdir baseq3 demoq3 missionpack
+src="../../../release$arch-glibc/"
+install -m 755 $src/linuxquake3 ioquake3.$arch
+install -m 755 $src/linuxq3ded ioq3ded.$arch
+install -m 644 $src/baseq3/*.so baseq3
+install -m 644 $src/missionpack/*.so missionpack
+pushd demoq3
+ln -s ../baseq3/*.so .
+popd
+popd
+
+tar --owner=root --group=root -C image/tmp -cf image/ioquake3.tar .
+rm -rf image/tmp
+
+### setup.xml
+sed 's/@VERSION@/'$VERSION'/g' < setup.xml > image/setup.data/setup.xml
+
+### start script
+mkdir -p image/bin/Linux/$arch
+ln -s x86_64 image/bin/Linux/amd64 # $§&%!!
+install -m 755 ioquake3.sh image/bin/Linux/$arch/ioquake3
+install -m 755 ioq3demo.sh image/bin/Linux/$arch/ioq3demo
+
+### README and COPYING
+install -m 644 ../../../README image/README
+install -m 644 ../../../COPYING.txt image/COPYING
+
+### makeself installer
+$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.$arch.run "icculus.org/quake3 $VERSION" ./setup.sh

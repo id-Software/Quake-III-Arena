@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes"?>
+<install product="ioquake3"
+	desc="icculus.org/quake3"
+	version="@VERSION@"
+	promptbinaries="yes">
+  <readme>
+    README
+  </readme>
+  <eula>
+   COPYING
+  </eula>
+  <component name="Default" version="@VERSION@" default="yes">
+   <option install="true" required="true">
+    Quake 3
+
+    <binary arch="any" libc="any" symlink="ioquake3" icon="icon.xpm" play="yes"
+	    name="icculus.org/quake3">
+      ioquake3
+    </binary>
+    <binary arch="any" libc="any" symlink="ioq3demo" icon="icon.xpm" play="no"
+	    name="icculus.org/quake3 (Demo)">
+      ioq3demo
+    </binary>
+    <files>
+      ioquake3.tar
+      icon.xpm
+    </files>
+   </option>
+  </component>
+</install>
