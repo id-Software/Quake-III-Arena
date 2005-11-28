@@ -60,6 +60,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SDL.h"
 
+#ifdef SMP
+#include "SDL_thread.h"
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1024,8 +1028,9 @@ void GLimp_EndFrame (void)
   QGL_EnableLogging( (qboolean)r_logFile->integer ); // bk001205 - was ->value
 }
 
-// Figure out something to do with this...
-#if 0 //def SMP
+
+
+#ifdef SMP
 /*
 ===========================================================
 
@@ -1034,53 +1039,104 @@ SMP acceleration
 ===========================================================
 */
 
-static pthread_mutex_t	smpMutex = PTHREAD_MUTEX_INITIALIZER;
+/*
+ * I have no idea if this will even work...most platforms don't offer
+ *  thread-safe OpenGL libraries, and it looks like the original Linux
+ *  code counted on each thread claiming the GL context with glXMakeCurrent(),
+ *  which you can't currently do in SDL. We'll just have to hope for the best.
+ */
 
-static pthread_cond_t		renderCommandsEvent = PTHREAD_COND_INITIALIZER;
-static pthread_cond_t		renderCompletedEvent = PTHREAD_COND_INITIALIZER;
+static SDL_mutex *smpMutex = NULL;
+static SDL_cond *renderCommandsEvent = NULL;
+static SDL_cond *renderCompletedEvent = NULL;
+static void (*glimpRenderThread)( void ) = NULL;
+static SDL_Thread *renderThread = NULL;
 
-static void (*glimpRenderThread)( void );
+static void GLimp_ShutdownRenderThread(void)
+{
+	if (smpMutex != NULL)
+	{
+		SDL_DestroyMutex(smpMutex);
+		smpMutex = NULL;
+	}
 
-static void *GLimp_RenderThreadWrapper( void *arg )
+	if (renderCommandsEvent != NULL)
+	{
+		SDL_DestroyCond(renderCommandsEvent);
+		renderCommandsEvent = NULL;
+	}
+
+	if (renderCompletedEvent != NULL)
+	{
+		SDL_DestroyCond(renderCompletedEvent);
+		renderCompletedEvent = NULL;
+	}
+
+	glimpRenderThread = NULL;
+}
+
+static int GLimp_RenderThreadWrapper( void *arg )
 {
 	Com_Printf( "Render thread starting\n" );
 
-  glimpRenderThread();
+	glimpRenderThread();
 
-	qglXMakeCurrent( dpy, None, NULL );
+	//qglXMakeCurrent( dpy, None, NULL );
 
 	Com_Printf( "Render thread terminating\n" );
 
-	return arg;
+	return 0;
 }
 
 qboolean GLimp_SpawnRenderThread( void (*function)( void ) )
 {
-	pthread_t renderThread;
-	int ret;
+	if (renderThread != NULL)  /* hopefully just a zombie at this point... */
+	{
+		Com_Printf("Already a render thread? Trying to clean it up...\n");
+		SDL_WaitThread(renderThread, NULL);
+		renderThread = NULL;
+		GLimp_ShutdownRenderThread();
+	}
 
-	pthread_mutex_init( &smpMutex, NULL );
+	smpMutex = SDL_CreateMutex();
+	if (smpMutex == NULL)
+	{
+		Com_Printf( "smpMutex creation failed: %s\n", SDL_GetError() );
+		GLimp_ShutdownRenderThread();
+		return qfalse;
+	}
 
-	pthread_cond_init( &renderCommandsEvent, NULL );
-	pthread_cond_init( &renderCompletedEvent, NULL );
+	renderCommandsEvent = SDL_CreateCond();
+	if (renderCommandsEvent == NULL)
+	{
+		Com_Printf( "renderCommandsEvent creation failed: %s\n", SDL_GetError() );
+		GLimp_ShutdownRenderThread();
+		return qfalse;
+	}
 
-  glimpRenderThread = function;
+	renderCompletedEvent = SDL_CreateCond();
+	if (renderCompletedEvent == NULL)
+	{
+		Com_Printf( "renderCompletedEvent creation failed: %s\n", SDL_GetError() );
+		GLimp_ShutdownRenderThread();
+		return qfalse;
+	}
 
-	ret = pthread_create( &renderThread,
-						  NULL,			// attributes
-						  GLimp_RenderThreadWrapper,
-						  NULL );		// argument
-	if ( ret ) {
-		ri.Printf( PRINT_ALL, "pthread_create returned %d: %s", ret, strerror( ret ) );
-    return qfalse;
+	glimpRenderThread = function;
+	renderThread = SDL_CreateThread(GLimp_RenderThreadWrapper, NULL);
+	if ( renderThread == NULL ) {
+		ri.Printf( PRINT_ALL, "SDL_CreateThread() returned %s", SDL_GetError() );
+		GLimp_ShutdownRenderThread();
+		return qfalse;
 	} else {
-		ret = pthread_detach( renderThread );
-		if ( ret ) {
-			ri.Printf( PRINT_ALL, "pthread_detach returned %d: %s", ret, strerror( ret ) );
-		}
-  }
+		// !!! FIXME: No detach API available in SDL!
+		//ret = pthread_detach( renderThread );
+		//if ( ret ) {
+			//ri.Printf( PRINT_ALL, "pthread_detach returned %d: %s", ret, strerror( ret ) );
+		//}
+	}
 
-  return qtrue;
+	return qtrue;
 }
 
 static volatile void    *smpData = NULL;
@@ -1088,58 +1144,58 @@ static volatile qboolean smpDataReady;
 
 void *GLimp_RendererSleep( void )
 {
-	void  *data;
+	void  *data = NULL;
 
-	qglXMakeCurrent( dpy, None, NULL );
+	//qglXMakeCurrent( dpy, None, NULL );
 
-	pthread_mutex_lock( &smpMutex );
+	SDL_LockMutex(smpMutex);
 	{
 		smpData = NULL;
 		smpDataReady = qfalse;
 
 		// after this, the front end can exit GLimp_FrontEndSleep
-		pthread_cond_signal( &renderCompletedEvent );
+		SDL_CondSignal(renderCompletedEvent);
 
 		while ( !smpDataReady ) {
-			pthread_cond_wait( &renderCommandsEvent, &smpMutex );
+			SDL_CondWait(renderCommandsEvent, smpMutex);
 		}
 
 		data = (void *)smpData;
 	}
-	pthread_mutex_unlock( &smpMutex );
+	SDL_UnlockMutex(smpMutex);
 
-	qglXMakeCurrent( dpy, win, ctx );
+	//qglXMakeCurrent( dpy, win, ctx );
 
-  return data;
+	return data;
 }
 
 void GLimp_FrontEndSleep( void )
 {
-	pthread_mutex_lock( &smpMutex );
+	SDL_LockMutex(smpMutex);
 	{
 		while ( smpData ) {
-			pthread_cond_wait( &renderCompletedEvent, &smpMutex );
+			SDL_CondWait(renderCompletedEvent, smpMutex);
 		}
 	}
-	pthread_mutex_unlock( &smpMutex );
+	SDL_UnlockMutex(smpMutex);
 
-	qglXMakeCurrent( dpy, win, ctx );
+	//qglXMakeCurrent( dpy, win, ctx );
 }
 
 void GLimp_WakeRenderer( void *data )
 {
-	qglXMakeCurrent( dpy, None, NULL );
+	//qglXMakeCurrent( dpy, None, NULL );
 
-	pthread_mutex_lock( &smpMutex );
+	SDL_LockMutex(smpMutex);
 	{
 		assert( smpData == NULL );
 		smpData = data;
 		smpDataReady = qtrue;
 
 		// after this, the renderer can continue through GLimp_RendererSleep
-		pthread_cond_signal( &renderCommandsEvent );
+		SDL_CondSignal(renderCommandsEvent);
 	}
-	pthread_mutex_unlock( &smpMutex );
+	SDL_UnlockMutex(smpMutex);
 }
 
 #else

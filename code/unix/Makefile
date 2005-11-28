@@ -326,8 +326,8 @@ ifeq ($(PLATFORM),darwin)
       $(B)/baseq3/vm/ui.qvm \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
-#      $(B)/$(PLATFORM)quake3-smp \
+      $(B)/missionpack/vm/ui.qvm \
+      $(B)/$(PLATFORM)quake3-smp \
 
 else # ifeq darwin
 
@@ -997,6 +997,18 @@ ifeq ($(PLATFORM),darwin)
     $(B)/client/linux_snd.o \
     $(B)/client/sdl_snd.o \
 
+  Q3POBJ_SMP=\
+    $(B)/client/unix_main.o \
+    $(B)/client/unix_net.o \
+    $(B)/client/unix_shared.o \
+    $(B)/client/linux_signals.o \
+    $(B)/client/linux_common.o \
+    $(B)/client/linux_qgl.o \
+    $(B)/client/sdl_glimp_smp.o \
+    $(B)/client/linux_joystick.o \
+    $(B)/client/linux_snd.o \
+    $(B)/client/sdl_snd.o \
+
   ifeq ($(ARCH),i386)
     I386OBJS := \
       $(B)/client/ftola.o \
@@ -1212,6 +1224,7 @@ $(B)/client/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
 $(B)/client/linux_glimp.o : $(UDIR)/linux_glimp.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/sdl_glimp.o : $(UDIR)/sdl_glimp.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/linux_glimp_smp.o : $(UDIR)/linux_glimp.c; $(DO_SMP_CC)  $(GL_CFLAGS)
+$(B)/client/sdl_glimp_smp.o : $(UDIR)/sdl_glimp.c; $(DO_SMP_CC)  $(GL_CFLAGS)
 $(B)/client/linux_joystick.o : $(UDIR)/linux_joystick.c; $(DO_CC)
 $(B)/client/linux_qgl.o : $(UDIR)/linux_qgl.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/linux_input.o : $(UDIR)/linux_input.c; $(DO_CC)
