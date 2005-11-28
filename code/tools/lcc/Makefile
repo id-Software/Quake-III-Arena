@@ -26,6 +26,11 @@ ifeq ($(USE_CCACHE),1)
   CC := ccache $(CC)
 endif
 
+# Need MACOS_X defined or this won't build.
+ifeq ($(PLATFORM),darwin)
+  LCC_CFLAGS += -DMACOS_X
+endif
+
 ifeq ($(PLATFORM),SunOS)
   INSTALL=ginstall
 else
