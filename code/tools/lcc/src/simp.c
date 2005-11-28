@@ -246,15 +246,15 @@ Tree simplify(int op, Type ty, Tree l, Tree r) {
 			break;
 
 		case CVI+F:
-			xcvtcnst(I,l->u.v.i,ty,d,(long double)l->u.v.i);
+			xcvtcnst(I,l->u.v.i,ty,d,(double)l->u.v.i);
 		case CVU+F:
-			xcvtcnst(U,l->u.v.u,ty,d,(long double)l->u.v.u);
+			xcvtcnst(U,l->u.v.u,ty,d,(double)l->u.v.u);
 			break;
 		case CVF+I:
 			xcvtcnst(F,l->u.v.d,ty,i,(long)l->u.v.d);
 			break;
 		case CVF+F: {
-			float d;
+			float d = 0.0f;
 			if (l->op == CNST+F) {
 				if (l->u.v.d < ty->u.sym->u.limits.min.d)
 					d = ty->u.sym->u.limits.min.d;
@@ -263,7 +263,7 @@ Tree simplify(int op, Type ty, Tree l, Tree r) {
 				else
 					d = l->u.v.d;
 			}
-			xcvtcnst(F,l->u.v.d,ty,d,(long double)d);
+			xcvtcnst(F,l->u.v.d,ty,d,(double)d);
 			break;
 			}
 		case BAND+U:

@@ -81,7 +81,7 @@ typedef struct table *Table;
 typedef union value {
 	long i;
 	unsigned long u;
-	long double d;
+	double d;
 	void *p;
 	void (*g)(void);
 } Value;
