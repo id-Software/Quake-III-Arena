@@ -1484,8 +1484,5 @@ void IN_JoyMove( void )
 
 #endif  // USE_SDL_VIDEO
 
-// end of linux_glimp_sdl.c ...
-
-
-
+// end sdl_glimp.c ...
 
