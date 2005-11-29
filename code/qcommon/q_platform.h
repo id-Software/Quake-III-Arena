@@ -93,7 +93,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //============================================================== MAC OS X ===
 
-#if defined(MACOS_X)
+#if defined(MACOS_X) || defined(__APPLE_CC__)
+
+// make sure this is defined, just for sanity's sake...
+#ifndef MACOS_X
+#define MACOS_X
+#endif
 
 #define OS_STRING "macosx"
 #define ID_INLINE inline
@@ -101,11 +106,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __ppc__
 #define ARCH_STRING "ppc"
+#define Q3_BIG_ENDIAN
 #elif defined __i386__
 #define ARCH_STRING "i386"
+#define Q3_LITTLE_ENDIAN
 #endif
-
-#define Q3_BIG_ENDIAN
 
 #endif
 
