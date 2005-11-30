@@ -304,6 +304,9 @@ static graphicsoptions_t		s_graphicsoptions;
 static InitialVideoOptions_s s_ivo_templates[] =
 {
 	{
+		6, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue
+	},
+	{
 		4, qtrue, 2, 0, 2, 2, 1, 1, 0, qtrue	// JDC: this was tq 3
 	},
 	{
@@ -350,7 +353,7 @@ static void GraphicsOptions_CheckConfig( void )
 {
 	int i;
 
-	for ( i = 0; i < NUM_IVO_TEMPLATES; i++ )
+	for ( i = 0; i < NUM_IVO_TEMPLATES-1; i++ )
 	{
 		if ( s_ivo_templates[i].colordepth != s_graphicsoptions.colordepth.curvalue )
 			continue;
@@ -373,7 +376,9 @@ static void GraphicsOptions_CheckConfig( void )
 		s_graphicsoptions.list.curvalue = i;
 		return;
 	}
-	s_graphicsoptions.list.curvalue = 4;
+
+	// return 'Custom' ivo template
+	s_graphicsoptions.list.curvalue = NUM_IVO_TEMPLATES - 1;
 }
 
 /*
@@ -736,6 +741,7 @@ void GraphicsOptions_MenuInit( void )
 
 	static const char *s_graphics_options_names[] =
 	{
+		"Very High Quality",
 		"High Quality",
 		"Normal",
 		"Fast",
