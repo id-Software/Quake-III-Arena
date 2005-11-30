@@ -190,7 +190,7 @@ static void S_AL_BufferUseDefault(sfxHandle_t sfx)
 	if(sfx == default_sfx)
 		Com_Error(ERR_FATAL, "Can't load default sound effect %s\n", knownSfx[sfx].filename);
 
-	Com_Printf( "Warning: Using default sound for %s\n", knownSfx[sfx].filename);
+	Com_Printf( S_COLOR_YELLOW "WARNING: Using default sound for %s\n", knownSfx[sfx].filename);
 	knownSfx[sfx].isDefault = qtrue;
 	knownSfx[sfx].buffer = knownSfx[default_sfx].buffer;
 }
@@ -237,7 +237,6 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 	data = S_CodecLoad(knownSfx[sfx].filename, &info);
 	if(!data)
 	{
-		Com_Printf( "Can't load %s\n", knownSfx[sfx].filename);
 		S_AL_BufferUseDefault(sfx);
 		return;
 	}
@@ -250,13 +249,22 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 	{
 		S_AL_BufferUseDefault(sfx);
 		Z_Free(data);
-		Com_Printf( "Can't create a sound buffer for %s - %s\n", knownSfx[sfx].filename, S_AL_ErrorMsg(error));
+		Com_Printf( S_COLOR_RED "ERROR: Can't create a sound buffer for %s - %s\n",
+				knownSfx[sfx].filename, S_AL_ErrorMsg(error));
 		return;
 	}
 
 	// Fill the buffer
-	qalGetError();
-	qalBufferData(knownSfx[sfx].buffer, format, data, info.size, info.rate);
+	if( info.size == 0 )
+	{
+		// We have no data to buffer, so buffer silence
+		byte dummyData[ 2 ] = { 0 };
+
+		qalBufferData(knownSfx[sfx].buffer, AL_FORMAT_MONO16, (void *)dummyData, 2, 22050);
+	}
+	else
+		qalBufferData(knownSfx[sfx].buffer, format, data, info.size, info.rate);
+
 	error = qalGetError();
 
 	// If we ran out of memory, start evicting the least recently used sounds
@@ -267,12 +275,11 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 		{
 			S_AL_BufferUseDefault(sfx);
 			Z_Free(data);
-			Com_Printf( "Out of memory loading %s\n", knownSfx[sfx].filename);
+			Com_Printf( S_COLOR_RED "ERROR: Out of memory loading %s\n", knownSfx[sfx].filename);
 			return;
 		}
 
 		// Try load it again
-		qalGetError();
 		qalBufferData(knownSfx[sfx].buffer, format, data, info.size, info.rate);
 		error = qalGetError();
 	}
@@ -282,7 +289,8 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 	{
 		S_AL_BufferUseDefault(sfx);
 		Z_Free(data);
-		Com_Printf( "Can't fill sound buffer for %s - %s", knownSfx[sfx].filename, S_AL_ErrorMsg(error));
+		Com_Printf( S_COLOR_RED "ERROR: Can't fill sound buffer for %s - %s\n",
+				knownSfx[sfx].filename, S_AL_ErrorMsg(error));
 		return;
 	}
 
@@ -352,7 +360,8 @@ static void S_AL_BufferUnload(sfxHandle_t sfx)
 	// Delete it
 	qalDeleteBuffers(1, &knownSfx[sfx].buffer);
 	if((error = qalGetError()) != AL_NO_ERROR)
-		Com_Printf( "Can't delete sound buffer for %s", knownSfx[sfx].filename);
+		Com_Printf( S_COLOR_RED "ERROR: Can't delete sound buffer for %s\n",
+				knownSfx[sfx].filename);
 
 	knownSfx[sfx].inMemory = qfalse;
 }
@@ -509,7 +518,7 @@ void S_AL_SrcShutdown( void )
 	for(i = 0; i < srcCount; i++)
 	{
 		if(srcList[i].isLocked)
-			Com_DPrintf("Warning: Source %d is locked\n", i);
+			Com_DPrintf( S_COLOR_YELLOW "WARNING: Source %d is locked\n", i);
 
 		qalSourceStop(srcList[i].source);
 		qalDeleteSources(1, &srcList[i].source);
@@ -1060,7 +1069,7 @@ void S_AL_RawSamples(int samples, int rate, int width, int channels, const byte 
 		// Failed?
 		if(streamSourceHandle == -1)
 		{
-			Com_Printf( "Can't allocate streaming streamSource\n");
+			Com_Printf( S_COLOR_RED "ERROR: Can't allocate streaming streamSource\n");
 			return;
 		}
 	}
@@ -1230,11 +1239,13 @@ S_AL_MusicProcess
 static
 void S_AL_MusicProcess(ALuint b)
 {
+	ALenum error;
 	int l;
 	ALuint format;
 
 	l = S_CodecReadStream(mus_stream, MUSIC_BUFFER_SIZE, decode_buffer);
 
+	// Run out data to read, start at the beginning again
 	if(l == 0)
 	{
 		S_CodecCloseStream(mus_stream);
@@ -1249,7 +1260,24 @@ void S_AL_MusicProcess(ALuint b)
 	}
 
 	format = S_AL_Format(mus_stream->info.width, mus_stream->info.channels);
-	qalBufferData(b, format, decode_buffer, l, mus_stream->info.rate);
+
+	if( l == 0 )
+	{
+		// We have no data to buffer, so buffer silence
+		byte dummyData[ 2 ] = { 0 };
+
+		qalBufferData( b, AL_FORMAT_MONO16, (void *)dummyData, 2, 22050 );
+	}
+	else
+		qalBufferData(b, format, decode_buffer, l, mus_stream->info.rate);
+
+	if( ( error = qalGetError( ) ) != AL_NO_ERROR )
+	{
+		S_AL_StopBackgroundTrack( );
+		Com_Printf( S_COLOR_RED "ERROR: while buffering data for music stream - %s\n",
+				S_AL_ErrorMsg( error ) );
+		return;
+	}
 }
 
 /*
@@ -1546,7 +1574,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	// Load QAL
 	if( !QAL_Init( s_alDriver->string ) )
 	{
-		Com_Printf(  "Failed to load library: \"%s\".\n", s_alDriver->string );
+		Com_Printf( "Failed to load library: \"%s\".\n", s_alDriver->string );
 		return qfalse;
 	}
 
@@ -1555,7 +1583,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	if( !alDevice )
 	{
 		QAL_Shutdown( );
-		Com_Printf(  "Failed to open OpenAL device.\n" );
+		Com_Printf( "Failed to open OpenAL device.\n" );
 		return qfalse;
 	}
 
@@ -1565,7 +1593,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	{
 		QAL_Shutdown( );
 		qalcCloseDevice( alDevice );
-		Com_Printf(  "Failed to create OpenAL context.\n" );
+		Com_Printf( "Failed to create OpenAL context.\n" );
 		return qfalse;
 	}
 	qalcMakeContextCurrent( alContext );

@@ -63,12 +63,12 @@ static int S_ReadChunkInfo(fileHandle_t f, char *name)
 
 	r = FS_Read(name, 4, f);
 	if(r != 4)
-		return 0;
+		return -1;
 
 	len = FGetLittleLong(f);
 	if( len < 0 ) {
 		Com_Printf( S_COLOR_YELLOW "WARNING: Negative chunk length\n" );
-		return 0;
+		return -1;
 	}
 
 	return len;
@@ -78,14 +78,14 @@ static int S_ReadChunkInfo(fileHandle_t f, char *name)
 =================
 S_FindRIFFChunk
 
-Returns the length of the data in the chunk, or 0 if not found
+Returns the length of the data in the chunk, or -1 if not found
 =================
 */
 static int S_FindRIFFChunk( fileHandle_t f, char *chunk ) {
 	char	name[5];
 	int		len;
 
-	while( ( len = S_ReadChunkInfo(f, name) ) )
+	while( ( len = S_ReadChunkInfo(f, name) ) >= 0 )
 	{
 		// If this is the right chunk, return
 		if( !Q_strncmp( name, chunk, 4 ) )
@@ -97,7 +97,7 @@ static int S_FindRIFFChunk( fileHandle_t f, char *chunk ) {
 		FS_Seek( f, len, FS_SEEK_CUR );
 	}
 
-	return 0;
+	return -1;
 }
 
 /*
@@ -138,7 +138,7 @@ static qboolean S_ReadRIFFHeader(fileHandle_t file, snd_info_t *info)
 	FS_Read(dump, 12, file);
 
 	// Scan for the format chunk
-	if((fmtlen = S_FindRIFFChunk(file, "fmt ")) == 0)
+	if((fmtlen = S_FindRIFFChunk(file, "fmt ")) < 0)
 	{
 		Com_Printf( S_COLOR_RED "ERROR: Couldn't find \"fmt\" chunk\n");
 		return qfalse;
@@ -161,7 +161,7 @@ static qboolean S_ReadRIFFHeader(fileHandle_t file, snd_info_t *info)
 	}
 
 	// Scan for the data chunk
-	if( (info->size = S_FindRIFFChunk(file, "data")) == 0)
+	if( (info->size = S_FindRIFFChunk(file, "data")) < 0)
 	{
 		Com_Printf( S_COLOR_RED "ERROR: Couldn't find \"data\" chunk\n");
 		return qfalse;
