@@ -6,6 +6,7 @@ release debug clean distclean copyfiles installer:
 dist:
 	rm -rf quake3-$(VERSION)
 	svn export . quake3-$(VERSION)
+	which convert >/dev/null 2>&1 && convert web/images/thenameofthisprojectis3.jpg quake3-$(VERSION)/code/unix/setup/splash.xpm || true
 	rm -rf quake3-$(VERSION)/web
 	tar --force-local -cjf quake3-$(VERSION).tar.bz2 quake3-$(VERSION)
 	rm -rf quake3-$(VERSION)
