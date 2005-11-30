@@ -21,7 +21,8 @@ mkdir image
 cp -a $SETUPIMAGE/{setup.data,setup.sh} image/
 
 ### splash
-convert ../../../web/images/quake3.jpg image/setup.data/splash.xpm
+rm -f image/setup.data/splash.xpm
+[ -e splash.xpm ] && cp splash.xpm image/setup.data/splash.xpm
 
 ### binaries
 mkdir image/tmp
