@@ -114,24 +114,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
-//=================================================================== MAC ===
-
-#ifdef __MACOS__
-
-#include <MacTypes.h>
-
-#define OS_STRING "macos"
-#define ID_INLINE inline
-#define PATH_SEP ':'
-
-#define ARCH_STRING "ppc"
-
-void Sys_PumpEvents( void );
-
-#define Q3_BIG_ENDIAN
-
-#endif
-
 //================================================================= LINUX ===
 
 #ifdef __linux__
