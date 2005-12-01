@@ -362,23 +362,49 @@ void Sys_Quit (void) {
   Sys_Exit(0);
 }
 
+
+#if idppc_altivec && !MACOS_X
+/* This is the brute force way of detecting instruction sets...
+   the code is borrowed from SDL, which got the idea from the libmpeg2
+   library - thanks!
+ */
+#include <signal.h>
+#include <setjmp.h>
+static jmp_buf jmpbuf;
+static void illegal_instruction(int sig)
+{
+    longjmp(jmpbuf, 1);
+}
+#endif
+
 static void Sys_DetectAltivec(void)
 {
   // Only detect if user hasn't forcibly disabled it.
+  qboolean altivec = qfalse;
   if (com_altivec->integer) {
 #if idppc_altivec
-#ifdef MACOS_X
+    #ifdef MACOS_X
     long feat = 0;
     OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
     if ((err==noErr) && ((1 << gestaltPowerPCHasVectorInstructions) & feat)) {
-      Cvar_Set( "com_altivec", "1" );
+        altivec = qtrue;
     }
-#else // !!! FIXME: PowerPC Linux, etc: how to detect?
-    Cvar_Set( "com_altivec", "1" );
-#endif
-#else
-    // not an Altivec system, so never use it.
-    Cvar_Set( "com_altivec", "0" );
+    #else
+    void (*handler)(int sig);
+    handler = signal(SIGILL, illegal_instruction);
+    if ( setjmp(jmpbuf) == 0 ) {
+        asm volatile ("mtspr 256, %0\n\t"
+                      "vand %%v0, %%v0, %%v0"
+                        :
+                        : "r" (-1));
+        altivec = qtrue;
+    }
+    signal(SIGILL, handler);
+    #endif
+
+    if (!altivec) {
+      Cvar_Set( "com_altivec", "0" );  // we don't have it! Disable support!
+    }
 #endif
   }
 }
