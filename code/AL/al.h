@@ -26,17 +26,24 @@
 extern "C" {
 #endif
 
+/* WIN32, not Xbox */
 #ifdef _WIN32
-#define ALAPI       __declspec(dllexport)
-#define ALAPIENTRY  __cdecl
+#ifndef _XBOX
+#ifdef _OPENAL32LIB
+#define ALAPI __declspec(dllexport)
+#else
+#define ALAPI __declspec(dllimport)
+#endif
+#define ALAPIENTRY __cdecl
 #define AL_CALLBACK 
-#else /* _WIN32 */
+#endif
+#endif
 
 #ifdef TARGET_OS_MAC
 #if TARGET_OS_MAC
 #pragma export on
-#endif /* TARGET_OS_MAC */
-#endif /* TARGET_OS_MAC */
+#endif
+#endif
 
 #ifndef ALAPI
 #define ALAPI
@@ -50,526 +57,437 @@ extern "C" {
 #define AL_CALLBACK 
 #endif
 
-#endif /* _WIN32 */
+#define OPENAL
 
 #ifndef AL_NO_PROTOTYPES
 
-/**
- * OpenAL Maintenance Functions
- * State Management and Query.
- * Error Handling.
- * Extension Support.
+/*
+ * Renderer State management
  */
-
-
-/** Renderer State management. */
 ALAPI void ALAPIENTRY alEnable( ALenum capability );
 
 ALAPI void ALAPIENTRY alDisable( ALenum capability ); 
 
 ALAPI ALboolean ALAPIENTRY alIsEnabled( ALenum capability ); 
 
-/** Application preferences for driver performance choices. */
-ALAPI void ALAPIENTRY alHint( ALenum target, ALenum mode );
 
-/** State retrieval. */
+/*
+ * State retrieval
+ */
+ALAPI const ALchar* ALAPIENTRY alGetString( ALenum param );
+
 ALAPI void ALAPIENTRY alGetBooleanv( ALenum param, ALboolean* data );
 
-/** State retrieval. */
 ALAPI void ALAPIENTRY alGetIntegerv( ALenum param, ALint* data );
 
-/** State retrieval. */
 ALAPI void ALAPIENTRY alGetFloatv( ALenum param, ALfloat* data );
 
-/** State retrieval. */
 ALAPI void ALAPIENTRY alGetDoublev( ALenum param, ALdouble* data );
 
-/** State retrieval. */
-ALAPI const ALubyte* ALAPIENTRY alGetString( ALenum param );
-
-
-/** State retrieval.through return value ( for compatibility ) */
 ALAPI ALboolean ALAPIENTRY alGetBoolean( ALenum param );
+
 ALAPI ALint ALAPIENTRY alGetInteger( ALenum param );
+
 ALAPI ALfloat ALAPIENTRY alGetFloat( ALenum param );
+
 ALAPI ALdouble ALAPIENTRY alGetDouble( ALenum param );
 
-/**
+
+/*
  * Error support.
  * Obtain the most recent error generated in the AL state machine.
  */
 ALAPI ALenum ALAPIENTRY alGetError( ALvoid );
 
-/** 
+
+/* 
  * Extension support.
- * Obtain the address of a function (usually an extension)
- *  with the name fname. All addresses are context-independent. 
+ * Query for the presence of an extension, and obtain any appropriate
+ * function pointers and enum values.
  */
-ALAPI ALboolean ALAPIENTRY alIsExtensionPresent( const ALubyte* fname );
+ALAPI ALboolean ALAPIENTRY alIsExtensionPresent( const ALchar* extname );
 
+ALAPI void* ALAPIENTRY alGetProcAddress( const ALchar* fname );
 
-/** 
- * Extension support.
- * Obtain the address of a function (usually an extension)
- *  with the name fname. All addresses are context-independent. 
- */
-ALAPI void* ALAPIENTRY alGetProcAddress( const ALubyte* fname );
+ALAPI ALenum ALAPIENTRY alGetEnumValue( const ALchar* ename );
 
-
-/**
- * Extension support.
- * Obtain the integer value of an enumeration (usually an extension) with the name ename. 
- */
-ALAPI ALenum ALAPIENTRY alGetEnumValue( const ALubyte* ename );
-
-
-
-
-
-
-/**
- * LISTENER
- * Listener is the sample position for a given context.
- * The multi-channel (usually stereo) output stream generated
- *  by the mixer is parametrized by this Listener object:
- *  its position and velocity relative to Sources, within
- *  occluder and reflector geometry.
- */
-
-
-
-/**
- *
- * Listener Gain:  default 1.0f.
- */
-ALAPI void ALAPIENTRY alListenerf( ALenum pname, ALfloat param );
-
-ALAPI void ALAPIENTRY alListeneri( ALenum pname, ALint param );
-
-/**
- *
- * Listener Position:        ALfloat[3]
- * Listener Velocity:        ALfloat[3]
- */
-ALAPI void ALAPIENTRY alListener3f( ALenum pname,
-				    ALfloat f1, ALfloat f2, ALfloat f3 ); 
-
-/**
- *
- * Listener Position:        ALfloat[3]
- * Listener Velocity:        ALfloat[3]
- * Listener Orientation:     ALfloat[6]  (forward and up vector).
- */
-ALAPI void ALAPIENTRY alListenerfv( ALenum pname, ALfloat* param ); 
 
 /*
- * Retrieve listener information.
+ * LISTENER
+ * Listener represents the location and orientation of the
+ * 'user' in 3D-space.
+ *
+ * Properties include: -
+ *
+ * Gain         AL_GAIN         ALfloat
+ * Position     AL_POSITION     ALfloat[3]
+ * Velocity     AL_VELOCITY     ALfloat[3]
+ * Orientation  AL_ORIENTATION  ALfloat[6] (Forward then Up vectors)
+*/
+
+/*
+ * Set Listener parameters
  */
-ALAPI void ALAPIENTRY alGetListeneri( ALenum pname, ALint* value );
-ALAPI void ALAPIENTRY alGetListenerf( ALenum pname, ALfloat* value );
+ALAPI void ALAPIENTRY alListenerf( ALenum param, ALfloat value );
 
-ALAPI void ALAPIENTRY alGetListeneriv( ALenum pname, ALint* value );
-ALAPI void ALAPIENTRY alGetListenerfv( ALenum pname, ALfloat* values );
+ALAPI void ALAPIENTRY alListener3f( ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
 
-ALAPI void ALAPIENTRY alGetListener3f( ALenum pname,
-				       ALfloat *f1, ALfloat *f2, ALfloat *f3 ); 
+ALAPI void ALAPIENTRY alListenerfv( ALenum param, const ALfloat* values ); 
+
+ALAPI void ALAPIENTRY alListeneri( ALenum param, ALint value );
+
+ALAPI void ALAPIENTRY alListener3i( ALenum param, ALint value1, ALint value2, ALint value3 );
+
+ALAPI void ALAPIENTRY alListeneriv( ALenum param, const ALint* values );
+
+/*
+ * Get Listener parameters
+ */
+ALAPI void ALAPIENTRY alGetListenerf( ALenum param, ALfloat* value );
+
+ALAPI void ALAPIENTRY alGetListener3f( ALenum param, ALfloat *value1, ALfloat *value2, ALfloat *value3 );
+
+ALAPI void ALAPIENTRY alGetListenerfv( ALenum param, ALfloat* values );
+
+ALAPI void ALAPIENTRY alGetListeneri( ALenum param, ALint* value );
+
+ALAPI void ALAPIENTRY alGetListener3i( ALenum param, ALint *value1, ALint *value2, ALint *value3 );
+
+ALAPI void ALAPIENTRY alGetListeneriv( ALenum param, ALint* values );
+
 
 /**
  * SOURCE
- * Source objects are by default localized. Sources
- *  take the PCM data provided in the specified Buffer,
- *  apply Source-specific modifications, and then
- *  submit them to be mixed according to spatial 
- *  arrangement etc.
+ * Sources represent individual sound objects in 3D-space.
+ * Sources take the PCM data provided in the specified Buffer,
+ * apply Source-specific modifications, and then
+ * submit them to be mixed according to spatial arrangement etc.
+ * 
+ * Properties include: -
+ *
+ * Gain                              AL_GAIN                 ALfloat
+ * Min Gain                          AL_MIN_GAIN             ALfloat
+ * Max Gain                          AL_MAX_GAIN             ALfloat
+ * Position                          AL_POSITION             ALfloat[3]
+ * Velocity                          AL_VELOCITY             ALfloat[3]
+ * Direction                         AL_DIRECTION            ALfloat[3]
+ * Head Relative Mode                AL_SOURCE_RELATIVE      ALint (AL_TRUE or AL_FALSE)
+ * Reference Distance                AL_REFERENCE_DISTANCE   ALfloat
+ * Max Distance                      AL_MAX_DISTANCE         ALfloat
+ * RollOff Factor                    AL_ROLLOFF_FACTOR       ALfloat
+ * Inner Angle                       AL_CONE_INNER_ANGLE     ALint or ALfloat
+ * Outer Angle                       AL_CONE_OUTER_ANGLE     ALint or ALfloat
+ * Cone Outer Gain                   AL_CONE_OUTER_GAIN      ALint or ALfloat
+ * Pitch                             AL_PITCH                ALfloat
+ * Looping                           AL_LOOPING			     ALint (AL_TRUE or AL_FALSE)
+ * MS Offset                         AL_MSEC_OFFSET          ALint or ALfloat
+ * Byte Offset                       AL_BYTE_OFFSET          ALint or ALfloat
+ * Sample Offset                     AL_SAMPLE_OFFSET        ALint or ALfloat
+ * Attached Buffer                   AL_BUFFER               ALint
+ * State (Query only)                AL_SOURCE_STATE         ALint
+ * Buffers Queued (Query only)       AL_BUFFERS_QUEUED       ALint
+ * Buffers Processed (Query only)    AL_BUFFERS_PROCESSED    ALint
  */
 
-
-
-/** Create Source objects. */
+/* Create Source objects */
 ALAPI void ALAPIENTRY alGenSources( ALsizei n, ALuint* sources ); 
 
-/** Delete Source objects. */
-ALAPI void ALAPIENTRY alDeleteSources( ALsizei n, ALuint* sources );
+/* Delete Source objects */
+ALAPI void ALAPIENTRY alDeleteSources( ALsizei n, const ALuint* sources );
 
-/** Verify a handle is a valid Source. */ 
+/* Verify a handle is a valid Source */ 
 ALAPI ALboolean ALAPIENTRY alIsSource( ALuint sid ); 
 
-
-/** Set an integer parameter for a Source object. */
-ALAPI void ALAPIENTRY alSourcei( ALuint sid, ALenum param, ALint value ); 
+/*
+ * Set Source parameters
+ */
 ALAPI void ALAPIENTRY alSourcef( ALuint sid, ALenum param, ALfloat value ); 
-ALAPI void ALAPIENTRY alSource3f( ALuint sid, ALenum param,
-                                  ALfloat f1, ALfloat f2, ALfloat f3 );
-ALAPI void ALAPIENTRY alSourcefv( ALuint sid, ALenum param, ALfloat* values ); 
 
-/** Get an integer parameter for a Source object. */
-ALAPI void ALAPIENTRY alGetSourcei( ALuint sid,  ALenum pname, ALint* value );
-ALAPI void ALAPIENTRY alGetSourceiv( ALuint sid,  ALenum pname, ALint* values );
-ALAPI void ALAPIENTRY alGetSourcef( ALuint sid, ALenum pname, ALfloat* value );
-ALAPI void ALAPIENTRY alGetSourcefv( ALuint sid, ALenum pname, ALfloat* values );
+ALAPI void ALAPIENTRY alSource3f( ALuint sid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
 
-/* deprecated, included for Win compatibility */
-ALAPI void ALAPIENTRY alGetSource3f( ALuint sid, ALenum pname, ALfloat* value1,
-                                     ALfloat* value2, ALfloat* value3);
+ALAPI void ALAPIENTRY alSourcefv( ALuint sid, ALenum param, const ALfloat* values ); 
 
-ALAPI void ALAPIENTRY alSourcePlayv( ALsizei ns, ALuint *ids );
-ALAPI void ALAPIENTRY alSourceStopv( ALsizei ns, ALuint *ids );
-ALAPI void ALAPIENTRY alSourceRewindv( ALsizei ns, ALuint *ids );
-ALAPI void ALAPIENTRY alSourcePausev( ALsizei ns, ALuint *ids );
+ALAPI void ALAPIENTRY alSourcei( ALuint sid, ALenum param, ALint value ); 
 
-/** Activate a source, start replay. */
+ALAPI void ALAPIENTRY alSource3i( ALuint sid, ALenum param, ALint value1, ALint value2, ALint value3 );
+
+ALAPI void ALAPIENTRY alSourceiv( ALuint sid, ALenum param, const ALint* values );
+
+/*
+ * Get Source parameters
+ */
+ALAPI void ALAPIENTRY alGetSourcef( ALuint sid, ALenum param, ALfloat* value );
+
+ALAPI void ALAPIENTRY alGetSource3f( ALuint sid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+
+ALAPI void ALAPIENTRY alGetSourcefv( ALuint sid, ALenum param, ALfloat* values );
+
+ALAPI void ALAPIENTRY alGetSourcei( ALuint sid,  ALenum param, ALint* value );
+
+ALAPI void ALAPIENTRY alGetSource3i( ALuint sid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+
+ALAPI void ALAPIENTRY alGetSourceiv( ALuint sid,  ALenum param, ALint* values );
+
+
+/*
+ * Source vector based playback calls
+ */
+
+/* Play, replay, or resume (if paused) a list of Sources */
+ALAPI void ALAPIENTRY alSourcePlayv( ALsizei ns, const ALuint *sids );
+
+/* Stop a list of Sources */
+ALAPI void ALAPIENTRY alSourceStopv( ALsizei ns, const ALuint *sids );
+
+/* Rewind a list of Sources */
+ALAPI void ALAPIENTRY alSourceRewindv( ALsizei ns, const ALuint *sids );
+
+/* Pause a list of Sources */
+ALAPI void ALAPIENTRY alSourcePausev( ALsizei ns, const ALuint *sids );
+
+/*
+ * Source based playback calls
+ */
+
+/* Play, replay, or resume a Source */
 ALAPI void ALAPIENTRY alSourcePlay( ALuint sid );
 
-/**
- * Pause a source, 
- *  temporarily remove it from the mixer list.
- */
-ALAPI void ALAPIENTRY alSourcePause( ALuint sid );
+/* Stop a Source */
+ALAPI void ALAPIENTRY alSourceStop( ALuint sid );
 
-/**
- * Rewind a source, 
- *  set the source to play at the beginning.
- */
+/* Rewind a Source (set playback postiton to beginning) */
 ALAPI void ALAPIENTRY alSourceRewind( ALuint sid );
 
-/**
- * Stop a source,
- *  temporarily remove it from the mixer list,
- *  and reset its internal state to pre-Play.
- * To remove a Source completely, it has to be
- *  deleted following Stop, or before Play.
+/* Pause a Source */
+ALAPI void ALAPIENTRY alSourcePause( ALuint sid );
+
+/*
+ * Source Queuing 
  */
-ALAPI void ALAPIENTRY alSourceStop( ALuint sid );
+ALAPI void ALAPIENTRY alSourceQueueBuffers( ALuint sid, ALsizei numEntries, const ALuint *bids );
+
+ALAPI void ALAPIENTRY alSourceUnqueueBuffers( ALuint sid, ALsizei numEntries, ALuint *bids );
+
 
 /**
  * BUFFER
  * Buffer objects are storage space for sample data.
- * Buffers are referred to by Sources. There can be more than
- *  one Source using the same Buffer data. If Buffers have
- *  to be duplicated on a per-Source basis, the driver has to
- *  take care of allocation, copying, and deallocation as well
- *  as propagating buffer data changes.
+ * Buffers are referred to by Sources. One Buffer can be used
+ * by multiple Sources.
+ *
+ * Properties include: -
+ *
+ * Frequency (Query only)    AL_FREQUENCY      ALint
+ * Size (Query only)         AL_SIZE           ALint
+ * Bits (Query only)         AL_BITS           ALint
+ * Channels (Query only)     AL_CHANNELS       ALint
  */
 
-
-
-
-/** Buffer object generation. */
+/* Create Buffer objects */
 ALAPI void ALAPIENTRY alGenBuffers( ALsizei n, ALuint* buffers );
 
-ALAPI void ALAPIENTRY alDeleteBuffers( ALsizei n, ALuint* buffers );
+/* Delete Buffer objects */
+ALAPI void ALAPIENTRY alDeleteBuffers( ALsizei n, const ALuint* buffers );
 
+/* Verify a handle is a valid Buffer */
+ALAPI ALboolean ALAPIENTRY alIsBuffer( ALuint bid );
 
-ALAPI ALboolean ALAPIENTRY alIsBuffer( ALuint buffer );
+/* Specify the data to be copied into a buffer */
+ALAPI void ALAPIENTRY alBufferData( ALuint bid, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq );
 
-/**
- * Specify the data to be filled into a buffer.
+/*
+ * Set Buffer parameters
  */
-ALAPI void ALAPIENTRY alBufferData( ALuint   buffer,
-                   ALenum   format,
-                   ALvoid*    data,
-                   ALsizei  size,
-                   ALsizei  freq );
+ALAPI void ALAPIENTRY alBufferf( ALuint bid, ALenum param, ALfloat value );
 
-ALAPI void ALAPIENTRY alGetBufferi( ALuint buffer, ALenum param, ALint*   value );
-ALAPI void ALAPIENTRY alGetBufferf( ALuint buffer, ALenum param, ALfloat* value );
-ALAPI void ALAPIENTRY alGetBufferiv( ALuint buffer, ALenum param, ALint *v);
-ALAPI void ALAPIENTRY alGetBufferfv( ALuint buffer, ALenum param, ALfloat *v);
+ALAPI void ALAPIENTRY alBuffer3f( ALuint bid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
 
+ALAPI void ALAPIENTRY alBufferfv( ALuint bid, ALenum param, const ALfloat* values );
 
+ALAPI void ALAPIENTRY alBufferi( ALuint bid, ALenum param, ALint value );
 
-/**
- * Frequency Domain Filters are band filters.
- *  Attenuation in Media (distance based)
- *  Reflection Material
- *  Occlusion Material (separating surface)
- *
- * Temporal Domain Filters:
- *  Early Reflections
- *  Late Reverb 
- *
+ALAPI void ALAPIENTRY alBuffer3i( ALuint bid, ALenum param, ALint value1, ALint value2, ALint value3 );
+
+ALAPI void ALAPIENTRY alBufferiv( ALuint bid, ALenum param, const ALint* values );
+
+/*
+ * Get Buffer parameters
  */
+ALAPI void ALAPIENTRY alGetBufferf( ALuint bid, ALenum param, ALfloat* value );
+
+ALAPI void ALAPIENTRY alGetBuffer3f( ALuint bid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+
+ALAPI void ALAPIENTRY alGetBufferfv( ALuint bid, ALenum param, ALfloat* values );
+
+ALAPI void ALAPIENTRY alGetBufferi( ALuint bid, ALenum param, ALint* value );
+
+ALAPI void ALAPIENTRY alGetBuffer3i( ALuint bid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+
+ALAPI void ALAPIENTRY alGetBufferiv( ALuint bid, ALenum param, ALint* values );
 
 
-
-
-/**
- * EXTENSION: IASIG Level 2 Environment.
- * Environment object generation.
- * This is an EXTension that describes the Environment/Reverb
- *  properties according to IASIG Level 2 specifications.
- */
-
-
-
-
-
-/**
- * Allocate n environment ids and store them in the array environs.
- * Returns the number of environments actually allocated.
- */
-ALAPI ALsizei ALAPIENTRY alGenEnvironmentIASIG( ALsizei n, ALuint* environs );
-
-ALAPI void ALAPIENTRY alDeleteEnvironmentIASIG( ALsizei n, ALuint* environs );
-
-ALAPI ALboolean ALAPIENTRY alIsEnvironmentIASIG( ALuint environ );
-
-ALAPI void ALAPIENTRY alEnvironmentiIASIG( ALuint eid, ALenum param, ALint value );
-
-ALAPI void ALAPIENTRY alEnvironmentfIASIG( ALuint eid, ALenum param, ALfloat value );
-
-
-
-/**
- * Queue stuff
- */
-ALAPI void ALAPIENTRY alSourceQueueBuffers( ALuint sid, ALsizei numEntries, ALuint *bids );
-ALAPI void ALAPIENTRY alSourceUnqueueBuffers( ALuint sid, ALsizei numEntries, ALuint *bids );
-ALAPI void ALAPIENTRY alQueuei( ALuint sid, ALenum param, ALint value );
-
-/**
- * Knobs and dials
+/*
+ * Global Parameters
  */
 ALAPI void ALAPIENTRY alDopplerFactor( ALfloat value );
+
 ALAPI void ALAPIENTRY alDopplerVelocity( ALfloat value );
+
+ALAPI void ALAPIENTRY alSpeedOfSound( ALfloat value );
+
 ALAPI void ALAPIENTRY alDistanceModel( ALenum distanceModel );
 
 #else /* AL_NO_PROTOTYPES */
 
+void          (ALAPIENTRY *alEnable)( ALenum capability );
+void          (ALAPIENTRY *alDisable)( ALenum capability ); 
+ALboolean     (ALAPIENTRY *alIsEnabled)( ALenum capability ); 
+const ALchar* (ALAPIENTRY *alGetString)( ALenum param );
+void          (ALAPIENTRY *alGetBooleanv)( ALenum param, ALboolean* data );
+void          (ALAPIENTRY *alGetIntegerv)( ALenum param, ALint* data );
+void          (ALAPIENTRY *alGetFloatv)( ALenum param, ALfloat* data );
+void          (ALAPIENTRY *alGetDoublev)( ALenum param, ALdouble* data );
+ALboolean     (ALAPIENTRY *alGetBoolean)( ALenum param );
+ALint         (ALAPIENTRY *alGetInteger)( ALenum param );
+ALfloat       (ALAPIENTRY *alGetFloat)( ALenum param );
+ALdouble      (ALAPIENTRY *alGetDouble)( ALenum param );
+ALenum        (ALAPIENTRY *alGetError)( ALvoid );
+ALboolean     (ALAPIENTRY *alIsExtensionPresent)(const ALchar* extname );
+void*         (ALAPIENTRY *alGetProcAddress)( const ALchar* fname );
+ALenum        (ALAPIENTRY *alGetEnumValue)( const ALchar* ename );
+void          (ALAPIENTRY *alListenerf)( ALenum param, ALfloat value );
+void          (ALAPIENTRY *alListener3f)( ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+void          (ALAPIENTRY *alListenerfv)( ALenum param, const ALfloat* values );
+void          (ALAPIENTRY *alListeneri)( ALenum param, ALint value );
+void          (ALAPIENTRY *alListener3i)( ALenum param, ALint value1, ALint value2, ALint value3 );
+void          (ALAPIENTRY *alListeneriv)( ALenum param, const ALint* values );
+void          (ALAPIENTRY *alGetListenerf)( ALenum param, ALfloat* value );
+void          (ALAPIENTRY *alGetListener3f)( ALenum param, ALfloat *value1, ALfloat *value2, ALfloat *value3 );
+void          (ALAPIENTRY *alGetListenerfv)( ALenum param, ALfloat* values );
+void          (ALAPIENTRY *alGetListeneri)( ALenum param, ALint* value );
+void          (ALAPIENTRY *alGetListener3i)( ALenum param, ALint *value1, ALint *value2, ALint *value3 );
+void          (ALAPIENTRY *alGetListeneriv)( ALenum param, ALint* values );
+void          (ALAPIENTRY *alGenSources)( ALsizei n, ALuint* sources );
+void          (ALAPIENTRY *alDeleteSources)( ALsizei n, const ALuint* sources );
+ALboolean     (ALAPIENTRY *alIsSource)( ALuint sid ); 
+void          (ALAPIENTRY *alSourcef)( ALuint sid, ALenum param, ALfloat value);
+void          (ALAPIENTRY *alSource3f)( ALuint sid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+void          (ALAPIENTRY *alSourcefv)( ALuint sid, ALenum param, const ALfloat* values );
+void          (ALAPIENTRY *alSourcei)( ALuint sid, ALenum param, ALint value);
+void          (ALAPIENTRY *alSource3i)( ALuint sid, ALenum param, ALint value1, ALint value2, ALint value3 );
+void          (ALAPIENTRY *alSourceiv)( ALuint sid, ALenum param, const ALint* values );
+void          (ALAPIENTRY *alGetSourcef)( ALuint sid, ALenum param, ALfloat* value );
+void          (ALAPIENTRY *alGetSource3f)( ALuint sid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+void          (ALAPIENTRY *alGetSourcefv)( ALuint sid, ALenum param, ALfloat* values );
+void          (ALAPIENTRY *alGetSourcei)( ALuint sid, ALenum param, ALint* value );
+void          (ALAPIENTRY *alGetSource3i)( ALuint sid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+void          (ALAPIENTRY *alGetSourceiv)( ALuint sid, ALenum param, ALint* values );
+void          (ALAPIENTRY *alSourcePlayv)( ALsizei ns, const ALuint *sids );
+void          (ALAPIENTRY *alSourceStopv)( ALsizei ns, const ALuint *sids );
+void          (ALAPIENTRY *alSourceRewindv)( ALsizei ns, const ALuint *sids );
+void          (ALAPIENTRY *alSourcePausev)( ALsizei ns, const ALuint *sids );
+void          (ALAPIENTRY *alSourcePlay)( ALuint sid );
+void          (ALAPIENTRY *alSourceStop)( ALuint sid );
+void          (ALAPIENTRY *alSourceRewind)( ALuint sid );
+void          (ALAPIENTRY *alSourcePause)( ALuint sid );
+void          (ALAPIENTRY *alSourceQueueBuffers)( ALuint sid, ALsizei numEntries, const ALuint *bids );
+void          (ALAPIENTRY *alSourceUnqueueBuffers)( ALuint sid, ALsizei numEntries, ALuint *bids );
+void          (ALAPIENTRY *alGenBuffers)( ALsizei n, ALuint* buffers );
+void          (ALAPIENTRY *alDeleteBuffers)( ALsizei n, const ALuint* buffers );
+ALboolean     (ALAPIENTRY *alIsBuffer)( ALuint bid );
+void          (ALAPIENTRY *alBufferData)( ALuint bid, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq );
+void          (ALAPIENTRY *alBufferf)( ALuint bid, ALenum param, ALfloat value);
+void          (ALAPIENTRY *alBuffer3f)( ALuint bid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+void          (ALAPIENTRY *alBufferfv)( ALuint bid, ALenum param, const ALfloat* values );
+void          (ALAPIENTRY *alBufferi)( ALuint bid, ALenum param, ALint value);
+void          (ALAPIENTRY *alBuffer3i)( ALuint bid, ALenum param, ALint value1, ALint value2, ALint value3 );
+void          (ALAPIENTRY *alBufferiv)( ALuint bid, ALenum param, const ALint* values );
+void          (ALAPIENTRY *alGetBufferf)( ALuint bid, ALenum param, ALfloat* value );
+void          (ALAPIENTRY *alGetBuffer3f)( ALuint bid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+void          (ALAPIENTRY *alGetBufferfv)( ALuint bid, ALenum param, ALfloat* values );
+void          (ALAPIENTRY *alGetBufferi)( ALuint bid, ALenum param, ALint* value );
+void          (ALAPIENTRY *alGetBuffer3i)( ALuint bid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+void          (ALAPIENTRY *alGetBufferiv)( ALuint bid, ALenum param, ALint* values );
+void          (ALAPIENTRY *alDopplerFactor)( ALfloat value );
+void          (ALAPIENTRY *alDopplerVelocity)( ALfloat value );
+void          (ALAPIENTRY *alSpeedOfSound)( ALfloat value );
+void          (ALAPIENTRY *alDistanceModel)( ALenum distanceModel );
 
-/** OpenAL Maintenance Functions */
+/* Type Definitions */
 
-      void                         (*alEnable)( ALenum capability );
-      void                         (*alDisable)( ALenum capability ); 
-      ALboolean                    (*alIsEnabled)( ALenum capability ); 
-      void                           (*alHint)( ALenum target, ALenum mode );
-      ALboolean                    (*alGetBoolean)( ALenum param );
-      ALint                        (*alGetInteger)( ALenum param );
-      ALfloat                      (*alGetFloat)( ALenum param );
-      ALdouble                     (*alGetDouble)( ALenum param );
-      void                         (*alGetBooleanv)( ALenum param,
-                                                      ALboolean* data );
-      void                         (*alGetIntegerv)( ALenum param,
-                                                      ALint* data );
-      void                         (*alGetFloatv)( ALenum param,
-                                                      ALfloat* data );
-      void                         (*alGetDoublev)( ALenum param,
-                                                      ALdouble* data );
-      const ALubyte*               (*GetString)( ALenum param );
-      ALenum                       (*alGetError)( ALvoid );
-
-      /** 
-       * Extension support.
-       * Query existance of extension
-       */
-      ALboolean                (*alIsExtensionPresent)(const ALubyte* fname );
-
-      /** 
-       * Extension support.
-       * Obtain the address of a function (usually an extension)
-       *  with the name fname. All addresses are context-independent. 
-       */
-      void*                (*alGetProcAddress)( const ALubyte* fname );
-      
-
-      /**
-       * Extension support.
-       * Obtain the integer value of an enumeration (usually an extension) with the name ename. 
-       */
-      ALenum                (*alGetEnumValue)( const ALubyte* ename );
-
-/**
- * LISTENER
- * Listener is the sample position for a given context.
- * The multi-channel (usually stereo) output stream generated
- *  by the mixer is parametrized by this Listener object:
- *  its position and velocity relative to Sources, within
- *  occluder and reflector geometry.
- */
-      /**
-       *
-       * Listener Gain:  default 1.0f.
-       */
-      void                (*alListenerf)( ALenum pname, ALfloat param );
-
-      /**
-       *
-       * Listener Position:        ALfloat[3]
-       * Listener Velocity:        ALfloat[3]
-       * Listener Orientation:     ALfloat[6]  (forward and up vector).
-       */
-      void                (*alListenerfv)( ALenum pname, ALfloat* param ); 
-
-      /*
-       * Retrieve listener information.
-       */
-      void              (*alGetListeneri)( ALenum pname, ALint* value );
-      void              (*alGetListenerf)( ALenum pname, ALfloat* value );
-
-      void              (*alGetListeneriv)( ALenum pname, ALint* values );
-      void              (*alGetListenerfv)( ALenum pname, ALfloat* values );
-
-/**
- * SOURCE
- * Source objects are by default localized. Sources
- *  take the PCM data provided in the specified Buffer,
- *  apply Source-specific modifications, and then
- *  submit them to be mixed according to spatial 
- *  arrangement etc.
- */
-
-      /** Create Source objects. */
-      void                (*alGenSources)( ALsizei n, ALuint* sources ); 
-
-      /** Delete Source objects. */
-      void                (*alDeleteSources)( ALsizei n, ALuint* sources );
-
-      /** Verify a handle is a valid Source. */ 
-      ALboolean        (*alIsSource)( ALuint sid ); 
-
-      /** Set an integer parameter for a Source object. */
-      void                (*alSourcei)( ALuint sid, ALenum param, ALint value); 
-
-      /** Set a float parameter for a Source object. */
-      void                (*alSourcef)( ALuint sid, ALenum param, ALfloat value); 
-
-      /** Set a 3 float parameter for a Source object. */
-      void                (*alSource3f)( ALuint sid, ALenum param,
-                                  ALfloat f1, ALfloat f2, ALfloat f3 );
-
-      /** Set a float vector parameter for a Source object. */
-      void                (*alSourcefv)( ALuint sid, ALenum param,
-                              ALfloat* values ); 
-
-      /** Get an integer scalar parameter for a Source object. */
-      void                (*alGetSourcei)( ALuint sid,
-                              ALenum pname, ALint* value );
-
-      /** Get an integer parameter for a Source object. */
-      void                (*alGetSourceiv)( ALuint sid,
-                              ALenum pname, ALint* values );
-
-      /** Get a float scalar parameter for a Source object. */
-      void                (*alGetSourcef)( ALuint sid,
-                              ALenum pname, ALfloat* value );
-
-      /** Get three float scalar parameter for a Source object. */
-      void                (*alGetSource3f)( ALuint sid, ALenum pname,
-					    ALfloat* value1,
-					    ALfloat* value2,
-					    ALfloat* value3);
-
-      /** Get a float vector parameter for a Source object. */
-      void                (*alGetSourcefv)( ALuint sid,
-                              ALenum pname, ALfloat* values );
-
-  
-      /** Activate a source, start replay. */
-      void                (*alSourcePlay)( ALuint sid );
-
-      /**
-       * Pause a source, 
-       *  temporarily remove it from the mixer list.
-       */
-      void                (*alSourcePause)( ALuint sid );
-
-      /**
-       * Stop a source,
-       *  temporarily remove it from the mixer list,
-       *  and reset its internal state to pre-Play.
-       * To remove a Source completely, it has to be
-       *  deleted following Stop, or before Play.
-       */
-      void                (*alSourceStop)( ALuint sid );
-
-      /**
-       * Rewind a souce.  Stopped paused and playing sources,
-       * resets the offset into the PCM data and sets state to
-       * AL_INITIAL.
-       */
-      void                (*alSourceRewind)( ALuint sid );
-
-      /**
-       * vector forms of those functions we all love
-       */
-      void                (*alSourcePlayv)( ALsizei ns, ALuint *ids );
-      void                (*alSourceStopv)( ALsizei ns, ALuint *ids );
-      void                (*alSourceRewindv)( ALsizei ns, ALuint *ids );
-      void                (*alSourcePausev)( ALsizei ns, ALuint *ids );
-
-/**
- * BUFFER
- * Buffer objects are storage space for sample data.
- * Buffers are referred to by Sources. There can be more than
- *  one Source using the same Buffer data. If Buffers have
- *  to be duplicated on a per-Source basis, the driver has to
- *  take care of allocation, copying, and deallocation as well
- *  as propagating buffer data changes.
- */
-
-      /** Buffer object generation. */
-      void                (*alGenBuffers)( ALsizei n, ALuint* buffers );
-      void                (*alDeleteBuffers)( ALsizei n, ALuint* buffers );
-      ALboolean           (*alIsBuffer)( ALuint buffer );
-
-      /**
-       * Specify the data to be filled into a buffer.
-       */
-      void                (*alBufferData)( ALuint   buffer,
-                                        ALenum   format,
-                                        ALvoid*    data,
-                                        ALsizei  size,
-                                        ALsizei  freq );
-
-      void                (*alGetBufferi)( ALuint buffer,
-                                      ALenum param, ALint*   value );
-      void                (*alGetBufferf)( ALuint buffer,
-                                      ALenum param, ALfloat* value );
-      void                (*alGetBufferiv)( ALuint buffer,
-                                      ALenum param, ALint*   value );
-      void                (*alGetBufferfv)( ALuint buffer,
-                                      ALenum param, ALfloat* value );
-
-/**
- * EXTENSION: IASIG Level 2 Environment.
- * Environment object generation.
- * This is an EXTension that describes the Environment/Reverb
- *  properties according to IASIG Level 2 specifications.
- */
-      /**
-       * Allocate n environment ids and store them in the array environs.
-       * Returns the number of environments actually allocated.
-       */
-      ALsizei                (*alGenEnvironmentIASIG)( ALsizei n, ALuint* environs );
-      void                (*alDeleteEnvironmentIASIG)(ALsizei n,
-                                              ALuint* environs);
-      ALboolean                (*alIsEnvironmentIASIG)( ALuint environ );
-      void                (*alEnvironmentiIASIG)( ALuint eid,
-                                      ALenum param, ALint value );
-      void                (*alEnvironmentfIASIG)( ALuint eid,
-                                      ALenum param, ALuint value );
-      /**
-       * Queue stuff
-       */
-      void              (*alQueuei)(ALuint sid, ALenum param, ALint value );
-      void              (*alSourceUnqueueBuffers)(ALuint sid, ALsizei numEntries, ALuint *bids );
-      void              (*alSourceQueueBuffers)(ALuint sid, ALsizei numEntries, ALuint *bids );
-
-      void              (*alDopplerFactor)( ALfloat value );
-      void              (*alDopplerVelocity)( ALfloat value );
-      void              (*alDistanceModel)( ALenum distanceModel );
-
-/**
- * Frequency Domain Filters are band filters.
- *  Attenuation in Media (distance based)
- *  Reflection Material
- *  Occlusion Material (separating surface)
- *
- * Temporal Domain Filters:
- *  Early Reflections
- *  Late Reverb 
- *
- */
+typedef void           (ALAPIENTRY *LPALENABLE)( ALenum capability );
+typedef void           (ALAPIENTRY *LPALDISABLE)( ALenum capability ); 
+typedef ALboolean      (ALAPIENTRY *LPALISENABLED)( ALenum capability ); 
+typedef const ALchar*  (ALAPIENTRY *LPALGETSTRING)( ALenum param );
+typedef void           (ALAPIENTRY *LPALGETBOOLEANV)( ALenum param, ALboolean* data );
+typedef void           (ALAPIENTRY *LPALGETINTEGERV)( ALenum param, ALint* data );
+typedef void           (ALAPIENTRY *LPALGETFLOATV)( ALenum param, ALfloat* data );
+typedef void           (ALAPIENTRY *LPALGETDOUBLEV)( ALenum param, ALdouble* data );
+typedef ALboolean      (ALAPIENTRY *LPALGETBOOLEAN)( ALenum param );
+typedef ALint          (ALAPIENTRY *LPALGETINTEGER)( ALenum param );
+typedef ALfloat        (ALAPIENTRY *LPALGETFLOAT)( ALenum param );
+typedef ALdouble       (ALAPIENTRY *LPALGETDOUBLE)( ALenum param );
+typedef ALenum         (ALAPIENTRY *LPALGETERROR)( ALvoid );
+typedef ALboolean      (ALAPIENTRY *LPALISEXTENSIONPRESENT)(const ALchar* extname );
+typedef void*          (ALAPIENTRY *LPALGETPROCADDRESS)( const ALchar* fname );
+typedef ALenum         (ALAPIENTRY *LPALGETENUMVALUE)( const ALchar* ename );
+typedef void           (ALAPIENTRY *LPALLISTENERF)( ALenum param, ALfloat value );
+typedef void           (ALAPIENTRY *LPALLISTENER3F)( ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+typedef void           (ALAPIENTRY *LPALLISTENERFV)( ALenum param, const ALfloat* values );
+typedef void           (ALAPIENTRY *LPALLISTENERI)( ALenum param, ALint value );
+typedef void           (ALAPIENTRY *LPALLISTENER3I)( ALenum param, ALint value1, ALint value2, ALint value3 );
+typedef void           (ALAPIENTRY *LPALLISTENERIV)( ALenum param, const ALint* values );
+typedef void           (ALAPIENTRY *LPALGETLISTENERF)( ALenum param, ALfloat* value );
+typedef void           (ALAPIENTRY *LPALGETLISTENER3F)( ALenum param, ALfloat *value1, ALfloat *value2, ALfloat *value3 );
+typedef void           (ALAPIENTRY *LPALGETLISTENERFV)( ALenum param, ALfloat* values );
+typedef void           (ALAPIENTRY *LPALGETLISTENERI)( ALenum param, ALint* value );
+typedef void           (ALAPIENTRY *LPALGETLISTENER3I)( ALenum param, ALint *value1, ALint *value2, ALint *value3 );
+typedef void           (ALAPIENTRY *LPALGETLISTENERIV)( ALenum param, ALint* values );
+typedef void           (ALAPIENTRY *LPALGENSOURCES)( ALsizei n, ALuint* sources ); 
+typedef void           (ALAPIENTRY *LPALDELETESOURCES)( ALsizei n, const ALuint* sources );
+typedef ALboolean      (ALAPIENTRY *LPALISSOURCE)( ALuint sid ); 
+typedef void           (ALAPIENTRY *LPALSOURCEF)( ALuint sid, ALenum param, ALfloat value); 
+typedef void           (ALAPIENTRY *LPALSOURCE3F)( ALuint sid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+typedef void           (ALAPIENTRY *LPALSOURCEFV)( ALuint sid, ALenum param, const ALfloat* values );
+typedef void           (ALAPIENTRY *LPALSOURCEI)( ALuint sid, ALenum param, ALint value); 
+typedef void           (ALAPIENTRY *LPALSOURCE3I)( ALuint sid, ALenum param, ALint value1, ALint value2, ALint value3 );
+typedef void           (ALAPIENTRY *LPALSOURCEIV)( ALuint sid, ALenum param, const ALint* values );
+typedef void           (ALAPIENTRY *LPALGETSOURCEF)( ALuint sid, ALenum param, ALfloat* value );
+typedef void           (ALAPIENTRY *LPALGETSOURCE3F)( ALuint sid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+typedef void           (ALAPIENTRY *LPALGETSOURCEFV)( ALuint sid, ALenum param, ALfloat* values );
+typedef void           (ALAPIENTRY *LPALGETSOURCEI)( ALuint sid, ALenum param, ALint* value );
+typedef void           (ALAPIENTRY *LPALGETSOURCE3I)( ALuint sid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+typedef void           (ALAPIENTRY *LPALGETSOURCEIV)( ALuint sid, ALenum param, ALint* values );
+typedef void           (ALAPIENTRY *LPALSOURCEPLAYV)( ALsizei ns, const ALuint *sids );
+typedef void           (ALAPIENTRY *LPALSOURCESTOPV)( ALsizei ns, const ALuint *sids );
+typedef void           (ALAPIENTRY *LPALSOURCEREWINDV)( ALsizei ns, const ALuint *sids );
+typedef void           (ALAPIENTRY *LPALSOURCEPAUSEV)( ALsizei ns, const ALuint *sids );
+typedef void           (ALAPIENTRY *LPALSOURCEPLAY)( ALuint sid );
+typedef void           (ALAPIENTRY *LPALSOURCESTOP)( ALuint sid );
+typedef void           (ALAPIENTRY *LPALSOURCEREWIND)( ALuint sid );
+typedef void           (ALAPIENTRY *LPALSOURCEPAUSE)( ALuint sid );
+typedef void           (ALAPIENTRY *LPALSOURCEQUEUEBUFFERS)(ALuint sid, ALsizei numEntries, const ALuint *bids );
+typedef void           (ALAPIENTRY *LPALSOURCEUNQUEUEBUFFERS)(ALuint sid, ALsizei numEntries, ALuint *bids );
+typedef void           (ALAPIENTRY *LPALGENBUFFERS)( ALsizei n, ALuint* buffers );
+typedef void           (ALAPIENTRY *LPALDELETEBUFFERS)( ALsizei n, const ALuint* buffers );
+typedef ALboolean      (ALAPIENTRY *LPALISBUFFER)( ALuint bid );
+typedef void           (ALAPIENTRY *LPALBUFFERDATA)( ALuint bid, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq );
+typedef void           (ALAPIENTRY *LPALBUFFERF)( ALuint bid, ALenum param, ALfloat value);
+typedef void           (ALAPIENTRY *LPALBUFFER3F)( ALuint bid, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3 );
+typedef void           (ALAPIENTRY *LPALBUFFERFV)( ALuint bid, ALenum param, const ALfloat* values );
+typedef void           (ALAPIENTRY *LPALBUFFERI)( ALuint bid, ALenum param, ALint value);
+typedef void           (ALAPIENTRY *LPALBUFFER3I)( ALuint bid, ALenum param, ALint value1, ALint value2, ALint value3 );
+typedef void           (ALAPIENTRY *LPALBUFFERIV)( ALuint bid, ALenum param, const ALint* values );
+typedef void           (ALAPIENTRY *LPALGETBUFFERF)( ALuint bid, ALenum param, ALfloat* value );
+typedef void           (ALAPIENTRY *LPALGETBUFFER3F)( ALuint bid, ALenum param, ALfloat* value1, ALfloat* value2, ALfloat* value3);
+typedef void           (ALAPIENTRY *LPALGETBUFFERFV)( ALuint bid, ALenum param, ALfloat* values );
+typedef void           (ALAPIENTRY *LPALGETBUFFERI)( ALuint bid, ALenum param, ALint* value );
+typedef void           (ALAPIENTRY *LPALGETBUFFER3I)( ALuint bid, ALenum param, ALint* value1, ALint* value2, ALint* value3);
+typedef void           (ALAPIENTRY *LPALGETBUFFERIV)( ALuint bid, ALenum param, ALint* values );
+typedef void           (ALAPIENTRY *LPALDOPPLERFACTOR)( ALfloat value );
+typedef void           (ALAPIENTRY *LPALDOPPLERVELOCITY)( ALfloat value );
+typedef void           (ALAPIENTRY *LPALSPEEDOFSOUND)( ALfloat value );
+typedef void           (ALAPIENTRY *LPALDISTANCEMODEL)( ALenum distanceModel );
 
 #endif /* AL_NO_PROTOTYPES */
 

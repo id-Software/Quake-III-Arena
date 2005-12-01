@@ -10,25 +10,77 @@ typedef void ALCcontext;
 
 typedef int ALCenum;
 
+/** ALC boolean type. */
+typedef char ALCboolean;
+
+/** ALC 8bit signed byte. */
+typedef char ALCbyte;
+
+/** ALC 8bit unsigned byte. */
+typedef unsigned char ALCubyte;
+
+/** OpenAL 8bit char */
+typedef char ALCchar;
+
+/** ALC 16bit signed short integer type. */
+typedef short ALCshort;
+
+/** ALC 16bit unsigned short integer type. */
+typedef unsigned short ALCushort;
+
+/** ALC 32bit unsigned integer type. */
+typedef unsigned ALCuint;
+
+/** ALC 32bit signed integer type. */
+typedef int ALCint;
+
+/** ALC 32bit floating point type. */
+typedef float ALCfloat;
+
+/** ALC 64bit double point type. */
+typedef double ALCdouble;
+
+/** ALC 32bit type. */
+typedef int ALCsizei;
+
+/** ALC void type */
+typedef void ALCvoid;
+
 /* Enumerant values begin at column 50. No tabs. */
 
 /* bad value */
 #define ALC_INVALID                              0
 
-/**
- * followed by <int> Hz
- */
-#define ALC_FREQUENCY                            0x100
+/* Boolean False. */
+#define ALC_FALSE                                0
+
+/* Boolean True. */
+#define ALC_TRUE                                 1
 
 /**
  * followed by <int> Hz
  */
-#define ALC_REFRESH                              0x101
+#define ALC_FREQUENCY                            0x1007
+
+/**
+ * followed by <int> Hz
+ */
+#define ALC_REFRESH                              0x1008
 
 /**
  * followed by AL_TRUE, AL_FALSE
  */
-#define ALC_SYNC                                 0x102
+#define ALC_SYNC                                 0x1009
+
+/**
+ * followed by <int> Num of requested Mono (3D) Sources
+ */
+#define ALC_MONO_SOURCES                         0x1010
+
+/**
+ * followed by <int> Num of requested Stereo Sources
+ */
+#define ALC_STEREO_SOURCES                       0x1011
 
 /**
  * errors
@@ -37,52 +89,54 @@ typedef int ALCenum;
 /**
  * No error
  */
-#define ALC_NO_ERROR                             0
+#define ALC_NO_ERROR                             ALC_FALSE
 
 /**
  * No device
  */
-#define ALC_INVALID_DEVICE                       0x200
+#define ALC_INVALID_DEVICE                       0xA001
 
 /**
  * invalid context ID
  */
-#define ALC_INVALID_CONTEXT                      0x201
+#define ALC_INVALID_CONTEXT                      0xA002
 
 /**
  * bad enum
  */
-#define ALC_INVALID_ENUM                         0x202
+#define ALC_INVALID_ENUM                         0xA003
 
 /**
  * bad value
  */
-#define ALC_INVALID_VALUE                        0x203
+#define ALC_INVALID_VALUE                        0xA004
 
 /**
  * Out of memory.
  */
-#define ALC_OUT_OF_MEMORY                        0x204
+#define ALC_OUT_OF_MEMORY                        0xA005
 
 
 
 /**
  * The Specifier string for default device
  */
-#define ALC_DEFAULT_DEVICE_SPECIFIER             0x300
-#define ALC_DEVICE_SPECIFIER                     0x301
-#define ALC_EXTENSIONS                           0x302
+#define ALC_DEFAULT_DEVICE_SPECIFIER             0x1004
+#define ALC_DEVICE_SPECIFIER                     0x1005
+#define ALC_EXTENSIONS                           0x1006
 
-#define ALC_MAJOR_VERSION                        0x303
-#define ALC_MINOR_VERSION                        0x304
+#define ALC_MAJOR_VERSION                        0x1000
+#define ALC_MINOR_VERSION                        0x1001
 
-#define ALC_ATTRIBUTES_SIZE                      0x305
-#define ALC_ALL_ATTRIBUTES                       0x306
+#define ALC_ATTRIBUTES_SIZE                      0x1002
+#define ALC_ALL_ATTRIBUTES                       0x1003
 
 /**
- * Not sure if the following are conformant
+ * Capture extension
  */
-#define ALC_FALSE                                0
-#define ALC_TRUE                                 (!(ALC_FALSE))
+#define ALC_CAPTURE_DEVICE_SPECIFIER             0x310
+#define ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER     0x311
+#define ALC_CAPTURE_SAMPLES                      0x312
+
 
 #endif /* _ALCTYPES_H */

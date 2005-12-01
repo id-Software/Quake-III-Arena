@@ -1,14 +1,30 @@
 #ifndef _AL_TYPES_H_
 #define _AL_TYPES_H_
 
+/* define platform type */
+#if !defined(MACINTOSH_AL) && !defined(LINUX_AL) && !defined(WINDOWS_AL)
+  #ifdef __APPLE__
+    #define MACINTOSH_AL
+    #else
+    #ifdef _WIN32
+      #define WINDOWS_AL
+    #else
+      #define LINUX_AL
+    #endif
+  #endif
+#endif
+
 /** OpenAL bool type. */
 typedef char ALboolean;
 
 /** OpenAL 8bit signed byte. */
-typedef signed char ALbyte;
+typedef char ALbyte;
 
 /** OpenAL 8bit unsigned byte. */
 typedef unsigned char ALubyte;
+
+/** OpenAL 8bit char */
+typedef char ALchar;
 
 /** OpenAL 16bit signed short integer type. */
 typedef short ALshort;
@@ -29,14 +45,10 @@ typedef float ALfloat;
 typedef double ALdouble;
 
 /** OpenAL 32bit type. */
-typedef signed int ALsizei;
+typedef int ALsizei;
 
 /** OpenAL void type (for params, not returns). */
-#ifdef __GNUC__
 typedef void ALvoid;
-#else
-#define ALvoid void
-#endif /* __GNUC__ */
 
 /** OpenAL enumerations. */
 typedef int ALenum;
@@ -63,14 +75,10 @@ typedef ALdouble ALclampd;
 /** Boolean True. */
 #define AL_TRUE                                   1
 
-/**
- * Indicate the type of AL_SOURCE.
- * Sources can be spatialized 
- */
-#define AL_SOURCE_TYPE                            0x0200
-
 /** Indicate Source has relative coordinates. */
-#define AL_SOURCE_RELATIVE                        0x0202
+#define AL_SOURCE_RELATIVE                        0x202
+
+
 
 /**
  * Directional source, inner cone angle, in degrees.
@@ -121,14 +129,6 @@ typedef ALdouble ALclampd;
 #define AL_LOOPING                                0x1007
 
 /**
- * Indicate whether source is meant to be streaming.
- * Type: ALboolean?
- * Range:   [AL_TRUE, AL_FALSE]
- * Default: FALSE.
- */
-#define AL_STREAMING                              0x1008
-
-/**
  * Indicate the buffer to provide sound samples. 
  * Type: ALuint.
  * Range: any valid Buffer id.
@@ -147,14 +147,6 @@ typedef ALdouble ALclampd;
  *  is effectively disabled.
  */
 #define AL_GAIN                                   0x100A
-
-/* byte offset into source (in canon format).  -1 if source
- * is not playing.  Don't set this, get this.
- *
- * Type:  ALint
- * Range: -1 - +inf
- */
-#define AL_BYTE_LOKI                              0x100C
 
 /*
  * Indicate minimum source attenuation
@@ -182,6 +174,14 @@ typedef ALdouble ALclampd;
 #define AL_ORIENTATION                            0x100F
 
 /**
+ * Specify the channel mask. (Creative)
+ * Type:	 ALuint
+ * Range:	 [0 - 255]
+ */
+#define AL_CHANNEL_MASK                           0x3000
+
+
+/**
  * Source state information.
  */
 #define AL_SOURCE_STATE                           0x1010
@@ -197,11 +197,22 @@ typedef ALdouble ALclampd;
 #define AL_BUFFERS_PROCESSED                      0x1016
 
 /**
- * Buffer states
+ * Source buffer position information
  */
-#define AL_PENDING                                0x1017
-#define AL_PROCESSED                              0x1018
+#define AL_SEC_OFFSET                             0x1024
+#define AL_SAMPLE_OFFSET                          0x1025
+#define AL_BYTE_OFFSET                            0x1026
 
+/*
+ * Source type (Static, Streaming or undetermined)
+ * Source is Static if a Buffer has been attached using AL_BUFFER
+ * Source is Streaming if one or more Buffers have been attached using alSourceQueueBuffers
+ * Source is undetermined when it has the NULL buffer attached
+ */
+#define AL_SOURCE_TYPE                            0x1027
+#define AL_STATIC                                 0x1028
+#define AL_STREAMING                              0x1029
+#define AL_UNDETERMINED                           0x1030
 
 /** Sound samples: format specifier. */
 #define AL_FORMAT_MONO8                           0x1100
@@ -256,6 +267,7 @@ typedef ALdouble ALclampd;
 #define AL_BITS                                   0x2002
 #define AL_CHANNELS                               0x2003
 #define AL_SIZE                                   0x2004
+#define AL_DATA                                   0x2005
 
 /**
  * Buffer state.
@@ -263,8 +275,9 @@ typedef ALdouble ALclampd;
  * Not supported for public use (yet).
  */
 #define AL_UNUSED                                 0x2010
-#define AL_QUEUED                                 0x2011
-#define AL_CURRENT                                0x2012
+#define AL_PENDING                                0x2011
+#define AL_PROCESSED                              0x2012
+
 
 /** Errors: No Error. */
 #define AL_NO_ERROR                               AL_FALSE
@@ -278,6 +291,7 @@ typedef ALdouble ALclampd;
  * Invalid parameter passed to AL call.
  */
 #define AL_ILLEGAL_ENUM                           0xA002
+#define AL_INVALID_ENUM                           0xA002
 
 /** 
  * Invalid enum parameter value.
@@ -288,6 +302,8 @@ typedef ALdouble ALclampd;
  * Illegal call.
  */
 #define AL_ILLEGAL_COMMAND                        0xA004
+#define AL_INVALID_OPERATION                      0xA004
+
   
 /**
  * No mojo.
@@ -314,9 +330,9 @@ typedef ALdouble ALclampd;
 #define AL_DOPPLER_VELOCITY                       0xC001
 
 /**
- * Distance scaling
+ * Speed of Sound in units per second
  */
-#define AL_DISTANCE_SCALE                         0xC002
+#define AL_SPEED_OF_SOUND                         0xC003
 
 /**
  * Distance models
@@ -328,114 +344,9 @@ typedef ALdouble ALclampd;
 #define AL_DISTANCE_MODEL                         0xD000
 #define AL_INVERSE_DISTANCE                       0xD001
 #define AL_INVERSE_DISTANCE_CLAMPED               0xD002
-
-
-/**
- * enables
- */
-
-/* #define AL_SOME_ENABLE                            0xE000 */
-
-/** IASIG Level 2 Environment. */
-
-/**  
- * Parameter:  IASIG ROOM  blah
- * Type:       intgeger
- * Range:      [-10000, 0]
- * Default:    -10000 
- */
-#define AL_ENV_ROOM_IASIG                         0x3001
-
-/**
- * Parameter:  IASIG ROOM_HIGH_FREQUENCY
- * Type:       integer
- * Range:      [-10000, 0]
- * Default:    0 
- */
-#define AL_ENV_ROOM_HIGH_FREQUENCY_IASIG          0x3002
-
-/**
- * Parameter:  IASIG ROOM_ROLLOFF_FACTOR
- * Type:       float
- * Range:      [0.0, 10.0]
- * Default:    0.0 
- */
-#define AL_ENV_ROOM_ROLLOFF_FACTOR_IASIG          0x3003
-
-/** 
- * Parameter:  IASIG  DECAY_TIME
- * Type:       float
- * Range:      [0.1, 20.0]
- * Default:    1.0 
- */
-#define AL_ENV_DECAY_TIME_IASIG                   0x3004
-
-/**
- * Parameter:  IASIG DECAY_HIGH_FREQUENCY_RATIO
- * Type:       float
- * Range:      [0.1, 2.0]
- * Default:    0.5
- */
-#define AL_ENV_DECAY_HIGH_FREQUENCY_RATIO_IASIG   0x3005
-
-/**
- * Parameter:  IASIG REFLECTIONS
- * Type:       integer
- * Range:      [-10000, 1000]
- * Default:    -10000
- */
-#define AL_ENV_REFLECTIONS_IASIG                  0x3006
-
-/**
- * Parameter:  IASIG REFLECTIONS_DELAY
- * Type:       float
- * Range:      [0.0, 0.3]
- * Default:    0.02
- */
-#define AL_ENV_REFLECTIONS_DELAY_IASIG            0x3006
-
-/**
- * Parameter:  IASIG REVERB
- * Type:       integer
- * Range:      [-10000,2000]
- * Default:    -10000
- */
-#define AL_ENV_REVERB_IASIG                       0x3007
-
-/**
- * Parameter:  IASIG REVERB_DELAY
- * Type:       float
- * Range:      [0.0, 0.1]
- * Default:    0.04
- */
-#define AL_ENV_REVERB_DELAY_IASIG                 0x3008
-
-/**
- * Parameter:  IASIG DIFFUSION
- * Type:       float
- * Range:      [0.0, 100.0]
- * Default:    100.0
- */
-#define AL_ENV_DIFFUSION_IASIG                    0x3009
-
-/**
- * Parameter:  IASIG DENSITY
- * Type:       float
- * Range:      [0.0, 100.0]
- * Default:    100.0
- */
-#define AL_ENV_DENSITY_IASIG                      0x300A
-  
-  /**
- * Parameter:  IASIG HIGH_FREQUENCY_REFERENCE
- * Type:       float
- * Range:      [20.0, 20000.0]
- * Default:    5000.0
- */
-#define AL_ENV_HIGH_FREQUENCY_REFERENCE_IASIG     0x300B
-
-
-#define AL_INVALID_ENUM                          0xA002  
-#define AL_INVALID_OPERATION                     0xA004
+#define AL_LINEAR_DISTANCE                        0xD003
+#define AL_LINEAR_DISTANCE_CLAMPED                0xD004
+#define AL_EXPONENT_DISTANCE                      0xD005
+#define AL_EXPONENT_DISTANCE_CLAMPED              0xD006
 
 #endif

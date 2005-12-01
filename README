@@ -1,8 +1,8 @@
 Name of this project: icculus.org/quake3
 URL: http://www.icculus.org/quake3
 Hello and welcome to the Quake 3 source repository on icculus.org
-I'll be your maintainer, zakk@icculus.org, please send all your patches to 
-the bugzilla: https://bugzilla.icculus.org, or join the mailing list 
+I'll be your maintainer, zakk@icculus.org, please send all your patches to
+the bugzilla: https://bugzilla.icculus.org, or join the mailing list
 (quake3-subscribe@icculus.org) and submit your patch there.
 Best case scenario is you subscribe to the ml, submit your patch to
 bugzilla, and then post the url to the mailing list.
@@ -40,10 +40,11 @@ Compiling (Under Linux)
 2. Run 'make'
 
 For distribution maintainers, you can set some make variables:
- OPTIMIZE        - use this for custom CFLAGS
- DEFAULT_BASEDIR - extra path to search for baseq3 and such
- BUILD_SERVER    - build the 'q3ded' server binary (1 = build it, default = 1)
- BUILD_CLIENT    - build the 'quake3' client binary (1 = build it, default = 1)
+ OPTIMIZE          - use this for custom CFLAGS
+ DEFAULT_BASEDIR   - extra path to search for baseq3 and such
+ BUILD_SERVER      - build the 'q3ded' server binary (1 = build it, default = 1)
+ BUILD_CLIENT      - build the 'quake3' client binary (1 = build it, default = 1)
+ USE_LOCAL_HEADERS - use system headers instead of ones local to ioq3
 
 Installing under Linux
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,14 +110,11 @@ follows:
 
 4. If you didn't install the DirectX SDK in C:\DXSDK\, add DXSDK_DIR to
    code/unix/Makefile.local to reflect the new location.
-5. If you want OpenAL support, aquire some OpenAL headers and put them in
-   /include/AL/ beneath your MinGW dir. If not, add "USE_OPENAL=0" to
-   code/unix/Makefile.local.
-6. Perform the usual precompilation sacrificial ritual.
-7. Open an MSys terminal, and follow the instructions for compiling on Linux.
-8. Steal underpants
-9. ?????
-10. Profit!
+5. Perform the usual precompilation sacrificial ritual.
+6. Open an MSys terminal, and follow the instructions for compiling on Linux.
+7. Steal underpants
+8. ?????
+9. Profit!
 
 Creating mods compatible with Q3 1.32b
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

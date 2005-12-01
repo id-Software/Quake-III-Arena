@@ -1,12 +1,24 @@
 #ifndef _ALUT_H_
 #define _ALUT_H_
 
+/* define platform type */
+#if !defined(MACINTOSH_AL) && !defined(LINUX_AL) && !defined(WINDOWS_AL)
+  #ifdef __APPLE__
+    #define MACINTOSH_AL
+    #else
+    #ifdef _WIN32
+      #define WINDOWS_AL
+    #else
+      #define LINUX_AL
+    #endif
+  #endif
+#endif
+
 #include "altypes.h"
-#include "aluttypes.h"
 
 #ifdef _WIN32
-#define ALAPI         __declspec(dllexport)
-#define ALAPIENTRY    __cdecl
+#define ALUTAPI
+#define ALUTAPIENTRY    __cdecl
 #define AL_CALLBACK
 #else  /* _WIN32 */
 
@@ -16,12 +28,12 @@
 #endif /* TARGET_OS_MAC */
 #endif /* TARGET_OS_MAC */
 
-#ifndef ALAPI
-#define ALAPI
+#ifndef ALUTAPI
+#define ALUTAPI
 #endif
 
-#ifndef ALAPIENTRY
-#define ALAPIENTRY
+#ifndef ALUTAPIENTRY
+#define ALUTAPIENTRY
 #endif
 
 #ifndef AL_CALLBACK
@@ -34,52 +46,36 @@
 extern "C" {
 #endif
 
-#ifndef AL_NO_PROTOTYPES
+#ifndef ALUT_NO_PROTOTYPES
 
-ALAPI void ALAPIENTRY alutInit(ALint *argc, ALbyte **argv);
-ALAPI void ALAPIENTRY alutExit(ALvoid);
+ALUTAPI void ALUTAPIENTRY alutInit(int *argc, char *argv[]);
+ALUTAPI void ALUTAPIENTRY alutExit(ALvoid);
 
-ALAPI ALboolean ALAPIENTRY alutLoadWAV( const char *fname,
-                        ALvoid **wave,
-			ALsizei *format,
-			ALsizei *size,
-			ALsizei *bits,
-			ALsizei *freq );
-
-ALAPI void ALAPIENTRY alutLoadWAVFile(ALbyte *file,
-				      ALenum *format,
-				      ALvoid **data,
-				      ALsizei *size,
-				      ALsizei *freq,
-				      ALboolean *loop);
-ALAPI void ALAPIENTRY alutLoadWAVMemory(ALbyte *memory,
-					ALenum *format,
-					ALvoid **data,
-					ALsizei *size,
-					ALsizei *freq,
-					ALboolean *loop);
-ALAPI void ALAPIENTRY alutUnloadWAV(ALenum format,
-				    ALvoid *data,
-				    ALsizei size,
-				    ALsizei freq);
-
+#ifndef MACINTOSH_AL
+/* Windows and Linux versions have a loop parameter, Macintosh doesn't */
+ALUTAPI void ALUTAPIENTRY alutLoadWAVFile(ALbyte *file, ALenum *format, ALvoid **data, ALsizei *size, ALsizei *freq, ALboolean *loop);
+ALUTAPI void ALUTAPIENTRY alutLoadWAVMemory(ALbyte *memory, ALenum *format, ALvoid **data, ALsizei *size, ALsizei *freq, ALboolean *loop);
 #else
-      void 	(*alutInit)(int *argc, char *argv[]);
-      void 	(*alutExit)(ALvoid);
+ALUTAPI void ALUTAPIENTRY alutLoadWAVFile(ALbyte *file, ALenum *format, ALvoid **data, ALsizei *size, ALsizei *freq);
+ALUTAPI void ALUTAPIENTRY alutLoadWAVMemory(ALbyte *memory, ALenum *format, ALvoid **data, ALsizei *size, ALsizei *freq);
+#endif
 
-      ALboolean 	(*alutLoadWAV)( const char *fname,
-                        ALvoid **wave,
-			ALsizei *format,
-			ALsizei *size,
-			ALsizei *bits,
-			ALsizei *freq );
+ALUTAPI void ALUTAPIENTRY alutUnloadWAV(ALenum format, ALvoid *data, ALsizei size, ALsizei freq);
 
-      void (*alutLoadWAVFile(ALbyte *file,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq,ALboolean *loop);
-      void (*alutLoadWAVMemory)(ALbyte *memory,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq,ALboolean *loop);
-      void (*alutUnloadWAV)(ALenum format,ALvoid *data,ALsizei size,ALsizei freq);
+#else /* ALUT_NO_PROTOTYPES */
 
+    void      (ALUTAPIENTRY *alutInit)( int *argc, char *argv[] );
+    void 	  (ALUTAPIENTRY *alutExit)( ALvoid );
+#ifndef MACINTOSH_AL
+    void      (ALUTAPIENTRY *alutLoadWAVFile)( ALbyte *file,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq,ALboolean *loop );
+    void      (ALUTAPIENTRY *alutLoadWAVMemory)( ALbyte *memory,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq,ALboolean *loop );
+#else
+    void      (ALUTAPIENTRY *alutLoadWAVFile( ALbyte *file,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq );
+    void      (ALUTAPIENTRY *alutLoadWAVMemory)( ALbyte *memory,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq );
+#endif
+    void      (ALUTAPIENTRY *alutUnloadWAV)( ALenum format,ALvoid *data,ALsizei size,ALsizei freq );
 
-#endif /* AL_NO_PROTOTYPES */
+#endif /* ALUT_NO_PROTOTYPES */
 
 #ifdef TARGET_OS_MAC
 #if TARGET_OS_MAC

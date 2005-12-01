@@ -1,0 +1,16 @@
+This file identifies the version of the AL headers in this directory. If you
+change or update the AL headers in any way, please make sure you also update
+this file.
+
+SVN revision >= 402
+-------------------
+Headers are from OpenAL CVS 6th August 2005:
+$ cvs -d:pserver:guest@opensource.creative.com:/usr/local/cvs-repository
+login
+(use password "guest")
+$ cvs -d:pserver:guest@opensource.creative.com:/usr/local/cvs-repository
+co -D "6 Aug 2005" openal
+
+SVN revision >= 374
+-------------------
+Standard OpenAL 1.0 headers
