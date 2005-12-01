@@ -10,8 +10,13 @@ set -e
 set -x
 
 arch=`uname -m`
+
+# $§&%!!
+setup_arch=$arch
+links=
 case "$arch" in
-	i?86) arch=i386 ;;
+	i?86) arch=i386; setup_arch=x86; links="amd64 x86_64" ;;
+	x86_64) links=amd64
 esac
 
 rm -rf image
@@ -45,10 +50,12 @@ rm -rf image/tmp
 sed 's/@VERSION@/'$VERSION'/g' < setup.xml > image/setup.data/setup.xml
 
 ### start script
-mkdir -p image/bin/Linux/$arch
-ln -s x86_64 image/bin/Linux/amd64 # $§&%!!
-install -m 755 ioquake3.sh image/bin/Linux/$arch/ioquake3
-install -m 755 ioq3demo.sh image/bin/Linux/$arch/ioq3demo
+mkdir -p image/bin/Linux/$setup_arch
+for i in $links; do
+	ln -s $setup_arch image/bin/Linux/$i
+done
+install -m 755 ioquake3.sh image/bin/Linux/$setup_arch/ioquake3
+install -m 755 ioq3demo.sh image/bin/Linux/$setup_arch/ioq3demo
 
 ### README and COPYING
 install -m 644 ../../../README image/README
