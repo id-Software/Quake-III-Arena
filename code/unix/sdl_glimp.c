@@ -75,6 +75,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "unix_glw.h"
 
+
+/* Just hack it for now. */
+#ifdef MACOS_X
+typedef CGLContextObj QGLContext;
+#define GLimp_GetCurrentContext() CGLGetCurrentContext()
+#define GLimp_SetCurrentContext(ctx) CGLSetCurrentContext(ctx)
+#else
+typedef void *QGLContext;
+#define GLimp_GetCurrentContext() (NULL)
+#define GLimp_SetCurrentContext(ctx)
+#endif
+
+static QGLContext opengl_context;
+
 #define	WINDOW_CLASS_NAME	"Quake III: Arena"
 #define	WINDOW_CLASS_NAME_BRIEF	"quake3"
 
@@ -637,6 +651,8 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
         continue;
     }
 
+    opengl_context = GLimp_GetCurrentContext();
+
     ri.Printf( PRINT_ALL, "Using %d/%d/%d Color bits, %d depth, %d stencil display.\n",
                sdlcolorbits, sdlcolorbits, sdlcolorbits,
                tdepthbits, tstencilbits);
@@ -1081,7 +1097,7 @@ static int GLimp_RenderThreadWrapper( void *arg )
 
 	glimpRenderThread();
 
-	//qglXMakeCurrent( dpy, None, NULL );
+	GLimp_SetCurrentContext(NULL);
 
 	Com_Printf( "Render thread terminating\n" );
 
@@ -1090,6 +1106,17 @@ static int GLimp_RenderThreadWrapper( void *arg )
 
 qboolean GLimp_SpawnRenderThread( void (*function)( void ) )
 {
+	static qboolean warned = qfalse;
+	if (!warned)
+	{
+		Com_Printf("WARNING: You enable r_smp at your own risk!\n");
+		warned = qtrue;
+	}
+
+#if !MACOS_X
+	return qfalse;  /* better safe than sorry for now. */
+#endif
+
 	if (renderThread != NULL)  /* hopefully just a zombie at this point... */
 	{
 		Com_Printf("Already a render thread? Trying to clean it up...\n");
@@ -1146,7 +1173,7 @@ void *GLimp_RendererSleep( void )
 {
 	void  *data = NULL;
 
-	//qglXMakeCurrent( dpy, None, NULL );
+	GLimp_SetCurrentContext(NULL);
 
 	SDL_LockMutex(smpMutex);
 	{
@@ -1164,7 +1191,7 @@ void *GLimp_RendererSleep( void )
 	}
 	SDL_UnlockMutex(smpMutex);
 
-	//qglXMakeCurrent( dpy, win, ctx );
+	GLimp_SetCurrentContext(opengl_context);
 
 	return data;
 }
@@ -1179,12 +1206,12 @@ void GLimp_FrontEndSleep( void )
 	}
 	SDL_UnlockMutex(smpMutex);
 
-	//qglXMakeCurrent( dpy, win, ctx );
+	GLimp_SetCurrentContext(opengl_context);
 }
 
 void GLimp_WakeRenderer( void *data )
 {
-	//qglXMakeCurrent( dpy, None, NULL );
+	GLimp_SetCurrentContext(NULL);
 
 	SDL_LockMutex(smpMutex);
 	{
