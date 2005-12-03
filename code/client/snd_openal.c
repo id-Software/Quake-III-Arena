@@ -100,13 +100,12 @@ static const char *S_AL_ErrorMsg(ALenum error)
 
 typedef struct alSfx_s
 {
-	char						filename[MAX_QPATH];
-	ALuint					buffer;		// OpenAL buffer
-	qboolean				isDefault;	// Couldn't be loaded - use default FX
-	qboolean				inMemory;	// Sound is stored in memory
-	qboolean				isLocked;	// Sound is locked (can not be unloaded)
-	int							used;		// Time last used
-	struct alSfx_t	*next;		// Next entry in hash list
+	char			filename[MAX_QPATH];
+	ALuint		buffer;					// OpenAL buffer
+	qboolean	isDefault;			// Couldn't be loaded - use default FX
+	qboolean	inMemory;				// Sound is stored in memory
+	qboolean	isLocked;				// Sound is locked (can not be unloaded)
+	int				lastUsedTime;		// Time last used
 } alSfx_t;
 
 static qboolean alBuffersInitialised = qfalse;
@@ -197,15 +196,60 @@ static void S_AL_BufferUseDefault(sfxHandle_t sfx)
 
 /*
 =================
+S_AL_BufferUnload
+=================
+*/
+static void S_AL_BufferUnload(sfxHandle_t sfx)
+{
+	ALenum error;
+
+	if(knownSfx[sfx].filename[0] == '\0')
+		return;
+
+	if(!knownSfx[sfx].inMemory)
+		return;
+
+	// Delete it
+	qalDeleteBuffers(1, &knownSfx[sfx].buffer);
+	if((error = qalGetError()) != AL_NO_ERROR)
+		Com_Printf( S_COLOR_RED "ERROR: Can't delete sound buffer for %s\n",
+				knownSfx[sfx].filename);
+
+	knownSfx[sfx].inMemory = qfalse;
+}
+
+/*
+=================
 S_AL_BufferEvict
-	
-Doesn't work yet, so if OpenAL reports that you're out of memory, you'll just
-get "Catastrophic sound memory exhaustion". Whoops.
 =================
 */
 static qboolean S_AL_BufferEvict( void )
 {
-	return qfalse;
+	int	i, oldestBuffer = -1;
+	int	oldestTime = Sys_Milliseconds( );
+
+	for( i = 0; i < MAX_SFX; i++ )
+	{
+		if( !knownSfx[ i ].filename[ 0 ] )
+			continue;
+
+		if( !knownSfx[ i ].inMemory )
+			continue;
+
+		if( knownSfx[ i ].lastUsedTime < oldestTime )
+		{
+			oldestTime = knownSfx[ i ].lastUsedTime;
+			oldestBuffer = i;
+		}
+	}
+
+	if( oldestBuffer >= 0 )
+	{
+		S_AL_BufferUnload( oldestBuffer );
+		return qtrue;
+	}
+	else
+		return qfalse;
 }
 
 /*
@@ -270,8 +314,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 	// If we ran out of memory, start evicting the least recently used sounds
 	while(error == AL_OUT_OF_MEMORY)
 	{
-		qboolean rv = S_AL_BufferEvict();
-		if(!rv)
+		if( !S_AL_BufferEvict( ) )
 		{
 			S_AL_BufferUseDefault(sfx);
 			Z_Free(data);
@@ -314,7 +357,7 @@ void S_AL_BufferUse(sfxHandle_t sfx)
 
 	if((!knownSfx[sfx].inMemory) && (!knownSfx[sfx].isDefault))
 		S_AL_BufferLoad(sfx);
-	knownSfx[sfx].used = Com_Milliseconds();
+	knownSfx[sfx].lastUsedTime = Sys_Milliseconds();
 }
 
 /*
@@ -340,30 +383,6 @@ qboolean S_AL_BufferInit( void )
 	// All done
 	alBuffersInitialised = qtrue;
 	return qtrue;
-}
-
-/*
-=================
-S_AL_BufferUnload
-=================
-*/
-static void S_AL_BufferUnload(sfxHandle_t sfx)
-{
-	ALenum error;
-
-	if(knownSfx[sfx].filename[0] == '\0')
-		return;
-
-	if(!knownSfx[sfx].inMemory)
-		return;
-
-	// Delete it
-	qalDeleteBuffers(1, &knownSfx[sfx].buffer);
-	if((error = qalGetError()) != AL_NO_ERROR)
-		Com_Printf( S_COLOR_RED "ERROR: Can't delete sound buffer for %s\n",
-				knownSfx[sfx].filename);
-
-	knownSfx[sfx].inMemory = qfalse;
 }
 
 /*
@@ -405,7 +424,7 @@ sfxHandle_t S_AL_RegisterSound( const char *sample, qboolean compressed )
 
 	if( s_alPrecache->integer && (!knownSfx[sfx].inMemory) && (!knownSfx[sfx].isDefault))
 		S_AL_BufferLoad(sfx);
-	knownSfx[sfx].used = Com_Milliseconds();
+	knownSfx[sfx].lastUsedTime = Com_Milliseconds();
 
 	return sfx;
 }
@@ -432,7 +451,7 @@ typedef struct src_s
 	ALuint					alSource;		// OpenAL source object
 	sfxHandle_t 		sfx;				// Sound effect in use
 
-	int							lastUse;		// Last time used
+	int							lastUsedTime;		// Last time used
 	alSrcPriority_t	priority;		// Priority
 	int							entity;			// Owning entity (-1 if none)
 	int							channel;		// Associated channel (-1 if none)
@@ -547,7 +566,7 @@ static void S_AL_SrcSetup(srcHandle_t src, sfxHandle_t sfx, alSrcPriority_t prio
 	buffer = S_AL_BufferGet(sfx);
 
 	// Set up src struct
-	srcList[src].lastUse = Sys_Milliseconds();
+	srcList[src].lastUsedTime = Sys_Milliseconds();
 	srcList[src].sfx = sfx;
 	srcList[src].priority = priority;
 	srcList[src].entity = entity;
@@ -608,7 +627,7 @@ static void S_AL_SrcKill(srcHandle_t src)
 	qalSourcei(srcList[src].alSource, AL_BUFFER, 0);
 
 	srcList[src].sfx = 0;
-	srcList[src].lastUse = 0;
+	srcList[src].lastUsedTime = 0;
 	srcList[src].priority = 0;
 	srcList[src].entity = -1;
 	srcList[src].channel = -1;
@@ -645,10 +664,10 @@ srcHandle_t S_AL_SrcAlloc( alSrcPriority_t priority, int entnum, int channel )
 		{
 			// If it's older or has lower priority, flag it as weak
 			if((srcList[i].priority < weakest_pri) ||
-				(srcList[i].lastUse < weakest_time))
+				(srcList[i].lastUsedTime < weakest_time))
 			{
 				weakest_pri = srcList[i].priority;
-				weakest_time = srcList[i].lastUse;
+				weakest_time = srcList[i].lastUsedTime;
 				weakest = i;
 			}
 		}
@@ -1063,7 +1082,6 @@ void S_AL_RawSamples(int samples, int rate, int width, int channels, const byte 
 {
 	ALuint buffer;
 	ALuint format;
-	ALint state;
 
 	format = S_AL_Format( width, channels );
 
@@ -1087,17 +1105,8 @@ void S_AL_RawSamples(int samples, int rate, int width, int channels, const byte 
 	// Shove the data onto the streamSource
 	qalSourceQueueBuffers(streamSource, 1, &buffer);
 
-	// Start the streamSource playing if necessary
-	qalGetSourcei(streamSource, AL_SOURCE_STATE, &state);
-
 	// Volume
 	qalSourcef (streamSource, AL_GAIN, volume * s_volume->value * s_alGain->value);
-
-	if(!streamPlaying)
-	{
-		qalSourcePlay(streamSource);
-		streamPlaying = qtrue;
-	}
 }
 
 /*
@@ -1108,31 +1117,38 @@ S_AL_StreamUpdate
 static
 void S_AL_StreamUpdate( void )
 {
-	int processed;
-	ALint state;
+	int		numBuffers;
+	ALint	state;
 
 	if(streamSourceHandle == -1)
 		return;
 
 	// Un-queue any buffers, and delete them
-	qalGetSourcei(streamSource, AL_BUFFERS_PROCESSED, &processed);
-	if(processed)
+	qalGetSourcei( streamSource, AL_BUFFERS_PROCESSED, &numBuffers );
+	while( numBuffers-- )
 	{
-		while(processed--)
-		{
-			ALuint buffer;
-			qalSourceUnqueueBuffers(streamSource, 1, &buffer);
-			qalDeleteBuffers(1, &buffer);
-		}
+		ALuint buffer;
+		qalSourceUnqueueBuffers(streamSource, 1, &buffer);
+		qalDeleteBuffers(1, &buffer);
 	}
+
+	// Start the streamSource playing if necessary
+	qalGetSourcei( streamSource, AL_BUFFERS_QUEUED, &numBuffers );
 
 	// If it's stopped, release the streamSource
 	qalGetSourcei(streamSource, AL_SOURCE_STATE, &state);
 	if(state == AL_STOPPED)
 	{
 		streamPlaying = qfalse;
-		qalSourceStop(streamSource);
-		S_AL_FreeStreamChannel();
+		/*qalSourceStop(streamSource);*/
+		if( !numBuffers )
+			S_AL_FreeStreamChannel( );
+	}
+
+	if( !streamPlaying && numBuffers )
+	{
+		qalSourcePlay(streamSource);
+		streamPlaying = qtrue;
 	}
 }
 
@@ -1330,6 +1346,9 @@ void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 	for(i = 0; i < NUM_MUSIC_BUFFERS; i++)
 		S_AL_MusicProcess(musicBuffers[i]);
 	qalSourceQueueBuffers(musicSource, NUM_MUSIC_BUFFERS, musicBuffers);
+
+	// Set the initial gain property
+	qalSourcef(musicSource, AL_GAIN, s_alGain->value * s_musicVolume->value);
 	
 	// Start playing
 	qalSourcePlay(musicSource);
@@ -1345,29 +1364,29 @@ S_AL_MusicUpdate
 static
 void S_AL_MusicUpdate( void )
 {
-	int processed;
-	ALint state;
+	int		numBuffers;
+	ALint	state;
 
 	if(!musicPlaying)
 		return;
 
-	qalGetSourcei(musicSource, AL_BUFFERS_PROCESSED, &processed);
-	if(processed)
+	qalGetSourcei( musicSource, AL_BUFFERS_PROCESSED, &numBuffers );
+	while( numBuffers-- )
 	{
-		while(processed--)
-		{
-			ALuint b;
-			qalSourceUnqueueBuffers(musicSource, 1, &b);
-			S_AL_MusicProcess(b);
-			qalSourceQueueBuffers(musicSource, 1, &b);
-		}
+		ALuint b;
+		qalSourceUnqueueBuffers(musicSource, 1, &b);
+		S_AL_MusicProcess(b);
+		qalSourceQueueBuffers(musicSource, 1, &b);
 	}
 
-	// If it's not still playing, give it a kick
-	qalGetSourcei(musicSource, AL_SOURCE_STATE, &state);
-	if(state == AL_STOPPED)
+	// Hitches can cause OpenAL to be starved of buffers when streaming.
+	// If this happens, it will stop playback. This restarts the source if
+	// it is no longer playing, and if there are buffers available
+	qalGetSourcei( musicSource, AL_SOURCE_STATE, &state );
+	qalGetSourcei( musicSource, AL_BUFFERS_QUEUED, &numBuffers );
+	if( state == AL_STOPPED && numBuffers )
 	{
-		Com_DPrintf( "Restarted OpenAL music musicSource\n");
+		Com_DPrintf( S_COLOR_YELLOW "Restarted OpenAL music\n" );
 		qalSourcePlay(musicSource);
 	}
 
