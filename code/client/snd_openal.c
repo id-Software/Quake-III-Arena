@@ -1135,19 +1135,19 @@ void S_AL_StreamUpdate( void )
 	// Start the streamSource playing if necessary
 	qalGetSourcei( streamSource, AL_BUFFERS_QUEUED, &numBuffers );
 
-	// If it's stopped, release the streamSource
 	qalGetSourcei(streamSource, AL_SOURCE_STATE, &state);
 	if(state == AL_STOPPED)
 	{
 		streamPlaying = qfalse;
-		/*qalSourceStop(streamSource);*/
+
+		// If there are no buffers queued up, release the streamSource
 		if( !numBuffers )
 			S_AL_FreeStreamChannel( );
 	}
 
 	if( !streamPlaying && numBuffers )
 	{
-		qalSourcePlay(streamSource);
+		qalSourcePlay( streamSource );
 		streamPlaying = qtrue;
 	}
 }
