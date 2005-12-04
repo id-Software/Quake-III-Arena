@@ -407,7 +407,6 @@ qboolean Sys_DetectAltivec( void )
 
 void Sys_Init(void)
 {
-  Sys_DetectAltivec();
 
   Cmd_AddCommand ("in_restart", Sys_In_Restart_f);
 
