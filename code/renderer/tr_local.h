@@ -1273,18 +1273,25 @@ typedef struct stageVars
 	vec2_t		texcoords[NUM_TEXTURE_BUNDLES][SHADER_MAX_VERTEXES];
 } stageVars_t;
 
+
+#ifdef __GNUC__
+#define ALIGN16 __attribute__((aligned(16)))
+#else
+#define ALIGN16
+#endif
+
 typedef struct shaderCommands_s 
 {
-	glIndex_t	indexes[SHADER_MAX_INDEXES];
-	vec4_t		xyz[SHADER_MAX_VERTEXES];
-	vec4_t		normal[SHADER_MAX_VERTEXES];
-	vec2_t		texCoords[SHADER_MAX_VERTEXES][2];
-	color4ub_t	vertexColors[SHADER_MAX_VERTEXES];
-	int			vertexDlightBits[SHADER_MAX_VERTEXES];
+	glIndex_t	indexes[SHADER_MAX_INDEXES] ALIGN16;
+	vec4_t		xyz[SHADER_MAX_VERTEXES] ALIGN16;
+	vec4_t		normal[SHADER_MAX_VERTEXES] ALIGN16;
+	vec2_t		texCoords[SHADER_MAX_VERTEXES][2] ALIGN16;
+	color4ub_t	vertexColors[SHADER_MAX_VERTEXES] ALIGN16;
+	int			vertexDlightBits[SHADER_MAX_VERTEXES] ALIGN16;
 
-	stageVars_t	svars;
+	stageVars_t	svars ALIGN16;
 
-	color4ub_t	constantColor255[SHADER_MAX_VERTEXES];
+	color4ub_t	constantColor255[SHADER_MAX_VERTEXES] ALIGN16;
 
 	shader_t	*shader;
   float   shaderTime;
