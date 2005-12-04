@@ -377,12 +377,11 @@ static void illegal_instruction(int sig)
 }
 #endif
 
-static void Sys_DetectAltivec(void)
+qboolean Sys_DetectAltivec( void )
 {
-  // Only detect if user hasn't forcibly disabled it.
-  if (com_altivec->integer) {
-#if idppc_altivec
     qboolean altivec = qfalse;
+
+#if idppc_altivec
     #ifdef MACOS_X
     long feat = 0;
     OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
@@ -401,12 +400,9 @@ static void Sys_DetectAltivec(void)
     }
     signal(SIGILL, handler);
     #endif
-
-    if (!altivec) {
-      Cvar_Set( "com_altivec", "0" );  // we don't have it! Disable support!
-    }
 #endif
-  }
+
+    return altivec;
 }
 
 void Sys_Init(void)

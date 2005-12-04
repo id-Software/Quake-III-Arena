@@ -2353,6 +2353,24 @@ out:
 #endif
 
 
+static void Com_DetectAltivec(void)
+{
+	// Only detect if user hasn't forcibly disabled it.
+	if (com_altivec->integer) {
+		static qboolean altivec = qfalse;
+		static qboolean detected = qfalse;
+		if (!detected) {
+			altivec = Sys_DetectAltivec();
+			detected = qtrue;
+		}
+
+		if (!altivec) {
+			Cvar_Set( "com_altivec", "0" );  // we don't have it! Disable support!
+		}
+	}
+}
+
+
 /*
 =================
 Com_Init
@@ -2510,9 +2528,11 @@ void Com_Init( char *commandLine ) {
 
 	com_fullyInitialized = qtrue;
 
-    #if idppc_altivec
+	// always set the cvar, but only print the info if it makes sense.
+	Com_DetectAltivec();
+	#if idppc
 	Com_Printf ("Altivec support is %s\n", com_altivec->integer ? "enabled" : "disabled");
-    #endif
+	#endif
 
 	Com_Printf ("--- Common Initialization Complete ---\n");
 }
@@ -2712,6 +2732,12 @@ void Com_Frame( void ) {
 		msec = com_frameTime - lastTime;
 	} while ( msec < minMsec );
 	Cbuf_Execute ();
+
+	if (com_altivec->modified)
+	{
+		Com_DetectAltivec();
+		com_altivec->modified = qfalse;
+	}
 
 	lastTime = com_frameTime;
 
