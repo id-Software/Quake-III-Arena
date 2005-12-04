@@ -265,7 +265,7 @@ ifeq ($(PLATFORM),darwin)
     GL_CFLAGS =
   endif
 
-  OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -falign-loops=16
+  OPTIMIZE = -O3 -ffast-math -falign-loops=16
 
   ifeq ($(ARCH),ppc)
   BASE_CFLAGS += -faltivec
