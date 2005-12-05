@@ -91,7 +91,7 @@ static int S_FindRIFFChunk( fileHandle_t f, char *chunk ) {
 		if( !Q_strncmp( name, chunk, 4 ) )
 			return len;
 
-		len = (len + 1 ) & ~1; // pad to word boundary
+		len = PAD( len, 2 );
 
 		// Not the right chunk - skip it
 		FS_Seek( f, len, FS_SEEK_CUR );

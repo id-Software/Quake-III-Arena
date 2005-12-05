@@ -690,7 +690,7 @@ bot_synonymlist_t *BotLoadSynonyms(char *filename)
 							return NULL;
 						} //end if
 						len = strlen(token.string) + 1;
-						len = ALIGN(len);
+						len = PAD(len, sizeof(long));
 						size += sizeof(bot_synonym_t) + len;
 						if (pass)
 						{
@@ -989,7 +989,7 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 				return NULL;
 			} //end if
 			len = strlen(token.string) + 1;
-			len = ALIGN(len);
+			len = PAD(len, sizeof(long));
 			size += sizeof(bot_randomlist_t) + len;
 			if (pass)
 			{
@@ -1020,7 +1020,7 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 					return NULL;
 				} //end if
 				len = strlen(chatmessagestring) + 1;
-				len = ALIGN(len);
+				len = PAD(len, sizeof(long));
 				size += sizeof(bot_randomstring_t) + len;
 				if (pass)
 				{
@@ -2123,7 +2123,7 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 								return NULL;
 							} //end if
 							len = strlen(chatmessagestring) + 1;
-							len = ALIGN(len);
+							len = PAD(len, sizeof(long));
 							if (pass)
 							{
 								chatmessage = (bot_chatmessage_t *) ptr;

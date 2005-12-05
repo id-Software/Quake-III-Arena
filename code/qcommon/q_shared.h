@@ -111,7 +111,13 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
-#define ALIGN(x) ((x+sizeof(long)-1) & ~(sizeof(long)-1))
+#define PAD(x,y) (((x)+(y)-1) & ~((y)-1))
+
+#ifdef __GNUC__
+#define ALIGN(x) __attribute__((aligned(x)))
+#else
+#define ALIGN(x)
+#endif
 
 #ifndef NULL
 #define NULL ((void *)0)

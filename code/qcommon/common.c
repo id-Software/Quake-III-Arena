@@ -929,7 +929,7 @@ void *Z_TagMalloc( int size, int tag ) {
 	//
 	size += sizeof(memblock_t);	// account for size of block header
 	size += 4;					// space for memory trash tester
-	size = ALIGN(size);		// align to 32/64 bit boundary
+	size = PAD(size, sizeof(long));		// align to 32/64 bit boundary
 	
 	base = rover = zone->rover;
 	start = base->prev;
@@ -1746,7 +1746,7 @@ void *Hunk_AllocateTempMemory( int size ) {
 
 	Hunk_SwapBanks();
 
-	size = ALIGN(size) + sizeof( hunkHeader_t );
+	size = PAD(size, sizeof(long)) + sizeof( hunkHeader_t );
 
 	if ( hunk_temp->temp + hunk_permanent->permanent + size > s_hunkTotal ) {
 		Com_Error( ERR_DROP, "Hunk_AllocateTempMemory: failed on %i", size );
