@@ -800,7 +800,7 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   assert( name );
 
   getcwd(curpath, sizeof(curpath));
-  snprintf (fname, sizeof(fname), "%s" ARCH_STRING ".so", name);
+  snprintf (fname, sizeof(fname), "%s" ARCH_STRING DLL_EXT, name);
 
   // TODO: use fs_searchpaths from files.c
   pwdpath = Sys_Cwd();

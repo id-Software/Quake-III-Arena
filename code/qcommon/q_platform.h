@@ -89,6 +89,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define Q3_LITTLE_ENDIAN
 
+#define DLL_EXT ".dll"
+
 #endif
 
 //============================================================== MAC OS X ===
@@ -111,6 +113,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "i386"
 #define Q3_LITTLE_ENDIAN
 #endif
+
+#define DLL_EXT ".dylib"
 
 #endif
 
@@ -158,6 +162,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define Q3_LITTLE_ENDIAN
 #endif
 
+#define DLL_EXT ".so"
+
 #endif
 
 //=============================================================== FreeBSD ===
@@ -181,6 +187,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #define Q3_LITTLE_ENDIAN
 #endif
+
+#define DLL_EXT ".so"
 
 #endif
 
@@ -207,6 +215,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define Q3_LITTLE_ENDIAN
 #endif
 
+#define DLL_EXT ".so"
+
 #endif
 
 //================================================================== Q3VM ===
@@ -218,6 +228,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PATH_SEP '/'
 
 #define ARCH_STRING "bytecode"
+
+#define DLL_EXT ".qvm"
 
 #endif
 
@@ -238,6 +250,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef PATH_SEP
 #error "PATH_SEP not defined"
+#endif
+
+#ifndef DLL_EXT
+#error "DLL_EXT not defined"
 #endif
 
 
