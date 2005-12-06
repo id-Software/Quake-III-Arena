@@ -524,7 +524,7 @@ ifeq ($(PLATFORM),SunOS)
   endif
 
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -pipe
 
   ifeq ($(USE_SDL),1)
     BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
@@ -533,22 +533,23 @@ ifeq ($(PLATFORM),SunOS)
     GL_CFLAGS = -I/usr/openwin/include
   endif
 
-  OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
+  OPTIMIZE = -O3 -ffast-math -funroll-loops
 
   ifeq ($(ARCH),sparc)
-    OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -falign-loops=2 \
+    OPTIMIZE = -O0 -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
+      -mtune=ultrasparc -mv8plus -munaligned-doubles \
       -funroll-loops
     BASE_CFLAGS += -DNO_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
-    OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
+    OPTIMIZE = -O3 -march=i686  -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -funroll-loops -fstrength-reduce
   endif
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -ggdb -O0
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
@@ -586,8 +587,8 @@ ifeq ($(PLATFORM),SunOS)
       $(B)/baseq3/vm/ui.qvm \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
-#      $(B)/$(PLATFORM)quake3-smp
+      $(B)/missionpack/vm/ui.qvm \
+      $(B)/$(PLATFORM)quake3-smp
   else
     TARGETS=\
       $(B)/$(PLATFORM)quake3 \
@@ -603,8 +604,8 @@ ifeq ($(PLATFORM),SunOS)
       $(B)/baseq3/vm/ui.qvm \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
-#      $(B)/$(PLATFORM)quake3-smp
+      $(B)/missionpack/vm/ui.qvm \
+      $(B)/$(PLATFORM)quake3-smp
 
   endif
 
