@@ -643,25 +643,6 @@ static unsigned short yuv_to_rgb( long y, long u, long v )
 * Description:	
 *
 ******************************************************************************/
-#if defined(MACOS_X)
-
-static ID_INLINE unsigned int yuv_to_rgb24( long y, long u, long v )
-{ 
-	long r,g,b,YY;
-        
-        YY = (long)(ROQ_YY_tab[(y)]);
-
-	r = (YY + ROQ_VR_tab[v]) >> 6;
-	g = (YY + ROQ_UG_tab[u] + ROQ_VG_tab[v]) >> 6;
-	b = (YY + ROQ_UB_tab[u]) >> 6;
-	
-	if (r<0) r = 0; if (g<0) g = 0; if (b<0) b = 0;
-	if (r > 255) r = 255; if (g > 255) g = 255; if (b > 255) b = 255;
-	
-	return ((r<<24)|(g<<16)|(b<<8))|(255);	//+(255<<24));
-}
-
-#else
 static unsigned int yuv_to_rgb24( long y, long u, long v )
 { 
 	long r,g,b,YY = (long)(ROQ_YY_tab[(y)]);
@@ -675,7 +656,6 @@ static unsigned int yuv_to_rgb24( long y, long u, long v )
 	
 	return LittleLong ((r)|(g<<8)|(b<<16)|(255<<24));
 }
-#endif
 
 /******************************************************************************
 *
