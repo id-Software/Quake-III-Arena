@@ -70,9 +70,26 @@ demoq3 and run quake3 with the parameters described above.
 
 64bit mods
 ~~~~~~~~~~
-To compile working(!) shared libraries for 64bit mods the vmMain and
-dllEntry functions as well as the syscall pointer have to be changed
-to accept and return long instead of int.
+If you wish to compile external mods as shared libraries on a 64bit platform,
+and the mod source is derived from the id Q3 SDK, you will need to modify the
+interface code a little. Open the files ending in _syscalls.c and change every
+instance of int to long in the declaration of the syscall function pointer and
+the dllEntry function. Also find the vmMain function for each module (usually
+in cg_main.c g_main.c etc.) and similarly replace every instance of int in the
+prototype with long.
+
+Note if you simply wish to run mods on a 64bit platform you do not need to
+recompile anything since by default Q3 uses a virtual machine system.
+Futhermore, ioq3 has an experimental JIT compiler for x86_64 which will result
+in better performance. To enable this find these lines in code/Makefile:
+
+    # experimental x86_64 jit compiler! you need as
+    #HAVE_VM_COMPILED = true
+
+..and change them to:
+
+    # experimental x86_64 jit compiler! you need as
+    HAVE_VM_COMPILED = true
 
 Compiling under windows using MinGW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
