@@ -855,7 +855,7 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 		src = S_AL_SrcAlloc( priority, entityNum, -1 );
 		if( src == -1 )
 		{
-			Com_Printf( S_COLOR_RED "ERROR: Failed to allocate source "
+			Com_DPrintf( S_COLOR_YELLOW "WARNING: Failed to allocate source "
 					"for loop sfx %d on entity %d\n", sfx, entityNum );
 			return;
 		}
@@ -1586,7 +1586,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	// New console variables
 	s_alPrecache = Cvar_Get( "s_alPrecache", "1", CVAR_ARCHIVE );
 	s_alGain = Cvar_Get( "s_alGain", "0.4", CVAR_ARCHIVE );
-	s_alSources = Cvar_Get( "s_alSources", "64", CVAR_ARCHIVE );
+	s_alSources = Cvar_Get( "s_alSources", "96", CVAR_ARCHIVE );
 	s_alDopplerFactor = Cvar_Get( "s_alDopplerFactor", "1.0", CVAR_ARCHIVE );
 	s_alDopplerSpeed = Cvar_Get( "s_alDopplerSpeed", "2200", CVAR_ARCHIVE );
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "80", CVAR_ARCHIVE );
