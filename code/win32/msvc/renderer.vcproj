@@ -3,8 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="renderer"
-	SccProjectName="&quot;$/MissionPack/code/renderer&quot;, EJBAAAAA"
-	SccLocalPath=".">
+	ProjectGUID="{AB424155-FBED-4D8D-B007-5B6CF93EA395}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\renderer_debug_ta"
+			IntermediateDirectory=".\build\renderer_debug_ta"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,10 +25,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug_TA/renderer.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile=".\Debug_TA/"
-				ProgramDataBaseFileName=".\Debug_TA/"
+				PrecompiledHeaderFile="$(IntDir)\renderer.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -38,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug_TA\renderer.lib"
+				OutputFile="$(OutDir)\renderer.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -63,8 +62,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\renderer_release"
+			IntermediateDirectory=".\build\renderer_release"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -79,17 +78,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/renderer.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\renderer.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\renderer.lib"
+				OutputFile="$(OutDir)\renderer.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -114,8 +113,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\build\renderer_debug"
+			IntermediateDirectory=".\build\renderer_debug"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -128,10 +127,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/renderer.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\renderer.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -140,7 +139,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug\renderer.lib"
+				OutputFile="$(OutDir)\renderer.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -165,8 +164,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\renderer_release_ta"
+			IntermediateDirectory=".\build\renderer_release_ta"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -181,17 +180,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/renderer.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\renderer.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release_TA\renderer.lib"
+				OutputFile="$(OutDir)\renderer.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -216,8 +215,8 @@
 		</Configuration>
 		<Configuration
 			Name="vector|Win32"
-			OutputDirectory=".\renderer___Win32_vector0"
-			IntermediateDirectory=".\renderer___Win32_vector0"
+			OutputDirectory=".\build\renderer_vector0"
+			IntermediateDirectory=".\build\renderer_vector0"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -233,17 +232,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\renderer___Win32_vector0/renderer.pch"
-				AssemblerListingLocation=".\renderer___Win32_vector0/"
-				ObjectFile=".\renderer___Win32_vector0/"
-				ProgramDataBaseFileName=".\renderer___Win32_vector0/"
+				PrecompiledHeaderFile="$(IntDir)\renderer.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\renderer___Win32_vector0\renderer.lib"
+				OutputFile="$(OutDir)\renderer.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -274,10 +273,10 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="ref_trin.def">
+				RelativePath="..\..\renderer\ref_trin.def">
 			</File>
 			<File
-				RelativePath="tr_animation.c">
+				RelativePath="..\..\renderer\tr_animation.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -319,7 +318,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_backend.c">
+				RelativePath="..\..\renderer\tr_backend.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -361,7 +360,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_bsp.c">
+				RelativePath="..\..\renderer\tr_bsp.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -403,7 +402,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_cmds.c">
+				RelativePath="..\..\renderer\tr_cmds.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -445,7 +444,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_curve.c">
+				RelativePath="..\..\renderer\tr_curve.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -487,7 +486,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_flares.c">
+				RelativePath="..\..\renderer\tr_flares.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -529,7 +528,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_font.c">
+				RelativePath="..\..\renderer\tr_font.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -571,7 +570,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_image.c">
+				RelativePath="..\..\renderer\tr_image.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -613,7 +612,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_init.c">
+				RelativePath="..\..\renderer\tr_init.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -655,7 +654,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_light.c">
+				RelativePath="..\..\renderer\tr_light.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -697,7 +696,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_main.c">
+				RelativePath="..\..\renderer\tr_main.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -739,7 +738,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_marks.c">
+				RelativePath="..\..\renderer\tr_marks.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -781,7 +780,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_mesh.c">
+				RelativePath="..\..\renderer\tr_mesh.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -823,7 +822,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_model.c">
+				RelativePath="..\..\renderer\tr_model.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -865,7 +864,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_noise.c">
+				RelativePath="..\..\renderer\tr_noise.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -907,7 +906,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_scene.c">
+				RelativePath="..\..\renderer\tr_scene.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -949,7 +948,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_shade.c">
+				RelativePath="..\..\renderer\tr_shade.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -991,7 +990,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_shade_calc.c">
+				RelativePath="..\..\renderer\tr_shade_calc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1033,7 +1032,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_shader.c">
+				RelativePath="..\..\renderer\tr_shader.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1075,7 +1074,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_shadows.c">
+				RelativePath="..\..\renderer\tr_shadows.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1117,7 +1116,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_sky.c">
+				RelativePath="..\..\renderer\tr_sky.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1159,7 +1158,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_surface.c">
+				RelativePath="..\..\renderer\tr_surface.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1201,7 +1200,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tr_world.c">
+				RelativePath="..\..\renderer\tr_world.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1243,7 +1242,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\win32\win_gamma.c">
+				RelativePath="..\..\win32\win_gamma.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1285,7 +1284,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\win32\win_glimp.c">
+				RelativePath="..\..\win32\win_glimp.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1327,7 +1326,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\win32\win_qgl.c">
+				RelativePath="..\..\win32\win_qgl.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1373,37 +1372,37 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\qcommon\cm_public.h">
+				RelativePath="..\..\qcommon\cm_public.h">
 			</File>
 			<File
-				RelativePath="..\win32\glw_win.h">
+				RelativePath="..\..\win32\glw_win.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.h">
+				RelativePath="..\..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\qcommon.h">
+				RelativePath="..\..\qcommon\qcommon.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\qfiles.h">
+				RelativePath="..\..\qcommon\qfiles.h">
 			</File>
 			<File
-				RelativePath="qgl.h">
+				RelativePath="..\..\renderer\qgl.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\surfaceflags.h">
+				RelativePath="..\..\qcommon\surfaceflags.h">
 			</File>
 			<File
-				RelativePath="tr_local.h">
+				RelativePath="..\..\renderer\tr_local.h">
 			</File>
 			<File
-				RelativePath="tr_public.h">
+				RelativePath="..\..\renderer\tr_public.h">
 			</File>
 			<File
-				RelativePath="..\cgame\tr_types.h">
+				RelativePath="..\..\cgame\tr_types.h">
 			</File>
 			<File
-				RelativePath="..\win32\win_local.h">
+				RelativePath="..\..\win32\win_local.h">
 			</File>
 		</Filter>
 		<Filter
@@ -1413,7 +1412,7 @@
 				Name="Source Files No. 1"
 				Filter="">
 				<File
-					RelativePath="..\jpeg-6\jcapimin.c">
+					RelativePath="..\..\jpeg-6\jcapimin.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1455,7 +1454,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jccoefct.c">
+					RelativePath="..\..\jpeg-6\jccoefct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1497,7 +1496,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jccolor.c">
+					RelativePath="..\..\jpeg-6\jccolor.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1539,7 +1538,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcdctmgr.c">
+					RelativePath="..\..\jpeg-6\jcdctmgr.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1581,7 +1580,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jchuff.c">
+					RelativePath="..\..\jpeg-6\jchuff.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1623,7 +1622,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcinit.c">
+					RelativePath="..\..\jpeg-6\jcinit.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1665,7 +1664,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcmainct.c">
+					RelativePath="..\..\jpeg-6\jcmainct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1707,7 +1706,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcmarker.c">
+					RelativePath="..\..\jpeg-6\jcmarker.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1749,7 +1748,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcmaster.c">
+					RelativePath="..\..\jpeg-6\jcmaster.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1791,7 +1790,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcomapi.c">
+					RelativePath="..\..\jpeg-6\jcomapi.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1833,7 +1832,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcparam.c">
+					RelativePath="..\..\jpeg-6\jcparam.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1875,7 +1874,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcphuff.c">
+					RelativePath="..\..\jpeg-6\jcphuff.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1917,7 +1916,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcprepct.c">
+					RelativePath="..\..\jpeg-6\jcprepct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -1959,7 +1958,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jcsample.c">
+					RelativePath="..\..\jpeg-6\jcsample.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2001,7 +2000,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jctrans.c">
+					RelativePath="..\..\jpeg-6\jctrans.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2043,7 +2042,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdapimin.c">
+					RelativePath="..\..\jpeg-6\jdapimin.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2085,7 +2084,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdapistd.c">
+					RelativePath="..\..\jpeg-6\jdapistd.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2127,7 +2126,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdatadst.c">
+					RelativePath="..\..\jpeg-6\jdatadst.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2169,7 +2168,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdatasrc.c">
+					RelativePath="..\..\jpeg-6\jdatasrc.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2211,7 +2210,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdcoefct.c">
+					RelativePath="..\..\jpeg-6\jdcoefct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2253,7 +2252,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdcolor.c">
+					RelativePath="..\..\jpeg-6\jdcolor.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2295,7 +2294,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jddctmgr.c">
+					RelativePath="..\..\jpeg-6\jddctmgr.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2337,7 +2336,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdhuff.c">
+					RelativePath="..\..\jpeg-6\jdhuff.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2379,7 +2378,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdinput.c">
+					RelativePath="..\..\jpeg-6\jdinput.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2421,7 +2420,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdmainct.c">
+					RelativePath="..\..\jpeg-6\jdmainct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2463,7 +2462,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdmarker.c">
+					RelativePath="..\..\jpeg-6\jdmarker.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2505,7 +2504,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdmaster.c">
+					RelativePath="..\..\jpeg-6\jdmaster.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2547,7 +2546,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdpostct.c">
+					RelativePath="..\..\jpeg-6\jdpostct.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2589,7 +2588,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdsample.c">
+					RelativePath="..\..\jpeg-6\jdsample.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2631,7 +2630,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdtrans.c">
+					RelativePath="..\..\jpeg-6\jdtrans.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2673,7 +2672,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jerror.c">
+					RelativePath="..\..\jpeg-6\jerror.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2715,7 +2714,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jfdctflt.c">
+					RelativePath="..\..\jpeg-6\jfdctflt.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2757,7 +2756,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jidctflt.c">
+					RelativePath="..\..\jpeg-6\jidctflt.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2799,7 +2798,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jmemmgr.c">
+					RelativePath="..\..\jpeg-6\jmemmgr.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2841,7 +2840,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jmemnobs.c">
+					RelativePath="..\..\jpeg-6\jmemnobs.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2883,7 +2882,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jutils.c">
+					RelativePath="..\..\jpeg-6\jutils.c">
 					<FileConfiguration
 						Name="Debug TA|Win32">
 						<Tool
@@ -2929,37 +2928,37 @@
 				Name="Header Files No. 1"
 				Filter="">
 				<File
-					RelativePath="..\jpeg-6\jchuff.h">
+					RelativePath="..\..\jpeg-6\jchuff.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jconfig.h">
+					RelativePath="..\..\jpeg-6\jconfig.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdct.h">
+					RelativePath="..\..\jpeg-6\jdct.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jdhuff.h">
+					RelativePath="..\..\jpeg-6\jdhuff.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jerror.h">
+					RelativePath="..\..\jpeg-6\jerror.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jinclude.h">
+					RelativePath="..\..\jpeg-6\jinclude.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jmemsys.h">
+					RelativePath="..\..\jpeg-6\jmemsys.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jmorecfg.h">
+					RelativePath="..\..\jpeg-6\jmorecfg.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jpegint.h">
+					RelativePath="..\..\jpeg-6\jpegint.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jpeglib.h">
+					RelativePath="..\..\jpeg-6\jpeglib.h">
 				</File>
 				<File
-					RelativePath="..\jpeg-6\jversion.h">
+					RelativePath="..\..\jpeg-6\jversion.h">
 				</File>
 			</Filter>
 		</Filter>
@@ -2967,7 +2966,7 @@
 			Name="FreeType2"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\ft2\ahangles.c">
+				RelativePath="..\..\ft2\ahangles.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3014,7 +3013,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ahglobal.c">
+				RelativePath="..\..\ft2\ahglobal.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3061,7 +3060,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ahglyph.c">
+				RelativePath="..\..\ft2\ahglyph.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3108,7 +3107,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ahhint.c">
+				RelativePath="..\..\ft2\ahhint.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3155,7 +3154,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ahmodule.c">
+				RelativePath="..\..\ft2\ahmodule.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3202,7 +3201,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ahoptim.c">
+				RelativePath="..\..\ft2\ahoptim.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3249,7 +3248,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftcalc.c">
+				RelativePath="..\..\ft2\ftcalc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3296,7 +3295,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftdebug.c">
+				RelativePath="..\..\ft2\ftdebug.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3343,7 +3342,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftextend.c">
+				RelativePath="..\..\ft2\ftextend.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3390,7 +3389,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftglyph.c">
+				RelativePath="..\..\ft2\ftglyph.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3437,7 +3436,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftgrays.c">
+				RelativePath="..\..\ft2\ftgrays.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3484,7 +3483,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftinit.c">
+				RelativePath="..\..\ft2\ftinit.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3531,7 +3530,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftlist.c">
+				RelativePath="..\..\ft2\ftlist.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3578,7 +3577,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftmm.c">
+				RelativePath="..\..\ft2\ftmm.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3625,7 +3624,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftnames.c">
+				RelativePath="..\..\ft2\ftnames.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3672,7 +3671,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftobjs.c">
+				RelativePath="..\..\ft2\ftobjs.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3719,7 +3718,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftoutln.c">
+				RelativePath="..\..\ft2\ftoutln.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3766,7 +3765,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftraster.c">
+				RelativePath="..\..\ft2\ftraster.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3813,7 +3812,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftrend1.c">
+				RelativePath="..\..\ft2\ftrend1.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3860,7 +3859,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftsmooth.c">
+				RelativePath="..\..\ft2\ftsmooth.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3907,7 +3906,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftstream.c">
+				RelativePath="..\..\ft2\ftstream.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -3954,7 +3953,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ftsystem.c">
+				RelativePath="..\..\ft2\ftsystem.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4001,7 +4000,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\sfdriver.c">
+				RelativePath="..\..\ft2\sfdriver.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4048,7 +4047,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\sfobjs.c">
+				RelativePath="..\..\ft2\sfobjs.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4095,7 +4094,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttcmap.c">
+				RelativePath="..\..\ft2\ttcmap.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4142,7 +4141,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttdriver.c">
+				RelativePath="..\..\ft2\ttdriver.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4189,7 +4188,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttgload.c">
+				RelativePath="..\..\ft2\ttgload.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4236,7 +4235,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttinterp.c">
+				RelativePath="..\..\ft2\ttinterp.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4283,7 +4282,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttload.c">
+				RelativePath="..\..\ft2\ttload.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4330,7 +4329,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttobjs.c">
+				RelativePath="..\..\ft2\ttobjs.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4377,7 +4376,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttpload.c">
+				RelativePath="..\..\ft2\ttpload.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4424,7 +4423,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttpost.c">
+				RelativePath="..\..\ft2\ttpost.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4471,7 +4470,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ft2\ttsbit.c">
+				RelativePath="..\..\ft2\ttsbit.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -4521,7 +4520,7 @@
 				Name="Include files"
 				Filter="*.h">
 				<File
-					RelativePath="..\ft2\ahangles.h">
+					RelativePath="..\..\ft2\ahangles.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4554,7 +4553,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahglobal.h">
+					RelativePath="..\..\ft2\ahglobal.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4587,7 +4586,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahglyph.h">
+					RelativePath="..\..\ft2\ahglyph.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4620,7 +4619,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahhint.h">
+					RelativePath="..\..\ft2\ahhint.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4653,7 +4652,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahloader.h">
+					RelativePath="..\..\ft2\ahloader.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4686,7 +4685,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahmodule.h">
+					RelativePath="..\..\ft2\ahmodule.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4719,7 +4718,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahoptim.h">
+					RelativePath="..\..\ft2\ahoptim.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4752,7 +4751,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ahtypes.h">
+					RelativePath="..\..\ft2\ahtypes.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4785,7 +4784,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\autohint.h">
+					RelativePath="..\..\ft2\autohint.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4818,7 +4817,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\freetype.h">
+					RelativePath="..\..\ft2\freetype.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4851,7 +4850,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftbbox.h">
+					RelativePath="..\..\ft2\ftbbox.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4884,7 +4883,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftcalc.h">
+					RelativePath="..\..\ft2\ftcalc.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4917,7 +4916,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftconfig.h">
+					RelativePath="..\..\ft2\ftconfig.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4950,7 +4949,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftdebug.h">
+					RelativePath="..\..\ft2\ftdebug.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -4983,7 +4982,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftdriver.h">
+					RelativePath="..\..\ft2\ftdriver.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5016,7 +5015,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\fterrors.h">
+					RelativePath="..\..\ft2\fterrors.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5049,7 +5048,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftextend.h">
+					RelativePath="..\..\ft2\ftextend.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5082,7 +5081,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftglyph.h">
+					RelativePath="..\..\ft2\ftglyph.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5115,7 +5114,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftimage.h">
+					RelativePath="..\..\ft2\ftimage.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5148,7 +5147,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftlist.h">
+					RelativePath="..\..\ft2\ftlist.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5181,7 +5180,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftmemory.h">
+					RelativePath="..\..\ft2\ftmemory.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5214,7 +5213,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftmm.h">
+					RelativePath="..\..\ft2\ftmm.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5247,7 +5246,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftmodule.h">
+					RelativePath="..\..\ft2\ftmodule.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5280,7 +5279,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftnames.h">
+					RelativePath="..\..\ft2\ftnames.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5313,7 +5312,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftobjs.h">
+					RelativePath="..\..\ft2\ftobjs.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5346,7 +5345,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftoption.h">
+					RelativePath="..\..\ft2\ftoption.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5379,7 +5378,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftoutln.h">
+					RelativePath="..\..\ft2\ftoutln.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5412,7 +5411,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftrender.h">
+					RelativePath="..\..\ft2\ftrender.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5445,7 +5444,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftstream.h">
+					RelativePath="..\..\ft2\ftstream.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5478,7 +5477,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ftsystem.h">
+					RelativePath="..\..\ft2\ftsystem.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5511,7 +5510,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\fttypes.h">
+					RelativePath="..\..\ft2\fttypes.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5544,7 +5543,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\psnames.h">
+					RelativePath="..\..\ft2\psnames.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5577,7 +5576,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\sfnt.h">
+					RelativePath="..\..\ft2\sfnt.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5610,7 +5609,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\t1errors.h">
+					RelativePath="..\..\ft2\t1errors.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5643,7 +5642,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\t1tables.h">
+					RelativePath="..\..\ft2\t1tables.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5676,7 +5675,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\t1types.h">
+					RelativePath="..\..\ft2\t1types.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5709,7 +5708,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\t2errors.h">
+					RelativePath="..\..\ft2\t2errors.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5742,7 +5741,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\t2types.h">
+					RelativePath="..\..\ft2\t2types.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5775,7 +5774,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttdriver.h">
+					RelativePath="..\..\ft2\ttdriver.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5808,7 +5807,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\tterrors.h">
+					RelativePath="..\..\ft2\tterrors.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5841,7 +5840,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttgload.h">
+					RelativePath="..\..\ft2\ttgload.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5874,7 +5873,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttinterp.h">
+					RelativePath="..\..\ft2\ttinterp.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5907,7 +5906,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttnameid.h">
+					RelativePath="..\..\ft2\ttnameid.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5940,7 +5939,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttobjs.h">
+					RelativePath="..\..\ft2\ttobjs.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -5973,7 +5972,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\ttpload.h">
+					RelativePath="..\..\ft2\ttpload.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -6006,7 +6005,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\tttables.h">
+					RelativePath="..\..\ft2\tttables.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -6039,7 +6038,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\tttags.h">
+					RelativePath="..\..\ft2\tttags.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">
@@ -6072,7 +6071,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\ft2\tttypes.h">
+					RelativePath="..\..\ft2\tttypes.h">
 					<FileConfiguration
 						Name="Debug TA|Win32"
 						ExcludedFromBuild="TRUE">

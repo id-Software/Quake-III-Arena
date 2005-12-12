@@ -3,8 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="cgame"
-	SccProjectName="&quot;$/MissionPack/code/cgame&quot;, NPAAAAAA"
-	SccLocalPath=".">
+	ProjectGUID="{C878E295-CB82-4B40-8ECF-5CE5525466FA}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\cgame_release_ta"
+			IntermediateDirectory=".\build\cgame_release_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -27,10 +26,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/cgame.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\cgame.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -38,16 +37,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Release_TA/cgamex86.dll"
+				OutputFile="$(OutDir)\cgamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\cgame.def"
-				ProgramDatabaseFile=".\Release_TA/cgamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\cgamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Release_TA/cgamex86.map"
+				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
-				ImportLibrary=".\Release_TA/cgamex86.lib"
+				ImportLibrary="$(IntDir)\/cgamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -55,7 +54,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release_TA/cgame.tlb"
+				TypeLibraryName=".\$(IntDir)\cgame.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -80,8 +79,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\build\cgame_debug"
+			IntermediateDirectory=".\build\cgame_debug"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -92,10 +91,10 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/cgame.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\cgame.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -105,17 +104,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Debug/cgamex86.dll"
+				OutputFile="$(OutDir)\cgamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\cgame.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug/cgamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\cgamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Debug/cgamex86.map"
+				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
-				ImportLibrary=".\Debug/cgamex86.lib"
+				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -148,8 +147,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\cgame_release"
+			IntermediateDirectory=".\build\cgame_release"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -163,10 +162,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/cgame.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\cgame.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -174,16 +173,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Release/cgamex86.dll"
+				OutputFile="$(OutDir)\cgamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\cgame.def"
-				ProgramDatabaseFile=".\Release/cgamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\cgamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Release/cgamex86.map"
+				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
-				ImportLibrary=".\Release/cgamex86.lib"
+				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -216,8 +215,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\cgame_debug_ta"
+			IntermediateDirectory=".\build\cgame_debug_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -228,10 +227,10 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;MISSIONPACK"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug_TA/cgame.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile=".\Debug_TA/"
-				ProgramDataBaseFileName=".\Debug_TA/"
+				PrecompiledHeaderFile="$(IntDir)\cgame.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -241,17 +240,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="..\Debug_TA\cgamex86.dll"
+				OutputFile="$(OutDir)\cgamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\cgame.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug_TA/cgamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\cgamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Debug_TA/cgamex86.map"
+				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
-				ImportLibrary=".\Debug_TA/cgamex86.lib"
+				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -290,7 +289,7 @@
 			Name="Source Files"
 			Filter="c">
 			<File
-				RelativePath="..\game\bg_lib.c">
+				RelativePath="..\..\game\bg_lib.c">
 				<FileConfiguration
 					Name="Release TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -327,7 +326,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\game\bg_misc.c">
+				RelativePath="..\..\game\bg_misc.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -360,7 +359,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\game\bg_pmove.c">
+				RelativePath="..\..\game\bg_pmove.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -393,7 +392,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\game\bg_slidemove.c">
+				RelativePath="..\..\game\bg_slidemove.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -426,7 +425,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_consolecmds.c">
+				RelativePath="..\..\cgame\cg_consolecmds.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -459,7 +458,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_draw.c">
+				RelativePath="..\..\cgame\cg_draw.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -492,7 +491,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_drawtools.c">
+				RelativePath="..\..\cgame\cg_drawtools.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -525,7 +524,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_effects.c">
+				RelativePath="..\..\cgame\cg_effects.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -558,7 +557,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_ents.c">
+				RelativePath="..\..\cgame\cg_ents.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -591,7 +590,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_event.c">
+				RelativePath="..\..\cgame\cg_event.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -624,7 +623,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_info.c">
+				RelativePath="..\..\cgame\cg_info.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -657,7 +656,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_localents.c">
+				RelativePath="..\..\cgame\cg_localents.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -690,7 +689,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_main.c">
+				RelativePath="..\..\cgame\cg_main.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -723,7 +722,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_marks.c">
+				RelativePath="..\..\cgame\cg_marks.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -756,7 +755,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_newDraw.c">
+				RelativePath="..\..\cgame\cg_newDraw.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -791,7 +790,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_players.c">
+				RelativePath="..\..\cgame\cg_players.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -824,7 +823,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_playerstate.c">
+				RelativePath="..\..\cgame\cg_playerstate.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -857,7 +856,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_predict.c">
+				RelativePath="..\..\cgame\cg_predict.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -890,7 +889,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_scoreboard.c">
+				RelativePath="..\..\cgame\cg_scoreboard.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -923,7 +922,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_servercmds.c">
+				RelativePath="..\..\cgame\cg_servercmds.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -956,7 +955,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_snapshot.c">
+				RelativePath="..\..\cgame\cg_snapshot.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -989,7 +988,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_syscalls.c">
+				RelativePath="..\..\cgame\cg_syscalls.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1022,7 +1021,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_view.c">
+				RelativePath="..\..\cgame\cg_view.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1055,7 +1054,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cg_weapons.c">
+				RelativePath="..\..\cgame\cg_weapons.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1088,13 +1087,13 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\qcommon\q_math.c">
+				RelativePath="..\..\qcommon\q_math.c">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.c">
+				RelativePath="..\..\qcommon\q_shared.c">
 			</File>
 			<File
-				RelativePath="..\ui\ui_shared.c">
+				RelativePath="..\..\ui\ui_shared.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1131,23 +1130,23 @@
 			Name="Header Files"
 			Filter="h">
 			<File
-				RelativePath="..\game\bg_public.h">
+				RelativePath="..\..\game\bg_public.h">
 			</File>
 			<File
-				RelativePath="cg_local.h">
+				RelativePath="..\..\cgame\cg_local.h">
 			</File>
 			<File
-				RelativePath="cg_public.h">
+				RelativePath="..\..\cgame\cg_public.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.h">
+				RelativePath="..\..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\surfaceflags.h">
+				RelativePath="..\..\qcommon\surfaceflags.h">
 			</File>
 		</Filter>
 		<File
-			RelativePath="cgame.def">
+			RelativePath="..\..\cgame\cgame.def">
 			<FileConfiguration
 				Name="Debug TA|Win32"
 				ExcludedFromBuild="TRUE">

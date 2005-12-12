@@ -3,8 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="botlib"
-	SccProjectName="&quot;$/MissionPack/code/botlib&quot;, HBAAAAAA"
-	SccLocalPath=".">
+	ProjectGUID="{A410161F-AE9F-485D-A01F-5294891430A6}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\botlib_debug_ta"
+			IntermediateDirectory=".\build\botlib_debug_ta"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,10 +25,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug_TA/botlib.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile=".\Debug_TA/"
-				ProgramDataBaseFileName=".\Debug_TA/"
+				PrecompiledHeaderFile="$(IntDir)\botlib.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -38,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug_TA\botlib.lib"
+				OutputFile="$(OutDir)\botlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -63,8 +62,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\botlib_release"
+			IntermediateDirectory=".\build\botlib_release"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -79,17 +78,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/botlib.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\botlib.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\botlib.lib"
+				OutputFile="$(OutDir)\botlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -114,8 +113,8 @@
 		</Configuration>
 		<Configuration
 			Name="vector|Win32"
-			OutputDirectory=".\botlib___Win32_vector0"
-			IntermediateDirectory=".\botlib___Win32_vector0"
+			OutputDirectory=".\build\botlib_vector0"
+			IntermediateDirectory=".\build\botlib_vector0"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -131,17 +130,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\botlib___Win32_vector0/botlib.pch"
-				AssemblerListingLocation=".\botlib___Win32_vector0/"
-				ObjectFile=".\botlib___Win32_vector0/"
-				ProgramDataBaseFileName=".\botlib___Win32_vector0/"
+				PrecompiledHeaderFile="$(IntDir)\botlib.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\botlib___Win32_vector0\botlib.lib"
+				OutputFile="$(OutDir)\botlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -166,8 +165,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\build\botlib_debug"
+			IntermediateDirectory=".\build\botlib_debug"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -176,14 +175,15 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="1"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BOTLIB;DEBUG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/botlib.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\botlib.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -192,7 +192,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug\botlib.lib"
+				OutputFile="$(OutDir)\botlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -217,8 +217,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\botlib_release_ta"
+			IntermediateDirectory=".\build\botlib_release_ta"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -233,17 +233,17 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/botlib.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\botlib.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release_TA\botlib.lib"
+				OutputFile="$(OutDir)\botlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -274,7 +274,7 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="be_aas_bspq3.c">
+				RelativePath="..\..\botlib\be_aas_bspq3.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -316,7 +316,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_cluster.c">
+				RelativePath="..\..\botlib\be_aas_cluster.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -358,7 +358,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_debug.c">
+				RelativePath="..\..\botlib\be_aas_debug.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -400,7 +400,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_entity.c">
+				RelativePath="..\..\botlib\be_aas_entity.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -442,7 +442,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_file.c">
+				RelativePath="..\..\botlib\be_aas_file.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -484,7 +484,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_main.c">
+				RelativePath="..\..\botlib\be_aas_main.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -526,7 +526,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_move.c">
+				RelativePath="..\..\botlib\be_aas_move.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -568,7 +568,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_optimize.c">
+				RelativePath="..\..\botlib\be_aas_optimize.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -610,7 +610,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_reach.c">
+				RelativePath="..\..\botlib\be_aas_reach.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -652,7 +652,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_route.c">
+				RelativePath="..\..\botlib\be_aas_route.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -694,7 +694,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_routealt.c">
+				RelativePath="..\..\botlib\be_aas_routealt.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -736,7 +736,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_aas_sample.c">
+				RelativePath="..\..\botlib\be_aas_sample.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -778,7 +778,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_char.c">
+				RelativePath="..\..\botlib\be_ai_char.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -820,7 +820,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_chat.c">
+				RelativePath="..\..\botlib\be_ai_chat.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -862,7 +862,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_gen.c">
+				RelativePath="..\..\botlib\be_ai_gen.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -904,7 +904,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_goal.c">
+				RelativePath="..\..\botlib\be_ai_goal.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -946,7 +946,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_move.c">
+				RelativePath="..\..\botlib\be_ai_move.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -988,7 +988,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_weap.c">
+				RelativePath="..\..\botlib\be_ai_weap.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1030,7 +1030,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ai_weight.c">
+				RelativePath="..\..\botlib\be_ai_weight.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1072,7 +1072,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_ea.c">
+				RelativePath="..\..\botlib\be_ea.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1114,7 +1114,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="be_interface.c">
+				RelativePath="..\..\botlib\be_interface.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1156,7 +1156,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_crc.c">
+				RelativePath="..\..\botlib\l_crc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1198,7 +1198,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_libvar.c">
+				RelativePath="..\..\botlib\l_libvar.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1240,7 +1240,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_log.c">
+				RelativePath="..\..\botlib\l_log.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1282,7 +1282,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_memory.c">
+				RelativePath="..\..\botlib\l_memory.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1324,7 +1324,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_precomp.c">
+				RelativePath="..\..\botlib\l_precomp.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1366,7 +1366,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_script.c">
+				RelativePath="..\..\botlib\l_script.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1408,7 +1408,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="l_struct.c">
+				RelativePath="..\..\botlib\l_struct.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1454,103 +1454,103 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="aasfile.h">
+				RelativePath="..\..\botlib\aasfile.h">
 			</File>
 			<File
-				RelativePath="be_aas_bsp.h">
+				RelativePath="..\..\botlib\be_aas_bsp.h">
 			</File>
 			<File
-				RelativePath="be_aas_cluster.h">
+				RelativePath="..\..\botlib\be_aas_cluster.h">
 			</File>
 			<File
-				RelativePath="be_aas_debug.h">
+				RelativePath="..\..\botlib\be_aas_debug.h">
 			</File>
 			<File
-				RelativePath="be_aas_def.h">
+				RelativePath="..\..\botlib\be_aas_def.h">
 			</File>
 			<File
-				RelativePath="be_aas_entity.h">
+				RelativePath="..\..\botlib\be_aas_entity.h">
 			</File>
 			<File
-				RelativePath="be_aas_file.h">
+				RelativePath="..\..\botlib\be_aas_file.h">
 			</File>
 			<File
-				RelativePath="be_aas_funcs.h">
+				RelativePath="..\..\botlib\be_aas_funcs.h">
 			</File>
 			<File
-				RelativePath="be_aas_main.h">
+				RelativePath="..\..\botlib\be_aas_main.h">
 			</File>
 			<File
-				RelativePath="be_aas_move.h">
+				RelativePath="..\..\botlib\be_aas_move.h">
 			</File>
 			<File
-				RelativePath="be_aas_optimize.h">
+				RelativePath="..\..\botlib\be_aas_optimize.h">
 			</File>
 			<File
-				RelativePath="be_aas_reach.h">
+				RelativePath="..\..\botlib\be_aas_reach.h">
 			</File>
 			<File
-				RelativePath="be_aas_route.h">
+				RelativePath="..\..\botlib\be_aas_route.h">
 			</File>
 			<File
-				RelativePath="be_aas_routealt.h">
+				RelativePath="..\..\botlib\be_aas_routealt.h">
 			</File>
 			<File
-				RelativePath="be_aas_sample.h">
+				RelativePath="..\..\botlib\be_aas_sample.h">
 			</File>
 			<File
-				RelativePath="be_ai_weight.h">
+				RelativePath="..\..\botlib\be_ai_weight.h">
 			</File>
 			<File
-				RelativePath="be_interface.h">
+				RelativePath="..\..\botlib\be_interface.h">
 			</File>
 			<File
-				RelativePath="..\game\bg_public.h">
+				RelativePath="..\..\game\bg_public.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\cm_public.h">
+				RelativePath="..\..\qcommon\cm_public.h">
 			</File>
 			<File
-				RelativePath="..\game\g_public.h">
+				RelativePath="..\\..\game\g_public.h">
 			</File>
 			<File
-				RelativePath="l_crc.h">
+				RelativePath="..\..\botlib\l_crc.h">
 			</File>
 			<File
-				RelativePath="l_libvar.h">
+				RelativePath="..\..\botlib\l_libvar.h">
 			</File>
 			<File
-				RelativePath="l_log.h">
+				RelativePath="..\..\botlib\l_log.h">
 			</File>
 			<File
-				RelativePath="l_memory.h">
+				RelativePath="..\..\botlib\l_memory.h">
 			</File>
 			<File
-				RelativePath="l_precomp.h">
+				RelativePath="..\..\botlib\l_precomp.h">
 			</File>
 			<File
-				RelativePath="l_script.h">
+				RelativePath="..\..\botlib\l_script.h">
 			</File>
 			<File
-				RelativePath="l_struct.h">
+				RelativePath="..\..\botlib\l_struct.h">
 			</File>
 			<File
-				RelativePath="l_utils.h">
+				RelativePath="..\..\botlib\l_utils.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.h">
+				RelativePath="..\..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\qcommon.h">
+				RelativePath="..\..\qcommon\qcommon.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\qfiles.h">
+				RelativePath="..\..\qcommon\qfiles.h">
 			</File>
 			<File
-				RelativePath="..\server\server.h">
+				RelativePath="..\\..\server\server.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\surfaceflags.h">
+				RelativePath="..\..\qcommon\surfaceflags.h">
 			</File>
 		</Filter>
 	</Files>

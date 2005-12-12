@@ -3,8 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="q3_ui"
-	SccProjectName="&quot;$/MissionPack/code/q3_ui&quot;, VFLAAAAA"
-	SccLocalPath=".">
+	ProjectGUID="{D454C4C7-7765-4149-ABAD-05FDEB9D94F8}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\q3_ui_debug_ta"
+			IntermediateDirectory=".\build\q3_ui_debug_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,10 +25,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="Debug/q3_ui.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile="Debug/"
-				ProgramDataBaseFileName="Debug/"
+				PrecompiledHeaderFile="$(IntDir)\q3_ui.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -39,16 +38,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Debug_TA/uix86_old.dll"
+				OutputFile="$(OutDir)\uix86_old.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\ui.def"
+				ModuleDefinitionFile="q3_ui.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="../Debug_TA/ui.pdb"
+				ProgramDatabaseFile="$(IntDir)\ui.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Debug_TA/uix86.map"
+				MapFileName="$(IntDir)\uix86.map"
 				BaseAddress="0x40000000"
-				ImportLibrary="Debug_TA/uix86.lib"
+				ImportLibrary="$(IntDir)\uix86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -81,8 +80,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\q3_ui_release_ta"
+			IntermediateDirectory=".\build\q3_ui_release_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -96,10 +95,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/q3_ui.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\q3_ui.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -107,12 +106,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Release_TA/uix86_old.dll"
+				OutputFile="$(OutDir)\uix86_old.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\ui.def"
-				ProgramDatabaseFile=".\Release_TA/uix86_old.pdb"
-				ImportLibrary="Release_TA/q3_ui.lib"
+				ModuleDefinitionFile="q3_ui.def"
+				ProgramDatabaseFile="$(IntDir)\uix86_old.pdb"
+				ImportLibrary="$(IntDir)\q3_ui.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -145,8 +144,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\q3_ui_release"
+			IntermediateDirectory=".\build\q3_ui_release"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -160,22 +159,23 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/q3_ui.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\q3_ui.pch"
+				AssemblerOutput="0"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../Release/uix86.dll"
+				OutputFile="$(OutDir)\uix86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\ui.def"
-				ProgramDatabaseFile=".\Release/uix86.pdb"
-				ImportLibrary=".\Release/uix86.lib"
+				ModuleDefinitionFile=".\q3_ui.def"
+				ProgramDatabaseFile="$(IntDir)\uix86.pdb"
+				ImportLibrary="$(IntDir)\uix86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -208,8 +208,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\q3_ui___Win32_Debug"
-			IntermediateDirectory=".\q3_ui___Win32_Debug"
+			OutputDirectory=".\build\q3_ui_debug"
+			IntermediateDirectory=".\build\q3_ui_debug"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -222,10 +222,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="Debug/q3_ui.pch"
-				AssemblerListingLocation=".\q3_ui___Win32_Debug/"
-				ObjectFile="Debug/"
-				ProgramDataBaseFileName="Debug/"
+				PrecompiledHeaderFile="$(IntDir)\q3_ui.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -235,16 +235,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="../Debug/uix86.dll"
+				OutputFile="$(OutDir)\uix86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\ui.def"
+				ModuleDefinitionFile="q3_ui.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="../Debug/ui.pdb"
+				ProgramDatabaseFile="$(IntDir)\ui.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Debug/uix86.map"
+				MapFileName="$(IntDir)\uix86.map"
 				BaseAddress="0x40000000"
-				ImportLibrary="Debug/uix86.lib"
+				ImportLibrary="$(IntDir)\uix86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -283,7 +283,7 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\game\bg_misc.c">
+				RelativePath="..\..\game\bg_misc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -320,13 +320,13 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\qcommon\q_math.c">
+				RelativePath="..\..\qcommon\q_math.c">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.c">
+				RelativePath="..\..\qcommon\q_shared.c">
 			</File>
 			<File
-				RelativePath="ui.def">
+				RelativePath="..\..\q3_ui\ui.def">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -347,7 +347,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_addbots.c">
+				RelativePath="..\..\q3_ui\ui_addbots.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -384,7 +384,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_atoms.c">
+				RelativePath="..\..\q3_ui\ui_atoms.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -421,7 +421,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_cdkey.c">
+				RelativePath="..\..\q3_ui\ui_cdkey.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -458,7 +458,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_cinematics.c">
+				RelativePath="..\..\q3_ui\ui_cinematics.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -495,7 +495,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_confirm.c">
+				RelativePath="..\..\q3_ui\ui_confirm.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -532,7 +532,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_connect.c">
+				RelativePath="..\..\q3_ui\ui_connect.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -569,7 +569,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_controls2.c">
+				RelativePath="..\..\q3_ui\ui_controls2.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -606,7 +606,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_credits.c">
+				RelativePath="..\..\q3_ui\ui_credits.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -643,7 +643,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_demo2.c">
+				RelativePath="..\..\q3_ui\ui_demo2.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -680,7 +680,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_display.c">
+				RelativePath="..\..\q3_ui\ui_display.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -717,7 +717,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_gameinfo.c">
+				RelativePath="..\..\q3_ui\ui_gameinfo.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -754,7 +754,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_ingame.c">
+				RelativePath="..\..\q3_ui\ui_ingame.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -791,7 +791,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_loadconfig.c">
+				RelativePath="..\..\q3_ui\ui_loadconfig.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -830,7 +830,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_main.c">
+				RelativePath="..\..\q3_ui\ui_main.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -867,7 +867,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_menu.c">
+				RelativePath="..\..\q3_ui\ui_menu.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -904,7 +904,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_mfield.c">
+				RelativePath="..\..\q3_ui\ui_mfield.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -941,7 +941,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_mods.c">
+				RelativePath="..\..\q3_ui\ui_mods.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -978,7 +978,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_network.c">
+				RelativePath="..\..\q3_ui\ui_network.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1015,7 +1015,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_options.c">
+				RelativePath="..\..\q3_ui\ui_options.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1052,7 +1052,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_playermodel.c">
+				RelativePath="..\..\q3_ui\ui_playermodel.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1089,7 +1089,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_players.c">
+				RelativePath="..\..\q3_ui\ui_players.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1126,7 +1126,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_playersettings.c">
+				RelativePath="..\..\q3_ui\ui_playersettings.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1163,7 +1163,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_preferences.c">
+				RelativePath="..\..\q3_ui\ui_preferences.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1200,7 +1200,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_qmenu.c">
+				RelativePath="..\..\q3_ui\ui_qmenu.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1237,7 +1237,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_removebots.c">
+				RelativePath="..\..\q3_ui\ui_removebots.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1274,7 +1274,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_saveconfig.c">
+				RelativePath="..\..\q3_ui\ui_saveconfig.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1313,7 +1313,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_serverinfo.c">
+				RelativePath="..\..\q3_ui\ui_serverinfo.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1350,7 +1350,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_servers2.c">
+				RelativePath="..\..\q3_ui\ui_servers2.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1387,7 +1387,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_setup.c">
+				RelativePath="..\..\q3_ui\ui_setup.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1424,7 +1424,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_sound.c">
+				RelativePath="..\..\q3_ui\ui_sound.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1461,7 +1461,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_sparena.c">
+				RelativePath="..\..\q3_ui\ui_sparena.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1498,7 +1498,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_specifyserver.c">
+				RelativePath="..\..\q3_ui\ui_specifyserver.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1535,7 +1535,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_splevel.c">
+				RelativePath="..\..\q3_ui\ui_splevel.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1572,7 +1572,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_sppostgame.c">
+				RelativePath="..\..\q3_ui\ui_sppostgame.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1609,7 +1609,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_spreset.c">
+				RelativePath="..\..\q3_ui\ui_spreset.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1646,7 +1646,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_spskill.c">
+				RelativePath="..\..\q3_ui\ui_spskill.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1683,7 +1683,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_startserver.c">
+				RelativePath="..\..\q3_ui\ui_startserver.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1720,7 +1720,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ui\ui_syscalls.c">
+				RelativePath="..\..\ui\ui_syscalls.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1755,7 +1755,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_team.c">
+				RelativePath="..\..\q3_ui\ui_team.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1792,7 +1792,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_teamorders.c">
+				RelativePath="..\..\q3_ui\ui_teamorders.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1829,7 +1829,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_video.c">
+				RelativePath="..\..\q3_ui\ui_video.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1870,7 +1870,7 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="keycodes.h">
+				RelativePath="..\..\q3_ui\keycodes.h">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1885,10 +1885,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.h">
+				RelativePath="..\..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="ui_local.h">
+				RelativePath="..\..\q3_ui\ui_local.h">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1903,7 +1903,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ui_public.h">
+				RelativePath="..\..\q3_ui\ui_public.h">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">

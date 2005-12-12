@@ -3,10 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="quake3"
-	SccProjectName="&quot;$/MissionPack/code&quot;, CAAAAAAA"
-	SccAuxPath=""
-	SccLocalPath="."
-	SccProvider="MSSCCI:Perforce SCM">
+	ProjectGUID="{81CB51C4-B434-4E12-B69B-BAEE102F2852}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -14,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\quake3_release_ta"
+			IntermediateDirectory=".\build\quake3_release_ta"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -29,10 +26,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/quake3.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
@@ -41,12 +38,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\Release_TA/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ProgramDatabaseFile="Release_TA/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Release_TA/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -56,7 +53,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release_TA/quake3.tlb"
+				TypeLibraryName="$(IntDir)\quake3.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -83,8 +80,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\build\quake3_debug"
+			IntermediateDirectory=".\build\quake3_debug"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -95,12 +92,12 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/quake3.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
-				BrowseInformationFile=".\Debug/"
+				BrowseInformationFile="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"/>
@@ -109,13 +106,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\Debug/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Debug/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -125,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/quake3.tlb"
+				TypeLibraryName="$(IntDir)\quake3.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -139,7 +136,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				ResourceOutputFileName="win32\winquake.res"/>
+				ResourceOutputFileName="..\winquake.res"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -153,8 +150,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release TA DEMO|Win32"
-			OutputDirectory=".\quake3___Win32_Release_TA_DEMO"
-			IntermediateDirectory=".\quake3___Win32_Release_TA_DEMO"
+			OutputDirectory=".\build\quake3_release_ta_demo"
+			IntermediateDirectory=".\build\quake3_release_ta_demo"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -168,10 +165,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\quake3___Win32_Release_TA_DEMO/quake3.pch"
-				AssemblerListingLocation=".\quake3___Win32_Release_TA_DEMO/"
-				ObjectFile=".\quake3___Win32_Release_TA_DEMO/"
-				ProgramDataBaseFileName=".\quake3___Win32_Release_TA_DEMO/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="2"/>
@@ -180,13 +177,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\quake3___Win32_Release_TA_DEMO/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="Release_TA/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Release_TA/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -221,8 +218,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\quake3_release"
+			IntermediateDirectory=".\build\quake3_release"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -236,10 +233,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/quake3.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -247,13 +244,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\Release/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Release/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Release/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -263,7 +260,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/quake3.tlb"
+				TypeLibraryName="$(IntDir)\quake3.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -288,8 +285,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug TA DEMO|Win32"
-			OutputDirectory=".\quake3___Win32_Debug_TA_DEMO"
-			IntermediateDirectory=".\quake3___Win32_Debug_TA_DEMO"
+			OutputDirectory=".\build\quake3_debug_ta_demo"
+			IntermediateDirectory=".\build\quake3_debug_ta_demo"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -300,12 +297,12 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;PRE_RELEASE_TADEMO;PRE_RELEASE_DEMO"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\quake3___Win32_Debug_TA_DEMO/quake3.pch"
-				AssemblerListingLocation=".\quake3___Win32_Debug_TA_DEMO/"
-				ObjectFile=".\quake3___Win32_Debug_TA_DEMO/"
-				ProgramDataBaseFileName=".\quake3___Win32_Debug_TA_DEMO/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
-				BrowseInformationFile=".\quake3___Win32_Debug_TA_DEMO/"
+				BrowseInformationFile="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"/>
@@ -314,13 +311,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\quake3___Win32_Debug_TA_DEMO/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\quake3___Win32_Debug_TA_DEMO/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Debug_TA/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -342,7 +339,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				ResourceOutputFileName="win32\winquake.res"/>
+				ResourceOutputFileName="..\winquake.res"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -356,8 +353,8 @@
 		</Configuration>
 		<Configuration
 			Name="vector|Win32"
-			OutputDirectory=".\quake3___Win32_vector0"
-			IntermediateDirectory=".\quake3___Win32_vector0"
+			OutputDirectory=".\build\quake3_vector0"
+			IntermediateDirectory=".\build\quake3_vector0"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -372,10 +369,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\quake3___Win32_vector0/quake3.pch"
-				AssemblerListingLocation=".\quake3___Win32_vector0/"
-				ObjectFile=".\quake3___Win32_vector0/"
-				ProgramDataBaseFileName=".\quake3___Win32_vector0/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"/>
@@ -384,13 +381,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\quake3___Win32_vector0/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="Release_TA/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Release_TA/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -425,8 +422,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\quake3_debug_ta"
+			IntermediateDirectory=".\build\quake3_debug_ta"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -437,12 +434,12 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug_TA/quake3.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile=".\Debug_TA/"
-				ProgramDataBaseFileName=".\Debug_TA/"
+				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
-				BrowseInformationFile=".\Debug_TA/"
+				BrowseInformationFile="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"/>
@@ -451,13 +448,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile=".\Debug_TA/quake3.exe"
+				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug_TA/quake3.pdb"
+				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="Debug_TA/quake3.map"
+				MapFileName="$(IntDir)\quake3.map"
 				SubSystem="2"
 				StackReserveSize="8388608"
 				TargetMachine="1"/>
@@ -467,7 +464,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug_TA/quake3.tlb"
+				TypeLibraryName="$(IntDir)\quake3.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -481,7 +478,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				ResourceOutputFileName="win32\winquake.res"/>
+				ResourceOutputFileName="..\winquake.res"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -501,7 +498,7 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90">
 			<File
-				RelativePath="client\cl_cgame.c">
+				RelativePath="..\..\client\cl_cgame.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -557,7 +554,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_cin.c">
+				RelativePath="..\..\client\cl_cin.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -613,7 +610,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_console.c">
+				RelativePath="..\..\client\cl_console.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -669,7 +666,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_input.c">
+				RelativePath="..\..\client\cl_input.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -725,7 +722,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_keys.c">
+				RelativePath="..\..\client\cl_keys.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -781,7 +778,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_main.c">
+				RelativePath="..\..\client\cl_main.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -837,7 +834,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_net_chan.c">
+				RelativePath="..\..\client\cl_net_chan.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -893,7 +890,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_parse.c">
+				RelativePath="..\..\client\cl_parse.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -949,7 +946,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_scrn.c">
+				RelativePath="..\..\client\cl_scrn.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1005,7 +1002,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_ui.c">
+				RelativePath="..\..\client\cl_ui.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1061,7 +1058,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cm_load.c">
+				RelativePath="..\..\qcommon\cm_load.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1117,7 +1114,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cm_patch.c">
+				RelativePath="..\..\qcommon\cm_patch.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1173,7 +1170,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cm_polylib.c">
+				RelativePath="..\..\qcommon\cm_polylib.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1229,7 +1226,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cm_test.c">
+				RelativePath="..\..\qcommon\cm_test.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1285,7 +1282,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cm_trace.c">
+				RelativePath="..\..\qcommon\cm_trace.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1341,7 +1338,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cmd.c">
+				RelativePath="..\..\qcommon\cmd.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1397,7 +1394,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\common.c">
+				RelativePath="..\..\qcommon\common.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1453,7 +1450,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\cvar.c">
+				RelativePath="..\..\qcommon\cvar.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1509,7 +1506,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\files.c">
+				RelativePath="..\..\qcommon\files.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1565,7 +1562,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\huffman.c">
+				RelativePath="..\..\qcommon\huffman.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1621,7 +1618,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\md4.c">
+				RelativePath="..\..\qcommon\md4.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1677,7 +1674,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\msg.c">
+				RelativePath="..\..\qcommon\msg.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1733,7 +1730,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\net_chan.c">
+				RelativePath="..\..\qcommon\net_chan.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1789,13 +1786,13 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\qcommon\q_math.c">
+				RelativePath="..\..\.\qcommon\q_math.c">
 			</File>
 			<File
-				RelativePath=".\qcommon\q_shared.c">
+				RelativePath="..\..\.\qcommon\q_shared.c">
 			</File>
 			<File
-				RelativePath="client\snd_adpcm.c">
+				RelativePath="..\..\client\snd_adpcm.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1851,7 +1848,13 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\snd_dma.c">
+				RelativePath="..\..\client\snd_codec.c">
+			</File>
+			<File
+				RelativePath="..\..\client\snd_codec_wav.c">
+			</File>
+			<File
+				RelativePath="..\..\client\snd_dma.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1907,7 +1910,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\snd_mem.c">
+				RelativePath="..\..\client\snd_main.c">
+			</File>
+			<File
+				RelativePath="..\..\client\snd_mem.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -1963,7 +1969,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\snd_mix.c">
+				RelativePath="..\..\client\snd_mix.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2019,7 +2025,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\snd_wavelet.c">
+				RelativePath="..\..\client\snd_openal.c">
+			</File>
+			<File
+				RelativePath="..\..\client\snd_wavelet.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2075,7 +2084,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_bot.c">
+				RelativePath="..\..\server\sv_bot.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2131,7 +2140,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_ccmds.c">
+				RelativePath="..\..\server\sv_ccmds.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2187,7 +2196,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_client.c">
+				RelativePath="..\..\server\sv_client.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2243,7 +2252,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_game.c">
+				RelativePath="..\..\server\sv_game.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2299,7 +2308,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_init.c">
+				RelativePath="..\..\server\sv_init.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2355,7 +2364,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_main.c">
+				RelativePath="..\..\server\sv_main.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2411,7 +2420,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_net_chan.c">
+				RelativePath="..\..\server\sv_net_chan.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2467,7 +2476,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_snapshot.c">
+				RelativePath="..\..\server\sv_snapshot.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2523,7 +2532,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="server\sv_world.c">
+				RelativePath="..\..\server\sv_world.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2579,7 +2588,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\unzip.c">
+				RelativePath="..\..\qcommon\unzip.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2635,7 +2644,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\vm.c">
+				RelativePath="..\..\qcommon\vm.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2691,7 +2700,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\vm_interpreted.c">
+				RelativePath="..\..\qcommon\vm_interpreted.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2747,7 +2756,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="qcommon\vm_x86.c">
+				RelativePath="..\..\qcommon\vm_x86.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2803,7 +2812,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_input.c">
+				RelativePath="..\..\win32\win_input.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2859,7 +2868,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_main.c">
+				RelativePath="..\..\win32\win_main.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2915,7 +2924,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_net.c">
+				RelativePath="..\..\win32\win_net.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -2971,7 +2980,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_shared.c">
+				RelativePath="..\..\win32\win_shared.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -3027,7 +3036,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_snd.c">
+				RelativePath="..\..\win32\win_snd.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -3083,7 +3092,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_syscon.c">
+				RelativePath="..\..\win32\win_syscon.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -3139,7 +3148,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32\win_wndproc.c">
+				RelativePath="..\..\win32\win_wndproc.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -3199,98 +3208,92 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;fi;fd">
 			<File
-				RelativePath="game\bg_public.h">
+				RelativePath="..\..\game\bg_public.h">
 			</File>
 			<File
-				RelativePath="cgame\cg_public.h">
+				RelativePath="..\..\cgame\cg_public.h">
 			</File>
 			<File
-				RelativePath="client\client.h">
+				RelativePath="..\..\client\client.h">
 			</File>
 			<File
-				RelativePath="qcommon\cm_local.h">
+				RelativePath="..\..\qcommon\cm_local.h">
 			</File>
 			<File
-				RelativePath="qcommon\cm_patch.h">
+				RelativePath="..\..\qcommon\cm_patch.h">
 			</File>
 			<File
-				RelativePath="qcommon\cm_polylib.h">
+				RelativePath="..\..\qcommon\cm_polylib.h">
 			</File>
 			<File
-				RelativePath="qcommon\cm_public.h">
+				RelativePath="..\..\qcommon\cm_public.h">
 			</File>
 			<File
-				RelativePath="game\g_public.h">
+				RelativePath="..\..\game\g_public.h">
 			</File>
 			<File
-				RelativePath="ui\keycodes.h">
+				RelativePath="..\..\ui\keycodes.h">
 			</File>
 			<File
-				RelativePath="client\keys.h">
+				RelativePath="..\..\client\keys.h">
 			</File>
 			<File
-				RelativePath=".\qcommon\q_shared.h">
+				RelativePath="..\..\.\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="qcommon\qcommon.h">
+				RelativePath="..\..\qcommon\qcommon.h">
 			</File>
 			<File
-				RelativePath="qcommon\qfiles.h">
+				RelativePath="..\..\qcommon\qfiles.h">
 			</File>
 			<File
-				RelativePath="renderer\qgl.h">
+				RelativePath="..\..\renderer\qgl.h">
 			</File>
 			<File
-				RelativePath="win32\resource.h">
+				RelativePath="..\..\win32\resource.h">
 			</File>
 			<File
-				RelativePath="server\server.h">
+				RelativePath="..\..\server\server.h">
 			</File>
 			<File
-				RelativePath="client\snd_local.h">
+				RelativePath="..\..\client\snd_local.h">
 			</File>
 			<File
-				RelativePath="client\snd_public.h">
+				RelativePath="..\..\client\snd_public.h">
 			</File>
 			<File
-				RelativePath=".\qcommon\surfaceflags.h">
+				RelativePath="..\..\.\qcommon\surfaceflags.h">
 			</File>
 			<File
-				RelativePath="renderer\tr_local.h">
+				RelativePath="..\..\renderer\tr_local.h">
 			</File>
 			<File
-				RelativePath="renderer\tr_public.h">
+				RelativePath="..\..\renderer\tr_public.h">
 			</File>
 			<File
-				RelativePath="cgame\tr_types.h">
+				RelativePath="..\..\cgame\tr_types.h">
 			</File>
 			<File
-				RelativePath="ui\ui_public.h">
+				RelativePath="..\..\ui\ui_public.h">
 			</File>
 			<File
-				RelativePath="qcommon\unzip.h">
+				RelativePath="..\..\qcommon\unzip.h">
 			</File>
 			<File
-				RelativePath="qcommon\vm_local.h">
+				RelativePath="..\..\qcommon\vm_local.h">
 			</File>
 			<File
-				RelativePath="win32\win_local.h">
+				RelativePath="..\..\win32\win_local.h">
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe">
 			<File
-				RelativePath="win32\cursor2.cur">
+				RelativePath="..\..\win32\qe3.ico">
 			</File>
 			<File
-				RelativePath="win32\cursor3.cur">
-			</File>
-			<File
-				RelativePath="win32\qe3.ico">
-			</File>
-			<File
-				RelativePath="win32\winquake.rc">
+				RelativePath="..\..\win32\winquake.rc">
 				<FileConfiguration
 					Name="Release TA|Win32">
 					<Tool
@@ -3342,15 +3345,6 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
-		<File
-			RelativePath="unix\ChangeLog">
-		</File>
-		<File
-			RelativePath="unix\Conscript-pk3">
-		</File>
-		<File
-			RelativePath="Construct">
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

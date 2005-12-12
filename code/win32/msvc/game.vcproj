@@ -3,8 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="game"
-	SccProjectName="&quot;$/MissionPack/code/game&quot;, CYAAAAAA"
-	SccLocalPath=".">
+	ProjectGUID="{F9EE10DA-2404-4154-B904-F93C936C040A}">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,8 +11,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug TA|Win32"
-			OutputDirectory=".\Debug_TA"
-			IntermediateDirectory=".\Debug_TA"
+			OutputDirectory=".\build\game_debug_ta"
+			IntermediateDirectory=".\build\game_debug_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -24,10 +23,10 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;MISSIONPACK;QAGAME"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug_TA/game.pch"
-				AssemblerListingLocation=".\Debug_TA/"
-				ObjectFile=".\Debug_TA/"
-				ProgramDataBaseFileName=".\Debug_TA/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -37,17 +36,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="..\Debug_TA\qagamex86.dll"
+				OutputFile="$(OutDir)\qagamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug_TA/qagamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Debug_TA/qagamex86.map"
+				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\Debug_TA/qagamex86.lib"
+				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -80,8 +79,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\build\game_debug"
+			IntermediateDirectory=".\build\game_debug"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -92,10 +91,10 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GLOBALRANK"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/game.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -105,17 +104,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="../Debug/qagamex86.dll"
+				OutputFile="$(OutDir)\qagamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug/qagamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Debug/qagamex86.map"
+				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\Debug/qagamex86.lib"
+				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -148,8 +147,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release Alpha|Win32"
-			OutputDirectory=".\..\ReleaseAXP"
-			IntermediateDirectory=".\ReleaseAXP"
+			OutputDirectory=".\build\game_release_alpha"
+			IntermediateDirectory=".\build\game_release_alpha"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -163,10 +162,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\ReleaseAXP/game.pch"
-				AssemblerListingLocation=".\ReleaseAXP/"
-				ObjectFile=".\ReleaseAXP/"
-				ProgramDataBaseFileName=".\ReleaseAXP/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="2"/>
@@ -175,14 +174,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="..\ReleaseAXP/qagameaxp.dll"
+				OutputFile="$(OutDir)\qagameaxp.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
-				ProgramDatabaseFile=".\..\ReleaseAXP/qagameaxp.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagameaxp.pdb"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\..\ReleaseAXP/qagameaxp.lib"/>
+				ImportLibrary="$(IntDir)\qagameaxp.lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -214,8 +213,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug Alpha|Win32"
-			OutputDirectory=".\..\DebugAxp"
-			IntermediateDirectory=".\DebugAxp"
+			OutputDirectory=".\build\game_debug_alpha"
+			IntermediateDirectory=".\build\game_debug_alpha"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -226,10 +225,10 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;C_ONLY"
 				RuntimeLibrary="5"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\DebugAxp/game.pch"
-				AssemblerListingLocation=".\DebugAxp/"
-				ObjectFile=".\DebugAxp/"
-				ProgramDataBaseFileName=".\DebugAxp/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"/>
@@ -238,15 +237,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="..\DebugAxp/qagameaxp.dll"
+				OutputFile="$(OutDir)\qagameaxp.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\DebugAxp/qagameaxp.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagameaxp.pdb"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\..\DebugAxp/qagameaxp.lib"/>
+				ImportLibrary="$(IntDir)\qagameaxp.lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -278,8 +277,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\build\game_release"
+			IntermediateDirectory=".\build\game_release"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -293,10 +292,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/game.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -304,16 +303,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="../Release/qagamex86.dll"
+				OutputFile="$(OutDir)\qagamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
-				ProgramDatabaseFile=".\Release/qagamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Release/qagamex86.map"
+				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\Release/qagamex86.lib"
+				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -346,8 +345,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release TA|Win32"
-			OutputDirectory=".\Release_TA"
-			IntermediateDirectory=".\Release_TA"
+			OutputDirectory=".\build\game_release_ta"
+			IntermediateDirectory=".\build\game_release_ta"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -361,10 +360,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release_TA/game.pch"
-				AssemblerListingLocation=".\Release_TA/"
-				ObjectFile=".\Release_TA/"
-				ProgramDataBaseFileName=".\Release_TA/"
+				PrecompiledHeaderFile="$(IntDir)\game.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -372,16 +371,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="../Release_TA/qagamex86.dll"
+				OutputFile="$(IntDir)\qagamex86.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile=".\game.def"
-				ProgramDatabaseFile=".\Release_TA/qagamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\qagamex86.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\Release_TA/qagamex86.map"
+				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
-				ImportLibrary=".\Release_TA/qagamex86.lib"
+				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -420,7 +419,7 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90">
 			<File
-				RelativePath="ai_chat.c">
+				RelativePath="..\..\game\ai_chat.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -467,7 +466,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_cmd.c">
+				RelativePath="..\..\game\ai_cmd.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -514,7 +513,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_dmnet.c">
+				RelativePath="..\..\game\ai_dmnet.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -561,7 +560,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_dmq3.c">
+				RelativePath="..\..\game\ai_dmq3.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -608,7 +607,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_main.c">
+				RelativePath="..\..\game\ai_main.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -655,7 +654,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_team.c">
+				RelativePath="..\..\game\ai_team.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -702,7 +701,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ai_vcmd.c">
+				RelativePath="..\..\game\ai_vcmd.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -749,7 +748,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="bg_lib.c">
+				RelativePath="..\..\game\bg_lib.c">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -800,7 +799,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="bg_misc.c">
+				RelativePath="..\..\game\bg_misc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -847,7 +846,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="bg_pmove.c">
+				RelativePath="..\..\game\bg_pmove.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -894,7 +893,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="bg_slidemove.c">
+				RelativePath="..\..\game\bg_slidemove.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -941,7 +940,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_active.c">
+				RelativePath="..\..\game\g_active.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -988,7 +987,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_arenas.c">
+				RelativePath="..\..\game\g_arenas.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1035,7 +1034,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_bot.c">
+				RelativePath="..\..\game\g_bot.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1082,7 +1081,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_client.c">
+				RelativePath="..\..\game\g_client.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1129,7 +1128,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_cmds.c">
+				RelativePath="..\..\game\g_cmds.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1176,7 +1175,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_combat.c">
+				RelativePath="..\..\game\g_combat.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1223,7 +1222,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_items.c">
+				RelativePath="..\..\game\g_items.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1270,7 +1269,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_main.c">
+				RelativePath="..\..\game\g_main.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1317,7 +1316,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_mem.c">
+				RelativePath="..\..\game\g_mem.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1364,7 +1363,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_misc.c">
+				RelativePath="..\..\game\g_misc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1411,7 +1410,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_missile.c">
+				RelativePath="..\..\game\g_missile.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1458,7 +1457,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_mover.c">
+				RelativePath="..\..\game\g_mover.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1505,7 +1504,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_session.c">
+				RelativePath="..\..\game\g_session.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1552,7 +1551,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_spawn.c">
+				RelativePath="..\..\game\g_spawn.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1599,7 +1598,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_svcmds.c">
+				RelativePath="..\..\game\g_svcmds.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1646,7 +1645,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_syscalls.c">
+				RelativePath="..\..\game\g_syscalls.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1693,7 +1692,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_target.c">
+				RelativePath="..\..\game\g_target.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1740,7 +1739,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_team.c">
+				RelativePath="..\..\game\g_team.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1787,7 +1786,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_trigger.c">
+				RelativePath="..\..\game\g_trigger.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1834,7 +1833,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_utils.c">
+				RelativePath="..\..\game\g_utils.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1881,7 +1880,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="g_weapon.c">
+				RelativePath="..\..\game\g_weapon.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">
 					<Tool
@@ -1928,7 +1927,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="game.def">
+				RelativePath="..\..\game\game.def">
 				<FileConfiguration
 					Name="Debug TA|Win32"
 					ExcludedFromBuild="TRUE">
@@ -1943,95 +1942,95 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\qcommon\q_math.c">
+				RelativePath="..\..\qcommon\q_math.c">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.c">
+				RelativePath="..\..\qcommon\q_shared.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;fi;fd">
 			<File
-				RelativePath="ai_chat.h">
+				RelativePath="..\..\game\ai_chat.h">
 			</File>
 			<File
-				RelativePath="ai_cmd.h">
+				RelativePath="..\..\game\ai_cmd.h">
 			</File>
 			<File
-				RelativePath="ai_dmnet.h">
+				RelativePath="..\..\game\ai_dmnet.h">
 			</File>
 			<File
-				RelativePath="ai_dmq3.h">
+				RelativePath="..\..\game\ai_dmq3.h">
 			</File>
 			<File
-				RelativePath="ai_main.h">
+				RelativePath="..\..\game\ai_main.h">
 			</File>
 			<File
-				RelativePath="ai_team.h">
+				RelativePath="..\..\game\ai_team.h">
 			</File>
 			<File
-				RelativePath="ai_vcmd.h">
+				RelativePath="..\..\game\ai_vcmd.h">
 			</File>
 			<File
-				RelativePath="be_aas.h">
+				RelativePath="..\..\game\be_aas.h">
 			</File>
 			<File
-				RelativePath="be_ai_char.h">
+				RelativePath="..\..\game\be_ai_char.h">
 			</File>
 			<File
-				RelativePath="be_ai_chat.h">
+				RelativePath="..\..\game\be_ai_chat.h">
 			</File>
 			<File
-				RelativePath="be_ai_gen.h">
+				RelativePath="..\..\game\be_ai_gen.h">
 			</File>
 			<File
-				RelativePath="be_ai_goal.h">
+				RelativePath="..\..\game\be_ai_goal.h">
 			</File>
 			<File
-				RelativePath="be_ai_move.h">
+				RelativePath="..\..\game\be_ai_move.h">
 			</File>
 			<File
-				RelativePath="be_ai_weap.h">
+				RelativePath="..\..\game\be_ai_weap.h">
 			</File>
 			<File
-				RelativePath="be_ea.h">
+				RelativePath="..\..\game\be_ea.h">
 			</File>
 			<File
-				RelativePath="bg_local.h">
+				RelativePath="..\..\game\bg_local.h">
 			</File>
 			<File
-				RelativePath="bg_public.h">
+				RelativePath="..\..\game\bg_public.h">
 			</File>
 			<File
-				RelativePath="botlib.h">
+				RelativePath="..\..\game\botlib.h">
 			</File>
 			<File
-				RelativePath="chars.h">
+				RelativePath="..\..\game\chars.h">
 			</File>
 			<File
-				RelativePath="g_local.h">
+				RelativePath="..\..\game\g_local.h">
 			</File>
 			<File
-				RelativePath="g_public.h">
+				RelativePath="..\..\game\g_public.h">
 			</File>
 			<File
-				RelativePath="g_team.h">
+				RelativePath="..\..\game\g_team.h">
 			</File>
 			<File
-				RelativePath="inv.h">
+				RelativePath="..\..\game\inv.h">
 			</File>
 			<File
-				RelativePath="match.h">
+				RelativePath="..\..\game\match.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\q_shared.h">
+				RelativePath="..\..\qcommon\q_shared.h">
 			</File>
 			<File
-				RelativePath="..\qcommon\surfaceflags.h">
+				RelativePath="..\..\qcommon\surfaceflags.h">
 			</File>
 			<File
-				RelativePath="syn.h">
+				RelativePath="..\..\game\syn.h">
 			</File>
 		</Filter>
 		<Filter
