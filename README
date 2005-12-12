@@ -25,7 +25,7 @@ Refer to the web-site for updated status, enjoy!
 
 Compiling (Under Windows)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run Visual Studio, open the quake3.vcproj file in the win32
+Run Visual Studio, open the quake3.sln file in the win32/msvc
 directory. Build. Copy the resultant Quake3.exe to your quake 3
 directory, make a backup if you want to keep your original.
 
