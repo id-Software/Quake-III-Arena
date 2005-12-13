@@ -1767,10 +1767,10 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 copyfiles: build_release
 	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
 	$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)quake3$(BINEXT) $(COPYDIR)/quake3
-	@if [ -f $(BR)/$(PLATFORM)q3ded$(BINEXT) ] \
-	then \
-		$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded$(BINEXT) \
-	fi
+
+	@if [ -f $(BR)/$(PLATFORM)q3ded$(BINEXT) ]; then \
+		$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded$(BINEXT); \
+	fi 
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
 	$(INSTALL) -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
