@@ -473,6 +473,47 @@ ifeq ($(PLATFORM),freebsd)
 else # ifeq freebsd
 
 #############################################################################
+# SETUP AND BUILD -- NETBSD
+#############################################################################
+
+ifeq ($(PLATFORM),netbsd)
+
+  ifeq ($(shell uname -m),i386)
+    ARCH=i386
+  endif
+
+  CC=gcc
+  LDFLAGS=-lm
+  SHLIBEXT=so
+  SHLIBCFLAGS=-fPIC
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+  THREAD_LDFLAGS=-lpthread
+
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+
+  ifneq ($(ARCH),i386)
+    BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
+
+  ifeq ($(ARCH),i386)
+    TARGETS=\
+      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
+      $(B)/$(PLATFORM)q3ded
+  else
+    TARGETS=\
+      $(B)/$(PLATFORM)q3ded
+
+  endif
+
+else # ifeq netbsd
+
+#############################################################################
 # SETUP AND BUILD -- IRIX
 #############################################################################
 
@@ -630,6 +671,7 @@ endif #Linux
 endif #darwin
 endif #mingw32
 endif #FreeBSD
+endif #NetBSD
 endif #IRIX
 endif #SunOS
 
