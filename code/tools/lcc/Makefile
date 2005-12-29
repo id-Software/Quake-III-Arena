@@ -1,4 +1,3 @@
-PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 TEMPDIR=/tmp
 A=.a
 O=.o
@@ -19,7 +18,7 @@ RANLIB=ranlib
 DIFF=diff
 RM=rm -f
 RMDIR=rmdir
-BUILDDIR=build
+BUILDDIR=build-$(PLATFORM)-$(ARCH)
 BD=$(BUILDDIR)/
 
 ifeq ($(USE_CCACHE),1)

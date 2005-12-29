@@ -55,6 +55,28 @@ haven't set it. Which is where the id patch installs by default.
 Then run "make copyfiles", beware that this will overwrite any binaries
 installed previously, even official id ones.
 
+Compiling under Windows using MinGW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It is possible to compile ioQ3 using the MinGW (Minimalist GNU for Windows)
+toolset. It's a little more involved than compiling for Linux; steps are as
+follows:
+
+1. Download and install MinGW and MSys from http://www.mingw.org/.
+2. Download http://www.libsdl.org/extras/win32/common/directx-devel.tar.gz
+   and untar in into your MinGW directory (usually C:\MinGW).
+3. Perform the usual precompilation sacrificial ritual.
+4. Open an MSys terminal, and follow the instructions for compiling on Linux.
+5. Steal underpants
+6. ?????
+7. Profit!
+
+It is also possible to cross compile for Windows using MinGW. A script is
+available to build a cross compilation environment from
+http://www.libsdl.org/extras/win32/cross/build-cross.sh. The gcc/binutils
+version numbers that the script downloads may need to be altered. After you
+have successfully run this script cross compiling is simply a case of using
+'./cross-make-mingw.sh' in place of 'make'.
+
 Using shared libraries instead of qvm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To make quake3 prefer shared libraries instead of qvm run it with
@@ -63,7 +85,7 @@ the following parameters:
 
 Using Demo Data Files
 ~~~~~~~~~~~~~~~~~~~~~
-you only need demoq3/pak0.pk3 from the demo installer. The qvm files inside
+You only need demoq3/pak0.pk3 from the demo installer. The qvm files inside
 pak0.pk3 will not work, you have to use the native shared libraries from this
 project. To do so copy or link ui*.so, qagame*.so, cgame*.so from baseq3 to
 demoq3 and run quake3 with the parameters described above.
@@ -80,58 +102,6 @@ prototype with long.
 
 Note if you simply wish to run mods on a 64bit platform you do not need to
 recompile anything since by default Q3 uses a virtual machine system.
-Futhermore, ioq3 has an experimental JIT compiler for x86_64 which will result
-in better performance. To enable this find these lines in code/Makefile:
-
-    # experimental x86_64 jit compiler! you need as
-    #HAVE_VM_COMPILED = true
-
-..and change them to:
-
-    # experimental x86_64 jit compiler! you need as
-    HAVE_VM_COMPILED = true
-
-Compiling under windows using MinGW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-It is possible to compile ioQ3 using the MinGW (Minimalist GNU for Windows)
-toolset. It's a little more involved than compiling for linux; steps are as
-follows:
-
-1. Download and install MinGW and MSys from http://www.mingw.org/.
-2. Download and install the DirectX 9 SDK from
-   http://msdn.microsoft.com/directx/. Previous versions of the SDK will
-   probably work, but they have not been tested.
-3. Find the following in DXSDK/Include/dinput.h...
-
-      } DIDEVICEINSTANCEW, *LPDIDEVICEINSTANCEW;
-      #ifdef UNICODE
-      typedef DIDEVICEINSTANCEW DIDEVICEINSTANCE;
-      typedef LPDIDEVICEINSTANCEW LPDIDEVICEINSTANCE;
-      #else
-      typedef DIDEVICEINSTANCEA DIDEVICEINSTANCE;
-      typedef LPDIDEVICEINSTANCEA LPDIDEVICEINSTANCE;
-      #endif // UNICODE
-
-      typedef const DIDEVICEINSTANCEA *LPCDIDEVICEINSTANCEA;
-      typedef const DIDEVICEINSTANCEW *LPCDIDEVICEINSTANCEW;
-   >  #ifdef UNICODE
-   >  typedef DIDEVICEINSTANCEW DIDEVICEINSTANCE;
-   >  typedef LPCDIDEVICEINSTANCEW LPCDIDEVICEINSTANCE;
-   >  #else
-   >  typedef DIDEVICEINSTANCEA DIDEVICEINSTANCE;
-   >  typedef LPCDIDEVICEINSTANCEA LPCDIDEVICEINSTANCE;
-   >  #endif // UNICODE
-      typedef const DIDEVICEINSTANCE  *LPCDIDEVICEINSTANCE;
-
-   ...and comment out/remove the duplicated code marked by '>'.
-
-4. If you didn't install the DirectX SDK in C:\DXSDK\, add DXSDK_DIR to
-   code/unix/Makefile.local to reflect the new location.
-5. Perform the usual precompilation sacrificial ritual.
-6. Open an MSys terminal, and follow the instructions for compiling on Linux.
-7. Steal underpants
-8. ?????
-9. Profit!
 
 Creating mods compatible with Q3 1.32b
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

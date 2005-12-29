@@ -11,18 +11,13 @@
 # GNU Make required
 #
 
-PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
-PLATFORM_RELEASE=$(shell uname -r)
+COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 
-# Apple does some things a little differently...
-ifeq ($(PLATFORM),darwin)
-  ARCH:= $(shell uname -p | sed -e s/i.86/i386/)
+ifeq ($(COMPILE_PLATFORM),darwin)
+  # Apple does some things a little differently...
+  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 else
-  ARCH:=$(shell uname -m | sed -e s/i.86/i386/)
-endif
-
-ifeq ($(ARCH),powerpc)
-  ARCH:=ppc
+  COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 endif
 
 #############################################################################
@@ -35,6 +30,31 @@ endif
 #############################################################################
 -include Makefile.local
 
+ifndef PLATFORM
+PLATFORM=$(COMPILE_PLATFORM)
+endif
+export PLATFORM
+
+ifndef ARCH
+ARCH=$(COMPILE_ARCH)
+endif
+
+ifeq ($(ARCH),powerpc)
+  ARCH=ppc
+endif
+export ARCH
+
+ifneq ($(PLATFORM),$(COMPILE_PLATFORM))
+  CROSS_COMPILING=1
+else
+  CROSS_COMPILING=0
+
+  ifneq ($(ARCH),$(COMPILE_ARCH))
+    CROSS_COMPILING=1
+  endif
+endif
+export CROSS_COMPILING
+
 ifndef COPYDIR
 COPYDIR="/usr/local/games/quake3"
 endif
@@ -46,11 +66,6 @@ endif
 
 ifndef GENERATE_DEPENDENCIES
 GENERATE_DEPENDENCIES=1
-endif
-
-# Used for building with mingw
-ifndef DXSDK_DIR
-DXSDK_DIR=C:/DXSDK
 endif
 
 ifndef USE_CCACHE
@@ -84,8 +99,8 @@ endif
 
 #############################################################################
 
-BD=debug$(ARCH)$(GLIBC)
-BR=release$(ARCH)$(GLIBC)
+BD=debug-$(PLATFORM)-$(ARCH)
+BR=release-$(PLATFORM)-$(ARCH)
 CDIR=$(MOUNT_DIR)/client
 SDIR=$(MOUNT_DIR)/server
 RDIR=$(MOUNT_DIR)/renderer
@@ -343,21 +358,16 @@ else # ifeq darwin
 
 ifeq ($(PLATFORM),mingw32)
 
-  GLIBC=-mingw
   CC=gcc
   WINDRES=windres
 
-  ifeq ($(ARCH),i386)
-    ARCH=x86
-  endif
+  ARCH=x86
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN=1
   endif
-
-  DX_CFLAGS = -I$(DXSDK_DIR)/Include
 
   GL_CFLAGS =
   MINGW_CFLAGS = -DDONT_TYPEDEF_INT32
@@ -685,16 +695,27 @@ endif
 
 ifneq ($(BUILD_CLIENT),1)
   TARGETS := \
-	$(subst $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT),,\
-	$(subst $(B)/baseq3/ui$(ARCH).$(SHLIBEXT),,\
-	$(subst $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT),,\
-	$(subst $(B)/missionpack/ui$(ARCH).$(SHLIBEXT),,\
-	$(subst $(B)/baseq3/vm/cgame.qvm,,\
-	$(subst $(B)/baseq3/vm/ui.qvm,,\
-	$(subst $(B)/missionpack/vm/cgame.qvm,,\
-	$(subst $(B)/missionpack/vm/ui.qvm,,\
-	$(subst $(B)/$(PLATFORM)quake3-smp$(BINEXT),,\
-	$(subst $(B)/$(PLATFORM)quake3$(BINEXT),,$(TARGETS) ))))))))))
+  $(subst $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT),,\
+  $(subst $(B)/baseq3/ui$(ARCH).$(SHLIBEXT),,\
+  $(subst $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT),,\
+  $(subst $(B)/missionpack/ui$(ARCH).$(SHLIBEXT),,\
+  $(subst $(B)/baseq3/vm/cgame.qvm,,\
+  $(subst $(B)/baseq3/vm/ui.qvm,,\
+  $(subst $(B)/missionpack/vm/cgame.qvm,,\
+  $(subst $(B)/missionpack/vm/ui.qvm,,\
+  $(subst $(B)/$(PLATFORM)quake3-smp$(BINEXT),,\
+  $(subst $(B)/$(PLATFORM)quake3$(BINEXT),,$(TARGETS) ))))))))))
+endif
+
+# Never build qvms when cross-compiling
+ifeq ($(CROSS_COMPILING),1)
+  TARGETS := \
+  $(subst $(B)/baseq3/vm/qagame.qvm,,\
+  $(subst $(B)/baseq3/vm/cgame.qvm,,\
+  $(subst $(B)/baseq3/vm/ui.qvm,,\
+  $(subst $(B)/missionpack/vm/qagame.qvm,,\
+  $(subst $(B)/missionpack/vm/cgame.qvm,,\
+  $(subst $(B)/missionpack/vm/ui.qvm,,$(TARGETS) ))))))
 endif
 
 ifdef DEFAULT_BASEDIR
@@ -769,9 +790,14 @@ makedirs:
 Q3LCC=../tools/q3lcc$(BINEXT)
 Q3ASM=../tools/q3asm$(BINEXT)
 
+ifeq ($(CROSS_COMPILING),1)
+tools:
+	echo QVM tools not built when cross-compiling
+else
 tools:
 	$(MAKE) -C ../tools/lcc install
 	$(MAKE) -C ../tools/asm install
+endif
 
 DO_Q3LCC=$(Q3LCC) -o $@ $<
 
@@ -1287,16 +1313,16 @@ $(B)/client/matha.o : $(UDIR)/matha.s; $(DO_AS)
 $(B)/client/ftola.o : $(UDIR)/ftola.s; $(DO_AS)
 $(B)/client/snapvectora.o : $(UDIR)/snapvectora.s; $(DO_AS)
 
-$(B)/client/win_gamma.o : $(W32DIR)/win_gamma.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_glimp.o : $(W32DIR)/win_glimp.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_input.o : $(W32DIR)/win_input.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_main.o : $(W32DIR)/win_main.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_net.o : $(W32DIR)/win_net.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_qgl.o : $(W32DIR)/win_qgl.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_shared.o : $(W32DIR)/win_shared.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_snd.o : $(W32DIR)/win_snd.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_syscon.o : $(W32DIR)/win_syscon.c; $(DO_CC) $(DX_CFLAGS)
-$(B)/client/win_wndproc.o : $(W32DIR)/win_wndproc.c; $(DO_CC) $(DX_CFLAGS)
+$(B)/client/win_gamma.o : $(W32DIR)/win_gamma.c; $(DO_CC)
+$(B)/client/win_glimp.o : $(W32DIR)/win_glimp.c; $(DO_CC)
+$(B)/client/win_input.o : $(W32DIR)/win_input.c; $(DO_CC)
+$(B)/client/win_main.o : $(W32DIR)/win_main.c; $(DO_CC)
+$(B)/client/win_net.o : $(W32DIR)/win_net.c; $(DO_CC)
+$(B)/client/win_qgl.o : $(W32DIR)/win_qgl.c; $(DO_CC)
+$(B)/client/win_shared.o : $(W32DIR)/win_shared.c; $(DO_CC)
+$(B)/client/win_snd.o : $(W32DIR)/win_snd.c; $(DO_CC)
+$(B)/client/win_syscon.o : $(W32DIR)/win_syscon.c; $(DO_CC)
+$(B)/client/win_wndproc.o : $(W32DIR)/win_wndproc.c; $(DO_CC)
 $(B)/client/win_resource.o : $(W32DIR)/winquake.rc; $(DO_WINDRES)
 
 $(B)/client/vm_x86.o : $(CMDIR)/vm_x86.c; $(DO_CC)

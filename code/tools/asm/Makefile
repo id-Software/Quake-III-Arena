@@ -1,6 +1,5 @@
 # yeah, couldn't do more simple really
 
-PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
 ifeq ($(PLATFORM),mingw32)
   BINEXT=.exe
 else
