@@ -20,6 +20,12 @@ else
   COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 endif
 
+BUILD_CLIENT     =
+BUILD_CLIENT_SMP =
+BUILD_SERVER     =
+BUILD_GAME_SO    =
+BUILD_GAME_QVM   =
+
 #############################################################################
 #
 # If you require a different configuration from the defaults below, create a
@@ -89,14 +95,6 @@ ifndef USE_LOCAL_HEADERS
 USE_LOCAL_HEADERS=1
 endif
 
-ifndef BUILD_CLIENT
-BUILD_CLIENT=1
-endif
-
-ifndef BUILD_SERVER
-BUILD_SERVER=1
-endif
-
 #############################################################################
 
 BD=debug-$(PLATFORM)-$(ARCH)
@@ -135,7 +133,6 @@ MKDIR=mkdir
 
 ifeq ($(PLATFORM),linux)
 
-  GLIBC=-glibc
   CC=gcc
 
   ifeq ($(ARCH),alpha)
@@ -227,29 +224,6 @@ ifeq ($(PLATFORM),linux)
     LDFLAGS+=-m32
   endif
 
-  ifeq ($(ARCH),axp)
-    TARGETS=\
-      $(B)/$(PLATFORM)q3ded
-  else
-    TARGETS=\
-      $(B)/$(PLATFORM)quake3 \
-      $(B)/$(PLATFORM)q3ded \
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/vm/cgame.qvm \
-      $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
-      $(B)/missionpack/vm/qagame.qvm \
-      $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
-#      $(B)/$(PLATFORM)quake3-smp \
-
-  endif
-
 else # ifeq Linux
 
 #############################################################################
@@ -257,7 +231,6 @@ else # ifeq Linux
 #############################################################################
 
 ifeq ($(PLATFORM),darwin)
-  GLIBC=
   CC=gcc
 
   # !!! FIXME: calling conventions are still broken! See Bugzilla #2519
@@ -332,23 +305,6 @@ ifeq ($(PLATFORM),darwin)
     endif
   endif
 
-  TARGETS=\
-      $(B)/$(PLATFORM)quake3 \
-      $(B)/$(PLATFORM)q3ded \
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/vm/cgame.qvm \
-      $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
-      $(B)/missionpack/vm/qagame.qvm \
-      $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm \
-      $(B)/$(PLATFORM)quake3-smp \
-
 else # ifeq darwin
 
 
@@ -394,21 +350,6 @@ ifeq ($(PLATFORM),mingw32)
     LDFLAGS+=-m32
   endif
 
-  TARGETS=\
-    $(B)/$(PLATFORM)quake3$(BINEXT) \
-    $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-    $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-    $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-    $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-    $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-    $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-    $(B)/baseq3/vm/cgame.qvm \
-    $(B)/baseq3/vm/qagame.qvm \
-    $(B)/baseq3/vm/ui.qvm \
-    $(B)/missionpack/vm/qagame.qvm \
-    $(B)/missionpack/vm/cgame.qvm \
-    $(B)/missionpack/vm/ui.qvm
-
 else # ifeq mingw32
 
 #############################################################################
@@ -416,8 +357,6 @@ else # ifeq mingw32
 #############################################################################
 
 ifeq ($(PLATFORM),freebsd)
-
-  GLIBC= #libc is irrelevant
 
   ifneq (,$(findstring alpha,$(shell uname -m)))
     ARCH=axp
@@ -459,26 +398,6 @@ ifeq ($(PLATFORM),freebsd)
 
   CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
 
-  ifeq ($(ARCH),axp)
-    TARGETS=\
-      $(B)/$(PLATFORM)q3ded
-  else
-    TARGETS=\
-      $(B)/$(PLATFORM)quake3 \
-      $(B)/$(PLATFORM)q3ded \
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/vm/cgame.qvm \
-      $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
-      $(B)/missionpack/vm/qagame.qvm \
-      $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
-  endif
 
 else # ifeq freebsd
 
@@ -506,20 +425,8 @@ ifeq ($(PLATFORM),netbsd)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
-  ifeq ($(ARCH),i386)
-    TARGETS=\
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/$(PLATFORM)q3ded
-  else
-    TARGETS=\
-      $(B)/$(PLATFORM)q3ded
-
-  endif
+  BUILD_CLIENT = 0
+  BUILD_GAME_QVM = 0
 
 else # ifeq netbsd
 
@@ -530,7 +437,6 @@ else # ifeq netbsd
 ifeq ($(PLATFORM),irix)
 
   ARCH=mips  #default to MIPS
-  GLIBC=  #libc is irrelevant
 
   CC=cc
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 -mips3 \
@@ -545,9 +451,6 @@ ifeq ($(PLATFORM),irix)
   LDFLAGS=-ldl -lm
   CLIENT_LDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
 
-  TARGETS=$(B)/$(PLATFORM)quake3 \
-    $(B)/$(PLATFORM)q3ded
-
 else # ifeq IRIX
 
 #############################################################################
@@ -556,7 +459,6 @@ else # ifeq IRIX
 
 ifeq ($(PLATFORM),SunOS)
 
-  GLIBC= #libc is irrelevant
   CC=gcc
   INSTALL=ginstall
   MKDIR=gmkdir
@@ -623,43 +525,6 @@ ifeq ($(PLATFORM),SunOS)
     LDFLAGS+=-m32
   endif
 
-  ifeq ($(ARCH),sparc)
-    TARGETS=\
-      $(B)/$(PLATFORM)quake3 \
-      $(B)/$(PLATFORM)q3ded \
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/vm/cgame.qvm \
-      $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
-      $(B)/missionpack/vm/qagame.qvm \
-      $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm \
-      $(B)/$(PLATFORM)quake3-smp
-  else
-    TARGETS=\
-      $(B)/$(PLATFORM)quake3 \
-      $(B)/$(PLATFORM)q3ded \
-      $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
-      $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
-      $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) \
-      $(B)/baseq3/vm/cgame.qvm \
-      $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
-      $(B)/missionpack/vm/qagame.qvm \
-      $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm \
-      $(B)/$(PLATFORM)quake3-smp
-
-  endif
-
 else # ifeq SunOS
 
 #############################################################################
@@ -674,9 +539,6 @@ else # ifeq SunOS
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared
 
-  TARGETS=\
-    $(B)/$(PLATFORM)q3ded
-
 endif #Linux
 endif #darwin
 endif #mingw32
@@ -685,37 +547,43 @@ endif #NetBSD
 endif #IRIX
 endif #SunOS
 
+TARGETS =
+
+ifneq ($(BUILD_SERVER),0)
+  TARGETS += $(B)/ioq3ded.$(ARCH)$(BINEXT)
+endif
+
+ifneq ($(BUILD_CLIENT),0)
+  TARGETS += $(B)/ioquake3.$(ARCH)$(BINEXT)
+  ifneq ($(BUILD_CLIENT_SMP),0)
+    TARGETS += $(B)/ioquake3-smp.$(ARCH)$(BINEXT)
+  endif
+endif
+
+ifneq ($(BUILD_GAME_SO),0)
+  TARGETS += \
+    $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
+    $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
+    $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+    $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
+    $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
+    $(B)/missionpack/ui$(ARCH).$(SHLIBEXT)
+endif
+
+ifneq ($(BUILD_GAME_QVM),0)
+  ifneq ($(CROSS_COMPILING),1)
+    TARGETS += \
+      $(B)/baseq3/vm/cgame.qvm \
+      $(B)/baseq3/vm/qagame.qvm \
+      $(B)/baseq3/vm/ui.qvm \
+      $(B)/missionpack/vm/qagame.qvm \
+      $(B)/missionpack/vm/cgame.qvm \
+      $(B)/missionpack/vm/ui.qvm
+  endif
+endif
+
 ifeq ($(USE_CCACHE),1)
   CC := ccache $(CC)
-endif
-
-ifneq ($(BUILD_SERVER),1)
-  TARGETS := $(subst $(B)/$(PLATFORM)q3ded,,$(TARGETS))
-endif
-
-ifneq ($(BUILD_CLIENT),1)
-  TARGETS := \
-  $(subst $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT),,\
-  $(subst $(B)/baseq3/ui$(ARCH).$(SHLIBEXT),,\
-  $(subst $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT),,\
-  $(subst $(B)/missionpack/ui$(ARCH).$(SHLIBEXT),,\
-  $(subst $(B)/baseq3/vm/cgame.qvm,,\
-  $(subst $(B)/baseq3/vm/ui.qvm,,\
-  $(subst $(B)/missionpack/vm/cgame.qvm,,\
-  $(subst $(B)/missionpack/vm/ui.qvm,,\
-  $(subst $(B)/$(PLATFORM)quake3-smp$(BINEXT),,\
-  $(subst $(B)/$(PLATFORM)quake3$(BINEXT),,$(TARGETS) ))))))))))
-endif
-
-# Never build qvms when cross-compiling
-ifeq ($(CROSS_COMPILING),1)
-  TARGETS := \
-  $(subst $(B)/baseq3/vm/qagame.qvm,,\
-  $(subst $(B)/baseq3/vm/cgame.qvm,,\
-  $(subst $(B)/baseq3/vm/ui.qvm,,\
-  $(subst $(B)/missionpack/vm/qagame.qvm,,\
-  $(subst $(B)/missionpack/vm/cgame.qvm,,\
-  $(subst $(B)/missionpack/vm/ui.qvm,,$(TARGETS) ))))))
 endif
 
 ifdef DEFAULT_BASEDIR
@@ -950,7 +818,6 @@ Q3OBJ = \
   $(B)/client/tr_surface.o \
   $(B)/client/tr_world.o \
 
-
 ifeq ($(ARCH),i386)
   Q3OBJ += $(B)/client/vm_x86.o
 endif
@@ -967,48 +834,24 @@ ifeq ($(ARCH),ppc)
   endif
 endif
 
-#platform specific objects
-ifeq ($(PLATFORM),freebsd)
-ifeq ($(ARCH),axp)
-  Q3POBJ=
-else
-  Q3POBJ=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/sdl_glimp.o \
-    $(B)/client/linux_glimp.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o
+Q3OBJ += \
+  $(B)/client/linux_common.o \
+  \
+  $(B)/client/snd_mixa.o \
+  $(B)/client/matha.o \
+  $(B)/client/ftola.o \
+  $(B)/client/snapvectora.o \
+  \
+  $(B)/client/unix_main.o \
+  $(B)/client/unix_net.o \
+  $(B)/client/unix_shared.o \
+  $(B)/client/linux_signals.o \
+  $(B)/client/linux_qgl.o \
+  $(B)/client/linux_snd.o \
+  $(B)/client/sdl_snd.o
 
-  ifeq ($(ARCH),i386)
-    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
-    Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
-  endif
-
-endif # FreeBSD-axp
-else
-ifeq ($(PLATFORM),irix)
-  Q3POBJ=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/irix_qgl.o \
-    $(B)/client/irix_glimp.o \
-    $(B)/client/irix_snd.o
-else
 ifeq ($(PLATFORM),mingw32)
-  Q3POBJ=\
-    $(B)/client/linux_common.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
-    $(B)/client/ftola.o \
-    $(B)/client/snapvectora.o \
+  Q3OBJ += \
     $(B)/client/win_gamma.o \
     $(B)/client/win_glimp.o \
     $(B)/client/win_input.o \
@@ -1021,123 +864,29 @@ ifeq ($(PLATFORM),mingw32)
     $(B)/client/win_wndproc.o \
     $(B)/client/win_resource.o
 else
-ifeq ($(PLATFORM),linux)
-ifeq ($(ARCH),axp)
-  Q3POBJ=
-else
-  Q3POBJ=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/linux_glimp.o \
-    $(B)/client/sdl_glimp.o \
-    $(B)/client/linux_joystick.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
+  ifeq ($(PLATFORM),linux)
+    Q3OBJ += $(B)/client/linux_joystick.o
+  endif
 
-  Q3POBJ_SMP=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
+  ifeq ($(USE_SDL),1)
+    ifneq ($(PLATFORM),darwin)
+      BUILD_CLIENT_SMP = 0
+    endif
+  endif
+
+  Q3POBJ = \
+    $(B)/client/linux_glimp.o \
+    $(B)/client/sdl_glimp.o
+
+  Q3POBJ_SMP = \
     $(B)/client/linux_glimp_smp.o \
-    $(B)/client/linux_joystick.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o
+    $(B)/client/sdl_glimp_smp.o
+endif
 
-  ifeq ($(ARCH),i386)
-    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o
-    Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
-  endif
-endif #Linux-axp
-
-else
-ifeq ($(PLATFORM),darwin)
-  Q3POBJ=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/linux_glimp.o \
-    $(B)/client/sdl_glimp.o \
-    $(B)/client/linux_joystick.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-
-  Q3POBJ_SMP=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/sdl_glimp_smp.o \
-    $(B)/client/linux_joystick.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o \
-
-  ifeq ($(ARCH),i386)
-    I386OBJS := \
-      $(B)/client/ftola.o \
-      $(B)/client/snapvectora.o \
-      $(B)/client/snd_mixa.o \
-      $(B)/client/matha.o \
-
-    Q3POBJ += $(I386OBJS)
-    Q3POBJ_SMP += $(I386OBJS)
-  endif
-
-else
-ifeq ($(PLATFORM),SunOS)
-  Q3POBJ=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/linux_glimp.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o
-
-  Q3POBJ_SMP=\
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_common.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/linux_glimp_smp.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o
-
-  ifeq ($(ARCH),i386)
-    Q3POBJ += $(B)/client/ftola.o $(B)/client/snapvectora.o $(B)/client/snd_mixa.o $(B)/client/matha.o
-    Q3POBJ_SMP += $(B)/client/ftola.o $(B)/client/snapvectora.o
-  endif
-
-endif #SunOS
-endif #Linux
-endif #darwin
-endif #mingw32
-endif #IRIX
-endif #FreeBSD
-
-$(B)/$(PLATFORM)quake3$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
+$(B)/ioquake3.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
 
-$(B)/$(PLATFORM)quake3-smp$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
+$(B)/ioquake3-smp.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
 	$(CC)  -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
 
@@ -1425,7 +1174,7 @@ ifeq ($(ARCH),ppc)
   endif
 endif
 
-$(B)/$(PLATFORM)q3ded$(BINEXT): $(Q3DOBJ)
+$(B)/ioq3ded.$(ARCH)$(BINEXT): $(Q3DOBJ)
 	$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
 
 $(B)/ded/sv_bot.o : $(SDIR)/sv_bot.c; $(DO_DED_CC)
@@ -1834,10 +1583,10 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 
 copyfiles: build_release
 	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where you installed Quake III!"; false; fi
-	$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)quake3$(BINEXT) $(COPYDIR)/quake3
+	$(INSTALL) -s -m 0755 $(BR)/ioquake3.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3.$(ARCH)$(BINEXT)
 
-	@if [ -f $(BR)/$(PLATFORM)q3ded$(BINEXT) ]; then \
-		$(INSTALL) -s -m 0755 $(BR)/$(PLATFORM)q3ded$(BINEXT) $(COPYDIR)/q3ded$(BINEXT); \
+	@if [ -f $(BR)/ioq3ded.$(ARCH)$(BINEXT) ]; then \
+		$(INSTALL) -s -m 0755 $(BR)/ioq3ded.$(ARCH)$(BINEXT) $(COPYDIR)/ioq3ded.$(ARCH)$(BINEXT); \
 	fi 
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
 	$(INSTALL) -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
