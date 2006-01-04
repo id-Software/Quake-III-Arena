@@ -489,9 +489,9 @@ ifeq ($(PLATFORM),SunOS)
   OPTIMIZE = -O3 -ffast-math -funroll-loops
 
   ifeq ($(ARCH),sparc)
-    OPTIMIZE = -O0 -ffast-math -falign-loops=2 \
+    OPTIMIZE = -O3 -ffast-math -falign-loops=2 \
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
-      -mtune=ultrasparc -mv8plus -munaligned-doubles \
+      -mtune=ultrasparc -mv8plus -mno-faster-structs \
       -funroll-loops
     BASE_CFLAGS += -DNO_VM_COMPILED
   else
@@ -512,6 +512,8 @@ ifeq ($(PLATFORM),SunOS)
 
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-lsocket -lnsl -ldl -lm
+
+  BOTCFLAGS=-O0
 
   ifeq ($(USE_SDL),1)
     CLIENT_LDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
@@ -602,7 +604,7 @@ endif
 
 DO_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 DO_SMP_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
-DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
+DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
 DO_DEBUG_CC=$(CC) $(NOTSHLIBCFLAGS) $(DEBUG_CFLAGS) -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
