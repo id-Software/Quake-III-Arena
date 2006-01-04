@@ -684,6 +684,7 @@ Q3OBJ = \
   $(B)/client/cl_parse.o \
   $(B)/client/cl_scrn.o \
   $(B)/client/cl_ui.o \
+  $(B)/client/cl_avi.o \
   \
   $(B)/client/cm_load.o \
   $(B)/client/cm_patch.o \
@@ -908,6 +909,7 @@ $(B)/client/cl_net_chan.o : $(CDIR)/cl_net_chan.c; $(DO_CC)
 $(B)/client/cl_parse.o : $(CDIR)/cl_parse.c; $(DO_CC)
 $(B)/client/cl_scrn.o : $(CDIR)/cl_scrn.c; $(DO_CC)
 $(B)/client/cl_ui.o : $(CDIR)/cl_ui.c; $(DO_CC)
+$(B)/client/cl_avi.o : $(CDIR)/cl_avi.c; $(DO_CC)
 $(B)/client/snd_adpcm.o : $(CDIR)/snd_adpcm.c; $(DO_CC)
 $(B)/client/snd_dma.o : $(CDIR)/snd_dma.c; $(DO_CC)
 $(B)/client/snd_mem.o : $(CDIR)/snd_mem.c; $(DO_CC)

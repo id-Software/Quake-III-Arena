@@ -700,6 +700,51 @@ void R_ScreenShotJPEG_f (void) {
 //============================================================================
 
 /*
+==================
+RB_TakeVideoFrameCmd
+==================
+*/
+const void *RB_TakeVideoFrameCmd( const void *data )
+{
+	const videoFrameCommand_t	*cmd;
+	int												frameSize;
+	int												i;
+	
+	cmd = (const videoFrameCommand_t *)data;
+	
+	qglReadPixels( 0, 0, cmd->width, cmd->height, GL_RGBA,
+			GL_UNSIGNED_BYTE, cmd->captureBuffer );
+
+	// gamma correct
+	if( ( tr.overbrightBits > 0 ) && glConfig.deviceSupportsGamma )
+		R_GammaCorrect( cmd->captureBuffer, cmd->width * cmd->height * 4 );
+
+	if( cmd->motionJpeg )
+	{
+		frameSize = SaveJPGToBuffer( cmd->encodeBuffer, 95,
+				cmd->width, cmd->height, cmd->captureBuffer );
+	}
+	else
+	{
+		frameSize = cmd->width * cmd->height * 4;
+
+		// Vertically flip the image
+		for( i = 0; i < cmd->height; i++ )
+		{
+			Com_Memcpy( &cmd->encodeBuffer[ i * ( cmd->width * 4 ) ],
+					&cmd->captureBuffer[ ( cmd->height - i - 1 ) * ( cmd->width * 4 ) ],
+					cmd->width * 4 );
+		}
+	}
+
+	ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize );
+
+	return (const void *)(cmd + 1);	
+}
+
+//============================================================================
+
+/*
 ** GL_SetDefaultState
 */
 void GL_SetDefaultState( void )
@@ -1200,6 +1245,8 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.RemapShader = R_RemapShader;
 	re.GetEntityToken = R_GetEntityToken;
 	re.inPVS = R_inPVS;
+
+	re.TakeVideoFrame = RE_TakeVideoFrame;
 
 	return &re;
 }

@@ -1215,6 +1215,7 @@ skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
 int R_ComputeLOD( trRefEntity_t *ent );
 
+const void *RB_TakeVideoFrameCmd( const void *data );
 
 //
 // tr_shader.c
@@ -1579,6 +1580,15 @@ typedef struct {
 	qboolean jpeg;
 } screenshotCommand_t;
 
+typedef struct {
+	int						commandId;
+	int						width;
+	int						height;
+	byte					*captureBuffer;
+	byte					*encodeBuffer;
+	qboolean			motionJpeg;
+} videoFrameCommand_t;
+
 typedef enum {
 	RC_END_OF_LIST,
 	RC_SET_COLOR,
@@ -1586,7 +1596,8 @@ typedef enum {
 	RC_DRAW_SURFS,
 	RC_DRAW_BUFFER,
 	RC_SWAP_BUFFERS,
-	RC_SCREENSHOT
+	RC_SCREENSHOT,
+	RC_VIDEOFRAME
 } renderCommand_t;
 
 
@@ -1635,6 +1646,11 @@ void RE_StretchPic ( float x, float y, float w, float h,
 void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
+int SaveJPGToBuffer( byte *buffer, int quality,
+		int image_width, int image_height,
+		byte *image_buffer );
+void RE_TakeVideoFrame( int width, int height,
+		byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
 
 // font stuff
 void R_InitFreeType( void );

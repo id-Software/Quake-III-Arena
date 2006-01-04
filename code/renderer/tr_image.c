@@ -1852,6 +1852,64 @@ void SaveJPG(char * filename, int quality, int image_width, int image_height, un
   /* And we're done! */
 }
 
+/*
+=================
+SaveJPGToBuffer
+=================
+*/
+int SaveJPGToBuffer( byte *buffer, int quality,
+    int image_width, int image_height,
+    byte *image_buffer )
+{
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
+  int row_stride;		/* physical row width in image buffer */
+
+  /* Step 1: allocate and initialize JPEG compression object */
+  cinfo.err = jpeg_std_error(&jerr);
+  /* Now we can initialize the JPEG compression object. */
+  jpeg_create_compress(&cinfo);
+
+  /* Step 2: specify data destination (eg, a file) */
+  /* Note: steps 2 and 3 can be done in either order. */
+  jpegDest(&cinfo, buffer, image_width*image_height*4);
+
+  /* Step 3: set parameters for compression */
+  cinfo.image_width = image_width; 	/* image width and height, in pixels */
+  cinfo.image_height = image_height;
+  cinfo.input_components = 4;		/* # of color components per pixel */
+  cinfo.in_color_space = JCS_RGB; 	/* colorspace of input image */
+
+  jpeg_set_defaults(&cinfo);
+  jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+
+  /* Step 4: Start compressor */
+  jpeg_start_compress(&cinfo, TRUE);
+
+  /* Step 5: while (scan lines remain to be written) */
+  /*           jpeg_write_scanlines(...); */
+  row_stride = image_width * 4;	/* JSAMPLEs per row in image_buffer */
+
+  while (cinfo.next_scanline < cinfo.image_height) {
+    /* jpeg_write_scanlines expects an array of pointers to scanlines.
+     * Here the array is only one element long, but you could pass
+     * more than one scanline at a time if that's more convenient.
+     */
+    row_pointer[0] = & image_buffer[((cinfo.image_height-1)*row_stride)-cinfo.next_scanline * row_stride];
+    (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+  }
+
+  /* Step 6: Finish compression */
+  jpeg_finish_compress(&cinfo);
+
+  /* Step 7: release JPEG compression object */
+  jpeg_destroy_compress(&cinfo);
+
+  /* And we're done! */
+  return hackSize;
+}
+
 //===================================================================
 
 /*

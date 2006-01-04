@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 cvar_t *s_volume;
 cvar_t *s_musicVolume;
 cvar_t *s_doppler;
+cvar_t *s_backend;
 
 static soundInterface_t si;
 
@@ -370,6 +371,7 @@ void S_Init( void )
 	s_volume = Cvar_Get( "s_volume", "0.8", CVAR_ARCHIVE );
 	s_musicVolume = Cvar_Get( "s_musicvolume", "0.25", CVAR_ARCHIVE );
 	s_doppler = Cvar_Get( "s_doppler", "1", CVAR_ARCHIVE );
+	s_backend = Cvar_Get( "s_backend", "", CVAR_ROM );
 
 	cv = Cvar_Get( "s_initsound", "1", 0 );
 	if( !cv->integer ) {
@@ -388,10 +390,12 @@ void S_Init( void )
 		if( cv->integer ) {
 			//OpenAL
 			started = S_AL_Init( &si );
+			Cvar_Set( "s_backend", "OpenAL" );
 		}
 
 		if( !started ) {
 			started = S_Base_Init( &si );
+			Cvar_Set( "s_backend", "base" );
 		}
 
 		if( started ) {
