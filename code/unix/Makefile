@@ -350,6 +350,9 @@ ifeq ($(PLATFORM),mingw32)
     LDFLAGS+=-m32
   endif
 
+  BUILD_SERVER = 0
+  BUILD_CLIENT_SMP = 0
+
 else # ifeq mingw32
 
 #############################################################################
@@ -823,9 +826,19 @@ Q3OBJ = \
 
 ifeq ($(ARCH),i386)
   Q3OBJ += $(B)/client/vm_x86.o
+  Q3OBJ += \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
+  Q3OBJ += \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86_64)
   Q3OBJ += $(B)/client/vm_x86_64.o
@@ -837,21 +850,6 @@ ifeq ($(ARCH),ppc)
   endif
 endif
 
-Q3OBJ += \
-  $(B)/client/linux_common.o \
-  \
-  $(B)/client/snd_mixa.o \
-  $(B)/client/matha.o \
-  $(B)/client/ftola.o \
-  $(B)/client/snapvectora.o \
-  \
-  $(B)/client/unix_main.o \
-  $(B)/client/unix_net.o \
-  $(B)/client/unix_shared.o \
-  $(B)/client/linux_signals.o \
-  $(B)/client/linux_qgl.o \
-  $(B)/client/linux_snd.o \
-  $(B)/client/sdl_snd.o
 
 ifeq ($(PLATFORM),mingw32)
   Q3OBJ += \
@@ -867,6 +865,15 @@ ifeq ($(PLATFORM),mingw32)
     $(B)/client/win_wndproc.o \
     $(B)/client/win_resource.o
 else
+  Q3OBJ += \
+    $(B)/client/unix_main.o \
+    $(B)/client/unix_net.o \
+    $(B)/client/unix_shared.o \
+    $(B)/client/linux_signals.o \
+    $(B)/client/linux_qgl.o \
+    $(B)/client/linux_snd.o \
+    $(B)/client/sdl_snd.o
+
   ifeq ($(PLATFORM),linux)
     Q3OBJ += $(B)/client/linux_joystick.o
   endif
@@ -1051,7 +1058,6 @@ $(B)/client/irix_glimp_smp.o : $(UDIR)/irix_glimp.c; $(DO_SMP_CC)
 $(B)/client/irix_snd.o : $(UDIR)/irix_snd.c; $(DO_CC)
 $(B)/client/irix_input.o : $(UDIR)/irix_input.c; $(DO_CC)
 $(B)/client/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_CC) $(GL_CFLAGS)
-$(B)/client/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
 $(B)/client/linux_glimp.o : $(UDIR)/linux_glimp.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/sdl_glimp.o : $(UDIR)/sdl_glimp.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/linux_glimp_smp.o : $(UDIR)/linux_glimp.c; $(DO_SMP_CC)  $(GL_CFLAGS)
@@ -1154,7 +1160,6 @@ Q3DOBJ = \
   $(B)/ded/l_struct.o \
   \
   $(B)/ded/linux_signals.o \
-  $(B)/ded/linux_common.o \
   $(B)/ded/unix_main.o \
   $(B)/ded/unix_net.o \
   $(B)/ded/unix_shared.o \
@@ -1236,7 +1241,6 @@ $(B)/ded/l_script.o : $(BLIBDIR)/l_script.c; $(DO_BOT_CC)
 $(B)/ded/l_struct.o : $(BLIBDIR)/l_struct.c; $(DO_BOT_CC)
 
 $(B)/ded/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_DED_CC)
-$(B)/ded/linux_common.o : $(UDIR)/linux_common.c; $(DO_DED_CC)
 $(B)/ded/unix_main.o : $(UDIR)/unix_main.c; $(DO_DED_CC)
 $(B)/ded/unix_net.o : $(UDIR)/unix_net.c; $(DO_DED_CC)
 $(B)/ded/unix_shared.o : $(UDIR)/unix_shared.c; $(DO_DED_CC)
