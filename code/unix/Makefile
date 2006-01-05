@@ -107,13 +107,11 @@ UDIR=$(MOUNT_DIR)/unix
 W32DIR=$(MOUNT_DIR)/win32
 GDIR=$(MOUNT_DIR)/game
 CGDIR=$(MOUNT_DIR)/cgame
-BAIDIR=$(GDIR)
 BLIBDIR=$(MOUNT_DIR)/botlib
 NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
 JPDIR=$(MOUNT_DIR)/jpeg-6
-SPLNDIR=$(MOUNT_DIR)/splines
 
 # extract version info
 VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
@@ -827,19 +825,9 @@ Q3OBJ = \
 
 ifeq ($(ARCH),i386)
   Q3OBJ += $(B)/client/vm_x86.o
-  Q3OBJ += \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
-    $(B)/client/ftola.o \
-    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
-  Q3OBJ += \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
-    $(B)/client/ftola.o \
-    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86_64)
   Q3OBJ += $(B)/client/vm_x86_64.o
@@ -851,6 +839,14 @@ ifeq ($(ARCH),ppc)
   endif
 endif
 
+# x86 asm versions of various functions
+# Guarded by #if id386, so safe to link
+# on any platform
+Q3OBJ += \
+  $(B)/client/snd_mixa.o \
+  $(B)/client/matha.o \
+  $(B)/client/ftola.o \
+  $(B)/client/snapvectora.o
 
 ifeq ($(PLATFORM),mingw32)
   Q3OBJ += \
