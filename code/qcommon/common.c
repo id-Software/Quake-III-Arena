@@ -37,14 +37,12 @@ int demo_protocols[] =
 #define MAX_NUM_ARGVS	50
 
 #define MIN_DEDICATED_COMHUNKMEGS 1
-#define MIN_COMHUNKMEGS 56
-#ifdef MACOS_X
-#define DEF_COMHUNKMEGS "64"
-#define DEF_COMZONEMEGS "24"
-#else
-#define DEF_COMHUNKMEGS "56"
-#define DEF_COMZONEMEGS "16"
-#endif
+#define MIN_COMHUNKMEGS		56
+#define DEF_COMHUNKMEGS		64
+#define DEF_COMZONEMEGS		24
+#define STRING(x)					#x
+#define DEF_COMHUNKMEGS_S	STRING(DEF_COMHUNKMEGS)
+#define DEF_COMZONEMEGS_S	STRING(DEF_COMZONEMEGS)
 
 int		com_argc;
 char	*com_argv[MAX_NUM_ARGVS+1];
@@ -414,7 +412,7 @@ Com_StartupVariable
 Searches for command line parameters that are set commands.
 If match is not NULL, only that cvar will be looked for.
 That is necessary because cddir and basedir need to be set
-before the filesystem is started, but all other sets shouls
+before the filesystem is started, but all other sets should
 be after execing the config and default.
 ===============
 */
@@ -1385,11 +1383,16 @@ void Com_InitSmallZoneMemory( void ) {
 
 void Com_InitZoneMemory( void ) {
 	cvar_t	*cv;
-	// allocate the random block zone
-	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS, CVAR_LATCH | CVAR_ARCHIVE );
 
-	if ( cv->integer < 20 ) {
-		s_zoneTotal = 1024 * 1024 * 16;
+	//FIXME: 05/01/06 com_zoneMegs is useless right now as neither q3config.cfg nor
+	// Com_StartupVariable have been executed by this point. The net result is that
+	// s_zoneTotal will always be set to the default value.
+
+	// allocate the random block zone
+	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS_S, CVAR_LATCH | CVAR_ARCHIVE );
+
+	if ( cv->integer < DEF_COMZONEMEGS ) {
+		s_zoneTotal = 1024 * 1024 * DEF_COMZONEMEGS;
 	} else {
 		s_zoneTotal = cv->integer * 1024 * 1024;
 	}
@@ -1500,7 +1503,7 @@ void Com_InitHunkMemory( void ) {
 	}
 
 	// allocate the stack based hunk allocator
-	cv = Cvar_Get( "com_hunkMegs", DEF_COMHUNKMEGS, CVAR_LATCH | CVAR_ARCHIVE );
+	cv = Cvar_Get( "com_hunkMegs", DEF_COMHUNKMEGS_S, CVAR_LATCH | CVAR_ARCHIVE );
 
 	// if we are not dedicated min allocation is 56, otherwise min is 1
 	if (com_dedicated && com_dedicated->integer) {
