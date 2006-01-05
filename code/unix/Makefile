@@ -583,7 +583,8 @@ ifneq ($(BUILD_GAME_QVM),0)
       $(B)/baseq3/vm/ui.qvm \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm
+      $(B)/missionpack/vm/ui.qvm \
+      qvmdeps
   endif
 endif
 
@@ -1639,6 +1640,16 @@ installer: build_release
 #############################################################################
 
 D_FILES=$(shell find . -name '*.d')
+
+$(B)/baseq3/vm/vm.d: $(Q3GOBJ) $(Q3CGOBJ) $(Q3UIOBJ)
+	-rm -f $@
+	find $(B)/baseq3 -iname '*.d' | xargs sed -e 's/\.o/\.asm/g' > $@
+
+$(B)/missionpack/vm/vm.d: $(MPGOBJ) $(MPCGOBJ) $(MPUIOBJ)
+	-rm -f $@
+	find $(B)/missionpack -iname '*.d' | xargs sed -e 's/\.o/\.asm/g' > $@
+
+qvmdeps: $(B)/baseq3/vm/vm.d $(B)/missionpack/vm/vm.d
 
 ifneq ($(strip $(D_FILES)),)
   include $(D_FILES)
