@@ -43,6 +43,7 @@ cvar_t	*cl_freezeDemo;
 cvar_t	*cl_shownet;
 cvar_t	*cl_showSend;
 cvar_t	*cl_timedemo;
+cvar_t	*cl_autoRecordDemo;
 cvar_t	*cl_avidemo;
 cvar_t	*cl_aviMotionJpeg;
 cvar_t	*cl_forceavidemo;
@@ -2038,6 +2039,44 @@ void CL_Frame ( int msec ) {
 		}
 	}
 	
+	if( cl_autoRecordDemo->integer ) {
+		if( cls.state == CA_ACTIVE && !clc.demorecording ) {
+			// If not recording a demo, and we should be, start one
+			qtime_t	now;
+			char		*nowString;
+			char		*p;
+			char		mapName[ MAX_QPATH ];
+			char		serverName[ MAX_OSPATH ];
+
+			Com_RealTime( &now );
+			nowString = va( "%04d%02d%02d%02d%02d%02d",
+					1900 + now.tm_year,
+					1 + now.tm_mon,
+					now.tm_mday,
+					now.tm_hour,
+					now.tm_min,
+					now.tm_sec );
+
+			Q_strncpyz( serverName, cls.servername, MAX_OSPATH );
+			// Replace the ":" in the address as it is not a valid
+			// file name character
+			p = strstr( serverName, ":" );
+			if( p ) {
+				*p = '.';
+			}
+
+			Q_strncpyz( mapName, COM_SkipPath( cl.mapname ), sizeof( cl.mapname ) );
+			COM_StripExtension( mapName, mapName );
+
+			Cbuf_ExecuteText( EXEC_NOW,
+					va( "record %s-%s-%s", nowString, serverName, mapName ) );
+		}
+		else if( cls.state != CA_ACTIVE && clc.demorecording ) {
+			// Recording, but not CA_ACTIVE, so stop recording
+			CL_StopRecord_f( );
+		}
+	}
+
 	// save the msec before checking pause
 	cls.realFrametime = msec;
 
@@ -2374,6 +2413,7 @@ void CL_Init( void ) {
 	cl_activeAction = Cvar_Get( "activeAction", "", CVAR_TEMP );
 
 	cl_timedemo = Cvar_Get ("timedemo", "0", 0);
+	cl_autoRecordDemo = Cvar_Get ("cl_autoRecordDemo", "0", CVAR_ARCHIVE);
 	cl_avidemo = Cvar_Get ("cl_avidemo", "25", CVAR_ARCHIVE);
 	cl_aviMotionJpeg = Cvar_Get ("cl_aviMotionJpeg", "1", CVAR_ARCHIVE);
 	cl_forceavidemo = Cvar_Get ("cl_forceavidemo", "0", 0);
