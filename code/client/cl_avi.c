@@ -332,9 +332,9 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   Com_Memset( &afd, 0, sizeof( aviFileData_t ) );
 
   // Don't start if a framerate has not been chosen
-  if( cl_avidemo->integer <= 0 )
+  if( cl_aviFrameRate->integer <= 0 )
   {
-    Com_Printf( S_COLOR_RED "cl_avidemo must be >= 1\n" );
+    Com_Printf( S_COLOR_RED "cl_aviFrameRate must be >= 1\n" );
     return qfalse;
   }
 
@@ -349,7 +349,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
 
   Q_strncpyz( afd.fileName, fileName, MAX_QPATH );
 
-  afd.frameRate = cl_avidemo->integer;
+  afd.frameRate = cl_aviFrameRate->integer;
   afd.framePeriod = (int)( 1000000.0f / afd.frameRate );
   afd.width = cls.glconfig.vidWidth;
   afd.height = cls.glconfig.vidHeight;
@@ -375,7 +375,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
     while( ( afd.a.rate % suggestRate ) && suggestRate >= 1 )
       suggestRate--;
 
-    Com_Printf( S_COLOR_YELLOW "WARNING: cl_avidemo is not a divisor "
+    Com_Printf( S_COLOR_YELLOW "WARNING: cl_aviFrameRate is not a divisor "
         "of the audio rate, suggest %d\n", suggestRate );
   }
 
@@ -484,7 +484,7 @@ void CL_WriteAVIAudioFrame( const byte *pcmBuffer, int size )
   bytesInBuffer += size;
 
   // Only write if we have a frame's worth of audio
-  if( bytesInBuffer >= (int)ceil( afd.a.rate / cl_avidemo->value ) *
+  if( bytesInBuffer >= (int)ceil( afd.a.rate / cl_aviFrameRate->value ) *
         afd.a.sampleSize )
   {
     int   chunkOffset = afd.fileSize - afd.moviOffset - 8;

@@ -343,7 +343,7 @@ extern	cvar_t	*m_side;
 extern	cvar_t	*m_filter;
 
 extern	cvar_t	*cl_timedemo;
-extern	cvar_t	*cl_avidemo;
+extern	cvar_t	*cl_aviFrameRate;
 extern	cvar_t	*cl_aviMotionJpeg;
 
 extern	cvar_t	*cl_activeAction;
