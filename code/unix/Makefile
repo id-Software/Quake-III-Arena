@@ -825,12 +825,29 @@ Q3OBJ = \
 
 ifeq ($(ARCH),i386)
   Q3OBJ += $(B)/client/vm_x86.o
+  Q3OBJ += \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86)
   Q3OBJ += $(B)/client/vm_x86.o
+  Q3OBJ += \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86_64)
   Q3OBJ += $(B)/client/vm_x86_64.o
+
+  #FIXME: why do these need to be here?
+  Q3OBJ += \
+    $(B)/client/snd_mixa.o \
+    $(B)/client/matha.o \
+    $(B)/client/ftola.o \
+    $(B)/client/snapvectora.o
 endif
 
 ifeq ($(ARCH),ppc)
@@ -838,15 +855,6 @@ ifeq ($(ARCH),ppc)
     Q3OBJ += $(B)/client/$(VM_PPC).o
   endif
 endif
-
-# x86 asm versions of various functions
-# Guarded by #if id386, so safe to link
-# on any platform
-Q3OBJ += \
-  $(B)/client/snd_mixa.o \
-  $(B)/client/matha.o \
-  $(B)/client/ftola.o \
-  $(B)/client/snapvectora.o
 
 ifeq ($(PLATFORM),mingw32)
   Q3OBJ += \
