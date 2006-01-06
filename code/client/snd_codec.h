@@ -44,6 +44,7 @@ typedef struct snd_stream_s
 	snd_codec_t *codec;
 	fileHandle_t file;
 	snd_info_t info;
+	int length;
 	int pos;
 	void *ptr;
 } snd_stream_t;

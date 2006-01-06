@@ -191,9 +191,10 @@ snd_stream_t *S_CodecUtilOpen(const char *filename, snd_codec_t *codec)
 {
 	snd_stream_t *stream;
 	fileHandle_t hnd;
+	int length;
 
 	// Try to open the file
-	FS_FOpenFileRead(filename, &hnd, qtrue);
+	length = FS_FOpenFileRead(filename, &hnd, qtrue);
 	if(!hnd)
 	{
 		Com_Printf("Can't read sound file %s\n", filename);
@@ -211,6 +212,7 @@ snd_stream_t *S_CodecUtilOpen(const char *filename, snd_codec_t *codec)
 	// Copy over, return
 	stream->codec = codec;
 	stream->file = hnd;
+	stream->length = length;
 	return stream;
 }
 
