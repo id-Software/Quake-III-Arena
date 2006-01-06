@@ -385,12 +385,11 @@ static int doas(char* in, char* out, unsigned char** compiledcode)
 
 	if((*compiledcode = (unsigned char*)buf))
 	{
-#ifdef VM_X86_64_STANDALONE // no idea why
-		if(mprotect(buf, allocsize, PROT_READ|PROT_EXEC) == -1)
+		// need to be able to exec code
+		if(mprotect(buf, allocsize, PROT_READ|PROT_WRITE|PROT_EXEC) == -1)
 		{
 			Com_Error(ERR_FATAL, "mprotect failed on %p+%x: %s\n", buf, allocsize, strerror(errno));
 		}
-#endif
 		return size;
 	}
 

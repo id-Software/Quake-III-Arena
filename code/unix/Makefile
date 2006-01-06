@@ -870,13 +870,6 @@ ifeq ($(ARCH),x86)
 endif
 ifeq ($(ARCH),x86_64)
   Q3OBJ += $(B)/client/vm_x86_64.o
-
-  #FIXME: why do these need to be here?
-  Q3OBJ += \
-    $(B)/client/snd_mixa.o \
-    $(B)/client/matha.o \
-    $(B)/client/ftola.o \
-    $(B)/client/snapvectora.o
 endif
 
 ifeq ($(ARCH),ppc)
