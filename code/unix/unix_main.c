@@ -1357,7 +1357,7 @@ void Sys_ParseArgs( int argc, char* argv[] ) {
 }
 
 #ifndef DEFAULT_BASEDIR
-# define DEFAULT_BASEDIR Sys_Cwd()
+# define DEFAULT_BASEDIR Sys_DefaultCDPath()
 #endif
 
 #include "../client/client.h"
