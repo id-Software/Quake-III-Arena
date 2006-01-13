@@ -24,6 +24,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "vm_local.h"
 
+#ifdef MACOS_X
+#include <CoreServices/CoreServices.h>
+#endif
+
 #define DEBUG_VM 0
 
 #if DEBUG_VM
@@ -1714,7 +1718,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	    // go back over it in place now to fixup reletive jump targets
 	    buf = (unsigned *)vm->codeBase;
-	}
+	} else if ( pass == 1 ) {
+           #ifdef MACOS_X
+           // On Mac OS X, the following library routine clears the instruction cache for generated code
+           MakeDataExecutable(vm->codeBase, vm->codeLength);
+           #else
+           #warning Need to clear the instruction cache for generated code
+           #endif
+       }
     }
     if(0)
     {
