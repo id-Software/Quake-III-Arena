@@ -18,3 +18,6 @@ For 1.35+:
 * Clean platform specific stuff from lcc
 * Merge exotic ports from various kind contributors
 * Try and find a way to remove DirectX for windows, and put in SDL.
+
+For 1.99:
+* Four player split-screen
