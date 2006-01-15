@@ -10,11 +10,16 @@ extern char	*objname;
 void appendDirToIncludeList( char *dir )
 {
 	int i;
+	char *fqdir;
+
+	fqdir = (char *)newstring( (uchar *)includelist[NINCLUDE-1].file, 256, 0 );
+	strcat( fqdir, "/" );
+	strcat( fqdir, dir );
 
 	//avoid adding it more than once
 	for (i=NINCLUDE-2; i>=0; i--) {
 		if (includelist[i].file &&
-				!strcmp (includelist[i].file, dir)) {
+				!strcmp (includelist[i].file, fqdir)) {
 			return;
 		}
 	}
@@ -22,7 +27,7 @@ void appendDirToIncludeList( char *dir )
 	for (i=NINCLUDE-2; i>=0; i--) {
 		if (includelist[i].file==NULL) {
 			includelist[i].always = 1;
-			includelist[i].file = dir;
+			includelist[i].file = fqdir;
 			break;
 		}
 	}
