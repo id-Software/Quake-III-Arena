@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 .data
 
-temp:   .float    0.0
+temp:   .single   0.0
 fpucw:  .long     0
 
 // Precision Control Field , 2 bits / 0x0300
@@ -63,7 +63,7 @@ cw0F7F: .long     0x0F7F
 // int qftol( void ) - default control word
 //
 
-.global C(qftol)
+.globl C(qftol)
 
 C(qftol):
         fistpl temp
@@ -75,7 +75,7 @@ C(qftol):
 // int qftol027F( void ) - DirectX FPU
 //
 
-.global C(qftol027F)
+.globl C(qftol027F)
 
 C(qftol027F):
         fnstcw fpucw
@@ -89,7 +89,7 @@ C(qftol027F):
 // int qftol037F( void ) - Linux FPU
 //
 
-.global C(qftol037F)
+.globl C(qftol037F)
 
 C(qftol037F):
         fnstcw fpucw
@@ -104,7 +104,7 @@ C(qftol037F):
 // int qftol0F7F( void ) - ANSI
 //
 
-.global C(qftol0F7F)
+.globl C(qftol0F7F)
 
 C(qftol0F7F):
         fnstcw fpucw
@@ -118,7 +118,7 @@ C(qftol0F7F):
 // int qftol0E7F( void )
 //
 
-.global C(qftol0E7F)
+.globl C(qftol0E7F)
 
 C(qftol0E7F):
         fnstcw fpucw
@@ -134,7 +134,7 @@ C(qftol0E7F):
 // long Q_ftol( float q )
 //
 
-.global C(Q_ftol)
+.globl C(Q_ftol)
 
 C(Q_ftol):
         flds 4(%esp)
@@ -147,7 +147,7 @@ C(Q_ftol):
 // long qftol0F7F( float q ) - Linux FPU
 //
 
-.global C(Q_ftol0F7F)
+.globl C(Q_ftol0F7F)
 
 C(Q_ftol0F7F):
         fnstcw fpucw

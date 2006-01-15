@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../qcommon/q_platform.h"
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(MACOS_X)
 #undef ELF
 #endif
 

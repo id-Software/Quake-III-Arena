@@ -46,7 +46,7 @@ cw037F: .long   0x037F
 .text
 
 // void Sys_SnapVector( float *v )
-.global C(Sys_SnapVector)
+.globl C(Sys_SnapVector)
 C(Sys_SnapVector):
         pushl   %eax
         pushl   %ebp
@@ -74,7 +74,7 @@ C(Sys_SnapVector):
         ret
 
 // void Sys_SnapVectorCW( float *v, unsigned short int cw )
-.global C(Sys_SnapVectorCW)
+.globl C(Sys_SnapVectorCW)
 C(Sys_SnapVectorCW):
         pushl   %eax
         pushl   %ebp

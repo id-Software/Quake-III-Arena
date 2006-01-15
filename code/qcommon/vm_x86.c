@@ -170,7 +170,7 @@ _asm {
 
 #else //!_MSC_VER
 
-#ifdef __MINGW32__ // _ is prepended to compiled symbols
+#if defined(__MINGW32__) || defined(MACOS_X) // _ is prepended to compiled symbols
 #define CMANG(sym) "_"#sym
 #else
 #define CMANG(sym) #sym
@@ -1174,13 +1174,13 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		memOpStack      = opStack;     
 		memEntryPoint   = entryPoint;  
 		
-		__asm__("	pushal				\r\n" \
-				"	movl %0,%%esi		\r\n" \
-				"	movl %1,%%edi		\r\n" \
-				"	call *%2			\r\n" \
-				"	movl %%esi,%0		\r\n" \
-				"	movl %%edi,%1		\r\n" \
-				"	popal				\r\n" \
+		__asm__("	pushal				\n" \
+				"	movl %0,%%esi		\n" \
+				"	movl %1,%%edi		\n" \
+				"	call *%2			\n" \
+				"	movl %%esi,%0		\n" \
+				"	movl %%edi,%1		\n" \
+				"	popal				\n" \
 				: "=m" (memProgramStack), "=m" (memOpStack) \
 				: "m" (memEntryPoint), "m" (memProgramStack), "m" (memOpStack) \
 				: "si", "di" \
