@@ -1589,8 +1589,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alSources = Cvar_Get( "s_alSources", "96", CVAR_ARCHIVE );
 	s_alDopplerFactor = Cvar_Get( "s_alDopplerFactor", "1.0", CVAR_ARCHIVE );
 	s_alDopplerSpeed = Cvar_Get( "s_alDopplerSpeed", "2200", CVAR_ARCHIVE );
-	s_alMinDistance = Cvar_Get( "s_alMinDistance", "80", CVAR_ARCHIVE );
-	s_alRolloff = Cvar_Get( "s_alRolloff", "0.25", CVAR_ARCHIVE );
+	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
+	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 
