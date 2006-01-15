@@ -60,7 +60,7 @@ END
 #ifndef __MINGW32__
 IDI_ICON1               ICON    DISCARDABLE     "qe3.ico"
 #else
-IDI_ICON1               ICON    DISCARDABLE     "../win32/qe3.ico"
+IDI_ICON1               ICON    DISCARDABLE     "code/win32/qe3.ico"
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

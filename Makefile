@@ -65,9 +65,12 @@ ifndef COPYDIR
 COPYDIR="/usr/local/games/quake3"
 endif
 
-# Where we are building from (where the source code should be!)
 ifndef MOUNT_DIR
-MOUNT_DIR=..
+MOUNT_DIR=code
+endif
+
+ifndef BUILD_DIR
+BUILD_DIR=build
 endif
 
 ifndef GENERATE_DEPENDENCIES
@@ -101,8 +104,8 @@ endif
 
 #############################################################################
 
-BD=debug-$(PLATFORM)-$(ARCH)
-BR=release-$(PLATFORM)-$(ARCH)
+BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
+BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)
 CDIR=$(MOUNT_DIR)/client
 SDIR=$(MOUNT_DIR)/server
 RDIR=$(MOUNT_DIR)/renderer
@@ -116,10 +119,21 @@ NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
 JPDIR=$(MOUNT_DIR)/jpeg-6
+TOOLSDIR=$(MOUNT_DIR)/tools
+LOKISETUPDIR=$(UDIR)/setup
+SDLHDIR=$(MOUNT_DIR)/SDL12
+LIBSDIR=$(MOUNT_DIR)/libs
 
 # extract version info
-VERSION=$(shell grep Q3_VERSION ../qcommon/q_shared.h | \
+VERSION=$(shell grep Q3_VERSION $(CMDIR)/q_shared.h | \
   sed -e 's/.*Q3\ \(.*\)"/\1/')
+
+ifeq ($(wildcard .svn),.svn)
+  SVN_VERSION=$(VERSION)_SVN$(shell LANG=C svnversion .)
+else
+  SVN_VERSION=$(VERSION)
+endif
+
 
 #############################################################################
 # SETUP AND BUILD -- LINUX
@@ -264,7 +278,7 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 -I../SDL12/include
+    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 -I$(SDLHDIR)/include
     GL_CFLAGS =
   endif
 
@@ -303,8 +317,8 @@ ifeq ($(PLATFORM),darwin)
     # We copy sdlmain before ranlib'ing it so that subversion doesn't think
     #  the file has been modified by each build.
     LIBSDLMAIN=$(B)/libSDLmain.a
-    LIBSDLMAINSRC=../libs/macosx/libSDLmain.a
-    CLIENT_LDFLAGS=-framework Cocoa -framework OpenGL ../libs/macosx/libSDL-1.2.0.dylib
+    LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
+    CLIENT_LDFLAGS=-framework Cocoa -framework OpenGL $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
   else
     # !!! FIXME: frameworks: OpenGL, Carbon, etc...
     #CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
@@ -665,6 +679,7 @@ all:build_debug build_release
 targets: $(TARGETS)
 
 makedirs:
+	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
 	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
 	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
 	@if [ ! -d $(B)/ded ];then $(MKDIR) $(B)/ded;fi
@@ -687,16 +702,16 @@ makedirs:
 # QVM BUILD TOOLS
 #############################################################################
 
-Q3LCC=../tools/q3lcc$(BINEXT)
-Q3ASM=../tools/q3asm$(BINEXT)
+Q3LCC=$(TOOLSDIR)/q3lcc$(BINEXT)
+Q3ASM=$(TOOLSDIR)/q3asm$(BINEXT)
 
 ifeq ($(CROSS_COMPILING),1)
 tools:
 	echo QVM tools not built when cross-compiling
 else
 tools:
-	$(MAKE) -C ../tools/lcc install
-	$(MAKE) -C ../tools/asm install
+	$(MAKE) -C $(TOOLSDIR)/lcc install
+	$(MAKE) -C $(TOOLSDIR)/asm install
 endif
 
 DO_Q3LCC=$(Q3LCC) -o $@ $<
@@ -1640,7 +1655,7 @@ copyfiles: build_release
 					$(COPYDIR)/missionpack/.
 
 clean:clean-debug clean-release
-	$(MAKE) -C setup clean
+	$(MAKE) -C $(LOKISETUPDIR) clean
 
 clean2:
 	if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
@@ -1656,11 +1671,20 @@ clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
 
 distclean: clean
-	$(MAKE) -C ../tools/asm clean uninstall
-	$(MAKE) -C ../tools/lcc clean uninstall
+	$(MAKE) -C $(TOOLSDIR)/asm clean uninstall
+	$(MAKE) -C $(TOOLSDIR)/lcc clean uninstall
 
 installer: build_release
-	$(MAKE) VERSION=$(VERSION) -C setup
+	$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
+
+dist:
+	rm -rf quake3-$(SVN_VERSION)
+	svn export . quake3-$(SVN_VERSION)
+	which convert >/dev/null 2>&1 && convert web/images/thenameofthisprojectis3.jpg \
+	quake3-$(SVN_VERSION)/code/unix/setup/splash.xpm || true
+	rm -rf quake3-$(SVN_VERSION)/web
+	tar --force-local -cjf quake3-$(SVN_VERSION).tar.bz2 quake3-$(SVN_VERSION)
+	rm -rf quake3-$(SVN_VERSION)
 
 #############################################################################
 # DEPENDENCIES
@@ -1679,3 +1703,5 @@ qvmdeps: $(B)/baseq3/vm/vm.d $(B)/missionpack/vm/vm.d
 ifneq ($(strip $(D_FILES)),)
   include $(D_FILES)
 endif
+
+.PHONY: release debug clean distclean copyfiles installer dist
