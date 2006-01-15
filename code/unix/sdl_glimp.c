@@ -1113,7 +1113,7 @@ qboolean GLimp_SpawnRenderThread( void (*function)( void ) )
 		warned = qtrue;
 	}
 
-#if !MACOS_X
+#ifndef MACOS_X
 	return qfalse;  /* better safe than sorry for now. */
 #endif
 
