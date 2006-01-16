@@ -353,15 +353,15 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 	// draw the colored text
 	trap_R_SetColor( color );
 	
-	ax = x * uis.scale + uis.bias;
-	ay = y * uis.scale;
+	ax = x * uis.xscale + uis.bias;
+	ay = y * uis.yscale;
 
 	s = str;
 	while ( *s )
 	{
 		ch = *s & 127;
 		if ( ch == ' ' ) {
-			ax += ((float)PROPB_SPACE_WIDTH + (float)PROPB_GAP_WIDTH)* uis.scale;
+			ax += ((float)PROPB_SPACE_WIDTH + (float)PROPB_GAP_WIDTH)* uis.xscale;
 		}
 		else if ( ch >= 'A' && ch <= 'Z' ) {
 			ch -= 'A';
@@ -369,10 +369,10 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 			frow = (float)propMapB[ch][1] / 256.0f;
 			fwidth = (float)propMapB[ch][2] / 256.0f;
 			fheight = (float)PROPB_HEIGHT / 256.0f;
-			aw = (float)propMapB[ch][2] * uis.scale;
-			ah = (float)PROPB_HEIGHT * uis.scale;
+			aw = (float)propMapB[ch][2] * uis.xscale;
+			ah = (float)PROPB_HEIGHT * uis.yscale;
 			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, uis.charsetPropB );
-			ax += (aw + (float)PROPB_GAP_WIDTH * uis.scale);
+			ax += (aw + (float)PROPB_GAP_WIDTH * uis.xscale);
 		}
 		s++;
 	}
@@ -463,27 +463,27 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 	// draw the colored text
 	trap_R_SetColor( color );
 	
-	ax = x * uis.scale + uis.bias;
-	ay = y * uis.scale;
+	ax = x * uis.xscale + uis.bias;
+	ay = y * uis.yscale;
 
 	s = str;
 	while ( *s )
 	{
 		ch = *s & 127;
 		if ( ch == ' ' ) {
-			aw = (float)PROP_SPACE_WIDTH * uis.scale * sizeScale;
+			aw = (float)PROP_SPACE_WIDTH * uis.xscale * sizeScale;
 		}
 		else if ( propMap[ch][2] != -1 ) {
 			fcol = (float)propMap[ch][0] / 256.0f;
 			frow = (float)propMap[ch][1] / 256.0f;
 			fwidth = (float)propMap[ch][2] / 256.0f;
 			fheight = (float)PROP_HEIGHT / 256.0f;
-			aw = (float)propMap[ch][2] * uis.scale * sizeScale;
-			ah = (float)PROP_HEIGHT * uis.scale * sizeScale;
+			aw = (float)propMap[ch][2] * uis.xscale * sizeScale;
+			ah = (float)PROP_HEIGHT * uis.yscale * sizeScale;
 			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
 		}
 
-		ax += (aw + (float)PROP_GAP_WIDTH * uis.scale * sizeScale);
+		ax += (aw + (float)PROP_GAP_WIDTH * uis.xscale * sizeScale);
 		s++;
 	}
 
@@ -654,10 +654,10 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 	// draw the colored text
 	trap_R_SetColor( color );
 	
-	ax = x * uis.scale + uis.bias;
-	ay = y * uis.scale;
-	aw = charw * uis.scale;
-	ah = charh * uis.scale;
+	ax = x * uis.xscale + uis.bias;
+	ay = y * uis.yscale;
+	aw = charw * uis.xscale;
+	ah = charh * uis.yscale;
 
 	s = str;
 	while ( *s )
@@ -1068,7 +1068,8 @@ void UI_Init( void ) {
 	trap_GetGlconfig( &uis.glconfig );
 
 	// for 640x480 virtualized screen
-	uis.scale = uis.glconfig.vidHeight * (1.0/480.0);
+	uis.xscale = uis.glconfig.vidWidth * (1.0/640.0);
+	uis.yscale = uis.glconfig.vidHeight * (1.0/480.0);
 	if ( uis.glconfig.vidWidth * 480 > uis.glconfig.vidHeight * 640 ) {
 		// wide screen
 		uis.bias = 0.5 * ( uis.glconfig.vidWidth - ( uis.glconfig.vidHeight * (640.0/480.0) ) );
@@ -1094,10 +1095,10 @@ Adjusted for resolution and screen aspect ratio
 */
 void UI_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 	// expect valid pointers
-	*x = *x * uis.scale + uis.bias;
-	*y *= uis.scale;
-	*w *= uis.scale;
-	*h *= uis.scale;
+	*x = *x * uis.xscale + uis.bias;
+	*y *= uis.yscale;
+	*w *= uis.xscale;
+	*h *= uis.yscale;
 }
 
 void UI_DrawNamedPic( float x, float y, float width, float height, const char *picname ) {
