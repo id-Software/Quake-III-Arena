@@ -1,3 +1,63 @@
+2006-01-16 Various contributors
+	+ Move code/unix/Makefile to ./Makefile
+	+ x86 OS X support
+	+ "quake3" shell script as shipped with 1.32 (on linux) no longer needed
+	+ Ogg codec support from Joerg Dietrich
+	+ Fix to the gcc4/-O0 x86 JIT compiler bug
+	+ Up the defaults for zone and hunk memory since some mods (UT) have large
+		memory requirements that will have increased versus 1.32b due to some of the
+		alignment fixes
+	+ Dependency generation for the .asm files
+	+ Remove FS_SetRestrictions
+	+ Add FS_CheckPak0 for better error messages where dumb users are involved
+	+ Added cl_autoRecordDemo, which when enabled automatically records a new demo
+		on each map change
+	+ Only display the g_synchronousClients warning when it's appropriate
+	+ Remove custom memcpy/memset code
+	+ AVI video output
+		- Uses motion jpeg codec by default
+		- Use cl_aviFrameRate to set a framerate
+		- \video [filename] to start capture
+		- \stopvideo to stop capture
+		- Audio capture is a bit ropey
+	+ General Makefile improvements
+	+ Support for MinGW cross compilation
+	+ NetBSD support from optical
+	+ x86_64 JIT bytecode compiler no longer disabled by default
+	+ msvc project files updated and moved to win32/msvc
+	+ Various alignment fixes
+	+ Solaris (x86 and sparc) support from Vincent S. Cojot
+	+ Fixed Altivec-based mesh rendering
+	+ Ditch Mac OS 9 support
+	+ Added a Makefile option USE_LOCAL_HEADERS which can be disabled to use system
+		headers if desired
+	+ Detection of Altivec on Mac OS X
+	+ SMP support with sdl_glimp.c on Mac OS X.
+	+ Add "very high quality" option (patch from Pascal de Bruijn)
+	+ Support for RIFF files with zero length data chunks (yes they exist, and yes,
+		they're legal)
+	+ Support for ccache. If you want it, add USE_CCACHE=1 to Makefile.local
+	+ Mac OS X now uses SDL backend, all Objective C removed
+	+ Partial implementation of FS_Seek for files in pk3s
+	+ Implementation of r_dlightBacks from Shane Isley
+	+ OpenAL support, from BlackAura aka Stuart Dalton
+	+ An abstract codec system, simplifying support for new formats
+	+ Ignore in_dgamouse setting if dga isn't available
+	+ Removed hard coded mouse acceleration in *nix input code
+	+ Basically rewrote the lcc Makefile to be more sane
+	+ Removed various bits of lcc that weren't built/needed
+	+ General portability improvements
+	+ Various variables added that aid packaging, from vapier
+	+ Centralise architecture defines in q_platform.h
+	+ Replaced a bunch of inline and __inline with ID_INLINE
+	+ Replaced a bunch of __i386__ with id386
+	+ General tidy up of asm preprocessor decisions
+	+ Removed C_ONLY from the dedicated server build
+	+ Removed rule to build C++ (for splines) from the Makefile
+	+ General decrufting
+	+ Split USE_SDL into USE_SDL_VIDEO and USE_SDL_AUDIO
+	+ Various assorted bug fixes
+
 2005-10-29 Various contributors
 	+ nasm syntax asm ported to gas
 	+ Disabled-by-default MD4 support
