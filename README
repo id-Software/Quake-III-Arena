@@ -111,3 +111,33 @@ of q3asm. This is because by default q3asm outputs an updated qvm format that
 is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
 compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it still
 exists when you read this) for more details.
+
+New Cvars
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cl_autoRecordDemo
+ when enabled automatically records a new demo
+ on each map change
+
+seta s_alDriver "libopenal.so.0"
+ Describes which OpenAL library to use.
+
+seta s_alRolloff "0.8"
+
+seta s_alMinDistance "120"
+
+seta s_alDopplerSpeed "2200"
+
+seta s_alDopplerFactor "1.0"
+
+seta s_alSources "64"
+
+seta s_alGain "0.4"
+
+seta s_alPrecache "0"
+
+seta s_useOpenAL "1"
+ When set to true, enables OpenAL audio instead of SDL audio.
+
+seta sdlmixsamps "0"
+
+seta sdldevsamps "0" 
