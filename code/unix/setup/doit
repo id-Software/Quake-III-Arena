@@ -33,9 +33,9 @@ rm -f image/setup.data/splash.xpm
 mkdir image/tmp
 pushd image/tmp
 mkdir baseq3 demoq3 missionpack
-src="../../../release$arch-glibc/"
-install -m 755 $src/linuxquake3 ioquake3.$arch
-install -m 755 $src/linuxq3ded ioq3ded.$arch
+src="../../../../../build/release-linux-$arch/"
+install -m 755 $src/ioquake3.$arch ioquake3.$arch
+install -m 755 $src/ioq3ded.$arch ioq3ded.$arch
 install -m 644 $src/baseq3/*.so baseq3
 install -m 644 $src/missionpack/*.so missionpack
 pushd demoq3
