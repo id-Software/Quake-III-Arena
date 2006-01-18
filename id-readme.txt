@@ -5,9 +5,6 @@ This file contains the following sections:
 
 LICENSE
 GENERAL NOTES
-COMPILING ON WIN32
-COMPILING ON GNU/LINUX
-COMPILING ON MAC
 
 LICENSE
 =======
@@ -39,26 +36,6 @@ zlib is Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
   2. Altered source versions must be plainly marked as such, and must not be
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
-
-MD4 Message-Digest Algorithm
------------------------------------------------------------------------------
-lines	file(s)
-299		code/qcommon/md4.c
-277		common/md4.c
-Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.
-
-License to copy and use this software is granted provided that it is identified 
-as the <93>RSA Data Security, Inc. MD4 Message-Digest Algorithm<94> in all mater
-ial mentioning or referencing this software or this function.
-License is also granted to make and use derivative works provided that such work
-s are identified as <93>derived from the RSA Data Security, Inc. MD4 Message-Dig
-est Algorithm<94> in all material mentioning or referencing the derived work.
-RSA Data Security, Inc. makes no representations concerning either the merchanta
-bility of this software or the suitability of this software for any particular p
-urpose. It is provided <93>as is<94> without express or implied warranty of any 
-kind.
-
-checksums are used to validate pak files
 
 standard C library replacement routines
 -----------------------------------------------------------------------------
@@ -163,31 +140,10 @@ q3asm/					assembly to qvm bytecode compiler
 q3map/					map compiler ( .map -> .bsp ) - this is the version that comes with Q3Radiant 200f
 q3radiant/				Q3Radiant map editor build 200f ( common/ and libs/ are support dirs for radiant )
 
-While we made sure we were still able to compile the game on Windows, GNU/Linux and Mac, this build didn't get any kind of extensive testing so it may not work completely right. Whenever an id game is released under GPL, several projects start making the source code more friendly to nowaday's compilers and environements. If you are picking up this release weeks/months/years after we uploaded it, you probably want to look around on the net for cleaned up versions of this codebase as well.
-
-COMPILING ON WIN32
-==================
-
-VC7 / Visual C++ 2003 project files are provided:
-code/quake3.sln
-q3radiant/Radiant.sln
-
-To compile the qvms, you need to run some batch files:
-you will need to have lcc.exe q3cpp.exe q3rcc.exe and q3asm.exe in your path
-( some precompiled binaries are provided in lcc/bin and code/win32/mod-sdk-setup/bin )
-the qvm batch files are in code/game code/cgame code/q3_ui code/ui ..
-
-COMPILING ON GNU/LINUX
-==================
-
-the build system using cons, which may be known as scons's perl ancestor now
-you don't have to track it down though, the build script is provided in the tree
-you will need nasm and gcc 2.95
-make sure you have the X Direct Graphics Access and X Video Mode extensions headers for your X11
-a typical compile command goes like this:
-[..]/code$ ./unix/cons -- gcc=gcc-2.95 g++=g++-2.95
-
-COMPILING ON MAC
-================
-
-project file for OSX compile is in code/macosx/Quake3.pbproj
+While we made sure we were still able to compile the game on Windows, GNU/Linux
+and Mac, this build didn't get any kind of extensive testing so it may not work
+completely right. Whenever an id game is released under GPL, several projects
+start making the source code more friendly to nowaday's compilers and
+environements. If you are picking up this release weeks/months/years after we
+uploaded it, you probably want to look around on the net for cleaned up
+versions of this codebase as well.
