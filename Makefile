@@ -1670,9 +1670,12 @@ clean-debug:
 clean-release:
 	$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
 
-distclean: clean
+toolsclean:
 	$(MAKE) -C $(TOOLSDIR)/asm clean uninstall
 	$(MAKE) -C $(TOOLSDIR)/lcc clean uninstall
+
+distclean: clean toolsclean
+	rm -rf $(BUILD_DIR)
 
 installer: build_release
 	$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
