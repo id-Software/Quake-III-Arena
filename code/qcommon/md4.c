@@ -1,238 +1,227 @@
-/* 
- * Cryptographic API.
- *
- * MD4 Message Digest Algorithm (RFC1320).
- *
- * Implementation derived from Andrew Tridgell and Steve French's
- * CIFS MD4 implementation, and the cryptoapi implementation
- * originally based on the public domain implementation written
- * by Colin Plumb in 1993.
- *
- * Copyright (c) Andrew Tridgell 1997-1998.
- * Modified by Steve French (sfrench@us.ibm.com) 2002
- * Copyright (c) Cryptoapi developers.
- * Copyright (c) 2002 David S. Miller (davem@redhat.com)
- * Copyright (c) 2002 James Morris <jmorris@intercode.com.au>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
+/*
+	mdfour.c
+
+	An implementation of MD4 designed for use in the samba SMB
+	authentication protocol
+
+	Copyright (C) 1997-1998  Andrew Tridgell
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
+
+	$Id: mdfour.c,v 1.1 2002/08/23 22:03:27 abster Exp $
+*/
 
 #include "q_shared.h"
 #include "qcommon.h"
-typedef unsigned int u32;
 
-#define MD4_DIGEST_SIZE		16
-#define MD4_HMAC_BLOCK_SIZE	64
-#define MD4_BLOCK_WORDS		16
-#define MD4_HASH_WORDS		4
+#ifndef int32
+#define int32 int
+#endif
 
-struct md4_ctx {
-	u32 hash[MD4_HASH_WORDS];
-	u32 block[MD4_BLOCK_WORDS];
-	u32 byte_count;
+#if SIZEOF_INT > 4
+#define LARGE_INT32
+#endif
+
+#ifndef uint32
+#define uint32 unsigned int32
+#endif
+
+struct mdfour {
+	uint32 A, B, C, D;
+	uint32 totalN;
 };
 
-static ID_INLINE u32 lshift(u32 x, unsigned int s)
+
+/* NOTE: This code makes no attempt to be fast!
+
+   It assumes that a int is at least 32 bits long
+*/
+
+static struct mdfour *m;
+
+#define F(X,Y,Z) (((X)&(Y)) | ((~(X))&(Z)))
+#define G(X,Y,Z) (((X)&(Y)) | ((X)&(Z)) | ((Y)&(Z)))
+#define H(X,Y,Z) ((X)^(Y)^(Z))
+#ifdef LARGE_INT32
+#define lshift(x,s) ((((x)<<(s))&0xFFFFFFFF) | (((x)>>(32-(s)))&0xFFFFFFFF))
+#else
+#define lshift(x,s) (((x)<<(s)) | ((x)>>(32-(s))))
+#endif
+
+#define ROUND1(a,b,c,d,k,s) a = lshift(a + F(b,c,d) + X[k], s)
+#define ROUND2(a,b,c,d,k,s) a = lshift(a + G(b,c,d) + X[k] + 0x5A827999,s)
+#define ROUND3(a,b,c,d,k,s) a = lshift(a + H(b,c,d) + X[k] + 0x6ED9EBA1,s)
+
+/* this applies md4 to 64 byte chunks */
+static void mdfour64(uint32 *M)
 {
-	x &= 0xFFFFFFFF;
-	return ((x << s) & 0xFFFFFFFF) | (x >> (32 - s));
+	int j;
+	uint32 AA, BB, CC, DD;
+	uint32 X[16];
+	uint32 A,B,C,D;
+
+	for (j=0;j<16;j++)
+		X[j] = M[j];
+
+	A = m->A; B = m->B; C = m->C; D = m->D;
+	AA = A; BB = B; CC = C; DD = D;
+
+        ROUND1(A,B,C,D,  0,  3);  ROUND1(D,A,B,C,  1,  7);
+	ROUND1(C,D,A,B,  2, 11);  ROUND1(B,C,D,A,  3, 19);
+        ROUND1(A,B,C,D,  4,  3);  ROUND1(D,A,B,C,  5,  7);
+	ROUND1(C,D,A,B,  6, 11);  ROUND1(B,C,D,A,  7, 19);
+        ROUND1(A,B,C,D,  8,  3);  ROUND1(D,A,B,C,  9,  7);
+	ROUND1(C,D,A,B, 10, 11);  ROUND1(B,C,D,A, 11, 19);
+        ROUND1(A,B,C,D, 12,  3);  ROUND1(D,A,B,C, 13,  7);
+	ROUND1(C,D,A,B, 14, 11);  ROUND1(B,C,D,A, 15, 19);
+
+        ROUND2(A,B,C,D,  0,  3);  ROUND2(D,A,B,C,  4,  5);
+	ROUND2(C,D,A,B,  8,  9);  ROUND2(B,C,D,A, 12, 13);
+        ROUND2(A,B,C,D,  1,  3);  ROUND2(D,A,B,C,  5,  5);
+	ROUND2(C,D,A,B,  9,  9);  ROUND2(B,C,D,A, 13, 13);
+        ROUND2(A,B,C,D,  2,  3);  ROUND2(D,A,B,C,  6,  5);
+	ROUND2(C,D,A,B, 10,  9);  ROUND2(B,C,D,A, 14, 13);
+        ROUND2(A,B,C,D,  3,  3);  ROUND2(D,A,B,C,  7,  5);
+	ROUND2(C,D,A,B, 11,  9);  ROUND2(B,C,D,A, 15, 13);
+
+	ROUND3(A,B,C,D,  0,  3);  ROUND3(D,A,B,C,  8,  9);
+	ROUND3(C,D,A,B,  4, 11);  ROUND3(B,C,D,A, 12, 15);
+        ROUND3(A,B,C,D,  2,  3);  ROUND3(D,A,B,C, 10,  9);
+	ROUND3(C,D,A,B,  6, 11);  ROUND3(B,C,D,A, 14, 15);
+        ROUND3(A,B,C,D,  1,  3);  ROUND3(D,A,B,C,  9,  9);
+	ROUND3(C,D,A,B,  5, 11);  ROUND3(B,C,D,A, 13, 15);
+        ROUND3(A,B,C,D,  3,  3);  ROUND3(D,A,B,C, 11,  9);
+	ROUND3(C,D,A,B,  7, 11);  ROUND3(B,C,D,A, 15, 15);
+
+	A += AA; B += BB; C += CC; D += DD;
+
+#ifdef LARGE_INT32
+	A &= 0xFFFFFFFF; B &= 0xFFFFFFFF;
+	C &= 0xFFFFFFFF; D &= 0xFFFFFFFF;
+#endif
+
+	for (j=0;j<16;j++)
+		X[j] = 0;
+
+	m->A = A; m->B = B; m->C = C; m->D = D;
 }
 
-static ID_INLINE u32 F(u32 x, u32 y, u32 z)
+static void copy64(uint32 *M, byte *in)
 {
-	return (x & y) | ((~x) & z);
+	int i;
+
+	for (i=0;i<16;i++)
+		M[i] = (in[i*4+3]<<24) | (in[i*4+2]<<16) |
+			(in[i*4+1]<<8) | (in[i*4+0]<<0);
 }
 
-static ID_INLINE u32 G(u32 x, u32 y, u32 z)
+static void copy4(byte *out,uint32 x)
 {
-	return (x & y) | (x & z) | (y & z);
+	out[0] = x&0xFF;
+	out[1] = (x>>8)&0xFF;
+	out[2] = (x>>16)&0xFF;
+	out[3] = (x>>24)&0xFF;
 }
 
-static ID_INLINE u32 H(u32 x, u32 y, u32 z)
+void mdfour_begin(struct mdfour *md)
 {
-	return x ^ y ^ z;
+	md->A = 0x67452301;
+	md->B = 0xefcdab89;
+	md->C = 0x98badcfe;
+	md->D = 0x10325476;
+	md->totalN = 0;
 }
-                        
-#define ROUND1(a,b,c,d,k,s) (a = lshift(a + F(b,c,d) + k, s))
-#define ROUND2(a,b,c,d,k,s) (a = lshift(a + G(b,c,d) + k + (u32)0x5A827999,s))
-#define ROUND3(a,b,c,d,k,s) (a = lshift(a + H(b,c,d) + k + (u32)0x6ED9EBA1,s))
 
-static ID_INLINE void LittleLongArray(u32 *buf, unsigned int words)
+
+static void mdfour_tail(byte *in, int n)
 {
-	while (words--) {
-		*buf = LittleLong(*buf);
-		buf++;
+	byte buf[128];
+	uint32 M[16];
+	uint32 b;
+
+	m->totalN += n;
+
+	b = m->totalN * 8;
+
+	Com_Memset(buf, 0, 128);
+	if (n) Com_Memcpy(buf, in, n);
+	buf[n] = 0x80;
+
+	if (n <= 55) {
+		copy4(buf+56, b);
+		copy64(M, buf);
+		mdfour64(M);
+	} else {
+		copy4(buf+120, b);
+		copy64(M, buf);
+		mdfour64(M);
+		copy64(M, buf+64);
+		mdfour64(M);
 	}
 }
 
-static void md4_transform(u32 *hash, u32 const *in)
+static void mdfour_update(struct mdfour *md, byte *in, int n)
 {
-	u32 a, b, c, d;
+	uint32 M[16];
 
-	a = hash[0];
-	b = hash[1];
-	c = hash[2];
-	d = hash[3];
+	if (n == 0) mdfour_tail(in, n);
 
-	ROUND1(a, b, c, d, in[0], 3);
-	ROUND1(d, a, b, c, in[1], 7);
-	ROUND1(c, d, a, b, in[2], 11);
-	ROUND1(b, c, d, a, in[3], 19);
-	ROUND1(a, b, c, d, in[4], 3);
-	ROUND1(d, a, b, c, in[5], 7);
-	ROUND1(c, d, a, b, in[6], 11);
-	ROUND1(b, c, d, a, in[7], 19);
-	ROUND1(a, b, c, d, in[8], 3);
-	ROUND1(d, a, b, c, in[9], 7);
-	ROUND1(c, d, a, b, in[10], 11);
-	ROUND1(b, c, d, a, in[11], 19);
-	ROUND1(a, b, c, d, in[12], 3);
-	ROUND1(d, a, b, c, in[13], 7);
-	ROUND1(c, d, a, b, in[14], 11);
-	ROUND1(b, c, d, a, in[15], 19);
+	m = md;
 
-	ROUND2(a, b, c, d,in[ 0], 3);
-	ROUND2(d, a, b, c, in[4], 5);
-	ROUND2(c, d, a, b, in[8], 9);
-	ROUND2(b, c, d, a, in[12], 13);
-	ROUND2(a, b, c, d, in[1], 3);
-	ROUND2(d, a, b, c, in[5], 5);
-	ROUND2(c, d, a, b, in[9], 9);
-	ROUND2(b, c, d, a, in[13], 13);
-	ROUND2(a, b, c, d, in[2], 3);
-	ROUND2(d, a, b, c, in[6], 5);
-	ROUND2(c, d, a, b, in[10], 9);
-	ROUND2(b, c, d, a, in[14], 13);
-	ROUND2(a, b, c, d, in[3], 3);
-	ROUND2(d, a, b, c, in[7], 5);
-	ROUND2(c, d, a, b, in[11], 9);
-	ROUND2(b, c, d, a, in[15], 13);
-
-	ROUND3(a, b, c, d,in[ 0], 3);
-	ROUND3(d, a, b, c, in[8], 9);
-	ROUND3(c, d, a, b, in[4], 11);
-	ROUND3(b, c, d, a, in[12], 15);
-	ROUND3(a, b, c, d, in[2], 3);
-	ROUND3(d, a, b, c, in[10], 9);
-	ROUND3(c, d, a, b, in[6], 11);
-	ROUND3(b, c, d, a, in[14], 15);
-	ROUND3(a, b, c, d, in[1], 3);
-	ROUND3(d, a, b, c, in[9], 9);
-	ROUND3(c, d, a, b, in[5], 11);
-	ROUND3(b, c, d, a, in[13], 15);
-	ROUND3(a, b, c, d, in[3], 3);
-	ROUND3(d, a, b, c, in[11], 9);
-	ROUND3(c, d, a, b, in[7], 11);
-	ROUND3(b, c, d, a, in[15], 15);
-
-	hash[0] += a;
-	hash[1] += b;
-	hash[2] += c;
-	hash[3] += d;
-}
-
-static ID_INLINE void md4_transform_helper(struct md4_ctx *ctx)
-{
-	LittleLongArray(ctx->block, sizeof(ctx->block) / 4);
-	md4_transform(ctx->hash, ctx->block);
-}
-
-static void md4_init(void *ctx)
-{
-	struct md4_ctx *mctx = ctx;
-
-	mctx->hash[0] = 0x67452301;
-	mctx->hash[1] = 0xefcdab89;
-	mctx->hash[2] = 0x98badcfe;
-	mctx->hash[3] = 0x10325476;
-	mctx->byte_count = 0;
-}
-
-static void md4_update(void *ctx, const byte *data, unsigned int len)
-{
-	struct md4_ctx *mctx = ctx;
-	const u32 avail = sizeof(mctx->block) - (mctx->byte_count & 0x3f);
-
-	mctx->byte_count += len;
-
-	if (avail > len) {
-		Com_Memcpy((char *)mctx->block + (sizeof(mctx->block) - avail),
-		       data, len);
-		return;
+	while (n >= 64) {
+		copy64(M, in);
+		mdfour64(M);
+		in += 64;
+		n -= 64;
+		m->totalN += 64;
 	}
 
-	Com_Memcpy((char *)mctx->block + (sizeof(mctx->block) - avail),
-	       data, avail);
-
-	md4_transform_helper(mctx);
-	data += avail;
-	len -= avail;
-
-	while (len >= sizeof(mctx->block)) {
-		Com_Memcpy(mctx->block, data, sizeof(mctx->block));
-		md4_transform_helper(mctx);
-		data += sizeof(mctx->block);
-		len -= sizeof(mctx->block);
-	}
-
-	Com_Memcpy(mctx->block, data, len);
+	mdfour_tail(in, n);
 }
 
-static void md4_final(void *ctx, byte *out)
+
+static void mdfour_result(struct mdfour *md, byte *out)
 {
-	struct md4_ctx *mctx = ctx;
-	const unsigned int offset = mctx->byte_count & 0x3f;
-	char *p = (char *)mctx->block + offset;
-	int padding = 56 - (offset + 1);
+	m = md;
 
-	*p++ = 0x80;
-	if (padding < 0) {
-		Com_Memset(p, 0x00, padding + 8);
-		md4_transform_helper(mctx);
-		p = (char *)mctx->block;
-		padding = 56;
-	}
+	copy4(out, m->A);
+	copy4(out+4, m->B);
+	copy4(out+8, m->C);
+	copy4(out+12, m->D);
+}
 
-	Com_Memset(p, 0, padding);
-	mctx->block[14] = mctx->byte_count << 3;
-	mctx->block[15] = mctx->byte_count >> 29;
-	LittleLongArray(mctx->block, (sizeof(mctx->block) - 8) / 4);
-	md4_transform(mctx->hash, mctx->block);
-	Com_Memcpy(out, mctx->hash, sizeof(mctx->hash));
-	Com_Memset(mctx, 0, sizeof(*mctx));
+static void mdfour(byte *out, byte *in, int n)
+{
+	struct mdfour md;
+	mdfour_begin(&md);
+	mdfour_update(&md, in, n);
+	mdfour_result(&md, out);
 }
 
 //===================================================================
 
-unsigned Com_BlockChecksum( const void *buffer, int length )
+unsigned Com_BlockChecksum (const void *buffer, int length)
 {
-	int							digest[4];
-	unsigned				val;
-	struct md4_ctx	ctx;
+	int				digest[4];
+	unsigned	val;
 
-	md4_init( &ctx );
-	md4_update( &ctx, (byte *)buffer, length );
-	md4_final( &ctx, (byte *)digest );
-	
-	val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
-
-	return val;
-}
-
-unsigned Com_BlockChecksumKey( const void *buffer, int length, int key )
-{
-	int							digest[4];
-	unsigned				val;
-	struct md4_ctx	ctx;
-
-	md4_init( &ctx );
-	md4_update( &ctx, (byte *)&key, 4 );
-	md4_update( &ctx, (byte *)buffer, length );
-	md4_final( &ctx, (byte *)digest );
+	mdfour( (byte *)digest, (byte *)buffer, length );
 	
 	val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
 
