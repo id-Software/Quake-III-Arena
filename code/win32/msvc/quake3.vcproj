@@ -498,6 +498,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90">
 			<File
+				RelativePath="..\..\client\cl_avi.c">
+			</File>
+			<File
 				RelativePath="..\..\client\cl_cgame.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
