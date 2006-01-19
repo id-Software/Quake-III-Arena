@@ -486,6 +486,25 @@ static sentity_t entityList[MAX_GENTITIES];
 
 /*
 =================
+S_AL_SanitiseVector
+=================
+*/
+#define S_AL_SanitiseVector(v) _S_AL_SanitiseVector(v,__LINE__)
+static void _S_AL_SanitiseVector( vec3_t v, int line )
+{
+	// NaNs can't be compared for equality, thus always fail this test
+	if( v[ 0 ] == v[ 0 ] &&
+			v[ 1 ] == v[ 1 ] &&
+			v[ 2 ] == v[ 2 ] )
+		return;
+
+	Com_DPrintf( S_COLOR_YELLOW "WARNING: vector with one or more NaN components "
+			"being passed to OpenAL at %s:%d -- zeroing\n", __FILE__, line );
+	VectorClear( v );
+}
+
+/*
+=================
 S_AL_SrcInit
 =================
 */
@@ -761,6 +780,7 @@ S_AL_UpdateEntityPosition
 static
 void S_AL_UpdateEntityPosition( int entityNum, const vec3_t origin )
 {
+	S_AL_SanitiseVector( (vec_t *)origin );
 	if ( entityNum < 0 || entityNum > MAX_GENTITIES )
 		Com_Error( ERR_DROP, "S_UpdateEntityPosition: bad entitynum %i", entityNum );
 	VectorCopy( origin, entityList[entityNum].origin );
@@ -815,6 +835,7 @@ void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx
 	}
 	else
 		VectorCopy( origin, sorigin );
+	S_AL_SanitiseVector( sorigin );
 	qalSourcefv(srcList[src].alSource, AL_POSITION, sorigin);
 
 	// Start it playing
@@ -895,6 +916,8 @@ S_AL_AddLoopingSound
 static
 void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	S_AL_SanitiseVector( (vec_t *)origin );
+	S_AL_SanitiseVector( (vec_t *)velocity );
 	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
 }
 
@@ -906,6 +929,8 @@ S_AL_AddRealLoopingSound
 static
 void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	S_AL_SanitiseVector( (vec_t *)origin );
+	S_AL_SanitiseVector( (vec_t *)velocity );
 	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
 }
 
@@ -1428,6 +1453,10 @@ S_AL_Respatialize
 static
 void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int inwater )
 {
+	S_AL_SanitiseVector( (vec_t *)origin );
+	S_AL_SanitiseVector( axis[ 0 ] );
+	S_AL_SanitiseVector( axis[ 1 ] );
+	S_AL_SanitiseVector( axis[ 2 ] );
 	// Axis[0] = Forward
 	// Axis[2] = Up
 	float velocity[] = {0.0f, 0.0f, 0.0f};
