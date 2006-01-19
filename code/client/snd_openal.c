@@ -492,15 +492,12 @@ S_AL_SanitiseVector
 #define S_AL_SanitiseVector(v) _S_AL_SanitiseVector(v,__LINE__)
 static void _S_AL_SanitiseVector( vec3_t v, int line )
 {
-	// NaNs can't be compared for equality, thus always fail this test
-	if( v[ 0 ] == v[ 0 ] &&
-			v[ 1 ] == v[ 1 ] &&
-			v[ 2 ] == v[ 2 ] )
-		return;
-
-	Com_DPrintf( S_COLOR_YELLOW "WARNING: vector with one or more NaN components "
-			"being passed to OpenAL at %s:%d -- zeroing\n", __FILE__, line );
-	VectorClear( v );
+	if( Q_isnan( v[ 0 ] ) || Q_isnan( v[ 1 ] ) || Q_isnan( v[ 2 ] ) )
+	{
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: vector with one or more NaN components "
+				"being passed to OpenAL at %s:%d -- zeroing\n", __FILE__, line );
+		VectorClear( v );
+	}
 }
 
 /*

@@ -1252,4 +1252,24 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	VectorNormalize( dst );
 }
 
+/*
+================
+Q_isnan
 
+Don't pass doubles to this
+================
+*/
+int Q_isnan( float x )
+{
+	union
+	{
+		float f;
+		unsigned int i;
+	} t;
+
+	t.f = x;
+	t.i &= 0x7FFFFFFF;
+	t.i = 0x7F800000 - t.i;
+
+	return (int)( (unsigned int)t.i >> 31 );
+}
