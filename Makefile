@@ -197,7 +197,7 @@ ifeq ($(PLATFORM),linux)
     HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),i386)
-    OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math \
+    OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math \
       -funroll-loops -falign-loops=2 -falign-jumps=2 \
       -falign-functions=2 -fstrength-reduce
     HAVE_VM_COMPILED=true
@@ -364,7 +364,7 @@ ifeq ($(PLATFORM),mingw32)
   GL_CFLAGS =
   MINGW_CFLAGS = -DDONT_TYPEDEF_INT32
 
-  OPTIMIZE = -O3 -march=i686 -fomit-frame-pointer -ffast-math -falign-loops=2 \
+  OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math -falign-loops=2 \
     -funroll-loops -falign-jumps=2 -falign-functions=2 -fstrength-reduce
 
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
@@ -539,7 +539,7 @@ ifeq ($(PLATFORM),SunOS)
     BASE_CFLAGS += -DNO_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
-    OPTIMIZE = -O3 -march=i686  -ffast-math \
+    OPTIMIZE = -O3 -march=i586  -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -funroll-loops -fstrength-reduce
   endif
