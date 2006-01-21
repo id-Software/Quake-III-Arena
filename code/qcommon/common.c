@@ -2934,7 +2934,12 @@ static void FindMatches( const char *s ) {
 	}
 
 	// cut shortestMatch to the amount common with s
-	for ( i = 0 ; s[i] ; i++ ) {
+	for ( i = 0 ; shortestMatch[i] ; i++ ) {
+		if ( i >= strlen( s ) ) {
+			shortestMatch[i] = 0;
+			break;
+		}
+
 		if ( tolower(shortestMatch[i]) != tolower(s[i]) ) {
 			shortestMatch[i] = 0;
 		}
