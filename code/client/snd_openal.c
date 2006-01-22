@@ -38,6 +38,7 @@ cvar_t *s_alDopplerSpeed;
 cvar_t *s_alMinDistance;
 cvar_t *s_alRolloff;
 cvar_t *s_alDriver;
+cvar_t *s_alMaxSpeakerDistance;
 
 /*
 =================
@@ -468,6 +469,7 @@ typedef struct src_s
 static src_t srcList[MAX_SRC];
 static int srcCount = 0;
 static qboolean alSourcesInitialised = qfalse;
+static vec3_t lastListenerOrigin = { 0.0f, 0.0f, 0.0f };
 
 typedef struct sentity_s
 {
@@ -915,7 +917,7 @@ void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velo
 {
 	S_AL_SanitiseVector( (vec_t *)origin );
 	S_AL_SanitiseVector( (vec_t *)velocity );
-	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
+	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
 }
 
 /*
@@ -928,7 +930,15 @@ void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t 
 {
 	S_AL_SanitiseVector( (vec_t *)origin );
 	S_AL_SanitiseVector( (vec_t *)velocity );
-	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
+
+	// There are certain maps (*cough* Q3:TA mpterra*) that have large quantities
+	// of ET_SPEAKERS in the PVS at any given time. OpenAL can't cope with mixing
+	// large numbers of sounds, so this culls them by distance
+	if( DistanceSquared( origin, lastListenerOrigin ) > 
+			s_alMaxSpeakerDistance->value * s_alMaxSpeakerDistance->value )
+		return;
+
+	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
 }
 
 /*
@@ -1460,6 +1470,8 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 	float orientation[] = {axis[0][0], axis[0][1], axis[0][2],
 		axis[2][0], axis[2][1], axis[2][2]};
 
+	VectorCopy( origin, lastListenerOrigin );
+
 	// Set OpenAL listener paramaters
 	qalListenerfv(AL_POSITION, (ALfloat *)origin);
 	qalListenerfv(AL_VELOCITY, velocity);
@@ -1617,6 +1629,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alDopplerSpeed = Cvar_Get( "s_alDopplerSpeed", "2200", CVAR_ARCHIVE );
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
 	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
+	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 
