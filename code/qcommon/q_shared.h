@@ -610,6 +610,8 @@ void Parse3DMatrix (char **buf_p, int z, int y, int x, float *m);
 
 void	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...);
 
+char *Com_SkipTokens( char *s, int numTokens, char *sep );
+char *Com_SkipCharset( char *s, char *sep );
 
 // mode parm for FS_FOpenFile
 typedef enum {

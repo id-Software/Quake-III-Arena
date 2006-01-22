@@ -549,7 +549,6 @@ char *Sys_ConsoleInput(void)
 {
   // we use this when sending back commands
   static char text[256];
-  int i;
   int avail;
   char key;
   field_t *history;
@@ -588,22 +587,7 @@ char *Sys_ConsoleInput(void)
         if (key == '\t')
         {
           tty_Hide();
-          Field_CompleteCommand( &tty_con );
-          // Field_CompleteCommand does weird things to the string, do a cleanup
-          //   it adds a '\' at the beginning of the string
-          //   cursor doesn't reflect actual length of the string that's sent back
-          tty_con.cursor = strlen(tty_con.buffer);
-          if (tty_con.cursor>0)
-          {
-            if (tty_con.buffer[0] == '\\')
-            {
-              for (i=0; i<=tty_con.cursor; i++)
-              {
-                tty_con.buffer[i] = tty_con.buffer[i+1];
-              }
-              tty_con.cursor--;
-            }
-          }
+          Field_AutoComplete( &tty_con );
           tty_Show();
           return NULL;
         }

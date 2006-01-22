@@ -483,7 +483,7 @@ void Console_Key (int key) {
 
 	// enter finishes the line
 	if ( key == K_ENTER || key == K_KP_ENTER ) {
-		// if not in the game explicitly prepent a slash if needed
+		// if not in the game explicitly prepend a slash if needed
 		if ( cls.state != CA_ACTIVE && g_consoleField.buffer[0] != '\\' 
 			&& g_consoleField.buffer[0] != '/' ) {
 			char	temp[MAX_STRING_CHARS];
@@ -528,7 +528,7 @@ void Console_Key (int key) {
 	// command completion
 
 	if (key == K_TAB) {
-		Field_CompleteCommand(&g_consoleField);
+		Field_AutoComplete(&g_consoleField);
 		return;
 	}
 

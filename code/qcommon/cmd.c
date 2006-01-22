@@ -439,7 +439,7 @@ will point into this temporary buffer.
 */
 // NOTE TTimo define that to track tokenization issues
 //#define TKN_DBG
-void Cmd_TokenizeString( const char *text_in ) {
+static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 	const char	*text;
 	char	*textOut;
 
@@ -495,7 +495,7 @@ void Cmd_TokenizeString( const char *text_in ) {
 
 		// handle quoted strings
     // NOTE TTimo this doesn't handle \" escaping
-		if ( *text == '"' ) {
+		if ( !ignoreQuotes && *text == '"' ) {
 			cmd_argv[cmd_argc] = textOut;
 			cmd_argc++;
 			text++;
@@ -516,7 +516,7 @@ void Cmd_TokenizeString( const char *text_in ) {
 
 		// skip until whitespace, quote, or command
 		while ( *text > ' ' ) {
-			if ( text[0] == '"' ) {
+			if ( !ignoreQuotes && text[0] == '"' ) {
 				break;
 			}
 
@@ -541,6 +541,23 @@ void Cmd_TokenizeString( const char *text_in ) {
 	
 }
 
+/*
+============
+Cmd_TokenizeString
+============
+*/
+void Cmd_TokenizeString( const char *text_in ) {
+	Cmd_TokenizeString2( text_in, qfalse );
+}
+
+/*
+============
+Cmd_TokenizeStringIgnoreQuotes
+============
+*/
+void Cmd_TokenizeStringIgnoreQuotes( const char *text_in ) {
+	Cmd_TokenizeString2( text_in, qtrue );
+}
 
 /*
 ============

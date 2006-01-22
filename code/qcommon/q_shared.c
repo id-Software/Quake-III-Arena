@@ -59,10 +59,19 @@ COM_StripExtension
 ============
 */
 void COM_StripExtension( const char *in, char *out ) {
-	while ( *in && *in != '.' ) {
-		*out++ = *in++;
+	int             length;
+
+	strcpy( out, in );
+
+	length = strlen(out)-1;
+	while (length > 0 && out[length] != '.')
+	{
+		length--;
+		if (out[length] == '/')
+			return;		// no extension
 	}
-	*out = 0;
+	if (length)
+		out[length] = 0;
 }
 
 
@@ -1249,4 +1258,68 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 
 //====================================================================
 
+/*
+==================
+Com_CharIsOneOfCharset
+==================
+*/
+static qboolean Com_CharIsOneOfCharset( char c, char *set )
+{
+	int i;
 
+	for( i = 0; i < strlen( set ); i++ )
+	{
+		if( set[ i ] == c )
+			return qtrue;
+	}
+
+	return qfalse;
+}
+
+/*
+==================
+Com_SkipCharset
+==================
+*/
+char *Com_SkipCharset( char *s, char *sep )
+{
+	char	*p = s;
+
+	while( p )
+	{
+		if( Com_CharIsOneOfCharset( *p, sep ) )
+			p++;
+		else
+			break;
+	}
+
+	return p;
+}
+
+/*
+==================
+Com_SkipTokens
+==================
+*/
+char *Com_SkipTokens( char *s, int numTokens, char *sep )
+{
+	int		sepCount = 0;
+	char	*p = s;
+
+	while( sepCount < numTokens )
+	{
+		if( Com_CharIsOneOfCharset( *p++, sep ) )
+		{
+			sepCount++;
+			while( Com_CharIsOneOfCharset( *p, sep ) )
+				p++;
+		}
+		else if( *p == '\0' )
+			break;
+	}
+
+	if( sepCount == numTokens )
+		return p;
+	else
+		return s;
+}

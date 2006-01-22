@@ -3426,3 +3426,26 @@ void	FS_Flush( fileHandle_t f ) {
 	fflush(fsh[f].handleFiles.file.o);
 }
 
+void	FS_FilenameCompletion( const char *dir, const char *ext,
+		qboolean stripExt, void(*callback)(const char *s) ) {
+	char	**filenames;
+	int		nfiles;
+	int		i;
+	char	filename[ MAX_STRING_CHARS ];
+
+	filenames = FS_ListFilteredFiles( dir, ext, NULL, &nfiles );
+
+	FS_SortFileList( filenames, nfiles );
+
+	for( i = 0; i < nfiles; i++ ) {
+		FS_ConvertPath( filenames[ i ] );
+		Q_strncpyz( filename, filenames[ i ], MAX_STRING_CHARS );
+
+		if( stripExt ) {
+			COM_StripExtension( filename, filename );
+		}
+
+		callback( filename );
+	}
+	FS_FreeFileList( filenames );
+}
