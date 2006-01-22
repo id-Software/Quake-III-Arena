@@ -1209,6 +1209,12 @@ void CL_CharEvent( int key ) {
 		return;
 	}
 
+	// delete is not a printable character and is
+	// otherwise handled by Field_KeyDownEvent
+	if ( key == 127 ) {
+		return;
+	}
+
 	// distribute the key down event to the apropriate handler
 	if ( cls.keyCatchers & KEYCATCH_CONSOLE )
 	{
