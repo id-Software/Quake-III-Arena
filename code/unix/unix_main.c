@@ -1400,6 +1400,18 @@ int main ( int argc, char* argv[] )
 
   while (1)
   {
+#if !defined( DEDICATED ) && USE_SDL_VIDEO
+    int appState = SDL_GetAppState( );
+
+    // If we have no input focus at all, sleep a bit
+    if( !( appState & ( SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS ) ) )
+      usleep( 16000 );
+
+    // If we're minimised, sleep a bit more
+    if( !( appState & SDL_APPACTIVE ) )
+      usleep( 32000 );
+#endif
+
 #ifdef __linux__
     Sys_ConfigureFPU();
 #endif
