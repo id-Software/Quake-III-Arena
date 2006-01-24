@@ -1,3 +1,23 @@
+2006-01-24 Various contributors
+	+ Persistent console history
+	+ Added code to sleep a bit when q3 has no focus and sleep a lot when it's
+		minimised (SDL only)
+	+ Cull excess speaker entities when using OpenAL
+	+ Fix the operation of the delete key in *nix
+	+ Only check the checksum on baseq3 pak0.pk3
+	+ Overhaul of console autocompletion
+		- No longer does weird stuff like move the cursor inappropriately
+		- Autocomplete works with compound commands
+		- Special autocomplete on some commands e.g. \map, \demo
+		- Removed various hacks used to counter the original autocomplete code
+	+ Fixed the ability to disable Ogg Vorbis
+	+ s/i686/i586/ - see bug #2578
+	+ Some sloppily coded mods call the Q3 sound API with NaNs -- sanitise this
+	+ Removed advertising clause from BSD license as per mailing list discussion
+	+ "make distclean" now does what you'd expect
+	+ "make clean toolsclean" now does what "make distclean" did before
+	+ GPL MD4 implementation
+
 2006-01-16 Various contributors
 	+ Move code/unix/Makefile to ./Makefile
 	+ x86 OS X support

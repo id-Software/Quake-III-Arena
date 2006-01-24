@@ -1,143 +1,197 @@
-Name of this project: icculus.org/quake3
-URL: http://www.icculus.org/quake3
-Hello and welcome to the Quake 3 source repository on icculus.org
-I'll be your maintainer, zakk@icculus.org, please send all your patches to
-the bugzilla: https://bugzilla.icculus.org, or join the mailing list
-(quake3-subscribe@icculus.org) and submit your patch there.
-Best case scenario is you subscribe to the ml, submit your patch to
-bugzilla, and then post the url to the mailing list.
+,------------------------------------------------------------------------------.
+|     _            _                          __              _       ____     |
+|    (_)__ __ _  _| |_  _ ___  ___ _ _ __ _  / /_ _ _  _ __ _| |_____|__ /     |
+|    | / _/ _| || | | || (_-<_/ _ \ '_/ _` |/ / _` | || / _` | / / -_)|_ \     |
+|    |_\__\__|\_,_|_|\_,_/__(_)___/_| \__, /_/\__, |\_,_\__,_|_\_\___|___/     |
+|                                     |___/      |_|                           |
+|                                                                              |
+`------------------------------------------ http://icculus.org/quake3 ---------'
 
-If you're too lazy for either method, then I would rather
-you e-mailed your patches to me directly than not at all.
+The intent of this project is to provide a baseline Quake 3 which may be used
+for further development. Some of the major features currently implemented are:
 
-The intent of this is to give people a baseline Quake 3.
-Bug fixes, SDL port, OpenAL, security, etc.
-Extra graphics and sound will be accepted as long as they are entirely
-optional and off by default.
+  * SDL backend for unix-like operating systems
+  * OpenAL sound API support (multiple speaker support and better sound
+    quality)
+  * Full x86_64 support on Linux
+  * MinGW compilation support on Windows and cross compilation support on Linux
+  * AVI video capture of demos
+  * Much improved console autocompletion
+  * Persistent console history
+  * Colorized terminal output
+  * Optional Ogg Vorbis support
+  * Much improved QVM tools
+  * Support for various esoteric operating systems (see
+    http://icculus.org/quake3/?page=status)
+  * Many, many bug fixes
 
-The map editor isn't included, get a modern copy from here:
-http://www.qeradiant.com/
+The map editor and associated compiling tools are not included. We suggest you
+use a modern copy from http://www.qeradiant.com/.
 
-The id software readme has been renamed to id-readme.txt
-so as to prevent confusion.
-
-Refer to the web-site for updated status, enjoy!
-
-Compiling (Under Windows)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run Visual Studio, open the quake3.sln file in the win32/msvc
-directory. Build. Copy the resultant Quake3.exe to your quake 3
-directory, make a backup if you want to keep your original.
-
-Copy the resultant dlls to your baseq3 directory, backup etc.
-
-Run, enjoy!
+The original id software readme that accompanied the Q3 source release has been
+renamed to id-readme.txt so as to prevent confusion. Please refer to the
+web-site for updated status.
 
 
-Compiling (Under Linux)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. If not already there, change to the directory containing this readme
-2. Run 'make'
+--------------------------------------------- Compilation and installation -----
 
-For distribution maintainers, you can set some make variables:
- OPTIMIZE          - use this for custom CFLAGS
- DEFAULT_BASEDIR   - extra path to search for baseq3 and such
- BUILD_SERVER      - build the 'q3ded' server binary (1 = build it, default = 1)
- BUILD_CLIENT      - build the 'quake3' client binary (1 = build it, default = 1)
- USE_LOCAL_HEADERS - use system headers instead of ones local to ioq3
+For *nix
+  1. Change to the directory containing this readme.
+  2. Run 'make'.
 
-Installing under Linux
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Set the COPYDIR variable in the shell to be where you installed
-Quake 3 to. By default it will be /usr/local/games/quake3 if you
-haven't set it. Which is where the id patch installs by default.
+For Windows, using MinGW
+  1. Download and install MinGW and MSys from http://www.mingw.org/.
+  2. Download http://www.libsdl.org/extras/win32/common/directx-devel.tar.gz
+     and untar in into your MinGW directory (usually C:\MinGW).
+  3. Open an MSys terminal, and follow the instructions for compiling on *nix.
 
-Then run "make copyfiles", beware that this will overwrite any binaries
-installed previously, even official id ones.
+For Windows, using MSVC
+  1. Run Visual Studio and open the quake3.sln file in the code/win32/msvc
+     directory.
+  2. Build.
+  3. Copy the resultant Quake3.exe to your quake 3 directory, make a backup if
+     you want to keep your original. If you wish to use native libraries, copy
+     the resultant dlls to your baseq3 directory.
 
-Compiling under Windows using MinGW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-It is possible to compile ioQ3 using the MinGW (Minimalist GNU for Windows)
-toolset. It's a little more involved than compiling for Linux; steps are as
-follows:
+Installation, for *nix
+  1. Set the COPYDIR variable in the shell to be where you installed Quake 3
+     to.  By default it will be /usr/local/games/quake3 if you haven't set it.
+     This is the path as used by the original Linux Q3 installer and subsequent
+     point releases.
+  2. Run 'make copyfiles'.
 
-1. Download and install MinGW and MSys from http://www.mingw.org/.
-2. Download http://www.libsdl.org/extras/win32/common/directx-devel.tar.gz
-   and untar in into your MinGW directory (usually C:\MinGW).
-3. Perform the usual precompilation sacrificial ritual.
-4. Open an MSys terminal, and follow the instructions for compiling on Linux.
-5. Steal underpants
-6. ?????
-7. Profit!
-
-It is also possible to cross compile for Windows using MinGW. A script is
-available to build a cross compilation environment from
+It is also possible to cross compile for Windows under *nix using MinGW. A
+script is available to build a cross compilation environment from
 http://www.libsdl.org/extras/win32/cross/build-cross.sh. The gcc/binutils
 version numbers that the script downloads may need to be altered. After you
 have successfully run this script cross compiling is simply a case of using
 './cross-make-mingw.sh' in place of 'make'.
 
+If the make based build system is being used (i.e. *nix or MinGW), the
+following variables may be set, either on the command line or in
+Makefile.local:
+
+  OPTIMIZE          - use this for custom CFLAGS
+  DEFAULT_BASEDIR   - extra path to search for baseq3 and such
+  BUILD_SERVER      - build the 'ioq3ded' server binary
+  BUILD_CLIENT      - build the 'ioquake3' client binary
+  BUILD_CLIENT_SMP  - build the 'ioquake3-smp' client binary
+  BUILD_GAME_SO     - build the game shared libraries
+  BUILD_GAME_QVM    - build the game qvms
+  USE_SDL           - use the SDL backend where available
+  USE_OPENAL        - use OpenAL where available
+  USE_OPENAL_DLOPEN - link with OpenAL at runtime
+  USE_CODEC_VORBIS  - enable Ogg Vorbis support
+  USE_LOCAL_HEADERS - use headers local to ioq3 instead of system ones
+  USE_CCACHE        - use ccache compiler caching tool
+  COPYDIR           - the target installation directory
+
+The defaults for these variables differ depending on the target platform.
+
+
+------------------------------------------------------------------ Console -----
+
+New cvars
+  cl_autoRecordDemo       - record a new demo on each map change
+  cl_aviFrameRate         - the framerate to use when capturing video
+  cl_aviMotionJpeg        - use the mjpeg codec when capturing video
+
+  s_useOpenAL             - use the OpenAL sound backend if available
+  s_alPrecache            - cache OpenAL sounds before use
+  s_alGain                - the value of AL_GAIN for each source
+  s_alSources             - the total number of sources (memory) to allocate
+  s_alDopplerFactor       - the value passed to alDopplerFactor
+  s_alDopplerSpeed        - the value passed to alDopplerVelocity
+  s_alMinDistance         - the value of AL_REFERENCE_DISTANCE for each source
+  s_alRolloff             - the value of AL_ROLLOFF_FACTOR for each source
+  s_alMaxSpeakerDistance  - ET_SPEAKERS beyond this distance are culled
+  s_alDriver              - which OpenAL library to use
+
+  s_sdlBits               - SDL bit resolution
+  s_sdlSpeed              - SDL sample rate
+  s_sdlChannels           - SDL number of channels
+  s_sdlDevSamps           - SDL DMA buffer size override
+  s_sdlMixSamps           - SDL mix buffer size override
+
+  ttycon_ansicolor        - enable use of ANSI escape codes in the tty
+  r_GLlibCoolDownMsec     - wait for some milliseconds to close GL library
+  com_altivec             - enable use of altivec on PowerPC systems
+  s_backend               - read only, indicates the current sound backend
+  cl_consoleHistory       - read only, stores the console history
+  cl_platformSensitivity  - read only, indicates the mouse input scaling
+
+New commands
+  video [filename]        - start video capture (use with demo command)
+  stopvideo               - stop video capture
+
+
+------------------------------------------------------------ Miscellaneous -----
+
 Using shared libraries instead of qvm
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To make quake3 prefer shared libraries instead of qvm run it with
-the following parameters:
-+set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0
+  To force Q3 to use shared libraries instead of qvms run it with the following
+  parameters: +set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0
 
 Using Demo Data Files
-~~~~~~~~~~~~~~~~~~~~~
-You only need demoq3/pak0.pk3 from the demo installer. The qvm files inside
-pak0.pk3 will not work, you have to use the native shared libraries from this
-project. To do so copy or link ui*.so, qagame*.so, cgame*.so from baseq3 to
-demoq3 and run quake3 with the parameters described above.
+  Copy demoq3/pak0.pk3 from the demo installer to your baseq3 directory. The
+  qvm files in this pak0.pk3 will not work, so you have to use the native
+  shared libraries or qvms from this project. To use the new qvms, they must be
+  put into a pk3 file. A pk3 file is just a zip file, so any compression tool
+  that can create such files will work. The shared libraries should already be
+  in the correct place. Use the instructions above to use them.
+
+  Please bear in mind that you will not be able to play online using the demo
+  data, nor is it something that we like to spend much time maintaining or
+  supporting.
 
 64bit mods
-~~~~~~~~~~
-If you wish to compile external mods as shared libraries on a 64bit platform,
-and the mod source is derived from the id Q3 SDK, you will need to modify the
-interface code a little. Open the files ending in _syscalls.c and change every
-instance of int to long in the declaration of the syscall function pointer and
-the dllEntry function. Also find the vmMain function for each module (usually
-in cg_main.c g_main.c etc.) and similarly replace every instance of int in the
-prototype with long.
+  If you wish to compile external mods as shared libraries on a 64bit platform,
+  and the mod source is derived from the id Q3 SDK, you will need to modify the
+  interface code a little. Open the files ending in _syscalls.c and change
+  every instance of int to long in the declaration of the syscall function
+  pointer and the dllEntry function. Also find the vmMain function for each
+  module (usually in cg_main.c g_main.c etc.) and similarly replace every
+  instance of int in the prototype with long.
 
-Note if you simply wish to run mods on a 64bit platform you do not need to
-recompile anything since by default Q3 uses a virtual machine system.
+  Note if you simply wish to run mods on a 64bit platform you do not need to
+  recompile anything since by default Q3 uses a virtual machine system.
 
 Creating mods compatible with Q3 1.32b
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you're using this package to create mods for the last official release of
-Q3, it is necessary to pass the commandline option '-vq3' to your invocation
-of q3asm. This is because by default q3asm outputs an updated qvm format that
-is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
-compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it still
-exists when you read this) for more details.
+  If you're using this package to create mods for the last official release of
+  Q3, it is necessary to pass the commandline option '-vq3' to your invocation
+  of q3asm. This is because by default q3asm outputs an updated qvm format that
+  is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
+  compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it
+  still exists when you read this) for more details.
 
-New Cvars
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cl_autoRecordDemo
- when enabled automatically records a new demo
- on each map change
 
-seta s_alDriver "libopenal.so.0"
- Describes which OpenAL library to use.
+------------------------------------------------------------- Contributing -----
 
-seta s_alRolloff "0.8"
+Please send all patches to bugzilla (https://bugzilla.icculus.org), or join the
+mailing list (quake3-subscribe@icculus.org) and submit your patch there.  The
+best case scenario is that you submit your patch to bugzilla, and then post the
+URL to the mailing list. If you're too lazy for either method, then it would be
+better if you emailed your patches to zakk@icculus.org directly than not at
+all.
 
-seta s_alMinDistance "120"
+The focus for ioq3 to develop a stable base suitable for further development.
+As such ioq3 does not have any significant graphical enhancements and none are
+planned at this time. However, improved graphics and sound patches will be
+accepted as long as they are entirely optional, do not require new media and
+off by default.
 
-seta s_alDopplerSpeed "2200"
 
-seta s_alDopplerFactor "1.0"
+------------------------------------------------------------------ Credits -----
 
-seta s_alSources "64"
+Maintainers
+  Aaron Gyes <floam@sh.nu>
+  Ludwig Nussel <ludwig.nussel@suse.de>
+  Ryan C. Gordon <icculus@icculus.org>
+  Tim Angus <tim@ngus.net>
+  Zachary J. Slater <zakk@timedoctor.org>
 
-seta s_alGain "0.4"
-
-seta s_alPrecache "0"
-
-seta s_useOpenAL "1"
- When set to true, enables OpenAL audio instead of SDL audio.
-
-seta sdlmixsamps "0"
-
-seta sdldevsamps "0" 
+Significant contributions from
+  Andreas Kohn <andreas@syndrom23.de>
+  Joerg Dietrich <Dietrich_Joerg@t-online.de>
+  Stuart Dalton <badcdev@gmail.com>
+  Vincent S. Cojot <vincent@cojot.name>
+  optical <alex@rigbo.se>
