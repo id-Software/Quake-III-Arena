@@ -918,6 +918,26 @@ char	* QDECL va( char *format, ... ) {
 	return buf;
 }
 
+/*
+============
+Com_TruncateLongString
+
+Assumes buffer is atleast TRUNCATE_LENGTH big
+============
+*/
+void Com_TruncateLongString( char *buffer, const char *s )
+{
+	int length = strlen( s );
+
+	if( length <= TRUNCATE_LENGTH )
+		Q_strncpyz( buffer, s, TRUNCATE_LENGTH );
+	else
+	{
+		Q_strncpyz( buffer, s, ( TRUNCATE_LENGTH / 2 ) - 3 );
+		Q_strcat( buffer, TRUNCATE_LENGTH, " ... " );
+		Q_strcat( buffer, TRUNCATE_LENGTH, s + length - ( TRUNCATE_LENGTH / 2 ) + 3 );
+	}
+}
 
 /*
 =====================================================================

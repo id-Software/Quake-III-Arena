@@ -486,7 +486,7 @@ void Console_Key (int key) {
 		// if not in the game explicitly prepend a slash if needed
 		if ( cls.state != CA_ACTIVE && g_consoleField.buffer[0] != '\\' 
 			&& g_consoleField.buffer[0] != '/' ) {
-			char	temp[MAX_STRING_CHARS];
+			char	temp[MAX_EDIT_LINE-1];
 
 			Q_strncpyz( temp, g_consoleField.buffer, sizeof( temp ) );
 			Com_sprintf( g_consoleField.buffer, sizeof( g_consoleField.buffer ), "\\%s", temp );
@@ -518,6 +518,8 @@ void Console_Key (int key) {
 		Field_Clear( &g_consoleField );
 
 		g_consoleField.widthInChars = g_console_field_width;
+
+		CL_SaveConsoleHistory( );
 
 		if ( cls.state == CA_DISCONNECTED ) {
 			SCR_UpdateScreen ();	// force an update, because the command
@@ -1256,3 +1258,107 @@ void Key_ClearStates (void)
 	}
 }
 
+// This must not exceed MAX_CMD_LINE
+#define MAX_CONSOLE_SAVE_BUFFER 1024
+static char consoleSaveBuffer[ MAX_CONSOLE_SAVE_BUFFER ];
+
+/*
+================
+CL_LoadConsoleHistory
+
+Load the console history from cl_consoleHistory
+================
+*/
+void CL_LoadConsoleHistory( void )
+{
+	char		*token, *text_p;
+	int			i, numChars, numLines = 0;
+	cvar_t	*cv;
+
+	cv = Cvar_Get( "cl_consoleHistory", "", CVAR_ARCHIVE|CVAR_ROM );
+	Q_strncpyz( consoleSaveBuffer, cv->string, MAX_CONSOLE_SAVE_BUFFER );
+
+	text_p = consoleSaveBuffer;
+
+	for( i = COMMAND_HISTORY - 1; i >= 0; i-- )
+	{
+		if( !*( token = COM_Parse( &text_p ) ) )
+			break;
+
+		historyEditLines[ i ].cursor = atoi( token );
+
+		if( !*( token = COM_Parse( &text_p ) ) )
+			break;
+
+		historyEditLines[ i ].scroll = atoi( token );
+
+		if( !*( token = COM_Parse( &text_p ) ) )
+			break;
+
+		numChars = atoi( token );
+		text_p++;
+		if( numChars > ( strlen( consoleSaveBuffer ) -  ( text_p - consoleSaveBuffer ) ) )
+		{
+			Com_DPrintf( S_COLOR_YELLOW "WARNING: probable corrupt history\n" );
+			break;
+		}
+		Com_Memcpy( historyEditLines[ i ].buffer,
+				text_p, numChars );
+		historyEditLines[ i ].buffer[ numChars ] = '\0';
+		text_p += numChars;
+
+		numLines++;
+	}
+
+	memmove( &historyEditLines[ 0 ], &historyEditLines[ i + 1 ],
+			numLines * sizeof( field_t ) );
+	for( i = numLines; i < COMMAND_HISTORY; i++ )
+		Field_Clear( &historyEditLines[ i ] );
+
+	historyLine = nextHistoryLine = numLines;
+}
+
+/*
+================
+CL_SaveConsoleHistory
+
+Save the console history into the cvar cl_consoleHistory
+so that it persists across invocations of q3
+================
+*/
+void CL_SaveConsoleHistory( void )
+{
+	int i;
+	int	lineLength, saveBufferLength, additionalLength;
+
+	consoleSaveBuffer[ 0 ] = '\0';
+
+	i = ( nextHistoryLine - 1 ) % COMMAND_HISTORY;
+	do
+	{
+		if( historyEditLines[ i ].buffer[ 0 ] )
+		{
+			lineLength = strlen( historyEditLines[ i ].buffer );
+			saveBufferLength = strlen( consoleSaveBuffer );
+
+			//ICK "seta cl_consoleHistory " + "%d %d %d  " = 23 + 13 = 36
+			additionalLength = lineLength + 36;
+
+			if( saveBufferLength + additionalLength < MAX_CONSOLE_SAVE_BUFFER )
+			{
+				Q_strcat( consoleSaveBuffer, MAX_CONSOLE_SAVE_BUFFER,
+						va( "%d %d %d %s ",
+						historyEditLines[ i ].cursor,
+						historyEditLines[ i ].scroll,
+						lineLength,
+						historyEditLines[ i ].buffer ) );
+			}
+			else
+				break;
+		}
+		i = ( i - 1 + COMMAND_HISTORY ) % COMMAND_HISTORY;
+	}
+	while( i != ( nextHistoryLine - 1 ) % COMMAND_HISTORY );
+
+	Cvar_Set( "cl_consoleHistory", consoleSaveBuffer );
+}

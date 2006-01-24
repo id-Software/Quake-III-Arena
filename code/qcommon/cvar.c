@@ -469,7 +469,10 @@ Handles variable inspection and changing from the console
 ============
 */
 qboolean Cvar_Command( void ) {
-	cvar_t			*v;
+	cvar_t	*v;
+	char		string[ TRUNCATE_LENGTH ];
+	char		resetString[ TRUNCATE_LENGTH ];
+	char		latchedString[ TRUNCATE_LENGTH ];
 
 	// check variables
 	v = Cvar_FindVar (Cmd_Argv(0));
@@ -479,9 +482,13 @@ qboolean Cvar_Command( void ) {
 
 	// perform a variable print or set
 	if ( Cmd_Argc() == 1 ) {
-		Com_Printf ("\"%s\" is:\"%s" S_COLOR_WHITE "\" default:\"%s" S_COLOR_WHITE "\"\n", v->name, v->string, v->resetString );
+		Com_TruncateLongString( string, v->string );
+		Com_TruncateLongString( resetString, v->resetString );
+		Com_Printf ("\"%s\" is:\"%s" S_COLOR_WHITE "\" default:\"%s" S_COLOR_WHITE "\"\n",
+				v->name, string, resetString );
 		if ( v->latchedString ) {
-			Com_Printf( "latched: \"%s\"\n", v->latchedString );
+			Com_TruncateLongString( latchedString, v->latchedString );
+			Com_Printf( "latched: \"%s\"\n", latchedString );
 		}
 		return qtrue;
 	}
@@ -645,11 +652,21 @@ void Cvar_WriteVariables( fileHandle_t f ) {
 		if( var->flags & CVAR_ARCHIVE ) {
 			// write the latched value, even if it hasn't taken effect yet
 			if ( var->latchedString ) {
+				if( strlen( var->name ) + strlen( var->latchedString ) + 10 > sizeof( buffer ) ) {
+					Com_Printf( S_COLOR_YELLOW "WARNING: value of variable "
+							"\"%s\" too long to write to file\n", var->name );
+					continue;
+				}
 				Com_sprintf (buffer, sizeof(buffer), "seta %s \"%s\"\n", var->name, var->latchedString);
 			} else {
+				if( strlen( var->name ) + strlen( var->string ) + 10 > sizeof( buffer ) ) {
+					Com_Printf( S_COLOR_YELLOW "WARNING: value of variable "
+							"\"%s\" too long to write to file\n", var->name );
+					continue;
+				}
 				Com_sprintf (buffer, sizeof(buffer), "seta %s \"%s\"\n", var->name, var->string);
 			}
-			FS_Printf (f, "%s", buffer);
+			FS_Write( buffer, strlen( buffer ), f );
 		}
 	}
 }

@@ -452,6 +452,8 @@ void Con_Top( void );
 void Con_Bottom( void );
 void Con_Close( void );
 
+void CL_LoadConsoleHistory( void );
+void CL_SaveConsoleHistory( void );
 
 //
 // cl_scrn.c
