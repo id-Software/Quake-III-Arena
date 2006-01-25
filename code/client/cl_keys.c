@@ -1043,28 +1043,22 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 	}
 
 #ifndef _WIN32
-  if (key == K_ENTER)
-  {
-    if (down)
-    {
-      if (keys[K_ALT].down)
-      {
-        Key_ClearStates();
-        if (Cvar_VariableValue("r_fullscreen") == 0)
-        {
-          Com_Printf("Switching to fullscreen rendering\n");
-          Cvar_Set("r_fullscreen", "1");
-        }
-        else
-        {
-          Com_Printf("Switching to windowed rendering\n");
-          Cvar_Set("r_fullscreen", "0");
-        }
-        Cbuf_ExecuteText( EXEC_APPEND, "vid_restart\n");
-        return;
-      }
-    }
-  }
+	if (key == K_ENTER)
+	{
+		if (down)
+		{
+			if (keys[K_ALT].down)
+			{
+				Key_ClearStates();
+				Cvar_SetValue( "r_fullscreen",
+						!Cvar_VariableIntegerValue( "r_fullscreen" ) );
+#if !USE_SDL_VIDEO // This is handled in sdl_glimp.c/GLimp_EndFrame
+				Cbuf_ExecuteText( EXEC_APPEND, "vid_restart\n");
+#endif
+				return;
+			}
+		}
+	}
 #endif
 
 	// console key is hardcoded, so the user can never unbind it

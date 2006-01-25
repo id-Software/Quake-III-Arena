@@ -1040,6 +1040,34 @@ void GLimp_EndFrame (void)
     SDL_GL_SwapBuffers();
   }
 
+  if( r_fullscreen->modified )
+  {
+    qboolean    fullscreen;
+    qboolean    sdlToggled = qfalse;
+    SDL_Surface *s = SDL_GetVideoSurface( );
+
+    if( s )
+    {
+      // Find out the current state
+      if( s->flags & SDL_FULLSCREEN )
+        fullscreen = qtrue;
+      else
+        fullscreen = qfalse;
+
+      // Is the state we want different from the current state?
+      if( !!r_fullscreen->integer != fullscreen )
+        sdlToggled = SDL_WM_ToggleFullScreen( s );
+      else
+        sdlToggled = qtrue;
+    }
+
+    // SDL_WM_ToggleFullScreen didn't work, so do it the slow way
+    if( !sdlToggled )
+      Cbuf_AddText( "vid_restart" );
+
+    r_fullscreen->modified = qfalse;
+  }
+
   // check logging
   QGL_EnableLogging( (qboolean)r_logFile->integer ); // bk001205 - was ->value
 }
