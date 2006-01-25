@@ -173,11 +173,13 @@ URL to the mailing list. If you're too lazy for either method, then it would be
 better if you emailed your patches to zakk@icculus.org directly than not at
 all.
 
-The focus for ioq3 to develop a stable base suitable for further development.
+The focus for ioq3 to develop a stable base suitable for further development,
+and provide players with the same Quake 3 experience they've had for years.
 As such ioq3 does not have any significant graphical enhancements and none are
 planned at this time. However, improved graphics and sound patches will be
 accepted as long as they are entirely optional, do not require new media and
 off by default.
+
 
 
 ------------------------------------------------------------------ Credits -----
