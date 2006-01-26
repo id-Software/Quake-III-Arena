@@ -414,6 +414,21 @@ ifeq ($(PLATFORM),freebsd)
 
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
+  ifeq ($(USE_OPENAL),1)
+    BASE_CFLAGS += -DUSE_OPENAL=1
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+  endif
+
+  ifeq ($(USE_SDL),1)
+    BASE_CFLAGS += $(shell sdl11-config --cflags) -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1
+  endif
+
   ifeq ($(ARCH),axp)
     CC=gcc
     BASE_CFLAGS += -DNO_VM_COMPILED
@@ -439,7 +454,23 @@ ifeq ($(PLATFORM),freebsd)
   # don't need -ldl (FreeBSD)
   LDFLAGS=-lm
 
-  CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
+  CLIENT_LDFLAGS =
+
+  ifeq ($(USE_SDL),1)
+    CLIENT_LDFLAGS += $(shell sdl11-config --libs)
+  else
+    CLIENT_LDFLAGS += -L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
+  endif
+
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lopenal
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+  endif
 
 
 else # ifeq freebsd
