@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 // counters are only bumped when running single threaded,
-// because they are an awefull coherence problem
+// because they are an awful coherence problem
 int	c_active_windings;
 int	c_peak_windings;
 int	c_winding_allocs;
