@@ -548,7 +548,7 @@ void Console_Key (int key) {
 
 	if ( (key == K_MWHEELDOWN && keys[K_SHIFT].down) || ( key == K_DOWNARROW ) || ( key == K_KP_DOWNARROW ) ||
 		 ( ( tolower(key) == 'n' ) && keys[K_CTRL].down ) ) {
-		if (historyLine == nextHistoryLine)
+		if (historyLine + 1 == nextHistoryLine)
 			return;
 		historyLine++;
 		g_consoleField = historyEditLines[ historyLine % COMMAND_HISTORY ];
