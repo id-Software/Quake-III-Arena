@@ -252,27 +252,20 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
   default: break;
   } 
 
-  if (*key == K_BACKSPACE)
-    buf[0] = 8;
-  else
+  if( keysym->unicode <= 127 )  // maps to ASCII?
   {
-    if (keysym->unicode <= 255 && keysym->unicode >= 20)  // maps to ASCII?
-    {
-      char ch = (char) keysym->unicode;
-      if (ch == '~')
-        *key = '~'; // console HACK
+    char ch = (char) keysym->unicode;
+    if (ch == '~')
+      *key = '~'; // console HACK
 
-      // The X11 driver converts to lowercase, but apparently we shouldn't.
-      //  There's possibly somewhere else where they covert back. Passing
-      //  uppercase to the engine works fine and fixes all-lower input.
-      //  (https://bugzilla.icculus.org/show_bug.cgi?id=2364)  --ryan.
-      //else if (ch >= 'A' && ch <= 'Z')
-      //  ch = ch - 'A' + 'a';
+    // The X11 driver converts to lowercase, but apparently we shouldn't.
+    //  There's possibly somewhere else where they covert back. Passing
+    //  uppercase to the engine works fine and fixes all-lower input.
+    //  (https://bugzilla.icculus.org/show_bug.cgi?id=2364)  --ryan.
+    //else if (ch >= 'A' && ch <= 'Z')
+    //  ch = ch - 'A' + 'a';
 
-      buf[0] = ch;
-    }
-    else if(keysym->unicode == 8) // ctrl-h
-      buf[0] = 8;
+    buf[0] = ch;
   }
 
   return buf;
