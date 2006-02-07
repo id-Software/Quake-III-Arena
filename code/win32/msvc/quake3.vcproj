@@ -21,7 +21,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS;USE_OPENAL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib wsock32.lib"
+				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
 				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -89,7 +89,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="1"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_OPENAL"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
@@ -105,7 +105,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib wsock32.lib"
+				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
 				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -228,7 +228,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;USE_OPENAL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -243,7 +243,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib wsock32.lib"
+				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
 				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -431,7 +431,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="1"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_OPENAL"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
@@ -447,7 +447,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib wsock32.lib"
+				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
 				OutputFile="$(OutDir)\quake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -1793,6 +1793,9 @@
 			</File>
 			<File
 				RelativePath="..\..\.\qcommon\q_shared.c">
+			</File>
+			<File
+				RelativePath="..\..\client\qal.c">
 			</File>
 			<File
 				RelativePath="..\..\client\snd_adpcm.c">
@@ -3242,6 +3245,9 @@
 			</File>
 			<File
 				RelativePath="..\..\.\qcommon\q_shared.h">
+			</File>
+			<File
+				RelativePath="..\..\client\qal.h">
 			</File>
 			<File
 				RelativePath="..\..\qcommon\qcommon.h">
