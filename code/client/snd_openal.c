@@ -1460,18 +1460,6 @@ S_AL_Respatialize
 static
 void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int inwater )
 {
-// this piece of code causes an compiler error on msvc (MSDN 58559)
-#ifndef _MSC_VER
-	S_AL_SanitiseVector( (vec_t *)origin );
-	S_AL_SanitiseVector( axis[ 0 ] );
-	S_AL_SanitiseVector( axis[ 1 ] );
-	S_AL_SanitiseVector( axis[ 2 ] );
-	// Axis[0] = Forward
-	// Axis[2] = Up
-	float velocity[] = {0.0f, 0.0f, 0.0f};
-	float orientation[] = {axis[0][0], axis[0][1], axis[0][2],
-		axis[2][0], axis[2][1], axis[2][2]};
-#else
 	float velocity[3] = {0.0f, 0.0f, 0.0f};
 	float orientation[6];
 
@@ -1482,7 +1470,6 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 
 	orientation[0] = axis[0][0]; orientation[1] = axis[0][1]; orientation[2] = axis[0][2];
 	orientation[3] = axis[2][0]; orientation[4] = axis[2][1]; orientation[5] = axis[2][2];
-#endif
 
 	VectorCopy( origin, lastListenerOrigin );
 
