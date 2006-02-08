@@ -1282,7 +1282,11 @@ void IN_Init(void) {
   in_joystickDebug = Cvar_Get ("in_debugjoystick", "0", CVAR_TEMP);
   joy_threshold = Cvar_Get ("joy_threshold", "0.15", CVAR_ARCHIVE); // FIXME: in_joythreshold
 
+#ifdef MACOS_X
+  Cvar_Set( "cl_platformSensitivity", "1.0" );
+#else
   Cvar_Set( "cl_platformSensitivity", "2.0" );
+#endif
 
   if (in_mouse->value)
     mouse_avail = qtrue;
