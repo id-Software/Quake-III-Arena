@@ -39,6 +39,7 @@ cvar_t *s_alMinDistance;
 cvar_t *s_alRolloff;
 cvar_t *s_alDriver;
 cvar_t *s_alMaxSpeakerDistance;
+cvar_t *s_alSpatEntOrigin;
 
 /*
 =================
@@ -1460,10 +1461,18 @@ S_AL_Respatialize
 static
 void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int inwater )
 {
-	float velocity[3] = {0.0f, 0.0f, 0.0f};
-	float orientation[6];
+	float		velocity[3] = {0.0f, 0.0f, 0.0f};
+	float		orientation[6];
+	vec3_t	sorigin;
 
-	S_AL_SanitiseVector( (vec_t *)origin );
+	if( s_alSpatEntOrigin->integer && entityNum )
+		VectorCopy( entityList[ entityNum ].origin, sorigin );
+	else
+	{
+		VectorCopy( origin, sorigin );
+		S_AL_SanitiseVector( sorigin );
+	}
+
 	S_AL_SanitiseVector( axis[ 0 ] );
 	S_AL_SanitiseVector( axis[ 1 ] );
 	S_AL_SanitiseVector( axis[ 2 ] );
@@ -1471,10 +1480,10 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 	orientation[0] = axis[0][0]; orientation[1] = axis[0][1]; orientation[2] = axis[0][2];
 	orientation[3] = axis[2][0]; orientation[4] = axis[2][1]; orientation[5] = axis[2][2];
 
-	VectorCopy( origin, lastListenerOrigin );
+	VectorCopy( sorigin, lastListenerOrigin );
 
 	// Set OpenAL listener paramaters
-	qalListenerfv(AL_POSITION, (ALfloat *)origin);
+	qalListenerfv(AL_POSITION, (ALfloat *)sorigin);
 	qalListenerfv(AL_VELOCITY, velocity);
 	qalListenerfv(AL_ORIENTATION, orientation);
 }
@@ -1631,6 +1640,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
 	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
 	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
+	s_alSpatEntOrigin = Cvar_Get( "s_alSpatEntOrigin", "1", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 

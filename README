@@ -105,6 +105,7 @@ New cvars
   s_alMinDistance         - the value of AL_REFERENCE_DISTANCE for each source
   s_alRolloff             - the value of AL_ROLLOFF_FACTOR for each source
   s_alMaxSpeakerDistance  - ET_SPEAKERS beyond this distance are culled
+  s_alSpatEntOrigin       - spatialize entity origin instead of view origin
   s_alDriver              - which OpenAL library to use
 
   s_sdlBits               - SDL bit resolution
