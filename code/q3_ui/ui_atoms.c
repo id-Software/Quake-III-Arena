@@ -1073,6 +1073,7 @@ void UI_Init( void ) {
 	if ( uis.glconfig.vidWidth * 480 > uis.glconfig.vidHeight * 640 ) {
 		// wide screen
 		uis.bias = 0.5 * ( uis.glconfig.vidWidth - ( uis.glconfig.vidHeight * (640.0/480.0) ) );
+		uis.xscale = uis.yscale;
 	}
 	else {
 		// no wide screen
