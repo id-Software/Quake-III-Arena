@@ -1465,7 +1465,7 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 	float		orientation[6];
 	vec3_t	sorigin;
 
-	if( s_alSpatEntOrigin->integer && entityNum )
+	if( s_alSpatEntOrigin->integer && entityNum >= 0 )
 		VectorCopy( entityList[ entityNum ].origin, sorigin );
 	else
 	{
