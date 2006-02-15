@@ -197,13 +197,16 @@ identical, but we have some general guidelines:
 	* Make sure to bump the version number to 1.34 in the source code when
 	  you build binaries
 
+	* Please contact the mailing list and/or zakk@timedoctor.org after
+	  you've made your installer.
+
 ------------------------------------------------------------------ Credits -----
 
 Maintainers
+  Aaron Gyes <floam at sh dot nu>
   Ludwig Nussel <ludwig.nussel@suse.de>
   Ryan C. Gordon <icculus@icculus.org>
   Tim Angus <tim@ngus.net>
-  Aaron Gyes <floam at sh dot nu>
   Zachary J. Slater <zakk@timedoctor.org>
 
 Significant contributions from
