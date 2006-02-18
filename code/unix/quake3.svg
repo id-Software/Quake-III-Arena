@@ -12,10 +12,8 @@
    width="64px"
    height="64px"
    id="svg1306"
-   sodipodi:version="0.32"
    inkscape:version="0.43"
-   sodipodi:docbase="/home/floam/Documents/src/quake3/code/unix"
-   sodipodi:docname="quake3.svg">
+   sodipodi:docname="quake3.svg"
   <defs
      id="defs1308">
     <linearGradient
@@ -88,17 +86,7 @@
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <cc:license
            rdf:resource="http://creativecommons.org/licenses/GPL/2.0/" />
-        <dc:title>Quake3 Icon</dc:title>
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>Aaron Gyes</dc:title>
-          </cc:Agent>
-        </dc:creator>
-        <dc:publisher>
-          <cc:Agent>
-            <dc:title>icculus.org</dc:title>
-          </cc:Agent>
-        </dc:publisher>
+        <dc:title></dc:title>
       </cc:Work>
       <cc:License
          rdf:about="http://creativecommons.org/licenses/GPL/2.0/">
@@ -124,15 +112,12 @@
     <path
        id="path1329"
        style="opacity:1;fill:url(#linearGradient3077);fill-opacity:1.0;fill-rule:nonzero;stroke:none;stroke-width:0.5261631;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 34.538626,32.090265 L 32.538627,64 L 30.538626,32 L 32.538627,0 L 34.538626,32.090265 z "
-       sodipodi:nodetypes="ccccc" />
+       d="M 34.538626,32.090265 L 32.538627,64 L 30.538626,32 L 32.538627,0 L 34.538626,32.090265 z " />
     <path
        style="fill:url(#linearGradient2190);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 28.059562,59 L 25.612281,34.036677 C 25.612281,34.036677 2.1281775,31.218199 2.0010765,25.064561 C 1.9155925,21.016997 6.9421265,19.095215 9.6946005,19.095215 C 12.000721,19.095215 4.2082195,19.143464 4.1713675,24.287073 C 4.1405475,28.679913 29.3599,30.346963 29.3599,30.346963 L 28.059562,59 z "
-       id="path1307"
-       sodipodi:nodetypes="ccssscc" />
+       id="path1307" />
     <path
-       sodipodi:nodetypes="ccssscc"
        id="path2192"
        d="M 36.940438,59 L 39.387719,34.036677 C 39.387719,34.036677 62.871823,31.218199 62.998924,25.064561 C 63.084408,21.016997 58.057873,19.095215 55.305399,19.095215 C 52.999279,19.095215 60.79178,19.143464 60.828632,24.287073 C 60.859452,28.679913 35.6401,30.346963 35.6401,30.346963 L 36.940438,59 z "
        style="fill:url(#linearGradient2194);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
