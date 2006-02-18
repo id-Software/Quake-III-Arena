@@ -102,6 +102,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //=============================================================
 
+#ifdef Q3_VM
+typedef int intptr_t;
+#else
+#include <inttypes.h>
+#endif
+
 typedef unsigned char 		byte;
 
 typedef enum {qfalse, qtrue}	qboolean;

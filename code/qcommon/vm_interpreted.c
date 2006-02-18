@@ -493,7 +493,7 @@ nextInstruction2:
 
 				src = (int *)&image[ r0&dataMask ];
 				dest = (int *)&image[ r1&dataMask ];
-				if ( ( (long)src | (long)dest | count ) & 3 ) {
+				if ( ( (intptr_t)src | (intptr_t)dest | count ) & 3 ) {
 					// happens in westernq3
 					Com_Printf( S_COLOR_YELLOW "Warning: OP_BLOCK_COPY not dword aligned\n");
 				}
@@ -534,16 +534,16 @@ nextInstruction2:
 
 //VM_LogSyscalls( (int *)&image[ programStack + 4 ] );
 				{
-					long* argptr = (long *)&image[ programStack + 4 ];
+					intptr_t* argptr = (intptr_t *)&image[ programStack + 4 ];
 				#if __WORDSIZE == 64
 				// the vm has ints on the stack, we expect
 				// longs so we have to convert it
-					long argarr[16];
+					intptr_t argarr[16];
 					int i;
 					for (i = 0; i < 16; ++i) {
 						argarr[i] = *(int*)&image[ programStack + 4 + 4*i ];
-						argptr = argarr;
 					}
+					argptr = argarr;
 				#endif
 					r = vm->systemCall( argptr );
 				}

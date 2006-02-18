@@ -412,7 +412,7 @@ CL_CgameSystemCalls
 The cgame module is making a system call
 ====================
 */
-long CL_CgameSystemCalls( long *args ) {
+intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case CG_PRINT:
 		Com_Printf( "%s", VMA(1) );

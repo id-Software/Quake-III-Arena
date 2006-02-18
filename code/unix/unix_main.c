@@ -766,11 +766,11 @@ static void* try_dlopen(const char* base, const char* gamedir, const char* fname
 }
 
 void *Sys_LoadDll( const char *name, char *fqpath ,
-                   long (**entryPoint)(long, ...),
-                   long (*systemcalls)(long, ...) ) 
+                   intptr_t (**entryPoint)(int, ...),
+                   intptr_t (*systemcalls)(intptr_t, ...) ) 
 {
   void *libHandle;
-  void  (*dllEntry)( long (*syscallptr)(long, ...) );
+  void  (*dllEntry)( intptr_t (*syscallptr)(intptr_t, ...) );
   char  curpath[MAX_OSPATH];
   char  fname[MAX_OSPATH];
   char  *basepath;

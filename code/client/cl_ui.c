@@ -764,7 +764,7 @@ CL_UISystemCalls
 The ui module is making a system call
 ====================
 */
-long CL_UISystemCalls( long *args ) {
+intptr_t CL_UISystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case UI_ERROR:
 		Com_Error( ERR_DROP, "%s", VMA(1) );

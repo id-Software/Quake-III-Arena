@@ -148,10 +148,18 @@ Using Demo Data Files
   If you wish to compile external mods as shared libraries on a 64bit platform,
   and the mod source is derived from the id Q3 SDK, you will need to modify the
   interface code a little. Open the files ending in _syscalls.c and change
-  every instance of int to long in the declaration of the syscall function
+  every instance of int to intptr_t in the declaration of the syscall function
   pointer and the dllEntry function. Also find the vmMain function for each
-  module (usually in cg_main.c g_main.c etc.) and similarly replace every
-  instance of int in the prototype with long.
+  module (usually in cg_main.c g_main.c etc.) and similarly replace the return
+  value in the prototype with intptr_t (arg0, arg1, ...stay int).
+
+  Add the following code snippet to q_shared.h:
+
+    #ifdef Q3_VM
+    typedef int intptr_t;
+    #else
+    #include <stdint.h>
+    #endif
 
   Note if you simply wish to run mods on a 64bit platform you do not need to
   recompile anything since by default Q3 uses a virtual machine system.

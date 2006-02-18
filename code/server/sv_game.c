@@ -305,7 +305,7 @@ SV_GameSystemCalls
 The module is making a system call
 ====================
 */
-long SV_GameSystemCalls( long *args ) {
+intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case G_PRINT:
 		Com_Printf( "%s", VMA(1) );

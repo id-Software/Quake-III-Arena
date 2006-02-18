@@ -329,10 +329,10 @@ Dlls will call this directly
  
 ============
 */
-long QDECL VM_DllSyscall( long arg, ... ) {
+intptr_t QDECL VM_DllSyscall( intptr_t arg, ... ) {
 #if !id386
   // rcg010206 - see commentary above
-  long args[16];
+  intptr_t args[16];
   int i;
   va_list ap;
   
@@ -340,7 +340,7 @@ long QDECL VM_DllSyscall( long arg, ... ) {
   
   va_start(ap, arg);
   for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
-    args[i] = va_arg(ap, long);
+    args[i] = va_arg(ap, intptr_t);
   va_end(ap);
   
   return currentVM->systemCall( args );
@@ -471,7 +471,7 @@ vm_t *VM_Restart( vm_t *vm ) {
 	// DLL's can't be restarted in place
 	if ( vm->dllHandle ) {
 		char	name[MAX_QPATH];
-		long	(*systemCall)( long *parms );
+		intptr_t	(*systemCall)( intptr_t *parms );
 		
 		systemCall = vm->systemCall;	
 		Q_strncpyz( name, vm->name, sizeof( name ) );
@@ -507,7 +507,7 @@ it will attempt to load as a system dll
 
 #define	STACK_SIZE	0x20000
 
-vm_t *VM_Create( const char *module, long (*systemCalls)(long *), 
+vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *), 
 				vmInterpret_t interpret ) {
 	vm_t		*vm;
 	vmHeader_t	*header;
@@ -648,7 +648,7 @@ void VM_Clear(void) {
 	lastVM = NULL;
 }
 
-void *VM_ArgPtr( long intValue ) {
+void *VM_ArgPtr( intptr_t intValue ) {
 	if ( !intValue ) {
 		return NULL;
 	}
@@ -664,7 +664,7 @@ void *VM_ArgPtr( long intValue ) {
 	}
 }
 
-void *VM_ExplicitArgPtr( vm_t *vm, long intValue ) {
+void *VM_ExplicitArgPtr( vm_t *vm, intptr_t intValue ) {
 	if ( !intValue ) {
 		return NULL;
 	}
@@ -709,9 +709,9 @@ locals from sp
 #define	MAX_STACK	256
 #define	STACK_MASK	(MAX_STACK-1)
 
-long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
+intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	vm_t	*oldVM;
-	int		r;
+	intptr_t r;
 	int i;
 
 	if ( !vm ) {
@@ -729,11 +729,11 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
 		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
-		long args[10];
+		int args[10];
 		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < sizeof (args) / sizeof (args[i]); i++) {
-			args[i] = va_arg(ap, long);
+			args[i] = va_arg(ap, int);
 		}
 		va_end(ap);
 
@@ -758,7 +758,7 @@ long	QDECL VM_Call( vm_t *vm, long callnum, ... ) {
 		a.callnum = callnum;
 		va_start(ap, callnum);
 		for (i = 0; i < sizeof (a.args) / sizeof (a.args[0]); i++) {
-			a.args[i] = va_arg(ap, long);
+			a.args[i] = va_arg(ap, int);
 		}
 		va_end(ap);
 #ifndef NO_VM_COMPILED
@@ -886,6 +886,6 @@ void VM_LogSyscalls( int *args ) {
 		f = fopen("syscalls.log", "w" );
 	}
 	callnum++;
-	fprintf(f, "%i: %li (%i) = %i %i %i %i\n", callnum, (long)(args - (int *)currentVM->dataBase),
+	fprintf(f, "%i: %"PRIiPTR" (%i) = %i %i %i %i\n", callnum, (intptr_t)(args - (int *)currentVM->dataBase),
 		args[0], args[1], args[2], args[3], args[4] );
 }

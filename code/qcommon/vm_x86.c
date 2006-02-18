@@ -192,7 +192,7 @@ void callAsmCall(void)
 	currentVM->programStack = callProgramStack - 4;
 	*(int *)((byte *)currentVM->dataBase + callProgramStack + 4) = callSyscallNum;
 	//VM_LogSyscalls((int *)((byte *)currentVM->dataBase + callProgramStack + 4) );
-	*(callOpStack2+1) = currentVM->systemCall( (long *)((byte *)currentVM->dataBase + callProgramStack + 4) );
+	*(callOpStack2+1) = currentVM->systemCall( (intptr_t *)((byte *)currentVM->dataBase + callProgramStack + 4) );
 
  	currentVM = savedVM;
 }
