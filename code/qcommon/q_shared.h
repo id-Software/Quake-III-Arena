@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#define	Q3_VERSION		"ioQ3 1.33"
+#define	Q3_VERSION		"ioQ3 1.34"
 // 1.32 released 7-10-2002
 
 #define MAX_TEAMNAME 32
