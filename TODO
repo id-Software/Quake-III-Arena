@@ -11,7 +11,7 @@ For 1.34:
 See above.
 Please remove each one as it is done:
 Win32
-Linux32 (we can get by with a source-only on this)
+Linux (we can get by with a source-only on this)
 MacOS X
 
 For 1.35+:
