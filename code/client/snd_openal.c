@@ -1640,7 +1640,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
 	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
 	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
-	s_alSpatEntOrigin = Cvar_Get( "s_alSpatEntOrigin", "1", CVAR_ARCHIVE );
+	s_alSpatEntOrigin = Cvar_Get( "s_alSpatEntOrigin", "0", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 
