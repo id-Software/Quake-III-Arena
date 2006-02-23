@@ -42,7 +42,7 @@ For *nix
 For Windows, using MinGW
   1. Download and install MinGW and MSys from http://www.mingw.org/.
   2. Download http://www.libsdl.org/extras/win32/common/directx-devel.tar.gz
-     and untar in into your MinGW directory (usually C:\MinGW).
+     and untar it into your MinGW directory (usually C:\MinGW).
   3. Open an MSys terminal, and follow the instructions for compiling on *nix.
 
 For Windows, using MSVC
@@ -196,12 +196,12 @@ We need help getting automated installers on all the platforms that icculus.org/
 quake3 supports. We don't neccesarily care about all the installers being
 identical, but we have some general guidelines:
 
-  * Please include patch PK3's in your installer. Don't worry about
+  * Please include patch pk3s in your installer. Don't worry about
     the EULA, this is all sorted.
 
-  * Please don't require the PAK0.PK3, since not everyone using the engine
-    plans on playing Quake 3 Arena on it. It's fine to (optionally)
-    assist the user in copying the file for them or telling them about it.
+  * Please don't require pak0.pk3, since not everyone using the engine
+    plans on playing Quake 3 Arena on it. It's fine to (optionally) assist the
+    user in copying the file or telling them how.
 
   * We'll bump the version to 1.34 as soon as we get enough people
     who can demonstrate a competent build for Windows and Mac.
@@ -209,7 +209,7 @@ identical, but we have some general guidelines:
   * Please contact the mailing list and/or zakk@timedoctor.org after
     you've made your installer.
 
-  * Please be prepared to alter your installer to the whims of the
+  * Please be prepared to alter your installer on the whim of the
     maintainers.
 
 
