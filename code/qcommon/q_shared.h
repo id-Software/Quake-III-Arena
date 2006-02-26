@@ -105,7 +105,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef Q3_VM
 typedef int intptr_t;
 #else
-#include <inttypes.h>
+# ifndef _MSC_VER
+#  include <stdint.h>
+# endif
 #endif
 
 typedef unsigned char 		byte;
