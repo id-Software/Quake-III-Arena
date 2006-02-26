@@ -1377,7 +1377,23 @@ void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 	
 	// Queue the musicBuffers up
 	for(i = 0; i < NUM_MUSIC_BUFFERS; i++)
+	{
 		S_AL_MusicProcess(musicBuffers[i]);
+
+		// check whether our stream still exists.
+		if(!mus_stream)
+		{
+			// there was an error in reading which resulted in a
+			// closed stream. We must bail out or we'll crash.
+
+			// deallocate everything we allocated so far:
+			qalDeleteBuffers(NUM_MUSIC_BUFFERS, musicBuffers);
+			S_AL_MusicSourceFree();
+
+			return;
+		}
+	}
+
 	qalSourceQueueBuffers(musicSource, NUM_MUSIC_BUFFERS, musicBuffers);
 
 	// Set the initial gain property

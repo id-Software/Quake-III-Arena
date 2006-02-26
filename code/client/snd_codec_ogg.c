@@ -412,7 +412,7 @@ where we read the whole stream at once.
 void *S_OGG_CodecLoad(const char *filename, snd_info_t *info)
 {
 	snd_stream_t *stream;
-	unsigned char *buffer;
+	byte *buffer;
 	int bytesRead;
 	
 	// check if input is valid
@@ -452,8 +452,9 @@ void *S_OGG_CodecLoad(const char *filename, snd_info_t *info)
 	// we don't even have read a single byte
 	if(bytesRead <= 0)
 	{
+		Z_Free(buffer);
 		S_OGG_CodecCloseStream(stream);
-	
+
 		return NULL;	
 	}
 
