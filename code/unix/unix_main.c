@@ -1346,38 +1346,24 @@ to symlink to binaries and /not/ have the links resolved.
 */
 char *Sys_BinName( const char *arg0 )
 {
-#ifdef NDEBUG
-  int           n;
-  char          src[ PATH_MAX ];
-  char          dir[ PATH_MAX ];
-  qboolean      links = qfalse;
-#endif
-
   static char   dst[ PATH_MAX ];
 
-  Q_strncpyz( dst, arg0, PATH_MAX );
-
 #ifdef NDEBUG
-  while( ( n = readlink( dst, src, PATH_MAX ) ) >= 0 )
-  {
-    src[ n ] = '\0';
 
-    Q_strncpyz( dir, dirname( dst ), PATH_MAX );
-    Q_strncpyz( dst, dir, PATH_MAX );
-    Q_strcat( dst, PATH_MAX, "/" );
-    Q_strcat( dst, PATH_MAX, src );
+#ifdef __linux__
+  int n = readlink( "/proc/self/exe", dst, PATH_MAX - 1 );
 
-    links = qtrue;
-  }
+  if( n >= 0 && n < PATH_MAX )
+    dst[ n ] = '\0';
+  else
+    Q_strncpyz( dst, arg0, PATH_MAX );
+#else
+#warning Sys_BinName not implemented
+  Q_strncpyz( dst, arg0, PATH_MAX );
+#endif
 
-  if( links )
-  {
-    Q_strncpyz( dst, Sys_Cwd( ), PATH_MAX );
-    Q_strcat( dst, PATH_MAX, "/" );
-    Q_strcat( dst, PATH_MAX, dir );
-    Q_strcat( dst, PATH_MAX, "/" );
-    Q_strcat( dst, PATH_MAX, src );
-  }
+#else
+  Q_strncpyz( dst, arg0, PATH_MAX );
 #endif
 
   return dst;
