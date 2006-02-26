@@ -1335,6 +1335,54 @@ void Sys_PrintBinVersion( const char* name ) {
   fprintf( stdout, "%s\n\n", sep );
 }
 
+/*
+=================
+Sys_BinName
+
+This resolves any symlinks to the binary. It's disabled for debug
+builds because there are situations where you are likely to want
+to symlink to binaries and /not/ have the links resolved.
+=================
+*/
+char *Sys_BinName( const char *arg0 )
+{
+#ifdef NDEBUG
+  int           n;
+  char          src[ PATH_MAX ];
+  char          dir[ PATH_MAX ];
+  qboolean      links = qfalse;
+#endif
+
+  static char   dst[ PATH_MAX ];
+
+  Q_strncpyz( dst, arg0, PATH_MAX );
+
+#ifdef NDEBUG
+  while( ( n = readlink( dst, src, PATH_MAX ) ) >= 0 )
+  {
+    src[ n ] = '\0';
+
+    Q_strncpyz( dir, dirname( dst ), PATH_MAX );
+    Q_strncpyz( dst, dir, PATH_MAX );
+    Q_strcat( dst, PATH_MAX, "/" );
+    Q_strcat( dst, PATH_MAX, src );
+
+    links = qtrue;
+  }
+
+  if( links )
+  {
+    Q_strncpyz( dst, Sys_Cwd( ), PATH_MAX );
+    Q_strcat( dst, PATH_MAX, "/" );
+    Q_strcat( dst, PATH_MAX, dir );
+    Q_strcat( dst, PATH_MAX, "/" );
+    Q_strcat( dst, PATH_MAX, src );
+  }
+#endif
+
+  return dst;
+}
+
 void Sys_ParseArgs( int argc, char* argv[] ) {
 
   if ( argc==2 )
@@ -1342,7 +1390,7 @@ void Sys_ParseArgs( int argc, char* argv[] ) {
     if ( (!strcmp( argv[1], "--version" ))
          || ( !strcmp( argv[1], "-v" )) )
     {
-      Sys_PrintBinVersion( argv[0] );
+      Sys_PrintBinVersion( Sys_BinName( argv[0] ) );
       Sys_Exit(0);
     }
   }
@@ -1365,7 +1413,7 @@ int main ( int argc, char* argv[] )
 
   Sys_ParseArgs( argc, argv );  // bk010104 - added this for support
 
-  strncat(cdpath, argv[0], sizeof(cdpath)-1);
+  strncat(cdpath, Sys_BinName( argv[0] ), sizeof(cdpath)-1);
   Sys_SetDefaultCDPath(dirname(cdpath));
 
   Sys_SetDefaultInstallPath(DEFAULT_BASEDIR);
