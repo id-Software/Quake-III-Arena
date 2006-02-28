@@ -39,7 +39,6 @@ cvar_t *s_alMinDistance;
 cvar_t *s_alRolloff;
 cvar_t *s_alDriver;
 cvar_t *s_alMaxSpeakerDistance;
-cvar_t *s_alSpatEntOrigin;
 
 /*
 =================
@@ -503,6 +502,39 @@ static void _S_AL_SanitiseVector( vec3_t v, int line )
 	}
 }
 
+
+#define AL_THIRD_PERSON_THRESHOLD_SQ (48.0f*48.0f)
+
+/*
+=================
+S_AL_HearingThroughEntity
+=================
+*/
+static qboolean S_AL_HearingThroughEntity( int entityNum )
+{
+	float	distanceSq;
+
+	if( clc.clientNum == entityNum )
+	{
+		// FIXME: <tim@ngus.net> 28/02/06 This is an outrageous hack to detect
+		// whether or not the player is rendering in third person or not. We can't
+		// ask the renderer because the renderer has no notion of entities and we
+		// can't ask cgame since that would involve changing the API and hence mod
+		// compatibility. I don't think there is any way around this, but I'll leave
+		// the FIXME just in case anyone has a bright idea.
+		distanceSq = DistanceSquared(
+				entityList[ entityNum ].origin,
+				lastListenerOrigin );
+
+		if( distanceSq > AL_THIRD_PERSON_THRESHOLD_SQ )
+			return qfalse; //we're the player, but third person
+		else
+			return qtrue;  //we're the player
+	}
+	else
+		return qfalse; //not the player
+}
+
 /*
 =================
 S_AL_SrcInit
@@ -578,7 +610,6 @@ static void S_AL_SrcSetup(srcHandle_t src, sfxHandle_t sfx, alSrcPriority_t prio
 		int entity, int channel, qboolean local)
 {
 	ALuint buffer;
-	float null_vector[] = {0, 0, 0};
 
 	// Mark the SFX as used, and grab the raw AL buffer
 	S_AL_BufferUse(sfx);
@@ -600,15 +631,15 @@ static void S_AL_SrcSetup(srcHandle_t src, sfxHandle_t sfx, alSrcPriority_t prio
 	qalSourcei(srcList[src].alSource, AL_BUFFER, buffer);
 	qalSourcef(srcList[src].alSource, AL_PITCH, 1.0f);
 	qalSourcef(srcList[src].alSource, AL_GAIN, s_alGain->value * s_volume->value);
-	qalSourcefv(srcList[src].alSource, AL_POSITION, null_vector);
-	qalSourcefv(srcList[src].alSource, AL_VELOCITY, null_vector);
+	qalSourcefv(srcList[src].alSource, AL_POSITION, vec3_origin);
+	qalSourcefv(srcList[src].alSource, AL_VELOCITY, vec3_origin);
 	qalSourcei(srcList[src].alSource, AL_LOOPING, AL_FALSE);
 	qalSourcef(srcList[src].alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
 
 	if(local)
 	{
 		qalSourcei(srcList[src].alSource, AL_SOURCE_RELATIVE, AL_TRUE);
-		qalSourcef(srcList[src].alSource, AL_ROLLOFF_FACTOR, 0);
+		qalSourcef(srcList[src].alSource, AL_ROLLOFF_FACTOR, 0.0f);
 	}
 	else
 	{
@@ -654,6 +685,7 @@ static void S_AL_SrcKill(srcHandle_t src)
 	srcList[src].isLocked = qfalse;
 	srcList[src].isLooping = qfalse;
 	srcList[src].isTracking = qfalse;
+	srcList[src].local = qfalse;
 }
 
 /*
@@ -826,17 +858,30 @@ void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx
 		return;
 
 	// Set up the effect
-	S_AL_SrcSetup(src, sfx, SRCPRI_ONESHOT, entnum, entchannel, qfalse);
-
-	if(origin == NULL)
+	if( origin == NULL )
 	{
-		srcList[src].isTracking = qtrue;
-		VectorCopy( entityList[entnum].origin, sorigin );
+		srcList[ src ].isTracking = qtrue;
+
+		if( S_AL_HearingThroughEntity( entnum ) )
+		{
+			// Where the entity is the local player, play a local sound
+			S_AL_SrcSetup( src, sfx, SRCPRI_ONESHOT, entnum, entchannel, qtrue );
+			VectorClear( sorigin );
+		}
+		else
+		{
+			S_AL_SrcSetup( src, sfx, SRCPRI_ONESHOT, entnum, entchannel, qfalse );
+			VectorCopy( entityList[ entnum ].origin, sorigin );
+		}
 	}
 	else
+	{
+		S_AL_SrcSetup( src, sfx, SRCPRI_ONESHOT, entnum, entchannel, qfalse );
 		VectorCopy( origin, sorigin );
+	}
+
 	S_AL_SanitiseVector( sorigin );
-	qalSourcefv(srcList[src].alSource, AL_POSITION, sorigin);
+	qalSourcefv( srcList[ src ].alSource, AL_POSITION, sorigin );
 
 	// Start it playing
 	qalSourcePlay(srcList[src].alSource);
@@ -903,9 +948,20 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 	srcList[ src ].isLooping = qtrue;
 	srcList[ src ].isActive = qtrue;
 
-	// Set up the position and velocity
-	qalSourcefv( srcList[ src ].alSource, AL_POSITION, (ALfloat *)sent->origin );
-	qalSourcefv( srcList[ src ].alSource, AL_VELOCITY, (ALfloat *)velocity );
+	if( S_AL_HearingThroughEntity( entityNum ) )
+	{
+		srcList[ src ].local = qtrue;
+
+		qalSourcefv( srcList[ src ].alSource, AL_POSITION, vec3_origin );
+		qalSourcefv( srcList[ src ].alSource, AL_VELOCITY, vec3_origin );
+	}
+	else
+	{
+		srcList[ src ].local = qfalse;
+
+		qalSourcefv( srcList[ src ].alSource, AL_POSITION, (ALfloat *)sent->origin );
+		qalSourcefv( srcList[ src ].alSource, AL_VELOCITY, (ALfloat *)velocity );
+	}
 }
 
 /*
@@ -1006,12 +1062,24 @@ void S_AL_SrcUpdate( void )
 				if( sent->startLoopingSound )
 				{
 					S_AL_SrcSetup( i, sent->loopSfx, sent->loopPriority,
-							entityNum, -1, qfalse );
+							entityNum, -1, srcList[ i ].local );
 					srcList[ i ].isLooping = qtrue;
 					qalSourcei( srcList[ i ].alSource, AL_LOOPING, AL_TRUE );
 					qalSourcePlay( srcList[ i ].alSource );
 
 					sent->startLoopingSound = qfalse;
+				}
+
+				// Update locality
+				if( srcList[ i ].local)
+				{
+					qalSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, AL_TRUE );
+					qalSourcef( srcList[ i ].alSource, AL_ROLLOFF_FACTOR, 0.0f );
+				}
+				else
+				{
+					qalSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, AL_FALSE );
+					qalSourcef( srcList[ i ].alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value );
 				}
 			}
 			else
@@ -1020,8 +1088,11 @@ void S_AL_SrcUpdate( void )
 			continue;
 		}
 
+		// Query relativity of source, don't move if it's true
+		qalGetSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, &state );
+
 		// See if it needs to be moved
-		if(srcList[i].isTracking)
+		if( srcList[ i ].isTracking && !state )
 			qalSourcefv(srcList[i].alSource, AL_POSITION, entityList[entityNum].origin);
 		
 		// Check if it's done, and flag it
@@ -1481,13 +1552,8 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 	float		orientation[6];
 	vec3_t	sorigin;
 
-	if( s_alSpatEntOrigin->integer && entityNum >= 0 )
-		VectorCopy( entityList[ entityNum ].origin, sorigin );
-	else
-	{
-		VectorCopy( origin, sorigin );
-		S_AL_SanitiseVector( sorigin );
-	}
+	VectorCopy( origin, sorigin );
+	S_AL_SanitiseVector( sorigin );
 
 	S_AL_SanitiseVector( axis[ 0 ] );
 	S_AL_SanitiseVector( axis[ 1 ] );
@@ -1656,7 +1722,6 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
 	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
 	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
-	s_alSpatEntOrigin = Cvar_Get( "s_alSpatEntOrigin", "0", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 
