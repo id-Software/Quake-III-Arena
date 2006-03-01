@@ -195,10 +195,10 @@ We need help getting automated installers on all the platforms that icculus.org/
 quake3 supports. We don't neccesarily care about all the installers being
 identical, but we have some general guidelines:
 
-  * Please include patch pk3s in your installer. Get them from:
-     http://icculus.org/quake3/?page=getdata
-     Make sure you show the EULA from that page in your installer and the user
-     agrees, if they want play Quake 3: Arena.
+  * Please include the id patch pk3s in your installer, which are available
+    from http://icculus.org/quake3/?page=getdata subject to agreement to the id
+    EULA. Your installer shall also ask the user to agree to this EULA and
+    subsequently refuse to continue the installation if they do not.
 
   * Please don't require pak0.pk3, since not everyone using the engine
     plans on playing Quake 3 Arena on it. It's fine to (optionally) assist the
