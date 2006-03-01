@@ -1662,7 +1662,8 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 #############################################################################
 
 copyfiles: build_release
-	@if [ ! -d $(COPYDIR) ]; then echo "You need to set COPYDIR to where your Quake3 data is!"; false; fi
+	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where your Quake3 data is!"; fi
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
 	$(INSTALL) -s -m 0755 $(BR)/ioquake3.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3.$(ARCH)$(BINEXT)
 
 	@if [ -f $(BR)/ioq3ded.$(ARCH)$(BINEXT) ]; then \
