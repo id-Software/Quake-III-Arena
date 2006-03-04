@@ -39,6 +39,8 @@ static FILE* qdasmout;
 #define Dfprintf(args...)
 #endif
 
+static void VM_Destroy_Compiled(vm_t* self);
+
 /*
 
   eax	scratch
@@ -308,10 +310,8 @@ out:
 
 static int doas(char* in, char* out, unsigned char** compiledcode)
 {
-	char* buf;
-	char* mem;
-	size_t size = -1, allocsize;
-	int ps;
+	unsigned char* mem;
+	size_t size = -1;
 	pid_t pid;
 
 	Com_Printf("running assembler < %s > %s\n", in, out);
@@ -358,42 +358,16 @@ static int doas(char* in, char* out, unsigned char** compiledcode)
 
 	Com_Printf("done\n");
 
-	mem = mmapfile(out, &size);
+	mem = (unsigned char*)mmapfile(out, &size);
 	if(!mem)
 	{
 		Com_Printf(S_COLOR_RED "can't mmap object file %s: %s\n", out, strerror(errno));
 		return -1;
 	}
 
-	ps = sysconf(_SC_PAGE_SIZE);
-	if(ps == -1)
-	{
-		Com_Printf(S_COLOR_RED "can't determine page size: %s\n", strerror(errno));
-		return -1;
-	}
+	*compiledcode = mem;
 
-	--ps;
-
-	allocsize = (size+ps)&~ps;
-	buf = Hunk_Alloc(allocsize, h_high);
-
-	buf = (void*)(((unsigned long)buf+ps)&~ps);
-
-	memcpy(buf, mem, size);
-
-	munmap(mem, 0);
-
-	if((*compiledcode = (unsigned char*)buf))
-	{
-		// need to be able to exec code
-		if(mprotect(buf, allocsize, PROT_READ|PROT_WRITE|PROT_EXEC) == -1)
-		{
-			Com_Error(ERR_FATAL, "mprotect failed on %p+%x: %s\n", buf, allocsize, strerror(errno));
-		}
-		return size;
-	}
-
-	return -1;
+	return size;
 }
 
 static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
@@ -897,6 +871,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	vm->codeBase   = compiledcode; // remember to skip ELF header!
 	vm->codeLength = compiledsize;
+
+	vm->destroy = VM_Destroy_Compiled;
 	
 	entryPoint = getentrypoint(vm);
 
@@ -928,6 +904,12 @@ out:
 		unlink(fn_o);
 		unlink(fn_s);
 	}
+}
+
+
+void VM_Destroy_Compiled(vm_t* self)
+{
+	munmap(self->codeBase, self->codeLength);
 }
 
 /*

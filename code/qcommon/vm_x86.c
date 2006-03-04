@@ -31,6 +31,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/mman.h> // for PROT_ stuff
 #endif
 
+/* need this on NX enabled systems (i386 with PAE kernel or
+ * noexec32=on x86_64) */
+#ifdef __linux__
+#define VM_X86_MMAP
+#endif
+
+static void VM_Destroy_Compiled(vm_t* self);
+
 /*
 
   eax	scratch
@@ -1069,34 +1077,40 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	// copy to an exact size buffer on the hunk
 	vm->codeLength = compiledOfs;
-	vm->codeBase = Hunk_Alloc( compiledOfs, h_low );
+#ifdef VM_X86_MMAP
+	vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+	if(vm->codeBase == (void*)-1)
+		Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+#else
+	vm->codeBase = malloc(compiledOfs);
+#endif
+
 	Com_Memcpy( vm->codeBase, buf, compiledOfs );
+
+#ifdef VM_X86_MMAP
+	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
+		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+#endif
+
 	Z_Free( buf );
 	Z_Free( jused );
 	Com_Printf( "VM file %s compiled to %i bytes of code\n", vm->name, compiledOfs );
+
+	vm->destroy = VM_Destroy_Compiled;
 
 	// offset all the instruction pointers for the new location
 	for ( i = 0 ; i < header->instructionCount ; i++ ) {
 		vm->instructionPointers[i] += (int)vm->codeBase;
 	}
+}
 
-#if 0 // ndef _WIN32
-	// Must make the newly generated code executable
-	{
-		int r;
-		unsigned long addr;
-		int psize = getpagesize();
-
-		addr = ((int)vm->codeBase & ~(psize-1)) - psize;
-
-		r = mprotect((char*)addr, vm->codeLength + (int)vm->codeBase - addr + psize, 
-			PROT_READ | PROT_WRITE | PROT_EXEC );
-
-		if (r < 0)
-			Com_Error( ERR_FATAL, "mprotect failed to change PROT_EXEC" );
-	}
+void VM_Destroy_Compiled(vm_t* self)
+{
+#ifdef VM_X86_MMAP
+	munmap(self->codeBase, self->codeLength);
+#else
+	free(self->codeBase);
 #endif
-
 }
 
 /*
