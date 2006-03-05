@@ -1716,7 +1716,7 @@ dist:
 	which convert >/dev/null 2>&1 && convert -border 2 -bordercolor black web/images/quake3_logo_web.png \
 		quake3-$(SVN_VERSION)/code/unix/setup/splash.xpm || true
 	rm -rf quake3-$(SVN_VERSION)/web
-	tar --force-local -cjf quake3-$(SVN_VERSION).tar.bz2 quake3-$(SVN_VERSION)
+	tar --owner=root --group=root --force-local -cjf quake3-$(SVN_VERSION).tar.bz2 quake3-$(SVN_VERSION)
 	rm -rf quake3-$(SVN_VERSION)
 
 #############################################################################
