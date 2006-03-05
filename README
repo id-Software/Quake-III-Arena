@@ -198,8 +198,9 @@ identical, but we have some general guidelines:
   * Please include the id patch pk3s in your installer, which are available
     from http://icculus.org/quake3/?page=getdata subject to agreement to the id
     EULA. Your installer shall also ask the user to agree to this EULA (which
-    is in the web directory for your convienience) and subsequently refuse to
-    continue the installation of the patch pk3s and pak0.pk3 if they do not.
+    is in the /web/include directory for your convienience) and subsequently
+    refuse to continue the installation of the patch pk3s and pak0.pk3 if they
+    do not.
 
   * Please don't require pak0.pk3, since not everyone using the engine
     plans on playing Quake 3 Arena on it. It's fine to (optionally) assist the
