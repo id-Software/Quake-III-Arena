@@ -36,9 +36,15 @@ else
 fi
 export LD_LIBRARY_PATH
 
-arch=`uname -m`
-case "$arch" in
-	i?86) arch=i386 ;;
+archs=`uname -m`
+case "$archs" in
+	i?86) archs=i386 ;;
+	x86_64) archs="x86_64 i386" ;;
+	ppc64) archs="ppc64 ppc" ;;
 esac
 
-exec ./ioquake3.$arch +set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0 +set fs_game demoq3 "$@"
+for arch in $archs; do
+	test -x ./ioquake3.$arch || continue
+	exec ./ioquake3.$arch +set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0 +set fs_game demoq3 "$@"
+done
+echo "could not execute ioquake3" >&2
