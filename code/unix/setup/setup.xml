@@ -6,25 +6,30 @@
   <readme>
     README
   </readme>
+<!--
   <eula>
    COPYING
   </eula>
+-->
   <component name="Default" version="@VERSION@" default="yes">
    <option install="true" required="true">
     Quake 3
 
-    <binary arch="any" libc="any" symlink="ioquake3" icon="icon.xpm" play="yes"
+    <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png" play="yes"
 	    name="icculus.org/quake3">
       ioquake3
     </binary>
-    <binary arch="any" libc="any" symlink="ioq3demo" icon="icon.xpm" play="no"
+    <files>
+      ioquake3.tar
+      quake3.png
+    </files>
+   </option>
+   <option install="false" required="false">
+    Quake 3 Demo start script
+    <binary arch="any" libc="any" symlink="ioq3demo" icon="quake3.png" play="no"
 	    name="icculus.org/quake3 (Demo)">
       ioq3demo
     </binary>
-    <files>
-      ioquake3.tar
-      icon.xpm
-    </files>
    </option>
   </component>
 </install>

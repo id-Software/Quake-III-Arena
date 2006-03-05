@@ -28,6 +28,8 @@ cp -a $SETUPIMAGE/{setup.data,setup.sh} image/
 ### splash
 rm -f image/setup.data/splash.xpm
 [ -e splash.xpm ] && cp splash.xpm image/setup.data/splash.xpm
+rm -f image/quake3.png
+cp ../quake3.png image/quake3.png
 
 ### binaries
 mkdir image/tmp
