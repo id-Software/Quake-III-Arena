@@ -2870,7 +2870,8 @@ static void FS_CheckPak0( void )
 	for( path = fs_searchpaths; path; path = path->next ) {
 		if( path->pack &&
 				!Q_stricmpn( path->pack->pakBasename, "pak0", MAX_OSPATH ) &&
-				!Q_stricmpn( path->pack->pakGamename, "baseq3", MAX_OSPATH ) ) {
+				(!Q_stricmpn( path->pack->pakGamename, "baseq3", MAX_OSPATH ) ||
+				!Q_stricmpn( path->pack->pakGamename, "demoq3", MAX_OSPATH ))) {
 			foundPak0 = qtrue;
 
 			if( path->pack->checksum == DEMO_PAK0_CHECKSUM ) {
