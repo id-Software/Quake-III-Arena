@@ -1,0 +1,12 @@
+CLASSES=none
+BASEDIR=/usr/local/share/games
+TZ=PST
+PATH=/sbin:/usr/sbin:/usr/bin:/usr/sadm/install/bin
+PKG=ioquake3d
+NAME=Icculus.Org Quake3 game data files for Solaris 10 (X11,GLX,SDL)
+VERSION=
+CATEGORY=application,graphics,opengl
+DESC=Icculus.Org Quake3 game data files for Solaris 10 (http://www.icculus.org/quake3)
+VENDOR=http://www.icculus.org/quake3
+EMAIL=quake@cojot.name
+PKGSAV=/var/sadm/pkg/ioquake3d/save
