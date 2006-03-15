@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "client.h"
 #include "snd_local.h"
 
+#define INDEX_FILE_EXTENSION ".index.dat"
+
 #define MAX_RIFF_CHUNKS 16
 
 typedef struct audioFormat_s
@@ -341,7 +343,8 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   if( ( afd.f = FS_FOpenFileWrite( fileName ) ) <= 0 )
     return qfalse;
 
-  if( ( afd.idxF = FS_FOpenFileWrite( va( "%s.idx", fileName ) ) ) <= 0 )
+  if( ( afd.idxF = FS_FOpenFileWrite(
+          va( "%s" INDEX_FILE_EXTENSION, fileName ) ) ) <= 0 )
   {
     FS_FCloseFile( afd.f );
     return qfalse;
@@ -416,6 +419,37 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
 
 /*
 ===============
+CL_CheckFileSize
+===============
+*/
+static qboolean CL_CheckFileSize( int bytesToAdd )
+{
+  unsigned int newFileSize;
+
+  newFileSize =
+    afd.fileSize +                // Current file size
+    bytesToAdd +                  // What we want to add
+    ( afd.numIndices * 16 ) +     // The index
+    4;                            // The index size
+
+  // I assume all the operating systems
+  // we target can handle a 2Gb file
+  if( newFileSize > INT_MAX )
+  {
+    // Close the current file...
+    CL_CloseAVI( );
+
+    // ...And open a new one
+    CL_OpenAVIForWriting( va( "%s_", afd.fileName ) );
+
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
+/*
+===============
 CL_WriteAVIVideoFrame
 ===============
 */
@@ -427,6 +461,10 @@ void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size )
   byte  padding[ 4 ] = { 0 };
 
   if( !afd.fileOpen )
+    return;
+
+  // Chunk header + contents + padding
+  if( CL_CheckFileSize( 8 + size + 2 ) )
     return;
 
   bufIndex = 0;
@@ -473,6 +511,10 @@ void CL_WriteAVIAudioFrame( const byte *pcmBuffer, int size )
   if( !afd.fileOpen )
     return;
 
+  // Chunk header + contents + padding
+  if( CL_CheckFileSize( 8 + bytesInBuffer + size + 2 ) )
+    return;
+
   if( bytesInBuffer + size > PCM_BUFFER_SIZE )
   {
     Com_Printf( S_COLOR_YELLOW
@@ -484,7 +526,7 @@ void CL_WriteAVIAudioFrame( const byte *pcmBuffer, int size )
   bytesInBuffer += size;
 
   // Only write if we have a frame's worth of audio
-  if( bytesInBuffer >= (int)ceil( afd.a.rate / cl_aviFrameRate->value ) *
+  if( bytesInBuffer >= (int)ceil( (float)afd.a.rate / (float)afd.frameRate ) *
         afd.a.sampleSize )
   {
     int   chunkOffset = afd.fileSize - afd.moviOffset - 8;
@@ -545,7 +587,7 @@ qboolean CL_CloseAVI( void )
 {
   int indexRemainder;
   int indexSize = afd.numIndices * 16;
-  const char *idxFileName = va( "%s.idx", afd.fileName );
+  const char *idxFileName = va( "%s" INDEX_FILE_EXTENSION, afd.fileName );
 
   // AVI file isn't open
   if( !afd.fileOpen )
