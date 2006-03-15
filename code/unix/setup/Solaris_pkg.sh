@@ -101,7 +101,7 @@ if [ -d ${BUILD_DIR} ]; then
                 > ${PKG_DATA_SRC_DIR}/pkginfo
         ${CAT} ${PKG_DATA_SRC_DIR}/prototype.template > ${PKG_DATA_SRC_DIR}/prototype
 
-	${INSTALL_DATA} ${MOUNT_DIR}/COPYING.txt ${PKG_DATA_SRC_DIR}/install/copyright
+	${INSTALL_DATA} ${MOUNT_DIR}/web/include/id_patch_pk3s_Q3A_EULA.txt ${PKG_DATA_SRC_DIR}/copyright
 
         ${PKGPROTO} ${PKG_DATA_BUILD_DIR}=quake3 | \
                 ${NAWK} '{ print $1,$2,$3,$4 }' >> ${PKG_DATA_SRC_DIR}/prototype
