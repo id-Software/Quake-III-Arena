@@ -20,6 +20,12 @@ else
   COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 endif
 
+ifeq ($(COMPILE_PLATFORM),mingw32)
+  ifeq ($(COMPILE_ARCH),i386)
+    COMPILE_ARCH=x86
+  endif
+endif
+
 BUILD_CLIENT     =
 BUILD_CLIENT_SMP =
 BUILD_SERVER     =
