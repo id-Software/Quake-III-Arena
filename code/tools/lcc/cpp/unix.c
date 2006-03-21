@@ -19,6 +19,8 @@ setup(int argc, char **argv)
 	char *fp, *dp;
 	Tokenrow tr;
 	extern void setup_kwtab(void);
+	char *includeDirs[ NINCLUDE ] = { 0 };
+	int   numIncludeDirs = 0;
 
 	setup_kwtab();
 	while ((c = getopt(argc, argv, "MNOVv+I:D:U:F:lg")) != -1)
@@ -29,7 +31,7 @@ setup(int argc, char **argv)
 					includelist[i].deleted = 1;
 			break;
 		case 'I':
-			appendDirToIncludeList( optarg );
+			includeDirs[ numIncludeDirs++ ] = newstring( (uchar *)optarg, strlen( optarg ), 0 );
 			break;
 		case 'D':
 		case 'U':
@@ -73,6 +75,10 @@ setup(int argc, char **argv)
 		setobjname(fp);
 	includelist[NINCLUDE-1].always = 0;
 	includelist[NINCLUDE-1].file = dp;
+
+	for( i = 0; i < numIncludeDirs; i++ )
+		appendDirToIncludeList( includeDirs[ i ] );
+
 	setsource(fp, fd, NULL);
 }
 
