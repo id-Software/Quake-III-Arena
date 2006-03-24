@@ -19,7 +19,7 @@ setup(int argc, char **argv)
 	char *fp, *dp;
 	Tokenrow tr;
 	extern void setup_kwtab(void);
-	char *includeDirs[ NINCLUDE ] = { 0 };
+	uchar *includeDirs[ NINCLUDE ] = { 0 };
 	int   numIncludeDirs = 0;
 
 	setup_kwtab();
@@ -77,7 +77,7 @@ setup(int argc, char **argv)
 	includelist[NINCLUDE-1].file = dp;
 
 	for( i = 0; i < numIncludeDirs; i++ )
-		appendDirToIncludeList( includeDirs[ i ] );
+		appendDirToIncludeList( (char *)includeDirs[ i ] );
 
 	setsource(fp, fd, NULL);
 }
