@@ -1690,7 +1690,7 @@ copyfiles: build_release
 	$(INSTALL) -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
 
-clean:clean-debug clean-release
+clean: clean-debug clean-release
 	$(MAKE) -C $(LOKISETUPDIR) clean
 
 clean2:
@@ -1719,7 +1719,6 @@ installer: build_release
 dist:
 	rm -rf quake3-$(SVN_VERSION)
 	svn export . quake3-$(SVN_VERSION)
-	rm -rf quake3-$(SVN_VERSION)/web
 	tar --owner=root --group=root --force-local -cjf quake3-$(SVN_VERSION).tar.bz2 quake3-$(SVN_VERSION)
 	rm -rf quake3-$(SVN_VERSION)
 
