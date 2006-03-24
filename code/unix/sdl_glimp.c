@@ -89,9 +89,6 @@ typedef void *QGLContext;
 
 static QGLContext opengl_context;
 
-#define	WINDOW_CLASS_NAME	"Quake III: Arena"
-#define	WINDOW_CLASS_NAME_BRIEF	"quake3"
-
 //#define KBD_DBG
 
 typedef enum
@@ -632,7 +629,7 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-    SDL_WM_SetCaption(WINDOW_CLASS_NAME, WINDOW_CLASS_NAME_BRIEF);
+    SDL_WM_SetCaption(CLIENT_WINDOW_TITLE, CLIENT_WINDOW_ICON);
     SDL_ShowCursor(0);
     SDL_EnableUNICODE(1);
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);

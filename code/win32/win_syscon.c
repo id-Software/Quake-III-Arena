@@ -334,7 +334,7 @@ void Sys_CreateConsole( void )
 
 	s_wcd.hWnd = CreateWindowEx( 0,
 							   DEDCLASS,
-							   "Quake 3 Console",
+							   CONSOLE_WINDOW_TITLE,
 							   DEDSTYLE,
 							   ( swidth - 600 ) / 2, ( sheight - 450 ) / 2 , rect.right - rect.left + 1, rect.bottom - rect.top + 1,
 							   NULL,

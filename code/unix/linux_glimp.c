@@ -81,8 +81,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HAVE_XF86DGA
 #endif
 
-#define	WINDOW_CLASS_NAME	"Quake III: Arena"
-
 typedef enum
 {
   RSERR_OK,
@@ -1150,7 +1148,7 @@ int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
                       0, visinfo->depth, InputOutput,
                       visinfo->visual, mask, &attr);
 
-  XStoreName( dpy, win, WINDOW_CLASS_NAME );
+  XStoreName( dpy, win, CLIENT_WINDOW_TITLE );
 
   /* GH: Don't let the window be resized */
   sizehints.flags = PMinSize | PMaxSize;
