@@ -117,6 +117,7 @@ New cvars
   r_GLlibCoolDownMsec     - wait for some milliseconds to close GL library
   com_altivec             - enable use of altivec on PowerPC systems
   s_backend               - read only, indicates the current sound backend
+  in_shiftedKeys          - non-SDL Linux only. Enables binding to shifted keys
   cl_consoleHistory       - read only, stores the console history
   cl_platformSensitivity  - read only, indicates the mouse input scaling
 
