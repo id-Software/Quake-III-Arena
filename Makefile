@@ -11,7 +11,7 @@
 # GNU Make required
 #
 
-COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr A-Z a-z)
+COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
 ifeq ($(COMPILE_PLATFORM),darwin)
   # Apple does some things a little differently...
