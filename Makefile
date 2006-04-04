@@ -537,7 +537,7 @@ else # ifeq IRIX
 # SETUP AND BUILD -- SunOS
 #############################################################################
 
-ifeq ($(PLATFORM),SunOS)
+ifeq ($(PLATFORM),sunos)
 
   CC=gcc
   INSTALL=ginstall
@@ -607,7 +607,7 @@ ifeq ($(PLATFORM),SunOS)
     LDFLAGS+=-m32
   endif
 
-else # ifeq SunOS
+else # ifeq sunos
 
 #############################################################################
 # SETUP AND BUILD -- GENERIC
