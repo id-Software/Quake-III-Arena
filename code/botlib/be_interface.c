@@ -136,12 +136,14 @@ qboolean BotLibSetup(char *str)
 int Export_BotLibSetup(void)
 {
 	int		errnum;
+	char		logfilename[MAX_QPATH];
 	
 	bot_developer = LibVarGetValue("bot_developer");
   memset( &botlibglobals, 0, sizeof(botlibglobals) ); // bk001207 - init
 	//initialize byte swapping (litte endian etc.)
 //	Swap_Init();
-	Log_Open("botlib.log");
+	Com_sprintf(logfilename, sizeof(logfilename), "%s%cbotlib.log", LibVarGetString("homedir"), PATH_SEP);
+	Log_Open(logfilename);
 	//
 	botimport.Print(PRT_MESSAGE, "------- BotLib Initialization -------\n");
 	//
