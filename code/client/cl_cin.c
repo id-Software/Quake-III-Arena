@@ -1000,10 +1000,6 @@ static void readQuadInfo( byte *qData )
 			Com_Printf("HACK: approxmimating cinematic for Rage Pro or Voodoo\n");
 		}
 	}
-#if defined(MACOS_X)
-	cinTable[currentHandle].drawX = 256;
-	cinTable[currentHandle].drawX = 256;
-#endif
 }
 
 /******************************************************************************
