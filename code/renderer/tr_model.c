@@ -660,19 +660,20 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 				curtri++;
 			}
 			
-			// tri and curtri now point to the end of their surfaces.
+			// tri now points to the end of the surface.
 			surf->ofsEnd = (byte *) tri - (byte *) surf;
-
-			// find the next surface
 			surf = (mdrSurface_t *) tri;
-			cursurf = (mdrSurface_t *) curtri;
+
+			// find the next surface.
+			cursurf = (mdrSurface_t *) ((byte *) cursurf + LittleLong(cursurf->ofsEnd));
 		}
 
 		// surf points to the next lod now.
 		lod->ofsEnd = (int)((byte *) surf - (byte *) lod);
-				
 		lod = (mdrLOD_t *) surf;
-		curlod = (mdrLOD_t *) cursurf;
+
+		// find the next LOD.
+		curlod = (mdrLOD_t *)((byte *) curlod + LittleLong(curlod->ofsEnd));
 	}
 	
 	// lod points to the first tag now, so update the offset too.
@@ -958,7 +959,7 @@ static md3Tag_t *R_GetTag( md3Header_t *mod, int frame, const char *tagName ) {
 #ifdef RAVENMD4
 void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, md3Tag_t * dest) 
 {
-	int				i;
+	int				i, j, k;
 	int				frameSize;
 	mdrFrame_t		*frame;
 	mdrTag_t		*tag;
@@ -980,20 +981,13 @@ void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, md3Tag_t
 			//
 			frameSize = (long)( &((mdrFrame_t *)0)->bones[ mod->numBones ] );
 			frame = (mdrFrame_t *)((byte *)mod + mod->ofsFrames + framenum * frameSize );
-	#if 1
-			VectorCopy(&frame->bones[tag->boneIndex].matrix[0][0], dest->axis[0] );
-			VectorCopy(&frame->bones[tag->boneIndex].matrix[1][0], dest->axis[1] );
-			VectorCopy(&frame->bones[tag->boneIndex].matrix[2][0], dest->axis[2] );
-	#else
+
+			for (j = 0; j < 3; j++)
 			{
-				int j,k;
-				for (j=0;j<3;j++)
-				{
-					for (k=0;k<3;k++)
-						dest->axis[j][k]=frame->bones[tag->boneIndex].matrix[k][j];
-				}
+				for (k = 0; k < 3; k++)
+					dest->axis[j][k]=frame->bones[tag->boneIndex].matrix[k][j];
 			}
-	#endif
+
 			dest->origin[0]=frame->bones[tag->boneIndex].matrix[0][3];
 			dest->origin[1]=frame->bones[tag->boneIndex].matrix[1][3];
 			dest->origin[2]=frame->bones[tag->boneIndex].matrix[2][3];				
