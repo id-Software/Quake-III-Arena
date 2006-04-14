@@ -258,7 +258,7 @@ void SV_MasterHeartbeat( void ) {
 				sv_master[i]->modified = qfalse;
 				continue;
 			}
-			if ( !strstr( ":", sv_master[i]->string ) ) {
+			if ( !strchr( sv_master[i]->string, ':' ) ) {
 				adr[i].port = BigShort( PORT_MASTER );
 			}
 			Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", sv_master[i]->string,
