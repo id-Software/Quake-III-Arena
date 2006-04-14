@@ -262,7 +262,14 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
     //else if (ch >= 'A' && ch <= 'Z')
     //  ch = ch - 'A' + 'a';
 
-    buf[0] = ch;
+    // tjw: translate K_BACKSPACE to ctrl-h for MACOS_X (others?)
+    if (ch == K_BACKSPACE)
+    {
+      *key = 'h' - 'a' + 1;
+      buf[0] = *key;
+    }
+    else
+      buf[0] = ch;
   }
 
   return buf;
