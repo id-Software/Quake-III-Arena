@@ -350,12 +350,25 @@ NET_GetLocalAddress
 =====================
 */
 #ifdef MACOS_X
-// Don't do a forward mapping from the hostname of the machine to the IP.  The reason is that we might have obtained an IP address from DHCP and there might not be any name registered for the machine.  On Mac OS X, the machine name defaults to 'localhost' and NetInfo has 127.0.0.1 listed for this name.  Instead, we want to get a list of all the IP network interfaces on the machine.
-// This code adapted from OmniNetworking.
+// Don't do a forward mapping from the hostname of the machine to the IP.
+// The reason is that we might have obtained an IP address from DHCP and
+// there might not be any name registered for the machine.  On Mac OS X,
+// the machine name defaults to 'localhost' and NetInfo has 127.0.0.1
+// listed for this name.  Instead, we want to get a list of all the IP
+// network interfaces on the machine. This code adapted from
+// OmniNetworking.
 
-#define IFR_NEXT(ifr)	\
-    ((struct ifreq *) ((char *) (ifr) + sizeof(*(ifr)) + \
-      MAX(0, (int) (ifr)->ifr_addr.sa_len - (int) sizeof((ifr)->ifr_addr))))
+
+#ifdef _SIZEOF_ADDR_IFREQ
+	// tjw: OSX 10.4 does not have sa_len
+	#define IFR_NEXT(ifr)	\
+	((struct ifreq *) ((char *) ifr + _SIZEOF_ADDR_IFREQ(*ifr)))
+#else
+	// tjw: assume that once upon a time some version did have sa_len
+	#define IFR_NEXT(ifr)	\
+	((struct ifreq *) ((char *) (ifr) + sizeof(*(ifr)) + \
+	MAX(0, (int) (ifr)->ifr_addr.sa_len - (int) sizeof((ifr)->ifr_addr))))
+#endif
 
 void NET_GetLocalAddress( void ) {
         struct ifreq requestBuffer[MAX_IPS], *linkInterface, *inetInterface;
@@ -365,7 +378,7 @@ void NET_GetLocalAddress( void ) {
         int interfaceSocket;
         int family;
         
-        //Com_Printf("NET_GetLocalAddress: Querying for network interfaces\n");
+        Com_Printf("NET_GetLocalAddress: Querying for network interfaces\n");
         
         // Set this early so we can just return if there is an error
 	numIP = 0;
@@ -373,7 +386,10 @@ void NET_GetLocalAddress( void ) {
         ifc.ifc_len = sizeof(requestBuffer);
         ifc.ifc_buf = (caddr_t)requestBuffer;
 
-        // Since we get at this info via an ioctl, we need a temporary little socket.  This will only get AF_INET interfaces, but we probably don't care about anything else.  If we do end up caring later, we should add a ONAddressFamily and at a -interfaces method to it.
+        // Since we get at this info via an ioctl, we need a temporary little socket.
+        // This will only get AF_INET interfaces, but we probably don't care about
+        // anything else.  If we do end up caring later, we should add a
+        // ONAddressFamily and at a -interfaces method to it.
         family = AF_INET;
         if ((interfaceSocket = socket(family, SOCK_DGRAM, 0)) < 0) {
             Com_Printf("NET_GetLocalAddress: Unable to create temporary socket, errno = %d\n", errno);
@@ -390,7 +406,14 @@ void NET_GetLocalAddress( void ) {
         while ((char *) linkInterface < &ifc.ifc_buf[ifc.ifc_len]) {
             unsigned int nameLength;
 
-            // The ioctl returns both the entries having the address (AF_INET) and the link layer entries (AF_LINK).  The AF_LINK entry has the link layer address which contains the interface type.  This is the only way I can see to get this information.  We cannot assume that we will get bot an AF_LINK and AF_INET entry since the interface may not be configured.  For example, if you have a 10Mb port on the motherboard and a 100Mb card, you may not configure the motherboard port.
+            // The ioctl returns both the entries having the address (AF_INET)
+            // and the link layer entries (AF_LINK).  The AF_LINK entry has the
+            // link layer address which contains the interface type.  This is the
+            // only way I can see to get this information.  We cannot assume that
+            // we will get bot an AF_LINK and AF_INET entry since the interface
+            // may not be configured.  For example, if you have a 10Mb port on
+            // the motherboard and a 100Mb card, you may not configure the
+            // motherboard port.
 
             // For each AF_LINK entry...
             if (linkInterface->ifr_addr.sa_family == AF_LINK) {
@@ -398,7 +421,8 @@ void NET_GetLocalAddress( void ) {
                 inetInterface = (struct ifreq *) ifc.ifc_buf;
                 while ((char *) inetInterface < &ifc.ifc_buf[ifc.ifc_len]) {
                     if (inetInterface->ifr_addr.sa_family == AF_INET &&
-                        !strncmp(inetInterface->ifr_name, linkInterface->ifr_name, sizeof(linkInterface->ifr_name))) {
+                        !strncmp(inetInterface->ifr_name, linkInterface->ifr_name,
+                          sizeof(linkInterface->ifr_name))) {
 
                         for (nameLength = 0; nameLength < IFNAMSIZ; nameLength++)
                             if (!linkInterface->ifr_name[nameLength])
@@ -410,7 +434,8 @@ void NET_GetLocalAddress( void ) {
                             // Get the local interface address
                             strncpy(ifr.ifr_name, inetInterface->ifr_name, sizeof(ifr.ifr_name));
                             if (ioctl(interfaceSocket, OSIOCGIFADDR, (caddr_t)&ifr) < 0) {
-                                Com_Printf("NET_GetLocalAddress: Unable to get local address for interface '%s', errno = %d\n", inetInterface->ifr_name, errno);
+                                Com_Printf("NET_GetLocalAddress: Unable to get local address "
+                                    "for interface '%s', errno = %d\n", inetInterface->ifr_name, errno);
                             } else {
                                 struct sockaddr_in *sin;
                                 int ip;
@@ -422,7 +447,10 @@ void NET_GetLocalAddress( void ) {
                                 localIP[ numIP ][1] = (ip >> 16) & 0xff;
                                 localIP[ numIP ][2] = (ip >>  8) & 0xff;
                                 localIP[ numIP ][3] = (ip >>  0) & 0xff;
-                                Com_Printf( "IP: %i.%i.%i.%i (%s)\n", localIP[ numIP ][0], localIP[ numIP ][1], localIP[ numIP ][2], localIP[ numIP ][3], inetInterface->ifr_name);
+                                Com_Printf( "IP: %i.%i.%i.%i (%s)\n",
+                                    localIP[ numIP ][0], localIP[ numIP ][1],
+                                    localIP[ numIP ][2], localIP[ numIP ][3],
+                                    inetInterface->ifr_name);
                                 numIP++;
                             }
                         }
@@ -437,6 +465,7 @@ void NET_GetLocalAddress( void ) {
             }
             linkInterface = IFR_NEXT(linkInterface);
         }
+        Com_Printf("NET_GetLocalAddress: DONE querying for network interfaces\n");
 
         close(interfaceSocket);
 }
