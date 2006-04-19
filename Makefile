@@ -132,7 +132,7 @@ LIBSDIR=$(MOUNT_DIR)/libs
 
 # extract version info
 VERSION=$(shell grep Q3_VERSION $(CMDIR)/q_shared.h | \
-  sed -e 's/.*".* \([^ ]*\)"/\1/') 
+  sed -e 's/.*".* \([^ ]*\)"/\1/')
 
 ifeq ($(wildcard .svn),.svn)
   SVN_VERSION=$(VERSION)_SVN$(shell LANG=C svnversion .)
