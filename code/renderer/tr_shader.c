@@ -3018,7 +3018,10 @@ static void CreateExternalShaders( void ) {
 		int index;
 		
 		for(index = 0; index < tr.flareShader->numUnfoggedPasses; index++)
+		{
 			tr.flareShader->stages[index]->adjustColorsForFog = ACFF_NONE;
+			tr.flareShader->stages[index]->stateBits |= GLS_DEPTHTEST_DISABLE;
+		}
 	}
 
 	tr.sunShader = R_FindShader( "sun", LIGHTMAP_NONE, qtrue );
