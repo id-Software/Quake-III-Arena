@@ -75,6 +75,7 @@ typedef struct flare_s {
 	int			windowX, windowY;
 	float		eyeZ;
 
+	vec3_t		origin;
 	vec3_t		color;
 } flare_t;
 
@@ -82,6 +83,8 @@ typedef struct flare_s {
 
 flare_t		r_flareStructs[MAX_FLARES];
 flare_t		*r_activeFlares, *r_inactiveFlares;
+
+int flareCoeff;
 
 /*
 ==================
@@ -113,10 +116,21 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, vec3_t 
 	int				i;
 	flare_t			*f, *oldest;
 	vec3_t			local;
-	float			d;
+	float			d = 1;
 	vec4_t			eye, clip, normalized, window;
 
 	backEnd.pc.c_flareAdds++;
+
+	if(normal && (normal[0] || normal[1] || normal[2]))
+	{
+		VectorSubtract( backEnd.viewParms.or.origin, point, local );
+		VectorNormalizeFast(local);
+		d = DotProduct(local, normal);
+
+		// If the viewer is behind the flare don't add it.
+		if(d < 0)
+			return;
+	}
 
 	// if the point is off the screen, don't bother adding it
 	// calculate screen coordinates and depth
@@ -171,16 +185,12 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, vec3_t 
 	f->addedFrame = backEnd.viewParms.frameCount;
 	f->fogNum = fogNum;
 
+	VectorCopy(point, f->origin);
 	VectorCopy( color, f->color );
 
 	// fade the intensity of the flare down as the
 	// light surface turns away from the viewer
-	if ( normal ) {
-		VectorSubtract( backEnd.viewParms.or.origin, point, local );
-		VectorNormalizeFast( local );
-		d = DotProduct( local, normal );
-		VectorScale( f->color, d, f->color ); 
-	}
+	VectorScale( f->color, d, f->color ); 
 
 	// save info needed to test
 	f->windowX = backEnd.viewParms.viewportX + window[0];
@@ -197,31 +207,39 @@ RB_AddDlightFlares
 void RB_AddDlightFlares( void ) {
 	dlight_t		*l;
 	int				i, j, k;
-	fog_t			*fog;
+	fog_t			*fog = NULL;
 
 	if ( !r_flares->integer ) {
 		return;
 	}
 
 	l = backEnd.refdef.dlights;
-	fog = tr.world->fogs;
+
+	if(tr.world)
+		fog = tr.world->fogs;
+
 	for (i=0 ; i<backEnd.refdef.num_dlights ; i++, l++) {
 
-		// find which fog volume the light is in 
-		for ( j = 1 ; j < tr.world->numfogs ; j++ ) {
-			fog = &tr.world->fogs[j];
-			for ( k = 0 ; k < 3 ; k++ ) {
-				if ( l->origin[k] < fog->bounds[0][k] || l->origin[k] > fog->bounds[1][k] ) {
+		if(fog)
+		{
+			// find which fog volume the light is in 
+			for ( j = 1 ; j < tr.world->numfogs ; j++ ) {
+				fog = &tr.world->fogs[j];
+				for ( k = 0 ; k < 3 ; k++ ) {
+					if ( l->origin[k] < fog->bounds[0][k] || l->origin[k] > fog->bounds[1][k] ) {
+						break;
+					}
+				}
+				if ( k == 3 ) {
 					break;
 				}
 			}
-			if ( k == 3 ) {
-				break;
+			if ( j == tr.world->numfogs ) {
+				j = 0;
 			}
 		}
-		if ( j == tr.world->numfogs ) {
+		else
 			j = 0;
-		}
 
 		RB_AddFlare( (void *)l, j, l->origin, l->color, NULL );
 	}
@@ -294,16 +312,61 @@ void RB_RenderFlare( flare_t *f ) {
 	float			size;
 	vec3_t			color;
 	int				iColor[3];
+	float distance, intensity, factor;
+	byte fogFactors[3] = {255, 255, 255};
 
 	backEnd.pc.c_flareRenders++;
 
-	VectorScale( f->color, f->drawIntensity*tr.identityLight, color );
-	iColor[0] = color[0] * 255;
-	iColor[1] = color[1] * 255;
-	iColor[2] = color[2] * 255;
+	// We don't want too big values anyways when dividing by distance.
+	if(f->eyeZ > -1.0f)
+		distance = 1.0f;
+	else
+		distance = -f->eyeZ;
 
-	size = backEnd.viewParms.viewportWidth * ( r_flareSize->value/640.0f + 8 / -f->eyeZ );
+	// calculate the flare size..
+	size = backEnd.viewParms.viewportWidth * ( r_flareSize->value/640.0f + 8 / distance );
 
+/*
+ * This is an alternative to intensity scaling. It changes the size of the flare on screen instead
+ * with growing distance. See in the description at the top why this is not the way to go.
+	// size will change ~ 1/r.
+	size = backEnd.viewParms.viewportWidth * (r_flareSize->value / (distance * -2.0f));
+*/
+
+/*
+ * As flare sizes stay nearly constant with increasing distance we must decrease the intensity
+ * to achieve a reasonable visual result. The intensity is ~ (size^2 / distance^2) which can be
+ * got by considering the ratio of
+ * (flaresurface on screen) : (Surface of sphere defined by flare origin and distance from flare)
+ * An important requirement is:
+ * intensity <= 1 for all distances.
+ *
+ * The formula used here to compute the intensity is as follows:
+ * intensity = flareCoeff * size^2 / (distance + size*sqrt(flareCoeff))^2
+ * As you can see, the intensity will have a max. of 1 when the distance is 0.
+ * The coefficient flareCoeff will determine the falloff speed with increasing distance.
+ */
+
+	factor = distance + size * sqrt(flareCoeff);
+	
+	intensity = flareCoeff * size * size / (factor * factor);
+
+	VectorScale(f->color, f->drawIntensity * tr.identityLight * intensity, color);
+
+// Calculations for fogging
+	if(f->fogNum)
+	{
+		tess.numVertexes = 1;
+		VectorCopy(f->origin, tess.xyz[0]);
+		tess.fogNum = f->fogNum;
+	
+		RB_CalcModulateColorsByFog(fogFactors);
+	}
+
+	iColor[0] = color[0] * fogFactors[0];
+	iColor[1] = color[1] * fogFactors[1];
+	iColor[2] = color[2] * fogFactors[2];
+	
 	RB_BeginSurface( tr.flareShader, f->fogNum );
 
 	// FIXME: use quadstamp?
@@ -381,6 +444,21 @@ void RB_RenderFlares (void) {
 	if ( !r_flares->integer ) {
 		return;
 	}
+
+	if(r_flareCoeff->modified)
+	{
+		if(r_flareCoeff->value == 0.0f)
+			flareCoeff = atof(FLARE_STDCOEFF);
+		else
+			flareCoeff = r_flareCoeff->value;
+			
+		r_flareCoeff->modified = qfalse;
+	}
+
+	// Reset currentEntity to world so that any previously referenced entities
+	// don't have influence on the rendering of these flares (i.e. RF_ renderer flags).
+	backEnd.currentEntity = &tr.worldEntity;
+	backEnd.or = backEnd.viewParms.world;
 
 //	RB_AddDlightFlares();
 
