@@ -802,6 +802,30 @@ static void GLW_InitExtensions( void )
     ri.Printf( PRINT_ALL, "...GL_EXT_compiled_vertex_array not found\n" );
   }
 
+  glConfig.textureFilterAnisotropic = qfalse;
+  if ( strstr( glConfig.extensions_string, "GL_EXT_texture_filter_anisotropic" ) )
+  {
+    if ( r_ext_texture_filter_anisotropic->integer ) {
+      qglGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxAnisotropy );
+      if ( glConfig.maxAnisotropy <= 0 ) {
+        ri.Printf( PRINT_ALL, "...GL_EXT_texture_filter_anisotropic not properly supported!\n" );
+        glConfig.maxAnisotropy = 0;
+      }
+      else
+      {
+        ri.Printf( PRINT_ALL, "...using GL_EXT_texture_filter_anisotropic (max: %i)\n", glConfig.maxAnisotropy );
+        glConfig.textureFilterAnisotropic = qtrue;
+      }
+    }
+    else
+    {
+      ri.Printf( PRINT_ALL, "...ignoring GL_EXT_texture_filter_anisotropic\n" );
+    }
+  }
+  else
+  {
+    ri.Printf( PRINT_ALL, "...GL_EXT_texture_filter_anisotropic not found\n" );
+  }
 }
 
 static void GLW_InitGamma( void )

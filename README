@@ -92,34 +92,43 @@ The defaults for these variables differ depending on the target platform.
 ------------------------------------------------------------------ Console -----
 
 New cvars
-  cl_autoRecordDemo       - record a new demo on each map change
-  cl_aviFrameRate         - the framerate to use when capturing video
-  cl_aviMotionJpeg        - use the mjpeg codec when capturing video
+  cl_autoRecordDemo                 - record a new demo on each map change
+  cl_aviFrameRate                   - the framerate to use when capturing video
+  cl_aviMotionJpeg                  - use the mjpeg codec when capturing video
 
-  s_useOpenAL             - use the OpenAL sound backend if available
-  s_alPrecache            - cache OpenAL sounds before use
-  s_alGain                - the value of AL_GAIN for each source
-  s_alSources             - the total number of sources (memory) to allocate
-  s_alDopplerFactor       - the value passed to alDopplerFactor
-  s_alDopplerSpeed        - the value passed to alDopplerVelocity
-  s_alMinDistance         - the value of AL_REFERENCE_DISTANCE for each source
-  s_alRolloff             - the value of AL_ROLLOFF_FACTOR for each source
-  s_alMaxSpeakerDistance  - ET_SPEAKERS beyond this distance are culled
-  s_alDriver              - which OpenAL library to use
+  s_useOpenAL                       - use the OpenAL sound backend if available
+  s_alPrecache                      - cache OpenAL sounds before use
+  s_alGain                          - the value of AL_GAIN for each source
+  s_alSources                       - the total number of sources (memory) to
+                                      allocate
+  s_alDopplerFactor                 - the value passed to alDopplerFactor
+  s_alDopplerSpeed                  - the value passed to alDopplerVelocity
+  s_alMinDistance                   - the value of AL_REFERENCE_DISTANCE for
+                                      each source
+  s_alRolloff                       - the value of AL_ROLLOFF_FACTOR for each
+                                      source
+  s_alMaxSpeakerDistance            - ET_SPEAKERS beyond this distance are
+                                      culled
+  s_alDriver                        - which OpenAL library to use
 
-  s_sdlBits               - SDL bit resolution
-  s_sdlSpeed              - SDL sample rate
-  s_sdlChannels           - SDL number of channels
-  s_sdlDevSamps           - SDL DMA buffer size override
-  s_sdlMixSamps           - SDL mix buffer size override
+  s_sdlBits                         - SDL bit resolution
+  s_sdlSpeed                        - SDL sample rate
+  s_sdlChannels                     - SDL number of channels
+  s_sdlDevSamps                     - SDL DMA buffer size override
+  s_sdlMixSamps                     - SDL mix buffer size override
 
-  ttycon_ansicolor        - enable use of ANSI escape codes in the tty
-  r_GLlibCoolDownMsec     - wait for some milliseconds to close GL library
-  com_altivec             - enable use of altivec on PowerPC systems
-  s_backend               - read only, indicates the current sound backend
-  in_shiftedKeys          - non-SDL Linux only. Enables binding to shifted keys
-  cl_consoleHistory       - read only, stores the console history
-  cl_platformSensitivity  - read only, indicates the mouse input scaling
+  ttycon_ansicolor                  - enable use of ANSI escape codes in the tty
+  r_GLlibCoolDownMsec               - wait for some milliseconds to close GL
+                                      library
+  com_altivec                       - enable use of altivec on PowerPC systems
+  s_backend                         - read only, indicates the current sound
+                                      backend
+  in_shiftedKeys                    - non-SDL Linux only. Enables binding to
+                                      shifted keys
+  cl_consoleHistory                 - read only, stores the console history
+  cl_platformSensitivity            - read only, indicates the mouse input
+                                      scaling
+  r_ext_texture_filter_anisotropic  - anisotropic texture filtering
 
 New commands
   video [filename]        - start video capture (use with demo command)
