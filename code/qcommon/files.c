@@ -2556,6 +2556,13 @@ FS_idPak
 */
 qboolean FS_idPak( char *pak, char *base ) {
 	int i;
+	char pakbuf[MAX_QPATH], *pakptr;
+
+	// Chop off filename extension if necessary.
+	Com_sprintf(pakbuf, sizeof(pakbuf), "%s", pak);
+	pakptr = Q_strrchr(pakbuf, '.');
+	if(pakptr)
+		*pakptr = '\0';
 
 	for (i = 0; i < NUM_ID_PAKS; i++) {
 		if ( !FS_FilenameCompare(pak, va("%s/pak%d", base, i)) ) {

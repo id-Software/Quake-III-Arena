@@ -354,7 +354,7 @@ void RB_RenderFlare( flare_t *f ) {
 	VectorScale(f->color, f->drawIntensity * tr.identityLight * intensity, color);
 
 // Calculations for fogging
-	if(f->fogNum < tr.world->numfogs)
+	if(tr.world && f->fogNum < tr.world->numfogs)
 	{
 		tess.numVertexes = 1;
 		VectorCopy(f->origin, tess.xyz[0]);
@@ -363,7 +363,7 @@ void RB_RenderFlare( flare_t *f ) {
 		RB_CalcModulateColorsByFog(fogFactors);
 		
 		// We don't need to render the flare if colors are 0 anyways.
-		if(!fogFactors[0] && !fogFactors[1] && !fogFactors[2])
+		if(!(fogFactors[0] || fogFactors[1] || fogFactors[2]))
 			return;
 	}
 
