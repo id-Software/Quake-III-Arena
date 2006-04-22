@@ -779,6 +779,7 @@ Q3OBJ = \
   $(B)/client/cvar.o \
   $(B)/client/files.o \
   $(B)/client/md4.o \
+  $(B)/client/md5.o \
   $(B)/client/msg.o \
   $(B)/client/net_chan.o \
   $(B)/client/huffman.o \
@@ -1029,6 +1030,7 @@ $(B)/client/common.o : $(CMDIR)/common.c; $(DO_CC)
 $(B)/client/cvar.o : $(CMDIR)/cvar.c; $(DO_CC)
 $(B)/client/files.o : $(CMDIR)/files.c; $(DO_CC)
 $(B)/client/md4.o : $(CMDIR)/md4.c; $(DO_CC)
+$(B)/client/md5.o : $(CMDIR)/md5.c; $(DO_CC)
 $(B)/client/msg.o : $(CMDIR)/msg.c; $(DO_CC)
 $(B)/client/net_chan.o : $(CMDIR)/net_chan.c; $(DO_CC)
 $(B)/client/huffman.o : $(CMDIR)/huffman.c; $(DO_CC)

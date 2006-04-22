@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../cgame/cg_public.h"
 #include "../game/bg_public.h"
 
+// tjw: file full of random crap that gets used to create cl_guid
+#define QKEY_FILE "qkey"
+
 #define	RETRANSMIT_TIMEOUT	3000	// time between connection packet retransmits
 
 
