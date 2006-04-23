@@ -30,7 +30,7 @@ ifeq ($(PLATFORM),darwin)
   LCC_CFLAGS += -DMACOS_X
 endif
 
-ifeq ($(PLATFORM),SunOS)
+ifeq ($(PLATFORM),sunos)
   INSTALL=ginstall
 else
   INSTALL=install
