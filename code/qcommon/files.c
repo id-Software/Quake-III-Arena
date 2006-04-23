@@ -2565,7 +2565,7 @@ qboolean FS_idPak( char *pak, char *base ) {
 		*pakptr = '\0';
 
 	for (i = 0; i < NUM_ID_PAKS; i++) {
-		if ( !FS_FilenameCompare(pak, va("%s/pak%d", base, i)) ) {
+		if ( !FS_FilenameCompare(pakbuf, va("%s/pak%d", base, i)) ) {
 			break;
 		}
 	}
