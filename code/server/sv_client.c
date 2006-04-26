@@ -768,7 +768,7 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 		Com_Printf( "clientDownload: %d : begining \"%s\"\n", cl - svs.clients, cl->downloadName );
 
 		missionPack = FS_idPak(cl->downloadName, "missionpack");
-		idPack = missionPack || FS_idPak(cl->downloadName, "baseq3");
+		idPack = missionPack || FS_idPak(cl->downloadName, BASEGAME);
 
 		if ( !sv_allowDownload->integer || idPack ||
 			( cl->downloadSize = FS_SV_FOpenFileRead( cl->downloadName, &cl->download ) ) <= 0 ) {

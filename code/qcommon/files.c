@@ -2182,7 +2182,7 @@ int	FS_GetModList( char *listbuf, int bufsize ) {
       continue;
     }
     // we drop "baseq3" "." and ".."
-    if (Q_stricmp(name, "baseq3") && Q_stricmpn(name, ".", 1)) {
+    if (Q_stricmp(name, BASEGAME) && Q_stricmpn(name, ".", 1)) {
       // now we need to find some .pk3 files to validate the mod
       // NOTE TTimo: (actually I'm not sure why .. what if it's a mod under developement with no .pk3?)
       // we didn't keep the information when we merged the directory names, as to what OS Path it was found under
@@ -2618,7 +2618,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		havepak = qfalse;
 
 		// never autodownload any of the id paks
-		if ( FS_idPak(fs_serverReferencedPakNames[i], "baseq3") || FS_idPak(fs_serverReferencedPakNames[i], "missionpack") ) {
+		if ( FS_idPak(fs_serverReferencedPakNames[i], BASEGAME) || FS_idPak(fs_serverReferencedPakNames[i], "missionpack") ) {
 			continue;
 		}
 
@@ -2829,7 +2829,7 @@ static void FS_Startup( const char *gameName ) {
 		}
 	}
 
-	Com_ReadCDKey( "baseq3" );
+	Com_ReadCDKey(BASEGAME);
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
 	if (fs && fs->string[0] != 0) {
 		Com_AppendCDKey( fs->string );
@@ -2877,7 +2877,7 @@ static void FS_CheckPak0( void )
 	for( path = fs_searchpaths; path; path = path->next ) {
 		if( path->pack &&
 				!Q_stricmpn( path->pack->pakBasename, "pak0", MAX_OSPATH ) &&
-				(!Q_stricmpn( path->pack->pakGamename, "baseq3", MAX_OSPATH ) ||
+				(!Q_stricmpn( path->pack->pakGamename, BASEGAME, MAX_OSPATH ) ||
 				!Q_stricmpn( path->pack->pakGamename, "demoq3", MAX_OSPATH ))) {
 			foundPak0 = qtrue;
 
@@ -2903,7 +2903,7 @@ static void FS_CheckPak0( void )
 	if( !foundPak0 ) {
 		Com_Error( ERR_FATAL, "Couldn't find pak0.pk3. Check that your Q3\n"
 				"executable is in the correct place and that every file\n"
-				"in the baseq3 directory is present and readable." );
+				"in the %s directory is present and readable.", BASEGAME);
 	}
 }
 

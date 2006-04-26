@@ -2600,7 +2600,7 @@ void Com_WriteConfiguration( void ) {
 	if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
 		Com_WriteCDKey( fs->string, &cl_cdkey[16] );
 	} else {
-		Com_WriteCDKey( "baseq3", cl_cdkey );
+		Com_WriteCDKey( BASEGAME, cl_cdkey );
 	}
 #endif
 }
