@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CONSOLE_WINDOW_ICON   "ioq3 console"
 // 1.32 released 7-10-2002
 
+#define BASEGAME              "baseq3"
+
 #define MAX_TEAMNAME 32
 
 #ifdef _MSC_VER

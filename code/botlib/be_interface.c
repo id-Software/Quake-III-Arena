@@ -150,7 +150,7 @@ int Export_BotLibSetup(void)
 			Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, gamedir, PATH_SEP);
 		}
 		else {
-			Com_sprintf(logfilename, sizeof(logfilename), "%s%cbaseq3%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
+			Com_sprintf(logfilename, sizeof(logfilename), "%s%c" BASEGAME "%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
 		}
 	} else {
 		Com_sprintf(logfilename, sizeof(logfilename), "botlib.log");
