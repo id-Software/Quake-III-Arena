@@ -247,7 +247,7 @@ static void Demos_MenuInit( void ) {
 		if (!Q_stricmp(demoname +  len - 4,".dm3"))
 			demoname[len-4] = '\0';
 
-		Q_strupr(demoname);
+//		Q_strupr(demoname);
 
 		demoname += len + 1;
 	}
