@@ -96,6 +96,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ** multitexture extension definitions
 */
 #if !defined(__sun)
+
 #define GL_ACTIVE_TEXTURE_ARB               0x84E0
 #define GL_CLIENT_ACTIVE_TEXTURE_ARB        0x84E1
 #define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
@@ -104,9 +105,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GL_TEXTURE1_ARB                     0x84C1
 #define GL_TEXTURE2_ARB                     0x84C2
 #define GL_TEXTURE3_ARB                     0x84C3
+
 #else
+
 #define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
+
 #endif /* defined(__sun) */
+
+// define for skyboxes without black seams on non SDL-versions.
+#if !defined(GL_VERSION_1_2) && !defined(GL_CLAMP_TO_EDGE)
+   #define GL_CLAMP_TO_EDGE                  0x812F
+#endif
 
 // NOTE: some Linux platforms would need those prototypes
 #if defined(MACOS_X) || ( defined(__sun) && defined(__sparc) )
