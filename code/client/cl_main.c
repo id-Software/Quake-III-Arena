@@ -2549,8 +2549,7 @@ void CL_Init( void ) {
 	Cvar_Set( "cl_running", "1" );
 
 	CL_GenerateQKey();	
-//	Uncomment this once md5.c has been made 64 bit-safe.
-//	Cvar_Get("cl_guid", Com_MD5File(QKEY_FILE, 0), CVAR_USERINFO | CVAR_ROM);
+	Cvar_Get("cl_guid", Com_MD5File(QKEY_FILE, 0), CVAR_USERINFO | CVAR_ROM);
 
 	Com_Printf( "----- Client Initialization Complete -----\n" );
 }
