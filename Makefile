@@ -1678,9 +1678,10 @@ ifneq ($(BUILD_CLIENT),0)
 	$(INSTALL) -s -m 0755 $(BR)/ioquake3.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3.$(ARCH)$(BINEXT)
 endif
 
-ifneq ($(BUILD_CLIENT_SMP),0)
-	$(INSTALL) -s -m 0755 $(BR)/ioquake3-smp.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3-smp.$(ARCH)$(BINEXT)
-endif
+# Don't copy the SMP until it's working together with SDL.
+#ifneq ($(BUILD_CLIENT_SMP),0)
+#	$(INSTALL) -s -m 0755 $(BR)/ioquake3-smp.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3-smp.$(ARCH)$(BINEXT)
+#endif
 
 ifneq ($(BUILD_SERVER),0)
 	@if [ -f $(BR)/ioq3ded.$(ARCH)$(BINEXT) ]; then \
