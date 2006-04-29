@@ -1672,12 +1672,23 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 copyfiles: build_release
 	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where your Quake3 data is!"; fi
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
-	$(INSTALL) -s -m 0755 $(BR)/ioquake3.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3.$(ARCH)$(BINEXT)
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack
 
+ifneq ($(BUILD_CLIENT),0)
+	$(INSTALL) -s -m 0755 $(BR)/ioquake3.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3.$(ARCH)$(BINEXT)
+endif
+
+ifneq ($(BUILD_CLIENT_SMP),0)
+	$(INSTALL) -s -m 0755 $(BR)/ioquake3-smp.$(ARCH)$(BINEXT) $(COPYDIR)/ioquake3-smp.$(ARCH)$(BINEXT)
+endif
+
+ifneq ($(BUILD_SERVER),0)
 	@if [ -f $(BR)/ioq3ded.$(ARCH)$(BINEXT) ]; then \
 		$(INSTALL) -s -m 0755 $(BR)/ioq3ded.$(ARCH)$(BINEXT) $(COPYDIR)/ioq3ded.$(ARCH)$(BINEXT); \
-	fi 
-	
+	fi
+endif
+
+ifneq ($(BUILD_GAME_SO),0)	
 	$(INSTALL) -s -m 0755 $(BR)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
 	$(INSTALL) -s -m 0755 $(BR)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
@@ -1691,6 +1702,18 @@ copyfiles: build_release
 					$(COPYDIR)/missionpack/.
 	$(INSTALL) -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
+endif
+
+ifneq ($(BUILD_GAME_QVM),0)
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3/vm
+	$(INSTALL) -m 0755 $(BR)/baseq3/vm/qagame.qvm $(COPYDIR)/baseq3/vm/qagame.qvm
+	$(INSTALL) -m 0755 $(BR)/baseq3/vm/cgame.qvm $(COPYDIR)/baseq3/vm/cgame.qvm
+	$(INSTALL) -m 0755 $(BR)/baseq3/vm/ui.qvm $(COPYDIR)/baseq3/vm/ui.qvm
+	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack/vm
+	$(INSTALL) -m 0755 $(BR)/missionpack/vm/qagame.qvm $(COPYDIR)/missionpack/vm/qagame.qvm
+	$(INSTALL) -m 0755 $(BR)/missionpack/vm/cgame.qvm $(COPYDIR)/missionpack/vm/cgame.qvm
+	$(INSTALL) -m 0755 $(BR)/missionpack/vm/ui.qvm $(COPYDIR)/missionpack/vm/ui.qvm
+endif
 
 clean: clean-debug clean-release
 	$(MAKE) -C $(LOKISETUPDIR) clean
