@@ -200,9 +200,6 @@ typedef struct {
 	qboolean				isFullscreen;
 	qboolean				stereoEnabled;
 	qboolean				smpActive;		// dual processor
-
-	qboolean				textureFilterAnisotropic;
-	int						maxAnisotropy;
 } glconfig_t;
 
 // FIXME: VM should be OS agnostic .. in theory
