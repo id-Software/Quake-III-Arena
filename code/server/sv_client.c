@@ -478,7 +478,7 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 		return;		// already dropped
 	}
 
-	if ( !drop->gentity || !(drop->gentity->r.svFlags & SVF_BOT) ) {
+	if (drop->netchan.remoteAddress.type != NA_BOT) {
 		// see if we already have a challenge for this ip
 		challenge = &svs.challenges[0];
 
