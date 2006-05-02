@@ -34,12 +34,12 @@ These commands can only be entered from stdin or by a remote operator datagram
 
 /*
 ==================
-SV_GetPlayerByName
+SV_GetPlayerByHandle
 
-Returns the player with name from Cmd_Argv(1)
+Returns the player with player id or name from Cmd_Argv(1)
 ==================
 */
-static client_t *SV_GetPlayerByName( void ) {
+static client_t *SV_GetPlayerByHandle( void ) {
 	client_t	*cl;
 	int			i;
 	char		*s;
@@ -56,6 +56,23 @@ static client_t *SV_GetPlayerByName( void ) {
 	}
 
 	s = Cmd_Argv(1);
+
+	// Check whether this is a numeric player handle
+	for(i = 0; s[i] >= '0' && s[i] <= '9'; i++);
+	
+	if(!s[i])
+	{
+		int plid = atoi(s);
+
+		// Check for numeric playerid match
+		if(plid >= 0 && plid < sv_maxclients->integer)
+		{
+			cl = &svs.clients[plid];
+			
+			if(cl->state)
+				return cl;
+		}
+	}
 
 	// check for a name match
 	for ( i=0, cl=svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
@@ -343,7 +360,7 @@ static void SV_Kick_f( void ) {
 		return;
 	}
 
-	cl = SV_GetPlayerByName();
+	cl = SV_GetPlayerByHandle();
 	if ( !cl ) {
 		if ( !Q_stricmp(Cmd_Argv(1), "all") ) {
 			for ( i=0, cl=svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
@@ -402,7 +419,7 @@ static void SV_Ban_f( void ) {
 		return;
 	}
 
-	cl = SV_GetPlayerByName();
+	cl = SV_GetPlayerByHandle();
 
 	if (!cl) {
 		return;
@@ -681,7 +698,7 @@ static void SV_DumpUser_f( void ) {
 		return;
 	}
 
-	cl = SV_GetPlayerByName();
+	cl = SV_GetPlayerByHandle();
 	if ( !cl ) {
 		return;
 	}
