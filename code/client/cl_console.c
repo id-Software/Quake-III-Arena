@@ -555,7 +555,7 @@ void Con_DrawNotify (void)
 		if (chat_team)
 		{
 			SCR_DrawBigString (8, v, "say_team:", 1.0f );
-			skip = 11;
+			skip = 10;
 		}
 		else
 		{
