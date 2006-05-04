@@ -1,0 +1,16 @@
+Things we won't ever be doing!
+Autotools.
+
+Scons
+
+New build system of the week.
+
+Punkbuster (unless even balance wants to work with us)
+
+Modifications to the core Quake 3: Arena/ Team Arena gameplay. Put that into
+your great mod, don't screw with this.
+
+Removing the CD Key/pk3 checksums, yes jerks are going to do this on their own,
+no we aren't going to support them. Obviously that doesn't apply if you're
+making a total conversion. That is, if you're not using any id data from the 
+pk3s from either Team Arena or the original game itself.
