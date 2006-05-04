@@ -2564,6 +2564,10 @@ CL_Shutdown
 void CL_Shutdown( void ) {
 	static qboolean recursive = qfalse;
 	
+	// check whether the client is running at all.
+	if(!(com_cl_running && com_cl_running->integer))
+		return;
+	
 	Com_Printf( "----- CL_Shutdown -----\n" );
 
 	if ( recursive ) {

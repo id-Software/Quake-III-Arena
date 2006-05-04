@@ -646,7 +646,7 @@ void SV_FinalMessage( char *message ) {
 			if (cl->state >= CS_CONNECTED) {
 				// don't send a disconnect to a local client
 				if ( cl->netchan.remoteAddress.type != NA_LOOPBACK ) {
-					SV_SendServerCommand( cl, "print \"%s\"\n", message );
+					SV_SendServerCommand( cl, "print \"%s\n\"\n", message );
 					SV_SendServerCommand( cl, "disconnect" );
 				}
 				// force a snapshot to be sent
