@@ -91,6 +91,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 //===========================================================================
+// <Timbo> I hate this section so much
 
 /*
 ** multitexture extension definitions
@@ -112,10 +113,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif /* defined(__sun) */
 
+// anisotropic filtering constants
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT       0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT   0x84FF
+
 // define for skyboxes without black seams on non SDL-versions.
 #if !defined(GL_VERSION_1_2) && !defined(GL_CLAMP_TO_EDGE)
    #define GL_CLAMP_TO_EDGE                  0x812F
 #endif
+
+//===========================================================================
 
 // NOTE: some Linux platforms would need those prototypes
 #if defined(MACOS_X) || ( defined(__sun) && defined(__sparc) )
@@ -183,7 +190,7 @@ extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 
 //===========================================================================
 
-// non-windows systems will just redefine qgl* to gl*
+// non-dlopening systems will just redefine qgl* to gl*
 #if !defined( _WIN32 ) && !defined(MACOS_X) && !defined( __linux__ ) && !defined( __FreeBSD__ ) && !defined(__sun) // rb010123
 
 #include "qgl_linked.h"
