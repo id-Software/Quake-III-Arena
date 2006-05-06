@@ -2,6 +2,7 @@
 <install product="ioquake3"
 	desc="icculus.org/quake3"
 	version="@VERSION@"
+	update_url="http://www.icculus.org/quake3/updates.txt"
 	promptbinaries="yes">
   <readme>
     README
