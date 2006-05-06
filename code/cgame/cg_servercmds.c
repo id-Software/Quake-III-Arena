@@ -1058,9 +1058,19 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-  if ( Q_stricmp (cmd, "remapShader") == 0 ) {
-		if (trap_Argc() == 4) {
-			trap_R_RemapShader(CG_Argv(1), CG_Argv(2), CG_Argv(3));
+	if ( Q_stricmp (cmd, "remapShader") == 0 )
+	{
+		if (trap_Argc() == 4)
+		{
+			char shader1[MAX_QPATH];
+			char shader2[MAX_QPATH];
+			char shader3[MAX_QPATH];
+
+			Q_strncpyz(shader1, CG_Argv(1), sizeof(shader1));
+			Q_strncpyz(shader2, CG_Argv(2), sizeof(shader2));
+			Q_strncpyz(shader3, CG_Argv(3), sizeof(shader3));
+
+			trap_R_RemapShader(shader1, shader2, shader3);
 		}
 	}
 

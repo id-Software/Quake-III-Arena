@@ -345,9 +345,13 @@ qboolean UI_ConsoleCommand( int realTime ) {
 		if (trap_Argc() == 4) {
 			char shader1[MAX_QPATH];
 			char shader2[MAX_QPATH];
+			char shader3[MAX_QPATH];
+			
 			Q_strncpyz(shader1, UI_Argv(1), sizeof(shader1));
 			Q_strncpyz(shader2, UI_Argv(2), sizeof(shader2));
-			trap_R_RemapShader(shader1, shader2, UI_Argv(3));
+			Q_strncpyz(shader3, UI_Argv(3), sizeof(shader3));
+			
+			trap_R_RemapShader(shader1, shader2, shader3);
 			return qtrue;
 		}
 	}
