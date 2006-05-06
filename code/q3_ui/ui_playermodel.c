@@ -391,7 +391,7 @@ static void PlayerModel_BuildList( void )
 	int		numfiles;
 	char	dirlist[2048];
 	char	filelist[2048];
-	char	skinname[64];
+	char	skinname[MAX_QPATH];
 	char*	dirptr;
 	char*	fileptr;
 	int		i;
@@ -424,7 +424,7 @@ static void PlayerModel_BuildList( void )
 		{
 			filelen = strlen(fileptr);
 
-			COM_StripExtension(fileptr,skinname);
+			COM_StripExtension(fileptr,skinname, sizeof(skinname));
 
 			// look for icon_????
 			if (!Q_stricmpn(skinname,"icon_",5))

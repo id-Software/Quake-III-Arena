@@ -58,10 +58,10 @@ char *COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension( const char *in, char *out ) {
+void COM_StripExtension( const char *in, char *out, int destsize ) {
 	int             length;
 
-	strcpy( out, in );
+	Q_strncpyz(out, in, destsize);
 
 	length = strlen(out)-1;
 	while (length > 0 && out[length] != '.')

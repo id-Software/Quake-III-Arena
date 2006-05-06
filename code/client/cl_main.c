@@ -2066,7 +2066,7 @@ void CL_Frame ( int msec ) {
 			}
 
 			Q_strncpyz( mapName, COM_SkipPath( cl.mapname ), sizeof( cl.mapname ) );
-			COM_StripExtension( mapName, mapName );
+			COM_StripExtension(mapName, mapName, sizeof(mapName));
 
 			Cbuf_ExecuteText( EXEC_NOW,
 					va( "record %s-%s-%s", nowString, serverName, mapName ) );

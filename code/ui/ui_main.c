@@ -4958,7 +4958,7 @@ static void UI_BuildQ3Model_List( void )
 	int		numfiles;
 	char	dirlist[2048];
 	char	filelist[2048];
-	char	skinname[64];
+	char	skinname[MAX_QPATH];
 	char	scratch[256];
 	char*	dirptr;
 	char*	fileptr;
@@ -4988,7 +4988,7 @@ static void UI_BuildQ3Model_List( void )
 		{
 			filelen = strlen(fileptr);
 
-			COM_StripExtension(fileptr,skinname);
+			COM_StripExtension(fileptr, skinname, sizeof(skinname));
 
 			// look for icon_????
 			if (Q_stricmpn(skinname, "icon_", 5) == 0 && !(Q_stricmp(skinname,"icon_blue") == 0 || Q_stricmp(skinname,"icon_red") == 0))

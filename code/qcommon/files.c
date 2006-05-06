@@ -3451,7 +3451,7 @@ void	FS_FilenameCompletion( const char *dir, const char *ext,
 		Q_strncpyz( filename, filenames[ i ], MAX_STRING_CHARS );
 
 		if( stripExt ) {
-			COM_StripExtension( filename, filename );
+			COM_StripExtension(filename, filename, sizeof(filename));
 		}
 
 		callback( filename );
