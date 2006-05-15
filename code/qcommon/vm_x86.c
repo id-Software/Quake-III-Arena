@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // vm_x86.c -- load time compiler and execution environment for x86
 
 #include "vm_local.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #ifdef __FreeBSD__ // rb0101023
 #include <sys/types.h>
@@ -1081,6 +1084,11 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 	if(vm->codeBase == (void*)-1)
 		Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+#elif _WIN32
+	// allocate memory with EXECUTE permissions under windows.
+	vm->codeBase = VirtualAlloc(NULL, compiledOfs, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if(!vm->codeBase)
+		Com_Error(ERR_DROP, "VM_CompileX86: VirtualAlloc failed");
 #else
 	vm->codeBase = malloc(compiledOfs);
 #endif
@@ -1090,6 +1098,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 #ifdef VM_X86_MMAP
 	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
 		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+#elif _WIN32
+	{
+		DWORD oldProtect = 0;
+		
+		// remove write permissions.
+		if(!VirtualProtect(vm->codeBase, compiledOfs, PAGE_EXECUTE_READ, &oldProtect))
+			Com_Error(ERR_DROP, "VM_CompileX86: VirtualProtect failed");
+	}
 #endif
 
 	Z_Free( buf );
@@ -1108,6 +1124,8 @@ void VM_Destroy_Compiled(vm_t* self)
 {
 #ifdef VM_X86_MMAP
 	munmap(self->codeBase, self->codeLength);
+#elif _WIN32
+	VirtualFree(self->codeBase, self->codeLength, MEM_RELEASE);
 #else
 	free(self->codeBase);
 #endif
