@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ProgramDatabaseFile="$(IntDir)\quake3.pdb"
@@ -106,7 +106,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -177,7 +177,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -244,7 +244,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -311,7 +311,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -381,7 +381,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -448,7 +448,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib openal32.lib"
-				OutputFile="$(OutDir)\quake3.exe"
+				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
