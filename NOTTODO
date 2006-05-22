@@ -14,3 +14,6 @@ Removing the CD Key/pk3 checksums, yes jerks are going to do this on their own,
 no we aren't going to support them. Obviously that doesn't apply if you're
 making a total conversion. That is, if you're not using any id data from the 
 pk3s from either Team Arena or the original game itself.
+
+Removing the SDL/OpenAL header files from SVN. Having them in SVN makes it easier
+for non-Linux platforms to compile the game. This isn't changing.
