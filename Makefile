@@ -432,7 +432,7 @@ ifeq ($(PLATFORM),freebsd)
   endif
 
   ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += $(shell sdl11-config --cflags) -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1
+    BASE_CFLAGS += $(shell sdl-config --cflags) -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1
   endif
 
   ifeq ($(ARCH),axp)
@@ -463,7 +463,7 @@ ifeq ($(PLATFORM),freebsd)
   CLIENT_LDFLAGS =
 
   ifeq ($(USE_SDL),1)
-    CLIENT_LDFLAGS += $(shell sdl11-config --libs)
+    CLIENT_LDFLAGS += $(shell sdl-config --libs)
   else
     CLIENT_LDFLAGS += -L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
   endif
