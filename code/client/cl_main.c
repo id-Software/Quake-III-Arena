@@ -1443,6 +1443,13 @@ void CL_NextDownload(void) {
 			*s++ = 0;
 		else
 			s = localName + strlen(localName); // point at the nul byte
+		
+		// Make sure the server cannot make us write to non-quake3 directories.
+		if(strstr(localName, "../"))
+		{
+			Com_Error(ERR_DROP, "CL_NextDownload: Invalid download name %s", localName);
+			return;
+		}
 
 		CL_BeginDownload( localName, remoteName );
 
