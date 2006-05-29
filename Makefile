@@ -264,7 +264,7 @@ ifeq ($(PLATFORM),darwin)
   CC=gcc
 
   # !!! FIXME: calling conventions are still broken! See Bugzilla #2519
-  #VM_PPC=vm_ppc_new
+  VM_PPC=vm_ppc_new
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
   BASE_CFLAGS += -DMACOS_X -fno-common -pipe
