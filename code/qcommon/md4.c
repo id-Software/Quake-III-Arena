@@ -159,9 +159,9 @@ static void mdfour_update(struct mdfour *md, byte *in, int n)
 {
 	uint32_t M[16];
 
-	if (n == 0) mdfour_tail(in, n);
-
 	m = md;
+
+	if (n == 0) mdfour_tail(in, n);
 
 	while (n >= 64) {
 		copy64(M, in);
