@@ -360,6 +360,13 @@ int S_OGG_CodecReadStream(snd_stream_t *stream, int bytes, void *buffer)
 	// Bitstream for the decoder
 	int BS = 0;
 
+	// big endian machines want their samples in big endian order
+	int IsBigEndian = 0;
+
+#	ifdef Q3_BIG_ENDIAN
+	IsBigEndian = 1;
+#	endif // Q3_BIG_ENDIAN
+
 	// check if input is valid
 	if(!(stream && buffer))
 	{
@@ -379,7 +386,7 @@ int S_OGG_CodecReadStream(snd_stream_t *stream, int bytes, void *buffer)
 	while(-1)
 	{
 		// read some bytes from the OGG codec
-		c = ov_read((OggVorbis_File *) stream->ptr, bufPtr, bytesLeft, 0, OGG_SAMPLEWIDTH, 1, &BS);
+		c = ov_read((OggVorbis_File *) stream->ptr, bufPtr, bytesLeft, IsBigEndian, OGG_SAMPLEWIDTH, 1, &BS);
 		
 		// no more bytes are left
 		if(c <= 0)
