@@ -449,6 +449,7 @@ ifeq ($(PLATFORM),freebsd)
       -march=pentium -fomit-frame-pointer -pipe -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -funroll-loops -fstrength-reduce
+    HAVE_VM_COMPILED=true
   else
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
