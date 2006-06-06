@@ -373,6 +373,8 @@ ifeq ($(PLATFORM),mingw32)
   OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math -falign-loops=2 \
     -funroll-loops -falign-jumps=2 -falign-functions=2 -fstrength-reduce
 
+  HAVE_VM_COMPILED = true
+
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
@@ -904,7 +906,6 @@ Q3OBJ = \
   $(B)/client/tr_world.o \
 
 ifeq ($(ARCH),i386)
-  Q3OBJ += $(B)/client/vm_x86.o
   Q3OBJ += \
     $(B)/client/snd_mixa.o \
     $(B)/client/matha.o \
@@ -912,19 +913,24 @@ ifeq ($(ARCH),i386)
     $(B)/client/snapvectora.o
 endif
 ifeq ($(ARCH),x86)
-  Q3OBJ += $(B)/client/vm_x86.o
   Q3OBJ += \
     $(B)/client/snd_mixa.o \
     $(B)/client/matha.o \
     $(B)/client/ftola.o \
     $(B)/client/snapvectora.o
 endif
-ifeq ($(ARCH),x86_64)
-  Q3OBJ += $(B)/client/vm_x86_64.o
-endif
 
-ifeq ($(ARCH),ppc)
-  ifneq ($(VM_PPC),)
+ifeq ($(HAVE_VM_COMPILED),true)
+  ifeq ($(ARCH),i386)
+    Q3OBJ += $(B)/client/vm_x86.o
+  endif
+  ifeq ($(ARCH),x86)
+    Q3OBJ += $(B)/client/vm_x86.o
+  endif
+  ifeq ($(ARCH),x86_64)
+    Q3OBJ += $(B)/client/vm_x86_64.o
+  endif
+  ifeq ($(ARCH),ppc)
     Q3OBJ += $(B)/client/$(VM_PPC).o
   endif
 endif
@@ -1249,16 +1255,23 @@ Q3DOBJ = \
   $(B)/ded/null_snddma.o
 
 ifeq ($(ARCH),i386)
-  Q3DOBJ += $(B)/ded/vm_x86.o $(B)/ded/ftola.o \
-      $(B)/ded/snapvectora.o $(B)/ded/matha.o
+  Q3DOBJ += \
+      $(B)/ded/ftola.o \
+      $(B)/ded/snapvectora.o \
+      $(B)/ded/matha.o
 endif
 
-ifeq ($(ARCH),x86_64)
-  Q3DOBJ += $(B)/ded/vm_x86_64.o
-endif
-
-ifeq ($(ARCH),ppc)
-  ifneq ($(VM_PPC),)
+ifeq ($(HAVE_VM_COMPILED),true)
+  ifeq ($(ARCH),i386)
+    Q3DOBJ += $(B)/ded/vm_x86.o
+  endif
+  ifeq ($(ARCH),x86)
+    Q3DOBJ += $(B)/ded/vm_x86.o
+  endif
+  ifeq ($(ARCH),x86_64)
+    Q3DOBJ += $(B)/ded/vm_x86_64.o
+  endif
+  ifeq ($(ARCH),ppc)
     Q3DOBJ += $(B)/ded/$(VM_PPC).o
   endif
 endif
