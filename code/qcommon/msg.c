@@ -492,6 +492,11 @@ char *MSG_ReadStringLine( msg_t *msg ) {
 		if ( c == '%' ) {
 			c = '.';
 		}
+		// don't allow higher ascii values
+		if ( c > 127 ) {
+			c = '.';
+		}
+
 		string[l] = c;
 		l++;
 	} while (l < sizeof(string)-1);
