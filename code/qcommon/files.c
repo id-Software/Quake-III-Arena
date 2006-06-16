@@ -2597,15 +2597,16 @@ we are not interested in a download string format, we want something human-reada
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t	*sp;
 	qboolean havepak, badchecksum;
+	char *origpos = neededpaks;
 	int i;
 
-	if ( !fs_numServerReferencedPaks ) {
+	if (!fs_numServerReferencedPaks)
 		return qfalse; // Server didn't send any pack information along
-	}
 
 	*neededpaks = 0;
 
-	for ( i = 0 ; i < fs_numServerReferencedPaks ; i++ ) {
+	for ( i = 0 ; i < fs_numServerReferencedPaks ; i++ )
+	{
 		// Ok, see if we have this pak file
 		badchecksum = qfalse;
 		havepak = qfalse;
@@ -2614,6 +2615,13 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		if ( FS_idPak(fs_serverReferencedPakNames[i], BASEGAME) || FS_idPak(fs_serverReferencedPakNames[i], "missionpack") ) {
 			continue;
 		}
+
+		// Make sure the server cannot make us write to non-quake3 directories.
+		if(strstr(fs_serverReferencedPakNames[i], "../") || strstr(fs_serverReferencedPakNames[i], "..\\"))
+                {
+			Com_Printf("WARNING: Invalid download name %s\n", fs_serverReferencedPakNames[i]);
+                        continue;
+                }
 
 		for ( sp = fs_searchpaths ; sp ; sp = sp->next ) {
 			if ( sp->pack && sp->pack->checksum == fs_serverReferencedPaks[i] ) {
@@ -2627,6 +2635,12 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 
       if (dlstring)
       {
+	// We need this to make sure we won't hit the end of the buffer or the server could
+	// overwrite non-pk3 files on clients by writing so much crap into neededpaks that
+	// Q_strcat cuts off the .pk3 extension.
+	
+	origpos += strlen(origpos);
+	
         // Remote name
         Q_strcat( neededpaks, len, "@");
         Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
@@ -2647,6 +2661,14 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
           Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
           Q_strcat( neededpaks, len, ".pk3" );
         }
+        
+        // Find out whether it might have overflowed the buffer and don't add this file to the
+        // list if that is the case.
+        if(strlen(origpos) + (origpos - neededpaks) >= len - 1)
+	{
+		*origpos = '\0';
+		break;
+	}
       }
       else
       {
@@ -3209,7 +3231,7 @@ checksums to see if any pk3 files need to be auto-downloaded.
 =====================
 */
 void FS_PureServerSetReferencedPaks( const char *pakSums, const char *pakNames ) {
-	int		i, c, d;
+	int		i, c, d = 0;
 
 	Cmd_TokenizeString( pakSums );
 
@@ -3218,30 +3240,37 @@ void FS_PureServerSetReferencedPaks( const char *pakSums, const char *pakNames )
 		c = MAX_SEARCH_PATHS;
 	}
 
-	fs_numServerReferencedPaks = c;
-
 	for ( i = 0 ; i < c ; i++ ) {
 		fs_serverReferencedPaks[i] = atoi( Cmd_Argv( i ) );
 	}
 
-	for ( i = 0 ; i < c ; i++ ) {
-		if (fs_serverReferencedPakNames[i]) {
+	for (i = 0 ; i < sizeof(fs_serverReferencedPakNames) / sizeof(*fs_serverReferencedPakNames); i++)
+	{
+		if(fs_serverReferencedPakNames[i])
 			Z_Free(fs_serverReferencedPakNames[i]);
-		}
+
 		fs_serverReferencedPakNames[i] = NULL;
 	}
+
 	if ( pakNames && *pakNames ) {
 		Cmd_TokenizeString( pakNames );
 
 		d = Cmd_Argc();
-		if ( d > MAX_SEARCH_PATHS ) {
+		if(d > MAX_SEARCH_PATHS)
 			d = MAX_SEARCH_PATHS;
-		}
+		else if(d > c)
+			d = c;
 
 		for ( i = 0 ; i < d ; i++ ) {
 			fs_serverReferencedPakNames[i] = CopyString( Cmd_Argv( i ) );
 		}
 	}
+	
+	// ensure that there are as many checksums as there are pak names.
+	if(d < c)
+		c = d;
+	
+	fs_numServerReferencedPaks = c;	
 }
 
 /*
