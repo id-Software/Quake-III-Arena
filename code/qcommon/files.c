@@ -3256,9 +3256,8 @@ void FS_PureServerSetReferencedPaks( const char *pakSums, const char *pakNames )
 		Cmd_TokenizeString( pakNames );
 
 		d = Cmd_Argc();
-		if(d > MAX_SEARCH_PATHS)
-			d = MAX_SEARCH_PATHS;
-		else if(d > c)
+
+		if(d > c)
 			d = c;
 
 		for ( i = 0 ; i < d ; i++ ) {
