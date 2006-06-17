@@ -1416,17 +1416,32 @@ static int joy_keys[16] = {
      K_JOY26, K_JOY27
 };
 
+// translate hat events into keypresses
+// the 4 highest buttons are used for the first hat ...
+static int hat_keys[16] = {
+     K_JOY29, K_JOY30,
+     K_JOY31, K_JOY32,
+     K_JOY25, K_JOY26,
+     K_JOY27, K_JOY28,
+     K_JOY21, K_JOY22,
+     K_JOY23, K_JOY24,
+     K_JOY17, K_JOY18,
+     K_JOY19, K_JOY20
+};
+
 
 // bk001130 - from linux_glimp.c
 extern cvar_t *  in_joystick;
 extern cvar_t *  in_joystickDebug;
 extern cvar_t *  joy_threshold;
+cvar_t *in_joystickNo;
 
 #define ARRAYLEN(x) (sizeof (x) / sizeof (x[0]))
 struct
 {
     qboolean buttons[16];  // !!! FIXME: these might be too many.
     unsigned int oldaxes;
+    unsigned int oldhats;
 } stick_state;
 
 
@@ -1466,36 +1481,35 @@ void IN_StartupJoystick( void )
   for (i = 0; i < total; i++)
     Com_Printf("[%d] %s\n", i, SDL_JoystickName(i));
 
-  // !!! FIXME: someone should add a way to select a specific stick.
-  for( i = 0; i < total; i++ ) {
-    stick = SDL_JoystickOpen(i);
-    if (stick == NULL)
-        continue;
+  in_joystickNo = Cvar_Get( "in_joystickNo", "0", CVAR_ARCHIVE );
+  if( in_joystickNo->integer < 0 || in_joystickNo->integer >= total )
+    Cvar_Set( "in_joystickNo", "0" );
 
-    Com_Printf( "Joystick %d opened\n", i );
-    Com_Printf( "Name:    %s\n", SDL_JoystickName(i) );
-    Com_Printf( "Axes:    %d\n", SDL_JoystickNumAxes(stick) );
-    Com_Printf( "Hats:    %d\n", SDL_JoystickNumHats(stick) );
-    Com_Printf( "Buttons: %d\n", SDL_JoystickNumButtons(stick) );
-    Com_Printf( "Balls: %d\n", SDL_JoystickNumBalls(stick) );
+  stick = SDL_JoystickOpen( in_joystickNo->integer );
 
-    SDL_JoystickEventState(SDL_QUERY);
-
-    /* Our work here is done. */
-    return;
-  }
-
-  /* No soup for you. */
-  if( stick == NULL ) {
+  if (stick == NULL) {
     Com_Printf( "No joystick opened.\n" );
     return;
   }
+
+  Com_Printf( "Joystick %d opened\n", in_joystickNo->integer );
+  Com_Printf( "Name:    %s\n", SDL_JoystickName(in_joystickNo->integer) );
+  Com_Printf( "Axes:    %d\n", SDL_JoystickNumAxes(stick) );
+  Com_Printf( "Hats:    %d\n", SDL_JoystickNumHats(stick) );
+  Com_Printf( "Buttons: %d\n", SDL_JoystickNumButtons(stick) );
+  Com_Printf( "Balls: %d\n", SDL_JoystickNumBalls(stick) );
+
+  SDL_JoystickEventState(SDL_QUERY);
+
+  /* Our work here is done. */
+  return;
 }
 
 void IN_JoyMove( void )
 {
     qboolean joy_pressed[ARRAYLEN(joy_keys)];
     unsigned int axes = 0;
+    unsigned int hats = 0;
     int total = 0;
     int i = 0;
 
@@ -1549,7 +1563,94 @@ void IN_JoyMove( void )
         }
     }
 
-    // !!! FIXME: look at the hats...
+    // look at the hats...
+    total = SDL_JoystickNumHats(stick);
+    if (total > 0)
+    {
+        if (total > 4) total = 4;
+        for (i = 0; i < total; i++)
+        {
+	    ((Uint8 *)&hats)[i] = SDL_JoystickGetHat(stick, i);
+        }
+    }
+
+    // update hat state
+    if (hats != stick_state.oldhats)
+    {
+        for( i = 0; i < 4; i++ ) {
+            if( ((Uint8 *)&hats)[i] != ((Uint8 *)&stick_state.oldhats)[i] ) {
+	        // release event
+	        switch( ((Uint8 *)&stick_state.oldhats)[i] ) {
+		case SDL_HAT_UP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHT:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_DOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_LEFT:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHTUP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qfalse, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHTDOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qfalse, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_LEFTUP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qfalse, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qfalse, 0, NULL );
+		  break;
+		case SDL_HAT_LEFTDOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qfalse, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qfalse, 0, NULL );
+		  break;
+		default:
+		  break;
+		}
+		// press event
+	        switch( ((Uint8 *)&hats)[i] ) {
+		case SDL_HAT_UP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHT:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_DOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_LEFT:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHTUP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qtrue, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_RIGHTDOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qtrue, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 1], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_LEFTUP:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 0], qtrue, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qtrue, 0, NULL );
+		  break;
+		case SDL_HAT_LEFTDOWN:
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 2], qtrue, 0, NULL );
+                  Sys_QueEvent( 0, SE_KEY, hat_keys[4*i + 3], qtrue, 0, NULL );
+		  break;
+		default:
+		  break;
+		}
+            }
+        }
+    }
+
+    // save hat state
+    stick_state.oldhats = hats;
 
     // finally, look at the axes...
     total = SDL_JoystickNumAxes(stick);

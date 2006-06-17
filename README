@@ -123,8 +123,9 @@ New cvars
   com_altivec                       - enable use of altivec on PowerPC systems
   s_backend                         - read only, indicates the current sound
                                       backend
-  in_shiftedKeys                    - non-SDL Linux only. Enables binding to
+  in_shiftedKeys                    - non-SDL Linux only; enables binding to
                                       shifted keys
+  in_joystickNo                     - SDL only; select which joystick to use
   cl_consoleHistory                 - read only, stores the console history
   cl_platformSensitivity            - read only, indicates the mouse input
                                       scaling
