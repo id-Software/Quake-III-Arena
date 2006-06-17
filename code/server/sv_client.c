@@ -901,6 +901,12 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 			rate = sv_maxRate->integer;
 		}
 	}
+	if ( sv_minRate->integer ) {
+		if ( sv_minRate->integer < 1000 )
+			Cvar_Set( "sv_minRate", "1000" );
+		if ( sv_minRate->integer > rate )
+			rate = sv_minRate->integer;
+	}
 
 	if (!rate) {
 		blockspersnap = 1;

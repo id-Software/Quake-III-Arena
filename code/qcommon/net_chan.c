@@ -615,6 +615,62 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 
 //=============================================================================
 
+typedef struct packetQueue_s {
+        struct packetQueue_s *next;
+        int length;
+        byte *data;
+        netadr_t to;
+        int release;
+} packetQueue_t;
+
+packetQueue_t *packetQueue = NULL;
+
+static void NET_QueuePacket( int length, const void *data, netadr_t to,
+	int offset )
+{
+	packetQueue_t *new, *next = packetQueue;
+
+	if(offset > 999)
+		offset = 999;
+
+	new = S_Malloc(sizeof(packetQueue_t));
+	new->data = S_Malloc(length);
+	Com_Memcpy(new->data, data, length);
+	new->length = length;
+	new->to = to;
+	new->release = Sys_Milliseconds() + offset;	
+	new->next = NULL;
+
+	if(!packetQueue) {
+		packetQueue = new;
+		return;
+	}
+	while(next) {
+		if(!next->next) {
+			next->next = new;
+			return;
+		}
+		next = next->next;
+	}
+}
+
+void NET_FlushPacketQueue(void)
+{
+	packetQueue_t *last;
+	int now;
+
+	while(packetQueue) {
+		now = Sys_Milliseconds();
+		if(packetQueue->release >= now)
+			break;
+		Sys_SendPacket(packetQueue->length, packetQueue->data,
+			packetQueue->to);
+		last = packetQueue;
+		packetQueue = packetQueue->next;
+		Z_Free(last->data);
+		Z_Free(last);
+	}
+}
 
 void NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to ) {
 
@@ -634,7 +690,15 @@ void NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to ) 
 		return;
 	}
 
-	Sys_SendPacket( length, data, to );
+	if ( sock == NS_CLIENT && cl_packetdelay->integer > 0 ) {
+		NET_QueuePacket( length, data, to, cl_packetdelay->integer );
+	}
+	else if ( sock == NS_SERVER && sv_packetdelay->integer > 0 ) {
+		NET_QueuePacket( length, data, to, sv_packetdelay->integer );
+	}
+	else {
+		Sys_SendPacket( length, data, to );
+	}
 }
 
 /*

@@ -159,7 +159,7 @@ void		NET_Init( void );
 void		NET_Shutdown( void );
 void		NET_Restart( void );
 void		NET_Config( qboolean enableNetworking );
-
+void		NET_FlushPacketQueue(void);
 void		NET_SendPacket (netsrc_t sock, int length, const void *data, netadr_t to);
 void		QDECL NET_OutOfBandPrint( netsrc_t net_socket, netadr_t adr, const char *format, ...);
 void		QDECL NET_OutOfBandData( netsrc_t sock, netadr_t adr, byte *format, int len );
@@ -757,6 +757,9 @@ extern	cvar_t	*com_altivec;
 // both client and server must agree to pause
 extern	cvar_t	*cl_paused;
 extern	cvar_t	*sv_paused;
+
+extern	cvar_t	*cl_packetdelay;
+extern	cvar_t	*sv_packetdelay;
 
 // com_speeds times
 extern	int		time_game;

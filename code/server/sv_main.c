@@ -44,6 +44,7 @@ cvar_t	*sv_killserver;			// menu system can set to 1 to shut server down
 cvar_t	*sv_mapname;
 cvar_t	*sv_mapChecksum;
 cvar_t	*sv_serverid;
+cvar_t	*sv_minRate;
 cvar_t	*sv_maxRate;
 cvar_t	*sv_minPing;
 cvar_t	*sv_maxPing;
