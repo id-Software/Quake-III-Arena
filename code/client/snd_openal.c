@@ -1538,6 +1538,7 @@ void S_AL_StopAllSounds( void )
 {
 	S_AL_SrcShutup();
 	S_AL_StopBackgroundTrack();
+	S_AL_StreamDie();
 }
 
 /*
