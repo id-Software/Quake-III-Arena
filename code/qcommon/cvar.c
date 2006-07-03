@@ -161,6 +161,20 @@ void Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize 
 	}
 }
 
+/*
+============
+Cvar_Flags
+============
+*/
+int Cvar_Flags(const char *var_name)
+{
+	cvar_t *var;
+	
+	if(! (var = Cvar_FindVar(var_name)) )
+		return CVAR_NONEXISTENT;
+	else
+		return var->flags;
+}
 
 /*
 ============

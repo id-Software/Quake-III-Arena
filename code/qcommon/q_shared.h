@@ -756,6 +756,9 @@ default values.
 #define CVAR_CHEAT			512	// can not be changed if cheats are disabled
 #define CVAR_NORESTART		1024	// do not clear when a cvar_restart is issued
 
+#define CVAR_SERVER_CREATED	2048	// cvar was created by a server the client connected to.
+#define CVAR_NONEXISTENT	0xFFFFFFFF	// Cvar doesn't exist.
+
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
 	char		*name;
