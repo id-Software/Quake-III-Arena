@@ -380,7 +380,7 @@ void CL_SystemInfoChanged( void ) {
 		{
 			if(FS_CheckDirTraversal(value))
 			{
-				Com_Printf("WARNING: Server sent invalid fs_game value %s\n", value);
+				Com_Printf(S_COLOR_YELLOW "WARNING: Server sent invalid fs_game value %s\n", value);
 				continue;
 			}
 				
@@ -393,7 +393,10 @@ void CL_SystemInfoChanged( void ) {
 		{
 			// If this cvar may not be modified by a server discard the value.
 			if(!(cvar_flags & (CVAR_SYSTEMINFO | CVAR_SERVER_CREATED)))
+			{
+				Com_Printf(S_COLOR_YELLOW "WARNING: server is not allowed to set %s=%s\n", key, value);
 				continue;
+			}
 
 			Cvar_Set(key, value);
 		}
