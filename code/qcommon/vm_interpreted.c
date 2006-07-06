@@ -852,7 +852,7 @@ nextInstruction2:
 			opStack--;
 			goto nextInstruction;
 		case OP_BCOM:
-			opStack[-1] = ~ ((unsigned)r0);
+			*opStack = ~ ((unsigned)r0);
 			goto nextInstruction;
 
 		case OP_LSH:
