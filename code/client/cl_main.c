@@ -298,10 +298,8 @@ void CL_Record_f( void ) {
 			CL_DemoFilename( number, demoName );
 			Com_sprintf (name, sizeof(name), "demos/%s.dm_%d", demoName, PROTOCOL_VERSION );
 
-			len = FS_ReadFile( name, NULL );
-			if ( len <= 0 ) {
+			if (!FS_FileExists(name))
 				break;	// file doesn't exist
-			}
 		}
 	}
 
