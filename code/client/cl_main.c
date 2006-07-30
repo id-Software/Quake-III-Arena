@@ -229,10 +229,8 @@ CL_DemoFilename
 void CL_DemoFilename( int number, char *fileName ) {
 	int		a,b,c,d;
 
-	if ( number < 0 || number > 9999 ) {
-		Com_sprintf( fileName, MAX_OSPATH, "demo9999.tga" );
-		return;
-	}
+	if(number < 0 || number > 9999)
+		number = 9999;
 
 	a = number / 1000;
 	number -= a*1000;
