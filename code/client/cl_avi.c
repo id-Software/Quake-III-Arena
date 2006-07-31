@@ -248,7 +248,7 @@ void CL_WriteAVIHeader( void )
           WRITE_4BYTES( afd.width );            //biWidth
           WRITE_4BYTES( afd.height );           //biHeight
           WRITE_2BYTES( 1 );                    //biPlanes
-          WRITE_2BYTES( 32 );                   //biBitCount
+          WRITE_2BYTES( 24 );                   //biBitCount
 
           if( afd.motionJpeg )   {              //biCompression
             WRITE_STRING( "MJPG" );
@@ -257,7 +257,7 @@ void CL_WriteAVIHeader( void )
           } else {
             WRITE_4BYTES( 0 );                  // BI_RGB
             WRITE_4BYTES( afd.width *
-            afd.height*4 );                     //biSizeImage
+            afd.height*3 );                     //biSizeImage
           }
 
           WRITE_4BYTES( 0 );                    //biXPelsPetMeter

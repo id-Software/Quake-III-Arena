@@ -715,7 +715,6 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	const videoFrameCommand_t	*cmd;
 	int												frameSize;
 	int												i;
-	char												swapper;
 	
 	cmd = (const videoFrameCommand_t *)data;
 	
@@ -734,16 +733,16 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	}
 	else
 	{
-		frameSize = cmd->width * cmd->height * 4;
+		frameSize = cmd->width * cmd->height;
 
-		for( i = 0; i < frameSize; i = i + 4)          // Swap R and B
+		for( i = 0; i < frameSize; i++)    // Pack to 24bpp and swap R and B
 		{
-			swapper = cmd->captureBuffer[ i ];
-			cmd->captureBuffer[ i ] = cmd->captureBuffer[ i + 2 ];
-			cmd->captureBuffer[ i + 2 ] = swapper;
-
+			cmd->encodeBuffer[ i*3 ]     = cmd->captureBuffer[ i*4 + 2 ];
+			cmd->encodeBuffer[ i*3 + 1 ] = cmd->captureBuffer[ i*4 + 1 ];
+			cmd->encodeBuffer[ i*3 + 2 ] = cmd->captureBuffer[ i*4 ];
 		}
-		ri.CL_WriteAVIVideoFrame( cmd->captureBuffer, frameSize );
+
+		ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize * 3 );
 	}
 
 	return (const void *)(cmd + 1);	
