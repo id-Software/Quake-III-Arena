@@ -715,6 +715,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	const videoFrameCommand_t	*cmd;
 	int												frameSize;
 	int												i;
+	char												swapper;
 	
 	cmd = (const videoFrameCommand_t *)data;
 	
@@ -729,21 +730,21 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	{
 		frameSize = SaveJPGToBuffer( cmd->encodeBuffer, 95,
 				cmd->width, cmd->height, cmd->captureBuffer );
+		ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize );
 	}
 	else
 	{
 		frameSize = cmd->width * cmd->height * 4;
 
-		// Vertically flip the image
-		for( i = 0; i < cmd->height; i++ )
+		for( i = 0; i < frameSize; i = i + 4)          // Swap R and B
 		{
-			Com_Memcpy( &cmd->encodeBuffer[ i * ( cmd->width * 4 ) ],
-					&cmd->captureBuffer[ ( cmd->height - i - 1 ) * ( cmd->width * 4 ) ],
-					cmd->width * 4 );
-		}
-	}
+			swapper = cmd->captureBuffer[ i ];
+			cmd->captureBuffer[ i ] = cmd->captureBuffer[ i + 2 ];
+			cmd->captureBuffer[ i + 2 ] = swapper;
 
-	ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize );
+		}
+		ri.CL_WriteAVIVideoFrame( cmd->captureBuffer, frameSize );
+	}
 
 	return (const void *)(cmd + 1);	
 }

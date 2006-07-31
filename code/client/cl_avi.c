@@ -168,7 +168,7 @@ static ID_INLINE void END_CHUNK( void )
   afd.chunkStackTop--;
   bufIndex = afd.chunkStack[ afd.chunkStackTop ];
   bufIndex += 4;
-  WRITE_4BYTES( endIndex - bufIndex - 1 );
+  WRITE_4BYTES( endIndex - bufIndex - 4 );
   bufIndex = endIndex;
   bufIndex = PAD( bufIndex, 2 );
 }
@@ -223,7 +223,7 @@ void CL_WriteAVIHeader( void )
           if( afd.motionJpeg )
             WRITE_STRING( "MJPG" );
           else
-            WRITE_STRING( " BGR" );
+            WRITE_4BYTES( 0 );                  // BI_RGB
 
           WRITE_4BYTES( 0 );                    //dwFlags
           WRITE_4BYTES( 0 );                    //dwPriority
@@ -248,15 +248,18 @@ void CL_WriteAVIHeader( void )
           WRITE_4BYTES( afd.width );            //biWidth
           WRITE_4BYTES( afd.height );           //biHeight
           WRITE_2BYTES( 1 );                    //biPlanes
-          WRITE_2BYTES( 24 );                   //biBitCount
+          WRITE_2BYTES( 32 );                   //biBitCount
 
-          if( afd.motionJpeg )                        //biCompression
+          if( afd.motionJpeg )   {              //biCompression
             WRITE_STRING( "MJPG" );
-          else
-            WRITE_STRING( " BGR" );
-
-          WRITE_4BYTES( afd.width *
+            WRITE_4BYTES( afd.width *
               afd.height );                     //biSizeImage
+          } else {
+            WRITE_4BYTES( 0 );                  // BI_RGB
+            WRITE_4BYTES( afd.width *
+            afd.height*4 );                     //biSizeImage
+          }
+
           WRITE_4BYTES( 0 );                    //biXPelsPetMeter
           WRITE_4BYTES( 0 );                    //biYPelsPetMeter
           WRITE_4BYTES( 0 );                    //biClrUsed
@@ -485,7 +488,7 @@ void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size )
   // Index
   bufIndex = 0;
   WRITE_STRING( "00dc" );           //dwIdentifier
-  WRITE_4BYTES( 0 );                //dwFlags
+  WRITE_4BYTES( 0x00000010 );       //dwFlags (all frames are KeyFrames)
   WRITE_4BYTES( chunkOffset );      //dwOffset
   WRITE_4BYTES( size );             //dwLength
   SafeFS_Write( buffer, 16, afd.idxF );
