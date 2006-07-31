@@ -1634,12 +1634,12 @@ void *GLimp_RendererSleep( void ) {
 		wglErrors++;
 	}
 
-	ResetEvent( renderActiveEvent );
-
 	// after this, the front end can exit GLimp_FrontEndSleep
 	SetEvent( renderCompletedEvent );
 
 	WaitForSingleObject( renderCommandsEvent, INFINITE );
+
+	ResetEvent( renderActiveEvent );
 
 	if ( !qwglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) ) {
 		wglErrors++;
