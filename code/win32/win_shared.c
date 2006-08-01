@@ -296,7 +296,7 @@ char	*Sys_DefaultHomePath(void) {
 	}
 	Q_strncpyz( path, szPath, sizeof(path) );
 	Q_strcat( path, sizeof(path), "\\Quake3" );
-	if( CreateDirectory( path, NULL ) )
+	if( !CreateDirectory( path, NULL ) )
 	{
 		if( GetLastError() != ERROR_ALREADY_EXISTS )
 		{
