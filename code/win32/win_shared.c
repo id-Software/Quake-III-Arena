@@ -285,7 +285,26 @@ char *Sys_GetCurrentUser( void )
 }
 
 char	*Sys_DefaultHomePath(void) {
-	return NULL;
+	TCHAR szPath[MAX_PATH];
+	static char path[MAX_OSPATH];
+
+	if( !SUCCEEDED( SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA,
+		NULL, 0, szPath ) ) )
+	{
+
+		return NULL;
+	}
+	Q_strncpyz( path, szPath, sizeof(path) );
+	Q_strcat( path, sizeof(path), "\\Quake3" );
+	if( CreateDirectory( path, NULL ) )
+	{
+		if( GetLastError() != ERROR_ALREADY_EXISTS )
+		{
+			Com_Printf("Unable to create directory \"%s\"\n", path);
+			return NULL;
+		}
+	}
+	return path;
 }
 
 char *Sys_DefaultInstallPath(void)
