@@ -67,7 +67,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if USE_SDL_VIDEO
+#include "SDL.h"
+#include "SDL_loadso.h"
+#else
 #include <dlfcn.h>
+#endif
 
 #include "../renderer/tr_local.h"
 #include "../client/client.h"
@@ -832,7 +837,7 @@ static void GLW_InitExtensions( void )
   if ( strstr( glConfig.extensions_string, "GL_EXT_texture_filter_anisotropic" ) )
   {
     if ( r_ext_texture_filter_anisotropic->integer ) {
-      qglGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy );
+      qglGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, (GLint *)&maxAnisotropy );
       if ( maxAnisotropy <= 0 ) {
         ri.Printf( PRINT_ALL, "...GL_EXT_texture_filter_anisotropic not properly supported!\n" );
         maxAnisotropy = 0;

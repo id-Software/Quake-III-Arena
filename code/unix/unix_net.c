@@ -25,6 +25,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 
 #include <unistd.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED == 1020
+  // needed for socket_t on OSX 10.2
+  #define _BSD_SOCKLEN_T_
+#endif
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>

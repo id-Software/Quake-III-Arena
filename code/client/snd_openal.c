@@ -1524,6 +1524,8 @@ static ALCcontext *alContext;
 
 #ifdef _WIN32
 #define ALDRIVER_DEFAULT "OpenAL32.dll"
+#elif defined(MACOS_X)
+#define ALDRIVER_DEFAULT "/System/Library/Frameworks/OpenAL.framework/OpenAL"
 #else
 #define ALDRIVER_DEFAULT "libopenal.so.0"
 #endif

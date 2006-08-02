@@ -262,44 +262,107 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),darwin)
   CC=gcc
-
-  # !!! FIXME: calling conventions are still broken! See Bugzilla #2519
   VM_PPC=vm_ppc_new
+  HAVE_VM_COMPILED=true
+  BASE_CFLAGS=
+  CLIENT_LDFLAGS=
+  LDFLAGS=
+  OPTIMIZE=
+  ifeq ($(BUILD_MACOSX_UB),ppc)
+    CC=gcc-3.3
+    BASE_CFLAGS += -arch ppc -DSMP \
+      -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 -nostdinc \
+      -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
+      -I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
+      -isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include
+    # when using the 10.2 SDK we are not allowed the two-level namespace so
+    # in order to get the OpenAL dlopen() stuff to work without major
+    # modifications, the controversial -m linker flag must be used.  this
+    # throws a ton of multiply defined errors which cannot be suppressed.
+    LDFLAGS += -arch ppc \
+      -L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
+      -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
+      -Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk,-m 
+    ARCH=ppc
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
-  BASE_CFLAGS += -DMACOS_X -fno-common -pipe
+    # OS X 10.2 sdk lacks dlopen() so ded would need libSDL anyway
+    BUILD_SERVER=0
+
+    # because of a problem with linking on 10.2 this will generate multiply
+    # defined symbol errors.  The errors can be turned into warnings with
+    # the -m linker flag, but you can't shut up the warnings 
+    USE_OPENAL_DLOPEN=1
+  else
+  ifeq ($(BUILD_MACOSX_UB),x86)
+    CC=gcc-4.0
+    BASE_CFLAGS += -arch i386 -DSMP \
+      -isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+      -mmacosx-version-min=10.4 \
+      -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -nostdinc \
+      -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
+      -I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
+      -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+    LDFLAGS = -mmacosx-version-min=10.4 \
+      -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
+    ARCH=x86
+    BUILD_SERVER=0
+  else
+    # for whatever reason using the headers in the MacOSX SDKs tend to throw 
+    # errors even though they are identical to the system ones which don't
+    # therefore we shut up warning flags when running the universal build
+    # script as much as possible.
+    BASE_CFLAGS += -Wall -Wimplicit -Wstrict-prototypes
+  endif
+  endif
+
+  ifeq ($(ARCH),ppc)
+    OPTIMIZE += -faltivec
+    # Carbon is required on PPC only to make a call to MakeDataExecutable
+    # in the PPC vm (should be a better non-Carbon way).
+    LDFLAGS += -framework Carbon
+  endif
+  ifeq ($(ARCH),x86)
+    OPTIMIZE += -msse2
+    # x86 vm will crash without -mstackrealign since MMX instructions will be
+    # used no matter what and they corrupt the frame pointer in VM calls
+    BASE_CFLAGS += -mstackrealign
+  endif
+
+  BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
   # Always include debug symbols...you can strip the binary later...
   BASE_CFLAGS += -gfull
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
-    ifeq ($(USE_OPENAL_DLOPEN),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LDFLAGS += -framework OpenAL
+    else
       BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
   ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 -I$(SDLHDIR)/include
+    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 \
+      -I$(SDLHDIR)/include
     GL_CFLAGS =
+    # We copy sdlmain before ranlib'ing it so that subversion doesn't think
+    #  the file has been modified by each build.
+    LIBSDLMAIN=$(B)/libSDLmain.a
+    LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
+    CLIENT_LDFLAGS += -framework Cocoa -framework OpenGL \
+      $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
+  else
+    # !!! FIXME: frameworks: OpenGL, Carbon, etc...
+    #CLIENT_LDFLAGS += -L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
   endif
 
-  OPTIMIZE = -O3 -ffast-math -falign-loops=16
-
-  ifeq ($(ARCH),ppc)
-  BASE_CFLAGS += -faltivec
-    ifneq ($(VM_PPC),)
-      HAVE_VM_COMPILED=true
-    endif
-  endif
-
-  ifeq ($(ARCH),i386)
-    # !!! FIXME: x86-specific flags here...
-  endif
+  OPTIMIZE += -O3 -ffast-math -falign-loops=16
 
   ifneq ($(HAVE_VM_COMPILED),true)
     BASE_CFLAGS += -DNO_VM_COMPILED
@@ -314,34 +377,6 @@ ifeq ($(PLATFORM),darwin)
   SHLIBLDFLAGS=-dynamiclib $(LDFLAGS)
 
   NOTSHLIBCFLAGS=-mdynamic-no-pic
-
-  #THREAD_LDFLAGS=-lpthread
-  #LDFLAGS=-ldl -lm
-  LDFLAGS += -framework Carbon
-
-  ifeq ($(USE_SDL),1)
-    # We copy sdlmain before ranlib'ing it so that subversion doesn't think
-    #  the file has been modified by each build.
-    LIBSDLMAIN=$(B)/libSDLmain.a
-    LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
-    CLIENT_LDFLAGS=-framework Cocoa -framework OpenGL $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
-  else
-    # !!! FIXME: frameworks: OpenGL, Carbon, etc...
-    #CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
-  endif
-
-  # -framework OpenAL requires 10.4 or later...for builds shipping to the
-  #  public, you'll want to use USE_OPENAL_DLOPEN and ship your own OpenAL
-  #  library (http://openal.org/ or http://icculus.org/al_osx/)
-  ifeq ($(USE_OPENAL),1)
-    ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += -framework OpenAL
-    endif
-  endif
-
-  ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
-  endif
 
 else # ifeq darwin
 
@@ -1256,6 +1291,12 @@ Q3DOBJ = \
   $(B)/ded/null_snddma.o
 
 ifeq ($(ARCH),i386)
+  Q3DOBJ += \
+      $(B)/ded/ftola.o \
+      $(B)/ded/snapvectora.o \
+      $(B)/ded/matha.o
+endif
+ifeq ($(ARCH),x86)
   Q3DOBJ += \
       $(B)/ded/ftola.o \
       $(B)/ded/snapvectora.o \
