@@ -293,7 +293,7 @@ ifeq ($(PLATFORM),darwin)
     # the -m linker flag, but you can't shut up the warnings 
     USE_OPENAL_DLOPEN=1
   else
-  ifeq ($(BUILD_MACOSX_UB),x86)
+  ifeq ($(BUILD_MACOSX_UB),i386)
     CC=gcc-4.0
     BASE_CFLAGS += -arch i386 -DSMP \
       -isysroot /Developer/SDKs/MacOSX10.4u.sdk \
@@ -304,7 +304,7 @@ ifeq ($(PLATFORM),darwin)
       -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include
     LDFLAGS = -mmacosx-version-min=10.4 \
       -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
-    ARCH=x86
+    ARCH=i386
     BUILD_SERVER=0
   else
     # for whatever reason using the headers in the MacOSX SDKs tend to throw 
@@ -321,7 +321,7 @@ ifeq ($(PLATFORM),darwin)
     # in the PPC vm (should be a better non-Carbon way).
     LDFLAGS += -framework Carbon
   endif
-  ifeq ($(ARCH),x86)
+  ifeq ($(ARCH),i386)
     OPTIMIZE += -msse2
     # x86 vm will crash without -mstackrealign since MMX instructions will be
     # used no matter what and they corrupt the frame pointer in VM calls
