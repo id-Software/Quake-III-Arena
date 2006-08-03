@@ -465,7 +465,11 @@ typedef struct src_s
 	qboolean				local;			// Is this local (relative to the cam)
 } src_t;
 
-#define MAX_SRC 128
+#ifdef MACOS_X
+  #define MAX_SRC 64
+#else
+  #define MAX_SRC 128
+#endif
 static src_t srcList[MAX_SRC];
 static int srcCount = 0;
 static qboolean alSourcesInitialised = qfalse;
