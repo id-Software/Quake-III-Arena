@@ -1760,17 +1760,6 @@ ifneq ($(BUILD_GAME_SO),0)
 					$(COPYDIR)/missionpack/.
 endif
 
-ifneq ($(BUILD_GAME_QVM),0)
-	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3/vm
-	$(INSTALL) -m 0755 $(BR)/baseq3/vm/qagame.qvm $(COPYDIR)/baseq3/vm/qagame.qvm
-	$(INSTALL) -m 0755 $(BR)/baseq3/vm/cgame.qvm $(COPYDIR)/baseq3/vm/cgame.qvm
-	$(INSTALL) -m 0755 $(BR)/baseq3/vm/ui.qvm $(COPYDIR)/baseq3/vm/ui.qvm
-	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack/vm
-	$(INSTALL) -m 0755 $(BR)/missionpack/vm/qagame.qvm $(COPYDIR)/missionpack/vm/qagame.qvm
-	$(INSTALL) -m 0755 $(BR)/missionpack/vm/cgame.qvm $(COPYDIR)/missionpack/vm/cgame.qvm
-	$(INSTALL) -m 0755 $(BR)/missionpack/vm/ui.qvm $(COPYDIR)/missionpack/vm/ui.qvm
-endif
-
 clean: clean-debug clean-release
 	$(MAKE) -C $(LOKISETUPDIR) clean
 

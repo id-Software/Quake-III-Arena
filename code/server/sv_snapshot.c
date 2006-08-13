@@ -583,11 +583,11 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 
 	// set nextSnapshotTime based on rate and requested number of updates
 
-	// local clients get snapshots every frame
+	// local clients get snapshots every server frame
 	// TTimo - https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=491
 	// added sv_lanForceRate check
 	if ( client->netchan.remoteAddress.type == NA_LOOPBACK || (sv_lanForceRate->integer && Sys_IsLANAddress (client->netchan.remoteAddress)) ) {
-		client->nextSnapshotTime = svs.time - 1;
+		client->nextSnapshotTime = svs.time + (1000/sv_fps->integer);
 		return;
 	}
 	

@@ -1816,6 +1816,11 @@ void SaveJPG(char * filename, int quality, int image_width, int image_height, un
    * Here we just illustrate the use of quality (quantization table) scaling:
    */
   jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+  /* If quality is set high, disable chroma subsampling */
+  if (quality >= 85) {
+    cinfo.comp_info[0].h_samp_factor = 1;
+    cinfo.comp_info[0].v_samp_factor = 1;
+  }
 
   /* Step 4: Start compressor */
 
@@ -1890,6 +1895,11 @@ int SaveJPGToBuffer( byte *buffer, int quality,
 
   jpeg_set_defaults(&cinfo);
   jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+  /* If quality is set high, disable chroma subsampling */
+  if (quality >= 85) {
+    cinfo.comp_info[0].h_samp_factor = 1;
+    cinfo.comp_info[0].v_samp_factor = 1;
+  }
 
   /* Step 4: Start compressor */
   jpeg_start_compress(&cinfo, TRUE);

@@ -72,6 +72,8 @@ cvar_t	*cl_inGameVideo;
 cvar_t	*cl_serverStatusResendTime;
 cvar_t	*cl_trn;
 
+cvar_t	*cl_lanForcePackets;
+
 clientActive_t		cl;
 clientConnection_t	clc;
 clientStatic_t		cls;
@@ -2484,6 +2486,7 @@ void CL_Init( void ) {
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 
+	cl_lanForcePackets = Cvar_Get ("cl_lanForcePackets", "1", CVAR_ARCHIVE);
 
 	// userinfo
 	Cvar_Get ("name", "UnnamedPlayer", CVAR_USERINFO | CVAR_ARCHIVE );
