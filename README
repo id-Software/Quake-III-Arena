@@ -1,22 +1,11 @@
-
-     o8o                                             oooo                  
-     `"'                                             `888                  
-    oooo   .ooooo.   .ooooo oo oooo  oooo   .oooo.    888  oooo   .ooooo.  
-    `888  d88' `88b d88' `888  `888  `888  `P  )88b   888 .8P'   d88' `88b 
-     888  888   888 888   888   888   888   .oP"888   888888.    888ooo888 
-     888  888   888 888   888   888   888  d8(  888   888 `88b.  888    .o 
-    o888o `Y8bod8P' `V8bod888   `V88V"V8P' `Y888""8o o888o o888o `Y8bod8P' 
-                          888.                                             
-                          8P'                                              
-                          "                                                
-                                    .oooo.   
-                                  .dP""Y88b  
-                                        ]8P' 
-                                      <88b.  
-                                       `88b. 
-                                  o.   .88P  
-                                  `8bd88P'   
-                                             
+                   ,---------------------------------------.
+                   |   _                     _       ____  |
+                   |  (_)___  __ _ _  _ __ _| |_____|__ /  |
+                   |  | / _ \/ _` | || / _` | / / -_)|_ \  |
+                   |  |_\___/\__, |\_,_\__,_|_\_\___|___/  |
+                   |            |_|                        |
+                   |                                       |
+                   `---------- http://icculus.org/quake3 --'
                                              
 The intent of this project is to provide a baseline Quake 3 which may be used
 for further development. Some of the major features currently implemented are:
@@ -203,19 +192,19 @@ URL to the mailing list. If you're too lazy for either method, then it would be
 better if you emailed your patches to zakk@icculus.org directly than not at
 all.
 
-The focus for ioquake3 to develop a stable base suitable for further 
-development, and provide players with the same Quake 3 experience they've 
-had for years.  As such ioq3 does not have any significant graphical
-enhancements and none are planned at this time. However, improved graphics
-and sound patches will be accepted as long as they are entirely optional,
-do not require new media and are off by default.
+The focus for ioquake3 to develop a stable base suitable for further
+development, and provide players with the same Quake 3 experience they've had
+for years.  As such ioq3 does not have any significant graphical enhancements
+and none are planned at this time. However, improved graphics and sound
+patches will be accepted as long as they are entirely optional, do not
+require new media and are off by default.
 
 
 --------------------------------------------- Building Official Installers -----
 
 We need help getting automated installers on all the platforms that ioquake3
-supports. We don't neccesarily care about all the installers being
-identical, but we have some general guidelines:
+supports. We don't neccesarily care about all the installers being identical,
+but we have some general guidelines:
 
   * Please include the id patch pk3s in your installer, which are available
     from http://icculus.org/quake3/?page=getdata subject to agreement to the id
@@ -257,6 +246,7 @@ Maintainers
   Ryan C. Gordon <icculus@icculus.org>
   Thilo Schulz <arny@ats.s.bawue.de>
   Tim Angus <tim@ngus.net>
+  Tony J. White <tjw@tjw.org>
   Zachary J. Slater <zakk@timedoctor.org>
 
 Significant contributions from
