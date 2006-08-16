@@ -53,6 +53,14 @@ For Windows, using MSVC
      you want to keep your original. If you wish to use native libraries, copy
      the resultant dlls to your baseq3 directory.
 
+For Mac OS X, building a Universal Binary
+  1. Install the MacOSX10.2.8.sdk and MacOSX10.4u.sdk which are included in
+     XCode 2.2 and newer.
+  2. Change to the directory containing this README file.
+  3. Run './make-macosx-ub.sh'
+  4. Copy all of the files in the resulting build/release-darwin-ub/ 
+     directory to the Contents/MacOS/ subdirectory of your .app bundle.
+
 Installation, for *nix
   1. Set the COPYDIR variable in the shell to be where you installed Quake 3
      to.  By default it will be /usr/local/games/quake3 if you haven't set it.
