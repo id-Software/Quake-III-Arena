@@ -651,7 +651,7 @@ void NET_Sleep(int msec)
 	struct timeval timeout;
 	fd_set	fdset;
 	extern qboolean stdin_active;
-	qboolean not_empty = qfalse;
+	int highestfd = 0;
 
 	if (!com_dedicated->integer)
 		return; // we're not a server, just run full speed
@@ -660,27 +660,27 @@ void NET_Sleep(int msec)
 	if (stdin_active)
 	{
 		FD_SET(0, &fdset); // stdin is processed too
-		not_empty = qtrue;
+		highestfd = 1;
 	}
 	if(ip_socket && com_sv_running->integer)
 	{
 		FD_SET(ip_socket, &fdset); // network socket
-		not_empty = qtrue;
+		if(ip_socket >= highestfd)
+			highestfd = ip_socket + 1;
 	}
 	
-	// There's no reason to call select() with an empty set.
-	if(not_empty)
+	if(highestfd)
 	{
 		if(msec >= 0)
 		{
 			timeout.tv_sec = msec/1000;
 			timeout.tv_usec = (msec%1000)*1000;
-			select(ip_socket+1, &fdset, NULL, NULL, &timeout);
+			select(highestfd, &fdset, NULL, NULL, &timeout);
 		}
 		else
 		{
 			// Block indefinitely
-			select(ip_socket+1, &fdset, NULL, NULL, NULL);
+			select(highestfd, &fdset, NULL, NULL, NULL);
 		}
 	}
 }
