@@ -648,19 +648,40 @@ char *NET_ErrorString (void)
 // sleeps msec or until net socket is ready
 void NET_Sleep(int msec)
 {
-    struct timeval timeout;
+	struct timeval timeout;
 	fd_set	fdset;
 	extern qboolean stdin_active;
+	qboolean not_empty = qfalse;
 
-	if (!ip_socket || !com_dedicated->integer)
+	if (!com_dedicated->integer)
 		return; // we're not a server, just run full speed
 
 	FD_ZERO(&fdset);
 	if (stdin_active)
+	{
 		FD_SET(0, &fdset); // stdin is processed too
-	FD_SET(ip_socket, &fdset); // network socket
-	timeout.tv_sec = msec/1000;
-	timeout.tv_usec = (msec%1000)*1000;
-	select(ip_socket+1, &fdset, NULL, NULL, &timeout);
+		not_empty = qtrue;
+	}
+	if(ip_socket && com_sv_running->integer)
+	{
+		FD_SET(ip_socket, &fdset); // network socket
+		not_empty = qtrue;
+	}
+	
+	// There's no reason to call select() with an empty set.
+	if(not_empty)
+	{
+		if(msec >= 0)
+		{
+			timeout.tv_sec = msec/1000;
+			timeout.tv_usec = (msec%1000)*1000;
+			select(ip_socket+1, &fdset, NULL, NULL, &timeout);
+		}
+		else
+		{
+			// Block indefinitely
+			select(ip_socket+1, &fdset, NULL, NULL, NULL);
+		}
+	}
 }
 

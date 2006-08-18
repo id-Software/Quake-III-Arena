@@ -777,7 +777,15 @@ void SV_Frame( int msec ) {
 		return;
 	}
 
-	if ( !com_sv_running->integer ) {
+	if (!com_sv_running->integer)
+	{
+		if(com_dedicated->integer)
+		{
+			// Block indefinitely until something interesting happens
+			// on STDIN.
+			NET_Sleep(-1);
+		}
+		
 		return;
 	}
 
