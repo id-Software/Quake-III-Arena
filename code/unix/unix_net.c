@@ -662,7 +662,7 @@ void NET_Sleep(int msec)
 		FD_SET(0, &fdset); // stdin is processed too
 		highestfd = 1;
 	}
-	if(ip_socket && com_sv_running->integer)
+	if(ip_socket)
 	{
 		FD_SET(ip_socket, &fdset); // network socket
 		if(ip_socket >= highestfd)
