@@ -404,9 +404,9 @@ void S_Init( void )
 			}
 
 			S_SoundInfo( );
-			Com_Printf( "Sound intialization successful.\n" );
+			Com_Printf( "Sound initialization successful.\n" );
 		} else {
-			Com_Printf( "Sound intialization failed.\n" );
+			Com_Printf( "Sound initialization failed.\n" );
 		}
 	}
 
