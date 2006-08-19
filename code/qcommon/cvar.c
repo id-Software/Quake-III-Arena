@@ -451,6 +451,15 @@ void Cvar_Reset( const char *var_name ) {
 	Cvar_Set2( var_name, NULL, qfalse );
 }
 
+/*
+============
+Cvar_ForceReset
+============
+*/
+void Cvar_ForceReset(const char *var_name)
+{
+	Cvar_Set2(var_name, NULL, qtrue);
+}
 
 /*
 ============

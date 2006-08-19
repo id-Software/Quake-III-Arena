@@ -38,6 +38,10 @@ cvar_t *s_alDopplerSpeed;
 cvar_t *s_alMinDistance;
 cvar_t *s_alRolloff;
 cvar_t *s_alDriver;
+#ifdef _WIN32
+cvar_t *s_alDevice;
+cvar_t *s_alAvailableDevices;
+#endif
 cvar_t *s_alMaxSpeakerDistance;
 
 /*
@@ -1525,6 +1529,7 @@ static ALCcontext *alContext;
 
 #ifdef _WIN32
 #define ALDRIVER_DEFAULT "OpenAL32.dll"
+#define ALDEVICE_DEFAULT "Generic Software"
 #elif defined(MACOS_X)
 #define ALDRIVER_DEFAULT "/System/Library/Frameworks/OpenAL.framework/OpenAL"
 #else
@@ -1672,6 +1677,10 @@ void S_AL_SoundInfo( void )
 	Com_Printf( "  Vendor:     %s\n", qalGetString( AL_VENDOR ) );
 	Com_Printf( "  Version:    %s\n", qalGetString( AL_VERSION ) );
 	Com_Printf( "  Renderer:   %s\n", qalGetString( AL_RENDERER ) );
+#ifdef _WIN32
+	if(qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT"))
+		Com_Printf( "  Device:     %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER) );
+#endif
 	Com_Printf( "  Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
 
 }
@@ -1713,6 +1722,11 @@ S_AL_Init
 qboolean S_AL_Init( soundInterface_t *si )
 {
 #if USE_OPENAL
+
+#ifdef _WIN32
+	qboolean enumsupport, founddev = qfalse;
+#endif
+
 	if( !si ) {
 		return qfalse;
 	}
@@ -1736,14 +1750,75 @@ qboolean S_AL_Init( soundInterface_t *si )
 		return qfalse;
 	}
 
+#ifdef _WIN32
+	// Device enumeration support on windows.
+	if((enumsupport = qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")))
+	{
+		char *devicelist, devicenames[8192] = "";
+		char *defaultdevice;
+		int curlen;
+		qboolean hasbegun = qfalse;
+		
+		// get all available devices + the default device name.
+		devicelist = qalcGetString(NULL, ALC_DEVICE_SPECIFIER);
+		defaultdevice = qalcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+
+		// check whether the default device is generic hardware. If it is, change to
+		// Generic Software as that one works more reliably with various sound systems.
+		// If it's not, use OpenAL's default selection as we don't want to ignore
+		// native hardware acceleration.
+		if(!strcmp(defaultdevice, "Generic Hardware"))
+			s_alDevice = Cvar_Get("s_alDevice", ALDEVICE_DEFAULT, CVAR_ARCHIVE | CVAR_LATCH);
+		else
+			s_alDevice = Cvar_Get("s_alDevice", defaultdevice, CVAR_ARCHIVE | CVAR_LATCH);
+
+		// dump a list of available devices to a cvar for the user to see.
+		while((curlen = strlen(devicelist)))
+		{
+			if(hasbegun)
+				Q_strcat(devicenames, sizeof(devicenames), ", ");
+
+			Q_strcat(devicenames, sizeof(devicenames), devicelist);
+			hasbegun = qtrue;
+
+			// check whether the device we want to load is available at all.
+			if(!strcmp(s_alDevice->string, devicelist))
+				founddev = qtrue;
+
+			s_alDevice->string;
+			devicelist += curlen + 1;
+		}
+
+		s_alAvailableDevices = Cvar_Get("s_alAvailableDevices", devicenames, CVAR_ROM | CVAR_NORESTART);
+		
+		if(!founddev)
+		{
+			Cvar_ForceReset("s_alDevice");
+			founddev = 1;
+		}
+	}
+
+	if(founddev)
+		alDevice = qalcOpenDevice(s_alDevice->string);
+	else
+		alDevice = qalcOpenDevice(NULL);
+#else // _WIN32
+
 	// Open default device
 	alDevice = qalcOpenDevice( NULL );
+#endif
+
 	if( !alDevice )
 	{
 		QAL_Shutdown( );
 		Com_Printf( "Failed to open OpenAL device.\n" );
 		return qfalse;
 	}
+
+#ifdef _WIN32
+	if(enumsupport)
+		Cvar_Set("s_alDevice", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
+#endif
 
 	// Create OpenAL context
 	alContext = qalcCreateContext( alDevice, NULL );
