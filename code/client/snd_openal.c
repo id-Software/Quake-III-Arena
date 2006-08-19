@@ -1675,10 +1675,12 @@ void S_AL_SoundInfo( void )
 	Com_Printf( "  Vendor:     %s\n", qalGetString( AL_VENDOR ) );
 	Com_Printf( "  Version:    %s\n", qalGetString( AL_VERSION ) );
 	Com_Printf( "  Renderer:   %s\n", qalGetString( AL_RENDERER ) );
-	if(qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT"))
-		Com_Printf( "  Device:     %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER) );
 	Com_Printf( "  Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
-
+	if(qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT"))
+	{
+		Com_Printf("  Device:     %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
+		Com_Printf("Available Devices:\n%s", s_alAvailableDevices->string);
+	}
 }
 
 /*
@@ -1751,7 +1753,6 @@ qboolean S_AL_Init( soundInterface_t *si )
 		const ALCchar *devicelist;
 		const ALCchar *defaultdevice;
 		int curlen;
-		qboolean hasbegun = qfalse;
 		
 		// get all available devices + the default device name.
 		devicelist = qalcGetString(NULL, ALC_DEVICE_SPECIFIER);
@@ -1771,11 +1772,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 		// dump a list of available devices to a cvar for the user to see.
 		while((curlen = strlen(devicelist)))
 		{
-			if(hasbegun)
-				Q_strcat(devicenames, sizeof(devicenames), ", ");
-
 			Q_strcat(devicenames, sizeof(devicenames), devicelist);
-			hasbegun = qtrue;
+			Q_strcat(devicenames, sizeof(devicenames), "\n");
 
 			// check whether the device we want to load is available at all.
 			if(!strcmp(s_alDevice->string, devicelist))
