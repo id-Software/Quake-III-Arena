@@ -1747,8 +1747,9 @@ qboolean S_AL_Init( soundInterface_t *si )
 	// Device enumeration support (extension currently only exists for windows).
 	if((enumsupport = qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")))
 	{
-		char *devicelist, devicenames[1024] = "";
-		char *defaultdevice;
+		char devicenames[1024] = "";
+		const ALCchar *devicelist;
+		const ALCchar *defaultdevice;
 		int curlen;
 		qboolean hasbegun = qfalse;
 		
