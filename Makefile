@@ -140,9 +140,10 @@ ifeq ($(wildcard .svn),.svn)
   ifneq ($(SVN_REV),)
     SVN_VERSION=$(VERSION)_SVN$(SVN_REV)
     USE_SVN=1
-  else
-    SVN_VERSION=$(VERSION)
   endif
+endif
+ifneq ($(USE_SVN),1)
+    SVN_VERSION=$(VERSION)
 endif
 
 
@@ -726,7 +727,7 @@ ifeq ($(GENERATE_DEPENDENCIES),1)
   endif
 endif
 
-ifneq ($(USE_SVN),)
+ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
 
@@ -1040,7 +1041,7 @@ endif
 $(B)/client/cl_cgame.o : $(CDIR)/cl_cgame.c; $(DO_CC)
 $(B)/client/cl_cin.o : $(CDIR)/cl_cin.c; $(DO_CC)
 $(B)/client/cl_console.o : $(CDIR)/cl_console.c; $(DO_CC)
-ifneq ($(USE_SVN),)
+ifeq ($(USE_SVN),1)
   $(B)/client/cl_console.o : .svn/entries
 endif
 $(B)/client/cl_input.o : $(CDIR)/cl_input.c; $(DO_CC)
