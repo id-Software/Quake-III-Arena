@@ -134,10 +134,15 @@ LIBSDIR=$(MOUNT_DIR)/libs
 VERSION=$(shell grep Q3_VERSION $(CMDIR)/q_shared.h | \
   sed -e 's/.*".* \([^ ]*\)"/\1/')
 
+USE_SVN=
 ifeq ($(wildcard .svn),.svn)
-  SVN_VERSION=$(VERSION)_SVN$(shell LANG=C svnversion .)
-else
-  SVN_VERSION=$(VERSION)
+  SVN_REV=$(shell LANG=C svnversion .)
+  ifneq ($(SVN_REV),)
+    SVN_VERSION=$(VERSION)_SVN$(SVN_REV)
+    USE_SVN=1
+  else
+    SVN_VERSION=$(VERSION)
+  endif
 endif
 
 
@@ -721,6 +726,10 @@ ifeq ($(GENERATE_DEPENDENCIES),1)
   endif
 endif
 
+ifneq ($(USE_SVN),)
+  BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
+endif
+
 DO_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 DO_SMP_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
 DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<   # $(SHLIBCFLAGS) # bk001212
@@ -1031,6 +1040,9 @@ endif
 $(B)/client/cl_cgame.o : $(CDIR)/cl_cgame.c; $(DO_CC)
 $(B)/client/cl_cin.o : $(CDIR)/cl_cin.c; $(DO_CC)
 $(B)/client/cl_console.o : $(CDIR)/cl_console.c; $(DO_CC)
+ifneq ($(USE_SVN),)
+  $(B)/client/cl_console.o : .svn/entries
+endif
 $(B)/client/cl_input.o : $(CDIR)/cl_input.c; $(DO_CC)
 $(B)/client/cl_keys.o : $(CDIR)/cl_keys.c; $(DO_CC)
 $(B)/client/cl_main.o : $(CDIR)/cl_main.c; $(DO_CC)
