@@ -1082,6 +1082,9 @@ $(B)/client/cm_patch.o : $(CMDIR)/cm_patch.c; $(DO_CC)
 $(B)/client/cm_polylib.o : $(CMDIR)/cm_polylib.c; $(DO_CC)
 $(B)/client/cmd.o : $(CMDIR)/cmd.c; $(DO_CC)
 $(B)/client/common.o : $(CMDIR)/common.c; $(DO_CC)
+ifeq ($(USE_SVN),1)
+  $(B)/client/common.o : .svn/entries
+endif
 $(B)/client/cvar.o : $(CMDIR)/cvar.c; $(DO_CC)
 $(B)/client/files.o : $(CMDIR)/files.c; $(DO_CC)
 $(B)/client/md4.o : $(CMDIR)/md4.c; $(DO_CC)
@@ -1350,6 +1353,9 @@ $(B)/ded/cm_trace.o : $(CMDIR)/cm_trace.c; $(DO_DED_CC)
 $(B)/ded/cm_patch.o : $(CMDIR)/cm_patch.c; $(DO_DED_CC)
 $(B)/ded/cmd.o : $(CMDIR)/cmd.c; $(DO_DED_CC)
 $(B)/ded/common.o : $(CMDIR)/common.c; $(DO_DED_CC)
+ifeq ($(USE_SVN),1)
+  $(B)/ded/common.o : .svn/entries
+endif
 $(B)/ded/cvar.o : $(CMDIR)/cvar.c; $(DO_DED_CC)
 $(B)/ded/files.o : $(CMDIR)/files.c; $(DO_DED_CC)
 $(B)/ded/md4.o : $(CMDIR)/md4.c; $(DO_DED_CC)
