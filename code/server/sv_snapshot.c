@@ -558,7 +558,7 @@ static int SV_RateMsec( client_t *client, int messageSize ) {
 			rate = sv_minRate->integer;
 	}
 
-	rateMsec = ( messageSize + HEADER_RATE_BYTES ) * 1000 / rate;
+	rateMsec = ( messageSize + HEADER_RATE_BYTES ) * 1000 / rate * com_timescale->value;
 
 	return rateMsec;
 }
@@ -594,9 +594,9 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 	// normal rate / snapshotMsec calculation
 	rateMsec = SV_RateMsec(client, msg->cursize);
 
-	if ( rateMsec < client->snapshotMsec ) {
+	if ( rateMsec < client->snapshotMsec * com_timescale->value) {
 		// never send more packets than this, no matter what the rate is at
-		rateMsec = client->snapshotMsec;
+		rateMsec = client->snapshotMsec * com_timescale->value;
 		client->rateDelayed = qfalse;
 	} else {
 		client->rateDelayed = qtrue;
