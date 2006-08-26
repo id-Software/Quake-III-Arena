@@ -394,6 +394,7 @@ void CL_InitRef( void );
 qboolean CL_CDKeyValidate( const char *key, const char *checksum );
 int CL_ServerStatus( char *serverAddress, char *serverStatusString, int maxLen );
 
+qboolean CL_CheckPaused(void);
 
 //
 // cl_input

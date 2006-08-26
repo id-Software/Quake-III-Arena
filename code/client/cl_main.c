@@ -1961,7 +1961,7 @@ void CL_CheckTimeout( void ) {
 	//
 	// check timeout
 	//
-	if ( ( !cl_paused->integer || !sv_paused->integer ) 
+	if ( ( !CL_CheckPaused() || !sv_paused->integer ) 
 		&& cls.state >= CA_CONNECTED && cls.state != CA_CINEMATIC
 	    && cls.realtime - clc.lastPacketTime > cl_timeout->value*1000) {
 		if (++cl.timeoutcount > 5) {	// timeoutcount saves debugger
@@ -1974,6 +1974,22 @@ void CL_CheckTimeout( void ) {
 	}
 }
 
+/*
+==================
+CL_CheckPaused
+Check whether client has been paused.
+==================
+*/
+qboolean CL_CheckPaused(void)
+{
+	// if cl_paused->modified is set, the cvar has only been changed in
+	// this frame. Keep paused in this frame to ensure the server doesn't
+	// lag behind.
+	if(cl_paused->integer || cl_paused->modified)
+		return qtrue;
+	
+	return qfalse;
+}
 
 //============================================================================
 
@@ -1985,19 +2001,19 @@ CL_CheckUserinfo
 */
 void CL_CheckUserinfo( void ) {
 	// don't add reliable commands when not yet connected
-	if ( cls.state < CA_CHALLENGING ) {
+	if(cls.state < CA_CHALLENGING)
 		return;
-	}
+
 	// don't overflow the reliable command buffer when paused
-	if ( cl_paused->integer ) {
+	if(CL_CheckPaused())
 		return;
-	}
+
 	// send a reliable userinfo update if needed
-	if ( cvar_modifiedFlags & CVAR_USERINFO ) {
+	if(cvar_modifiedFlags & CVAR_USERINFO)
+	{
 		cvar_modifiedFlags &= ~CVAR_USERINFO;
 		CL_AddReliableCommand( va("userinfo \"%s\"", Cvar_InfoString( CVAR_USERINFO ) ) );
 	}
-
 }
 
 /*

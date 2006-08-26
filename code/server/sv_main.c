@@ -798,7 +798,7 @@ void SV_Frame( int msec ) {
 	if ( sv_fps->integer < 1 ) {
 		Cvar_Set( "sv_fps", "10" );
 	}
-	frameMsec = 1000 / sv_fps->integer ;
+	frameMsec = 1000 / sv_fps->integer * com_timescale->value;
 
 	sv.timeResidual += msec;
 

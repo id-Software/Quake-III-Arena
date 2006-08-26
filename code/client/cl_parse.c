@@ -219,6 +219,10 @@ void CL_ParseSnapshot( msg_t *msg ) {
 
 	newSnap.serverTime = MSG_ReadLong( msg );
 
+	// if we were just unpaused, we can only *now* really let the
+	// change come into effect or the client hangs.
+	cl_paused->modified = 0;
+
 	newSnap.messageNum = clc.serverMessageSequence;
 
 	deltaNum = MSG_ReadByte( msg );

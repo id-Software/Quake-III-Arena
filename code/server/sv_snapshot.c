@@ -587,12 +587,12 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 	// TTimo - https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=491
 	// added sv_lanForceRate check
 	if ( client->netchan.remoteAddress.type == NA_LOOPBACK || (sv_lanForceRate->integer && Sys_IsLANAddress (client->netchan.remoteAddress)) ) {
-		client->nextSnapshotTime = svs.time + (1000/sv_fps->integer);
+		client->nextSnapshotTime = svs.time + (1000.0 / sv_fps->integer * com_timescale->value);
 		return;
 	}
 	
 	// normal rate / snapshotMsec calculation
-	rateMsec = SV_RateMsec( client, msg->cursize );
+	rateMsec = SV_RateMsec(client, msg->cursize);
 
 	if ( rateMsec < client->snapshotMsec ) {
 		// never send more packets than this, no matter what the rate is at
@@ -602,16 +602,15 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 		client->rateDelayed = qtrue;
 	}
 
-	client->nextSnapshotTime = svs.time + rateMsec;
+	client->nextSnapshotTime = svs.time + rateMsec * com_timescale->value;
 
 	// don't pile up empty snapshots while connecting
 	if ( client->state != CS_ACTIVE ) {
 		// a gigantic connection message may have already put the nextSnapshotTime
 		// more than a second away, so don't shorten it
 		// do shorten if client is downloading
-		if ( !*client->downloadName && client->nextSnapshotTime < svs.time + 1000 ) {
-			client->nextSnapshotTime = svs.time + 1000;
-		}
+		if (!*client->downloadName && client->nextSnapshotTime < svs.time + 1000 * com_timescale->value)
+			client->nextSnapshotTime = svs.time + 1000 * com_timescale->value;
 	}
 }
 
