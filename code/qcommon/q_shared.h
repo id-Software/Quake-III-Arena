@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // A user mod should never modify this file
 
 #define Q3_VERSION            "ioQ3 1.33"
+#ifndef SVN_VERSION
+  #define SVN_VERSION Q3_VERSION
+#endif
 #define CLIENT_WINDOW_TITLE   "icculus.org/quake3"
 #define CLIENT_WINDOW_ICON    "ioq3"
 #define CONSOLE_WINDOW_TITLE  "icculus.org/quake3 console"

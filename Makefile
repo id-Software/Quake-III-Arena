@@ -131,7 +131,7 @@ SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 
 # extract version info
-VERSION=$(shell grep Q3_VERSION $(CMDIR)/q_shared.h | \
+VERSION=$(shell grep "\#define Q3_VERSION" $(CMDIR)/q_shared.h | \
   sed -e 's/.*".* \([^ ]*\)"/\1/')
 
 USE_SVN=
