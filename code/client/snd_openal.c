@@ -1291,6 +1291,7 @@ static ALuint musicSource;
 static ALuint musicBuffers[NUM_MUSIC_BUFFERS];
 
 static snd_stream_t *mus_stream;
+static snd_stream_t *intro_stream;
 static char s_backgroundLoop[MAX_QPATH];
 
 static byte decode_buffer[MUSIC_BUFFER_SIZE];
@@ -1334,6 +1335,26 @@ static void S_AL_MusicSourceFree( void )
 
 /*
 =================
+S_AL_CloseMusicFiles
+=================
+*/
+static void S_AL_CloseMusicFiles(void)
+{
+	if(intro_stream)
+	{
+		S_CodecCloseStream(intro_stream);
+		intro_stream = NULL;
+	}
+	
+	if(mus_stream)
+	{
+		S_CodecCloseStream(mus_stream);
+		mus_stream = NULL;
+	}
+}
+
+/*
+=================
 S_AL_StopBackgroundTrack
 =================
 */
@@ -1356,9 +1377,7 @@ void S_AL_StopBackgroundTrack( void )
 	S_AL_MusicSourceFree();
 
 	// Unload the stream
-	if(mus_stream)
-		S_CodecCloseStream(mus_stream);
-	mus_stream = NULL;
+	S_AL_CloseMusicFiles();
 
 	musicPlaying = qfalse;
 }
@@ -1374,27 +1393,42 @@ void S_AL_MusicProcess(ALuint b)
 	ALenum error;
 	int l;
 	ALuint format;
+	snd_stream_t *curstream;
 
-	if(!mus_stream)
+	if(intro_stream)
+		curstream = intro_stream;
+	else
+		curstream = mus_stream;
+
+	if(!curstream)
 		return;
 
-	l = S_CodecReadStream(mus_stream, MUSIC_BUFFER_SIZE, decode_buffer);
+	l = S_CodecReadStream(curstream, MUSIC_BUFFER_SIZE, decode_buffer);
 
 	// Run out data to read, start at the beginning again
 	if(l == 0)
 	{
-		S_CodecCloseStream(mus_stream);
-		mus_stream = S_CodecOpenStream(s_backgroundLoop);
-		if(!mus_stream)
+		S_CodecCloseStream(curstream);
+
+		// the intro stream just finished playing so we don't need to reopen
+		// the music stream.
+		if(intro_stream)
+			intro_stream = NULL;
+		else
+			mus_stream = S_CodecOpenStream(s_backgroundLoop);
+		
+		curstream = mus_stream;
+
+		if(!curstream)
 		{
 			S_AL_StopBackgroundTrack();
 			return;
 		}
 
-		l = S_CodecReadStream(mus_stream, MUSIC_BUFFER_SIZE, decode_buffer);
+		l = S_CodecReadStream(curstream, MUSIC_BUFFER_SIZE, decode_buffer);
 	}
 
-	format = S_AL_Format(mus_stream->info.width, mus_stream->info.channels);
+	format = S_AL_Format(curstream->info.width, curstream->info.channels);
 
 	if( l == 0 )
 	{
@@ -1404,7 +1438,7 @@ void S_AL_MusicProcess(ALuint b)
 		qalBufferData( b, AL_FORMAT_MONO16, (void *)dummyData, 2, 22050 );
 	}
 	else
-		qalBufferData(b, format, decode_buffer, l, mus_stream->info.rate);
+		qalBufferData(b, format, decode_buffer, l, curstream->info.rate);
 
 	if( ( error = qalGetError( ) ) != AL_NO_ERROR )
 	{
@@ -1424,27 +1458,12 @@ static
 void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 {
 	int i;
+	qboolean issame;
 
 	// Stop any existing music that might be playing
 	S_AL_StopBackgroundTrack();
 
-	if ( !intro || !intro[0] ) {
-		intro = loop;
-	}
-	if ( !loop || !loop[0] ) {
-		loop = intro;
-	}
-
-	if((!intro || !intro[0]) && (!intro || !intro[0]))
-		return;
-
-	// Copy the loop over
-	strncpy( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
-
-	// Open the intro
-	mus_stream = S_CodecOpenStream(intro);
-
-	if(!mus_stream)
+	if((!intro || !*intro) && (!intro || !*intro))
 		return;
 
 	// Allocate a musicSource
@@ -1452,9 +1471,32 @@ void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 	if(musicSourceHandle == -1)
 		return;
 
+	if (!loop || !*loop)
+	{
+		loop = intro;
+		issame = qtrue;
+	}
+	else if(intro && *intro && !strcmp(intro, loop))
+		issame = qtrue;
+	else
+		issame = qfalse;
+
+	// Copy the loop over
+	strncpy( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
+
+	if(!issame)
+	{
+		// Open the intro and don't mind whether it succeeds.
+		// The important part is the loop.
+		intro_stream = S_CodecOpenStream(intro);
+	}
+	else
+		intro_stream = NULL;
+
 	mus_stream = S_CodecOpenStream(s_backgroundLoop);
 	if(!mus_stream)
 	{
+		S_AL_CloseMusicFiles();
 		S_AL_MusicSourceFree();
 		return;
 	}
