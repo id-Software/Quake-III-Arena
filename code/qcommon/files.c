@@ -2720,7 +2720,7 @@ void FS_Shutdown( qboolean closemfp ) {
 	int	i;
 
 	for(i = 0; i < MAX_FILE_HANDLES; i++) {
-		if (fsh[i].fileSize) {
+		if (fsh[i].handleFiles.file.o) {
 			FS_FCloseFile(i);
 		}
 	}
