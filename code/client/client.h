@@ -376,6 +376,7 @@ void CL_Snd_Restart_f (void);
 void CL_StartDemoLoop( void );
 void CL_NextDemo( void );
 void CL_ReadDemoMessage( void );
+void CL_StopRecord_f(void);
 
 void CL_InitDownloads(void);
 void CL_NextDownload(void);
