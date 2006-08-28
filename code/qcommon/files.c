@@ -2712,18 +2712,15 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 ================
 FS_Shutdown
 
-Frees all resources and closes all files
+Frees all resources.
 ================
 */
 void FS_Shutdown( qboolean closemfp ) {
 	searchpath_t	*p, *next;
 	int	i;
 
-	// logfile will now get closed.
-	logfile = 0;
-
 	for(i = 0; i < MAX_FILE_HANDLES; i++) {
-		if (fsh[i].handleFiles.file.o) {
+		if (fsh[i].fileSize) {
 			FS_FCloseFile(i);
 		}
 	}

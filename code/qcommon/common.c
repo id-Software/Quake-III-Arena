@@ -51,7 +51,8 @@ char	*com_argv[MAX_NUM_ARGVS+1];
 jmp_buf abortframe;		// an ERR_DROP occured, exit the entire frame
 
 
-fileHandle_t	logfile;
+FILE *debuglogfile;
+static fileHandle_t logfile;
 fileHandle_t	com_journalFile;			// events are written here
 fileHandle_t	com_journalDataFile;		// config files are written here
 
@@ -261,6 +262,9 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		code = ERR_FATAL;
 	}
 
+	// make sure we can get at our local stuff
+	FS_PureServerSetLoadedPaks( "", "" );
+
 	// if we are getting a solid stream of ERR_DROP, do an ERR_FATAL
 	currentTime = Sys_Milliseconds();
 	if ( currentTime - lastErrorTime < 100 ) {
@@ -288,8 +292,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	if ( code == ERR_SERVERDISCONNECT ) {
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
-		// make sure we can get at our local stuff
-		FS_PureServerSetLoadedPaks("", "");
 		com_errorEntered = qfalse;
 		longjmp (abortframe, -1);
 	} else if ( code == ERR_DROP || code == ERR_DISCONNECT ) {
@@ -297,7 +299,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		SV_Shutdown (va("Server crashed: %s",  com_errorMessage));
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
-		FS_PureServerSetLoadedPaks("", "");
 		com_errorEntered = qfalse;
 		longjmp (abortframe, -1);
 	} else if ( code == ERR_NEED_CD ) {
@@ -310,7 +311,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		} else {
 			Com_Printf("Server didn't have CD\n" );
 		}
-		FS_PureServerSetLoadedPaks("", "");
 		longjmp (abortframe, -1);
 	} else {
 		CL_Shutdown ();
