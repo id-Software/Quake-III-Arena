@@ -302,14 +302,15 @@ ifeq ($(PLATFORM),darwin)
   ifeq ($(BUILD_MACOSX_UB),i386)
     CC=gcc-4.0
     BASE_CFLAGS += -arch i386 -DSMP \
-      -isysroot /Developer/SDKs/MacOSX10.4u.sdk \
       -mmacosx-version-min=10.4 \
       -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -nostdinc \
       -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
       -I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
       -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include
-    LDFLAGS = -mmacosx-version-min=10.4 \
-      -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
+    LDFLAGS = -arch i386 -mmacosx-version-min=10.4 \
+      -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1 \
+      -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
+      -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk
     ARCH=i386
     BUILD_SERVER=0
   else
