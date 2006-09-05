@@ -83,4 +83,4 @@ install -m 644 ../../../COPYING.txt image/COPYING
 install -m 644 ./id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
 
 ### makeself installer
-$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.run "ioquake3 $VERSION" ./setup.sh
+$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.run "ioquake3 $VERSION-$RELEASE" ./setup.sh

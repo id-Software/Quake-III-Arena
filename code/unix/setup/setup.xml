@@ -17,8 +17,7 @@
   <component name="Quake3 Arena gamedata" version="@VERSION@" default="yes">
    <option size="457M">
      <help>
-       If you don't select this, you must make sure to copy pak0.pk3 to the
-       baseq3 directory manually.
+       If you don't select this, you must make sure to copy pak0.pk3 to the baseq3 directory manually.
      </help>
      Copy Quake3 Arena CD data
      <files cdromid="CD 1" path="baseq3" size="457M">
@@ -37,14 +36,13 @@
 
   <component name="Quake3 Team Arena gamedata" version="@VERSION@">
    <option>
-     Install Team Arena components.
+     Install Team Arena components
      <files path="missionpack">
        idtapatchpk3s.tar
      </files>
      <option size="457M">
        <help>
-         If you don't select this, you must make sure to copy the TA pak0.pk3 to the
-         missionpack directory manually.
+         If you don't select this, you must make sure to copy the TA pak0.pk3 to the missionpack directory manually.
        </help>
        Copy Quake3 Team Arena CD data
        <files cdromid="CD 2" path="missionpack" size="457M">
