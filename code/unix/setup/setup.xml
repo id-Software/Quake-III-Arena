@@ -5,7 +5,8 @@
 	update_url="http://www.icculus.org/quake3/updates.txt"
 	promptbinaries="yes"
 	reinstall="yes"
-	nopromptoverwrite="yes">
+	nopromptoverwrite="yes"
+	preuninstall="preuninstall.sh">
   <readme>
     README
   </readme>
