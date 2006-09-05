@@ -64,4 +64,4 @@ install -m 644 ../../../README image/README
 install -m 644 ../../../COPYING.txt image/COPYING
 
 ### makeself installer
-$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.$arch.run "icculus.org/quake3 $VERSION" ./setup.sh
+$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.$arch.run "ioquake3 $VERSION" ./setup.sh

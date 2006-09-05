@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
 <install product="ioquake3"
-	desc="icculus.org/quake3"
+	desc="ioquake3"
 	version="@VERSION@"
 	update_url="http://www.icculus.org/quake3/updates.txt"
 	promptbinaries="yes">
@@ -17,7 +17,7 @@
     Quake 3
 
     <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png" play="yes"
-	    name="icculus.org/quake3">
+	    name="ioquake3">
       ioquake3
     </binary>
     <files>
@@ -28,7 +28,7 @@
    <option install="false" required="false">
     Quake 3 Demo start script
     <binary arch="any" libc="any" symlink="ioq3demo" icon="quake3.png" play="no"
-	    name="icculus.org/quake3 (Demo)">
+	    name="ioquake3 (Demo)">
       ioq3demo
     </binary>
    </option>
