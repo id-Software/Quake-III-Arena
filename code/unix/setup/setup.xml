@@ -14,13 +14,13 @@
     id_patch_pk3s_Q3A_EULA.txt
   </eula>
 
-  <component name="Quake3 Arena gamedata" version="@VERSION@" showname="no" default="yes">
-   <option install="true" size="457M">
+  <component name="Quake3 Arena gamedata" version="@VERSION@" default="yes">
+   <option size="457M">
      <help>
        If you don't select this, you must make sure to copy pak0.pk3 to the
        baseq3 directory manually.
      </help>
-     Quake3 Arena gamedata
+     Copy Quake3 Arena CD data
      <files cdromid="CD 1" path="baseq3" size="457M">
        Quake3/baseq3/pak0.pk3
      </files>
@@ -35,19 +35,25 @@
    </option>
   </component>
 
-  <component name="Quake3 Team Arena gamedata" version="@VERSION@" showname="no" default="yes">
-   <option install="true" size="457M">
-     <help>
-       If you don't select this, you must make sure to copy the TA pak0.pk3 to the
-       missionpack directory manually.
-     </help>
-     Quake3 Team Arena gamedata
-     <files cdromid="CD 2" path="missionpack" size="457M">
-       Setup/missionpack/pak0.pk3
+  <component name="Quake3 Team Arena gamedata" version="@VERSION@">
+   <option>
+     Install Team Arena components.
+     <files path="missionpack">
+       idtapatchpk3s.tar
      </files>
+     <option size="457M">
+       <help>
+         If you don't select this, you must make sure to copy the TA pak0.pk3 to the
+         missionpack directory manually.
+       </help>
+       Copy Quake3 Team Arena CD data
+       <files cdromid="CD 2" path="missionpack" size="457M">
+         Setup/missionpack/pak0.pk3
+       </files>
+     </option>
    </option>
   </component>
-  <component arch="x86_64" name="x86_64" version="@VERSION@" showname="no">
+  <component arch="x86_64" name="x86_64" version="@VERSION@">
     <option arch="x86_64" install="true">
      64 bit binaries
      <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png"
@@ -61,7 +67,7 @@
     </option>
   </component>
 
-  <component if="|(x86,x86_64)" name="i386" version="@VERSION@" showname="no">
+  <component if="|(x86,x86_64)" name="i386" version="@VERSION@">
     <option arch="x86_64" install="true">
      32 bit binaries
      <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png"
