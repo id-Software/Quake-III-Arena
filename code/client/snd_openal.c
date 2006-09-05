@@ -1792,8 +1792,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 	if((enumsupport = qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")))
 	{
 		char devicenames[1024] = "";
-		const ALCchar *devicelist;
-		const ALCchar *defaultdevice;
+		const char *devicelist;
+		const char *defaultdevice;
 		int curlen;
 		
 		// get all available devices + the default device name.
