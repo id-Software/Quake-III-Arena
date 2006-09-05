@@ -1,7 +1,7 @@
 #!/bin/bash
 
-: ${MAKESELF:=/usr/share/loki-setup/makeself}
-: ${SETUPIMAGE:=/usr/share/loki-setup/image}
+: ${MAKESELF:=/usr/share/loki_setup/makeself}
+: ${SETUPIMAGE:=/usr/share/loki_setup/image}
 
 : ${VERSION:=0.0_`date +%Y%m%d%H%M`}
 : ${RELEASE:=0}
@@ -10,14 +10,6 @@ set -e
 set -x
 
 arch=`uname -m`
-
-# $§&%!!
-setup_arch=$arch
-links=
-case "$arch" in
-	i?86) arch=i386; setup_arch=x86; links="amd64 x86_64" ;;
-	x86_64) links=amd64
-esac
 
 rm -rf image
 mkdir image
@@ -32,36 +24,59 @@ rm -f image/quake3.png
 cp ../quake3.png image/quake3.png
 
 ### binaries
+src="../../../../../build"
+
 mkdir image/tmp
 pushd image/tmp
 mkdir baseq3 demoq3 missionpack
-src="../../../../../build/release-linux-$arch/"
-install -m 755 $src/ioquake3.$arch ioquake3.$arch
-install -m 755 $src/ioq3ded.$arch ioq3ded.$arch
-install -m 644 $src/baseq3/*.so baseq3
-install -m 644 $src/missionpack/*.so missionpack
+# 32 bit binaries
+install -m 755 $src/release-linux-i386/ioquake3.i386 ioquake3.i386
+install -m 755 $src/release-linux-i386/ioq3ded.i386 ioq3ded.i386
+install -m 644 $src/release-linux-i386/baseq3/*.so baseq3
+install -m 644 $src/release-linux-i386/missionpack/*.so missionpack
 pushd demoq3
 ln -s ../baseq3/*.so .
 popd
 popd
 
-tar --owner=root --group=root -C image/tmp -cf image/ioquake3.tar .
+tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.i386.tar .
+rm -rf ./image/tmp
+
+mkdir image/tmp
+pushd image/tmp
+mkdir baseq3 demoq3 missionpack
+# 64 bit binaries
+install -m 755 $src/release-linux-x86_64/ioquake3.x86_64 ioquake3.x86_64
+install -m 755 $src/release-linux-x86_64/ioq3ded.x86_64 ioq3ded.x86_64
+install -m 644 $src/release-linux-x86_64/baseq3/*.so baseq3
+install -m 644 $src/release-linux-x86_64/missionpack/*.so missionpack
+pushd demoq3
+ln -s ../baseq3/*.so .
+popd
+popd
+
+tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.x86_64.tar .
 rm -rf image/tmp
+
+# patch pk3 files
+install -m 644 ./idpatchpk3s.tar image/idpatchpk3s.tar
 
 ### setup.xml
 sed 's/@VERSION@/'$VERSION'/g' < setup.xml > image/setup.data/setup.xml
 
 ### start script
-mkdir -p image/bin/Linux/$setup_arch
-for i in $links; do
-	ln -s $setup_arch image/bin/Linux/$i
-done
-install -m 755 ioquake3.sh image/bin/Linux/$setup_arch/ioquake3
-install -m 755 ioq3demo.sh image/bin/Linux/$setup_arch/ioq3demo
+mkdir -p image/bin/Linux/x86
+mkdir -p image/bin/Linux/x86_64
 
-### README and COPYING
+install -m 755 ioquake3.sh image/bin/Linux/x86/ioquake3
+install -m 755 ioq3demo.sh image/bin/Linux/x86/ioq3demo
+install -m 755 ioquake3.sh image/bin/Linux/x86_64/ioquake3
+install -m 755 ioq3demo.sh image/bin/Linux/x86_64/ioq3demo
+
+### README, COPYING and EULA
 install -m 644 ../../../README image/README
 install -m 644 ../../../COPYING.txt image/COPYING
+install -m 644 ./id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
 
 ### makeself installer
 $MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.$arch.run "ioquake3 $VERSION" ./setup.sh
