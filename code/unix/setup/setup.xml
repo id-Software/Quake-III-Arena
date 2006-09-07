@@ -66,7 +66,7 @@
   </component>
 
   <component if="|(x86,x86_64)" name="i386" version="@VERSION@">
-    <option arch="x86_64" install="true">
+    <option arch="any" install="true">
      32 bit binaries
      <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png"
              menu="." name="ioquake3">
