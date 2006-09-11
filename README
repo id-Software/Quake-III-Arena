@@ -23,6 +23,7 @@ for further development. Some of the major features currently implemented are:
   * Much improved QVM tools
   * Support for various esoteric operating systems (see
     http://icculus.org/quake3/?page=status)
+  * HTTP/FTP download redirection (using cURL)
   * Many, many bug fixes
 
 The map editor and associated compiling tools are not included. We suggest you
@@ -140,6 +141,9 @@ New cvars
   cl_platformSensitivity            - read only, indicates the mouse input
                                       scaling
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
+  cl_cURLLib                        - filename of cURL library to load
+  sv_dlURL                          - the base of the HTTP or FTP site that
+                                      holds custom pk3 files for your server 
 
 New commands
   video [filename]        - start video capture (use with demo command)
@@ -192,6 +196,43 @@ Creating mods compatible with Q3 1.32b
   compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it
   still exists when you read this) for more details.
 
+Using HTTP/FTP Download Support (Server)
+    You can enable redirected downloads on your server even if it's not
+    an ioquake3 server.  You simply need to use the 'sets' command to put
+    the sv_dlURL cvar into your SERVERINFO string and ensure sv_allowDownloads
+    is set to 1
+
+    sv_dlURL is the base of the URL that contains your custom .pk3 files
+    the client will append both fs_game and the filename to the end of
+    this value.  For example, if you have sv_dlURL set to
+    "http://icculus.org/quake3", fs_game is "baseq3", and the client is
+    missing "test.pk3", it will attempt to download from the URL
+    "http://icculus.org/quake3/baseq3/test.pk3"
+
+    sv_allowDownload's value is now a bitmask made up of the following
+    flags:
+      1 - ENABLE
+      2 - do not use HTTP/FTP downloads
+      4 - do not use UDP downloads
+      8 - do not ask the client to disconnect when using HTTP/FTP
+
+    Server operators who are concerned about potential "leeching" from their
+    HTTP servers from other ioquake3 servers can make use of the HTTP_REFERER
+    that ioquake3 sets which is "ioQ3://{SERVER_IP}:{SERVER_PORT}".  For,
+    example, Apache's mod_rewrite can restrict access based on HTTP_REFERER. 
+
+Using HTTP/FTP Download Support (Client)
+    Simply setting cl_allowDownload to 1 will enable HTTP/FTP downloads
+    assuming ioquake3 was compiled with USE_CURL=1 (the default).
+    like sv_allowDownload, cl_allowDownload also uses a bitmask value
+    supporting the following flags:
+      1 - ENABLE
+      2 - do not use HTTP/FTP downloads
+      4 - do not use UDP downloads
+
+    When ioquake3 is built with USE_CURL_DLOPEN=1 (default on some platforms),
+    it will use the value of the cvar cl_cURLLib as the filename of the cURL
+    library to dynamically load. 
 
 ------------------------------------------------------------- Contributing -----
 
