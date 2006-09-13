@@ -288,10 +288,17 @@ char	*Sys_DefaultHomePath(void) {
 	TCHAR szPath[MAX_PATH];
 	static char path[MAX_OSPATH];
 
-	if( !SUCCEEDED( SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA,
+	// do not bother using a seperate home directory on versions of
+	// windows that do not offer true per-user home directories 
+	// (win98, win95, winme)
+	g_wv.osversion.dwOSVersionInfoSize = sizeof( g_wv.osversion );
+	GetVersionEx( &g_wv.osversion );
+	if( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
+		return NULL;
+
+	if( !SUCCEEDED( SHGetFolderPath( NULL, CSIDL_APPDATA,
 		NULL, 0, szPath ) ) )
 	{
-
 		return NULL;
 	}
 	Q_strncpyz( path, szPath, sizeof(path) );
