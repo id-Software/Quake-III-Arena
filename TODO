@@ -6,6 +6,9 @@ FOR ANY RELEASE, WE NEED, ON EACH PLATFORM:
    whatever
 4) Installers which include all up-to-date id pak files, require no cd rom,
    user will have to copy pak0.pk3 themselves.
+4a) installers that require no cd-rom can optionally install the data from cd
+-roms, just that people can deal with pak0s themselves and not be forced into
+locating the disc right then -at install time.
 
 For 1.34:
 See above.
@@ -18,6 +21,8 @@ For 1.35+:
 * IPv6 support
 * merge unix_net.c and win_net.c
 * Replace windows DirectX backend with SDL
+* Graphical "ioquake3" watermark in videos, optional, on by default
+* Gamma stuff while recording videos.
 
 For 1.99:
 * Four player split-screen
