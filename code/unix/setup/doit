@@ -58,6 +58,22 @@ popd
 tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.x86_64.tar .
 rm -rf image/tmp
 
+mkdir image/tmp
+pushd image/tmp
+mkdir baseq3 demoq3 missionpack
+# ppc binaries
+install -m 755 $src/release-linux-ppc/ioquake3.ppc ioquake3.ppc
+install -m 755 $src/release-linux-ppc/ioq3ded.ppc ioq3ded.ppc
+install -m 644 $src/release-linux-ppc/baseq3/*.so baseq3
+install -m 644 $src/release-linux-ppc/missionpack/*.so missionpack
+pushd demoq3
+ln -s ../baseq3/*.so .
+popd
+popd
+
+tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.ppc.tar .
+rm -rf image/tmp
+
 # patch pk3 files
 install -m 644 ./idpatchpk3s.tar image/idpatchpk3s.tar
 install -m 644 ./idtapatchpk3s.tar image/idtapatchpk3s.tar
@@ -71,11 +87,14 @@ install -m 755 ./preuninstall.sh image/preuninstall.sh
 ### start script
 mkdir -p image/bin/Linux/x86
 mkdir -p image/bin/Linux/x86_64
+mkdir -p image/bin/Linux/ppc
 
 install -m 755 ioquake3.sh image/bin/Linux/x86/ioquake3
 install -m 755 ioq3demo.sh image/bin/Linux/x86/ioq3demo
 install -m 755 ioquake3.sh image/bin/Linux/x86_64/ioquake3
 install -m 755 ioq3demo.sh image/bin/Linux/x86_64/ioq3demo
+install -m 755 ioquake3.sh image/bin/Linux/ppc/ioquake3
+install -m 755 ioq3demo.sh image/bin/Linux/ppc/ioq3demo
 
 ### README, COPYING and EULA
 install -m 644 ../../../README image/README

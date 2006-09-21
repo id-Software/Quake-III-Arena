@@ -52,9 +52,9 @@
    </option>
   </component>
   <component arch="x86_64" name="x86_64" version="@VERSION@">
-    <option arch="x86_64" install="true">
-     64 bit binaries
-     <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png"
+    <option install="true">
+     x86_64 binaries
+     <binary libc="any" symlink="ioquake3" icon="quake3.png"
              menu="." name="ioquake3">
        ioquake3
      </binary>
@@ -66,14 +66,28 @@
   </component>
 
   <component if="|(x86,x86_64)" name="i386" version="@VERSION@">
-    <option arch="any" install="true">
-     32 bit binaries
-     <binary arch="any" libc="any" symlink="ioquake3" icon="quake3.png"
+    <option install="true">
+     x86 (32 bit) binaries
+     <binary libc="any" symlink="ioquake3" icon="quake3.png"
              menu="." name="ioquake3">
        ioquake3
      </binary>
      <files>
        ioquake3.i386.tar
+       quake3.png
+     </files>
+    </option>
+  </component>
+
+  <component arch="ppc" name="ppc" version="@VERSION@">
+    <option install="true">
+     ppc 32 bit binaries
+     <binary libc="any" symlink="ioquake3" icon="quake3.png"
+             menu="." name="ioquake3">
+       ioquake3
+     </binary>
+     <files>
+       ioquake3.ppc.tar
        quake3.png
      </files>
     </option>
