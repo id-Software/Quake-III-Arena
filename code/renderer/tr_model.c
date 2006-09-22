@@ -652,9 +652,9 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 			
 			for(j = 0; j < surf->numTriangles; j++)
 			{
-				tri->indexes[0] = curtri->indexes[0];
-				tri->indexes[1] = curtri->indexes[1];
-				tri->indexes[2] = curtri->indexes[2];
+				tri->indexes[0] = LittleLong(curtri->indexes[0]);
+				tri->indexes[1] = LittleLong(curtri->indexes[1]);
+				tri->indexes[2] = LittleLong(curtri->indexes[2]);
 				
 				tri++;
 				curtri++;
