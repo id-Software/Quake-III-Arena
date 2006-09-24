@@ -157,30 +157,36 @@ typedef enum {
 #define	RG_EA 				r14
 
 // The deepest value I saw in the Quake3 games was 9.
-#define OP_STACK_MAX_DEPTH	12
+#define OP_STACK_MAX_DEPTH	16
 
-// These are all volatile and thus must be saved
-// upon entry to the VM code.
+// These are all volatile and thus must be saved upon entry to the VM code.
+// NOTE: These are General Purpose Registers (GPR) numbers like the 
+//       R_ definitions in the regNums_t enum above (31 is the max)
 static int opStackIntRegisters[OP_STACK_MAX_DEPTH] =
 {
 	16, 17, 18, 19,
 	20, 21, 22, 23,
-	24, 25, 26, 27
+	24, 25, 26, 27,
+	28, 29, 30, 31
 };
 
 static unsigned int *opStackLoadInstructionAddr[OP_STACK_MAX_DEPTH];
 
 // We use different registers for the floating point
 // operand stack (these are volatile in the PPC ABI)
+// NOTE: these are Floating Point Register (FPR) numbers, not 
+//       General Purpose Register (GPR) numbers
 static int opStackFloatRegisters[OP_STACK_MAX_DEPTH] =
 {
 	0, 1, 2, 3,
 	4, 5, 6, 7,
-	8, 9, 10, 11
+	8, 9, 10, 11,
+	12, 13, 14, 15
 };
 
 static int opStackRegType[OP_STACK_MAX_DEPTH] =
 {
+	0, 0, 0, 0,
 	0, 0, 0, 0,
 	0, 0, 0, 0,
 	0, 0, 0, 0
