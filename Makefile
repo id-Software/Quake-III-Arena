@@ -348,7 +348,7 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   ifeq ($(ARCH),ppc)
-    OPTIMIZE += -faltivec
+    OPTIMIZE += -faltivec -O3
     # Carbon is required on PPC only to make a call to MakeDataExecutable
     # in the PPC vm (should be a better non-Carbon way).
     LDFLAGS += -framework Carbon
