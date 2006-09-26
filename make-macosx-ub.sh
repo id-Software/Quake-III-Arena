@@ -1,8 +1,13 @@
 #!/bin/sh
-
+APPBUNDLE=ioquake3.app
+BINARY=ioquake3.ub
+PKGINFO=APPIOQ3
+ICNS=code/unix/MacSupport/ioquake3.icns
 DESTDIR=build/release-darwin-ub
 BASEDIR=baseq3
 MPACKDIR=missionpack
+Q3_VERSION=`grep "\#define Q3_VERSION" code/qcommon/q_shared.h | \
+	sed -e 's/.*".* \([^ ]*\)"/\1/'`;
 
 BIN_OBJ="
 	build/release-darwin-ppc/ioquake3.ppc
@@ -44,19 +49,57 @@ fi
 
 (BUILD_MACOSX_UB=ppc make && BUILD_MACOSX_UB=i386 make) || exit 1;
 
-if [ ! -d $DESTDIR ]; then 
-	mkdir $DESTDIR || exit 1;
+echo "Creating .app bundle $DESTDIR/$APPBUNDLE"
+if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR ]; then
+	mkdir -p $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR || exit 1;
 fi
-if [ ! -d $DESTDIR/$BASEDIR ]; then
-	mkdir $DESTDIR/$BASEDIR || exit 1;
+if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR ]; then
+	mkdir -p $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR || exit 1;
 fi
-if [ ! -d $DESTDIR/$MPACKDIR ]; then
-	mkdir $DESTDIR/$MPACKDIR || exit 1;
+if [ ! -d $DESTDIR/$APPBUNDLE/Contents/Resources ]; then
+	mkdir -p $DESTDIR/$APPBUNDLE/Contents/Resources
 fi
+cp $ICNS $DESTDIR/$APPBUNDLE/Contents/Resources/ioquake3.icns || exit 1;
+echo $PKGINFO > $DESTDIR/$APPBUNDLE/Contents/PkgInfo
+echo "
+	<?xml version=\"1.0\" encoding="UTF-8"?>
+	<!DOCTYPE plist
+		PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\"
+		\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+	<plist version=\"1.0\">
+	<dict>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>English</string>
+		<key>CFBundleExecutable</key>
+		<string>$BINARY</string>
+		<key>CFBundleGetInfoString</key>
+		<string>ioquake3 $Q3_VERSION</string>
+		<key>CFBundleIconFile</key>
+		<string>ioquake3.icns</string>
+		<key>CFBundleIdentifier</key>
+		<string>org.icculus.quake3</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>ioquake3</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$Q3_VERSION</string>
+		<key>CFBundleSignature</key>
+		<string>$PKGINFO</string>
+		<key>CFBundleVersion</key>
+		<string>$Q3_VERSION</string>
+		<key>NSExtensions</key>
+		<dict/>
+		<key>NSPrincipalClass</key>
+		<string>NSApplication</string>
+	</dict>
+	</plist>
+	" > $DESTDIR/$APPBUNDLE/Contents/Info.plist
 
-echo "Installing Universal Binaries in $DESTDIR"
-lipo -create -o $DESTDIR/ioquake3.ub $BIN_OBJ
-cp $BASE_OBJ $DESTDIR/$BASEDIR/
-cp $MPACK_OBJ $DESTDIR/$MPACKDIR/
-cp code/libs/macosx/*.dylib $DESTDIR/
+lipo -create -o $DESTDIR/$APPBUNDLE/Contents/MacOS/$BINARY $BIN_OBJ
+cp $BASE_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR/
+cp $MPACK_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR/
+cp code/libs/macosx/*.dylib $DESTDIR/$APPBUNDLE/Contents/MacOS/
 
