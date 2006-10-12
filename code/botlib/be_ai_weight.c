@@ -595,7 +595,7 @@ float FuzzyWeight_r(int *inventory, fuzzyseperator_t *fs)
 			//the scale factor
 			scale = (float) (inventory[fs->index] - fs->value) / (fs->next->value - fs->value);
 			//scale between the two weights
-			return (1 - scale) * w1 + scale * w2;;
+			return scale * w1 + (1 - scale) * w2;
 		} //end if
 		return FuzzyWeight_r(inventory, fs->next);
 	} //end else if
@@ -627,7 +627,7 @@ float FuzzyWeightUndecided_r(int *inventory, fuzzyseperator_t *fs)
 			if (fs->next->child) w2 = FuzzyWeight_r(inventory, fs->next->child);
 			else w2 = fs->next->minweight + random() * (fs->next->maxweight - fs->next->minweight);
 			//the scale factor
-			scale = (inventory[fs->index] - fs->value) / (fs->next->value - fs->value);
+			scale = (float) (inventory[fs->index] - fs->value) / (fs->next->value - fs->value);
 			//scale between the two weights
 			return scale * w1 + (1 - scale) * w2;
 		} //end if
@@ -750,7 +750,7 @@ void ScaleFuzzySeperator_r(fuzzyseperator_t *fs, float scale)
 	else if (fs->type == WT_BALANCE)
 	{
 		//
-		fs->weight = (fs->maxweight + fs->minweight) * scale;
+		fs->weight = (float) (fs->maxweight + fs->minweight) * scale;
 		//get the weight between bounds
 		if (fs->weight < fs->minweight) fs->weight = fs->minweight;
 		else if (fs->weight > fs->maxweight) fs->weight = fs->maxweight;
