@@ -866,8 +866,6 @@ void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx
 	// Set up the effect
 	if( origin == NULL )
 	{
-		srcList[ src ].isTracking = qtrue;
-
 		if( S_AL_HearingThroughEntity( entnum ) )
 		{
 			// Where the entity is the local player, play a local sound
@@ -879,6 +877,7 @@ void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx
 			S_AL_SrcSetup( src, sfx, SRCPRI_ONESHOT, entnum, entchannel, qfalse );
 			VectorCopy( entityList[ entnum ].origin, sorigin );
 		}
+		srcList[ src ].isTracking = qtrue;
 	}
 	else
 	{
