@@ -61,8 +61,8 @@ For Mac OS X, building a Universal Binary
      XCode 2.2 and newer.
   2. Change to the directory containing this README file.
   3. Run './make-macosx-ub.sh'
-  4. Copy all of the files in the resulting build/release-darwin-ub/ 
-     directory to the Contents/MacOS/ subdirectory of your .app bundle.
+  4. Copy the resulting ioquake3.app in /build/release-darwin-ub to your 
+     /Applications/ioquake3 folder.
 
 Installation, for *nix
   1. Set the COPYDIR variable in the shell to be where you installed Quake 3
