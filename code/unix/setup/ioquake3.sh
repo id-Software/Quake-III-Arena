@@ -5,7 +5,7 @@ readlink() {
     
     if [ -L "$path" ]; then 
         ll="$(LC_ALL=C ls -l "$path" 2> /dev/null)" &&
-        echo "${ll/* -> }"
+        echo "${ll##* -> }"
     else    
         return 1
     fi
