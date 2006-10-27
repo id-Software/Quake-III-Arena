@@ -1202,6 +1202,9 @@ void CL_Vid_Restart_f( void ) {
 		CL_CloseAVI( );
 	}
 
+	if(clc.demorecording)
+		CL_StopRecord_f();
+
 	// don't let them loop during the restart
 	S_StopAllSounds();
 	// shutdown the UI

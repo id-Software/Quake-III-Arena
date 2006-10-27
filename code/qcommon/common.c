@@ -262,9 +262,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		code = ERR_FATAL;
 	}
 
-	// make sure we can get at our local stuff
-	FS_PureServerSetLoadedPaks( "", "" );
-
 	// if we are getting a solid stream of ERR_DROP, do an ERR_FATAL
 	currentTime = Sys_Milliseconds();
 	if ( currentTime - lastErrorTime < 100 ) {
@@ -285,20 +282,22 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	vsprintf (com_errorMessage,fmt,argptr);
 	va_end (argptr);
 
-	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
+	if (code != ERR_DISCONNECT && code != ERR_NEED_CD)
 		Cvar_Set("com_errorMessage", com_errorMessage);
-	}
 
-	if ( code == ERR_SERVERDISCONNECT ) {
+	if (code == ERR_DISCONNECT || code == ERR_SERVERDISCONNECT) {
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		// make sure we can get at our local stuff
+		FS_PureServerSetLoadedPaks("", "");
 		com_errorEntered = qfalse;
 		longjmp (abortframe, -1);
-	} else if ( code == ERR_DROP || code == ERR_DISCONNECT ) {
+	} else if (code == ERR_DROP) {
 		Com_Printf ("********************\nERROR: %s\n********************\n", com_errorMessage);
 		SV_Shutdown (va("Server crashed: %s",  com_errorMessage));
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		FS_PureServerSetLoadedPaks("", "");
 		com_errorEntered = qfalse;
 		longjmp (abortframe, -1);
 	} else if ( code == ERR_NEED_CD ) {
@@ -311,6 +310,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		} else {
 			Com_Printf("Server didn't have CD\n" );
 		}
+		FS_PureServerSetLoadedPaks("", "");
 		longjmp (abortframe, -1);
 	} else {
 		CL_Shutdown ();
