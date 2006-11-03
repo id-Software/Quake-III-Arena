@@ -116,8 +116,12 @@ New cvars
   s_alDopplerSpeed                  - the value passed to alDopplerVelocity
   s_alMinDistance                   - the value of AL_REFERENCE_DISTANCE for
                                       each source
+  s_alMaxDistance                   - the maximum distance before sounds start
+                                      to become inaudible.
   s_alRolloff                       - the value of AL_ROLLOFF_FACTOR for each
                                       source
+  s_alGraceDistance                 - after having passed MaxDistance, length
+                                      until sounds are completely inaudible.
   s_alMaxSpeakerDistance            - ET_SPEAKERS beyond this distance are
                                       culled
   s_alDriver                        - which OpenAL library to use

@@ -36,7 +36,9 @@ cvar_t *s_alSources;
 cvar_t *s_alDopplerFactor;
 cvar_t *s_alDopplerSpeed;
 cvar_t *s_alMinDistance;
+cvar_t *s_alMaxDistance;
 cvar_t *s_alRolloff;
+cvar_t *s_alGraceDistance;
 cvar_t *s_alDriver;
 cvar_t *s_alDevice;
 cvar_t *s_alAvailableDevices;
@@ -464,6 +466,9 @@ typedef struct src_s
 	int							isLooping;	// Is this a looping effect (attached to an entity)
 	int							isTracking;	// Is this object tracking it's owner
 
+	float							curGain;	// gain employed if source is within maxdistance.
+	float							scaleGain;	// Last gain value for this source. 0 if muted.
+
 	qboolean				local;			// Is this local (relative to the cam)
 } src_t;
 
@@ -510,6 +515,50 @@ static void _S_AL_SanitiseVector( vec3_t v, int line )
 
 
 #define AL_THIRD_PERSON_THRESHOLD_SQ (48.0f*48.0f)
+
+/*
+=================
+S_AL_ScaleGain
+Adapt the gain if necessary to get a quicker fadeout when the source is too far away.
+=================
+*/
+
+static void S_AL_ScaleGain(src_t *chksrc, vec3_t origin)
+{
+	float distance;
+
+	if(chksrc->local)
+		distance = VectorLength(origin);
+	else
+		distance = Distance(origin, lastListenerOrigin);
+
+	// If we exceed a certain distance, scale the gain linearly until the sound
+	// vanishes into nothingness.
+	if((distance -= s_alMaxDistance->value) > 0)
+	{
+		float scaleFactor;
+
+		if(distance >= s_alGraceDistance->value)
+			scaleFactor = 0.0f;
+		else
+			scaleFactor = 1.0f - distance / s_alGraceDistance->value;
+		
+		scaleFactor *= chksrc->curGain;
+		
+		if(chksrc->scaleGain != scaleFactor);
+		{
+			chksrc->scaleGain = scaleFactor;
+			// if(scaleFactor > 0.0f)
+			// Com_Printf("%f\n", scaleFactor);
+			qalSourcef(chksrc->alSource, AL_GAIN, chksrc->scaleGain);
+		}
+	}
+	else if(chksrc->scaleGain != chksrc->curGain)
+	{
+		chksrc->scaleGain = chksrc->curGain;
+		qalSourcef(chksrc->alSource, AL_GAIN, chksrc->scaleGain);
+	}
+}
 
 /*
 =================
@@ -616,41 +665,46 @@ static void S_AL_SrcSetup(srcHandle_t src, sfxHandle_t sfx, alSrcPriority_t prio
 		int entity, int channel, qboolean local)
 {
 	ALuint buffer;
+	src_t *curSource;
 
 	// Mark the SFX as used, and grab the raw AL buffer
 	S_AL_BufferUse(sfx);
 	buffer = S_AL_BufferGet(sfx);
 
 	// Set up src struct
-	srcList[src].lastUsedTime = Sys_Milliseconds();
-	srcList[src].sfx = sfx;
-	srcList[src].priority = priority;
-	srcList[src].entity = entity;
-	srcList[src].channel = channel;
-	srcList[src].isActive = qtrue;
-	srcList[src].isLocked = qfalse;
-	srcList[src].isLooping = qfalse;
-	srcList[src].isTracking = qfalse;
-	srcList[src].local = local;
+	curSource = &srcList[src];
+	
+	curSource->lastUsedTime = Sys_Milliseconds();
+	curSource->sfx = sfx;
+	curSource->priority = priority;
+	curSource->entity = entity;
+	curSource->channel = channel;
+	curSource->isActive = qtrue;
+	curSource->isLocked = qfalse;
+	curSource->isLooping = qfalse;
+	curSource->isTracking = qfalse;
+	curSource->curGain = s_alGain->value * s_volume->value;
+	curSource->scaleGain = curSource->curGain;
+	curSource->local = local;
 
 	// Set up OpenAL source
-	qalSourcei(srcList[src].alSource, AL_BUFFER, buffer);
-	qalSourcef(srcList[src].alSource, AL_PITCH, 1.0f);
-	qalSourcef(srcList[src].alSource, AL_GAIN, s_alGain->value * s_volume->value);
-	qalSourcefv(srcList[src].alSource, AL_POSITION, vec3_origin);
-	qalSourcefv(srcList[src].alSource, AL_VELOCITY, vec3_origin);
-	qalSourcei(srcList[src].alSource, AL_LOOPING, AL_FALSE);
-	qalSourcef(srcList[src].alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
+	qalSourcei(curSource->alSource, AL_BUFFER, buffer);
+	qalSourcef(curSource->alSource, AL_PITCH, 1.0f);
+	qalSourcef(curSource->alSource, AL_GAIN, curSource->curGain);
+	qalSourcefv(curSource->alSource, AL_POSITION, vec3_origin);
+	qalSourcefv(curSource->alSource, AL_VELOCITY, vec3_origin);
+	qalSourcei(curSource->alSource, AL_LOOPING, AL_FALSE);
+	qalSourcef(curSource->alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
 
 	if(local)
 	{
-		qalSourcei(srcList[src].alSource, AL_SOURCE_RELATIVE, AL_TRUE);
-		qalSourcef(srcList[src].alSource, AL_ROLLOFF_FACTOR, 0.0f);
+		qalSourcei(curSource->alSource, AL_SOURCE_RELATIVE, AL_TRUE);
+		qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, 0.0f);
 	}
 	else
 	{
-		qalSourcei(srcList[src].alSource, AL_SOURCE_RELATIVE, AL_FALSE);
-		qalSourcef(srcList[src].alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
+		qalSourcei(curSource->alSource, AL_SOURCE_RELATIVE, AL_FALSE);
+		qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
 	}
 }
 
@@ -887,6 +941,7 @@ void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx
 
 	S_AL_SanitiseVector( sorigin );
 	qalSourcefv( srcList[ src ].alSource, AL_POSITION, sorigin );
+	S_AL_ScaleGain(&srcList[src], sorigin);
 
 	// Start it playing
 	qalSourcePlay(srcList[src].alSource);
@@ -918,6 +973,7 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 {
 	int				src;
 	sentity_t	*sent = &entityList[ entityNum ];
+	src_t		*curSource;
 
 	// Do we need to allocate a new source for this entity
 	if( !sent->srcAllocated )
@@ -945,28 +1001,33 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 	// If this is not set then the looping sound is removed
 	sent->loopAddedThisFrame = qtrue;
 
+	curSource = &srcList[src];
+
 	// UGH
 	// These lines should be called via S_AL_SrcSetup, but we
 	// can't call that yet as it buffers sfxes that may change
 	// with subsequent calls to S_AL_SrcLoop
-	srcList[ src ].entity = entityNum;
-	srcList[ src ].isLooping = qtrue;
-	srcList[ src ].isActive = qtrue;
+	curSource->entity = entityNum;
+	curSource->isLooping = qtrue;
+	curSource->isActive = qtrue;
 
 	if( S_AL_HearingThroughEntity( entityNum ) )
 	{
-		srcList[ src ].local = qtrue;
+		curSource->local = qtrue;
 
-		qalSourcefv( srcList[ src ].alSource, AL_POSITION, vec3_origin );
-		qalSourcefv( srcList[ src ].alSource, AL_VELOCITY, vec3_origin );
+		qalSourcefv( curSource->alSource, AL_POSITION, vec3_origin );
+		qalSourcefv( curSource->alSource, AL_VELOCITY, vec3_origin );
 	}
 	else
 	{
-		srcList[ src ].local = qfalse;
+		curSource->local = qfalse;
 
-		qalSourcefv( srcList[ src ].alSource, AL_POSITION, (ALfloat *)sent->origin );
-		qalSourcefv( srcList[ src ].alSource, AL_VELOCITY, (ALfloat *)velocity );
+		qalSourcefv( curSource->alSource, AL_POSITION, (ALfloat *)sent->origin );
+		qalSourcefv( curSource->alSource, AL_VELOCITY, (ALfloat *)velocity );
+		
 	}
+
+	S_AL_ScaleGain(curSource, sent->origin);
 }
 
 /*
@@ -1028,63 +1089,65 @@ void S_AL_SrcUpdate( void )
 	int i;
 	int entityNum;
 	ALint state;
+	src_t *curSource;	
 
 	for(i = 0; i < srcCount; i++)
 	{
 		entityNum = srcList[i].entity;
+		curSource = &srcList[i];
 
-		if(srcList[i].isLocked)
+		if(curSource->isLocked)
 			continue;
 
-		if(!srcList[i].isActive)
+		if(!curSource->isActive)
 			continue;
 
 		// Update source parameters
 		if((s_alGain->modified)||(s_volume->modified))
-			qalSourcef(srcList[i].alSource, AL_GAIN, s_alGain->value * s_volume->value);
-		if((s_alRolloff->modified)&&(!srcList[i].local))
-			qalSourcef(srcList[i].alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
+			curSource->curGain = s_alGain->value * s_volume->value;
+		if((s_alRolloff->modified)&&(!curSource->local))
+			qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
 		if(s_alMinDistance->modified)
-			qalSourcef(srcList[i].alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
+			qalSourcef(curSource->alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
 
-		if( srcList[ i ].isLooping )
+		if(curSource->isLooping)
 		{
 			sentity_t *sent = &entityList[ entityNum ];
 
 			// If a looping effect hasn't been touched this frame, kill it
-			if( sent->loopAddedThisFrame )
+			if(sent->loopAddedThisFrame)
 			{
 				// The sound has changed without an intervening removal
-				if( srcList[ i ].isActive && !sent->startLoopingSound &&
-						srcList[ i ].sfx != sent->loopSfx )
+				if(curSource->isActive && !sent->startLoopingSound &&
+						curSource->sfx != sent->loopSfx)
 				{
-					qalSourceStop( srcList[ i ].alSource );
-					qalSourcei( srcList[ i ].alSource, AL_BUFFER, 0 );
+					qalSourceStop(curSource->alSource);
+					qalSourcei(curSource->alSource, AL_BUFFER, 0);
 					sent->startLoopingSound = qtrue;
 				}
 
-				// Ths sound hasn't been started yet
-				if( sent->startLoopingSound )
+				// The sound hasn't been started yet
+				if(sent->startLoopingSound)
 				{
-					S_AL_SrcSetup( i, sent->loopSfx, sent->loopPriority,
-							entityNum, -1, srcList[ i ].local );
-					srcList[ i ].isLooping = qtrue;
-					qalSourcei( srcList[ i ].alSource, AL_LOOPING, AL_TRUE );
-					qalSourcePlay( srcList[ i ].alSource );
+					S_AL_SrcSetup(i, sent->loopSfx, sent->loopPriority,
+							entityNum, -1, curSource->local);
+					curSource->isLooping = qtrue;
+					qalSourcei(curSource->alSource, AL_LOOPING, AL_TRUE);
+					qalSourcePlay(curSource->alSource);
 
 					sent->startLoopingSound = qfalse;
 				}
 
 				// Update locality
-				if( srcList[ i ].local)
+				if(curSource->local)
 				{
-					qalSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, AL_TRUE );
-					qalSourcef( srcList[ i ].alSource, AL_ROLLOFF_FACTOR, 0.0f );
+					qalSourcei(curSource->alSource, AL_SOURCE_RELATIVE, AL_TRUE);
+					qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, 0.0f);
 				}
 				else
 				{
-					qalSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, AL_FALSE );
-					qalSourcef( srcList[ i ].alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value );
+					qalSourcei(curSource->alSource, AL_SOURCE_RELATIVE, AL_FALSE);
+					qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
 				}
 			}
 			else
@@ -1093,19 +1156,22 @@ void S_AL_SrcUpdate( void )
 			continue;
 		}
 
-		// Query relativity of source, don't move if it's true
-		qalGetSourcei( srcList[ i ].alSource, AL_SOURCE_RELATIVE, &state );
-
-		// See if it needs to be moved
-		if( srcList[ i ].isTracking && !state )
-			qalSourcefv(srcList[i].alSource, AL_POSITION, entityList[entityNum].origin);
-		
 		// Check if it's done, and flag it
-		qalGetSourcei(srcList[i].alSource, AL_SOURCE_STATE, &state);
+		qalGetSourcei(curSource->alSource, AL_SOURCE_STATE, &state);
 		if(state == AL_STOPPED)
 		{
 			S_AL_SrcKill(i);
 			continue;
+		}
+
+		// Query relativity of source, don't move if it's true
+		qalGetSourcei(curSource->alSource, AL_SOURCE_RELATIVE, &state);
+
+		// See if it needs to be moved
+		if(curSource->isTracking && !state)
+		{
+			qalSourcefv(curSource->alSource, AL_POSITION, entityList[entityNum].origin);
+ 			S_AL_ScaleGain(curSource, entityList[entityNum].origin);
 		}
 	}
 }
@@ -1775,7 +1841,9 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alDopplerFactor = Cvar_Get( "s_alDopplerFactor", "1.0", CVAR_ARCHIVE );
 	s_alDopplerSpeed = Cvar_Get( "s_alDopplerSpeed", "2200", CVAR_ARCHIVE );
 	s_alMinDistance = Cvar_Get( "s_alMinDistance", "120", CVAR_CHEAT );
-	s_alRolloff = Cvar_Get( "s_alRolloff", "0.8", CVAR_CHEAT );
+	s_alMaxDistance = Cvar_Get("s_alMaxDistance", "1024", CVAR_CHEAT);
+	s_alRolloff = Cvar_Get( "s_alRolloff", "2", CVAR_CHEAT);
+	s_alGraceDistance = Cvar_Get("s_alGraceDistance", "512", CVAR_CHEAT);
 	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
@@ -1787,7 +1855,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 		return qfalse;
 	}
 
-	// Device enumeration support (extension currently only exists for windows).
+	// Device enumeration support (extension is implemented reasonably only on Windows right now).
 	if((enumsupport = qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")))
 	{
 		char devicenames[1024] = "";
@@ -1863,6 +1931,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	S_AL_SrcInit( );
 
 	// Set up OpenAL parameters (doppler, etc)
+	qalDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 	qalDopplerFactor( s_alDopplerFactor->value );
 	qalDopplerVelocity( s_alDopplerSpeed->value );
 
