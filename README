@@ -5,7 +5,7 @@
                    |  |_\___/\__, |\_,_\__,_|_\_\___|___/  |
                    |            |_|                        |
                    |                                       |
-                   `---------- http://icculus.org/quake3 --'
+                   `---------- http://ioquake3.org --------'
                                              
 The intent of this project is to provide a baseline Quake 3 which may be used
 for further development. Some of the major features currently implemented are:
@@ -22,7 +22,7 @@ for further development. Some of the major features currently implemented are:
   * Optional Ogg Vorbis support
   * Much improved QVM tools
   * Support for various esoteric operating systems (see
-    http://icculus.org/quake3/?page=status)
+    http://ioquake3.org/?page=status)
   * HTTP/FTP download redirection (using cURL)
   * Multiuser support on Windows systems (user specific game data
     is stored in "%APPDATA%\Quake3")
@@ -211,9 +211,9 @@ Using HTTP/FTP Download Support (Server)
     sv_dlURL is the base of the URL that contains your custom .pk3 files
     the client will append both fs_game and the filename to the end of
     this value.  For example, if you have sv_dlURL set to
-    "http://icculus.org/quake3", fs_game is "baseq3", and the client is
+    "http://ioquake3.org", fs_game is "baseq3", and the client is
     missing "test.pk3", it will attempt to download from the URL
-    "http://icculus.org/quake3/baseq3/test.pk3"
+    "http://ioquake3.org/baseq3/test.pk3"
 
     sv_allowDownload's value is now a bitmask made up of the following
     flags:
@@ -290,7 +290,7 @@ supports. We don't neccesarily care about all the installers being identical,
 but we have some general guidelines:
 
   * Please include the id patch pk3s in your installer, which are available
-    from http://icculus.org/quake3/?page=getdata subject to agreement to the id
+    from http://ioquake3.org/?page=getdata subject to agreement to the id
     EULA. Your installer shall also ask the user to agree to this EULA (which
     is in the /web/include directory for your convenience) and subsequently
     refuse to continue the installation of the patch pk3s and pak0.pk3 if they
