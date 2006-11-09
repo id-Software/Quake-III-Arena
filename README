@@ -92,6 +92,8 @@ Makefile.local:
   USE_SDL           - use the SDL backend where available
   USE_OPENAL        - use OpenAL where available
   USE_OPENAL_DLOPEN - link with OpenAL at runtime
+  USE_CURL          - use libcurl for http/ftp download support
+  USE_CURL_DLOPEN   - link with libcurl at runtime
   USE_CODEC_VORBIS  - enable Ogg Vorbis support
   USE_LOCAL_HEADERS - use headers local to ioq3 instead of system ones
   USE_CCACHE        - use ccache compiler caching tool
