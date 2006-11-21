@@ -1,6 +1,6 @@
 #!/bin/bash
 # Solaris tuff
-OSTYPE=SunOS
+PLATFORM=`uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'`
 if [ "X`uname -m`" = "Xi386" ]; then
 	ARCH=i386
 else
@@ -12,14 +12,14 @@ PKG_SOLARIS_NAME=ioquake3
 PKG_DATA_NAME=ioquake3d
 BUILD_DATE="`/usr/bin/date '+%Y%m%d%H%M%S'`"
 BUILD_VERSION="1.34-rSVN"
-PKG_VERSION="1"
+PKG_VERSION="`date '+%Y%m%d%H%M'`"
 PKG_MAINT_ID="quake@cojot.name"
 SOLARIS_PKGFILE="${PKG_SOLARIS_NAME}-${BUILD_VERSION}-${PKG_VERSION}-${ARCH}.pkg"
 DATA_PKGFILE="${PKG_DATA_NAME}-${BUILD_VERSION}-${PKG_VERSION}-${ARCH}.pkg"
 
 # Locations
 MOUNT_DIR="../../.."
-BUILD_DIR="${MOUNT_DIR}/build/release-${OSTYPE}-${ARCH}"
+BUILD_DIR="${MOUNT_DIR}/build/release-${PLATFORM}-${ARCH}"
 PKG_SRC_DIR="${MOUNT_DIR}/code/unix/setup/pkg/${PKG_SOLARIS_NAME}"
 PKG_BUILD_DIR="/tmp/ioquake3-build/${PKG_SOLARIS_NAME}-${BUILD_VERSION}"
 PKG_DATA_SRC_DIR="${MOUNT_DIR}/code/unix/setup/pkg/${PKG_DATA_NAME}"
@@ -49,7 +49,7 @@ if [ -d ${BUILD_DIR} ]; then
 	echo "Building ${BUILD_DIR}/pkg/${SOLARIS_PKGFILE}"
         ${RM} -f ${BUILD_DIR}/pkg/${SOLARIS_PKGFILE}
         ${TOUCH} ${BUILD_DIR}/pkg/${SOLARIS_PKGFILE}
-        ${SED} -e "/VERSION=/s/.*/VERSION=${BUILD_VERSION}.${PKG_VERSION}/" \
+        ${SED} -e "/VERSION=/s/.*/VERSION=${BUILD_VERSION}-${PKG_VERSION}/" \
                 < ${PKG_SRC_DIR}/pkginfo.template \
                 > ${PKG_SRC_DIR}/pkginfo
         ${CAT} ${PKG_SRC_DIR}/prototype.template > ${PKG_SRC_DIR}/prototype
@@ -101,7 +101,9 @@ if [ -d ${BUILD_DIR} ]; then
                 > ${PKG_DATA_SRC_DIR}/pkginfo
         ${CAT} ${PKG_DATA_SRC_DIR}/prototype.template > ${PKG_DATA_SRC_DIR}/prototype
 
-	${INSTALL_DATA} ${MOUNT_DIR}/web/include/id_patch_pk3s_Q3A_EULA.txt ${PKG_DATA_SRC_DIR}/copyright
+	if [ -f ${MOUNT_DIR}/../../webspace/include/id_patch_pk3s_Q3A_EULA.txt ]; then
+	${INSTALL_DATA} ${MOUNT_DIR}/../../webspace/include/id_patch_pk3s_Q3A_EULA.txt ${PKG_DATA_SRC_DIR}/copyright
+	fi
 
         ${PKGPROTO} ${PKG_DATA_BUILD_DIR}=quake3 | \
                 ${NAWK} '{ print $1,$2,$3,$4 }' >> ${PKG_DATA_SRC_DIR}/prototype
