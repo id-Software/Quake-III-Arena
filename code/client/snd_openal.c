@@ -1528,7 +1528,7 @@ void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 	// Stop any existing music that might be playing
 	S_AL_StopBackgroundTrack();
 
-	if((!intro || !*intro) && (!intro || !*intro))
+	if((!intro || !*intro) && (!loop || !*loop))
 		return;
 
 	// Allocate a musicSource
