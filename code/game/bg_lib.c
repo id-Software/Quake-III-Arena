@@ -1067,7 +1067,7 @@ void AddInt( char **buf_p, int val, int width, int flags ) {
 	}
 
 	if( flags & LADJUST ) {
-		while ( width-- ) {
+		while ( width-- > 0) {
 			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
 		}
 	}
