@@ -137,7 +137,11 @@ static sfxHandle_t S_AL_BufferFindFree( void )
 	{
 		// Got one
 		if(knownSfx[i].filename[0] == '\0')
+		{
+			if(i > numSfx)
+				numSfx = i + 1;
 			return i;
+		}
 	}
 
 	// Shit...
@@ -158,7 +162,7 @@ static sfxHandle_t S_AL_BufferFind(const char *filename)
 	sfxHandle_t sfx = -1;
 	int i;
 
-	for(i = 0; i < MAX_SFX; i++)
+	for(i = 0; i < numSfx; i++)
 	{
 		if(!Q_stricmp(knownSfx[i].filename, filename))
 		{
@@ -233,7 +237,7 @@ static qboolean S_AL_BufferEvict( void )
 	int	i, oldestBuffer = -1;
 	int	oldestTime = Sys_Milliseconds( );
 
-	for( i = 0; i < MAX_SFX; i++ )
+	for( i = 0; i < numSfx; i++ )
 	{
 		if( !knownSfx[ i ].filename[ 0 ] )
 			continue;
@@ -407,7 +411,7 @@ void S_AL_BufferShutdown( void )
 	knownSfx[default_sfx].isLocked = qfalse;
 
 	// Free all used effects
-	for(i = 0; i < MAX_SFX; i++)
+	for(i = 0; i < numSfx; i++)
 		S_AL_BufferUnload(i);
 
 	// Clear the tables
@@ -880,6 +884,27 @@ void S_AL_UpdateEntityPosition( int entityNum, const vec3_t origin )
 
 /*
 =================
+S_AL_CheckInput
+Check whether input values from mods are out of range.
+Necessary for i.g. Western Quake3 mod which is buggy.
+=================
+*/
+static qboolean S_AL_CheckInput(int entityNum, sfxHandle_t sfx)
+{
+	if (entityNum < 0 || entityNum > MAX_GENTITIES)
+		Com_Error(ERR_DROP, "S_StartSound: bad entitynum %i", entityNum);
+
+	if (sfx < 0 || sfx >= numSfx)
+	{
+		Com_Printf(S_COLOR_RED, "ERROR: S_AL_CheckInput: handle %i out of range\n", sfx);
+                return qtrue;
+        }
+
+	return qfalse;
+}
+
+/*
+=================
 S_AL_StartLocalSound
 
 Play a local (non-spatialized) sound effect
@@ -888,6 +913,9 @@ Play a local (non-spatialized) sound effect
 static
 void S_AL_StartLocalSound(sfxHandle_t sfx, int channel)
 {
+	if(S_AL_CheckInput(0, sfx))
+		return;
+
 	// Try to grab a source
 	srcHandle_t src = S_AL_SrcAlloc(SRCPRI_LOCAL, -1, channel);
 	if(src == -1)
@@ -911,6 +939,9 @@ static
 void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx )
 {
 	vec3_t sorigin;
+
+	if(S_AL_CheckInput(origin ? 0 : entnum, sfx))
+		return;
 
 	// Try to grab a source
 	srcHandle_t src = S_AL_SrcAlloc(SRCPRI_ONESHOT, entnum, entchannel);
@@ -1038,6 +1069,9 @@ S_AL_AddLoopingSound
 static
 void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	if(S_AL_CheckInput(entityNum, sfx))
+		return;
+
 	S_AL_SanitiseVector( (vec_t *)origin );
 	S_AL_SanitiseVector( (vec_t *)velocity );
 	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
@@ -1051,6 +1085,9 @@ S_AL_AddRealLoopingSound
 static
 void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	if(S_AL_CheckInput(entityNum, sfx))
+		return;
+
 	S_AL_SanitiseVector( (vec_t *)origin );
 	S_AL_SanitiseVector( (vec_t *)velocity );
 
