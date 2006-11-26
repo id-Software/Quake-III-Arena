@@ -138,7 +138,7 @@ static sfxHandle_t S_AL_BufferFindFree( void )
 		// Got one
 		if(knownSfx[i].filename[0] == '\0')
 		{
-			if(i > numSfx)
+			if(i >= numSfx)
 				numSfx = i + 1;
 			return i;
 		}
