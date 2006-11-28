@@ -1236,7 +1236,7 @@ void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
     if( msg[ i ] == '\n' )
     {
       Com_sprintf( tempBuffer, 7, "%c[0m\n", 0x1B );
-      strncat( buffer, tempBuffer, bufferSize );
+      strncat( buffer, tempBuffer, bufferSize - 1);
       i++;
     }
     else if( msg[ i ] == Q_COLOR_ESCAPE )
@@ -1258,7 +1258,7 @@ void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
         if( escapeCode )
         {
           Com_sprintf( tempBuffer, 7, "%c[%sm", 0x1B, escapeCode );
-          strncat( buffer, tempBuffer, bufferSize );
+          strncat( buffer, tempBuffer, bufferSize - 1);
         }
 
         i++;
@@ -1267,7 +1267,7 @@ void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
     else
     {
       Com_sprintf( tempBuffer, 7, "%c", msg[ i++ ] );
-      strncat( buffer, tempBuffer, bufferSize );
+      strncat( buffer, tempBuffer, bufferSize - 1);
     }
   }
 }

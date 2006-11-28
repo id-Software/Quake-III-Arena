@@ -469,9 +469,9 @@ int PC_StringizeTokens(token_t *tokens, token_t *token)
 	strcat(token->string, "\"");
 	for (t = tokens; t; t = t->next)
 	{
-		strncat(token->string, t->string, MAX_TOKEN - strlen(token->string));
+		strncat(token->string, t->string, MAX_TOKEN - strlen(token->string) - 1);
 	} //end for
-	strncat(token->string, "\"", MAX_TOKEN - strlen(token->string));
+	strncat(token->string, "\"", MAX_TOKEN - strlen(token->string) - 1);
 	return qtrue;
 } //end of the function PC_StringizeTokens
 //============================================================================
@@ -1015,7 +1015,7 @@ int PC_Directive_include(source_t *source)
 				break;
 			} //end if
 			if (token.type == TT_PUNCTUATION && *token.string == '>') break;
-			strncat(path, token.string, MAX_PATH);
+			strncat(path, token.string, MAX_PATH - 1);
 		} //end while
 		if (*token.string != '>')
 		{
