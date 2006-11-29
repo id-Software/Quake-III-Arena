@@ -19,3 +19,14 @@ Removing the SDL/OpenAL header files from SVN. Having them in SVN makes it easie
 for non-Linux platforms to compile the game. This isn't changing.
 
 MP3 support. It is already done, see: http://icculus.org/quake3/?page=patches
+
+All development should take place on the trunk. This includes bug
+fixes, new features and experimental stuff.
+
+Release branches should not receive any commits that aren't also made
+to the trunk. Normally you /shouldn't/ commit to release branches as
+such commits are periodically merged from the trunk. These merges are
+harder to perform if there are sporadic commits made in the interim.
+
+Under NO CIRCUMSTANCES ever commit to a tag. A tag is a static
+snapshot which is intended to be unchanging.
