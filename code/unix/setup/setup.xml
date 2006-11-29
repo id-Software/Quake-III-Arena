@@ -23,6 +23,9 @@
      <files cdromid="CD 1" path="baseq3" size="457M">
        Quake3/baseq3/pak0.pk3
      </files>
+   </option>
+   <option required="true" install="true" show="false">
+     This needs to be fixed properly.
      <files path="baseq3">
        idpatchpk3s.tar
      </files>
