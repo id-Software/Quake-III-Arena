@@ -5,7 +5,7 @@ MOUNT_DIR="../../.."
 
 # Solaris stuff
 PLATFORM=`uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'`
-if [ "X`uname -m`" = "Xi386" ]; then
+if [ "X`uname -m`" = "Xi86pc" ]; then
 	ARCH=i386
 else
 	ARCH=sparc

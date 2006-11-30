@@ -665,13 +665,20 @@ ifeq ($(PLATFORM),sunos)
       -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
       -mtune=ultrasparc -mv8plus -mno-faster-structs \
       -funroll-loops
-    BASE_CFLAGS += -DNO_VM_COMPILED
   else
   ifeq ($(ARCH),i386)
-    OPTIMIZE = -O3 -march=i586  -ffast-math \
-      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
-      -funroll-loops -fstrength-reduce
+    OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math \
+      -funroll-loops -falign-loops=2 -falign-jumps=2 \
+      -falign-functions=2 -fstrength-reduce
+    HAVE_VM_COMPILED=true
+    BASE_CFLAGS += -m32
+    LDFLAGS+=-m32
+    GL_CFLAGS+= -I/usr/X11/include/NVIDIA
   endif
+  endif
+
+  ifneq ($(HAVE_VM_COMPILED),true)
+    BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
   DEBUG_CFLAGS = $(BASE_CFLAGS) -ggdb -O0
@@ -691,12 +698,6 @@ ifeq ($(PLATFORM),sunos)
     CLIENT_LDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
   else
     CLIENT_LDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
-  endif
-
-  ifeq ($(ARCH),i386)
-    # Solarix x86 make ...
-    BASE_CFLAGS += -m32
-    LDFLAGS+=-m32
   endif
 
 else # ifeq sunos
