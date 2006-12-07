@@ -267,8 +267,8 @@ static const char *XLateKey(SDL_keysym *keysym, int *key)
     //else if (ch >= 'A' && ch <= 'Z')
     //  ch = ch - 'A' + 'a';
 
-    // tjw: translate K_BACKSPACE to ctrl-h for MACOS_X (others?)
-    if (ch == K_BACKSPACE)
+    // translate K_BACKSPACE to ctrl-h for MACOS_X (others?)
+    if (ch == K_BACKSPACE && keysym->sym != SDLK_DELETE)
     {
       *key = 'h' - 'a' + 1;
       buf[0] = *key;
