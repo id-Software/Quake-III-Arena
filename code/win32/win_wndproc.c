@@ -55,7 +55,7 @@ static void WIN_DisableAltTab( void )
 	{
 		BOOL old;
 
-		SystemParametersInfo( SPI_SCREENSAVERRUNNING, 1, &old, 0 );
+		SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 1, &old, 0 );
 	}
 	s_alttab_disabled = qtrue;
 }
@@ -72,7 +72,7 @@ static void WIN_EnableAltTab( void )
 		{
 			BOOL old;
 
-			SystemParametersInfo( SPI_SCREENSAVERRUNNING, 0, &old, 0 );
+			SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 0, &old, 0 );
 		}
 
 		s_alttab_disabled = qfalse;
