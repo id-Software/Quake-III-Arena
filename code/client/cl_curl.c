@@ -105,7 +105,7 @@ static void *GPA(char *str)
 	}
 	else
 	{
-		Com_DPrintf("Loaded symbol %s (0x%08X)\n", str, rv);
+		Com_DPrintf("Loaded symbol %s (0x%p)\n", str, rv);
         return rv;
 	}
 }
@@ -347,7 +347,7 @@ void CL_cURL_PerformDownload(void)
 
 		qcurl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE,
 			&code);	
-		Com_Error(ERR_DROP, "Download Error: %s Code: %d URL: %s",
+		Com_Error(ERR_DROP, "Download Error: %s Code: %ld URL: %s",
 			qcurl_easy_strerror(msg->data.result),
 			code, clc.downloadURL);
 	}

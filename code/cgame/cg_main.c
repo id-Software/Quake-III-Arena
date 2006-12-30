@@ -1448,7 +1448,7 @@ void CG_LoadMenus(const char *menuFile) {
 		trap_Error( va( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile ) );
 		len = trap_FS_FOpenFile( "ui/hud.txt", &f, FS_READ );
 		if (!f) {
-			trap_Error( va( S_COLOR_RED "default menu file not found: ui/hud.txt, unable to continue!\n", menuFile ) );
+			trap_Error( va( S_COLOR_RED "default menu file not found: ui/hud.txt, unable to continue!\n") );
 		}
 	}
 

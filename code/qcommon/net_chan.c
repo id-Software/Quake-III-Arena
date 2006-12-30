@@ -397,8 +397,7 @@ qboolean Netchan_Process( netchan_t *chan, msg_t *msg ) {
 		if ( fragmentStart != chan->fragmentLength ) {
 			if ( showdrop->integer || showpackets->integer ) {
 				Com_Printf( "%s:Dropped a message fragment\n"
-				, NET_AdrToString( chan->remoteAddress )
-				, sequence);
+				, NET_AdrToString( chan->remoteAddress ));
 			}
 			// we can still keep the part that we have so far,
 			// so we don't need to clear chan->fragmentLength

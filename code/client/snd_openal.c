@@ -896,7 +896,7 @@ static qboolean S_AL_CheckInput(int entityNum, sfxHandle_t sfx)
 
 	if (sfx < 0 || sfx >= numSfx)
 	{
-		Com_Printf(S_COLOR_RED, "ERROR: S_AL_CheckInput: handle %i out of range\n", sfx);
+		Com_Printf(S_COLOR_RED "ERROR: S_AL_CheckInput: handle %i out of range\n", sfx);
                 return qtrue;
         }
 

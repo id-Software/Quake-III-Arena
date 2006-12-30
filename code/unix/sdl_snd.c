@@ -186,7 +186,7 @@ static void print_audiospec(const char *str, const SDL_AudioSpec *spec)
 	if( fmt ) {
 		Com_Printf( "  Format:   %s\n", fmt );
 	} else {
-		Com_Printf( "  Format:   " S_COLOR_RED "UNKNOWN\n", fmt );
+		Com_Printf( "  Format:   " S_COLOR_RED "UNKNOWN\n");
 	}
 
 	Com_Printf( "  Freq:     %d\n", (int) spec->freq );

@@ -726,7 +726,7 @@ intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	lastVM = vm;
 
 	if ( vm_debugLevel ) {
-	  Com_Printf( "VM_Call( %ld )\n", callnum );
+	  Com_Printf( "VM_Call( %d )\n", callnum );
 	}
 
 	// if we have a dll loaded, call it directly

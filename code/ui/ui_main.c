@@ -946,7 +946,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 		trap_Error( va( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile ) );
 		handle = trap_PC_LoadSource( "ui/menus.txt" );
 		if (!handle) {
-			trap_Error( va( S_COLOR_RED "default menu file not found: ui/menus.txt, unable to continue!\n", menuFile ) );
+			trap_Error( va( S_COLOR_RED "default menu file not found: ui/menus.txt, unable to continue!\n") );
 		}
 	}
 

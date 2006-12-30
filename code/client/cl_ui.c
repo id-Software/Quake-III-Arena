@@ -767,11 +767,11 @@ The ui module is making a system call
 intptr_t CL_UISystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case UI_ERROR:
-		Com_Error( ERR_DROP, "%s", VMA(1) );
+		Com_Error( ERR_DROP, "%s", (const char*)VMA(1) );
 		return 0;
 
 	case UI_PRINT:
-		Com_Printf( "%s", VMA(1) );
+		Com_Printf( "%s", (const char*)VMA(1) );
 		return 0;
 
 	case UI_MILLISECONDS:
