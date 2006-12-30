@@ -1187,29 +1187,21 @@ Changes or adds a key/value pair
 */
 void Info_SetValueForKey( char *s, const char *key, const char *value ) {
 	char	newi[MAX_INFO_STRING];
+	const char* blacklist = "\\;\"";
 
 	if ( strlen( s ) >= MAX_INFO_STRING ) {
 		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
 	}
 
-	if (strchr (key, '\\') || strchr (value, '\\'))
+	for(; *blacklist; ++blacklist)
 	{
-		Com_Printf ("Can't use keys or values with a \\\n");
-		return;
+		if (strchr (key, *blacklist) || strchr (value, *blacklist))
+		{
+			Com_Printf (S_COLOR_YELLOW "Can't use keys or values with a '%c': %s = %s\n", *blacklist, key, value);
+			return;
+		}
 	}
-
-	if (strchr (key, ';') || strchr (value, ';'))
-	{
-		Com_Printf ("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strchr (key, '\"') || strchr (value, '\"'))
-	{
-		Com_Printf ("Can't use keys or values with a \"\n");
-		return;
-	}
-
+	
 	Info_RemoveKey (s, key);
 	if (!value || !strlen(value))
 		return;
@@ -1235,27 +1227,19 @@ Changes or adds a key/value pair
 */
 void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	char	newi[BIG_INFO_STRING];
+	const char* blacklist = "\\;\"";
 
 	if ( strlen( s ) >= BIG_INFO_STRING ) {
 		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
 	}
 
-	if (strchr (key, '\\') || strchr (value, '\\'))
+	for(; *blacklist; ++blacklist)
 	{
-		Com_Printf ("Can't use keys or values with a \\\n");
-		return;
-	}
-
-	if (strchr (key, ';') || strchr (value, ';'))
-	{
-		Com_Printf ("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strchr (key, '\"') || strchr (value, '\"'))
-	{
-		Com_Printf ("Can't use keys or values with a \"\n");
-		return;
+		if (strchr (key, *blacklist) || strchr (value, *blacklist))
+		{
+			Com_Printf (S_COLOR_YELLOW "Can't use keys or values with a '%c': %s = %s\n", *blacklist, key, value);
+			return;
+		}
 	}
 
 	Info_RemoveKey_Big (s, key);
