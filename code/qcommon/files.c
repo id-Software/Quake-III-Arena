@@ -196,12 +196,20 @@ or configs will never get loaded from disk!
 
 */
 
-#define	DEMOGAME			"demota"
-
 // every time a new demo pk3 file is built, this checksum must be updated.
 // the easiest way to get it is to just run the game and see what it spits out
 #define	DEMO_PAK0_CHECKSUM	2985612116u
-#define	PAK0_CHECKSUM				1566731103u
+static const unsigned pak_checksums[] = {
+	1566731103u,
+	298122907u,
+	412165236u,
+	2991495316u,
+	1197932710u,
+	4087071573u,
+	3709064859u,
+	908855077u,
+	977125798u
+};
 
 // if this is defined, the executable positively won't work with any paks other
 // than the demo pak, even if productid is present.  This is only used for our
@@ -2893,14 +2901,18 @@ Q3 media pak0.pk3, you'll want to remove this function
 static void FS_CheckPak0( void )
 {
 	searchpath_t	*path;
-	qboolean			foundPak0 = qfalse;
+	qboolean founddemo = qfalse;
+	unsigned foundPak = 0;
 
 	for( path = fs_searchpaths; path; path = path->next ) {
-		if( path->pack &&
-				!Q_stricmpn( path->pack->pakBasename, "pak0", MAX_OSPATH ) &&
-				(!Q_stricmpn( path->pack->pakGamename, BASEGAME, MAX_OSPATH ) ||
-				!Q_stricmpn( path->pack->pakGamename, "demoq3", MAX_OSPATH ))) {
-			foundPak0 = qtrue;
+		const char* pakBasename = path->pack->pakBasename;
+
+		if(!path->pack)
+			continue;
+
+		if(!Q_stricmpn( path->pack->pakGamename, "demoq3", MAX_OSPATH )
+		&& !Q_stricmpn( pakBasename, "pak0", MAX_OSPATH )) {
+			founddemo = qtrue;
 
 			if( path->pack->checksum == DEMO_PAK0_CHECKSUM ) {
 				Com_Printf( "\n\n"
@@ -2909,22 +2921,56 @@ static void FS_CheckPak0( void )
 						"from the demo. This may work fine, but it is not\n"
 						"guaranteed or supported.\n"
 						"**************************************************\n\n\n" );
-			} else if( path->pack->checksum != PAK0_CHECKSUM ) {
-				Com_Printf( "\n\n"
+			}
+		} else if(!Q_stricmpn( path->pack->pakGamename, BASEGAME, MAX_OSPATH )
+		&& strlen(pakBasename) == 4 && !Q_stricmpn( pakBasename, "pak", 3 )
+		&& pakBasename[3] >= '0' && pakBasename[3] <= '8') {
+
+			if( path->pack->checksum != pak_checksums[pakBasename[3]-'0'] ) {
+				if(pakBasename[0] == '0') {
+					Com_Printf("\n\n"
 						"**************************************************\n"
 						"WARNING: pak0.pk3 is present but its checksum (%u)\n"
 						"is not correct. Please re-copy pak0.pk3 from your\n"
 						"legitimate Q3 CDROM.\n"
 						"**************************************************\n\n\n",
 						path->pack->checksum );
+				} else {
+					Com_Printf("\n\n"
+						"**************************************************\n"
+						"WARNING: pak%d.pk3 is present but its checksum (%u)\n"
+						"is not correct. Please re-install the point release\n"
+						"**************************************************\n\n\n",
+						pakBasename[3]-'0', path->pack->checksum );
+				}
 			}
+
+			foundPak |= 1<<(pakBasename[3]-'0');
 		}
 	}
 
-	if( !foundPak0 ) {
-		Com_Error( ERR_FATAL, "Couldn't find pak0.pk3. Check that your Q3\n"
-				"executable is in the correct place and that every file\n"
-				"in the %s directory is present and readable.", BASEGAME);
+	if( !founddemo && foundPak != 0x1ff ) {
+		if((foundPak&1) != 1 ) {
+			Com_Printf("\n\n"
+			"pak0.pk3 is missing. Please copy it\n"
+			"from your legitimate Q3 CDROM.\n");
+		}
+
+		if((foundPak&0x1fe) != 0x1fe ) {
+			Com_Printf("\n\n"
+			"Point Release files are missing. Please\n"
+			"re-install the 1.32 point release.\n");
+		}
+
+		Com_Printf("\n\n"
+			"Also check that your Q3 executable is in\n"
+			"the correct place and that every file\n"
+			"in the %s directory is present and readable.\n", BASEGAME);
+
+		if(!fs_gamedirvar->string[0]
+		|| !Q_stricmp( fs_gamedirvar->string, BASEGAME )
+		|| !Q_stricmp( fs_gamedirvar->string, "missionpack" ))
+			Com_Error(ERR_FATAL, "\n*** you need to install Quake III Arena in order to play ***");
 	}
 }
 
