@@ -980,7 +980,7 @@ void CL_InitKeyCommands( void ) {
 CL_AddKeyUpCommands
 ===================
 */
-void CL_AddKeyUpCommands( int key, char *kb ) {
+void CL_AddKeyUpCommands( int key, char *kb, unsigned time) {
 	int i;
 	char button[1024], *buttonPtr;
 	char	cmd[1024];
@@ -1126,7 +1126,7 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 	if (!down) {
 		kb = keys[key].binding;
 
-		CL_AddKeyUpCommands( key, kb );
+		CL_AddKeyUpCommands( key, kb, time );
 
 		if ( cls.keyCatchers & KEYCATCH_UI && uivm ) {
 			VM_Call( uivm, UI_KEY_EVENT, key, down );
