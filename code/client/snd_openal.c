@@ -913,11 +913,14 @@ Play a local (non-spatialized) sound effect
 static
 void S_AL_StartLocalSound(sfxHandle_t sfx, int channel)
 {
+	srcHandle_t src;
+	
 	if(S_AL_CheckInput(0, sfx))
 		return;
 
 	// Try to grab a source
-	srcHandle_t src = S_AL_SrcAlloc(SRCPRI_LOCAL, -1, channel);
+	src = S_AL_SrcAlloc(SRCPRI_LOCAL, -1, channel);
+	
 	if(src == -1)
 		return;
 
@@ -939,12 +942,13 @@ static
 void S_AL_StartSound( vec3_t origin, int entnum, int entchannel, sfxHandle_t sfx )
 {
 	vec3_t sorigin;
+	srcHandle_t src;
 
 	if(S_AL_CheckInput(origin ? 0 : entnum, sfx))
 		return;
 
 	// Try to grab a source
-	srcHandle_t src = S_AL_SrcAlloc(SRCPRI_ONESHOT, entnum, entchannel);
+	src = S_AL_SrcAlloc(SRCPRI_ONESHOT, entnum, entchannel);
 	if(src == -1)
 		return;
 
