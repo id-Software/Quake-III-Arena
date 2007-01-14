@@ -30,9 +30,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef SVN_VERSION
   #define SVN_VERSION Q3_VERSION
 #endif
-#define CLIENT_WINDOW_TITLE   "icculus.org/quake3"
+#define CLIENT_WINDOW_TITLE   "ioquake3"
 #define CLIENT_WINDOW_ICON    "ioq3"
-#define CONSOLE_WINDOW_TITLE  "icculus.org/quake3 console"
+#define CONSOLE_WINDOW_TITLE  "ioquake3 console"
 #define CONSOLE_WINDOW_ICON   "ioq3 console"
 // 1.32 released 7-10-2002
 
