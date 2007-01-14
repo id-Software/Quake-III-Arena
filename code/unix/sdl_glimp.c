@@ -10,7 +10,7 @@
  *  GPL release of Quake 3.
  *
  * Written by Ryan C. Gordon (icculus@icculus.org). Please refer to
- *    http://icculus.org/quake3/ for the latest version of this code.
+ *    http://ioquake3.org/ for the latest version of this code.
  *
  *  Patches and comments are welcome at the above address.
  *
