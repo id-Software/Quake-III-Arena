@@ -18,7 +18,7 @@ pk3s from either Team Arena or the original game itself.
 Removing the SDL/OpenAL header files from SVN. Having them in SVN makes it easier
 for non-Linux platforms to compile the game. This isn't changing.
 
-MP3 support. It is already done, see: http://icculus.org/quake3/?page=patches
+MP3 support. It is already done, see: http://ioquake3.org/?page=patches
 
 All development should take place on the trunk. This includes bug
 fixes, new features and experimental stuff.

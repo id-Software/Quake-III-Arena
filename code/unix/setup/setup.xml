@@ -2,7 +2,7 @@
 <install product="ioquake3"
 	desc="ioquake3"
 	version="@VERSION@"
-	update_url="http://www.icculus.org/quake3/updates.txt"
+	update_url="http://www.ioquake3.org/updates.txt"
 	promptbinaries="yes"
 	reinstall="yes"
 	nopromptoverwrite="yes"
