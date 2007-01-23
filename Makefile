@@ -1859,10 +1859,10 @@ installer: build_release
 	$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
 
 dist:
-	rm -rf quake3-$(SVN_VERSION)
-	svn export . quake3-$(SVN_VERSION)
-	tar --owner=root --group=root --force-local -cjf quake3-$(SVN_VERSION).tar.bz2 quake3-$(SVN_VERSION)
-	rm -rf quake3-$(SVN_VERSION)
+	rm -rf ioquake3-$(SVN_VERSION)
+	svn export . ioquake3-$(SVN_VERSION)
+	tar --owner=root --group=root --force-local -cjf ioquake3-$(SVN_VERSION).tar.bz2 ioquake3-$(SVN_VERSION)
+	rm -rf ioquake3-$(SVN_VERSION)
 
 #############################################################################
 # DEPENDENCIES
