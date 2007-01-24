@@ -1109,7 +1109,7 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 
 		
 	default:
-		Com_Error( ERR_DROP, "Bad UI system trap: %i", args[0] );
+		Com_Error( ERR_DROP, "Bad UI system trap: %ld", (long int) args[0] );
 
 	}
 

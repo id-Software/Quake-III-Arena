@@ -698,7 +698,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 
 	default:
 	        assert(0); // bk010102
-		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
+		Com_Error( ERR_DROP, "Bad cgame system trap: %ld", (long int) args[0] );
 	}
 	return 0;
 }

@@ -422,7 +422,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		unlink(fn_s);
 		unlink(fn_o);
 
-		Com_Printf(S_COLOR_RED "can't create temporary files for vm\n", fn_s);
+		Com_Printf(S_COLOR_RED "can't create temporary file %s for vm\n", fn_s);
 		vm->compiled = qfalse;
 		return;
 	}
@@ -895,7 +895,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	fflush(qdasmout);
 #endif
 
-	Com_Printf( "VM file %s compiled to %i bytes of code (0x%lx - 0x%lx)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
+	Com_Printf( "VM file %s compiled to %i bytes of code (%p - %p)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
 
 out:
 	close(fd_o);
@@ -990,7 +990,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	);
 
 	if ( opStack != &stack[1] ) {
-		Com_Error( ERR_DROP, "opStack corrupted in compiled code (offset %d)\n", (void*)&stack[1] - opStack);
+		Com_Error( ERR_DROP, "opStack corrupted in compiled code (offset %ld)\n", (long int) ((void *) &stack[1] - opStack));
 	}
 	if ( programStack != stackOnEntry - 48 ) {
 		Com_Error( ERR_DROP, "programStack corrupted in compiled code\n" );
