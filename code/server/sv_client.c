@@ -493,8 +493,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 	// tell everyone why they got dropped
 	SV_SendServerCommand( NULL, "print \"%s" S_COLOR_WHITE " %s\n\"", drop->name, reason );
 
-	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
-	drop->state = CS_ZOMBIE;		// become free in a few seconds
 
 	if (drop->download)	{
 		FS_FCloseFile( drop->download );
@@ -514,6 +512,9 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 
 	// nuke user info
 	SV_SetUserinfo( drop - svs.clients, "" );
+	
+	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
+	drop->state = CS_ZOMBIE;		// become free in a few seconds
 
 	// if this was the last client on the server, send a heartbeat
 	// to the master so it is known the server is empty
