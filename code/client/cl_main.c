@@ -74,6 +74,8 @@ cvar_t	*cl_trn;
 
 cvar_t	*cl_lanForcePackets;
 
+cvar_t	*cl_guidServerUniq;
+
 clientActive_t		cl;
 clientConnection_t	clc;
 clientStatic_t		cls;
@@ -713,6 +715,28 @@ void CL_ClearState (void) {
 	Com_Memset( &cl, 0, sizeof( cl ) );
 }
 
+/*
+====================
+CL_UpdateGUID
+
+update cl_guid using QKEY_FILE and optional prefix
+====================
+*/
+static void CL_UpdateGUID( char *prefix, int prefix_len )
+{
+	fileHandle_t f;
+	int len;
+
+	len = FS_SV_FOpenFileRead( QKEY_FILE, &f );
+	FS_FCloseFile( f );
+
+	if( len != QKEY_SIZE ) 
+		Cvar_Set( "cl_guid", "" );
+	else
+		Cvar_Set( "cl_guid", Com_MD5File( QKEY_FILE, QKEY_SIZE,
+			prefix, prefix_len ) );
+}
+
 
 /*
 =====================
@@ -781,6 +805,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	if( CL_VideoRecording( ) ) {
 		CL_CloseAVI( );
 	}
+	CL_UpdateGUID( NULL, 0 );
 }
 
 
@@ -1036,6 +1061,7 @@ CL_Connect_f
 */
 void CL_Connect_f( void ) {
 	char	*server;
+	char	serverString[ 22 ];
 
 	if ( Cmd_Argc() != 2 ) {
 		Com_Printf( "usage: connect [server]\n");
@@ -1078,10 +1104,17 @@ void CL_Connect_f( void ) {
 	if (clc.serverAddress.port == 0) {
 		clc.serverAddress.port = BigShort( PORT_SERVER );
 	}
-	Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", cls.servername,
-		clc.serverAddress.ip[0], clc.serverAddress.ip[1],
-		clc.serverAddress.ip[2], clc.serverAddress.ip[3],
-		BigShort( clc.serverAddress.port ) );
+	Com_sprintf( serverString, sizeof( serverString ), "%i.%i.%i.%i:%i",
+                clc.serverAddress.ip[0], clc.serverAddress.ip[1],
+                clc.serverAddress.ip[2], clc.serverAddress.ip[3],
+                BigShort( clc.serverAddress.port ) );
+ 
+	Com_Printf( "%s resolved to %s\n", cls.servername, serverString );
+
+	if( cl_guidServerUniq->integer )
+		CL_UpdateGUID( serverString, strlen( serverString ) );
+	else
+		CL_UpdateGUID( NULL, 0 );
 
 	// if we aren't playing on a lan, we need to authenticate
 	// with the cd key
@@ -2480,25 +2513,48 @@ void CL_StopVideo_f( void )
   CL_CloseAVI( );
 }
 
+/*
+===============
+CL_GenerateQKey
+
+test to see if a valid QKEY_FILE exists.  If one does not, try to generate
+it by filling it with 2048 bytes of random data.
+===============
+*/
 static void CL_GenerateQKey(void)
 {
 	int len = 0;
-	unsigned char buff[2048];
+	unsigned char buff[ QKEY_SIZE ];
+	fileHandle_t f;
 
-	len = FS_ReadFile(QKEY_FILE, NULL);
-	if(len >= (int)sizeof(buff)) {
-		Com_Printf("QKEY found.\n");
+	len = FS_SV_FOpenFileRead( QKEY_FILE, &f );
+	FS_FCloseFile( f );
+	if( len == QKEY_SIZE ) {
+		Com_Printf( "QKEY found.\n" );
 		return;
 	}
 	else {
 		int i;
+
+		if( len > 0 ) {
+			Com_Printf( "QKEY file size != %d, regenerating\n",
+				QKEY_SIZE );
+		}
+
 		srand(time(0));
 		for(i = 0; i < sizeof(buff) - 1; i++) {
 			buff[i] = (unsigned char)(rand() % 255);
 		}
 		buff[i] = 0;
-		Com_Printf("QKEY generated\n");
-		FS_WriteFile(QKEY_FILE, buff, sizeof(buff));
+		f = FS_SV_FOpenFileWrite( QKEY_FILE );
+		if( !f ) {
+			Com_Printf( "QKEY could not open %s for write\n",
+				QKEY_FILE );
+			return;
+		}
+		FS_Write( buff, sizeof(buff), f );
+		FS_FCloseFile( f );
+		Com_Printf( "QKEY generated\n" );
 	}
 } 
 
@@ -2595,6 +2651,8 @@ void CL_Init( void ) {
 
 	cl_lanForcePackets = Cvar_Get ("cl_lanForcePackets", "1", CVAR_ARCHIVE);
 
+	cl_guidServerUniq = Cvar_Get ("cl_guidServerUniq", "1", CVAR_ARCHIVE);
+
 	// userinfo
 	Cvar_Get ("name", "UnnamedPlayer", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get ("rate", "3000", CVAR_USERINFO | CVAR_ARCHIVE );
@@ -2655,7 +2713,8 @@ void CL_Init( void ) {
 	Cvar_Set( "cl_running", "1" );
 
 	CL_GenerateQKey();	
-	Cvar_Get("cl_guid", Com_MD5File(QKEY_FILE, 0), CVAR_USERINFO | CVAR_ROM);
+	Cvar_Get( "cl_guid", "", CVAR_USERINFO | CVAR_ROM );
+	CL_UpdateGUID( NULL, 0 );
 
 	Com_Printf( "----- Client Initialization Complete -----\n" );
 }
