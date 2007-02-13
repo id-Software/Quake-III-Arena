@@ -23,6 +23,7 @@ for further development. Some of the major features currently implemented are:
   * Much improved QVM tools
   * Support for various esoteric operating systems (see
     http://ioquake3.org/?page=status)
+  * cl_guid support
   * HTTP/FTP download redirection (using cURL)
   * Multiuser support on Windows systems (user specific game data
     is stored in "%APPDATA%\Quake3")
@@ -149,6 +150,7 @@ New cvars
   cl_platformSensitivity            - read only, indicates the mouse input
                                       scaling
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
+  cl_guidServerUniq                 - makes cl_guid unique for each server
   cl_cURLLib                        - filename of cURL library to load
   sv_dlURL                          - the base of the HTTP or FTP site that
                                       holds custom pk3 files for your server 
@@ -203,6 +205,24 @@ Creating mods compatible with Q3 1.32b
   is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
   compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it
   still exists when you read this) for more details.
+
+cl_guid Support
+  cl_guid is a cvar which is part of the client's USERINFO string.  Its value
+  is a 32 character string made up of [a-f] and [0-9] characters.  This
+  value is pseudo-unique for every player.  Id's Quake 3 Arena client also
+  sets cl_guid, but only if Punkbuster is enabled on the client.
+
+  If cl_guidServerUniq is non-zero (the default), then this value is also
+  pseudo-unique for each server a client connects to (based on IP:PORT of
+  the server). 
+
+  The purpose of cl_guid is to add an identifier for each player on
+  a server.  This value can be reset by the client at any time so it's not
+  useful for blocking access.  However, it can have at least two uses in
+  your mod's game code:
+    1) improve logging to allow statistical tools to index players by more
+       than just name
+    2) granting some weak admin rights to players without requiring passwords 
 
 Using HTTP/FTP Download Support (Server)
   You can enable redirected downloads on your server even if it's not
