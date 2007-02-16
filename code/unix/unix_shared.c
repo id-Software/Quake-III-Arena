@@ -174,6 +174,22 @@ char *strlwr (char *s) {
   return s; // bk001204 - duh
 }
 
+qboolean Sys_RandomBytes( byte *string, int len )
+{
+  FILE *fp;
+
+  fp = fopen( "/dev/urandom", "r" );
+  if( !fp )
+    return qfalse;
+
+  if( !fread( string, sizeof( byte ), len, fp ) ) {
+	fclose( fp );
+	return qfalse;
+  }
+  fclose( fp );
+  return qtrue; 
+}
+
 //============================================
 
 #define	MAX_FOUND_FILES	0x1000

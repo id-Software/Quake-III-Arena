@@ -1001,6 +1001,8 @@ int		Sys_Milliseconds (void);
 
 void	Sys_SnapVector( float *v );
 
+qboolean Sys_RandomBytes( byte *string, int len );
+
 // the system console is shown when a dedicated server is running
 void	Sys_DisplaySystemConsole( qboolean show );
 

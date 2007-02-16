@@ -3217,3 +3217,24 @@ void Field_AutoComplete( field_t *field )
 
 	Field_CompleteCommand( completionField->buffer, qtrue, qtrue );
 }
+
+/*
+==================
+Com_RandomBytes
+
+fills string array with len radom bytes, peferably from the OS randomizer
+==================
+*/
+void Com_RandomBytes( byte *string, int len )
+{
+	int i;
+
+	if( Sys_RandomBytes( string, len ) )
+		return;
+
+	Com_Printf( "Com_RandomBytes: using weak randomization\n" );
+	srand( time( 0 ) );
+	for( i = 0; i < len; i++ )
+		string[i] = (unsigned char)( rand() % 255 );
+}
+

@@ -2534,18 +2534,14 @@ static void CL_GenerateQKey(void)
 		return;
 	}
 	else {
-		int i;
-
 		if( len > 0 ) {
 			Com_Printf( "QKEY file size != %d, regenerating\n",
 				QKEY_SIZE );
 		}
 
-		srand(time(0));
-		for(i = 0; i < sizeof(buff) - 1; i++) {
-			buff[i] = (unsigned char)(rand() % 255);
-		}
-		buff[i] = 0;
+		Com_Printf( "QKEY building random string\n" );
+		Com_RandomBytes( buff, sizeof(buff) );
+
 		f = FS_SV_FOpenFileWrite( QKEY_FILE );
 		if( !f ) {
 			Com_Printf( "QKEY could not open %s for write\n",
