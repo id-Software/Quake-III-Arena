@@ -746,6 +746,10 @@ void CL_InitCGame( void ) {
 	// otherwise server commands sent just before a gamestate are dropped
 	VM_Call( cgvm, CG_INIT, clc.serverMessageSequence, clc.lastExecutedServerCommand, clc.clientNum );
 
+	// reset any CVAR_CHEAT cvars registered by cgame
+	if ( !cl_connectedToCheatServer )
+		Cvar_SetCheatState();
+
 	// we will send a usercmd this frame, which
 	// will cause the server to send us the first snapshot
 	cls.state = CA_PRIMED;

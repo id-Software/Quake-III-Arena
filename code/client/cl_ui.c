@@ -1171,6 +1171,10 @@ void CL_InitUI( void ) {
 		// init for this gamestate
 		VM_Call( uivm, UI_INIT, (cls.state >= CA_AUTHORIZING && cls.state < CA_ACTIVE) );
 	}
+
+	// reset any CVAR_CHEAT cvars registered by ui
+	if ( !cl_connectedToCheatServer ) 
+		Cvar_SetCheatState();
 }
 
 qboolean UI_usesUniqueCDKey( void ) {
