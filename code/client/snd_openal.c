@@ -42,7 +42,6 @@ cvar_t *s_alGraceDistance;
 cvar_t *s_alDriver;
 cvar_t *s_alDevice;
 cvar_t *s_alAvailableDevices;
-cvar_t *s_alMaxSpeakerDistance;
 
 /*
 =================
@@ -1096,8 +1095,8 @@ void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t 
 	// There are certain maps (*cough* Q3:TA mpterra*) that have large quantities
 	// of ET_SPEAKERS in the PVS at any given time. OpenAL can't cope with mixing
 	// large numbers of sounds, so this culls them by distance
-	if( DistanceSquared( origin, lastListenerOrigin ) > 
-			s_alMaxSpeakerDistance->value * s_alMaxSpeakerDistance->value )
+	if( DistanceSquared( origin, lastListenerOrigin ) > (s_alMaxDistance->value + s_alGraceDistance->value) *
+							    (s_alMaxDistance->value + s_alGraceDistance->value) )
 		return;
 
 	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
@@ -1883,7 +1882,6 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alMaxDistance = Cvar_Get("s_alMaxDistance", "1024", CVAR_CHEAT);
 	s_alRolloff = Cvar_Get( "s_alRolloff", "2", CVAR_CHEAT);
 	s_alGraceDistance = Cvar_Get("s_alGraceDistance", "512", CVAR_CHEAT);
-	s_alMaxSpeakerDistance = Cvar_Get( "s_alMaxSpeakerDistance", "1024", CVAR_ARCHIVE );
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE );
 

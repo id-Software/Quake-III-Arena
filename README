@@ -125,8 +125,6 @@ New cvars
                                       source
   s_alGraceDistance                 - after having passed MaxDistance, length
                                       until sounds are completely inaudible.
-  s_alMaxSpeakerDistance            - ET_SPEAKERS beyond this distance are
-                                      culled
   s_alDriver                        - which OpenAL library to use
   s_alDevice                        - which OpenAL device to use
   s_alAvailableDevices              - list of available OpenAL devices
