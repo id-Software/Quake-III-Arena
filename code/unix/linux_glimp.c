@@ -199,8 +199,8 @@ static const char *Q_stristr( const char *s, const char *find)
 
 static char *XLateKey(XKeyEvent *ev, int *key)
 {
-  static char buf[64];
-  static char bufnomod[2];
+  static unsigned char buf[64];
+  static unsigned char bufnomod[2];
   KeySym keysym;
   int XLookupRet;
 
