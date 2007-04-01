@@ -1470,7 +1470,7 @@ void CL_SaveConsoleHistory( void )
 			saveBufferLength = strlen( consoleSaveBuffer );
 
 			//ICK
-			additionalLength = lineLength + strlen( "999 999 999	" );
+			additionalLength = lineLength + strlen( "999 999 999  " );
 
 			if( saveBufferLength + additionalLength < MAX_CONSOLE_SAVE_BUFFER )
 			{
