@@ -747,6 +747,7 @@ void SV_Shutdown( char *finalmsg ) {
 	Com_Printf( "---------------------------\n" );
 
 	// disconnect any local clients
-	CL_Disconnect( qfalse );
+	if( sv_killserver->integer != 2 )
+		CL_Disconnect( qfalse );
 }
 

@@ -508,7 +508,8 @@ void CL_PlayDemo_f( void ) {
 	}
 
 	// make sure a local server is killed
-	Cvar_Set( "sv_killserver", "1" );
+	// 2 means don't force disconnect of local client
+	Cvar_Set( "sv_killserver", "2" );
 
 	CL_Disconnect( qtrue );
 
