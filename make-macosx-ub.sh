@@ -1,7 +1,7 @@
 #!/bin/sh
 APPBUNDLE=ioquake3.app
 BINARY=ioquake3.ub
-PKGINFO=APPIOQ3
+PKGINFO=APPLIOQ3
 ICNS=code/unix/MacSupport/ioquake3.icns
 DESTDIR=build/release-darwin-ub
 BASEDIR=baseq3
