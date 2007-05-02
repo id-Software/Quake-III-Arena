@@ -23,6 +23,8 @@ For 1.35+:
 * Replace windows DirectX backend with SDL
 * Graphical "ioquake3" watermark in videos, optional, on by default
 * Gamma stuff while recording videos.
+* Application for OS X at least to launch mods with appropriate hunkmegs, etc.
 
-For 1.99:
+For 2.0:
 * Four player split-screen
+* Multi-platform application to launch and download mods.
