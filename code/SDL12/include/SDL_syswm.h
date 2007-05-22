@@ -1,35 +1,32 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2004 Sam Lantinga
+    Copyright (C) 1997-2006 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
+    modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+    version 2.1 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
+    Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
 */
-
-#ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id: SDL_syswm.h,v 1.18 2005/09/08 06:16:13 icculus Exp $";
-#endif
 
 /* Include file for SDL custom system window manager hooks */
 
 #ifndef _SDL_syswm_h
 #define _SDL_syswm_h
 
+#include "SDL_stdinc.h"
+#include "SDL_error.h"
 #include "SDL_version.h"
 
 #include "begin_code.h"
@@ -48,23 +45,18 @@ struct SDL_SysWMinfo;
 typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 #else
 
+/* This is the structure for custom window manager events */
+#if defined(SDL_VIDEO_DRIVER_X11)
 #if defined(__APPLE__) && defined(__MACH__)
-// conflicts with Quickdraw.h
+/* conflicts with Quickdraw.h */
 #define Cursor X11Cursor
 #endif
 
-/* This is the structure for custom window manager events */
-#if (defined(unix) || defined(__unix__) || defined(_AIX) || \
-         defined(__OpenBSD__) || defined(__NetBSD__) || \
-         (defined(__APPLE__) && defined(__MACH__))) && \
-    (!defined(DISABLE_X11) && !defined(__CYGWIN32__) && !defined(ENABLE_NANOX) && \
-         !defined(__QNXNTO__))
- /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
 #if defined(__APPLE__) && defined(__MACH__)
-// matches the re-define above
+/* matches the re-define above */
 #undef Cursor
 #endif
 
@@ -108,7 +100,7 @@ typedef struct SDL_SysWMinfo {
 	} info;
 } SDL_SysWMinfo;
 
-#elif defined(ENABLE_NANOX)
+#elif defined(SDL_VIDEO_DRIVER_NANOX)
 #include <microwin/nano-X.h>
 
 /* The generic custom event structure */
@@ -123,7 +115,7 @@ typedef struct SDL_SysWMinfo {
 	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
 
-#elif defined(WIN32)
+#elif defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW) || defined(SDL_VIDEO_DRIVER_GAPI)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -143,7 +135,7 @@ typedef struct SDL_SysWMinfo {
 	HGLRC hglrc;			/* The OpenGL context, if any */
 } SDL_SysWMinfo;
 
-#elif defined(__riscos__)
+#elif defined(SDL_VIDEO_DRIVER_RISCOS)
 
 /* RISC OS custom event structure */
 struct SDL_SysWMmsg {
@@ -160,7 +152,7 @@ typedef struct SDL_SysWMinfo {
 	int window;		/* The RISC OS display window */
 } SDL_SysWMinfo;
 
-#elif defined(__QNXNTO__)
+#elif defined(SDL_VIDEO_DRIVER_PHOTON)
 #include <sys/neutrino.h>
 #include <Ph.h>
 
@@ -190,7 +182,7 @@ typedef struct SDL_SysWMinfo {
 	int data;
 } SDL_SysWMinfo;
 
-#endif /* OS type */
+#endif /* video driver type */
 
 #endif /* SDL_PROTOTYPES_ONLY */
 

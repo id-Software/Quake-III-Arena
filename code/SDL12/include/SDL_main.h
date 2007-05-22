@@ -1,38 +1,35 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2004 Sam Lantinga
+    Copyright (C) 1997-2006 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
+    modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+    version 2.1 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
+    Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
 */
 
-#ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id: SDL_main.h,v 1.13 2005/09/27 09:00:42 icculus Exp $";
-#endif
-
 #ifndef _SDL_main_h
 #define _SDL_main_h
 
+#include "SDL_stdinc.h"
+
 /* Redefine main() on Win32 and MacOS so that it is called by winmain.c */
 
-#if defined(WIN32) || defined(_WIN32) || \
+#if defined(__WIN32__) || \
     (defined(__MWERKS__) && !defined(__BEOS__)) || \
-    defined(macintosh) || defined(__APPLE__) || \
+    defined(__MACOS__) || defined(__MACOSX__) || \
     defined(__SYMBIAN32__) || defined(QWS)
 
 #ifdef __cplusplus
@@ -57,10 +54,9 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 
 
 /* From the SDL library code -- needed for registering the app on Win32 */
-#if defined(WIN32)
-#include "SDL_types.h"
-#include "begin_code.h"
+#ifdef __WIN32__
 
+#include "begin_code.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,7 +66,7 @@ extern DECLSPEC void SDLCALL SDL_SetModuleHandle(void *hInst);
 /* This can also be called, but is no longer necessary */
 extern DECLSPEC int SDLCALL SDL_RegisterApp(char *name, Uint32 style, void *hInst);
 /* This can also be called, but is no longer necessary (SDL_Quit calls it) */
-extern DECLSPEC void SDLCALL SDL_UnregisterApp();
+extern DECLSPEC void SDLCALL SDL_UnregisterApp(void);
 #ifdef __cplusplus
 }
 #endif
@@ -78,9 +74,9 @@ extern DECLSPEC void SDLCALL SDL_UnregisterApp();
 #endif
 
 /* From the SDL library code -- needed for registering QuickDraw on MacOS */
-#if defined(macintosh)
-#include "begin_code.h"
+#if defined(__MACOS__)
 
+#include "begin_code.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
