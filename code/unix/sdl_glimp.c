@@ -689,6 +689,13 @@ static int GLW_SetMode( const char *drivername, int mode, qboolean fullscreen )
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
+#if SDL_VERSION_ATLEAST( 1, 2, 10 )
+    if( SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, r_swapInterval->integer ) )
+        ri.Printf( PRINT_ALL, "r_swapInterval requires libSDL >= 1.2.10\n" );
+#else
+    #warning libSDL >= 1.2.10  required for r_swapInterval support
+#endif // SDL_GL_SWAP_CONTROL
+
     SDL_WM_SetCaption(CLIENT_WINDOW_TITLE, CLIENT_WINDOW_ICON);
     SDL_ShowCursor(0);
     SDL_EnableUNICODE(1);

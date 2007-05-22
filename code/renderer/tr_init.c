@@ -979,7 +979,12 @@ void R_Register( void )
 	r_dlightBacks = ri.Cvar_Get( "r_dlightBacks", "1", CVAR_ARCHIVE );
 	r_finish = ri.Cvar_Get ("r_finish", "0", CVAR_ARCHIVE);
 	r_textureMode = ri.Cvar_Get( "r_textureMode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+#if USE_SDL_VIDEO
+	r_swapInterval = ri.Cvar_Get( "r_swapInterval", "0",
+					CVAR_ARCHIVE | CVAR_LATCH );
+#else
 	r_swapInterval = ri.Cvar_Get( "r_swapInterval", "0", CVAR_ARCHIVE );
+#endif
 	r_gamma = ri.Cvar_Get( "r_gamma", "1", CVAR_ARCHIVE );
 	r_facePlaneCull = ri.Cvar_Get ("r_facePlaneCull", "1", CVAR_ARCHIVE );
 
