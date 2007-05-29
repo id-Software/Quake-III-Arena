@@ -54,6 +54,7 @@ endif
 ifndef CC
 CC=gcc
 endif
+CC_IS_GCC=$(shell $(CC) --version | grep -q "(GCC)" && echo 1)
 
 ifeq ($(ARCH),powerpc)
   ARCH=ppc
@@ -767,7 +768,7 @@ ifeq ($(USE_LOCAL_HEADERS),1)
 endif
 
 ifeq ($(GENERATE_DEPENDENCIES),1)
-  ifeq ($(CC),gcc)
+  ifeq ($(CC_IS_GCC),1)
     DEPEND_CFLAGS=-MMD
   endif
 endif
