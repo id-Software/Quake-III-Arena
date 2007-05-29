@@ -75,9 +75,12 @@ Installation, for *nix
 It is also possible to cross compile for Windows under *nix using MinGW. A
 script is available to build a cross compilation environment from
 http://www.libsdl.org/extras/win32/cross/build-cross.sh. The gcc/binutils
-version numbers that the script downloads may need to be altered. After you
-have successfully run this script cross compiling is simply a case of using
-'./cross-make-mingw.sh' in place of 'make'.
+version numbers that the script downloads may need to be altered.
+Alternatively, your distribution may have mingw32 packages available. On
+debian/Ubuntu, these are mingw32, mingw32-runtime and mingw32-binutils. Cross
+compiling is simply a case of using './cross-make-mingw.sh' in place of 'make',
+though you may find you need to change the value of the variables in this
+script to match your environment.
 
 If the make based build system is being used (i.e. *nix or MinGW), the
 following variables may be set, either on the command line or in

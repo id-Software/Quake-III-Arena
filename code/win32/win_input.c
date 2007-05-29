@@ -937,8 +937,8 @@ void IN_JoyMove( void ) {
 
 	if ( in_debugJoystick->integer ) {
 		Com_Printf( "%8x %5i %5.2f %5.2f %5.2f %5.2f %6i %6i\n", 
-			joy.ji.dwButtons,
-			joy.ji.dwPOV,
+			JoyToI( joy.ji.dwButtons ),
+			JoyToI( joy.ji.dwPOV ),
 			JoyToF( joy.ji.dwXpos ), JoyToF( joy.ji.dwYpos ),
 			JoyToF( joy.ji.dwZpos ), JoyToF( joy.ji.dwRpos ),
 			JoyToI( joy.ji.dwUpos ), JoyToI( joy.ji.dwVpos ) );
@@ -1130,7 +1130,8 @@ static void IN_StartupMIDI( void )
 					 ( unsigned long ) NULL,
 					 CALLBACK_FUNCTION ) != MMSYSERR_NOERROR )
 	{
-		Com_Printf( "WARNING: could not open MIDI device %d: '%s'\n", in_mididevice->integer , s_midiInfo.caps[( int ) in_mididevice->value] );
+		Com_Printf( "WARNING: could not open MIDI device %d: '%s'\n",
+                in_mididevice->integer , s_midiInfo.caps[( int ) in_mididevice->value].szPname );
 		return;
 	}
 

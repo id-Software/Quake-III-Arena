@@ -51,6 +51,10 @@ ifndef ARCH
 ARCH=$(COMPILE_ARCH)
 endif
 
+ifndef CC
+CC=gcc
+endif
+
 ifeq ($(ARCH),powerpc)
   ARCH=ppc
 endif
@@ -173,8 +177,6 @@ MKDIR=mkdir
 
 ifeq ($(PLATFORM),linux)
 
-  CC=gcc
-
   ifeq ($(ARCH),alpha)
     ARCH=axp
   else
@@ -292,7 +294,6 @@ else # ifeq Linux
 #############################################################################
 
 ifeq ($(PLATFORM),darwin)
-  CC=gcc
   VM_PPC=vm_ppc_new
   HAVE_VM_COMPILED=true
   BASE_CFLAGS=
@@ -428,8 +429,9 @@ else # ifeq darwin
 
 ifeq ($(PLATFORM),mingw32)
 
-  CC=gcc
-  WINDRES=windres
+ifndef WINDRES
+WINDRES=windres
+endif
 
   ARCH=x86
 
@@ -527,13 +529,11 @@ ifeq ($(PLATFORM),freebsd)
   endif
 
   ifeq ($(ARCH),axp)
-    CC=gcc
     BASE_CFLAGS += -DNO_VM_COMPILED
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
       -fomit-frame-pointer -fexpensive-optimizations
   else
   ifeq ($(ARCH),i386)
-    CC=gcc
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro \
       -march=pentium -fomit-frame-pointer -pipe -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
@@ -583,7 +583,6 @@ ifeq ($(PLATFORM),netbsd)
     ARCH=i386
   endif
 
-  CC=gcc
   LDFLAGS=-lm
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -610,7 +609,6 @@ ifeq ($(PLATFORM),irix)
 
   ARCH=mips  #default to MIPS
 
-  CC=cc
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 -mips3 \
     -nostdinc -I. -I$(ROOT)/usr/include -DNO_VM_COMPILED
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
@@ -631,7 +629,6 @@ else # ifeq IRIX
 
 ifeq ($(PLATFORM),sunos)
 
-  CC=gcc
   INSTALL=ginstall
   MKDIR=gmkdir
   COPYDIR="/usr/local/share/games/quake3"
@@ -705,7 +702,6 @@ else # ifeq sunos
 #############################################################################
 # SETUP AND BUILD -- GENERIC
 #############################################################################
-  CC=cc
   BASE_CFLAGS=-DNO_VM_COMPILED
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3
