@@ -52,9 +52,16 @@ ARCH=$(COMPILE_ARCH)
 endif
 
 ifndef CC
-CC=gcc
+  CC=gcc
 endif
-CC_IS_GCC=$(shell $(CC) --version | grep -q "(GCC)" && echo 1)
+
+ifeq ($(PLATFORM),sunos)
+  # GNU make on SunOS defines CC as 'cc'. 'grep -q' is not an option on SunOS.
+  CC=gcc
+  CC_IS_GCC=1
+else
+  CC_IS_GCC=$(shell $(CC) --version | grep -q "(GCC)" && echo 1)
+endif
 
 ifeq ($(ARCH),powerpc)
   ARCH=ppc
