@@ -15,12 +15,12 @@
  * Note that the max_memory_to_use option is ignored by this implementation.
  */
 
+#include "../renderer/tr_local.h"
+
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
 #include "jmemsys.h"		/* import the system-dependent declarations */
-
-#include "../renderer/tr_local.h"
 
 /*
  * Memory allocation and ri.Freeing are controlled by the regular library

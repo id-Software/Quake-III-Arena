@@ -449,7 +449,6 @@ endif
   endif
 
   GL_CFLAGS =
-  MINGW_CFLAGS = -DDONT_TYPEDEF_INT32
 
   OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math -falign-loops=2 \
     -funroll-loops -falign-jumps=2 -falign-functions=2 -fstrength-reduce
@@ -1197,10 +1196,10 @@ $(B)/client/jdmaster.o : $(JPDIR)/jdmaster.c; $(DO_CC)
 $(B)/client/jdpostct.o : $(JPDIR)/jdpostct.c; $(DO_CC)
 $(B)/client/jdsample.o : $(JPDIR)/jdsample.c; $(DO_CC)
 $(B)/client/jdtrans.o : $(JPDIR)/jdtrans.c; $(DO_CC)
-$(B)/client/jerror.o : $(JPDIR)/jerror.c; $(DO_CC) $(GL_CFLAGS) $(MINGW_CFLAGS)
+$(B)/client/jerror.o : $(JPDIR)/jerror.c; $(DO_CC) $(GL_CFLAGS)
 $(B)/client/jidctflt.o : $(JPDIR)/jidctflt.c; $(DO_CC)
 $(B)/client/jmemmgr.o : $(JPDIR)/jmemmgr.c; $(DO_CC)
-$(B)/client/jmemnobs.o : $(JPDIR)/jmemnobs.c; $(DO_CC)  $(GL_CFLAGS) $(MINGW_CFLAGS)
+$(B)/client/jmemnobs.o : $(JPDIR)/jmemnobs.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/jutils.o : $(JPDIR)/jutils.c; $(DO_CC)
 
 $(B)/client/tr_bsp.o : $(RDIR)/tr_bsp.c; $(DO_CC)  $(GL_CFLAGS)
@@ -1210,7 +1209,7 @@ $(B)/client/tr_cmds.o : $(RDIR)/tr_cmds.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/tr_curve.o : $(RDIR)/tr_curve.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/tr_flares.o : $(RDIR)/tr_flares.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/tr_font.o : $(RDIR)/tr_font.c; $(DO_CC)   $(GL_CFLAGS)
-$(B)/client/tr_image.o : $(RDIR)/tr_image.c; $(DO_CC)   $(GL_CFLAGS) $(MINGW_CFLAGS)
+$(B)/client/tr_image.o : $(RDIR)/tr_image.c; $(DO_CC)   $(GL_CFLAGS)
 $(B)/client/tr_init.o : $(RDIR)/tr_init.c; $(DO_CC)    $(GL_CFLAGS)
 $(B)/client/tr_light.o : $(RDIR)/tr_light.c; $(DO_CC)  $(GL_CFLAGS)
 $(B)/client/tr_main.o : $(RDIR)/tr_main.c; $(DO_CC)   $(GL_CFLAGS)

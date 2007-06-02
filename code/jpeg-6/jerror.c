@@ -13,13 +13,13 @@
  * These routines are used by both the compression and decompression code.
  */
 
+#include "../renderer/tr_local.h"
+
 /* this is not a core library module, so it doesn't define JPEG_INTERNALS */
 #include "jinclude.h"
 #include "jpeglib.h"
 #include "jversion.h"
 #include "jerror.h"
-
-#include "../renderer/tr_local.h"
 
 #ifndef EXIT_FAILURE		/* define exit() codes if not provided */
 #define EXIT_FAILURE  1
