@@ -394,9 +394,8 @@ nextInstruction:
 		r0 = ((int *)opStack)[0];
 		r1 = ((int *)opStack)[-1];
 nextInstruction2:
-		opcode = codeImage[ programCounter++ ];
 #ifdef DEBUG_VM
-		if ( (unsigned)programCounter > vm->codeLength ) {
+		if ( (unsigned)programCounter >= vm->codeLength ) {
 			Com_Error( ERR_DROP, "VM pc out of range" );
 		}
 
@@ -420,6 +419,7 @@ nextInstruction2:
 		}
 		profileSymbol->profileCount++;
 #endif
+		opcode = codeImage[ programCounter++ ];
 
 		switch ( opcode ) {
 #ifdef DEBUG_VM
@@ -564,6 +564,8 @@ nextInstruction2:
 					Com_Printf( "%s<--- %s\n", DEBUGSTR, VM_ValueToSymbol( vm, programCounter ) );
 				}
 #endif
+			} else if ( (unsigned)programCounter >= vm->codeLength ) {
+				Com_Error( ERR_DROP, "VM program counter out of range in OP_CALL" );
 			} else {
 				programCounter = vm->instructionPointers[ programCounter ];
 			}
@@ -619,6 +621,8 @@ nextInstruction2:
 			// check for leaving the VM
 			if ( programCounter == -1 ) {
 				goto done;
+			} else if ( (unsigned)programCounter >= vm->codeLength ) {
+				Com_Error( ERR_DROP, "VM program counter out of range in OP_LEAVE" );
 			}
 			goto nextInstruction;
 
