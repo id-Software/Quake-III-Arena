@@ -648,21 +648,21 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				XJ("jb");
 				break;
 			case OP_LOAD1:
-				emit("movl 0(%%rsi), %%eax"); // get pointer from stack
+				emit("movl 0(%%rsi), %%eax"); // get value from stack
 				RANGECHECK(eax);
 				emit("movb 0(%%r8, %%rax, 1), %%al"); // deref into eax
 				emit("andq $255, %%rax");
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
 				break;
 			case OP_LOAD2:
-				emit("movl 0(%%rsi), %%eax"); // get pointer from stack
+				emit("movl 0(%%rsi), %%eax"); // get value from stack
 				RANGECHECK(eax);
-				emit("movw 0(%%r8, %%rax, 1), %%rax"); // deref into eax
+				emit("movw 0(%%r8, %%rax, 1), %%ax"); // deref into eax
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
 				break;
 			case OP_LOAD4:
-				emit("movl 0(%%rsi), %%eax"); // get pointer from stack
-				RANGECHECK(eax);
+				emit("movl 0(%%rsi), %%eax"); // get value from stack
+				RANGECHECK(eax); // not a pointer!?
 				emit("movl 0(%%r8, %%rax, 1), %%eax"); // deref into eax
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
 				break;
@@ -678,7 +678,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
 				emit("movl -4(%%rsi), %%ebx"); // get pointer from stack
 				RANGECHECK(ebx);
-				emit("movw %%rax, 0(%%r8, %%rbx, 1)"); // store in memory
+				emit("movw %%ax, 0(%%r8, %%rbx, 1)"); // store in memory
 				emit("subq $8, %%rsi");
 				break;
 			case OP_STORE4:
@@ -717,14 +717,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 				break;
 			case OP_SEX8:
-				emit("movw 0(%%rsi), %%rax");
+				emit("movw 0(%%rsi), %%ax");
 				emit("andq $255, %%rax");
 				emit("cbw");
 				emit("cwde");
 				emit("movl %%eax, 0(%%rsi)");
 				break;
 			case OP_SEX16:
-				emit("movw 0(%%rsi), %%rax");
+				emit("movw 0(%%rsi), %%ax");
 				emit("cwde");
 				emit("movl %%eax, 0(%%rsi)");
 				break;
@@ -755,14 +755,15 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("subq $4, %%rsi");
 				emit("movl 0(%%rsi), %%eax");
 				emit("xorl %%edx, %%edx");
-				emit("divl 4(%%rsi)");
+				emit("cdq");
+				emit("idivl 4(%%rsi)");
 				emit("movl %%edx, 0(%%rsi)");
 				break;
 			case OP_MODU:
 				emit("subq $4, %%rsi");
 				emit("movl 0(%%rsi), %%eax");
 				emit("xorl %%edx, %%edx");
-				emit("idivl 4(%%rsi)");
+				emit("divl 4(%%rsi)");
 				emit("movl %%edx, 0(%%rsi)");
 				break;
 			case OP_MULI:
