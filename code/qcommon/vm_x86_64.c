@@ -991,7 +991,9 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		"	movl %4,%%edi		\r\n" \
 		"	movq %2,%%r10		\r\n" \
 		"	movq %3,%%r8		\r\n" \
+		"       subq $8, %%rsp # fix alignment as call pushes one value \r\n" \
 		"	callq *%%r10		\r\n" \
+		"       addq $8, %%rsp          \r\n" \
 		"	movl %%edi, %0		\r\n" \
 		"	movq %%rsi, %1		\r\n" \
 		: "=m" (programStack), "=m" (opStack)
