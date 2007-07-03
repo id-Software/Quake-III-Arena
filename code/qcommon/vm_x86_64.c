@@ -539,14 +539,19 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("push %%r8");
 				emit("push %%r9");
 				emit("push %%r10");
-				emit("push %%r10"); // align!
+				emit("movq %%rsp, %%rbx"); // we need to align the stack pointer
+				emit("subq $8, %%rbx");    //   |
+				emit("andq $127, %%rbx");  //   |
+				emit("subq %%rbx, %%rsp"); // <-+
+				emit("push %%rbx");
 				emit("negl %%eax");        // convert to actual number
 				emit("decl %%eax");
 				                           // first argument already in rdi
 				emit("movq %%rax, %%rsi"); // second argument in rsi
 				emit("movq $%lu, %%rax", (unsigned long)callAsmCall);
 				emit("callq *%%rax");
-				emit("pop %%r10");
+				emit("pop %%rbx");
+				emit("addq %%rbx, %%rsp");
 				emit("pop %%r10");
 				emit("pop %%r9");
 				emit("pop %%r8");
@@ -554,7 +559,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("pop %%rsi");
 //				emit("frstor 4(%%rsi)");
 				emit("addq $4, %%rsi");
-				emit("movl %%eax, (%%rsi)");
+				emit("movl %%eax, (%%rsi)"); // store return value
 				break;
 			case OP_PUSH:
 				emit("addq $4, %%rsi");
@@ -991,9 +996,9 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		"	movl %4,%%edi		\r\n" \
 		"	movq %2,%%r10		\r\n" \
 		"	movq %3,%%r8		\r\n" \
-		"       subq $8, %%rsp # fix alignment as call pushes one value \r\n" \
+		"       subq $24, %%rsp # fix alignment as call pushes one value \r\n" \
 		"	callq *%%r10		\r\n" \
-		"       addq $8, %%rsp          \r\n" \
+		"       addq $24, %%rsp          \r\n" \
 		"	movl %%edi, %0		\r\n" \
 		"	movq %%rsi, %1		\r\n" \
 		: "=m" (programStack), "=m" (opStack)
