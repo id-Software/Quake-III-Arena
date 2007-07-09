@@ -83,6 +83,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /* Just hack it for now. */
 #ifdef MACOS_X
+#include <IOKit/hidsystem/IOHIDLib.h>
+#include <IOKit/hidsystem/IOHIDParameter.h>
+#include <drivers/event_status_driver.h>
 typedef CGLContextObj QGLContext;
 #define GLimp_GetCurrentContext() CGLGetCurrentContext()
 #define GLimp_SetCurrentContext(ctx) CGLSetCurrentContext(ctx)
@@ -116,6 +119,8 @@ static qboolean mouse_active = qfalse;
 static qboolean sdlrepeatenabled = qfalse;
 
 static cvar_t *in_mouse;
+static cvar_t *in_disablemacosxmouseaccel;
+static double originalMouseSpeed = -1.0;
 cvar_t *in_subframe;
 cvar_t *in_nograb; // this is strictly for developers
 
@@ -432,11 +437,69 @@ void KBD_Close(void)
 {
 }
 
+#ifdef MACOS_X
+io_connect_t IN_GetIOHandle() // mac os x mouse accel hack
+  	 {
+  	         io_connect_t iohandle = MACH_PORT_NULL;
+  	         kern_return_t status;
+  	         io_service_t iohidsystem = MACH_PORT_NULL;
+  	         mach_port_t masterport;
+  	 
+  	         status = IOMasterPort(MACH_PORT_NULL, &masterport);
+  	         if(status != KERN_SUCCESS)
+  	                 return 0;
+  	 
+  	         iohidsystem = IORegistryEntryFromPath(masterport, kIOServicePlane ":/IOResources/IOHIDSystem");
+  	         if(!iohidsystem)
+  	                 return 0;
+  	 
+  	         status = IOServiceOpen(iohidsystem, mach_task_self(), kIOHIDParamConnectType, &iohandle);
+  	         IOObjectRelease(iohidsystem);
+  	 
+  	         return iohandle;
+  	 }
+#endif
+
 void IN_ActivateMouse( void ) 
 {
   if (!mouse_avail || !screen)
      return;
 
+  #ifdef MACOS_X
+  if (!mouse_active && mouse_avail) // mac os x mouse accel hack
+  {
+	  // Save the status of mouse acceleration
+  	  originalMouseSpeed = -1.0; // in case of error
+  	  if(in_disablemacosxmouseaccel->integer)
+  	  {
+  	          io_connect_t mouseDev = IN_GetIOHandle();
+  	          if(mouseDev != 0)
+  	          {
+  	                  if(IOHIDGetAccelerationWithKey(mouseDev, CFSTR(kIOHIDMouseAccelerationType), &originalMouseSpeed) == kIOReturnSuccess)
+  	                  {
+						  Com_Printf("previous mouse acceleration: %f\n", originalMouseSpeed);
+  						  if(IOHIDSetAccelerationWithKey(mouseDev, CFSTR(kIOHIDMouseAccelerationType), -1.0) != kIOReturnSuccess)
+  						  {
+							  Com_Printf("Could not disable mouse acceleration (failed at IOHIDSetAccelerationWithKey).\n");
+  							  Cvar_Set ("in_disablemacosxmouseaccel", 0);
+  						  }
+  	                  }
+  	                  else
+  	                  {
+						  Com_Printf("Could not disable mouse acceleration (failed at IOHIDGetAccelerationWithKey).\n");
+  						  Cvar_Set ("in_disablemacosxmouseaccel", 0);
+  	                  }
+  	                  IOServiceClose(mouseDev);
+  	          }
+  	          else
+  	          {
+  	                  Com_Printf("Could not disable mouse acceleration (failed at IO_GetIOHandle).\n");
+  	                  Cvar_Set ("in_disablemacosxmouseaccel", 0);
+  	          }
+  	  }
+  }
+  #endif
+  
   if (!mouse_active)
   {
     if (!in_nograb->value)
@@ -449,6 +512,25 @@ void IN_DeactivateMouse( void )
 {
   if (!mouse_avail || !screen)
     return;
+	
+  #ifdef MACOS_X
+  if (mouse_active) // mac os x mouse accel hack
+  {
+	  if(originalMouseSpeed != -1.0)
+  	  {
+		  io_connect_t mouseDev = IN_GetIOHandle();
+		  if(mouseDev != 0)
+          {
+			  Com_Printf("restoring mouse acceleration to: %f\n", originalMouseSpeed);
+			  if(IOHIDSetAccelerationWithKey(mouseDev, CFSTR(kIOHIDMouseAccelerationType), originalMouseSpeed) != kIOReturnSuccess)
+			     Com_Printf("Could not re-enable mouse acceleration (failed at IOHIDSetAccelerationWithKey).\n");
+  	          IOServiceClose(mouseDev);
+  	      }
+  	      else 
+			  Com_Printf("Could not re-enable mouse acceleration (failed at IO_GetIOHandle).\n");
+	  }
+  }
+  #endif
 
   if (mouse_active)
   {
@@ -1357,6 +1439,7 @@ void IN_Init(void) {
 	Com_Printf ("\n------- Input Initialization -------\n");
   // mouse variables
   in_mouse = Cvar_Get ("in_mouse", "1", CVAR_ARCHIVE);
+  in_disablemacosxmouseaccel = Cvar_Get ("in_disablemacosxmouseaccel", "1", CVAR_ARCHIVE);
 	
 	// turn on-off sub-frame timing of X events
 	in_subframe = Cvar_Get ("in_subframe", "1", CVAR_ARCHIVE);

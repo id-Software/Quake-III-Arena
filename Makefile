@@ -393,7 +393,7 @@ ifeq ($(PLATFORM),darwin)
     #  the file has been modified by each build.
     LIBSDLMAIN=$(B)/libSDLmain.a
     LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
-    CLIENT_LDFLAGS += -framework Cocoa -framework OpenGL \
+    CLIENT_LDFLAGS += -framework Cocoa -framework IOKit -framework OpenGL \
       $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
   else
     # !!! FIXME: frameworks: OpenGL, Carbon, etc...
