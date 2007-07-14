@@ -120,7 +120,9 @@ static qboolean sdlrepeatenabled = qfalse;
 
 static cvar_t *in_mouse;
 static cvar_t *in_disablemacosxmouseaccel;
+#ifdef MACOS_X
 static double originalMouseSpeed = -1.0;
+#endif
 cvar_t *in_subframe;
 cvar_t *in_nograb; // this is strictly for developers
 
