@@ -24,8 +24,101 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "vm_local.h"
 
-#pragma opt_pointer_analysis off
+#ifdef MACOS_X
+#include <CoreServices/CoreServices.h>
+#endif
 
+#define DEBUG_VM 0
+
+#if DEBUG_VM
+static char	*opnames[256] = {
+	"OP_UNDEF", 
+
+	"OP_IGNORE", 
+
+	"OP_BREAK",
+
+	"OP_ENTER",
+	"OP_LEAVE",
+	"OP_CALL",
+	"OP_PUSH",
+	"OP_POP",
+
+	"OP_CONST",
+
+	"OP_LOCAL",
+
+	"OP_JUMP",
+
+	//-------------------
+
+	"OP_EQ",
+	"OP_NE",
+
+	"OP_LTI",
+	"OP_LEI",
+	"OP_GTI",
+	"OP_GEI",
+
+	"OP_LTU",
+	"OP_LEU",
+	"OP_GTU",
+	"OP_GEU",
+
+	"OP_EQF",
+	"OP_NEF",
+
+	"OP_LTF",
+	"OP_LEF",
+	"OP_GTF",
+	"OP_GEF",
+
+	//-------------------
+
+	"OP_LOAD1",
+	"OP_LOAD2",
+	"OP_LOAD4",
+	"OP_STORE1",
+	"OP_STORE2",
+	"OP_STORE4",
+	"OP_ARG",
+
+	"OP_BLOCK_COPY",
+
+	//-------------------
+
+	"OP_SEX8",
+	"OP_SEX16",
+
+	"OP_NEGI",
+	"OP_ADD",
+	"OP_SUB",
+	"OP_DIVI",
+	"OP_DIVU",
+	"OP_MODI",
+	"OP_MODU",
+	"OP_MULI",
+	"OP_MULU",
+
+	"OP_BAND",
+	"OP_BOR",
+	"OP_BXOR",
+	"OP_BCOM",
+
+	"OP_LSH",
+	"OP_RSHI",
+	"OP_RSHU",
+
+	"OP_NEGF",
+	"OP_ADDF",
+	"OP_SUBF",
+	"OP_DIVF",
+	"OP_MULF",
+
+	"OP_CVIF",
+	"OP_CVFI"
+};
+#endif
 
 typedef enum {
     R_REAL_STACK = 1,
@@ -62,6 +155,42 @@ typedef enum {
 #define	RG_TOP				r12
 #define	RG_SECOND			r13
 #define	RG_EA 				r14
+
+// The deepest value I saw in the Quake3 games was 9.
+#define OP_STACK_MAX_DEPTH	16
+
+// These are all volatile and thus must be saved upon entry to the VM code.
+// NOTE: These are General Purpose Registers (GPR) numbers like the 
+//       R_ definitions in the regNums_t enum above (31 is the max)
+static int opStackIntRegisters[OP_STACK_MAX_DEPTH] =
+{
+	16, 17, 18, 19,
+	20, 21, 22, 23,
+	24, 25, 26, 27,
+	28, 29, 30, 31
+};
+
+static unsigned int *opStackLoadInstructionAddr[OP_STACK_MAX_DEPTH];
+
+// We use different registers for the floating point
+// operand stack (these are volatile in the PPC ABI)
+// NOTE: these are Floating Point Register (FPR) numbers, not 
+//       General Purpose Register (GPR) numbers
+static int opStackFloatRegisters[OP_STACK_MAX_DEPTH] =
+{
+	0, 1, 2, 3,
+	4, 5, 6, 7,
+	8, 9, 10, 11,
+	12, 13, 14, 15
+};
+
+static int opStackRegType[OP_STACK_MAX_DEPTH] =
+{
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0
+};
 
 // this doesn't have the low order bits set for instructions i'm not using...
 typedef enum {
@@ -199,7 +328,7 @@ typedef enum {
 	PPC_MCRXR	= 0x7c000000,
 	PPC_LSWX	= 0x7c000000,
 	PPC_LWBRX	= 0x7c000000,
-	PPC_LFSX	= 0x7c000000,
+	PPC_LFSX	= 0x7c00042e,
 	PPC_SRW		= 0x7c000430,
 	PPC_SRD		= 0x7c000000,
 	PPC_TLBSYNC	= 0x7c000000,
@@ -212,7 +341,7 @@ typedef enum {
 	PPC_MFSRIN	= 0x7c000000,
 	PPC_STSWX	= 0x7c000000,
 	PPC_STWBRX	= 0x7c000000,
-	PPC_STFSX	= 0x7c000000,
+	PPC_STFSX	= 0x7c00052e,
 	PPC_STFSUX	= 0x7c000000,
 	PPC_STSWI	= 0x7c000000,
 	PPC_STFDX	= 0x7c000000,
@@ -308,6 +437,7 @@ typedef enum {
 // the newly generated code
 static	unsigned	*buf;
 static	int		compiledOfs;	// in dwords
+static int pass;
 
 // fromt the original bytecode
 static	byte	*code;
@@ -333,83 +463,179 @@ static int	Constant1( void ) {
 	return v;
 }
 
-static void Emit4( int i ) {
+static void Emit4( char *opname, int i ) {
+	#if DEBUG_VM
+	if(pass == 1)
+		printf("\t\t\t%p %s\t%08lx\n",&buf[compiledOfs],opname,i&0x3ffffff);
+	#endif
 	buf[ compiledOfs ] = i;
 	compiledOfs++;
 }
 
-static void Inst( int opcode, int destReg, int aReg, int bReg ) {
+static void Inst( char *opname, int opcode, int destReg, int aReg, int bReg ) {
     unsigned		r;
 
+	#if DEBUG_VM
+	if(pass == 1)
+		printf("\t\t\t%p %s\tr%d,r%d,r%d\n",&buf[compiledOfs],opname,destReg,aReg,bReg);
+	#endif
     r = opcode | ( destReg << 21 ) | ( aReg << 16 ) | ( bReg << 11 ) ;
     buf[ compiledOfs ] = r;
     compiledOfs++;
 }
 
-static void Inst4( int opcode, int destReg, int aReg, int bReg, int cReg ) {
+static void Inst4( char *opname, int opcode, int destReg, int aReg, int bReg, int cReg ) {
     unsigned		r;
 
+	#if DEBUG_VM
+	if(pass == 1)
+		printf("\t\t\t%p %s\tr%d,r%d,r%d,r%d\n",&buf[compiledOfs],opname,destReg,aReg,bReg,cReg);
+	#endif
     r = opcode | ( destReg << 21 ) | ( aReg << 16 ) | ( bReg << 11 ) | ( cReg << 6 );
     buf[ compiledOfs ] = r;
     compiledOfs++;
 }
 
-static void InstImm( int opcode, int destReg, int aReg, int immediate ) {
+static void InstImm( char *opname, int opcode, int destReg, int aReg, int immediate ) {
 	unsigned		r;
 	
 	if ( immediate > 32767 || immediate < -32768 ) {
 	    Com_Error( ERR_FATAL, "VM_Compile: immediate value %i out of range, opcode %x,%d,%d", immediate, opcode, destReg, aReg );
 	}
+	#if DEBUG_VM
+	if(pass == 1)
+		printf("\t\t\t%p %s\tr%d,r%d,0x%x\n",&buf[compiledOfs],opname,destReg,aReg,immediate);
+	#endif
 	r = opcode | ( destReg << 21 ) | ( aReg << 16 ) | ( immediate & 0xffff );
 	buf[ compiledOfs ] = r;
 	compiledOfs++;
 }
 
-static void InstImmU( int opcode, int destReg, int aReg, int immediate ) {
+static void InstImmU( char *opname, int opcode, int destReg, int aReg, int immediate ) {
 	unsigned		r;
 	
 	if ( immediate > 0xffff || immediate < 0 ) {
 		Com_Error( ERR_FATAL, "VM_Compile: immediate value %i out of range", immediate );
 	}
+	#if DEBUG_VM
+	if(pass == 1)
+		printf("\t\t\t%p %s\tr%d,r%d,0x%x\n",&buf[compiledOfs],opname,destReg,aReg,immediate);
+	#endif
     r = opcode | ( destReg << 21 ) | ( aReg << 16 ) | ( immediate & 0xffff );
 	buf[ compiledOfs ] = r;
 	compiledOfs++;
 }
 
-static qboolean	rtopped;
 static int pop0, pop1, oc0, oc1;
 static vm_t *tvm;
 static int instruction;
 static byte *jused;
-static int pass;
 
-static void ltop() {
-    if (rtopped == qfalse) {
-	InstImm( PPC_LWZ, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-    }
+static void spillOpStack(int depth)
+{
+	// Store out each register on the operand stack to it's correct location.
+	int i;
+	
+	for(i = 0; i < depth; i++)
+	{
+		assert(opStackRegType[i]);
+		assert(opStackRegType[i] == 1);
+		switch(opStackRegType[i])
+		{
+			case 1:	// Integer register
+				InstImm( "stw", PPC_STW, opStackIntRegisters[i], R_OPSTACK, i*4+4);
+				break;
+			case 2: // Float register
+				InstImm( "stfs", PPC_STFS, opStackFloatRegisters[i], R_OPSTACK, i*4+4);
+				break;
+		}
+		opStackRegType[i] = 0;
+	}
 }
 
-static void ltopandsecond() {
-    if (pass>=0 && buf[compiledOfs-1] == (PPC_STWU |  R_TOP<<21 | R_OPSTACK<<16 | 4 ) && jused[instruction]==0 ) {
-	compiledOfs--;
-	if (!pass) {
-	    tvm->instructionPointers[instruction] = compiledOfs * 4;
+static void loadOpStack(int depth)
+{
+	// Back off operand stack pointer and reload all operands.
+//	InstImm( "addi", PPC_ADDI, R_OPSTACK, R_OPSTACK, -(depth)*4 );
+
+	int i;
+	
+	for(i = 0; i < depth; i++)
+	{
+		assert(opStackRegType[i] == 0);
+		// For now we're stuck reloading everything as an integer.
+		opStackLoadInstructionAddr[i] = &buf[compiledOfs];
+		InstImm( "lwz", PPC_LWZ, opStackIntRegisters[i], R_OPSTACK, i*4+4);
+		opStackRegType[i] = 1;
+	}	
+}
+
+static void makeFloat(int depth)
+{
+	//assert(opStackRegType[depth] == 1);
+	if(opStackRegType[depth] == 1)
+	{
+		unsigned instruction;
+		unsigned destReg, aReg, bReg, imm;
+		
+		if(opStackLoadInstructionAddr[depth])
+		{
+			// Repatch load instruction to use LFS instead of LWZ
+			instruction = *opStackLoadInstructionAddr[depth];
+			// Figure out if it's LWZ or LWZX
+			if((instruction & 0xfc000000) == PPC_LWZ)
+			{
+				//printf("patching LWZ at %p to LFS at depth %ld\n",opStackLoadInstructionAddr[depth],depth);
+				//printf("old instruction: %08lx\n",instruction);
+				// Extract registers
+				destReg = (instruction >> 21) & 31;
+				aReg    = (instruction >> 16) & 31;
+				imm     = instruction & 0xffff;
+				
+				// Calculate correct FP register to use.
+				// THIS ASSUMES REGISTER USAGE FOR THE STACK IS n, n+1, n+2, etc!
+				//printf("old dest: %ld\n",destReg);
+				destReg = (destReg - opStackIntRegisters[0]) + opStackFloatRegisters[0];
+				instruction = PPC_LFS | ( destReg << 21 ) | ( aReg << 16 ) | imm ;			
+				//printf("new dest: %ld\n",destReg);
+				//printf("new instruction: %08lx\n",instruction);
+			}
+			else
+			{
+				//printf("patching LWZX at %p to LFSX at depth %ld\n",opStackLoadInstructionAddr[depth],depth);
+				//printf("old instruction: %08lx\n",instruction);
+				// Extract registers
+				destReg = (instruction >> 21) & 31;
+				aReg    = (instruction >> 16) & 31;
+				bReg    = (instruction >> 11) & 31;
+				// Calculate correct FP register to use.
+				// THIS ASSUMES REGISTER USAGE FOR THE STACK IS n, n+1, n+2, etc!
+				//printf("old dest: %ld\n",destReg);
+				destReg = (destReg - opStackIntRegisters[0]) + opStackFloatRegisters[0];
+				instruction = PPC_LFSX | ( destReg << 21 ) | ( aReg << 16 ) | ( bReg << 11 ) ;			
+				//printf("new dest: %ld\n",destReg);
+				//printf("new instruction: %08lx\n",instruction);
+			}
+			*opStackLoadInstructionAddr[depth] = instruction;
+			opStackLoadInstructionAddr[depth] = 0;
+		}
+		else
+		{	
+			//printf("doing float constant load at %p for depth %ld\n",&buf[compiledOfs],depth);
+			// It was likely loaded as a constant so we have to save/load it.  A more
+			// interesting implementation might be to generate code to do a "PC relative"
+			// load from the VM code region.
+			InstImm( "stw", PPC_STW, opStackIntRegisters[depth], R_OPSTACK, depth*4+4);
+			// For XXX make sure we force enough NOPs to get the load into
+			// another dispatch group to avoid pipeline flush.
+			Inst( "ori", PPC_ORI,  0, 0, 0 );
+			Inst( "ori", PPC_ORI,  0, 0, 0 );
+			Inst( "ori", PPC_ORI,  0, 0, 0 );
+			Inst( "ori", PPC_ORI,  0, 0, 0 );
+			InstImm( "lfs", PPC_LFS, opStackFloatRegisters[depth], R_OPSTACK, depth*4+4);
+		}
+		opStackRegType[depth] = 2;
 	}
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-    } else if (pass>=0 && buf[compiledOfs-1] == (PPC_STW |  R_TOP<<21 | R_OPSTACK<<16 | 0 )  && jused[instruction]==0 ) {
-	compiledOfs--;
-	if (!pass) {
-	    tvm->instructionPointers[instruction] = compiledOfs * 4;
-	}
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, -4 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -8 );
-    } else {
-	ltop();		// get value from opstack
-	InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, -4 );	// get value from opstack
-	InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -8 );
-    }
-    rtopped = qfalse;
 }
 
 // TJW: Unused
@@ -421,6 +647,7 @@ static void fltop() {
 }
 #endif
 
+#if 0
 static void fltopandsecond() {
 	InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
 	InstImm( PPC_LFS, R_SECOND, R_OPSTACK, -4 );	// get value from opstack
@@ -428,6 +655,9 @@ static void fltopandsecond() {
     rtopped = qfalse;
 	return;
 }
+#endif
+
+#define assertInteger(depth)	assert(opStackRegType[depth] == 1)
 
 /*
 =================
@@ -439,7 +669,10 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	int		maxLength;
 	int		v;
 	int		i;
-        
+        int		opStackDepth;
+	
+	int		mainFunction;
+	
 	// set up the into-to-float variables
    	((int *)itofConvert)[0] = 0x43300000;
    	((int *)itofConvert)[1] = 0x80000000;
@@ -455,9 +688,10 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
     // pointers for branches
     for ( pass = -1 ; pass < 2 ; pass++ ) {
 
-	rtopped = qfalse;
         // translate all instructions
         pc = 0;
+	mainFunction = 0;
+	opStackDepth = 0;
 	
 	pop0 = 343545;
 	pop1 = 2443545;
@@ -472,7 +706,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		Emit4( 0 );
 #endif
 
-		for ( instruction = 0 ; instruction < header->instructionCount ; instruction++ ) {
+	for ( instruction = 0 ; instruction < header->instructionCount ; instruction++ ) {
             if ( compiledOfs*4 > maxLength - 16 ) {
                 Com_Error( ERR_DROP, "VM_Compile: maxLength exceeded" );
             }
@@ -486,651 +720,988 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
             case 0:
                 break;
             case OP_BREAK:
-                InstImmU( PPC_ADDI, R_TOP, 0, 0 );
-                InstImm( PPC_LWZ, R_TOP, R_TOP, 0 );			// *(int *)0 to crash to debugger
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08lx BREAK\n",instruction);
+		#endif
+                InstImmU( "addi", PPC_ADDI, R_TOP, 0, 0 );
+                InstImm( "lwz", PPC_LWZ, R_TOP, R_TOP, 0 );			// *(int *)0 to crash to debugger
                 break;
             case OP_ENTER:
-                InstImm( PPC_ADDI, R_STACK, R_STACK, -Constant4() );	// sub R_STACK, R_STACK, imm
-		rtopped = qfalse;
+		opStackDepth = 0;
+		v = Constant4();
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x ENTER\t%04x\n",instruction,v);
+		#endif
+		opStackRegType[opStackDepth] = 0;
+		mainFunction++;
+		if(mainFunction == 1)
+		{
+			// Main VM entry point is the first thing we compile, so save off operand stack
+			// registers here.  This avoids issues with trying to trick the native compiler
+			// into doing it, and properly matches the PowerPC ABI
+			InstImm( "addi", PPC_ADDI, R_REAL_STACK, R_REAL_STACK, -OP_STACK_MAX_DEPTH*4 );	// sub R_STACK, R_STACK, imm
+			for(i = 0; i < OP_STACK_MAX_DEPTH; i++)
+				InstImm( "stw", PPC_STW, opStackIntRegisters[i], R_REAL_STACK, i*4);
+		}
+                InstImm( "addi", PPC_ADDI, R_STACK, R_STACK, -v );	// sub R_STACK, R_STACK, imm
                 break;
             case OP_CONST:
                 v = Constant4();
-		if (code[pc] == OP_LOAD4 || code[pc] == OP_LOAD2 || code[pc] == OP_LOAD1) {
-		    v &= vm->dataMask;
-		}
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x CONST\t%08x\n",instruction,v);
+		#endif
+		opStackLoadInstructionAddr[opStackDepth] = 0;
                 if ( v < 32768 && v >= -32768 ) {
-                    InstImmU( PPC_ADDI, R_TOP, 0, v & 0xffff );
+                    InstImmU( "addi", PPC_ADDI, opStackIntRegisters[opStackDepth], 0, v & 0xffff );
                 } else {
-                    InstImmU( PPC_ADDIS, R_TOP, 0, (v >> 16)&0xffff );
+                    InstImmU( "addis", PPC_ADDIS, opStackIntRegisters[opStackDepth], 0, (v >> 16)&0xffff );
                     if ( v & 0xffff ) {
-                        InstImmU( PPC_ORI, R_TOP, R_TOP, v & 0xffff );
+                        InstImmU( "ori", PPC_ORI, opStackIntRegisters[opStackDepth], opStackIntRegisters[opStackDepth], v & 0xffff );
                     }
                 }
-		if (code[pc] == OP_LOAD4) {
-		    Inst( PPC_LWZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		} else if (code[pc] == OP_LOAD2) {
-		    Inst( PPC_LHZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		} else if (code[pc] == OP_LOAD1) {
-		    Inst( PPC_LBZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		}
-		if (code[pc] == OP_STORE4) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );	// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STWX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		} else if (code[pc] == OP_STORE2) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );	// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STHX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		} else if (code[pc] == OP_STORE1) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );	// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STBX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		}
+		opStackRegType[opStackDepth] = 1;
+		opStackDepth += 1;
 		if (code[pc] == OP_JUMP) {
 		    jused[v] = 1;
 		}
-		InstImm( PPC_STWU, R_TOP, R_OPSTACK, 4 );
-		rtopped = qtrue;
 		break;
             case OP_LOCAL:
-		oc0 = oc1;
 		oc1 = Constant4();
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x LOCAL\t%08x\n",instruction,oc1);
+		#endif
 		if (code[pc] == OP_LOAD4 || code[pc] == OP_LOAD2 || code[pc] == OP_LOAD1) {
 		    oc1 &= vm->dataMask;
 		}
-                InstImm( PPC_ADDI, R_TOP, R_STACK, oc1 );
-		if (code[pc] == OP_LOAD4) {
-		    Inst( PPC_LWZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		} else if (code[pc] == OP_LOAD2) {
-		    Inst( PPC_LHZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		} else if (code[pc] == OP_LOAD1) {
-		    Inst( PPC_LBZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-		    pc++;
-		    instruction++;
-		}
-		if (code[pc] == OP_STORE4) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );		// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STWX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		} else if (code[pc] == OP_STORE2) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );		// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STHX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		} else if (code[pc] == OP_STORE1) {
-		    InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, 0 );		// get value from opstack
-		    InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		    //Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );	// mask it
-		    Inst( PPC_STBX, R_TOP, R_SECOND, R_MEMBASE );	// store from memory base
-		    pc++;
-		    instruction++;
-		    rtopped = qfalse;
-		    break;
-		}
-                InstImm( PPC_STWU, R_TOP, R_OPSTACK, 4 );
-		rtopped = qtrue;
+                InstImm( "addi", PPC_ADDI, opStackIntRegisters[opStackDepth], R_STACK, oc1 );
+		opStackRegType[opStackDepth] = 1;
+		opStackLoadInstructionAddr[opStackDepth] = 0;
+		opStackDepth += 1;
                 break;
             case OP_ARG:
-                ltop();							// get value from opstack
-                InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-                InstImm( PPC_ADDI, R_EA, R_STACK, Constant1() );	// location to put it
-                Inst( PPC_STWX, R_TOP, R_EA, R_MEMBASE );
-		rtopped = qfalse;
+		v = Constant1();
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x ARG \t%08x\n",instruction,v);
+		#endif
+                InstImm( "addi", PPC_ADDI, R_EA, R_STACK, v );	// location to put it
+		if(opStackRegType[opStackDepth-1] == 1)
+			Inst( "stwx", PPC_STWX, opStackIntRegisters[opStackDepth-1], R_EA, R_MEMBASE );
+		else
+			Inst( "stfsx", PPC_STFSX, opStackFloatRegisters[opStackDepth-1], R_EA, R_MEMBASE );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
+		
                 break;
             case OP_CALL:
-                Inst( PPC_MFSPR, R_SECOND, 8, 0 );			// move from link register
-                InstImm( PPC_STWU, R_SECOND, R_REAL_STACK, -16 );	// save off the old return address
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x CALL\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assert(opStackDepth > 0);
+                Inst( "mflr", PPC_MFSPR, R_SECOND, 8, 0 );			// move from link register
+                InstImm( "stwu", PPC_STWU, R_SECOND, R_REAL_STACK, -16 );	// save off the old return address
 
-                Inst( PPC_MTSPR, R_ASMCALL, 9, 0 );			// move to count register
-                Inst( PPC_BCCTR | 1, 20, 0, 0 );			// jump and link to the count register
+		// Spill operand stack registers.
+		spillOpStack(opStackDepth);
+		
+		// We need to leave R_OPSTACK pointing to the top entry on the stack, which is the call address.
+		// It will be consumed (and R4 decremented) by the AsmCall code.
+		InstImm( "addi", PPC_ADDI, R_OPSTACK, R_OPSTACK, opStackDepth*4);
 
-                InstImm( PPC_LWZ, R_SECOND, R_REAL_STACK, 0 );		// fetch the old return address
-                InstImm( PPC_ADDI, R_REAL_STACK, R_REAL_STACK, 16 );
-                Inst( PPC_MTSPR, R_SECOND, 8, 0 );			// move to link register
-		rtopped = qfalse;
+                Inst( "mtctr", PPC_MTSPR, R_ASMCALL, 9, 0 );			// move to count register
+                Inst( "bctrl", PPC_BCCTR | 1, 20, 0, 0 );			// jump and link to the count register
+
+		// R4 now points to the top of the operand stack, which has the return value in it.  We want to
+		// back off the pointer to point to the base of our local operand stack and then reload the stack.
+		
+		InstImm("addi", PPC_ADDI, R_OPSTACK, R_OPSTACK, -opStackDepth*4);
+		
+		// Reload operand stack.
+		loadOpStack(opStackDepth);
+
+                InstImm( "lwz", PPC_LWZ, R_SECOND, R_REAL_STACK, 0 );		// fetch the old return address
+                InstImm( "addi", PPC_ADDI, R_REAL_STACK, R_REAL_STACK, 16 );
+                Inst( "mtlr", PPC_MTSPR, R_SECOND, 8, 0 );			// move to link register
                 break;
             case OP_PUSH:
-                InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, 4 );
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x PUSH\n",instruction);
+		#endif
+		opStackRegType[opStackDepth] = 1; 	// Garbage int value.
+		opStackDepth += 1;
                 break;
             case OP_POP:
-                InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x POP\n",instruction);
+		#endif
+		opStackDepth -= 1;
+		opStackRegType[opStackDepth] = 0; 	// ??
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_LEAVE:
-                InstImm( PPC_ADDI, R_STACK, R_STACK, Constant4() );	// add R_STACK, R_STACK, imm
-                Inst( PPC_BCLR, 20, 0, 0 );							// branch unconditionally to link register
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x LEAVE\n",instruction);
+		#endif
+		assert(opStackDepth == 1);
+		assert(opStackRegType[0] != 0);
+		// Save return value onto top of op stack.  We also have to increment R_OPSTACK
+		switch(opStackRegType[0])
+		{
+			case 1:	// Integer register
+				InstImm( "stw", PPC_STWU, opStackIntRegisters[0], R_OPSTACK, 4);
+				break;
+			case 2: // Float register
+				InstImm( "stfs", PPC_STFSU, opStackFloatRegisters[0], R_OPSTACK, 4);
+				break;
+		}
+                InstImm( "addi", PPC_ADDI, R_STACK, R_STACK, Constant4() );	// add R_STACK, R_STACK, imm
+		if(mainFunction == 1)
+		{
+			for(i = 0; i < OP_STACK_MAX_DEPTH; i++)
+				InstImm( "lwz", PPC_LWZ,  opStackIntRegisters[i], R_REAL_STACK, i*4);
+			InstImm( "addi", PPC_ADDI, R_REAL_STACK, R_REAL_STACK, OP_STACK_MAX_DEPTH*4 );	
+		}
+		opStackDepth--;
+		opStackRegType[opStackDepth] = 0;
+		opStackLoadInstructionAddr[opStackDepth] = 0;
+                Inst( "blr", PPC_BCLR, 20, 0, 0 );							// branch unconditionally to link register
                 break;
             case OP_LOAD4:
-                ltop();							// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_TOP, R_TOP );		// mask it
-                Inst( PPC_LWZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x LOAD4\n",instruction);
+		#endif
+		// We should try to figure out whether to use LWZX or LFSX based
+		// on some kind of code analysis after subsequent passes.  I think what
+		// we could do is store the compiled load instruction address along with
+		// the register type.  When we hit the first mismatched operator, we go back
+		// and patch the load.  Since LCC's operand stack should be at 0 depth by the
+		// time we hit a branch, this should work fairly well.  FIXME FIXME FIXME.
+		assertInteger(opStackDepth-1);
+		opStackLoadInstructionAddr[opStackDepth-1] = &buf[ compiledOfs ];
+                Inst( "lwzx", PPC_LWZX, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], R_MEMBASE );// load from memory base
+		opStackRegType[opStackDepth-1] = 1;
                 break;
             case OP_LOAD2:
-                ltop();							// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_TOP, R_TOP );		// mask it
-                Inst( PPC_LHZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x LOAD2\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+                Inst( "lhzx", PPC_LHZX, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], R_MEMBASE );// load from memory base
+		opStackRegType[opStackDepth-1] = 1;
                 break;
             case OP_LOAD1:
-                ltop();							// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_TOP, R_TOP );		// mask it
-                Inst( PPC_LBZX, R_TOP, R_TOP, R_MEMBASE );		// load from memory base
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x LOAD1\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+                Inst( "lbzx", PPC_LBZX, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], R_MEMBASE );// load from memory base
+		opStackRegType[opStackDepth-1] = 1;
                 break;
             case OP_STORE4:
-                ltopandsecond();					// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );		// mask it
-                Inst( PPC_STWX, R_TOP, R_SECOND, R_MEMBASE );		// store from memory base
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x STORE4\n",instruction);
+		#endif
+		assertInteger(opStackDepth-2);
+		if(opStackRegType[opStackDepth-1] == 1)
+			Inst( "stwx", PPC_STWX, opStackIntRegisters[opStackDepth-1], 
+					opStackIntRegisters[opStackDepth-2], R_MEMBASE );		// store from memory base
+		else
+			Inst( "stfsx", PPC_STFSX, opStackFloatRegisters[opStackDepth-1], 
+					opStackIntRegisters[opStackDepth-2], R_MEMBASE );		// store from memory base
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 break;
             case OP_STORE2:
-                ltopandsecond();					// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );		// mask it
-                Inst( PPC_STHX, R_TOP, R_SECOND, R_MEMBASE );		// store from memory base
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x STORE2\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "sthx", PPC_STHX, opStackIntRegisters[opStackDepth-1],
+				opStackIntRegisters[opStackDepth-2], R_MEMBASE );		// store from memory base
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 break;
             case OP_STORE1:
-                ltopandsecond();					// get value from opstack
-		//Inst( PPC_AND, R_MEMMASK, R_SECOND, R_SECOND );		// mask it
-                Inst( PPC_STBX, R_TOP, R_SECOND, R_MEMBASE );		// store from memory base
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x STORE1\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "stbx", PPC_STBX, opStackIntRegisters[opStackDepth-1],
+				opStackIntRegisters[opStackDepth-2], R_MEMBASE );		// store from memory base
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 break;
 
             case OP_EQ:
-                ltopandsecond();					// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x EQ\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 4, 2, 8 );
+                InstImm( "bc", PPC_BC, 4, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];                    
                 } else {
                     v = 0;             
                 }
-                Emit4(PPC_B | (v&0x3ffffff) );
-				rtopped = qfalse;
+                Emit4("b", PPC_B | (v&0x3ffffff) );
                 break;
             case OP_NE:
-                ltopandsecond();					// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+			printf("%08x NE\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 12, 2, 8 );
+                InstImm( "bc", PPC_BC, 12, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];                    
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 2, v );
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 2, v );
 
-				rtopped = qfalse;
                 break;
             case OP_LTI:
-                ltopandsecond();					// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LTI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 4, 0, 8 );
+                InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 0, v );
-				rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 0, v );
                 break;
             case OP_LEI:
-                ltopandsecond();					// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LEI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 12, 1, 8 );
+                InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 1, v );
-				rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 1, v );
                 break;
             case OP_GTI:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GTI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 4, 1, 8 );
+                InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 1, v );
-				rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 1, v );
                 break;
             case OP_GEI:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMP, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GEI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmp", PPC_CMP, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 				jused[i] = 1;
-                InstImm( PPC_BC, 12, 0, 8 );
+                InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 0, v );
-				rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 0, v );
                 break;
             case OP_LTU:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMPL, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LTU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmpl", PPC_CMPL, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 4, 0, 8 );
+                InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 0, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 0, v );
                 break;
             case OP_LEU:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMPL, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LEU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmpl", PPC_CMPL, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 12, 1, 8 );
+                InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 1, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 1, v );
                 break;
             case OP_GTU:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMPL, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GTU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmpl", PPC_CMPL, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 4, 1, 8 );
+                InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 1, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 1, v );
                 break;
             case OP_GEU:
-                ltopandsecond();		// get value from opstack
-                Inst( PPC_CMPL, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GEU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "cmpl", PPC_CMPL, 0, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 12, 0, 8 );
+                InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 0, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 0, v );
                 break;
                 
             case OP_EQF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_TOP, R_SECOND );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x EQF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 4, 2, 8 );
+                InstImm( "bc", PPC_BC, 4, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 2, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 2, v );
                 break;			
             case OP_NEF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_TOP, R_SECOND );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x NEF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 12, 2, 8 );
+                InstImm( "bc", PPC_BC, 12, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 2, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 2, v );
                 break;			
             case OP_LTF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LTF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 4, 0, 8 );
+                InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 0, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 0, v );
                 break;			
             case OP_LEF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LEF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 12, 1, 8 );
+                InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 1, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 1, v );
                 break;			
             case OP_GTF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GTF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 4, 1, 8 );
+                InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 12, 1, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 12, 1, v );
                 break;			
             case OP_GEF:
-                fltopandsecond();		// get value from opstack
-                Inst( PPC_FCMPU, 0, R_SECOND, R_TOP );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x GEF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fcmpu", PPC_FCMPU, 0, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 i = Constant4();
 		jused[i] = 1;
-                InstImm( PPC_BC, 12, 0, 8 );
+                InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
                 } else {
                     v = 0;
                 }
-                Emit4(PPC_B | (unsigned int)(v&0x3ffffff) );
-//                InstImm( PPC_BC, 4, 0, v );
-		rtopped = qfalse;
+                Emit4("b", PPC_B | (unsigned int)(v&0x3ffffff) );
+//                InstImm( "bc", PPC_BC, 4, 0, v );
                 break;
 
             case OP_NEGI:
-                ltop();		// get value from opstack
-                InstImm( PPC_SUBFIC, R_TOP, R_TOP, 0 );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x NEGI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+                InstImm( "subfic", PPC_SUBFIC, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], 0 );
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_ADD:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_ADD, R_TOP, R_TOP, R_SECOND );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x ADD\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "add", PPC_ADD, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-2] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_SUB:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_SUBF, R_TOP, R_TOP, R_SECOND );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x SUB\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "subf", PPC_SUBF, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-2] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_DIVI:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_DIVW, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x DIVI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "divw", PPC_DIVW, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_DIVU:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_DIVWU, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x DIVU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "divwu", PPC_DIVWU, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_MODI:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_DIVW, R_EA, R_SECOND, R_TOP );
-                Inst( PPC_MULLW, R_EA, R_TOP, R_EA );
-                Inst( PPC_SUBF, R_TOP, R_EA, R_SECOND );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x MODI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "divw", PPC_DIVW, R_EA, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+                Inst( "mullw", PPC_MULLW, R_EA, opStackIntRegisters[opStackDepth-1], R_EA );
+                Inst( "subf", PPC_SUBF, opStackIntRegisters[opStackDepth-2], R_EA, opStackIntRegisters[opStackDepth-2] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_MODU:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_DIVWU, R_EA, R_SECOND, R_TOP );
-                Inst( PPC_MULLW, R_EA, R_TOP, R_EA );
-                Inst( PPC_SUBF, R_TOP, R_EA, R_SECOND );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x MODU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "divwu", PPC_DIVWU, R_EA, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+                Inst( "mullw", PPC_MULLW, R_EA, opStackIntRegisters[opStackDepth-1], R_EA );
+                Inst( "subf", PPC_SUBF, opStackIntRegisters[opStackDepth-2], R_EA, opStackIntRegisters[opStackDepth-2] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_MULI:
             case OP_MULU:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_MULLW, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x MULI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "mullw", PPC_MULLW, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-2] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_BAND:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_AND, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x BAND\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "and", PPC_AND, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_BOR:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_OR, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x BOR\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "or", PPC_OR, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_BXOR:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_XOR, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x BXOR\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "xor", PPC_XOR, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_BCOM:
-                ltop();		// get value from opstack
-                Inst( PPC_NOR, R_TOP, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x BCOM\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+                Inst( "nor", PPC_NOR, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1] );
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_LSH:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_SLW, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x LSH\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "slw", PPC_SLW, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_RSHI:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_SRAW, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x RSHI\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "sraw", PPC_SRAW, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_RSHU:
-                ltop();		// get value from opstack
-                InstImm( PPC_LWZU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_SRW, R_SECOND, R_TOP, R_TOP );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x RSHU\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                Inst( "srw", PPC_SRW, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
 
             case OP_NEGF:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                Inst( PPC_FNEG, R_TOP, 0, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x NEGF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+                Inst( "fneg", PPC_FNEG, opStackFloatRegisters[opStackDepth-1], 0, opStackFloatRegisters[opStackDepth-1] );
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_ADDF:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                InstImm( PPC_LFSU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_FADDS, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x ADDF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fadds", PPC_FADDS, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_SUBF:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                InstImm( PPC_LFSU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_FSUBS, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x SUBF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fsubs", PPC_FSUBS, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_DIVF:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                InstImm( PPC_LFSU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst( PPC_FDIVS, R_TOP, R_SECOND, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x DIVF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst( "fdivs", PPC_FDIVS, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             case OP_MULF:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                InstImm( PPC_LFSU, R_SECOND, R_OPSTACK, -4 );		// get value from opstack
-                Inst4( PPC_FMULS, R_TOP, R_SECOND, 0, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x MULF\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+		makeFloat(opStackDepth-2);
+                Inst4( "fmuls", PPC_FMULS, opStackFloatRegisters[opStackDepth-2], opStackFloatRegisters[opStackDepth-2], 0, opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
 
             case OP_CVIF:
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x CVIF\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+		//makeInteger(opStackDepth-1);
                 v = (int)&itofConvert;
-                InstImmU( PPC_ADDIS, R_EA, 0, (v >> 16)&0xffff );
-                InstImmU( PPC_ORI, R_EA, R_EA, v & 0xffff );
-		InstImm( PPC_LWZ, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                InstImmU( PPC_XORIS, R_TOP, R_TOP, 0x8000 );
-                InstImm( PPC_STW, R_TOP, R_EA, 12 );
-                InstImm( PPC_LFD, R_TOP, R_EA, 0 );
-                InstImm( PPC_LFD, R_SECOND, R_EA, 8 );
-                Inst( PPC_FSUB, R_TOP, R_SECOND, R_TOP );
+                InstImmU( "addis", PPC_ADDIS, R_EA, 0, (v >> 16)&0xffff );
+                InstImmU( "ori", PPC_ORI, R_EA, R_EA, v & 0xffff );
+                InstImmU( "xoris", PPC_XORIS, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], 0x8000 );
+                InstImm( "stw", PPC_STW, opStackIntRegisters[opStackDepth-1], R_EA, 12 );
+                InstImm( "lfd", PPC_LFD, opStackFloatRegisters[opStackDepth-1], R_EA, 0 );
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+                InstImm( "lfd", PPC_LFD, 13, R_EA, 8 );
+                Inst( "fsub", PPC_FSUB, opStackFloatRegisters[opStackDepth-1], 13, opStackFloatRegisters[opStackDepth-1] );
+		opStackRegType[opStackDepth-1] = 2;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
     //            Inst( PPC_FRSP, R_TOP, 0, R_TOP );
-                InstImm( PPC_STFS, R_TOP, R_OPSTACK, 0 );		// save value to opstack
-		rtopped = qfalse;
                 break;
             case OP_CVFI:
-                InstImm( PPC_LFS, R_TOP, R_OPSTACK, 0 );		// get value from opstack
-                Inst( PPC_FCTIWZ, R_TOP, 0, R_TOP );
-                Inst( PPC_STFIWX, R_TOP, 0, R_OPSTACK );		// save value to opstack
-		rtopped = qfalse;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x CVFI\n",instruction);
+		#endif
+		makeFloat(opStackDepth-1);
+
+		InstImm( "addi", PPC_ADDI, R_OPSTACK, R_OPSTACK, opStackDepth*4);
+
+                Inst( "fctiwz", PPC_FCTIWZ, opStackFloatRegisters[opStackDepth-1], 0, opStackFloatRegisters[opStackDepth-1] );
+                Inst( "stfiwx", PPC_STFIWX, opStackFloatRegisters[opStackDepth-1], 0, R_OPSTACK );		// save value to opstack (dummy area now)
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+		Inst( "ori", PPC_ORI, 0, 0, 0);
+                InstImm( "lwz", PPC_LWZ, opStackIntRegisters[opStackDepth-1], R_OPSTACK, 0 );
+		
+		InstImm( "addi", PPC_ADDI, R_OPSTACK, R_OPSTACK, -opStackDepth*4);
+		
+		opStackRegType[opStackDepth-1] = 1;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_SEX8:
-                ltop();	// get value from opstack
-                Inst( PPC_EXTSB, R_TOP, R_TOP, 0 );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x SEX8\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+                Inst( "extsb", PPC_EXTSB, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], 0 );
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
             case OP_SEX16:
-                ltop();	// get value from opstack
-                Inst( PPC_EXTSH, R_TOP, R_TOP, 0 );
-                InstImm( PPC_STW, R_TOP, R_OPSTACK, 0 );
-		rtopped = qtrue;
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x SEX16\n",instruction);
+		#endif
+		assertInteger(opStackDepth-1);
+                Inst( "extsh", PPC_EXTSH, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], 0 );
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
                 break;
 
             case OP_BLOCK_COPY:
                 v = Constant4() >> 2;
-                ltop();		// source
-                InstImm( PPC_LWZ, R_SECOND, R_OPSTACK, -4 );	// dest
-                InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -8 );
-                InstImmU( PPC_ADDI, R_EA, 0, v );				// count
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x BLOCK_COPY\t%08lx\n",instruction,v<<2);
+		#endif
+		assert(opStackDepth >= 2);
+		assertInteger(opStackDepth-1);
+		assertInteger(opStackDepth-2);
+                InstImmU( "addi", PPC_ADDI, R_EA, 0, v );				// count
 				// FIXME: range check
-              	Inst( PPC_MTSPR, R_EA, 9, 0 );					// move to count register
+              	Inst( "mtctr", PPC_MTSPR, R_EA, 9, 0 );					// move to count register
 
-                Inst( PPC_ADD, R_TOP, R_TOP, R_MEMBASE );
-                InstImm( PPC_ADDI, R_TOP, R_TOP, -4 );
-                Inst( PPC_ADD, R_SECOND, R_SECOND, R_MEMBASE );
-                InstImm( PPC_ADDI, R_SECOND, R_SECOND, -4 );
+                Inst( "add", PPC_ADD, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], R_MEMBASE );
+                InstImm( "addi", PPC_ADDI, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], -4 );
+                Inst( "add", PPC_ADD, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], R_MEMBASE );
+                InstImm( "addi", PPC_ADDI, opStackIntRegisters[opStackDepth-2], opStackIntRegisters[opStackDepth-2], -4 );
 
-                InstImm( PPC_LWZU, R_EA, R_TOP, 4 );		// source
-                InstImm( PPC_STWU, R_EA, R_SECOND, 4 );	// dest
-                Inst( PPC_BC | 0xfff8 , 16, 0, 0 );					// loop
-		rtopped = qfalse;
+                InstImm( "lwzu", PPC_LWZU, R_EA, opStackIntRegisters[opStackDepth-1], 4 );		// source
+                InstImm( "stwu", PPC_STWU, R_EA, opStackIntRegisters[opStackDepth-2], 4 );	// dest
+                Inst( "b", PPC_BC | 0xfff8 , 16, 0, 0 );					// loop
+		opStackRegType[opStackDepth-1] = 0;
+		opStackRegType[opStackDepth-2] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-2] = 0;
+		opStackDepth -= 2;
                 break;
 
             case OP_JUMP:
-                ltop();	// get value from opstack
-                InstImm( PPC_ADDI, R_OPSTACK, R_OPSTACK, -4 );
-                Inst( PPC_RLWINM | ( 29 << 1 ), R_TOP, R_TOP, 2 );
+		#if DEBUG_VM
+		if(pass == 1)
+		printf("%08x JUMP\n",instruction);
+		#endif
+		assert(opStackDepth == 1);
+		assertInteger(opStackDepth-1);
+
+                Inst( "rlwinm", PPC_RLWINM | ( 29 << 1 ), opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], 2 );
 		// FIXME: range check
-		Inst( PPC_LWZX, R_TOP, R_TOP, R_INSTRUCTIONS );
-                Inst( PPC_MTSPR, R_TOP, 9, 0 );		// move to count register
-                Inst( PPC_BCCTR, 20, 0, 0 );		// jump to the count register
-		rtopped = qfalse;
+		Inst( "lwzx", PPC_LWZX, opStackIntRegisters[opStackDepth-1], opStackIntRegisters[opStackDepth-1], R_INSTRUCTIONS );
+                Inst( "mtctr", PPC_MTSPR, opStackIntRegisters[opStackDepth-1], 9, 0 );		// move to count register
+                Inst( "bctr", PPC_BCCTR, 20, 0, 0 );		// jump to the count register
+		opStackRegType[opStackDepth-1] = 0;
+		opStackLoadInstructionAddr[opStackDepth-1] = 0;
+		opStackDepth -= 1;
                 break;
             default:
                 Com_Error( ERR_DROP, "VM_CompilePPC: bad opcode %i at instruction %i, offset %i", op, instruction, pc );
             }
 	    pop0 = pop1;
 	    pop1 = op;
+		assert(opStackDepth >= 0);
+		assert(opStackDepth < OP_STACK_MAX_DEPTH);
+		
+		//printf("%4d\t%s\n",opStackDepth,opnames[op]);
         }
 
 	Com_Printf( "VM file %s pass %d compiled to %i bytes of code\n", vm->name, (pass+1), compiledOfs*4 );
@@ -1140,16 +1711,33 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	    vm->codeLength = compiledOfs * 4;
 	    vm->codeBase = Hunk_Alloc( vm->codeLength, h_low );
 	    Com_Memcpy( vm->codeBase, buf, vm->codeLength );
+	    
+	    //printf("codeBase: %p\n",vm->codeBase);
+	    
 	    Z_Free( buf );
 	
 	    // offset all the instruction pointers for the new location
 	    for ( i = 0 ; i < header->instructionCount ; i++ ) {
 		vm->instructionPointers[i] += (int)vm->codeBase;
+		//printf("%08x %08lx\n",i,vm->instructionPointers[i]);
 	    }
 
 	    // go back over it in place now to fixup reletive jump targets
 	    buf = (unsigned *)vm->codeBase;
-	}
+	} else if ( pass == 1 ) {
+           #ifdef MACOS_X
+           // On Mac OS X, the following library routine clears the instruction cache for generated code
+           MakeDataExecutable(vm->codeBase, vm->codeLength);
+           #else
+           #warning Need to clear the instruction cache for generated code
+           #endif
+       }
+    }
+    if(0)
+    {
+	char buf[256];
+	printf("wait..\n");
+	gets(buf);
     }
     Z_Free( jused );
 }
@@ -1169,6 +1757,9 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 
 	currentVM = vm;
 
+	//printf("VM_CallCompiled: %p   %08lx %08lx %08lx\n",
+	//	vm, args[0],args[1],args[2]);
+		
 	// interpret the code
 	vm->currentlyInterpreting = qtrue;
 
@@ -1193,6 +1784,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	*(int *)&image[ programStack + 4 ] = 0;	// return stack
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
+	// Cheesy... manually save registers used by VM call...
 	// off we go into generated code...
 	// the PPC calling standard says the parms will all go into R3 - R11, so 
 	// no special asm code is needed here
@@ -1245,7 +1837,7 @@ asm (
 
 #if defined(MACOS_X) && defined(__OPTIMIZE__)
     // On Mac OS X, gcc doesn't push a frame when we are optimized, so trying to tear it down results in grave disorder.
-#warning Mac OS X optimization on, not popping GCC AsmCall frame
+//#warning Mac OS X optimization on, not popping GCC AsmCall frame
 #else
     // Mac OS X Server and unoptimized compiles include a GCC AsmCall frame
     asm (
@@ -1308,7 +1900,7 @@ asm (
     // save off the return value
 "    stwu	r12,4(r4)		\n"	// RG_TOP, 0(RG_OPSTACK)
 
-	// GCC adds its own prolog / epilog code
+	// GCC adds its own prolog / epliog code
  );
 }
 #else
