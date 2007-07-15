@@ -364,7 +364,7 @@ ifeq ($(PLATFORM),darwin)
       BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
     endif
   endif
- 
+
   ifeq ($(USE_CURL),1)
     BASE_CFLAGS += -DUSE_CURL=1
     ifneq ($(USE_CURL_DLOPEN),1)
@@ -429,7 +429,7 @@ endif
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN=1
   endif
- 
+
   ifeq ($(USE_CURL),1)
     BASE_CFLAGS += -DUSE_CURL=1
     ifneq ($(USE_CURL_DLOPEN),1)
@@ -758,33 +758,40 @@ ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
 
-DO_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
-DO_SMP_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
-DO_BOT_CC=$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
-DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
-DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
-DO_DED_CC=$(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
-DO_WINDRES=$(WINDRES) -i $< -o $@
+DO_CC       = @echo "CC $<"; \
+              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
+DO_SMP_CC   = @echo "SMP_CC $<"; \
+              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
+DO_BOT_CC   = @echo "BOT_CC $<"; \
+              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
+DO_SHLIB_CC = @echo "SHLIB_CC $<"; \
+              $(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+DO_AS       = @echo "AS $<"; \
+              $(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+DO_DED_CC   = @echo "DED_CC $<"; \
+              $(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
+DO_WINDRES  = @echo "WINDRES $<"; \
+              $(WINDRES) -i $< -o $@
 
 #############################################################################
 # MAIN TARGETS
 #############################################################################
 
-default:build_release
+default: build_release
 
 debug: build_debug
 release: build_release
 
-build_debug: B=$(BD)
-build_debug: makedirs tools
-	$(MAKE)  targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS) $(DEPEND_CFLAGS)"
+build_debug: tools
+	$(MAKE) makedirs targets B=$(BD) \
+		CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS) $(DEPEND_CFLAGS)"
 
-build_release: B=$(BR)
-build_release: makedirs tools
-	$(MAKE)  targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS) $(DEPEND_CFLAGS)"
+build_release: tools
+	$(MAKE) makedirs targets B=$(BR) \
+		CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS) $(DEPEND_CFLAGS)"
 
 # Build both debug and release builds
-all:build_debug build_release
+all: build_debug build_release
 
 targets: $(TARGETS)
 
@@ -823,7 +830,8 @@ tools:
 	$(MAKE) -C $(TOOLSDIR)/asm install
 endif
 
-DO_Q3LCC=$(Q3LCC) -o $@ $<
+DO_Q3LCC    = @echo "Q3LCC $<"; \
+              $(Q3LCC) -o $@ $<
 
 #############################################################################
 # CLIENT/SERVER
@@ -1052,10 +1060,13 @@ else
 endif
 
 $(B)/ioquake3.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
-	$(CC) -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
+	@echo "LD $@"
+	@$(CC) -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) \
+		$(LDFLAGS) $(LIBSDLMAIN)
 
 $(B)/ioquake3-smp.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
-	$(CC) -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
+	@echo "LD $@"
+	@$(CC) -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
 
 ifneq ($(strip $(LIBSDLMAIN)),)
@@ -1171,7 +1182,8 @@ ifeq ($(HAVE_VM_COMPILED),true)
 endif
 
 $(B)/ioq3ded.$(ARCH)$(BINEXT): $(Q3DOBJ)
-	$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
+	@echo "LD $@"
+	@$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
 
 
 
@@ -1209,10 +1221,12 @@ Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
 Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
-	$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
+	@echo "LD $@"
+	@$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
 
 $(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
-	$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK CGAME
@@ -1250,10 +1264,12 @@ MPCGOBJ = $(MPCGOBJ_) $(B)/missionpack/cgame/cg_syscalls.o
 MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
-	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
+	@echo "LD $@"
+	@$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
 
 $(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
-	$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 
 
@@ -1300,10 +1316,12 @@ Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
 Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
-	$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
+	@echo "LD $@"
+	@$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
 $(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
-	$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK GAME
@@ -1348,10 +1366,12 @@ MPGOBJ = $(MPGOBJ_) $(B)/missionpack/game/g_syscalls.o
 MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
-	$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
+	@echo "LD $@"
+	@$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
 
 $(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
-	$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
 
 
 
@@ -1408,10 +1428,12 @@ Q3UIOBJ = $(Q3UIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) : $(Q3UIOBJ)
-	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
+	@echo "LD $@"
+	@$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
 
 $(B)/baseq3/vm/ui.qvm: $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
-	$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK UI
@@ -1433,10 +1455,12 @@ MPUIOBJ = $(MPUIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
-	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
+	@echo "LD $@"
+	@$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
 
 $(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
-	$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
+	@echo "Q3ASM $@"
+	@$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 
 
@@ -1601,30 +1625,31 @@ ifneq ($(BUILD_GAME_SO),0)
 endif
 
 clean: clean-debug clean-release
-	$(MAKE) -C $(LOKISETUPDIR) clean
+	@$(MAKE) -C $(LOKISETUPDIR) clean
 
 clean2:
-	if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
-	rm -f $(Q3OBJ) $(Q3POBJ) $(Q3POBJ_SMP) $(Q3DOBJ) \
+	@echo "CLEAN $(B)"
+	@if [ -d $(B) ];then (find $(B) -name '*.d' -exec rm {} \;)fi
+	@rm -f $(Q3OBJ) $(Q3POBJ) $(Q3POBJ_SMP) $(Q3DOBJ) \
 		$(MPGOBJ) $(Q3GOBJ) $(Q3CGOBJ) $(MPCGOBJ) $(Q3UIOBJ) $(MPUIOBJ) \
 		$(MPGVMOBJ) $(Q3GVMOBJ) $(Q3CGVMOBJ) $(MPCGVMOBJ) $(Q3UIVMOBJ) $(MPUIVMOBJ)
-	rm -f $(TARGETS)
+	@rm -f $(TARGETS)
 
 clean-debug:
-	$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
+	@$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
 
 clean-release:
-	$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
+	@$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
 
 toolsclean:
-	$(MAKE) -C $(TOOLSDIR)/asm clean uninstall
-	$(MAKE) -C $(TOOLSDIR)/lcc clean uninstall
+	@$(MAKE) -C $(TOOLSDIR)/asm clean uninstall
+	@$(MAKE) -C $(TOOLSDIR)/lcc clean uninstall
 
 distclean: clean toolsclean
-	rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
 
 installer: build_release
-	$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
+	@$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
 
 dist:
 	rm -rf ioquake3-$(SVN_VERSION)
@@ -1639,10 +1664,10 @@ dist:
 D_FILES=$(shell find . -name '*.d')
 
 $(B)/baseq3/vm/vm.d: $(Q3GOBJ) $(Q3CGOBJ) $(Q3UIOBJ)
-	cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
+	@cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
 
 $(B)/missionpack/vm/vm.d: $(MPGOBJ) $(MPCGOBJ) $(MPUIOBJ)
-	cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
+	@cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
 
 qvmdeps: $(B)/baseq3/vm/vm.d $(B)/missionpack/vm/vm.d
 

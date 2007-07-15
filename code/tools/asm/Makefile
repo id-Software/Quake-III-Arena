@@ -28,9 +28,9 @@ ifeq ($(USE_CCACHE),1)
   CXX := ccache $(CXX)
 endif
 
-default:	q3asm
+default: q3asm
 
-q3asm:	q3asm.c cmdlib.c
+q3asm: q3asm.c cmdlib.c
 	$(CC) $(Q3ASM_CFLAGS) -o $@ $^
 
 clean:
