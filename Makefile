@@ -751,7 +751,7 @@ ifeq ($(USE_LOCAL_HEADERS),1)
 endif
 
 ifeq ($(GENERATE_DEPENDENCIES),1)
-  DEPEND_CFLAGS=-MMD
+  BASE_CFLAGS += -MMD
 endif
 
 ifeq ($(USE_SVN),1)
@@ -777,23 +777,35 @@ DO_WINDRES  = @echo "WINDRES $<"; \
 # MAIN TARGETS
 #############################################################################
 
-default: build_release
+default: release
+all: debug release
 
-debug: build_debug
-release: build_release
+debug:
+	@$(MAKE) targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS)"
 
-build_debug: tools
-	$(MAKE) makedirs targets B=$(BD) \
-		CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS) $(DEPEND_CFLAGS)"
+release:
+	@$(MAKE) targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS)"
 
-build_release: tools
-	$(MAKE) makedirs targets B=$(BR) \
-		CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS) $(DEPEND_CFLAGS)"
-
-# Build both debug and release builds
-all: build_debug build_release
-
-targets: $(TARGETS)
+# Create the build directories and tools, print out
+# an informational message, then start building
+targets: makedirs tools
+	@echo ""
+	@echo "Building ioquake3 in $(B):"
+	@echo "  CC: $(CC)"
+	@echo ""
+	@echo "  CFLAGS:"
+	@for i in $(CFLAGS); \
+	do \
+		echo "    $$i"; \
+	done
+	@echo ""
+	@echo "  Output:"
+	@for i in $(TARGETS); \
+	do \
+		echo "    $$i"; \
+	done
+	@echo ""
+	@$(MAKE) $(TARGETS)
 
 makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
@@ -1588,7 +1600,7 @@ $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
 # MISC
 #############################################################################
 
-copyfiles: build_release
+copyfiles: release
 	@if [ ! -d $(COPYDIR)/baseq3 ]; then echo "You need to set COPYDIR to where your Quake3 data is!"; fi
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/baseq3
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack
@@ -1636,10 +1648,10 @@ clean2:
 	@rm -f $(TARGETS)
 
 clean-debug:
-	@$(MAKE) clean2 B=$(BD) CFLAGS="$(DEBUG_CFLAGS)"
+	@$(MAKE) clean2 B=$(BD)
 
 clean-release:
-	@$(MAKE) clean2 B=$(BR) CFLAGS="$(RELEASE_CFLAGS)"
+	@$(MAKE) clean2 B=$(BR)
 
 toolsclean:
 	@$(MAKE) -C $(TOOLSDIR)/asm clean uninstall
@@ -1648,7 +1660,7 @@ toolsclean:
 distclean: clean toolsclean
 	@rm -rf $(BUILD_DIR)
 
-installer: build_release
+installer: release
 	@$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
 
 dist:
@@ -1675,4 +1687,6 @@ ifneq ($(strip $(D_FILES)),)
   include $(D_FILES)
 endif
 
-.PHONY: release debug clean distclean copyfiles installer dist
+.PHONY: all clean clean2 clean-debug clean-release copyfiles \
+	debug default dist distclean installer makedirs qvmdeps \
+	release targets tools toolsclean
