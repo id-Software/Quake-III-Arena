@@ -733,8 +733,7 @@ ifneq ($(BUILD_GAME_QVM),0)
       $(B)/baseq3/vm/ui.qvm \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
-      $(B)/missionpack/vm/ui.qvm \
-      qvmdeps
+      $(B)/missionpack/vm/ui.qvm
   endif
 endif
 
@@ -758,20 +757,52 @@ ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
 
-DO_CC       = @echo "CC $<"; \
-              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
-DO_SMP_CC   = @echo "SMP_CC $<"; \
-              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
-DO_BOT_CC   = @echo "BOT_CC $<"; \
-              $(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
-DO_SHLIB_CC = @echo "SHLIB_CC $<"; \
-              $(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
-DO_AS       = @echo "AS $<"; \
-              $(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
-DO_DED_CC   = @echo "DED_CC $<"; \
-              $(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
-DO_WINDRES  = @echo "WINDRES $<"; \
-              $(WINDRES) -i $< -o $@
+define DO_CC       
+@echo "CC $<"
+@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
+endef
+
+define DO_SMP_CC
+@echo "SMP_CC $<"
+@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
+endef
+
+define DO_BOT_CC
+@echo "BOT_CC $<"
+@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
+endef
+
+ifeq ($(GENERATE_DEPENDENCIES),1)
+  DO_QVM_DEP=cat $(@:%.o=%.d) | sed -e 's/\.o/\.asm/g' >> $(@:%.o=%.d)
+endif
+
+define DO_SHLIB_CC
+@echo "SHLIB_CC $<"
+@$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+@$(DO_QVM_DEP)
+endef
+
+define DO_SHLIB_CC_MISSIONPACK
+@echo "SHLIB_CC_MISSIONPACK $<"
+@$(CC) -DMISSIONPACK $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+@$(DO_QVM_DEP)
+endef
+
+define DO_AS
+@echo "AS $<"
+@$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+endef
+
+define DO_DED_CC
+@echo "DED_CC $<"
+@$(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
+endef
+
+define DO_WINDRES
+@echo "WINDRES $<"
+@$(WINDRES) -i $< -o $@
+endef
+
 
 #############################################################################
 # MAIN TARGETS
@@ -842,8 +873,16 @@ tools:
 	$(MAKE) -C $(TOOLSDIR)/asm install
 endif
 
-DO_Q3LCC    = @echo "Q3LCC $<"; \
-              $(Q3LCC) -o $@ $<
+define DO_Q3LCC
+@echo "Q3LCC $<"
+@$(Q3LCC) -o $@ $<
+endef
+
+define DO_Q3LCC_MISSIONPACK
+@echo "Q3LCC_MISSIONPACK $<"
+@$(Q3LCC) -DMISSIONPACK -o $@ $<
+endef
+
 
 #############################################################################
 # CLIENT/SERVER
@@ -1551,10 +1590,10 @@ $(B)/baseq3/cgame/%.asm: $(CGDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/cgame/%.o: $(CGDIR)/%.c
-	$(DO_SHLIB_CC) -DMISSIONPACK
+	$(DO_SHLIB_CC_MISSIONPACK)
 
 $(B)/missionpack/cgame/%.asm: $(CGDIR)/%.c
-	$(DO_Q3LCC) -DMISSIONPACK
+	$(DO_Q3LCC_MISSIONPACK)
 
 
 $(B)/baseq3/game/%.o: $(GDIR)/%.c
@@ -1564,10 +1603,10 @@ $(B)/baseq3/game/%.asm: $(GDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/game/%.o: $(GDIR)/%.c
-	$(DO_SHLIB_CC) -DMISSIONPACK
+	$(DO_SHLIB_CC_MISSIONPACK)
 
 $(B)/missionpack/game/%.asm: $(GDIR)/%.c
-	$(DO_Q3LCC) -DMISSIONPACK
+	$(DO_Q3LCC_MISSIONPACK)
 
 
 $(B)/baseq3/ui/%.o: $(Q3UIDIR)/%.c
@@ -1577,10 +1616,10 @@ $(B)/baseq3/ui/%.asm: $(Q3UIDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/ui/%.o: $(UIDIR)/%.c
-	$(DO_SHLIB_CC) -DMISSIONPACK
+	$(DO_SHLIB_CC_MISSIONPACK)
 
 $(B)/missionpack/ui/%.asm: $(UIDIR)/%.c
-	$(DO_Q3LCC) -DMISSIONPACK
+	$(DO_Q3LCC_MISSIONPACK)
 
 
 $(B)/baseq3/qcommon/%.o: $(CMDIR)/%.c
@@ -1590,10 +1629,10 @@ $(B)/baseq3/qcommon/%.asm: $(CMDIR)/%.c
 	$(DO_Q3LCC)
 
 $(B)/missionpack/qcommon/%.o: $(CMDIR)/%.c
-	$(DO_SHLIB_CC) -DMISSIONPACK
+	$(DO_SHLIB_CC_MISSIONPACK)
 
 $(B)/missionpack/qcommon/%.asm: $(CMDIR)/%.c
-	$(DO_Q3LCC) -DMISSIONPACK
+	$(DO_Q3LCC_MISSIONPACK)
 
 
 #############################################################################
@@ -1675,18 +1714,10 @@ dist:
 
 D_FILES=$(shell find . -name '*.d')
 
-$(B)/baseq3/vm/vm.d: $(Q3GOBJ) $(Q3CGOBJ) $(Q3UIOBJ)
-	@cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
-
-$(B)/missionpack/vm/vm.d: $(MPGOBJ) $(MPCGOBJ) $(MPUIOBJ)
-	@cat $(^:%.o=%.d) | sed -e 's/\.o/\.asm/g' > $@
-
-qvmdeps: $(B)/baseq3/vm/vm.d $(B)/missionpack/vm/vm.d
-
 ifneq ($(strip $(D_FILES)),)
   include $(D_FILES)
 endif
 
 .PHONY: all clean clean2 clean-debug clean-release copyfiles \
-	debug default dist distclean installer makedirs qvmdeps \
-	release targets tools toolsclean
+	debug default dist distclean installer makedirs release \
+	targets tools toolsclean
