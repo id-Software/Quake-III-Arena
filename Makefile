@@ -614,6 +614,7 @@ else # ifeq IRIX
 
 ifeq ($(PLATFORM),sunos)
 
+  CC=gcc
   INSTALL=ginstall
   MKDIR=gmkdir
   COPYDIR="/usr/local/share/games/quake3"
