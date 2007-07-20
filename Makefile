@@ -340,9 +340,6 @@ ifeq ($(PLATFORM),darwin)
 
   ifeq ($(ARCH),ppc)
     OPTIMIZE += -faltivec -O3
-    # Carbon is required on PPC only to make a call to MakeDataExecutable
-    # in the PPC vm (should be a better non-Carbon way).
-    LDFLAGS += -framework Carbon
   endif
   ifeq ($(ARCH),i386)
     OPTIMIZE += -march=prescott -mfpmath=sse

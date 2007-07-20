@@ -382,8 +382,6 @@ void NET_GetLocalAddress( void ) {
         int interfaceSocket;
         int family;
         
-        Com_Printf("NET_GetLocalAddress: Querying for network interfaces\n");
-        
         // Set this early so we can just return if there is an error
 	numIP = 0;
         
@@ -404,7 +402,6 @@ void NET_GetLocalAddress( void ) {
             Com_Printf("NET_GetLocalAddress: Unable to get list of network interfaces, errno = %d\n", errno);
             return;
         }
-
 
         linkInterface = (struct ifreq *) ifc.ifc_buf;
         while ((char *) linkInterface < &ifc.ifc_buf[ifc.ifc_len]) {
@@ -469,7 +466,6 @@ void NET_GetLocalAddress( void ) {
             }
             linkInterface = IFR_NEXT(linkInterface);
         }
-        Com_Printf("NET_GetLocalAddress: DONE querying for network interfaces\n");
 
         close(interfaceSocket);
 }

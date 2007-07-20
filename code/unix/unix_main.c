@@ -72,7 +72,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #if idppc_altivec
   #ifdef MACOS_X
-    #include <Carbon/Carbon.h>
+    #include <sys/sysctl.h>
   #endif
 #endif
 
@@ -383,11 +383,13 @@ qboolean Sys_DetectAltivec( void )
 
 #if idppc_altivec
     #ifdef MACOS_X
-    long feat = 0;
-    OSErr err = Gestalt(gestaltPowerPCProcessorFeatures, &feat);
-    if ((err==noErr) && ((1 << gestaltPowerPCHasVectorInstructions) & feat)) {
-        altivec = qtrue;
-    }
+    int selectors[2] = { CTL_HW, HW_VECTORUNIT };
+    int hasVectorUnit = 0;
+    size_t length = sizeof(hasVectorUnit);
+    int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0);
+
+    if( 0 == error )
+        altivec = (hasVectorUnit != 0);
     #else
     void (*handler)(int sig);
     handler = signal(SIGILL, illegal_instruction);
