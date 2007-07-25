@@ -1256,7 +1256,7 @@ void Com_Meminfo_f( void ) {
 	for (block = mainzone->blocklist.next ; ; block = block->next) {
 		if ( Cmd_Argc() != 1 ) {
 			Com_Printf ("block:%p    size:%7i    tag:%3i\n",
-				block, block->size, block->tag);
+				(void *)block, block->size, block->tag);
 		}
 		if ( block->tag ) {
 			zoneBytes += block->size;

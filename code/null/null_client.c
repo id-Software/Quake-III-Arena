@@ -85,7 +85,7 @@ void CL_StartHunkUsers( void ) {
 }
 
 // bk001119 - added new dummy for sv_init.c
-void CL_ShutdownAll(void) {};
+void CL_ShutdownAll(void) {}
 
 // bk001208 - added new dummy (RC4)
 qboolean CL_CDKeyValidate( const char *key, const char *checksum ) { return qtrue; }

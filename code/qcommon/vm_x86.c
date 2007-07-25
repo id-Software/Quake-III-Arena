@@ -212,7 +212,7 @@ void callAsmCall(void)
 // arbitrarily named (though this is not true for the MSC version).  When a vm
 // makes a system call, control jumps straight to the doAsmCall label.
 void AsmCall( void ) {
-	asm( CMANG(doAsmCall) ":				\n\t" \
+	__asm__( CMANG(doAsmCall) ":				\n\t" \
 		"	movl (%%edi),%%eax			\n\t" \
 		"	subl $4,%%edi				\n\t" \
 		"	orl %%eax,%%eax				\n\t" \

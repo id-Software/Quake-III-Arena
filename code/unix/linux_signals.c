@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderer/tr_local.h"
 #endif
 
-static qboolean signalcaught = qfalse;;
+static qboolean signalcaught = qfalse;
 
 void Sys_Exit(int); // bk010104 - abstraction
 

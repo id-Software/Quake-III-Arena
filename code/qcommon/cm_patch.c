@@ -1153,7 +1153,7 @@ struct patchCollide_s	*CM_GeneratePatchCollide( int width, int height, vec3_t *p
 
 	if ( width <= 2 || height <= 2 || !points ) {
 		Com_Error( ERR_DROP, "CM_GeneratePatchFacets: bad parameters: (%i, %i, %p)",
-			width, height, points );
+			width, height, (void *)points );
 	}
 
 	if ( !(width & 1) || !(height & 1) ) {
