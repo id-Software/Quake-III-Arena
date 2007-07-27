@@ -250,6 +250,10 @@ int CM_PointContents( const vec3_t p, clipHandle_t model ) {
 		brushnum = cm.leafbrushes[leaf->firstLeafBrush+k];
 		b = &cm.brushes[brushnum];
 
+		if ( !BoundsIntersectPoint( b->bounds[0], b->bounds[1], p ) ) {
+			continue;
+		}
+
 		// see if the point is in the brush
 		for ( i = 0 ; i < b->numsides ; i++ ) {
 			d = DotProduct( p, b->sides[i].plane->normal );

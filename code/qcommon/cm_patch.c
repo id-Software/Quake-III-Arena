@@ -1386,6 +1386,11 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 	static cvar_t *cv;
 #endif //BSPC
 
+	if ( !BoundsIntersect( tw->bounds[0], tw->bounds[1],
+				pc->bounds[0], pc->bounds[1] ) ) {
+		return;
+	}
+
 	if (tw->isPoint) {
 		CM_TracePointThroughPatchCollide( tw, pc );
 		return;

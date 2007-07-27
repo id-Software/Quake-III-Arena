@@ -530,7 +530,7 @@ vec_t VectorLengthSquared( const vec3_t v );
 vec_t Distance( const vec3_t p1, const vec3_t p2 );
 
 vec_t DistanceSquared( const vec3_t p1, const vec3_t p2 );
- 
+
 void VectorNormalizeFast( vec3_t v );
 
 void VectorInverse( vec3_t v );
@@ -562,6 +562,13 @@ void AxisCopy( vec3_t in[3], vec3_t out[3] );
 
 void SetPlaneSignbits( struct cplane_s *out );
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
+
+qboolean BoundsIntersect(const vec3_t mins, const vec3_t maxs,
+		const vec3_t mins2, const vec3_t maxs2);
+qboolean BoundsIntersectSphere(const vec3_t mins, const vec3_t maxs,
+		const vec3_t origin, vec_t radius);
+qboolean BoundsIntersectPoint(const vec3_t mins, const vec3_t maxs,
+		const vec3_t origin);
 
 float	AngleMod(float a);
 float	LerpAngle (float from, float to, float frac);
