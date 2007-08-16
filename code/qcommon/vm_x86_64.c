@@ -28,9 +28,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>
+#include <time.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdarg.h>
+
+//#define USE_GAS
+//#define DEBUG_VM
 
 #ifdef DEBUG_VM
 #define Dfprintf(fd, args...) fprintf(fd, ##args)
@@ -38,6 +44,19 @@ static FILE* qdasmout;
 #else
 #define Dfprintf(args...)
 #endif
+
+#define VM_X86_64_MMAP
+
+#ifndef USE_GAS
+void assembler_set_output(char* buf);
+size_t assembler_get_code_size(void);
+void assembler_init(int pass);
+void assemble_line(const char* input, size_t len);
+#ifdef Dfprintf
+#undef Dfprintf
+#define Dfprintf(args...)
+#endif
+#endif // USE_GAS
 
 static void VM_Destroy_Compiled(vm_t* self);
 
@@ -206,8 +225,29 @@ static unsigned char op_argsize[256] =
 	[OP_BLOCK_COPY] = 4,
 };
 
+#ifdef USE_GAS
 #define emit(x...) \
 	do { fprintf(fh_s, ##x); fputc('\n', fh_s); } while(0)
+#else
+void emit(const char* fmt, ...)
+{
+	va_list ap;
+	char line[4096];
+	va_start(ap, fmt);
+	vsnprintf(line, sizeof(line), fmt, ap);
+	va_end(ap);
+	assemble_line(line, strlen(line));
+}
+#endif // USE_GAS
+
+#ifdef USE_GAS
+#define JMPIARG \
+	emit("jmp i_%08x", iarg);
+#else
+#define JMPIARG \
+	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
+	emit("jmpq *%rax");
+#endif
  
 // integer compare and jump
 #define IJ(op) \
@@ -215,7 +255,8 @@ static unsigned char op_argsize[256] =
 	emit("movl 4(%%rsi), %%eax"); \
 	emit("cmpl 8(%%rsi), %%eax"); \
 	emit(op " i_%08x", instruction+1); \
-	emit("jmp i_%08x", iarg);
+	JMPIARG \
+	neednilabel = 1;
 
 #ifdef USE_X87
 #define FJ(bits, op) \
@@ -225,7 +266,8 @@ static unsigned char op_argsize[256] =
 	emit("fnstsw %%ax");\
 	emit("testb $" #bits ", %%ah");\
 	emit(op " i_%08x", instruction+1);\
-	emit("jmp i_%08x", iarg);
+	JMPIARG \
+	neednilabel = 1;
 #define XJ(x)
 #else
 #define FJ(x, y)
@@ -235,7 +277,8 @@ static unsigned char op_argsize[256] =
 	emit("ucomiss 8(%%rsi), %%xmm0");\
 	emit("jp i_%08x", instruction+1);\
 	emit(op " i_%08x", instruction+1);\
-	emit("jmp i_%08x", iarg);
+	JMPIARG \
+	neednilabel = 1;
 #endif
 
 #define SIMPLE(op) \
@@ -292,9 +335,14 @@ static unsigned char op_argsize[256] =
 
 static void* getentrypoint(vm_t* vm)
 {
+#ifdef USE_GAS
        return vm->codeBase+64; // skip ELF header
+#else
+       return vm->codeBase;
+#endif // USE_GAS
 }
 
+#ifdef USE_GAS
 char* mmapfile(const char* fn, size_t* size)
 {
 	int fd = -1;
@@ -382,6 +430,7 @@ static int doas(char* in, char* out, unsigned char** compiledcode)
 
 	return size;
 }
+#endif // USE_GAS
 
 static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
 {
@@ -410,8 +459,13 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	char* code;
 	unsigned iarg = 0;
 	unsigned char barg = 0;
-	void* entryPoint;
+	int neednilabel = 0;
+	struct timeval tvstart =  {0, 0};
 
+#ifdef USE_GAS
+	byte* compiledcode;
+	int   compiledsize;
+	void* entryPoint;
 	char fn_s[2*MAX_QPATH]; // output file for assembler code
 	char fn_o[2*MAX_QPATH]; // file written by as
 #ifdef DEBUG_VM
@@ -419,16 +473,16 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 #endif
 	FILE* fh_s;
 	int fd_s, fd_o;
-	byte* compiledcode;
-	int   compiledsize;
+
+	gettimeofday(&tvstart, NULL);
 
 	Com_Printf("compiling %s\n", vm->name);
 
 #ifdef DEBUG_VM
 	snprintf(fn_s, sizeof(fn_s), "%.63s.s", vm->name);
 	snprintf(fn_o, sizeof(fn_o), "%.63s.o", vm->name);
-	fd_s = open(fn_s, O_CREAT|O_WRONLY, 0644);
-	fd_o = open(fn_o, O_CREAT|O_WRONLY, 0644);
+	fd_s = open(fn_s, O_CREAT|O_WRONLY|O_TRUNC, 0644);
+	fd_o = open(fn_o, O_CREAT|O_WRONLY|O_TRUNC, 0644);
 #else
 	snprintf(fn_s, sizeof(fn_s), "/tmp/%.63s.s_XXXXXX", vm->name);
 	snprintf(fn_o, sizeof(fn_o), "/tmp/%.63s.o_XXXXXX", vm->name);
@@ -462,25 +516,50 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		return;
 	}
 
-	// translate all instructions
-	pc = 0;
-	code = (char *)header + header->codeOffset;
-
 	emit("start:");
 	emit("or %%r8, %%r8"); // check whether to set up instruction pointers
 	emit("jnz main");
 	emit("jmp setupinstructionpointers");
 
 	emit("main:");
+#else  // USE_GAS
+	int pass;
+	size_t compiledOfs = 0;
+
+	gettimeofday(&tvstart, NULL);
+
+	for (pass = 0; pass < 2; ++pass) {
+
+	if(pass)
+	{
+		compiledOfs = assembler_get_code_size();
+		vm->codeLength = compiledOfs;
+		vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+		if(vm->codeBase == (void*)-1)
+			Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+
+		assembler_set_output((char*)vm->codeBase);
+	}
+
+	assembler_init(pass);
+
+#endif // USE_GAS
+
+	// translate all instructions
+	pc = 0;
+	code = (char *)header + header->codeOffset;
 
 	for ( instruction = 0; instruction < header->instructionCount; ++instruction )
 	{
 		op = code[ pc ];
 		++pc;
 
-		vm->instructionPointers[instruction] = pc;
+#ifndef USE_GAS
+		vm->instructionPointers[instruction] = assembler_get_code_size();
+#endif
 
-#if 0
+		/* store current instruction number in r15 for debugging */
+#if 1
 		emit("nop");
 		emit("movq $%d, %%r15", instruction);
 		emit("nop");
@@ -501,7 +580,17 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		{
 			Dfprintf(qdasmout, "%s\n", opnames[op]);
 		}
+
+#ifdef USE_GAS
 		emit("i_%08x:", instruction);
+#else
+		if(neednilabel)
+		{
+			emit("i_%08x:", instruction);
+			neednilabel = 0;
+		}
+#endif
+
 		switch ( op )
 		{
 			case OP_UNDEF:
@@ -560,6 +649,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 //				emit("frstor 4(%%rsi)");
 				emit("addq $4, %%rsi");
 				emit("movl %%eax, (%%rsi)"); // store return value
+				neednilabel = 1;
 				break;
 			case OP_PUSH:
 				emit("addq $4, %%rsi");
@@ -628,7 +718,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("jp dojump_i_%08x", instruction);
 				emit("jz i_%08x", instruction+1);
 				emit("dojump_i_%08x:", instruction);
-				emit("jmp i_%08x", iarg);
+				JMPIARG
+				neednilabel = 1;
 #endif
 				break;
 			case OP_LTF:
@@ -855,7 +946,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		}
 	}
 
-
+#ifdef USE_GAS
 	emit("setupinstructionpointers:");
 	emit("movq $%lu, %%rax", (unsigned long)vm->instructionPointers);
 	for ( instruction = 0; instruction < header->instructionCount; ++instruction )
@@ -888,8 +979,17 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	vm->codeBase   = compiledcode; // remember to skip ELF header!
 	vm->codeLength = compiledsize;
 
+#else  // USE_GAS
+	}
+	assembler_init(0);
+
+	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
+		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+#endif // USE_GAS
+
 	vm->destroy = VM_Destroy_Compiled;
 	
+#ifdef USE_GAS
 	entryPoint = getentrypoint(vm);
 
 //	__asm__ __volatile__ ("int3");
@@ -910,8 +1010,6 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	fclose(qdasmout);
 #endif
 
-	Com_Printf( "VM file %s compiled to %i bytes of code (%p - %p)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
-
 out:
 	close(fd_o);
 
@@ -922,12 +1020,30 @@ out:
 		unlink(fn_s);
 	}
 #endif
+#endif // USE_GAS
+
+	if(vm->compiled)
+	{
+		struct timeval tvdone =  {0, 0};
+		struct timeval dur =  {0, 0};
+		Com_Printf( "VM file %s compiled to %i bytes of code (%p - %p)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
+
+		gettimeofday(&tvdone, NULL);
+		timersub(&tvdone, &tvstart, &dur);
+		Com_Printf( "compilation took %lu.%06lu seconds\n", dur.tv_sec, dur.tv_usec );
+	}
 }
 
 
 void VM_Destroy_Compiled(vm_t* self)
 {
+#ifdef USE_GAS
 	munmap(self->codeBase, self->codeLength);
+#elif _WIN32
+	VirtualFree(self->codeBase, self->codeLength, MEM_RELEASE);
+#else
+	munmap(self->codeBase, self->codeLength);
+#endif
 }
 
 /*
