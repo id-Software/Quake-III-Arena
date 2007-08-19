@@ -48,8 +48,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define DEBUG_AI_WEAP
 
 //structure field offsets
-#define WEAPON_OFS(x) (int)&(((weaponinfo_t *)0)->x)
-#define PROJECTILE_OFS(x) (int)&(((projectileinfo_t *)0)->x)
+#define WEAPON_OFS(x) (size_t)&(((weaponinfo_t *)0)->x)
+#define PROJECTILE_OFS(x) (size_t)&(((projectileinfo_t *)0)->x)
 
 //weapon definition // bk001212 - static
 static fielddef_t weaponinfo_fields[] =
