@@ -1189,7 +1189,7 @@ wait 10 seconds before going on.
 =================
 */
 void CheckIntermissionExit( void ) {
-	int			ready, notReady;
+	int			ready, notReady, playerCount;
 	int			i;
 	gclient_t	*cl;
 	int			readyMask;
@@ -1202,6 +1202,7 @@ void CheckIntermissionExit( void ) {
 	ready = 0;
 	notReady = 0;
 	readyMask = 0;
+	playerCount = 0;
 	for (i=0 ; i< g_maxclients.integer ; i++) {
 		cl = level.clients + i;
 		if ( cl->pers.connected != CON_CONNECTED ) {
@@ -1211,6 +1212,7 @@ void CheckIntermissionExit( void ) {
 			continue;
 		}
 
+		playerCount++;
 		if ( cl->readyToExit ) {
 			ready++;
 			if ( i < 16 ) {
@@ -1236,16 +1238,19 @@ void CheckIntermissionExit( void ) {
 		return;
 	}
 
-	// if nobody wants to go, clear timer
-	if ( !ready ) {
-		level.readyToExit = qfalse;
-		return;
-	}
+	// only test ready status when there are real players present
+	if ( playerCount > 0 ) {
+		// if nobody wants to go, clear timer
+		if ( !ready ) {
+			level.readyToExit = qfalse;
+			return;
+		}
 
-	// if everyone wants to go, go now
-	if ( !notReady ) {
-		ExitLevel();
-		return;
+		// if everyone wants to go, go now
+		if ( !notReady ) {
+			ExitLevel();
+			return;
+		}
 	}
 
 	// the first person to ready starts the ten second timeout

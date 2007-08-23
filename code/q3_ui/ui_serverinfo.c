@@ -128,11 +128,11 @@ static void ServerInfo_MenuDraw( void )
 	const char		*s;
 	char			key[MAX_INFO_KEY];
 	char			value[MAX_INFO_VALUE];
-	int				y;
+	int				i = 0, y;
 
 	y = SCREEN_HEIGHT/2 - s_serverinfo.numlines*(SMALLCHAR_HEIGHT)/2 - 20;
 	s = s_serverinfo.info;
-	while ( s ) {
+	while ( s && i < s_serverinfo.numlines ) {
 		Info_NextPair( &s, key, value );
 		if ( !key[0] ) {
 			break;
@@ -144,6 +144,7 @@ static void ServerInfo_MenuDraw( void )
 		UI_DrawString(SCREEN_WIDTH*0.50 + 8,y,value,UI_LEFT|UI_SMALLFONT,text_color_normal);
 
 		y += SMALLCHAR_HEIGHT;
+		i++;
 	}
 
 	Menu_Draw( &s_serverinfo.menu );

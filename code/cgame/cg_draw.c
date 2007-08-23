@@ -530,9 +530,7 @@ static void CG_DrawStatusBar( void ) {
 	vec4_t		hcolor;
 	vec3_t		angles;
 	vec3_t		origin;
-#ifdef MISSIONPACK
-	qhandle_t	handle;
-#endif
+
 	static float colors[4][4] = { 
 //		{ 0.2, 1.0, 0.2, 1.0 } , { 1.0, 0.2, 0.2, 1.0 }, {0.5, 0.5, 0.5, 1} };
 		{ 1.0f, 0.69f, 0.0f, 1.0f },    // normal
@@ -580,20 +578,6 @@ static void CG_DrawStatusBar( void ) {
 		CG_Draw3DModel( 370 + CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE,
 					   cgs.media.armorModel, 0, origin, angles );
 	}
-#ifdef MISSIONPACK
-	if( cgs.gametype == GT_HARVESTER ) {
-		origin[0] = 90;
-		origin[1] = 0;
-		origin[2] = -10;
-		angles[YAW] = ( cg.time & 2047 ) * 360 / 2048.0;
-		if( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE ) {
-			handle = cgs.media.redCubeModel;
-		} else {
-			handle = cgs.media.blueCubeModel;
-		}
-		CG_Draw3DModel( 640 - (TEXT_ICON_SPACE + ICON_SIZE), 416, ICON_SIZE, ICON_SIZE, handle, 0, origin, angles );
-	}
-#endif
 	//
 	// ammo
 	//
@@ -663,29 +647,6 @@ static void CG_DrawStatusBar( void ) {
 		}
 
 	}
-#ifdef MISSIONPACK
-	//
-	// cubes
-	//
-	if( cgs.gametype == GT_HARVESTER ) {
-		value = ps->generic1;
-		if( value > 99 ) {
-			value = 99;
-		}
-		trap_R_SetColor( colors[0] );
-		CG_DrawField (640 - (CHAR_WIDTH*2 + TEXT_ICON_SPACE + ICON_SIZE), 432, 2, value);
-		trap_R_SetColor( NULL );
-		// if we didn't draw a 3D icon, draw a 2D icon for armor
-		if ( !cg_draw3dIcons.integer && cg_drawIcons.integer ) {
-			if( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE ) {
-				handle = cgs.media.redCubeIcon;
-			} else {
-				handle = cgs.media.blueCubeIcon;
-			}
-			CG_DrawPic( 640 - (TEXT_ICON_SPACE + ICON_SIZE), 432, ICON_SIZE, ICON_SIZE, handle );
-		}
-	}
-#endif
 }
 #endif
 
@@ -1122,19 +1083,6 @@ static float CG_DrawScores( float y ) {
 			}
 		}
 
-#ifdef MISSIONPACK
-		if ( cgs.gametype == GT_1FCTF ) {
-			// Display flag status
-			item = BG_FindItemForPowerup( PW_NEUTRALFLAG );
-
-			if (item) {
-				y1 = y - BIGCHAR_HEIGHT - 8;
-				if( cgs.flagStatus >= 0 && cgs.flagStatus <= 3 ) {
-					CG_DrawPic( x, y1-4, w, BIGCHAR_HEIGHT+8, cgs.media.flagShader[cgs.flagStatus] );
-				}
-			}
-		}
-#endif
 		if ( cgs.gametype >= GT_CTF ) {
 			v = cgs.capturelimit;
 		} else {
