@@ -568,34 +568,37 @@ static void ArenaServers_Remove( void )
 
 	// find address in master list
 	for (i=0; i<g_arenaservers.numfavoriteaddresses; i++)
-		if (!Q_stricmp(g_arenaservers.favoriteaddresses[i],servernodeptr->adrstr))
-				break;
-
-	// delete address from master list
-	if (i <= g_arenaservers.numfavoriteaddresses-1)
 	{
-		if (i < g_arenaservers.numfavoriteaddresses-1)
+		if (!Q_stricmp(g_arenaservers.favoriteaddresses[i],servernodeptr->adrstr))
 		{
-			// shift items up
-			memcpy( &g_arenaservers.favoriteaddresses[i], &g_arenaservers.favoriteaddresses[i+1], (g_arenaservers.numfavoriteaddresses - i - 1)*sizeof(MAX_ADDRESSLENGTH));
+			// delete address from master list
+			if (i < g_arenaservers.numfavoriteaddresses-1)
+			{
+				// shift items up
+				memcpy( &g_arenaservers.favoriteaddresses[i], &g_arenaservers.favoriteaddresses[i+1], (g_arenaservers.numfavoriteaddresses - i - 1)* MAX_ADDRESSLENGTH );
+			}
+			g_arenaservers.numfavoriteaddresses--;
+			memset( &g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], 0, MAX_ADDRESSLENGTH );
+			break;
 		}
-		g_arenaservers.numfavoriteaddresses--;
 	}	
 
 	// find address in server list
 	for (i=0; i<g_numfavoriteservers; i++)
-		if (&g_favoriteserverlist[i] == servernodeptr)
-				break;
-
-	// delete address from server list
-	if (i <= g_numfavoriteservers-1)
 	{
-		if (i < g_numfavoriteservers-1)
+		if (&g_favoriteserverlist[i] == servernodeptr)
 		{
-			// shift items up
-			memcpy( &g_favoriteserverlist[i], &g_favoriteserverlist[i+1], (g_numfavoriteservers - i - 1)*sizeof(servernode_t));
+
+			// delete address from server list
+			if (i < g_numfavoriteservers-1)
+			{
+				// shift items up
+				memcpy( &g_favoriteserverlist[i], &g_favoriteserverlist[i+1], (g_numfavoriteservers - i - 1)*sizeof(servernode_t));
+			}
+			g_numfavoriteservers--;
+			memset( &g_favoriteserverlist[ g_numfavoriteservers ], 0, sizeof(servernode_t));
+			break;
 		}
-		g_numfavoriteservers--;
 	}	
 
 	g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
