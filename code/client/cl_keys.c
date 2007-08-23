@@ -475,7 +475,7 @@ void Field_KeyDownEvent( field_t *edit, int key ) {
 			break;
 	}
 
-	// Change scroll is cursor if no longer visible
+	// Change scroll if cursor is no longer visible
 	if ( edit->cursor < edit->scroll ) {
 		edit->scroll = edit->cursor;
 	} else if ( edit->cursor >= edit->scroll + edit->widthInChars && edit->cursor <= len ) {
