@@ -1107,7 +1107,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 						}
 					}
 
-					if (!(pak->referenced & FS_QAGAME_REF) && strstr(filename, "game.qvm")) {
+					if (!(pak->referenced & FS_QAGAME_REF) && strstr(filename, "qagame.qvm")) {
 						pak->referenced |= FS_QAGAME_REF;
 					}
 					if (!(pak->referenced & FS_CGAME_REF) && strstr(filename, "cgame.qvm")) {
