@@ -267,13 +267,13 @@ qboolean IN_InitDIMouse( void ) {
 		DINPUT_BUFFERSIZE,              // dwData
 	};
 
-	Com_Printf( "Initializing DirectInput...\n");
+	Com_DPrintf( "Initializing DirectInput...\n");
 
 	if (!hInstDI) {
 		hInstDI = LoadLibrary("dinput.dll");
 		
 		if (hInstDI == NULL) {
-			Com_Printf ("Couldn't load dinput.dll\n");
+			Com_DPrintf ("Couldn't load dinput.dll\n");
 			return qfalse;
 		}
 	}
@@ -283,7 +283,7 @@ qboolean IN_InitDIMouse( void ) {
 			GetProcAddress(hInstDI,"DirectInputCreateA");
 
 		if (!pDirectInputCreate) {
-			Com_Printf ("Couldn't get DI proc addr\n");
+			Com_DPrintf ("Couldn't get DI proc addr\n");
 			return qfalse;
 		}
 	}
@@ -292,7 +292,7 @@ qboolean IN_InitDIMouse( void ) {
 	hr = iDirectInputCreate( g_wv.hInstance, DIRECTINPUT_VERSION, &g_pdi, NULL);
 
 	if (FAILED(hr)) {
-		Com_Printf ("iDirectInputCreate failed\n");
+		Com_DPrintf ("iDirectInputCreate failed\n");
 		return qfalse;
 	}
 
@@ -300,7 +300,7 @@ qboolean IN_InitDIMouse( void ) {
 	hr = IDirectInput_CreateDevice(g_pdi, &GUID_SysMouse, &g_pMouse, NULL);
 
 	if (FAILED(hr)) {
-		Com_Printf ("Couldn't open DI mouse device\n");
+		Com_DPrintf ("Couldn't open DI mouse device\n");
 		return qfalse;
 	}
 
@@ -308,7 +308,7 @@ qboolean IN_InitDIMouse( void ) {
 	hr = IDirectInputDevice_SetDataFormat(g_pMouse, &df);
 
 	if (FAILED(hr)) 	{
-		Com_Printf ("Couldn't set DI mouse format\n");
+		Com_DPrintf ("Couldn't set DI mouse format\n");
 		return qfalse;
 	}
 
@@ -318,7 +318,7 @@ qboolean IN_InitDIMouse( void ) {
 
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=50
 	if (FAILED(hr)) {
-		Com_Printf ("Couldn't set DI coop level\n");
+		Com_DPrintf ("Couldn't set DI coop level\n");
 		return qfalse;
 	}
 
@@ -328,7 +328,7 @@ qboolean IN_InitDIMouse( void ) {
 	hr = IDirectInputDevice_SetProperty(g_pMouse, DIPROP_BUFFERSIZE, &dipdw.diph);
 
 	if (FAILED(hr)) {
-		Com_Printf ("Couldn't set DI buffersize\n");
+		Com_DPrintf ("Couldn't set DI buffersize\n");
 		return qfalse;
 	}
 
@@ -336,7 +336,7 @@ qboolean IN_InitDIMouse( void ) {
 	IN_DIMouse( &x, &y );
 	IN_DIMouse( &x, &y );
 
-	Com_Printf( "DirectInput initialized.\n");
+	Com_DPrintf( "DirectInput initialized.\n");
 	return qtrue;
 }
 
@@ -557,7 +557,7 @@ void IN_StartupMouse( void )
   s_wmv.mouseStartupDelayed = qfalse;
 
 	if ( in_mouse->integer == 0 ) {
-		Com_Printf ("Mouse control not active.\n");
+		Com_DPrintf ("Mouse control not active.\n");
 		return;
 	}
 
@@ -565,16 +565,16 @@ void IN_StartupMouse( void )
 	if ( ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32_NT ) &&
 		 ( g_wv.osversion.dwMajorVersion == 4 ) )
 	{
-		Com_Printf ("Disallowing DirectInput on NT 4.0\n");
+		Com_DPrintf ("Disallowing DirectInput on NT 4.0\n");
 		Cvar_Set( "in_mouse", "-1" );
 	}
 
 	if ( in_mouse->integer == -1 ) {
-		Com_Printf ("Skipping check for DirectInput\n");
+		Com_DPrintf ("Skipping check for DirectInput\n");
 	} else {
     if (!g_wv.hWnd)
     {
-      Com_Printf ("No window for DirectInput mouse init, delaying\n");
+      Com_DPrintf ("No window for DirectInput mouse init, delaying\n");
       s_wmv.mouseStartupDelayed = qtrue;
       return;
     }
@@ -582,7 +582,7 @@ void IN_StartupMouse( void )
 	    s_wmv.mouseInitialized = qtrue;
 			return;
 		}
-		Com_Printf ("Falling back to Win32 mouse support...\n");
+		Com_DPrintf ("Falling back to Win32 mouse support...\n");
 	}
 	s_wmv.mouseInitialized = qtrue;
 	IN_InitWin32Mouse();
@@ -654,11 +654,11 @@ IN_Startup
 ===========
 */
 void IN_Startup( void ) {
-	Com_Printf ("\n------- Input Initialization -------\n");
+	Com_DPrintf ("\n------- Input Initialization -------\n");
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
 	IN_StartupMIDI();
-	Com_Printf ("------------------------------------\n");
+	Com_DPrintf ("------------------------------------\n");
 
 	in_mouse->modified = qfalse;
 	in_joystick->modified = qfalse;
@@ -802,14 +802,14 @@ void IN_StartupJoystick (void) {
 	joy.avail = qfalse; 
 
 	if (! in_joystick->integer ) {
-		Com_Printf ("Joystick is not active.\n");
+		Com_DPrintf ("Joystick is not active.\n");
 		return;
 	}
 
 	// verify joystick driver is present
 	if ((numdevs = joyGetNumDevs ()) == 0)
 	{
-		Com_Printf ("joystick not found -- driver not present\n");
+		Com_DPrintf ("joystick not found -- driver not present\n");
 		return;
 	}
 
@@ -828,7 +828,7 @@ void IN_StartupJoystick (void) {
 	// abort startup if we didn't find a valid joystick
 	if (mmr != JOYERR_NOERROR)
 	{
-		Com_Printf ("joystick not found -- no valid joysticks (%x)\n", mmr);
+		Com_DPrintf ("joystick not found -- no valid joysticks (%x)\n", mmr);
 		return;
 	}
 
@@ -837,22 +837,22 @@ void IN_StartupJoystick (void) {
 	Com_Memset (&joy.jc, 0, sizeof(joy.jc));
 	if ((mmr = joyGetDevCaps (joy.id, &joy.jc, sizeof(joy.jc))) != JOYERR_NOERROR)
 	{
-		Com_Printf ("joystick not found -- invalid joystick capabilities (%x)\n", mmr); 
+		Com_DPrintf ("joystick not found -- invalid joystick capabilities (%x)\n", mmr); 
 		return;
 	}
 
-	Com_Printf( "Joystick found.\n" );
-	Com_Printf( "Pname: %s\n", joy.jc.szPname );
-	Com_Printf( "OemVxD: %s\n", joy.jc.szOEMVxD );
-	Com_Printf( "RegKey: %s\n", joy.jc.szRegKey );
+	Com_DPrintf( "Joystick found.\n" );
+	Com_DPrintf( "Pname: %s\n", joy.jc.szPname );
+	Com_DPrintf( "OemVxD: %s\n", joy.jc.szOEMVxD );
+	Com_DPrintf( "RegKey: %s\n", joy.jc.szRegKey );
 
-	Com_Printf( "Numbuttons: %i / %i\n", joy.jc.wNumButtons, joy.jc.wMaxButtons );
-	Com_Printf( "Axis: %i / %i\n", joy.jc.wNumAxes, joy.jc.wMaxAxes );
-	Com_Printf( "Caps: 0x%x\n", joy.jc.wCaps );
+	Com_DPrintf( "Numbuttons: %i / %i\n", joy.jc.wNumButtons, joy.jc.wMaxButtons );
+	Com_DPrintf( "Axis: %i / %i\n", joy.jc.wNumAxes, joy.jc.wMaxAxes );
+	Com_DPrintf( "Caps: 0x%x\n", joy.jc.wCaps );
 	if ( joy.jc.wCaps & JOYCAPS_HASPOV ) {
-		Com_Printf( "HASPOV\n" );
+		Com_DPrintf( "HASPOV\n" );
 	} else {
-		Com_Printf( "no POV\n" );
+		Com_DPrintf( "no POV\n" );
 	}
 
 	// old button and POV states default to no buttons pressed
@@ -1130,7 +1130,7 @@ static void IN_StartupMIDI( void )
 					 ( unsigned long ) NULL,
 					 CALLBACK_FUNCTION ) != MMSYSERR_NOERROR )
 	{
-		Com_Printf( "WARNING: could not open MIDI device %d: '%s'\n",
+		Com_DPrintf( "WARNING: could not open MIDI device %d: '%s'\n",
 								in_mididevice->integer , s_midiInfo.caps[( int ) in_mididevice->value].szPname );
 		return;
 	}

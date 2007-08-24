@@ -76,7 +76,7 @@ void IN_StartupJoystick( void )
   joy_fd = -1;
 
   if( !in_joystick->integer ) {
-    Com_Printf( "Joystick is not active.\n" );
+    Com_DPrintf( "Joystick is not active.\n" );
     return;
   }
 
@@ -94,7 +94,7 @@ void IN_StartupJoystick( void )
       char name[128];
       int n = -1;
 
-      Com_Printf( "Joystick %s found\n", filename );
+      Com_DPrintf( "Joystick %s found\n", filename );
 
       /* Get rid of initialization messages. */
       do {
@@ -114,9 +114,9 @@ void IN_StartupJoystick( void )
 	strncpy( name, "Unknown", sizeof( name ) );
       }
 
-      Com_Printf( "Name:    %s\n", name );
-      Com_Printf( "Axes:    %d\n", axes );
-      Com_Printf( "Buttons: %d\n", buttons );
+      Com_DPrintf( "Name:    %s\n", name );
+      Com_DPrintf( "Axes:    %d\n", axes );
+      Com_DPrintf( "Buttons: %d\n", buttons );
 
       /* Our work here is done. */
       return;
@@ -126,7 +126,7 @@ void IN_StartupJoystick( void )
 
   /* No soup for you. */
   if( joy_fd == -1 ) {
-    Com_Printf( "No joystick found.\n" );
+    Com_DPrintf( "No joystick found.\n" );
     return;
   }
 
