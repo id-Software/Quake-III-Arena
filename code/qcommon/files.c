@@ -974,22 +974,6 @@ qboolean FS_FilenameCompare( const char *s1, const char *s2 ) {
 
 /*
 ===========
-FS_ShiftedStrStr
-===========
-*/
-char *FS_ShiftedStrStr(const char *string, const char *substring, int shift) {
-	char buf[MAX_STRING_TOKENS];
-	int i;
-
-	for (i = 0; substring[i]; i++) {
-		buf[i] = substring[i] + shift;
-	}
-	buf[i] = '\0';
-	return strstr(string, buf);
-}
-
-/*
-===========
 FS_FOpenFileRead
 
 Finds the file in the search path.
@@ -1123,19 +1107,13 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 						}
 					}
 
-					// qagame.qvm	- 13
-					// dTZT`X!di`
-					if (!(pak->referenced & FS_QAGAME_REF) && FS_ShiftedStrStr(filename, "dTZT`X!di`", 13)) {
+					if (!(pak->referenced & FS_QAGAME_REF) && strstr(filename, "game.qvm")) {
 						pak->referenced |= FS_QAGAME_REF;
 					}
-					// cgame.qvm	- 7
-					// \`Zf^'jof
-					if (!(pak->referenced & FS_CGAME_REF) && FS_ShiftedStrStr(filename , "\\`Zf^'jof", 7)) {
+					if (!(pak->referenced & FS_CGAME_REF) && strstr(filename, "cgame.qvm")) {
 						pak->referenced |= FS_CGAME_REF;
 					}
-					// ui.qvm		- 5
-					// pd)lqh
-					if (!(pak->referenced & FS_UI_REF) && FS_ShiftedStrStr(filename , "pd)lqh", 5)) {
+					if (!(pak->referenced & FS_UI_REF) && strstr(filename, "ui.qvm")) {
 						pak->referenced |= FS_UI_REF;
 					}
 

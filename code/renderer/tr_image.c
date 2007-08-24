@@ -4405,11 +4405,14 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height ) {
 		if (!*pic) {
 			// try jpg in place of tga 
 			char altname[MAX_QPATH];
+
 			strcpy( altname, name );
 			len = strlen( altname );
 			altname[len-3] = 'j';
 			altname[len-2] = 'p';
 			altname[len-1] = 'g';
+
+			ri.Printf( PRINT_DEVELOPER, "WARNING: %s failed, trying %s\n", name, altname );
 			LoadJPG( altname, pic, width, height );
 		}
 	}
@@ -4477,19 +4480,8 @@ image_t	*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmi
 	// load the pic from disk
 	//
 	R_LoadImage( name, &pic, &width, &height );
-	if ( pic == NULL ) {                                    // if we dont get a successful load
-	  char altname[MAX_QPATH];                              // copy the name
-    int len;                                              //  
-    strcpy( altname, name );                              //
-    len = strlen( altname );                              // 
-    altname[len-3] = toupper(altname[len-3]);             // and try upper case extension for unix systems
-    altname[len-2] = toupper(altname[len-2]);             //
-    altname[len-1] = toupper(altname[len-1]);             //
-		ri.Printf( PRINT_DEVELOPER, "trying %s...\n", altname );    // 
-	  R_LoadImage( altname, &pic, &width, &height );        //
-    if (pic == NULL) {                                    // if that fails
-      return NULL;                                        // bail
-    }
+	if ( pic == NULL ) {
+		return NULL;
 	}
 
 	image = R_CreateImage( ( char * ) name, pic, width, height, mipmap, allowPicmip, glWrapClampMode );
