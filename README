@@ -314,9 +314,24 @@ SDL Keyboard Differences
 
 PNG support
   ioquake3 supports the use of PNG (Portable Network Graphic) images as
-  textures. It should be noted that the use of such images in a maps will
+  textures. It should be noted that the use of such images in a map will
   result in missing placeholder textures where the map is used with the id
   Quake 3 client or earlier versions of ioquake3.
+
+  Recent versions of GtkRadiant and q3map2 support PNG images without
+  modification. However GtkRadiant is not aware that PNG textures are supported
+  by ioquake3. To change this behaviour open the file 'q3.game' in the 'games'
+  directory of the GtkRadiant base directory with an editor and change the
+  line:
+
+    texturetypes="tga jpg"
+
+  to
+
+    texturetypes="tga jpg png"
+
+  Restart GtkRadiant and PNG textures are now available.
+
 
 ------------------------------------------------------------- Contributing -----
 

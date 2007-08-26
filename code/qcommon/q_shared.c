@@ -55,6 +55,28 @@ char *COM_SkipPath (char *pathname)
 
 /*
 ============
+COM_GetExtension
+============
+*/
+const char *COM_GetExtension( const char *name ) {
+	int length, i;
+
+	length = strlen(name)-1;
+	i = length;
+
+	while (name[i] != '.')
+	{
+		i--;
+		if (name[i] == '/' || i == 0)
+			return ""; // no extension
+	}
+
+	return &name[i+1];
+}
+
+
+/*
+============
 COM_StripExtension
 ============
 */

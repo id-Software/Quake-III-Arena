@@ -1207,7 +1207,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 		}		
 	}
 	
-	Com_DPrintf ("Can't find %s\n", filename);
 #ifdef FS_MISSING
 	if (missingFiles) {
 		fprintf(missingFiles, "%s\n", filename);

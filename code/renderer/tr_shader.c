@@ -2416,7 +2416,6 @@ most world construction surfaces.
 */
 shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImage ) {
 	char		strippedName[MAX_QPATH];
-	char		fileName[MAX_QPATH];
 	int			i, hash;
 	char		*shaderText;
 	image_t		*image;
@@ -2494,13 +2493,11 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 
 	//
 	// if not defined in the in-memory shader descriptions,
-	// look for a single TGA, BMP, or PCX
+	// look for a single supported image file
 	//
-	Q_strncpyz( fileName, name, sizeof( fileName ) );
-	COM_DefaultExtension( fileName, sizeof( fileName ), ".tga" );
-	image = R_FindImageFile( fileName, mipRawImage, mipRawImage, mipRawImage ? GL_REPEAT : GL_CLAMP );
+	image = R_FindImageFile( name, mipRawImage, mipRawImage, mipRawImage ? GL_REPEAT : GL_CLAMP );
 	if ( !image ) {
-		ri.Printf( PRINT_DEVELOPER, "Couldn't find image for shader %s\n", name );
+		ri.Printf( PRINT_DEVELOPER, "Couldn't find image file for shader %s\n", name );
 		shader.defaultShader = qtrue;
 		return FinishShader();
 	}

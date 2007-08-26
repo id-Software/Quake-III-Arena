@@ -599,6 +599,7 @@ int Q_isnan( float x );
 float Com_Clamp( float min, float max, float value );
 
 char	*COM_SkipPath( char *pathname );
+const char	*COM_GetExtension( const char *name );
 void	COM_StripExtension(const char *in, char *out, int destsize);
 void	COM_DefaultExtension( char *path, int maxSize, const char *extension );
 

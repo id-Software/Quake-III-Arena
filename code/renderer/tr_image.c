@@ -4376,6 +4376,27 @@ static void LoadPNG(const char *name, byte **pic, int *width, int *height)
 
 //===================================================================
 
+typedef struct
+{
+	char *ext;
+	void (*ImageLoader)( const char *, unsigned char **, int *, int * );
+} imageExtToLoaderMap_t;
+
+// Note that the ordering indicates the order of preference used
+// when there are multiple images of different formats available
+static imageExtToLoaderMap_t imageLoaders[ ] =
+{
+	{ "tga",  LoadTGA },
+	{ "jpg",  LoadJPG },
+	{ "jpeg", LoadJPG },
+	{ "png",  LoadPNG },
+	{ "pcx",  LoadPCX32 },
+	{ "bmp",  LoadBMP }
+};
+
+static int numImageLoaders = sizeof( imageLoaders ) /
+		sizeof( imageLoaders[ 0 ] );
+
 /*
 =================
 R_LoadImage
@@ -4384,53 +4405,71 @@ Loads any of the supported image types into a cannonical
 32 bit format.
 =================
 */
-void R_LoadImage( const char *name, byte **pic, int *width, int *height ) {
-	int		len;
+void R_LoadImage( const char *name, byte **pic, int *width, int *height )
+{
+	qboolean orgNameFailed = qfalse;
+	int i;
+	char localName[ MAX_QPATH ];
+	const char *ext;
 
 	*pic = NULL;
 	*width = 0;
 	*height = 0;
 
-	len = strlen(name);
-	if (len<5) {
-		return;
-	}
+	Q_strncpyz( localName, name, MAX_QPATH );
 
-	if ( !Q_stricmp( name+len-4, ".tga" ) ) {
-		LoadTGA( name, pic, width, height );
+	ext = COM_GetExtension( localName );
 
-		// This is a hack to get around the fact that some
-		// baseq3 shaders refer to tga files where the images
-		// are actually jpgs
-		if (!*pic) {
-			// try jpg in place of tga 
-			char altname[MAX_QPATH];
+	if( *ext )
+	{
+		// Look for the correct loader and use it
+		for( i = 0; i < numImageLoaders; i++ )
+		{
+			if( !Q_stricmp( ext, imageLoaders[ i ].ext ) )
+			{
+				// Load
+				imageLoaders[ i ].ImageLoader( localName, pic, width, height );
+				break;
+			}
+		}
 
-			strcpy( altname, name );
-			len = strlen( altname );
-			altname[len-3] = 'j';
-			altname[len-2] = 'p';
-			altname[len-1] = 'g';
-
-			ri.Printf( PRINT_DEVELOPER, "WARNING: %s failed, trying %s\n", name, altname );
-			LoadJPG( altname, pic, width, height );
+		// A loader was found
+		if( i < numImageLoaders )
+		{
+			if( *pic == NULL )
+			{
+				// Loader failed, most likely because the file isn't there;
+				// try again without the extension
+				orgNameFailed = qtrue;
+				COM_StripExtension( name, localName, MAX_QPATH );
+			}
+			else
+			{
+				// Something loaded
+				return;
+			}
 		}
 	}
-	else if ( !Q_stricmp(name+len-4, ".pcx") )
+
+	// Try and find a suitable match using all
+	// the image formats supported
+	for( i = 0; i < numImageLoaders; i++ )
 	{
-		LoadPCX32( name, pic, width, height );
-	}
-	else if ( !Q_stricmp( name+len-4, ".bmp" ) )
-	{
-		LoadBMP( name, pic, width, height );
-	}
-	else if ( !Q_stricmp( name+len-4, ".jpg" ) )
-	{
-		LoadJPG( name, pic, width, height );
-	}
-	else if ( !Q_stricmp( name+len-4, ".png" ) )
-	{
-		LoadPNG( name, pic, width, height );
+		char *altName = va( "%s.%s", localName, imageLoaders[ i ].ext );
+
+		// Load
+		imageLoaders[ i ].ImageLoader( altName, pic, width, height );
+
+		if( *pic )
+		{
+			if( orgNameFailed )
+			{
+				ri.Printf( PRINT_DEVELOPER, "WARNING: %s not present, using %s instead\n",
+						name, altName );
+			}
+
+			break;
+		}
 	}
 }
 
