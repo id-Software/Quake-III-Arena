@@ -32,6 +32,14 @@ BUILD_SERVER     =
 BUILD_GAME_SO    =
 BUILD_GAME_QVM   =
 
+ifeq ($(V),1)
+echo_cmd=@:
+Q=
+else
+echo_cmd=@echo
+Q=@
+endif
+
 #############################################################################
 #
 # If you require a different configuration from the defaults below, create a
@@ -756,18 +764,18 @@ ifeq ($(USE_SVN),1)
 endif
 
 define DO_CC       
-@echo "CC $<"
-@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
+$(echo_cmd) "CC $<"
+$(Q)$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 endef
 
 define DO_SMP_CC
-@echo "SMP_CC $<"
-@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
+$(echo_cmd) "SMP_CC $<"
+$(Q)$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -DSMP -o $@ -c $<
 endef
 
 define DO_BOT_CC
-@echo "BOT_CC $<"
-@$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
+$(echo_cmd) "BOT_CC $<"
+$(Q)$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) $(BOTCFLAGS) -DBOTLIB -o $@ -c $<
 endef
 
 ifeq ($(GENERATE_DEPENDENCIES),1)
@@ -775,30 +783,30 @@ ifeq ($(GENERATE_DEPENDENCIES),1)
 endif
 
 define DO_SHLIB_CC
-@echo "SHLIB_CC $<"
-@$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
-@$(DO_QVM_DEP)
+$(echo_cmd) "SHLIB_CC $<"
+$(Q)$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+$(Q)$(DO_QVM_DEP)
 endef
 
 define DO_SHLIB_CC_MISSIONPACK
-@echo "SHLIB_CC_MISSIONPACK $<"
-@$(CC) -DMISSIONPACK $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
-@$(DO_QVM_DEP)
+$(echo_cmd) "SHLIB_CC_MISSIONPACK $<"
+$(Q)$(CC) -DMISSIONPACK $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+$(Q)$(DO_QVM_DEP)
 endef
 
 define DO_AS
-@echo "AS $<"
-@$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+$(echo_cmd) "AS $<"
+$(Q)$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 endef
 
 define DO_DED_CC
-@echo "DED_CC $<"
-@$(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
+$(echo_cmd) "DED_CC $<"
+$(Q)$(CC) $(NOTSHLIBCFLAGS) -DDEDICATED $(CFLAGS) -o $@ -c $<
 endef
 
 define DO_WINDRES
-@echo "WINDRES $<"
-@$(WINDRES) -i $< -o $@
+$(echo_cmd) "WINDRES $<"
+$(Q)$(WINDRES) -i $< -o $@
 endef
 
 
@@ -810,16 +818,19 @@ default: release
 all: debug release
 
 debug:
-	@$(MAKE) targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS)"
+	@$(MAKE) targets B=$(BD) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS)" V=$(V)
 
 release:
-	@$(MAKE) targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS)"
+	@$(MAKE) targets B=$(BR) CFLAGS="$(CFLAGS) $(RELEASE_CFLAGS)" V=$(V)
 
 # Create the build directories and tools, print out
 # an informational message, then start building
 targets: makedirs tools
 	@echo ""
 	@echo "Building ioquake3 in $(B):"
+	@echo "  ARCH: $(ARCH)"
+	@echo "  COMPILE_PLATFORM: $(COMPILE_PLATFORM)"
+	@echo "  COMPILE_ARCH: $(COMPILE_ARCH)"
 	@echo "  CC: $(CC)"
 	@echo ""
 	@echo "  CFLAGS:"
@@ -834,7 +845,7 @@ targets: makedirs tools
 		echo "    $$i"; \
 	done
 	@echo ""
-	@$(MAKE) $(TARGETS)
+	@$(MAKE) $(TARGETS) V=$(V)
 
 makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
@@ -872,13 +883,13 @@ tools:
 endif
 
 define DO_Q3LCC
-@echo "Q3LCC $<"
-@$(Q3LCC) -o $@ $<
+$(echo_cmd) "Q3LCC $<"
+$(Q)$(Q3LCC) -o $@ $<
 endef
 
 define DO_Q3LCC_MISSIONPACK
-@echo "Q3LCC_MISSIONPACK $<"
-@$(Q3LCC) -DMISSIONPACK -o $@ $<
+$(echo_cmd) "Q3LCC_MISSIONPACK $<"
+$(Q)$(Q3LCC) -DMISSIONPACK -o $@ $<
 endef
 
 
@@ -1110,13 +1121,13 @@ else
 endif
 
 $(B)/ioquake3.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
-	@echo "LD $@"
-	@$(CC) -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) \
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) \
 		$(LDFLAGS) $(LIBSDLMAIN)
 
 $(B)/ioquake3-smp.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
-	@echo "LD $@"
-	@$(CC) -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
 		$(THREAD_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
 
 ifneq ($(strip $(LIBSDLMAIN)),)
@@ -1232,8 +1243,8 @@ ifeq ($(HAVE_VM_COMPILED),true)
 endif
 
 $(B)/ioq3ded.$(ARCH)$(BINEXT): $(Q3DOBJ)
-	@echo "LD $@"
-	@$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
 
 
 
@@ -1271,12 +1282,12 @@ Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
 Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) : $(Q3CGOBJ)
-	@echo "LD $@"
-	@$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
 
 $(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK CGAME
@@ -1314,12 +1325,12 @@ MPCGOBJ = $(MPCGOBJ_) $(B)/missionpack/cgame/cg_syscalls.o
 MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) : $(MPCGOBJ)
-	@echo "LD $@"
-	@$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
 
 $(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
 
 
@@ -1366,12 +1377,12 @@ Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
 Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) : $(Q3GOBJ)
-	@echo "LD $@"
-	@$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
 $(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK GAME
@@ -1416,12 +1427,12 @@ MPGOBJ = $(MPGOBJ_) $(B)/missionpack/game/g_syscalls.o
 MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
 
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) : $(MPGOBJ)
-	@echo "LD $@"
-	@$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
 
 $(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(MPGVMOBJ) $(GDIR)/g_syscalls.asm
 
 
 
@@ -1478,12 +1489,12 @@ Q3UIOBJ = $(Q3UIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT) : $(Q3UIOBJ)
-	@echo "LD $@"
-	@$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3UIOBJ)
 
 $(B)/baseq3/vm/ui.qvm: $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(Q3UIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 #############################################################################
 ## MISSIONPACK UI
@@ -1505,12 +1516,12 @@ MPUIOBJ = $(MPUIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
 MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
 
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT) : $(MPUIOBJ)
-	@echo "LD $@"
-	@$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPUIOBJ)
 
 $(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
-	@echo "Q3ASM $@"
-	@$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 
 
 
@@ -1699,7 +1710,7 @@ distclean: clean toolsclean
 	@rm -rf $(BUILD_DIR)
 
 installer: release
-	@$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR)
+	@$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR) V=$(V)
 
 dist:
 	rm -rf ioquake3-$(SVN_VERSION)
