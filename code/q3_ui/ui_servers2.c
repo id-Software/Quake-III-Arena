@@ -142,7 +142,6 @@ static char* gamenames[] = {
 static char* netnames[] = {
 	"???",
 	"UDP",
-	"IPX",
 	NULL
 };
 

@@ -19,7 +19,6 @@ MacOS X
 
 For 1.35+:
 * IPv6 support
-* merge unix_net.c and win_net.c
 * Replace windows DirectX backend with SDL
 * Graphical "ioquake3" watermark in videos, optional, on by default
 * Gamma stuff while recording videos.

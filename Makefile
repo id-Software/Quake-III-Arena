@@ -828,6 +828,7 @@ release:
 targets: makedirs tools
 	@echo ""
 	@echo "Building ioquake3 in $(B):"
+	@echo "  PLATFORM: $(PLATFORM)"
 	@echo "  ARCH: $(ARCH)"
 	@echo "  COMPILE_PLATFORM: $(COMPILE_PLATFORM)"
 	@echo "  COMPILE_ARCH: $(COMPILE_ARCH)"
@@ -924,6 +925,7 @@ Q3OBJ = \
   $(B)/client/md5.o \
   $(B)/client/msg.o \
   $(B)/client/net_chan.o \
+  $(B)/client/net_ip.o \
   $(B)/client/huffman.o \
   \
   $(B)/client/snd_adpcm.o \
@@ -1084,7 +1086,6 @@ ifeq ($(PLATFORM),mingw32)
     $(B)/client/win_glimp.o \
     $(B)/client/win_input.o \
     $(B)/client/win_main.o \
-    $(B)/client/win_net.o \
     $(B)/client/win_qgl.o \
     $(B)/client/win_shared.o \
     $(B)/client/win_snd.o \
@@ -1094,7 +1095,6 @@ ifeq ($(PLATFORM),mingw32)
 else
   Q3OBJ += \
     $(B)/client/unix_main.o \
-    $(B)/client/unix_net.o \
     $(B)/client/unix_shared.o \
     $(B)/client/linux_signals.o \
     $(B)/client/linux_qgl.o \
@@ -1167,6 +1167,7 @@ Q3DOBJ = \
   $(B)/ded/md4.o \
   $(B)/ded/msg.o \
   $(B)/ded/net_chan.o \
+  $(B)/ded/net_ip.o \
   $(B)/ded/huffman.o \
   \
   $(B)/ded/q_math.o \
@@ -1207,7 +1208,6 @@ Q3DOBJ = \
   \
   $(B)/ded/linux_signals.o \
   $(B)/ded/unix_main.o \
-  $(B)/ded/unix_net.o \
   $(B)/ded/unix_shared.o \
   \
   $(B)/ded/null_client.o \
