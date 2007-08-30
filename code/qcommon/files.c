@@ -2881,17 +2881,20 @@ static void FS_CheckPak0( void )
 	qboolean founddemo = qfalse;
 	unsigned foundPak = 0;
 
-	for( path = fs_searchpaths; path; path = path->next ) {
+	for( path = fs_searchpaths; path; path = path->next )
+	{
 		const char* pakBasename = path->pack->pakBasename;
 
 		if(!path->pack)
 			continue;
 
 		if(!Q_stricmpn( path->pack->pakGamename, "demoq3", MAX_OSPATH )
-		&& !Q_stricmpn( pakBasename, "pak0", MAX_OSPATH )) {
+		   && !Q_stricmpn( pakBasename, "pak0", MAX_OSPATH ))
+		{
 			founddemo = qtrue;
 
-			if( path->pack->checksum == DEMO_PAK0_CHECKSUM ) {
+			if( path->pack->checksum == DEMO_PAK0_CHECKSUM )
+			{
 				Com_Printf( "\n\n"
 						"**************************************************\n"
 						"WARNING: It looks like you're using pak0.pk3\n"
@@ -2899,12 +2902,16 @@ static void FS_CheckPak0( void )
 						"guaranteed or supported.\n"
 						"**************************************************\n\n\n" );
 			}
-		} else if(!Q_stricmpn( path->pack->pakGamename, BASEGAME, MAX_OSPATH )
-		&& strlen(pakBasename) == 4 && !Q_stricmpn( pakBasename, "pak", 3 )
-		&& pakBasename[3] >= '0' && pakBasename[3] <= '8') {
+		}
 
-			if( path->pack->checksum != pak_checksums[pakBasename[3]-'0'] ) {
-				if(pakBasename[0] == '0') {
+		else if(!Q_stricmpn( path->pack->pakGamename, BASEGAME, MAX_OSPATH )
+			&& strlen(pakBasename) == 4 && !Q_stricmpn( pakBasename, "pak", 3 )
+			&& pakBasename[3] >= '0' && pakBasename[3] <= '8')
+		{
+			if( path->pack->checksum != pak_checksums[pakBasename[3]-'0'] )
+			{
+				if(pakBasename[0] == '0')
+				{
 					Com_Printf("\n\n"
 						"**************************************************\n"
 						"WARNING: pak0.pk3 is present but its checksum (%u)\n"
@@ -2912,7 +2919,9 @@ static void FS_CheckPak0( void )
 						"legitimate Q3 CDROM.\n"
 						"**************************************************\n\n\n",
 						path->pack->checksum );
-				} else {
+				}
+				else
+				{
 					Com_Printf("\n\n"
 						"**************************************************\n"
 						"WARNING: pak%d.pk3 is present but its checksum (%u)\n"
@@ -2926,14 +2935,17 @@ static void FS_CheckPak0( void )
 		}
 	}
 
-	if( !founddemo && foundPak != 0x1ff ) {
-		if((foundPak&1) != 1 ) {
+	if(!founddemo && (foundPak & 0x1ff) != 0x1ff )
+	{
+		if((foundPak&1) != 1 )
+		{
 			Com_Printf("\n\n"
 			"pak0.pk3 is missing. Please copy it\n"
 			"from your legitimate Q3 CDROM.\n");
 		}
 
-		if((foundPak&0x1fe) != 0x1fe ) {
+		if((foundPak&0x1fe) != 0x1fe )
+		{
 			Com_Printf("\n\n"
 			"Point Release files are missing. Please\n"
 			"re-install the 1.32 point release.\n");
