@@ -438,7 +438,7 @@ void  Sys_Error( const char *error, ...)
   CL_Shutdown ();
 
   va_start (argptr,error);
-  vsprintf (string,error,argptr);
+  Q_vsnprintf (string, sizeof(string), error, argptr);
   va_end (argptr);
   fprintf(stderr, "Sys_Error: %s\n", string);
 
