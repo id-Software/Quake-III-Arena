@@ -62,12 +62,12 @@ static SDL_Surface *screen = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
 
-void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
-void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
-void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
+PFNGLMULTITEXCOORD2FARBPROC qglMultiTexCoord2fARB;
+PFNGLACTIVETEXTUREARBPROC qglActiveTextureARB;
+PFNGLCLIENTACTIVETEXTUREARBPROC qglClientActiveTextureARB;
 
-void ( APIENTRY * qglLockArraysEXT)( GLint, GLint);
-void ( APIENTRY * qglUnlockArraysEXT) ( void );
+PFNGLLOCKARRAYSEXTPROC qglLockArraysEXT;
+PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
 
 /*
 ===============
@@ -387,7 +387,7 @@ static void GLimp_InitExtensions( void )
 			if ( qglActiveTextureARB )
 			{
 				GLint glint = 0;
-				qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glint );
+				qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glint );
 				glConfig.maxActiveTextures = (int) glint;
 				if ( glConfig.maxActiveTextures > 1 )
 				{

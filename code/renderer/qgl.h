@@ -26,125 +26,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __QGL_H__
 #define __QGL_H__
 
-#if defined( _WIN32 )
+#include "SDL_opengl.h"
 
-#if _MSC_VER
-#pragma warning (disable: 4201)
-#pragma warning (disable: 4214)
-#pragma warning (disable: 4514)
-#pragma warning (disable: 4032)
-#pragma warning (disable: 4201)
-#pragma warning (disable: 4214)
-#endif
+extern PFNGLMULTITEXCOORD2FARBPROC qglMultiTexCoord2fARB;
+extern PFNGLACTIVETEXTUREARBPROC qglActiveTextureARB;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC qglClientActiveTextureARB;
 
-#include <windows.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#elif defined(MACOS_X)
-
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#ifndef GL_EXT_abgr
-#include <OpenGL/glext.h>
-#endif
-
-#else
-
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#endif
-
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-
-
-//===========================================================================
-// <Timbo> I hate this section so much
-
-/*
-** multitexture extension definitions
-*/
-#if !defined(__sun)
-
-#define GL_ACTIVE_TEXTURE_ARB               0x84E0
-#define GL_CLIENT_ACTIVE_TEXTURE_ARB        0x84E1
-#define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
-
-#define GL_TEXTURE0_ARB                     0x84C0
-#define GL_TEXTURE1_ARB                     0x84C1
-#define GL_TEXTURE2_ARB                     0x84C2
-#define GL_TEXTURE3_ARB                     0x84C3
-
-#else
-
-// FIXME GL_MAX_TEXTURE_UNITS_ARB?
-#define GL_MAX_ACTIVE_TEXTURES_ARB          0x84E2
-
-#endif /* defined(__sun) */
-
-// anisotropic filtering constants
-#define GL_TEXTURE_MAX_ANISOTROPY_EXT       0x84FE
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT   0x84FF
-
-// define for skyboxes without black seams on non SDL-versions.
-#if !defined(GL_VERSION_1_2) && !defined(GL_CLAMP_TO_EDGE)
-   #define GL_CLAMP_TO_EDGE                  0x812F
-#endif
-
-// S3TC compression constants
-#define GL_RGB_S3TC                          0x83A0
-#define GL_RGB4_S3TC                         0x83A1
-
-#if defined(MACOS_X) || ( defined(__sun) && defined(__sparc) )
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1DARBPROC) (GLenum target, GLdouble s);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1DVARBPROC) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1FARBPROC) (GLenum target, GLfloat s);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1FVARBPROC) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1IARBPROC) (GLenum target, GLint s);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1IVARBPROC) (GLenum target, const GLint *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1SARBPROC) (GLenum target, GLshort s);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD1SVARBPROC) (GLenum target, const GLshort *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2DARBPROC) (GLenum target, GLdouble s, GLdouble t);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2DVARBPROC) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2FARBPROC) (GLenum target, GLfloat s, GLfloat t);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2FVARBPROC) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2IARBPROC) (GLenum target, GLint s, GLint t);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2IVARBPROC) (GLenum target, const GLint *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2SARBPROC) (GLenum target, GLshort s, GLshort t);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD2SVARBPROC) (GLenum target, const GLshort *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3DARBPROC) (GLenum target, GLdouble s, GLdouble t, GLdouble r);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3DVARBPROC) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3FARBPROC) (GLenum target, GLfloat s, GLfloat t, GLfloat r);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3FVARBPROC) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3IARBPROC) (GLenum target, GLint s, GLint t, GLint r);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3IVARBPROC) (GLenum target, const GLint *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3SARBPROC) (GLenum target, GLshort s, GLshort t, GLshort r);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD3SVARBPROC) (GLenum target, const GLshort *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4DARBPROC) (GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4DVARBPROC) (GLenum target, const GLdouble *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4FARBPROC) (GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4FVARBPROC) (GLenum target, const GLfloat *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4IARBPROC) (GLenum target, GLint s, GLint t, GLint r, GLint q);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4IVARBPROC) (GLenum target, const GLint *v);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4SARBPROC) (GLenum target, GLshort s, GLshort t, GLshort r, GLshort q);
-typedef void (APIENTRY * PFNGLMULTITEXCOORD4SVARBPROC) (GLenum target, const GLshort *v);
-typedef void (APIENTRY * PFNGLACTIVETEXTUREARBPROC) (GLenum target);
-typedef void (APIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum target);
-#endif
-
-//===========================================================================
-
-// extensions will be function pointers on all platforms
-extern void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
-extern void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
-extern void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
-
-extern void ( APIENTRY * qglLockArraysEXT)( GLint, GLint);
-extern void ( APIENTRY * qglUnlockArraysEXT) ( void );
+extern PFNGLLOCKARRAYSEXTPROC qglLockArraysEXT;
+extern PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
 
 //===========================================================================
 
