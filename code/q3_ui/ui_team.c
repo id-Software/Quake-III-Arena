@@ -47,16 +47,6 @@ typedef struct
 
 static teammain_t	s_teammain;
 
-// bk001204 - unused
-//static menuframework_s	s_teammain_menu;
-//static menuaction_s		s_teammain_orders;
-//static menuaction_s		s_teammain_voice;
-//static menuaction_s		s_teammain_joinred;
-//static menuaction_s		s_teammain_joinblue;
-//static menuaction_s		s_teammain_joingame;
-//static menuaction_s		s_teammain_spectate;
-
-
 /*
 ===============
 TeamMain_MenuEvent

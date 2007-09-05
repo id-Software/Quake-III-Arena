@@ -1,0 +1,440 @@
+/*
+===========================================================================
+Copyright (C) 1999-2005 Id Software, Inc.
+
+This file is part of Quake III Arena source code.
+
+Quake III Arena source code is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the License,
+or (at your option) any later version.
+
+Quake III Arena source code is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Quake III Arena source code; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+===========================================================================
+*/
+
+#include "../qcommon/q_shared.h"
+#include "../qcommon/qcommon.h"
+
+#include <unistd.h>
+#include <signal.h>
+#include <termios.h>
+#include <fcntl.h>
+
+/*
+=============================================================
+tty console routines
+
+NOTE: if the user is editing a line when something gets printed to the early
+console then it won't look good so we provide TTY_Hide and TTY_Show to be
+called before and after a stdout or stderr output
+=============================================================
+*/
+
+// general flag to tell about tty console mode
+static qboolean ttycon_on = qfalse;
+static int ttycon_hide = 0;
+
+// some key codes that the terminal may be using, initialised on start up
+static int TTY_erase;
+static int TTY_eof;
+
+static struct termios TTY_tc;
+
+static field_t TTY_con;
+
+// This is somewhat of aduplicate of the graphical console history
+// but it's safer more modular to have our own here
+#define TTY_HISTORY 32
+static field_t ttyEditLines[ TTY_HISTORY ];
+static int hist_current = -1, hist_count = 0;
+
+/*
+==================
+TTY_FlushIn
+
+Flush stdin, I suspect some terminals are sending a LOT of shit
+FIXME relevant?
+==================
+*/
+static void TTY_FlushIn( void )
+{
+	char key;
+	while (read(0, &key, 1)!=-1);
+}
+
+/*
+==================
+TTY_Back
+
+Output a backspace
+
+NOTE: it seems on some terminals just sending '\b' is not enough so instead we
+send "\b \b"
+(FIXME there may be a way to find out if '\b' alone would work though)
+==================
+*/
+static void TTY_Back( void )
+{
+	char key;
+	key = '\b';
+	write(1, &key, 1);
+	key = ' ';
+	write(1, &key, 1);
+	key = '\b';
+	write(1, &key, 1);
+}
+
+/*
+==================
+TTY_Hide
+
+Clear the display of the line currently edited
+bring cursor back to beginning of line
+==================
+*/
+void TTY_Hide( void )
+{
+	if( ttycon_on )
+	{
+		int i;
+		if (ttycon_hide)
+		{
+			ttycon_hide++;
+			return;
+		}
+		if (TTY_con.cursor>0)
+		{
+			for (i=0; i<TTY_con.cursor; i++)
+			{
+				TTY_Back();
+			}
+		}
+		TTY_Back(); // Delete "]"
+		ttycon_hide++;
+	}
+}
+
+/*
+==================
+TTY_Show
+
+Show the current line
+FIXME need to position the cursor if needed?
+==================
+*/
+void TTY_Show( void )
+{
+	if( ttycon_on )
+	{
+		int i;
+
+		assert(ttycon_hide>0);
+		ttycon_hide--;
+		if (ttycon_hide == 0)
+		{
+			write( 1, "]", 1 );
+			if (TTY_con.cursor)
+			{
+				for (i=0; i<TTY_con.cursor; i++)
+				{
+					write(1, TTY_con.buffer+i, 1);
+				}
+			}
+		}
+	}
+}
+
+/*
+==================
+TTY_Shutdown
+
+Never exit without calling this, or your terminal will be left in a pretty bad state
+==================
+*/
+void TTY_Shutdown( void )
+{
+	if (ttycon_on)
+	{
+		TTY_Back(); // Delete "]"
+		tcsetattr (0, TCSADRAIN, &TTY_tc);
+
+		// Restore blocking to stdin reads
+		fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NDELAY );
+	}
+}
+
+/*
+==================
+Hist_Add
+==================
+*/
+void Hist_Add(field_t *field)
+{
+	int i;
+	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count >= 0);
+	assert(hist_current >= -1);
+	assert(hist_current <= hist_count);
+	// make some room
+	for (i=TTY_HISTORY-1; i>0; i--)
+	{
+		ttyEditLines[i] = ttyEditLines[i-1];
+	}
+	ttyEditLines[0] = *field;
+	if (hist_count<TTY_HISTORY)
+	{
+		hist_count++;
+	}
+	hist_current = -1; // re-init
+}
+
+/*
+==================
+Hist_Prev
+==================
+*/
+field_t *Hist_Prev( void )
+{
+	int hist_prev;
+	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count >= 0);
+	assert(hist_current >= -1);
+	assert(hist_current <= hist_count);
+	hist_prev = hist_current + 1;
+	if (hist_prev >= hist_count)
+	{
+		return NULL;
+	}
+	hist_current++;
+	return &(ttyEditLines[hist_current]);
+}
+
+/*
+==================
+Hist_Next
+==================
+*/
+field_t *Hist_Next( void )
+{
+	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count >= 0);
+	assert(hist_current >= -1);
+	assert(hist_current <= hist_count);
+	if (hist_current >= 0)
+	{
+		hist_current--;
+	}
+	if (hist_current == -1)
+	{
+		return NULL;
+	}
+	return &(ttyEditLines[hist_current]);
+}
+
+/*
+==================
+TTY_Init
+
+Initialize the console input (tty mode if possible)
+==================
+*/
+void TTY_Init( void )
+{
+	struct termios tc;
+
+	// If the process is backgrounded (running non interactively)
+	// then SIGTTIN or SIGTOU is emitted, if not caught, turns into a SIGSTP
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+
+	// Make stdin reads non-blocking
+	fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) | O_NDELAY );
+
+	if (isatty(STDIN_FILENO)!=1)
+	{
+		Com_Printf( "stdin is not a tty, tty console mode disabled\n");
+		ttycon_on = qfalse;
+		return;
+	}
+
+	Field_Clear(&TTY_con);
+	tcgetattr (0, &TTY_tc);
+	TTY_erase = TTY_tc.c_cc[VERASE];
+	TTY_eof = TTY_tc.c_cc[VEOF];
+	tc = TTY_tc;
+
+	/*
+	ECHO: don't echo input characters
+	ICANON: enable canonical mode.  This  enables  the  special
+	characters  EOF,  EOL,  EOL2, ERASE, KILL, REPRINT,
+	STATUS, and WERASE, and buffers by lines.
+	ISIG: when any of the characters  INTR,  QUIT,  SUSP,  or
+	DSUSP are received, generate the corresponding sig­
+	nal
+	*/
+	tc.c_lflag &= ~(ECHO | ICANON);
+
+	/*
+	ISTRIP strip off bit 8
+	INPCK enable input parity checking
+	*/
+	tc.c_iflag &= ~(ISTRIP | INPCK);
+	tc.c_cc[VMIN] = 1;
+	tc.c_cc[VTIME] = 0;
+	tcsetattr (0, TCSADRAIN, &tc);
+	ttycon_on = qtrue;
+}
+
+/*
+==================
+TTY_ConsoleInput
+==================
+*/
+char *TTY_ConsoleInput( void )
+{
+	// we use this when sending back commands
+	static char text[256];
+	int avail;
+	char key;
+	field_t *history;
+
+	if( ttycon_on )
+	{
+		avail = read(0, &key, 1);
+		if (avail != -1)
+		{
+			// we have something
+			// backspace?
+			// NOTE TTimo testing a lot of values .. seems it's the only way to get it to work everywhere
+			if ((key == TTY_erase) || (key == 127) || (key == 8))
+			{
+				if (TTY_con.cursor > 0)
+				{
+					TTY_con.cursor--;
+					TTY_con.buffer[TTY_con.cursor] = '\0';
+					TTY_Back();
+				}
+				return NULL;
+			}
+			// check if this is a control char
+			if ((key) && (key) < ' ')
+			{
+				if (key == '\n')
+				{
+					// push it in history
+					Hist_Add(&TTY_con);
+					strcpy(text, TTY_con.buffer);
+					Field_Clear(&TTY_con);
+					key = '\n';
+					write(1, &key, 1);
+					write( 1, "]", 1 );
+					return text;
+				}
+				if (key == '\t')
+				{
+					TTY_Hide();
+					Field_AutoComplete( &TTY_con );
+					TTY_Show();
+					return NULL;
+				}
+				avail = read(0, &key, 1);
+				if (avail != -1)
+				{
+					// VT 100 keys
+					if (key == '[' || key == 'O')
+					{
+						avail = read(0, &key, 1);
+						if (avail != -1)
+						{
+							switch (key)
+							{
+								case 'A':
+									history = Hist_Prev();
+									if (history)
+									{
+										TTY_Hide();
+										TTY_con = *history;
+										TTY_Show();
+									}
+									TTY_FlushIn();
+									return NULL;
+									break;
+								case 'B':
+									history = Hist_Next();
+									TTY_Hide();
+									if (history)
+									{
+										TTY_con = *history;
+									} else
+									{
+										Field_Clear(&TTY_con);
+									}
+									TTY_Show();
+									TTY_FlushIn();
+									return NULL;
+									break;
+								case 'C':
+									return NULL;
+								case 'D':
+									return NULL;
+							}
+						}
+					}
+				}
+				Com_DPrintf("droping ISCTL sequence: %d, TTY_erase: %d\n", key, TTY_erase);
+				TTY_FlushIn();
+				return NULL;
+			}
+			// push regular character
+			TTY_con.buffer[TTY_con.cursor] = key;
+			TTY_con.cursor++;
+			// print the current line (this is differential)
+			write(1, &key, 1);
+		}
+
+		return NULL;
+	}
+	else
+	{
+		int     len;
+		fd_set  fdset;
+		struct timeval timeout;
+		static qboolean stdin_active;
+
+		if (!com_dedicated || !com_dedicated->value)
+			return NULL;
+
+		if (!stdin_active)
+			return NULL;
+
+		FD_ZERO(&fdset);
+		FD_SET(0, &fdset); // stdin
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 0;
+		if (select (1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
+		{
+			return NULL;
+		}
+
+		len = read (0, text, sizeof(text));
+		if (len == 0)
+		{ // eof!
+			stdin_active = qfalse;
+			return NULL;
+		}
+
+		if (len < 1)
+			return NULL;
+		text[len-1] = 0;    // rip off the /n and terminate
+
+		return text;
+	}
+}

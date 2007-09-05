@@ -68,7 +68,6 @@ METHODDEF void process_data_buffer_main
 METHODDEF void
 start_pass_main (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
 {
-  // bk001204 - don't use main...
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
 
   /* Do nothing in raw-data mode. */
@@ -115,7 +114,6 @@ process_data_simple_main (j_compress_ptr cinfo,
 			  JSAMPARRAY input_buf, JDIMENSION *in_row_ctr,
 			  JDIMENSION in_rows_avail)
 {
-  // bk001204 - don't use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
 
   while (jmain->cur_iMCU_row < cinfo->total_iMCU_rows) {
@@ -246,7 +244,6 @@ process_data_buffer_main (j_compress_ptr cinfo,
 GLOBAL void
 jinit_c_main_controller (j_compress_ptr cinfo, boolean need_full_buffer)
 {
-  // bk001204 - don't use main
   my_main_ptr jmain;
   int ci;
   jpeg_component_info *compptr;

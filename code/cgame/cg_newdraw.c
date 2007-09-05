@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#ifndef MISSIONPACK // bk001204
+#ifndef MISSIONPACK
 #error This file not be used for classic Q3A.
 #endif
 
@@ -172,7 +172,7 @@ static void CG_DrawPlayerArmorIcon( rectDef_t *rect, qboolean draw2D ) {
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
 
-	if ( draw2D || ( !cg_draw3dIcons.integer && cg_drawIcons.integer) ) { // bk001206 - parentheses
+	if ( draw2D || ( !cg_draw3dIcons.integer && cg_drawIcons.integer) ) {
 		CG_DrawPic( rect->x, rect->y + rect->h/2 + 1, rect->w, rect->h, cgs.media.armorIcon );
   } else if (cg_draw3dIcons.integer) {
 	  VectorClear( angles );
@@ -209,10 +209,9 @@ static void CG_DrawPlayerArmorValue(rectDef_t *rect, float scale, vec4_t color, 
 	}
 }
 
-#ifndef MISSIONPACK // bk001206 
+#ifndef MISSIONPACK
 static float healthColors[4][4] = { 
 //		{ 0.2, 1.0, 0.2, 1.0 } , { 1.0, 0.2, 0.2, 1.0 }, {0.5, 0.5, 0.5, 1} };
-  // bk0101016 - float const
   { 1.0f, 0.69f, 0.0f, 1.0f } ,		// normal
   { 1.0f, 0.2f, 0.2f, 1.0f },		// low health
   { 0.5f, 0.5f, 0.5f, 1.0f},		// weapon firing
@@ -228,7 +227,7 @@ static void CG_DrawPlayerAmmoIcon( rectDef_t *rect, qboolean draw2D ) {
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
 
-	if ( draw2D || (!cg_draw3dIcons.integer && cg_drawIcons.integer) ) { // bk001206 - parentheses
+	if ( draw2D || (!cg_draw3dIcons.integer && cg_drawIcons.integer) ) {
 	  qhandle_t	icon;
     icon = cg_weapons[ cg.predictedPlayerState.weapon ].ammoIcon;
 		if ( icon ) {
@@ -1214,8 +1213,6 @@ static void CG_Text_Paint_Limit(float *maxX, float x, float y, float scale, vec4
 	vec4_t newColor;
 	glyphInfo_t *glyph;
   if (text) {
-// TTimo: FIXME
-//    const unsigned char *s = text; // bk001206 - unsigned
     const char *s = text;
 		float max = *maxX;
 		float useScale;

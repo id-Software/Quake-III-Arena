@@ -697,7 +697,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		return re.inPVS( VMA(1), VMA(2) );
 
 	default:
-	        assert(0); // bk010102
+	        assert(0);
 		Com_Error( ERR_DROP, "Bad cgame system trap: %ld", (long int) args[0] );
 	}
 	return 0;
@@ -906,8 +906,6 @@ void CL_FirstSnapshot( void ) {
 		Cbuf_AddText( cl_activeAction->string );
 		Cvar_Set( "activeAction", "" );
 	}
-	
-	Sys_BeginProfiling();
 }
 
 /*
@@ -1010,9 +1008,35 @@ void CL_SetCGameTime( void ) {
 	// while a normal demo may have different time samples
 	// each time it is played back
 	if ( cl_timedemo->integer ) {
+		int now = Sys_Milliseconds( );
+		int frameDuration;
+
 		if (!clc.timeDemoStart) {
-			clc.timeDemoStart = Sys_Milliseconds();
+			clc.timeDemoStart = clc.timeDemoLastFrame = now;
+			clc.timeDemoMinDuration = INT_MAX;
+			clc.timeDemoMaxDuration = 0;
 		}
+
+		frameDuration = now - clc.timeDemoLastFrame;
+		clc.timeDemoLastFrame = now;
+
+		// Ignore the first measurement as it'll always be 0
+		if( clc.timeDemoFrames > 0 )
+		{
+			if( frameDuration > clc.timeDemoMaxDuration )
+				clc.timeDemoMaxDuration = frameDuration;
+
+			if( frameDuration < clc.timeDemoMinDuration )
+				clc.timeDemoMinDuration = frameDuration;
+
+			// 255 ms = about 4fps
+			if( frameDuration > UCHAR_MAX )
+				frameDuration = UCHAR_MAX;
+
+			clc.timeDemoDurations[ ( clc.timeDemoFrames - 1 ) %
+				MAX_TIMEDEMO_DURATIONS ] = frameDuration;
+		}
+
 		clc.timeDemoFrames++;
 		cl.serverTime = clc.timeDemoBaseTime + clc.timeDemoFrames * 50;
 	}

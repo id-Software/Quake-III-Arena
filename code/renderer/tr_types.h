@@ -202,33 +202,4 @@ typedef struct {
 	qboolean				smpActive;		// dual processor
 } glconfig_t;
 
-// FIXME: VM should be OS agnostic .. in theory
-
-/*
-#ifdef Q3_VM
-
-#define _3DFX_DRIVER_NAME	"Voodoo"
-#define OPENGL_DRIVER_NAME	"Default"
-
-#elif defined(_WIN32)
-*/
-
-#if defined(Q3_VM) || defined(_WIN32)
-
-#define _3DFX_DRIVER_NAME	"3dfxvgl"
-#define OPENGL_DRIVER_NAME	"opengl32"
-
-#elif defined(MACOS_X)
-
-#define _3DFX_DRIVER_NAME	"libMesaVoodooGL.dylib"
-#define OPENGL_DRIVER_NAME	"/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
-
-#else
-
-#define _3DFX_DRIVER_NAME	"libMesaVoodooGL.so"
-// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=524
-#define OPENGL_DRIVER_NAME	"libGL.so.1"
-
-#endif	// !defined _WIN32
-
 #endif	// __TR_TYPES_H

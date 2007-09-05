@@ -1596,18 +1596,18 @@ static void CG_DrawDisconnect( void ) {
 	int			cmdNum;
 	usercmd_t	cmd;
 	const char		*s;
-	int			w;  // bk010215 - FIXME char message[1024];
+	int			w;
 
 	// draw the phone jack if we are completely past our buffers
 	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
 	trap_GetUserCmd( cmdNum, &cmd );
 	if ( cmd.serverTime <= cg.snap->ps.commandTime
-		|| cmd.serverTime > cg.time ) {	// special check for map_restart // bk 0102165 - FIXME
+		|| cmd.serverTime > cg.time ) {	// special check for map_restart
 		return;
 	}
 
 	// also add text in center of screen
-	s = "Connection Interrupted"; // bk 010215 - FIXME
+	s = "Connection Interrupted";
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 	CG_DrawBigString( 320 - w/2, 100, s, 1.0F);
 
@@ -1786,8 +1786,8 @@ static void CG_DrawCenterString( void ) {
 	char	*start;
 	int		l;
 	int		x, y, w;
-#ifdef MISSIONPACK // bk010221 - unused else
-  int h;
+#ifdef MISSIONPACK
+	int h;
 #endif
 	float	*color;
 

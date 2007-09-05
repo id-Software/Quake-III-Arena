@@ -321,7 +321,7 @@ static void SV_MapRestart_f( void ) {
 			// this generally shouldn't happen, because the client
 			// was connected before the level change
 			SV_DropClient( client, denied );
-			Com_Printf( "SV_MapRestart_f(%d): dropped client %i - denied!\n", delay, i ); // bk010125
+			Com_Printf( "SV_MapRestart_f(%d): dropped client %i - denied!\n", delay, i );
 			continue;
 		}
 

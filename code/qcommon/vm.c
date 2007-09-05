@@ -36,8 +36,8 @@ and one exported function: Perform
 #include "vm_local.h"
 
 
-vm_t	*currentVM = NULL; // bk001212
-vm_t	*lastVM    = NULL; // bk001212
+vm_t	*currentVM = NULL;
+vm_t	*lastVM    = NULL;
 int		vm_debugLevel;
 
 #define	MAX_VM		3
@@ -543,13 +543,6 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 	Q_strncpyz( vm->name, module, sizeof( vm->name ) );
 	vm->systemCall = systemCalls;
 
-	// never allow dll loading with a demo
-	if ( interpret == VMI_NATIVE ) {
-		if ( Cvar_VariableValue( "fs_restrict" ) ) {
-			interpret = VMI_COMPILED;
-		}
-	}
-
 	if ( interpret == VMI_NATIVE ) {
 		// try to load as a system dll
 		Com_Printf( "Loading dll file %s.\n", vm->name );
@@ -655,7 +648,7 @@ void *VM_ArgPtr( intptr_t intValue ) {
 	if ( !intValue ) {
 		return NULL;
 	}
-	// bk001220 - currentVM is missing on reconnect
+	// currentVM is missing on reconnect
 	if ( currentVM==NULL )
 	  return NULL;
 
@@ -672,7 +665,7 @@ void *VM_ExplicitArgPtr( vm_t *vm, intptr_t intValue ) {
 		return NULL;
 	}
 
-	// bk010124 - currentVM is missing on reconnect here as well?
+	// currentVM is missing on reconnect here as well?
 	if ( currentVM==NULL )
 	  return NULL;
 
@@ -773,7 +766,7 @@ intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 #endif
 	}
 
-	if ( oldVM != NULL ) // bk001220 - assert(currentVM!=NULL) for oldVM==NULL
+	if ( oldVM != NULL )
 	  currentVM = oldVM;
 	return r;
 }

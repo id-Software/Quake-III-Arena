@@ -25,37 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 cvar_t *cl_cURLLib;
 
 #if USE_CURL_DLOPEN
-
-#if USE_SDL_VIDEO
-#include "SDL.h"
-#include "SDL_loadso.h"
-#define OBJTYPE void *
-#define OBJLOAD(x) SDL_LoadObject(x)
-#define SYMLOAD(x,y) SDL_LoadFunction(x,y)
-#define OBJFREE(x) SDL_UnloadObject(x)
-
-#elif defined _WIN32
-#include <windows.h>
-#define OBJTYPE HMODULE
-#define OBJLOAD(x) LoadLibrary(x)
-#define SYMLOAD(x,y) GetProcAddress(x,y)
-#define OBJFREE(x) FreeLibrary(x)
-
-#elif defined __linux__ || defined __FreeBSD__ || defined MACOS_X || defined __sun
-#include <dlfcn.h>
-#define OBJTYPE void *
-#define OBJLOAD(x) dlopen(x, RTLD_LAZY | RTLD_GLOBAL)
-#define SYMLOAD(x,y) dlsym(x,y)
-#define OBJFREE(x) dlclose(x)
-#else
-
-#error "Your platform has no lib loading code or it is disabled"
-#endif
-
-#if defined __linux__ || defined __FreeBSD__ || defined MACOS_X
-#include <unistd.h>
-#include <sys/types.h>
-#endif
+#include "../sys/sys_loadlib.h"
 
 char* (*qcurl_version)(void);
 
@@ -85,7 +55,7 @@ CURLMsg *(*qcurl_multi_info_read)(CURLM *multi_handle,
                                                 int *msgs_in_queue);
 const char *(*qcurl_multi_strerror)(CURLMcode);
 
-static OBJTYPE cURLLib = NULL;
+static void *cURLLib = NULL;
 
 /*
 =================
@@ -96,7 +66,7 @@ static void *GPA(char *str)
 {
 	void *rv;
 
-	rv = SYMLOAD(cURLLib, str);
+	rv = Sys_LoadFunction(cURLLib, str);
 	if(!rv)
 	{
 		Com_Printf("Can't load symbol %s\n", str);
@@ -124,17 +94,17 @@ qboolean CL_cURL_Init()
 
 
 	Com_Printf("Loading \"%s\"...", cl_cURLLib->string);
-	if( (cURLLib = OBJLOAD(cl_cURLLib->string)) == 0 )
+	if( (cURLLib = Sys_LoadLibrary(cl_cURLLib->string)) == 0 )
 	{
 #ifdef _WIN32
 		return qfalse;
 #else
 		char fn[1024];
-		getcwd(fn, sizeof(fn));
+		Q_strncpyz( fn, Sys_Cwd( ), sizeof( fn ) );
 		strncat(fn, "/", sizeof(fn)-strlen(fn)-1);
 		strncat(fn, cl_cURLLib->string, sizeof(fn)-strlen(fn)-1);
 
-		if( (cURLLib = OBJLOAD(fn)) == 0 )
+		if( (cURLLib = Sys_LoadLibrary(fn)) == 0 )
 		{
 			return qfalse;
 		}
@@ -189,7 +159,7 @@ void CL_cURL_Shutdown( void )
 #if USE_CURL_DLOPEN
 	if(cURLLib)
 	{
-		OBJFREE(cURLLib);
+		Sys_UnloadLibrary(cURLLib);
 		cURLLib = NULL;
 	}
 	qcurl_easy_init = NULL;

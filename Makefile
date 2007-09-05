@@ -32,12 +32,8 @@ BUILD_SERVER     =
 BUILD_GAME_SO    =
 BUILD_GAME_QVM   =
 
-ifeq ($(V),1)
-echo_cmd=@:
-Q=
-else
-echo_cmd=@echo
-Q=@
+ifneq ($(PLATFORM),darwin)
+  BUILD_CLIENT_SMP = 0
 endif
 
 #############################################################################
@@ -96,10 +92,6 @@ USE_CCACHE=0
 endif
 export USE_CCACHE
 
-ifndef USE_SDL
-USE_SDL=1
-endif
-
 ifndef USE_OPENAL
 USE_OPENAL=1
 endif
@@ -136,8 +128,9 @@ CDIR=$(MOUNT_DIR)/client
 SDIR=$(MOUNT_DIR)/server
 RDIR=$(MOUNT_DIR)/renderer
 CMDIR=$(MOUNT_DIR)/qcommon
-UDIR=$(MOUNT_DIR)/unix
-W32DIR=$(MOUNT_DIR)/win32
+SDLDIR=$(MOUNT_DIR)/sdl
+ASMDIR=$(MOUNT_DIR)/asm
+SYSDIR=$(MOUNT_DIR)/sys
 GDIR=$(MOUNT_DIR)/game
 CGDIR=$(MOUNT_DIR)/cgame
 BLIBDIR=$(MOUNT_DIR)/botlib
@@ -146,7 +139,7 @@ UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
 JPDIR=$(MOUNT_DIR)/jpeg-6
 TOOLSDIR=$(MOUNT_DIR)/tools
-LOKISETUPDIR=$(UDIR)/setup
+LOKISETUPDIR=misc/setup
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 
@@ -158,7 +151,7 @@ USE_SVN=
 ifeq ($(wildcard .svn),.svn)
   SVN_REV=$(shell LANG=C svnversion .)
   ifneq ($(SVN_REV),)
-    SVN_VERSION=$(VERSION)_SVN$(SVN_REV)
+    SVN_VERSION=$(SVN_REV)
     USE_SVN=1
   endif
 endif
@@ -195,7 +188,8 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -pipe
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
@@ -213,12 +207,6 @@ ifeq ($(PLATFORM),linux)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
-  endif
-
-  ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
-  else
-    BASE_CFLAGS += -I/usr/X11R6/include
   endif
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
@@ -247,10 +235,6 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
-
-  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
-
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
@@ -258,18 +242,14 @@ ifeq ($(PLATFORM),linux)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
 
-  ifeq ($(USE_SDL),1)
-    CLIENT_LDFLAGS=$(shell sdl-config --libs)
-  else
-    CLIENT_LDFLAGS=-L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
-  endif
+  CLIENT_LDFLAGS=$(shell sdl-config --libs) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LDFLAGS += -lopenal
     endif
   endif
- 
+
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
       CLIENT_LDFLAGS += -lcurl
@@ -285,6 +265,9 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -m32
     LDFLAGS+=-m32
   endif
+
+  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
 else # ifeq Linux
 
@@ -384,19 +367,13 @@ ifeq ($(PLATFORM),darwin)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
-  ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1 -D_THREAD_SAFE=1 \
-      -I$(SDLHDIR)/include
-    # We copy sdlmain before ranlib'ing it so that subversion doesn't think
-    #  the file has been modified by each build.
-    LIBSDLMAIN=$(B)/libSDLmain.a
-    LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
-    CLIENT_LDFLAGS += -framework Cocoa -framework IOKit -framework OpenGL \
-      $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
-  else
-    # !!! FIXME: frameworks: OpenGL, Carbon, etc...
-    #CLIENT_LDFLAGS += -L/usr/X11R6/$(LIB) -lX11 -lXext -lXxf86dga -lXxf86vm
-  endif
+  BASE_CFLAGS += -D_THREAD_SAFE=1 -I$(SDLHDIR)/include
+  # We copy sdlmain before ranlib'ing it so that subversion doesn't think
+  #  the file has been modified by each build.
+  LIBSDLMAIN=$(B)/libSDLmain.a
+  LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
+  CLIENT_LDFLAGS += -framework Cocoa -framework IOKit -framework OpenGL \
+    $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
 
   OPTIMIZE += -ffast-math -falign-loops=16
 
@@ -429,7 +406,8 @@ endif
 
   ARCH=x86
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -DUSE_ICON -I$(SDLHDIR)/include
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN=1
@@ -446,14 +424,11 @@ endif
     BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
   endif
 
-  OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math -falign-loops=2 \
-    -funroll-loops -falign-jumps=2 -falign-functions=2 -fstrength-reduce
+  OPTIMIZE = -O3 -march=i586 -fno-omit-frame-pointer -ffast-math \
+    -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
+    -fstrength-reduce
 
   HAVE_VM_COMPILED = true
-
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
-
-  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   SHLIBEXT=dll
   SHLIBCFLAGS=
@@ -461,7 +436,7 @@ endif
 
   BINEXT=.exe
 
-  LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32
+  LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32 -lopengl32
   CLIENT_LDFLAGS=
 
   ifeq ($(USE_CURL),1)
@@ -479,6 +454,14 @@ endif
     BASE_CFLAGS += -m32
     LDFLAGS+=-m32
   endif
+
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
+
+  # libmingw32 must be linked before libSDLmain
+  CLIENT_LDFLAGS += -lmingw32 \
+                    $(LIBSDIR)/win32/libSDLmain.a \
+                    $(LIBSDIR)/win32/libSDL.dll.a
 
   BUILD_SERVER = 0
   BUILD_CLIENT_SMP = 0
@@ -499,9 +482,7 @@ ifeq ($(PLATFORM),freebsd)
 
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-                -I/usr/X11R6/include
-
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+    -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1
@@ -512,10 +493,6 @@ ifeq ($(PLATFORM),freebsd)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
-  endif
-
-  ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += $(shell sdl-config --cflags) -DUSE_SDL_VIDEO=1 -DUSE_SDL_SOUND=1
   endif
 
   ifeq ($(ARCH),axp)
@@ -534,6 +511,8 @@ ifeq ($(PLATFORM),freebsd)
   endif
   endif
 
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
@@ -544,11 +523,7 @@ ifeq ($(PLATFORM),freebsd)
 
   CLIENT_LDFLAGS =
 
-  ifeq ($(USE_SDL),1)
-    CLIENT_LDFLAGS += $(shell sdl-config --libs)
-  else
-    CLIENT_LDFLAGS += -L/usr/X11R6/$(LIB) -lGL -lX11 -lXext -lXxf86dga -lXxf86vm
-  endif
+  CLIENT_LDFLAGS += $(shell sdl-config --libs) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -580,11 +555,12 @@ ifeq ($(PLATFORM),netbsd)
   THREAD_LDFLAGS=-lpthread
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
   ifneq ($(ARCH),i386)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
+
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
   BUILD_CLIENT = 0
   BUILD_GAME_QVM = 0
@@ -637,13 +613,8 @@ ifeq ($(PLATFORM),sunos)
   endif
 
 
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -pipe
-
-  ifeq ($(USE_SDL),1)
-    BASE_CFLAGS += -DUSE_SDL_SOUND=1 $(shell sdl-config --cflags)
-  else
-    BASE_CFLAGS += -I/usr/openwin/include
-  endif
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -DUSE_ICON $(shell sdl-config --cflags)
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops
 
@@ -681,11 +652,7 @@ ifeq ($(PLATFORM),sunos)
 
   BOTCFLAGS=-O0
 
-  ifeq ($(USE_SDL),1)
-    CLIENT_LDFLAGS=$(shell sdl-config --libs) -L/usr/X11/lib -lGLU -lX11 -lXext
-  else
-    CLIENT_LDFLAGS=-L/usr/openwin/$(LIB) -L/usr/X11/lib -lGLU -lX11 -lXext
-  endif
+  CLIENT_LDFLAGS=$(shell sdl-config --libs) -lGL
 
 else # ifeq sunos
 
@@ -761,6 +728,14 @@ endif
 
 ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
+endif
+
+ifeq ($(V),1)
+echo_cmd=@:
+Q=
+else
+echo_cmd=@echo
+Q=@
 endif
 
 define DO_CC       
@@ -1049,6 +1024,12 @@ Q3OBJ = \
   $(B)/client/tr_sky.o \
   $(B)/client/tr_surface.o \
   $(B)/client/tr_world.o \
+  \
+  $(B)/client/sdl_gamma.o \
+  $(B)/client/sdl_input.o \
+  $(B)/client/sdl_snd.o \
+  \
+  $(B)/client/sys_main.o
 
 ifeq ($(ARCH),i386)
   Q3OBJ += \
@@ -1082,43 +1063,18 @@ endif
 
 ifeq ($(PLATFORM),mingw32)
   Q3OBJ += \
-    $(B)/client/win_gamma.o \
-    $(B)/client/win_glimp.o \
-    $(B)/client/win_input.o \
-    $(B)/client/win_main.o \
-    $(B)/client/win_qgl.o \
-    $(B)/client/win_shared.o \
-    $(B)/client/win_snd.o \
-    $(B)/client/win_syscon.o \
-    $(B)/client/win_wndproc.o \
-    $(B)/client/win_resource.o
+    $(B)/client/win_resource.o \
+    $(B)/client/sys_win32.o
 else
   Q3OBJ += \
-    $(B)/client/unix_main.o \
-    $(B)/client/unix_shared.o \
-    $(B)/client/linux_signals.o \
-    $(B)/client/linux_qgl.o \
-    $(B)/client/linux_snd.o \
-    $(B)/client/sdl_snd.o
-
-  ifeq ($(PLATFORM),linux)
-    Q3OBJ += $(B)/client/linux_joystick.o
-  endif
-
-  ifeq ($(USE_SDL),1)
-    ifneq ($(PLATFORM),darwin)
-      BUILD_CLIENT_SMP = 0
-    endif
-  endif
-
-  Q3POBJ = \
-    $(B)/client/linux_glimp.o \
-    $(B)/client/sdl_glimp.o
-
-  Q3POBJ_SMP = \
-    $(B)/clientsmp/linux_glimp.o \
-    $(B)/clientsmp/sdl_glimp.o
+    $(B)/client/sys_unix.o
 endif
+
+Q3POBJ += \
+  $(B)/client/sdl_glimp.o
+
+Q3POBJ_SMP += \
+  $(B)/clientsmp/sdl_glimp.o
 
 $(B)/ioquake3.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
@@ -1206,13 +1162,14 @@ Q3DOBJ = \
   $(B)/ded/l_script.o \
   $(B)/ded/l_struct.o \
   \
-  $(B)/ded/linux_signals.o \
-  $(B)/ded/unix_main.o \
-  $(B)/ded/unix_shared.o \
-  \
   $(B)/ded/null_client.o \
   $(B)/ded/null_input.o \
-  $(B)/ded/null_snddma.o
+  $(B)/ded/null_snddma.o \
+  \
+  $(B)/ded/tty_console.o \
+  $(B)/ded/sys_unix.o \
+  \
+  $(B)/ded/sys_main.o
 
 ifeq ($(ARCH),i386)
   Q3DOBJ += \
@@ -1529,7 +1486,7 @@ $(B)/missionpack/vm/ui.qvm: $(MPUIVMOBJ) $(UIDIR)/ui_syscalls.asm
 ## CLIENT/SERVER RULES
 #############################################################################
 
-$(B)/client/%.o: $(UDIR)/%.s
+$(B)/client/%.o: $(ASMDIR)/%.s
 	$(DO_AS)
 
 $(B)/client/%.o: $(CDIR)/%.c
@@ -1550,20 +1507,20 @@ $(B)/client/%.o: $(JPDIR)/%.c
 $(B)/client/%.o: $(RDIR)/%.c
 	$(DO_CC)
 
-$(B)/client/%.o: $(UDIR)/%.c
+$(B)/client/%.o: $(SDLDIR)/%.c
 	$(DO_CC)
 
-$(B)/clientsmp/%.o: $(UDIR)/%.c
+$(B)/clientsmp/%.o: $(SDLDIR)/%.c
 	$(DO_SMP_CC)
 
-$(B)/client/%.o: $(W32DIR)/%.c
+$(B)/client/%.o: $(SYSDIR)/%.c
 	$(DO_CC)
 
-$(B)/client/%.o: $(W32DIR)/%.rc
+$(B)/client/%.o: $(SYSDIR)/%.rc
 	$(DO_WINDRES)
 
 
-$(B)/ded/%.o: $(UDIR)/%.s
+$(B)/ded/%.o: $(ASMDIR)/%.s
 	$(DO_AS)
 
 $(B)/ded/%.o: $(SDIR)/%.c
@@ -1575,7 +1532,7 @@ $(B)/ded/%.o: $(CMDIR)/%.c
 $(B)/ded/%.o: $(BLIBDIR)/%.c
 	$(DO_BOT_CC)
 
-$(B)/ded/%.o: $(UDIR)/%.c
+$(B)/ded/%.o: $(SYSDIR)/%.c
 	$(DO_DED_CC)
 
 $(B)/ded/%.o: $(NDIR)/%.c

@@ -26,14 +26,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#define Q3_VERSION            "ioQ3 1.33"
-#ifndef SVN_VERSION
-  #define SVN_VERSION Q3_VERSION
+#define Q3_VERSION_BASE         "ioq3 1.35"
+#ifdef SVN_VERSION
+# define Q3_VERSION Q3_VERSION_BASE "_SVN" SVN_VERSION
+#else
+# define Q3_VERSION Q3_VERSION_BASE
 #endif
-#define CLIENT_WINDOW_TITLE   "ioquake3"
-#define CLIENT_WINDOW_ICON    "ioq3"
-#define CONSOLE_WINDOW_TITLE  "ioquake3 console"
-#define CONSOLE_WINDOW_ICON   "ioq3 console"
+
+#define CLIENT_WINDOW_TITLE     "ioquake3"
+#define CLIENT_WINDOW_MIN_TITLE "ioq3"
 // 1.32 released 7-10-2002
 
 #define BASEGAME              "baseq3"
@@ -260,14 +261,6 @@ typedef enum {
 void *Hunk_AllocDebug( int size, ha_pref preference, char *label, char *file, int line );
 #else
 void *Hunk_Alloc( int size, ha_pref preference );
-#endif
-
-#if defined(__GNUC__) && !defined(__MINGW32__) && !defined(MACOS_X)
-// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371
-// custom Snd_Memset implementation for glibc memset bug workaround
-void Snd_Memset (void* dest, const int val, const size_t count);
-#else
-#define Snd_Memset Com_Memset
 #endif
 
 #define Com_Memset memset
@@ -678,6 +671,7 @@ int		Q_stricmpn (const char *s1, const char *s2, int n);
 char	*Q_strlwr( char *s1 );
 char	*Q_strupr( char *s1 );
 char	*Q_strrchr( const char* string, int c );
+const char	*Q_stristr( const char *s, const char *find);
 
 // buffer size safe library replacements
 void	Q_strncpyz( char *dest, const char *src, int destsize );

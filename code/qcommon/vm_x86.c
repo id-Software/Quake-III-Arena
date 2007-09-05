@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <windows.h>
 #endif
 
-#ifdef __FreeBSD__ // rb0101023
+#ifdef __FreeBSD__
 #include <sys/types.h>
 #endif
 
@@ -77,13 +77,11 @@ static	int		asmCallPtr = (int)AsmCall;
 #else // _MSC_VER
 
 #if defined( FTOL_PTR )
-// bk001213 - BEWARE: does not work! UI menu etc. broken - stack!
-// bk001119 - added: int gftol( float x ) { return (int)x; }
 
-int qftol( void );     // bk001213 - label, see unix/ftol.nasm
-int qftol027F( void ); // bk001215 - fixed FPU control variants
+int qftol( void );
+int qftol027F( void );
 int qftol037F( void );
-int qftol0E7F( void ); // bk010102 - fixed bogus bits (duh)
+int qftol0E7F( void );
 int qftol0F7F( void );
 
 
@@ -95,7 +93,7 @@ static	int		asmCallPtr = (int)doAsmCall;
 #endif
 
 
-static	int		callMask = 0; // bk001213 - init
+static	int		callMask = 0;
 
 static	int	instruction, pass;
 static	int	lastConst = 0;
@@ -1020,7 +1018,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			EmitString( "D9 1F" );		// fstp dword ptr [edi]
 			break;
 		case OP_CVFI:
-#ifndef FTOL_PTR // WHENHELLISFROZENOVER  // bk001213 - was used in 1.17
+#ifndef FTOL_PTR // WHENHELLISFROZENOVER
 			// not IEEE complient, but simple and fast
 			EmitString( "D9 07" );		// fld dword ptr [edi]
 			EmitString( "DB 1F" );		// fistp dword ptr [edi]

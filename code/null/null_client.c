@@ -53,7 +53,7 @@ void CL_MapLoading( void ) {
 }
 
 qboolean CL_GameCommand( void ) {
-  return qfalse; // bk001204 - non-void
+  return qfalse;
 }
 
 void CL_KeyEvent (int key, qboolean down, unsigned time) {
@@ -81,11 +81,9 @@ void CL_CDDialog( void ) {
 void CL_FlushMemory( void ) {
 }
 
-void CL_StartHunkUsers( void ) {
+void CL_StartHunkUsers( qboolean rendererOnly ) {
 }
 
-// bk001119 - added new dummy for sv_init.c
 void CL_ShutdownAll(void) {}
 
-// bk001208 - added new dummy (RC4)
 qboolean CL_CDKeyValidate( const char *key, const char *checksum ) { return qtrue; }

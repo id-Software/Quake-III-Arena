@@ -1635,7 +1635,7 @@ typedef enum {
   SYSTEM_PRINT,
   CHAT_PRINT,
   TEAMCHAT_PRINT
-} q3print_t; // bk001201 - warning: useless keyword or type name in empty declaration
+} q3print_t;
 
 
 int trap_CIN_PlayCinematic( const char *arg0, int xpos, int ypos, int width, int height, int bits);

@@ -1026,28 +1026,22 @@ void NET_Shutdown( void ) {
 ====================
 NET_Sleep
 
-Sleeps msec or until net socket is ready
+Sleeps msec or until something happens on the network or stdin
 ====================
 */
 void NET_Sleep( int msec ) {
 	struct timeval timeout;
 	fd_set	fdset;
-#ifndef _WIN32 //FIXME
-	extern qboolean stdin_active;
-#endif
 	int highestfd = 0;
 
 	if (!com_dedicated->integer)
 		return; // we're not a server, just run full speed
 
 	FD_ZERO(&fdset);
-#ifndef _WIN32 //FIXME
-	if (stdin_active)
-	{
-		FD_SET(0, &fdset); // stdin is processed too
-		highestfd = 1;
-	}
-#endif
+
+	FD_SET(fileno(stdin), &fdset);
+	highestfd = fileno(stdin) + 1;
+
 	if(ip_socket)
 	{
 		FD_SET(ip_socket, &fdset); // network socket

@@ -330,8 +330,6 @@ static int propMapB[26][3] = {
 #define PROPB_SPACE_WIDTH	12
 #define PROPB_HEIGHT		36
 
-// bk001205 - code below duplicated in cgame/cg_drawtools.c
-// bk001205 - FIXME: does this belong in ui_shared.c?
 /*
 =================
 UI_DrawBannerString
@@ -340,7 +338,7 @@ UI_DrawBannerString
 static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 {
 	const char* s;
-	unsigned char	ch; // bk001204 - unsigned
+	unsigned char	ch;
 	float	ax;
 	float	ay;
 	float	aw;
@@ -450,10 +448,10 @@ int UI_ProportionalStringWidth( const char* str ) {
 static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t color, float sizeScale, qhandle_t charset )
 {
 	const char* s;
-	unsigned char	ch; // bk001204 - unsigned
+	unsigned char	ch;
 	float	ax;
 	float	ay;
-	float	aw = 0; // bk001204 - init
+	float	aw = 0;
 	float	ah;
 	float	frow;
 	float	fcol;
@@ -831,7 +829,6 @@ void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 		UI_InGameMenu();
 		return;
 		
-	// bk001204
 	case UIMENU_TEAM:
 	case UIMENU_POSTGAME:
 	default:

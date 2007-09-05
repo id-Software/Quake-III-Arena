@@ -677,6 +677,8 @@ Ket_SetCatcher
 ====================
 */
 void Key_SetCatcher( int catcher ) {
+	// prevent console from being closed
+	catcher |= cls.keyCatchers & KEYCATCH_CONSOLE;
 	cls.keyCatchers = catcher;
 }
 

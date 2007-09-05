@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 static portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
 static int snd_vol;
 
-// bk001119 - these not static, required by unix/snd_mixa.s
 int*     snd_p;  
 int      snd_linear_count;
 short*   snd_out;

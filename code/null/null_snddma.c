@@ -47,7 +47,6 @@ void SNDDMA_Submit(void)
 {
 }
 
-// bk001119 - added boolean flag, match client/snd_public.h
 sfxHandle_t S_RegisterSound( const char *name, qboolean compressed ) 
 {
 	return 0;

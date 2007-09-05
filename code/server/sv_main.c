@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 serverStatic_t	svs;				// persistant server info
 server_t		sv;					// local server
-vm_t			*gvm = NULL;				// game virtual machine // bk001212 init
+vm_t			*gvm = NULL;				// game virtual machine
 
 cvar_t	*sv_fps;				// time rate for running non-clients
 cvar_t	*sv_timeout;			// seconds without any message
@@ -334,15 +334,6 @@ void SVC_Status( netadr_t from ) {
 	// echo back the parameter to status. so master servers can use it as a challenge
 	// to prevent timed spoofed reply packets that add ghost servers
 	Info_SetValueForKey( infostring, "challenge", Cmd_Argv(1) );
-
-	// add "demo" to the sv_keywords if restricted
-	if ( Cvar_VariableValue( "fs_restrict" ) ) {
-		char	keywords[MAX_INFO_STRING];
-
-		Com_sprintf( keywords, sizeof( keywords ), "demo %s",
-			Info_ValueForKey( infostring, "sv_keywords" ) );
-		Info_SetValueForKey( infostring, "sv_keywords", keywords );
-	}
 
 	status[0] = 0;
 	statusLength = 0;
@@ -780,13 +771,12 @@ void SV_Frame( int msec ) {
 
 	if (!com_sv_running->integer)
 	{
-		if(com_dedicated->integer)
-		{
-			// Block indefinitely until something interesting happens
-			// on STDIN.
-			NET_Sleep(-1);
-		}
-		
+		// Running as a server, but no map loaded
+#ifdef DEDICATED
+		// Block until something interesting happens
+		NET_Sleep(-1);
+#endif
+
 		return;
 	}
 

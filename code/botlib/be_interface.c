@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*****************************************************************************
- * name:		be_interface.c // bk010221 - FIXME - DEAD code elimination
+ * name:		be_interface.c
  *
  * desc:		bot library interface
  *
@@ -140,7 +140,7 @@ int Export_BotLibSetup(void)
 	char		*homedir, *gamedir;
 	
 	bot_developer = LibVarGetValue("bot_developer");
-  memset( &botlibglobals, 0, sizeof(botlibglobals) ); // bk001207 - init
+ 	memset( &botlibglobals, 0, sizeof(botlibglobals) );
 	//initialize byte swapping (litte endian etc.)
 //	Swap_Init();
 	homedir = LibVarGetString("homedir");
@@ -860,9 +860,9 @@ GetBotLibAPI
 ============
 */
 botlib_export_t *GetBotLibAPI(int apiVersion, botlib_import_t *import) {
-	assert(import);   // bk001129 - this wasn't set for baseq3/
-  botimport = *import;
-  assert(botimport.Print);   // bk001129 - pars pro toto
+	assert(import);
+	botimport = *import;
+	assert(botimport.Print);
 
 	Com_Memset( &be_botlib_export, 0, sizeof( be_botlib_export ) );
 

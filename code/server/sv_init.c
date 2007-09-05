@@ -416,6 +416,11 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// clear the whole hunk because we're (re)loading the server
 	Hunk_Clear();
 
+#ifndef DEDICATED
+	// Restart renderer
+	CL_StartHunkUsers( qtrue );
+#endif
+
 	// clear collision map data
 	CM_ClearMap();
 

@@ -1752,7 +1752,7 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hSkin, refEntity_t *torso 
 }
 
 
-#ifdef MISSIONPACK // bk001204
+#ifdef MISSIONPACK
 /*
 ===============
 CG_PlayerTokens
@@ -2025,7 +2025,7 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane ) {
 	// fade the shadow out with height
 	alpha = 1.0 - trace.fraction;
 
-	// bk0101022 - hack / FPE - bogus planes?
+	// hack / FPE - bogus planes?
 	//assert( DotProduct( trace.plane.normal, trace.plane.normal ) != 0.0f ) 
 
 	// add the mark as a temporary, so it goes directly to the renderer

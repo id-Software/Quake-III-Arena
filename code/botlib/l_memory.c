@@ -100,7 +100,7 @@ void *GetMemory(unsigned long size)
 {
 	void *ptr;
 	memoryblock_t *block;
-  assert(botimport.GetMemory); // bk001129 - was NULL'ed
+	assert(botimport.GetMemory);
 	ptr = botimport.GetMemory(size + sizeof(memoryblock_t));
 	block = (memoryblock_t *) ptr;
 	block->id = MEM_ID;

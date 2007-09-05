@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define WEAPON_OFS(x) (size_t)&(((weaponinfo_t *)0)->x)
 #define PROJECTILE_OFS(x) (size_t)&(((projectileinfo_t *)0)->x)
 
-//weapon definition // bk001212 - static
+//weapon definition
 static fielddef_t weaponinfo_fields[] =
 {
 {"number", WEAPON_OFS(number), FT_INT},						//weapon number

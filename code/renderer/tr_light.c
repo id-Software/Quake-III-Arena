@@ -160,7 +160,7 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 	VectorClear( ent->directedLight );
 	VectorClear( direction );
 
-	assert( tr.world->lightGridData ); // bk010103 - NULL with -nolight maps
+	assert( tr.world->lightGridData ); // NULL with -nolight maps
 
 	// trilerp the light value
 	gridStep[0] = 8;
@@ -380,7 +380,6 @@ int R_LightForPoint( vec3_t point, vec3_t ambientLight, vec3_t directedLight, ve
 {
 	trRefEntity_t ent;
 	
-	// bk010103 - this segfaults with -nolight maps
 	if ( tr.world->lightGridData == NULL )
 	  return qfalse;
 

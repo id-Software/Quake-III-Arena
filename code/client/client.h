@@ -153,6 +153,7 @@ demo through a file.
 =============================================================================
 */
 
+#define MAX_TIMEDEMO_DURATIONS	4096
 
 typedef struct {
 
@@ -219,6 +220,10 @@ typedef struct {
 	int			timeDemoFrames;		// counter of rendered frames
 	int			timeDemoStart;		// cls.realtime before first frame
 	int			timeDemoBaseTime;	// each frame will be at this time + frameNum * 50
+	int			timeDemoLastFrame;// time the last frame was rendered
+	int			timeDemoMinDuration;	// minimum frame duration
+	int			timeDemoMaxDuration;	// maximum frame duration
+	unsigned char	timeDemoDurations[ MAX_TIMEDEMO_DURATIONS ];	// log of frame durations
 
 	// big stuff at end of structure so most offsets are 15 bits or less
 	netchan_t	netchan;
@@ -384,7 +389,7 @@ void CL_FlushMemory(void);
 void CL_ShutdownAll(void);
 void CL_AddReliableCommand( const char *cmd );
 
-void CL_StartHunkUsers( void );
+void CL_StartHunkUsers( qboolean rendererOnly );
 
 void CL_Disconnect_f (void);
 void CL_GetChallengePacket (void);

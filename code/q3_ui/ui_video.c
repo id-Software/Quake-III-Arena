@@ -238,13 +238,6 @@ GRAPHICS OPTIONS MENU
 #define GRAPHICSOPTIONS_ACCEPT0	"menu/art/accept_0"
 #define GRAPHICSOPTIONS_ACCEPT1	"menu/art/accept_1"
 
-static const char *s_drivers[] =
-{
-	OPENGL_DRIVER_NAME,
-	_3DFX_DRIVER_NAME,
-	NULL
-};
-
 #define ID_BACK2		101
 #define ID_FULLSCREEN	102
 #define ID_LIST			103
@@ -489,24 +482,9 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 	trap_Cvar_SetValue( "r_allowExtensions", s_graphicsoptions.allow_extensions.curvalue );
 	trap_Cvar_SetValue( "r_mode", s_graphicsoptions.mode.curvalue );
 	trap_Cvar_SetValue( "r_fullscreen", s_graphicsoptions.fs.curvalue );
-	trap_Cvar_Set( "r_glDriver", ( char * ) s_drivers[s_graphicsoptions.driver.curvalue] );
-	switch ( s_graphicsoptions.colordepth.curvalue )
-	{
-	case 0:
-		trap_Cvar_SetValue( "r_colorbits", 0 );
-		trap_Cvar_SetValue( "r_depthbits", 0 );
-		trap_Cvar_SetValue( "r_stencilbits", 0 );
-		break;
-	case 1:
-		trap_Cvar_SetValue( "r_colorbits", 16 );
-		trap_Cvar_SetValue( "r_depthbits", 16 );
-		trap_Cvar_SetValue( "r_stencilbits", 0 );
-		break;
-	case 2:
-		trap_Cvar_SetValue( "r_colorbits", 32 );
-		trap_Cvar_SetValue( "r_depthbits", 24 );
-		break;
-	}
+	trap_Cvar_SetValue( "r_colorbits", 0 );
+	trap_Cvar_SetValue( "r_depthbits", 0 );
+	trap_Cvar_SetValue( "r_stencilbits", 0 );
 	trap_Cvar_SetValue( "r_vertexLight", s_graphicsoptions.lighting.curvalue );
 
 	if ( s_graphicsoptions.geometry.curvalue == 2 )

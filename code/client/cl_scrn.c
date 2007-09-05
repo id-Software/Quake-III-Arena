@@ -448,14 +448,9 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 		}
 	}
 
-	if ( !uivm ) {
-		Com_DPrintf("draw screen without UI loaded\n");
-		return;
-	}
-
 	// if the menu is going to cover the entire screen, we
 	// don't need to render anything under it
-	if ( !VM_Call( uivm, UI_IS_FULLSCREEN )) {
+	if ( uivm && !VM_Call( uivm, UI_IS_FULLSCREEN )) {
 		switch( cls.state ) {
 		default:
 			Com_Error( ERR_FATAL, "SCR_DrawScreenField: bad cls.state" );

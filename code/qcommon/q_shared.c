@@ -734,7 +734,6 @@ Safe strncpy that ensures a trailing zero
 =============
 */
 void Q_strncpyz( char *dest, const char *src, int destsize ) {
-  // bk001129 - also NULL dest
   if ( !dest ) {
     Com_Error( ERR_FATAL, "Q_strncpyz: NULL dest" );
   }
@@ -752,7 +751,6 @@ void Q_strncpyz( char *dest, const char *src, int destsize ) {
 int Q_stricmpn (const char *s1, const char *s2, int n) {
 	int		c1, c2;
 
-	// bk001129 - moved in 1.17 fix not in id codebase
         if ( s1 == NULL ) {
            if ( s2 == NULL )
              return 0;
@@ -844,6 +842,38 @@ void Q_strcat( char *dest, int size, const char *src ) {
 		Com_Error( ERR_FATAL, "Q_strcat: already overflowed" );
 	}
 	Q_strncpyz( dest + l1, src, size - l1 );
+}
+
+/*
+* Find the first occurrence of find in s.
+*/
+const char *Q_stristr( const char *s, const char *find)
+{
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != 0)
+  {
+    if (c >= 'a' && c <= 'z')
+    {
+      c -= ('a' - 'A');
+    }
+    len = strlen(find);
+    do
+    {
+      do
+      {
+        if ((sc = *s++) == 0)
+          return NULL;
+        if (sc >= 'a' && sc <= 'z')
+        {
+          sc -= ('a' - 'A');
+        }
+      } while (sc != c);
+    } while (Q_stricmpn(s, find, len) != 0);
+    s--;
+  }
+  return s;
 }
 
 

@@ -1358,7 +1358,6 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 
 #if 0 
   // TTimo: this is the chunk of code to ensure a behavior that meets TGA specs 
-  // bk0101024 - fix from Leonardo
   // bit 5 set => top-down
   if (targa_header.attributes & 0x20) {
     unsigned char *flip = (unsigned char*)malloc (columns*4);
@@ -4850,15 +4849,13 @@ void R_DeleteTextures( void ) {
 	tr.numImages = 0;
 
 	Com_Memset( glState.currenttextures, 0, sizeof( glState.currenttextures ) );
-	if ( qglBindTexture ) {
-		if ( qglActiveTextureARB ) {
-			GL_SelectTexture( 1 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
-			GL_SelectTexture( 0 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
-		} else {
-			qglBindTexture( GL_TEXTURE_2D, 0 );
-		}
+	if ( qglActiveTextureARB ) {
+		GL_SelectTexture( 1 );
+		qglBindTexture( GL_TEXTURE_2D, 0 );
+		GL_SelectTexture( 0 );
+		qglBindTexture( GL_TEXTURE_2D, 0 );
+	} else {
+		qglBindTexture( GL_TEXTURE_2D, 0 );
 	}
 }
 

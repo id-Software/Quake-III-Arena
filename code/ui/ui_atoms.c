@@ -76,7 +76,7 @@ void UI_StartDemoLoop( void ) {
 }
 
 
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static void NeedCDAction( qboolean result ) {
 	if ( !result ) {
 		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
@@ -84,7 +84,7 @@ static void NeedCDAction( qboolean result ) {
 }
 #endif // MISSIONPACK
 
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static void NeedCDKeyAction( qboolean result ) {
 	if ( !result ) {
 		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );

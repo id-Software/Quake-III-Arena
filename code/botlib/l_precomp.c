@@ -669,7 +669,7 @@ void PC_AddBuiltinDefines(source_t *source)
 	{
 		char *string;
 		int builtin;
-	} builtin[] = { // bk001204 - brackets
+	} builtin[] = {
 		{ "__LINE__",	BUILTIN_LINE },
 		{ "__FILE__",	BUILTIN_FILE },
 		{ "__DATE__",	BUILTIN_DATE },

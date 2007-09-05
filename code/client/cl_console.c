@@ -71,9 +71,8 @@ Con_ToggleConsole_f
 ================
 */
 void Con_ToggleConsole_f (void) {
-	// closing a full screen console restarts the demo loop
+	// Can't toggle the console when it's the only thing available
 	if ( cls.state == CA_DISCONNECTED && cls.keyCatchers == KEYCATCH_CONSOLE ) {
-		CL_StartDemoLoop();
 		return;
 	}
 
@@ -619,13 +618,13 @@ void Con_DrawSolidConsole( float frac ) {
 
 	re.SetColor( g_color_table[ColorIndex(COLOR_RED)] );
 
-	i = strlen( SVN_VERSION );
+	i = strlen( Q3_VERSION );
 
 	for (x=0 ; x<i ; x++) {
 
 		SCR_DrawSmallChar( cls.glconfig.vidWidth - ( i - x ) * SMALLCHAR_WIDTH, 
 
-			(lines-(SMALLCHAR_HEIGHT+SMALLCHAR_HEIGHT/2)), SVN_VERSION[x] );
+			(lines-(SMALLCHAR_HEIGHT+SMALLCHAR_HEIGHT/2)), Q3_VERSION[x] );
 
 	}
 

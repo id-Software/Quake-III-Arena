@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // be a valid snapshot this frame
 
 #include "cg_local.h"
-#include "../../ui/menudef.h" // bk001205 - for Q3_ui as well
+#include "../../ui/menudef.h"
 
 typedef struct {
 	const char *order;
@@ -46,7 +46,7 @@ static const orderTask_t validOrders[] = {
 
 static const int numValidOrders = sizeof(validOrders) / sizeof(orderTask_t);
 
-#ifdef MISSIONPACK // bk001204
+#ifdef MISSIONPACK
 static int CG_ValidOrder(const char *p) {
 	int i;
 	for (i = 0; i < numValidOrders; i++) {

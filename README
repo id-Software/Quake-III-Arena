@@ -10,7 +10,7 @@
 The intent of this project is to provide a baseline Quake 3 which may be used
 for further development. Some of the major features currently implemented are:
 
-  * SDL backend for unix-like operating systems
+  * SDL backend
   * OpenAL sound API support (multiple speaker support and better sound
     quality)
   * Full x86_64 support on Linux
@@ -46,17 +46,7 @@ For *nix
 
 For Windows, using MinGW
   1. Download and install MinGW and MSys from http://www.mingw.org/.
-  2. Download http://www.libsdl.org/extras/win32/common/directx-devel.tar.gz
-     and untar it into your MinGW directory (usually C:\MinGW).
-  3. Open an MSys terminal, and follow the instructions for compiling on *nix.
-
-For Windows, using MSVC
-  1. Run Visual Studio and open the quake3.sln file in the code/win32/msvc
-     directory.
-  2. Build.
-  3. Copy the resultant Quake3.exe to your quake 3 directory, make a backup if
-     you want to keep your original. If you wish to use native libraries, copy
-     the resultant dlls to your baseq3 directory.
+  2. Open an MSys terminal, and follow the instructions for compiling on *nix.
 
 For Mac OS X, building a Universal Binary
   1. Install the MacOSX10.2.8.sdk and MacOSX10.4u.sdk which are included in
@@ -68,7 +58,7 @@ For Mac OS X, building a Universal Binary
 
 Installation, for *nix
   1. Set the COPYDIR variable in the shell to be where you installed Quake 3
-     to.  By default it will be /usr/local/games/quake3 if you haven't set it.
+     to. By default it will be /usr/local/games/quake3 if you haven't set it.
      This is the path as used by the original Linux Q3 installer and subsequent
      point releases.
   2. Run 'make copyfiles'.
@@ -83,11 +73,10 @@ compiling is simply a case of using './cross-make-mingw.sh' in place of 'make',
 though you may find you need to change the value of the variables in this
 script to match your environment.
 
-If the make based build system is being used (i.e. *nix or MinGW), the
-following variables may be set, either on the command line or in
+The following variables may be set, either on the command line or in
 Makefile.local:
 
-  OPTIMIZE          - use this for custom CFLAGS
+  CFLAGS            - use this for custom CFLAGS
   V                 - set to show cc command line when building
   DEFAULT_BASEDIR   - extra path to search for baseq3 and such
   BUILD_SERVER      - build the 'ioq3ded' server binary
@@ -95,7 +84,6 @@ Makefile.local:
   BUILD_CLIENT_SMP  - build the 'ioquake3-smp' client binary
   BUILD_GAME_SO     - build the game shared libraries
   BUILD_GAME_QVM    - build the game qvms
-  USE_SDL           - use the SDL backend where available
   USE_OPENAL        - use OpenAL where available
   USE_OPENAL_DLOPEN - link with OpenAL at runtime
   USE_CURL          - use libcurl for http/ftp download support
@@ -140,15 +128,12 @@ New cvars
   s_sdlDevSamps                     - SDL DMA buffer size override
   s_sdlMixSamps                     - SDL mix buffer size override
 
-  ttycon_ansicolor                  - enable use of ANSI escape codes in the tty
-  r_GLlibCoolDownMsec               - wait for some milliseconds to close GL
-                                      library
+  com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
   s_backend                         - read only, indicates the current sound
                                       backend
-  in_shiftedKeys                    - non-SDL Linux only; enables binding to
-                                      shifted keys
-  in_joystickNo                     - SDL only; select which joystick to use
+  s_muteWhenMinimized               - mute sound when minimized
+  in_joystickNo                     - select which joystick to use
   cl_consoleHistory                 - read only, stores the console history
   cl_platformSensitivity            - read only, indicates the mouse input
                                       scaling
@@ -292,8 +277,8 @@ Multiuser Support on Windows systems
   Note that this cvar MUST be set as a command line parameter.
 
 SDL Keyboard Differences
-  ioquake3 clients built againt SDL (e.g. Linux and Mac OS X) have different
-  keyboard behaviour than the original Quake3 clients.
+  ioquake3 clients have different keyboard behaviour compared to the original
+  Quake3 clients.
 
     * "Caps Lock" and "Num Lock" can not be used as normal binds since they
       do not send a KEYUP event until the key is pressed again.
@@ -345,7 +330,7 @@ all.
 
 The focus for ioquake3 to develop a stable base suitable for further
 development, and provide players with the same Quake 3 experience they've had
-for years.  As such ioq3 does not have any significant graphical enhancements
+for years. As such ioq3 does not have any significant graphical enhancements
 and none are planned at this time. However, improved graphics and sound
 patches will be accepted as long as they are entirely optional, do not
 require new media and are off by default.
@@ -372,8 +357,7 @@ but we have some general guidelines:
     providing pak0.pk3 and the patch pk3s are not refered to or included in the
     installer.
 
-  * Please include at least an SDL so/dylib on every platform but Windows
-    (which doesn't use it yet).
+  * Please include at least an SDL so/dylib on every platform.
 
   * Please include an OpenAL so/dylib/dll, since every platform should be using
     it by now.

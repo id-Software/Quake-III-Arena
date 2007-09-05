@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "../renderer/tr_types.h"
 //NOTE: include the ui_public.h from the new UI
-#include "../ui/ui_public.h" // bk001205 - yes, do have to use this
+#include "../ui/ui_public.h"
 //redefine to old API version
 #undef UI_API_VERSION
 #define UI_API_VERSION	4
@@ -678,7 +678,7 @@ int				trap_MemoryRemaining( void );
 void			trap_GetCDKey( char *buf, int buflen );
 void			trap_SetCDKey( char *buf );
 
-qboolean               trap_VerifyCDKey( const char *key, const char *chksum); // bk001208 - RC4
+qboolean               trap_VerifyCDKey( const char *key, const char *chksum);
 
 void			trap_SetPbClStatus( int status );
 

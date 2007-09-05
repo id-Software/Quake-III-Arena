@@ -79,7 +79,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		UI_DrawConnectScreen( arg0 );
 		return 0;
 	case UI_HASUNIQUECDKEY:				// mod authors need to observe this
-		return qtrue;  // bk010117 - change this to qfalse for mods!
+		return qtrue;  // change this to qfalse for mods!
 	}
 
 	return -1;
@@ -156,7 +156,6 @@ vmCvar_t	ui_server16;
 
 vmCvar_t	ui_cdkeychecked;
 
-// bk001129 - made static to avoid aliasing.
 static cvarTable_t		cvarTable[] = {
 	{ &ui_ffa_fraglimit, "ui_ffa_fraglimit", "20", CVAR_ARCHIVE },
 	{ &ui_ffa_timelimit, "ui_ffa_timelimit", "0", CVAR_ARCHIVE },
@@ -216,7 +215,6 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_cdkeychecked, "ui_cdkeychecked", "0", CVAR_ROM }
 };
 
-// bk001129 - made static to avoid aliasing
 static int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
 
 

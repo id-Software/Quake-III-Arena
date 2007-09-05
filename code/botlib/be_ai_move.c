@@ -51,8 +51,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define DEBUG_ELEVATOR
 //#define DEBUG_GRAPPLE
 
-// bk001204 - redundant bot_avoidspot_t, see be_ai_move.h
-
 //movement state
 //NOTE: the moveflags MFL_ONGROUND, MFL_TELEPORTED, MFL_WATERJUMP and
 //		MFL_GRAPPLEPULL must be set outside the movement code

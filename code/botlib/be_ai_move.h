@@ -102,8 +102,6 @@ typedef struct bot_moveresult_s
 
 #define bot_moveresult_t_cleared(x) bot_moveresult_t (x) = {0, 0, 0, 0, 0, 0, 0, {0, 0, 0}, {0, 0, 0}}
 
-// bk001204: from code/botlib/be_ai_move.c
-// TTimo 04/12/2001 was moved here to avoid dup defines
 typedef struct bot_avoidspot_s
 {
 	vec3_t origin;

@@ -223,7 +223,7 @@ typedef struct
 
 static controls_t s_controls;
 
-static vec4_t controls_binding_color  = {1.00f, 0.43f, 0.00f, 1.00f}; // bk: Win32 C4305
+static vec4_t controls_binding_color  = {1.00f, 0.43f, 0.00f, 1.00f};
 
 static bind_t g_bindings[] = 
 {
@@ -561,7 +561,6 @@ static void Controls_Update( void ) {
 	// disable all controls in all groups
 	for( i = 0; i < C_MAX; i++ ) {
 		controls = g_controls[i];
-		// bk001204 - parentheses
 		for( j = 0;  (control = controls[j]) ; j++ ) {
 			control->flags |= (QMF_HIDDEN|QMF_INACTIVE);
 		}
@@ -570,14 +569,12 @@ static void Controls_Update( void ) {
 	controls = g_controls[s_controls.section];
 
 	// enable controls in active group (and count number of items for vertical centering)
-	// bk001204 - parentheses
 	for( j = 0;  (control = controls[j]) ; j++ ) {
 		control->flags &= ~(QMF_GRAYED|QMF_HIDDEN|QMF_INACTIVE);
 	}
 
 	// position controls
 	y = ( SCREEN_HEIGHT - j * SMALLCHAR_HEIGHT ) / 2;
-	// bk001204 - parentheses
 	for( j = 0;	(control = controls[j]) ; j++, y += SMALLCHAR_HEIGHT ) {
 		control->x      = 320;
 		control->y      = y;

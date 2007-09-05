@@ -168,7 +168,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //=============================================================== FreeBSD ===
 
-#ifdef __FreeBSD__ // rb010123
+#ifdef __FreeBSD__
 
 #include <machine/endian.h>
 

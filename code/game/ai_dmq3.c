@@ -3751,7 +3751,6 @@ void BotMapScripts(bot_state_t *bs) {
 BotSetMovedir
 ==================
 */
-// bk001205 - made these static
 static vec3_t VEC_UP		= {0, -1,  0};
 static vec3_t MOVEDIR_UP	= {0,  0,  1};
 static vec3_t VEC_DOWN		= {0, -2,  0};

@@ -159,7 +159,6 @@ alloc_funny_pointers (j_decompress_ptr cinfo)
  * This is done only once, not once per pass.
  */
 {
-  // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
   int ci, rgroup;
   int M = cinfo->min_DCT_scaled_size;
@@ -201,7 +200,6 @@ make_funny_pointers (j_decompress_ptr cinfo)
  * This will be repeated at the beginning of each pass.
  */
 {
- // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
   int ci, i, rgroup;
   int M = cinfo->min_DCT_scaled_size;
@@ -242,7 +240,6 @@ set_wraparound_pointers (j_decompress_ptr cinfo)
  * This changes the pointer list state from top-of-image to the normal state.
  */
 {
- // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
   int ci, i, rgroup;
   int M = cinfo->min_DCT_scaled_size;
@@ -272,7 +269,6 @@ set_bottom_pointers (j_decompress_ptr cinfo)
  * Also sets rowgroups_avail to indicate number of nondummy row groups in row.
  */
 {
- // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
   int ci, i, rgroup, iMCUheight, rows_left;
   jpeg_component_info *compptr;
@@ -310,7 +306,6 @@ set_bottom_pointers (j_decompress_ptr cinfo)
 METHODDEF void
 start_pass_main (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
 {
-  // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
 
   switch (pass_mode) {
@@ -351,7 +346,6 @@ process_data_simple_main (j_decompress_ptr cinfo,
 			  JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
 			  JDIMENSION out_rows_avail)
 {
-  // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
   JDIMENSION rowgroups_avail;
 
@@ -392,7 +386,6 @@ process_data_context_main (j_decompress_ptr cinfo,
 			   JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
 			   JDIMENSION out_rows_avail)
 {
-  // bk001204 - no use main
   my_main_ptr jmain = (my_main_ptr) cinfo->main;
 
   /* Read input data if we haven't filled the main buffer yet */
@@ -482,7 +475,6 @@ process_data_crank_post (j_decompress_ptr cinfo,
 GLOBAL void
 jinit_d_main_controller (j_decompress_ptr cinfo, boolean need_full_buffer)
 {
-  // bk001204 - no use main
   my_main_ptr jmain;
   int ci, rgroup, ngroups;
   jpeg_component_info *compptr;
