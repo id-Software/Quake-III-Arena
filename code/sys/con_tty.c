@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 tty console routines
 
 NOTE: if the user is editing a line when something gets printed to the early
-console then it won't look good so we provide TTY_Hide and TTY_Show to be
+console then it won't look good so we provide CON_Hide and CON_Show to be
 called before and after a stdout or stderr output
 =============================================================
 */
@@ -52,19 +52,19 @@ static field_t TTY_con;
 
 // This is somewhat of aduplicate of the graphical console history
 // but it's safer more modular to have our own here
-#define TTY_HISTORY 32
-static field_t ttyEditLines[ TTY_HISTORY ];
+#define CON_HISTORY 32
+static field_t ttyEditLines[ CON_HISTORY ];
 static int hist_current = -1, hist_count = 0;
 
 /*
 ==================
-TTY_FlushIn
+CON_FlushIn
 
 Flush stdin, I suspect some terminals are sending a LOT of shit
 FIXME relevant?
 ==================
 */
-static void TTY_FlushIn( void )
+static void CON_FlushIn( void )
 {
 	char key;
 	while (read(0, &key, 1)!=-1);
@@ -72,7 +72,7 @@ static void TTY_FlushIn( void )
 
 /*
 ==================
-TTY_Back
+CON_Back
 
 Output a backspace
 
@@ -81,7 +81,7 @@ send "\b \b"
 (FIXME there may be a way to find out if '\b' alone would work though)
 ==================
 */
-static void TTY_Back( void )
+static void CON_Back( void )
 {
 	char key;
 	key = '\b';
@@ -94,13 +94,13 @@ static void TTY_Back( void )
 
 /*
 ==================
-TTY_Hide
+CON_Hide
 
 Clear the display of the line currently edited
 bring cursor back to beginning of line
 ==================
 */
-void TTY_Hide( void )
+void CON_Hide( void )
 {
 	if( ttycon_on )
 	{
@@ -114,23 +114,23 @@ void TTY_Hide( void )
 		{
 			for (i=0; i<TTY_con.cursor; i++)
 			{
-				TTY_Back();
+				CON_Back();
 			}
 		}
-		TTY_Back(); // Delete "]"
+		CON_Back(); // Delete "]"
 		ttycon_hide++;
 	}
 }
 
 /*
 ==================
-TTY_Show
+CON_Show
 
 Show the current line
 FIXME need to position the cursor if needed?
 ==================
 */
-void TTY_Show( void )
+void CON_Show( void )
 {
 	if( ttycon_on )
 	{
@@ -154,21 +154,21 @@ void TTY_Show( void )
 
 /*
 ==================
-TTY_Shutdown
+CON_Shutdown
 
 Never exit without calling this, or your terminal will be left in a pretty bad state
 ==================
 */
-void TTY_Shutdown( void )
+void CON_Shutdown( void )
 {
 	if (ttycon_on)
 	{
-		TTY_Back(); // Delete "]"
+		CON_Back(); // Delete "]"
 		tcsetattr (0, TCSADRAIN, &TTY_tc);
-
-		// Restore blocking to stdin reads
-		fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NDELAY );
 	}
+
+  // Restore blocking to stdin reads
+  fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NDELAY );
 }
 
 /*
@@ -179,17 +179,17 @@ Hist_Add
 void Hist_Add(field_t *field)
 {
 	int i;
-	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count <= CON_HISTORY);
 	assert(hist_count >= 0);
 	assert(hist_current >= -1);
 	assert(hist_current <= hist_count);
 	// make some room
-	for (i=TTY_HISTORY-1; i>0; i--)
+	for (i=CON_HISTORY-1; i>0; i--)
 	{
 		ttyEditLines[i] = ttyEditLines[i-1];
 	}
 	ttyEditLines[0] = *field;
-	if (hist_count<TTY_HISTORY)
+	if (hist_count<CON_HISTORY)
 	{
 		hist_count++;
 	}
@@ -204,7 +204,7 @@ Hist_Prev
 field_t *Hist_Prev( void )
 {
 	int hist_prev;
-	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count <= CON_HISTORY);
 	assert(hist_count >= 0);
 	assert(hist_current >= -1);
 	assert(hist_current <= hist_count);
@@ -224,7 +224,7 @@ Hist_Next
 */
 field_t *Hist_Next( void )
 {
-	assert(hist_count <= TTY_HISTORY);
+	assert(hist_count <= CON_HISTORY);
 	assert(hist_count >= 0);
 	assert(hist_current >= -1);
 	assert(hist_current <= hist_count);
@@ -241,12 +241,12 @@ field_t *Hist_Next( void )
 
 /*
 ==================
-TTY_Init
+CON_Init
 
 Initialize the console input (tty mode if possible)
 ==================
 */
-void TTY_Init( void )
+void CON_Init( void )
 {
 	struct termios tc;
 
@@ -295,10 +295,10 @@ void TTY_Init( void )
 
 /*
 ==================
-TTY_ConsoleInput
+CON_ConsoleInput
 ==================
 */
-char *TTY_ConsoleInput( void )
+char *CON_ConsoleInput( void )
 {
 	// we use this when sending back commands
 	static char text[256];
@@ -320,7 +320,7 @@ char *TTY_ConsoleInput( void )
 				{
 					TTY_con.cursor--;
 					TTY_con.buffer[TTY_con.cursor] = '\0';
-					TTY_Back();
+					CON_Back();
 				}
 				return NULL;
 			}
@@ -340,9 +340,9 @@ char *TTY_ConsoleInput( void )
 				}
 				if (key == '\t')
 				{
-					TTY_Hide();
+					CON_Hide();
 					Field_AutoComplete( &TTY_con );
-					TTY_Show();
+					CON_Show();
 					return NULL;
 				}
 				avail = read(0, &key, 1);
@@ -360,16 +360,16 @@ char *TTY_ConsoleInput( void )
 									history = Hist_Prev();
 									if (history)
 									{
-										TTY_Hide();
+										CON_Hide();
 										TTY_con = *history;
-										TTY_Show();
+										CON_Show();
 									}
-									TTY_FlushIn();
+									CON_FlushIn();
 									return NULL;
 									break;
 								case 'B':
 									history = Hist_Next();
-									TTY_Hide();
+									CON_Hide();
 									if (history)
 									{
 										TTY_con = *history;
@@ -377,8 +377,8 @@ char *TTY_ConsoleInput( void )
 									{
 										Field_Clear(&TTY_con);
 									}
-									TTY_Show();
-									TTY_FlushIn();
+									CON_Show();
+									CON_FlushIn();
 									return NULL;
 									break;
 								case 'C':
@@ -390,7 +390,7 @@ char *TTY_ConsoleInput( void )
 					}
 				}
 				Com_DPrintf("droping ISCTL sequence: %d, TTY_erase: %d\n", key, TTY_erase);
-				TTY_FlushIn();
+				CON_FlushIn();
 				return NULL;
 			}
 			// push regular character

@@ -429,8 +429,8 @@ endif
 
   BINEXT=.exe
 
-  LDFLAGS= -mwindows -lwsock32 -lgdi32 -lwinmm -lole32 -lopengl32
-  CLIENT_LDFLAGS=
+  LDFLAGS= -mwindows -lwsock32 -lwinmm
+  CLIENT_LDFLAGS = -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
@@ -456,7 +456,6 @@ endif
                     $(LIBSDIR)/win32/libSDLmain.a \
                     $(LIBSDIR)/win32/libSDL.dll.a
 
-  BUILD_SERVER = 0
   BUILD_CLIENT_SMP = 0
 
 else # ifeq mingw32
@@ -1181,9 +1180,6 @@ Q3DOBJ = \
   $(B)/ded/null_input.o \
   $(B)/ded/null_snddma.o \
   \
-  $(B)/ded/tty_console.o \
-  $(B)/ded/sys_unix.o \
-  \
   $(B)/ded/sys_main.o
 
 ifeq ($(ARCH),i386)
@@ -1212,6 +1208,17 @@ ifeq ($(HAVE_VM_COMPILED),true)
   ifeq ($(ARCH),ppc)
     Q3DOBJ += $(B)/ded/vm_ppc.o
   endif
+endif
+
+ifeq ($(PLATFORM),mingw32)
+  Q3DOBJ += \
+    $(B)/ded/win_resource.o \
+    $(B)/ded/sys_win32.o \
+    $(B)/ded/con_win32.o
+else
+  Q3DOBJ += \
+    $(B)/ded/sys_unix.o \
+    $(B)/ded/con_tty.o
 endif
 
 $(B)/ioq3ded.$(ARCH)$(BINEXT): $(Q3DOBJ)
@@ -1549,6 +1556,9 @@ $(B)/ded/%.o: $(BLIBDIR)/%.c
 
 $(B)/ded/%.o: $(SYSDIR)/%.c
 	$(DO_DED_CC)
+
+$(B)/ded/%.o: $(SYSDIR)/%.rc
+	$(DO_WINDRES)
 
 $(B)/ded/%.o: $(NDIR)/%.c
 	$(DO_DED_CC)

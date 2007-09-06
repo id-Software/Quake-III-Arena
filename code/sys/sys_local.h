@@ -28,12 +28,12 @@ void IN_Init (void);
 void IN_Frame (void);
 void IN_Shutdown (void);
 
-// TTY console
-void TTY_Hide( void );
-void TTY_Show( void );
-void TTY_Shutdown( void );
-void TTY_Init( void );
-char *TTY_ConsoleInput(void);
+// Console
+void CON_Hide( void );
+void CON_Show( void );
+void CON_Shutdown( void );
+void CON_Init( void );
+char *CON_ConsoleInput(void);
 
 #ifdef MACOS_X
 char *Sys_StripAppBundle( char *pwd );
