@@ -874,12 +874,13 @@ BASE_CFLAGS += -DMINSDL_MAJOR=$(MINSDL_MAJOR) \
                -DMINSDL_PATCH=$(MINSDL_PATCH)
 
 libversioncheck:
-	@echo "#include \"SDL_version.h\"\n" \
+	@/bin/echo -e "#include \"SDL_version.h\"\n" \
 		"#if SDL_VERSION_ATLEAST(" \
 		"$(MINSDL_MAJOR),$(MINSDL_MINOR),$(MINSDL_PATCH)" \
 		")\nMINSDL_PASSED\n#endif" | \
 		$(CC) $(BASE_CFLAGS) -E - | grep -q MINSDL_PASSED || \
-		( echo "SDL version $(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
+		( /bin/echo "SDL version" \
+		"$(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
 		"or greater required" && exit 1 )
 
 
@@ -1711,5 +1712,5 @@ ifneq ($(strip $(D_FILES)),)
 endif
 
 .PHONY: all clean clean2 clean-debug clean-release copyfiles \
-	debug default dist distclean installer makedirs release \
-	targets tools toolsclean
+	debug default dist distclean installer libversioncheck makedirs \
+	release targets tools toolsclean
