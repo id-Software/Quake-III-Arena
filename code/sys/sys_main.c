@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef DEDICATED
 #include "SDL.h"
+#include "SDL_cpuinfo.h"
 #endif
 
 #include "sys_local.h"
@@ -603,6 +604,24 @@ int main( int argc, char **argv )
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
+
+#ifndef DEDICATED
+  const SDL_version *ver = SDL_Linked_Version( );
+
+#define STRING(s) #s
+#define XSTRING(s) STRING(s)
+#define MINSDL_VERSION \
+  XSTRING(MINSDL_MAJOR) "." \
+  XSTRING(MINSDL_MINOR) "." \
+  XSTRING(MINSDL_PATCH)
+
+  if( SDL_VERSIONNUM( ver->major, ver->minor, ver->patch ) <
+      SDL_VERSIONNUM( MINSDL_MAJOR, MINSDL_MINOR, MINSDL_PATCH ) )
+  {
+    Sys_Print( "SDL version " MINSDL_VERSION " or greater required\n" );
+    Sys_Exit( 1 );
+  }
+#endif
 
 	Sys_ParseArgs( argc, argv );
 	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );

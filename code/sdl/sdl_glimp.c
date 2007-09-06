@@ -22,6 +22,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SDL.h"
 
+#if !SDL_VERSION_ATLEAST(1, 2, 10)
+#define SDL_GL_ACCELERATED_VISUAL 15
+#define SDL_GL_SWAP_CONTROL 16
+#elif MINSDL_PATCH >= 10
+#error Code block no longer necessary, please remove
+#endif
+
 #ifdef SMP
 #include "SDL_thread.h"
 #endif

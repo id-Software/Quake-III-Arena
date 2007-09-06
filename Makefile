@@ -1,12 +1,5 @@
 #
-# Quake3 Unix Makefile
-#
-# Nov '98 by Zoid <zoid@idsoftware.com>
-#
-# Loki Hacking by Bernd Kreimeier
-#  and a little more by Ryan C. Gordon.
-#  and a little more by Rafael Barrero
-#  and a little more by the ioq3 cr3w
+# ioq3 Makefile
 #
 # GNU Make required
 #
@@ -144,8 +137,8 @@ SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 
 # extract version info
-VERSION=$(shell grep "\#define Q3_VERSION" $(CMDIR)/q_shared.h | \
-  sed -e 's/.*".* \([^ ]*\)"/\1/')
+VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | \
+  sed -e 's/[^"]*"\(.*\)"/\1/')
 
 USE_SVN=
 ifeq ($(wildcard .svn),.svn)
@@ -738,7 +731,7 @@ echo_cmd=@echo
 Q=@
 endif
 
-define DO_CC       
+define DO_CC
 $(echo_cmd) "CC $<"
 $(Q)$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 endef
@@ -800,7 +793,7 @@ release:
 
 # Create the build directories and tools, print out
 # an informational message, then start building
-targets: makedirs tools
+targets: makedirs tools libversioncheck
 	@echo ""
 	@echo "Building ioquake3 in $(B):"
 	@echo "  PLATFORM: $(PLATFORM)"
@@ -867,6 +860,28 @@ define DO_Q3LCC_MISSIONPACK
 $(echo_cmd) "Q3LCC_MISSIONPACK $<"
 $(Q)$(Q3LCC) -DMISSIONPACK -o $@ $<
 endef
+
+
+#############################################################################
+# LIBRARY VERSION CHECKS
+#############################################################################
+
+MINSDL_MAJOR  = 1
+MINSDL_MINOR  = 2
+MINSDL_PATCH  = 7
+
+BASE_CFLAGS += -DMINSDL_MAJOR=$(MINSDL_MAJOR) \
+               -DMINSDL_MINOR=$(MINSDL_MINOR) \
+               -DMINSDL_PATCH=$(MINSDL_PATCH)
+
+libversioncheck:
+	@echo "#include \"SDL_version.h\"\n" \
+		"#if SDL_VERSION_ATLEAST(" \
+		"$(MINSDL_MAJOR),$(MINSDL_MINOR),$(MINSDL_PATCH)" \
+		")\nMINSDL_PASSED\n#endif" | \
+		$(CC) $(BASE_CFLAGS) -E - | grep -q MINSDL_PASSED || \
+		( echo "SDL version $(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
+		"or greater required" && exit 1 )
 
 
 #############################################################################
