@@ -151,7 +151,7 @@ USE_SVN=
 ifeq ($(wildcard .svn),.svn)
   SVN_REV=$(shell LANG=C svnversion .)
   ifneq ($(SVN_REV),)
-    SVN_VERSION=$(SVN_REV)
+    SVN_VERSION=$(VERSION)_SVN$(SVN_REV)
     USE_SVN=1
   endif
 endif
