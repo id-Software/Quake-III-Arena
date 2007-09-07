@@ -429,8 +429,8 @@ endif
 
   BINEXT=.exe
 
-  LDFLAGS= -mwindows -lwsock32 -lwinmm
-  CLIENT_LDFLAGS = -lgdi32 -lole32 -lopengl32
+  LDFLAGS= -lwsock32 -lwinmm
+  CLIENT_LDFLAGS = -mwindows -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
