@@ -24,8 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 #include "windows.h"
 
-#define QCONSOLE_WIDTH 80
-#define QCONSOLE_HEIGHT 30
 
 #define QCONSOLE_THEME FOREGROUND_RED | \
                        BACKGROUND_RED | \
@@ -34,7 +32,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define QCONSOLE_INPUT_RECORDS 1024
 
+// used to track key input
 static int qconsole_chars = 0;
+
+// used to restore original color theme 
+static int qconsole_orig_attrib;
 
 /*
 ==================
@@ -61,6 +63,15 @@ CON_Shutdown
 */
 void CON_Shutdown( void )
 {
+  HANDLE hout;
+  COORD screen = { 0, 0 };
+  DWORD written;
+
+  hout = GetStdHandle( STD_OUTPUT_HANDLE );
+
+  SetConsoleTextAttribute( hout, qconsole_orig_attrib );
+  FillConsoleOutputAttribute( hout, qconsole_orig_attrib, 63999,
+                              screen, &written ); 
 }
 
 /*
@@ -70,18 +81,21 @@ CON_Init
 */
 void CON_Init( void )
 {
-  SMALL_RECT win = { 0, 0, QCONSOLE_WIDTH-1, QCONSOLE_HEIGHT-1 };
   HANDLE hout;
   COORD screen = { 0, 0 };
-  DWORD written;
+  DWORD written, read;
   CONSOLE_SCREEN_BUFFER_INFO binfo;
   SMALL_RECT rect;
-
-  SetConsoleTitle("ioquake3 Dedicated Server Console");
+  WORD oldattrib;
 
   hout = GetStdHandle( STD_OUTPUT_HANDLE );
 
-  SetConsoleWindowInfo( hout, TRUE, &win );
+  // remember original color theme
+  ReadConsoleOutputAttribute( hout, &oldattrib, 1, screen, &read );
+  qconsole_orig_attrib = oldattrib;
+  
+  SetConsoleTitle("ioquake3 Dedicated Server Console");
+
   SetConsoleTextAttribute( hout, QCONSOLE_THEME );
   FillConsoleOutputAttribute( hout, QCONSOLE_THEME, 63999, screen, &written ); 
   
@@ -111,7 +125,7 @@ char *CON_ConsoleInput( void )
   static char input[ 1024 ] = { "" };
   int inputlen;
   int newlinepos = -1;
-  CHAR_INFO line[ QCONSOLE_WIDTH ];
+  CHAR_INFO line[ QCONSOLE_INPUT_RECORDS ];
   int linelen = 0;
 
   inputlen = 0;
@@ -136,8 +150,7 @@ char *CON_ConsoleInput( void )
 
   for( i = 0; i < count; i++ )
   {
-    if( buff[ i ].EventType == KEY_EVENT &&
-        buff[ i ].Event.KeyEvent.bKeyDown )
+    if( buff[ i ].EventType == KEY_EVENT && buff[ i ].Event.KeyEvent.bKeyDown ) 
     {
       if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_RETURN )
       {
@@ -145,7 +158,7 @@ char *CON_ConsoleInput( void )
         break;
       }
 
-      if( linelen < QCONSOLE_WIDTH &&
+      if( linelen < QCONSOLE_INPUT_RECORDS &&
           buff[ i ].Event.KeyEvent.uChar.AsciiChar )
       {
         if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_BACK )
@@ -168,7 +181,7 @@ char *CON_ConsoleInput( void )
   if( linelen != qconsole_chars )
   {
     CONSOLE_SCREEN_BUFFER_INFO binfo;
-    COORD writeSize = { QCONSOLE_WIDTH, 1 };
+    COORD writeSize = { QCONSOLE_INPUT_RECORDS, 1 };
     COORD writePos = { 0, 0 };
     SMALL_RECT writeArea = { 0, 0, 0, 0 };
     int i;
@@ -198,16 +211,24 @@ char *CON_ConsoleInput( void )
     writeArea.Left = 0;
     writeArea.Top = binfo.srWindow.Bottom; 
     writeArea.Bottom = binfo.srWindow.Bottom; 
-    writeArea.Right = QCONSOLE_WIDTH;
+    writeArea.Right = QCONSOLE_INPUT_RECORDS;
 
     // pad line with ' ' to handle VK_BACK
-    for( i = linelen; i < QCONSOLE_WIDTH; i++ )
+    for( i = linelen; i < QCONSOLE_INPUT_RECORDS; i++ )
     {
       line[ i ].Char.AsciiChar = ' '; 
       line[ i ].Attributes =  QCONSOLE_THEME;
     }
 
-    WriteConsoleOutput( hout, line, writeSize, writePos, &writeArea );
+    if( linelen > binfo.srWindow.Right )
+    {
+      WriteConsoleOutput( hout, line + (linelen - binfo.srWindow.Right ),
+                          writeSize, writePos, &writeArea );
+    }
+    else
+    {
+      WriteConsoleOutput( hout, line, writeSize, writePos, &writeArea );
+    }
 
     if( binfo.dwCursorPosition.X != linelen )
     {
@@ -241,8 +262,7 @@ char *CON_ConsoleInput( void )
 
   for( i = 0; i < count; i++ )
   {
-    if( buff[ i ].EventType == KEY_EVENT &&
-        buff[ i ].Event.KeyEvent.bKeyDown )
+    if( buff[ i ].EventType == KEY_EVENT && buff[ i ].Event.KeyEvent.bKeyDown ) 
     {
       if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_BACK )
       {
