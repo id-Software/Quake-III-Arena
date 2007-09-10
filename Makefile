@@ -599,7 +599,6 @@ ifeq ($(PLATFORM),sunos)
   MKDIR=gmkdir
   GREP=/usr/xpg4/bin/grep
   COPYDIR="/usr/local/share/games/quake3"
-  SDL_DIR=/usr/local
 
   ifneq (,$(findstring i86pc,$(shell uname -m)))
     ARCH=i386
@@ -884,6 +883,7 @@ BASE_CFLAGS += -DMINSDL_MAJOR=$(MINSDL_MAJOR) \
                -DMINSDL_PATCH=$(MINSDL_PATCH)
 
 libversioncheck:
+ifneq ($(COMPILE_PLATFORM),sunos)
 	@/bin/echo -e "#include \"SDL_version.h\"\n" \
 		"#if SDL_VERSION_ATLEAST(" \
 		"$(MINSDL_MAJOR),$(MINSDL_MINOR),$(MINSDL_PATCH)" \
@@ -892,7 +892,7 @@ libversioncheck:
 		( /bin/echo "SDL version" \
 		"$(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
 		"or greater required" && exit 1 )
-
+endif
 
 #############################################################################
 # CLIENT/SERVER
