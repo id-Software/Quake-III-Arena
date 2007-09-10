@@ -70,10 +70,6 @@ static SDL_Surface *screen = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
 
-PFNGLMULTITEXCOORD2FARBPROC qglMultiTexCoord2fARB;
-PFNGLACTIVETEXTUREARBPROC qglActiveTextureARB;
-PFNGLCLIENTACTIVETEXTUREARBPROC qglClientActiveTextureARB;
-
 PFNGLLOCKARRAYSEXTPROC qglLockArraysEXT;
 PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
 
@@ -380,46 +376,6 @@ static void GLimp_InitExtensions( void )
 		ri.Printf( PRINT_ALL, "...GL_EXT_texture_env_add not found\n" );
 	}
 
-	// GL_ARB_multitexture
-	qglMultiTexCoord2fARB = NULL;
-	qglActiveTextureARB = NULL;
-	qglClientActiveTextureARB = NULL;
-	if ( Q_stristr( glConfig.extensions_string, "GL_ARB_multitexture" ) )
-	{
-		if ( r_ext_multitexture->value )
-		{
-			qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
-			qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
-
-			if ( qglActiveTextureARB )
-			{
-				GLint glint = 0;
-				qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glint );
-				glConfig.maxActiveTextures = (int) glint;
-				if ( glConfig.maxActiveTextures > 1 )
-				{
-					ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture\n" );
-				}
-				else
-				{
-					qglMultiTexCoord2fARB = NULL;
-					qglActiveTextureARB = NULL;
-					qglClientActiveTextureARB = NULL;
-					ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
-				}
-			}
-		}
-		else
-		{
-			ri.Printf( PRINT_ALL, "...ignoring GL_ARB_multitexture\n" );
-		}
-	}
-	else
-	{
-		ri.Printf( PRINT_ALL, "...GL_ARB_multitexture not found\n" );
-	}
-
 	// GL_EXT_compiled_vertex_array
 	if ( Q_stristr( glConfig.extensions_string, "GL_EXT_compiled_vertex_array" ) )
 	{
@@ -490,7 +446,7 @@ void GLimp_Init( void )
 	{
 		if( r_mode->integer != R_MODE_FALLBACK )
 		{
-			ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d",
+			ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
 					r_mode->integer, R_MODE_FALLBACK );
 			if( !GLimp_StartDriverAndSetMode( R_MODE_FALLBACK, r_fullscreen->integer ) )
 				success = qfalse;
@@ -514,6 +470,11 @@ void GLimp_Init( void )
 		glConfig.renderer_string[strlen(glConfig.renderer_string) - 1] = 0;
 	Q_strncpyz( glConfig.version_string, (char *) qglGetString (GL_VERSION), sizeof( glConfig.version_string ) );
 	Q_strncpyz( glConfig.extensions_string, (char *) qglGetString (GL_EXTENSIONS), sizeof( glConfig.extensions_string ) );
+
+	// multitexturing
+	qglGetIntegerv( GL_MAX_TEXTURE_UNITS, (GLint *)&glConfig.numTextureUnits );
+	if( glConfig.numTextureUnits < 2 )
+		ri.Printf( PRINT_ALL, "Insufficient texture units for multitexturing\n" );
 
 	// initialize extensions
 	GLimp_InitExtensions( );

@@ -1761,7 +1761,7 @@ static qboolean CollapseMultitexture( void ) {
 	int i;
 	textureBundle_t tmpBundle;
 
-	if ( !qglActiveTextureARB ) {
+	if ( glConfig.numTextureUnits < 2 ) {
 		return qfalse;
 	}
 

@@ -28,10 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SDL_opengl.h"
 
-extern PFNGLMULTITEXCOORD2FARBPROC qglMultiTexCoord2fARB;
-extern PFNGLACTIVETEXTUREARBPROC qglActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC qglClientActiveTextureARB;
-
 extern PFNGLLOCKARRAYSEXTPROC qglLockArraysEXT;
 extern PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
 
@@ -371,5 +367,23 @@ extern PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
 #define qglVertex4sv glVertex4sv
 #define qglVertexPointer glVertexPointer
 #define qglViewport glViewport
+#define qglMultiTexCoord1s glMultiTexCoord1s
+#define qglMultiTexCoord1i glMultiTexCoord1i
+#define qglMultiTexCoord1f glMultiTexCoord1f
+#define qglMultiTexCoord1d glMultiTexCoord1d
+#define qglMultiTexCoord2s glMultiTexCoord2s
+#define qglMultiTexCoord2i glMultiTexCoord2i
+#define qglMultiTexCoord2f glMultiTexCoord2f
+#define qglMultiTexCoord2d glMultiTexCoord2d
+#define qglMultiTexCoord3s glMultiTexCoord3s
+#define qglMultiTexCoord3i glMultiTexCoord3i
+#define qglMultiTexCoord3f glMultiTexCoord3f
+#define qglMultiTexCoord3d glMultiTexCoord3d
+#define qglMultiTexCoord4s glMultiTexCoord4s
+#define qglMultiTexCoord4i glMultiTexCoord4i
+#define qglMultiTexCoord4f glMultiTexCoord4f
+#define qglMultiTexCoord4d glMultiTexCoord4d
+#define qglActiveTexture glActiveTexture
+#define qglClientActiveTexture glClientActiveTexture
 
 #endif
