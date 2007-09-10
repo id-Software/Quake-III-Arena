@@ -10,7 +10,12 @@ ifeq ($(COMPILE_PLATFORM),darwin)
   # Apple does some things a little differently...
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 else
-  COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
+  ifeq ($(COMPILE_PLATFORM),sunos)
+    # So does SunOS
+    COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
+  else
+    COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
+  endif
 endif
 
 ifeq ($(COMPILE_PLATFORM),mingw32)
@@ -162,6 +167,7 @@ LIB=lib
 
 INSTALL=install
 MKDIR=mkdir
+GREP=grep
 
 ifeq ($(PLATFORM),linux)
 
@@ -587,10 +593,13 @@ else # ifeq IRIX
 
 ifeq ($(PLATFORM),sunos)
 
+  CROSS_COMPILING=0
   CC=gcc
   INSTALL=ginstall
   MKDIR=gmkdir
+  GREP=/usr/xpg4/bin/grep
   COPYDIR="/usr/local/share/games/quake3"
+  SDL_DIR=/usr/local
 
   ifneq (,$(findstring i86pc,$(shell uname -m)))
     ARCH=i386
@@ -631,6 +640,7 @@ ifeq ($(PLATFORM),sunos)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
+  BASE_CFLAGS += -I$(SDL_DIR)/include
   DEBUG_CFLAGS = $(BASE_CFLAGS) -ggdb -O0
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
@@ -878,7 +888,7 @@ libversioncheck:
 		"#if SDL_VERSION_ATLEAST(" \
 		"$(MINSDL_MAJOR),$(MINSDL_MINOR),$(MINSDL_PATCH)" \
 		")\nMINSDL_PASSED\n#endif" | \
-		$(CC) $(BASE_CFLAGS) -E - | grep -q MINSDL_PASSED || \
+		$(CC) $(BASE_CFLAGS) -E - | $(GREP) -q MINSDL_PASSED || \
 		( /bin/echo "SDL version" \
 		"$(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
 		"or greater required" && exit 1 )
