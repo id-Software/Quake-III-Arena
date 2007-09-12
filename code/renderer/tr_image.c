@@ -765,13 +765,13 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	image->wrapClampMode = glWrapClampMode;
 
 	// lightmaps are always allocated on TMU 1
-	if ( glConfig.numTextureUnits > 1 && isLightmap ) {
+	if ( qglActiveTextureARB && isLightmap ) {
 		image->TMU = 1;
 	} else {
 		image->TMU = 0;
 	}
 
-	if ( glConfig.numTextureUnits > 1 ) {
+	if ( qglActiveTextureARB ) {
 		GL_SelectTexture( image->TMU );
 	}
 
@@ -4849,7 +4849,7 @@ void R_DeleteTextures( void ) {
 	tr.numImages = 0;
 
 	Com_Memset( glState.currenttextures, 0, sizeof( glState.currenttextures ) );
-	if ( glConfig.numTextureUnits > 1 ) {
+	if ( qglActiveTextureARB ) {
 		GL_SelectTexture( 1 );
 		qglBindTexture( GL_TEXTURE_2D, 0 );
 		GL_SelectTexture( 0 );

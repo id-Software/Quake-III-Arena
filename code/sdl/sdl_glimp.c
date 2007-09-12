@@ -70,8 +70,12 @@ static SDL_Surface *screen = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
 
-PFNGLLOCKARRAYSEXTPROC qglLockArraysEXT;
-PFNGLUNLOCKARRAYSEXTPROC qglUnlockArraysEXT;
+void (APIENTRYP qglActiveTextureARB) (GLenum texture);
+void (APIENTRYP qglClientActiveTextureARB) (GLenum texture);
+void (APIENTRYP qglMultiTexCoord2fARB) (GLenum target, GLfloat s, GLfloat t);
+
+void (APIENTRYP qglLockArraysEXT) (GLint first, GLsizei count);
+void (APIENTRYP qglUnlockArraysEXT) (void);
 
 /*
 ===============
@@ -85,8 +89,8 @@ void GLimp_Shutdown( void )
 	SDL_QuitSubSystem( SDL_INIT_VIDEO );
 	screen = NULL;
 
-	memset( &glConfig, 0, sizeof( glConfig ) );
-	memset( &glState, 0, sizeof( glState ) );
+	Com_Memset( &glConfig, 0, sizeof( glConfig ) );
+	Com_Memset( &glState, 0, sizeof( glState ) );
 }
 
 /*
@@ -376,6 +380,46 @@ static void GLimp_InitExtensions( void )
 		ri.Printf( PRINT_ALL, "...GL_EXT_texture_env_add not found\n" );
 	}
 
+	// GL_ARB_multitexture
+	qglMultiTexCoord2fARB = NULL;
+	qglActiveTextureARB = NULL;
+	qglClientActiveTextureARB = NULL;
+	if ( Q_stristr( glConfig.extensions_string, "GL_ARB_multitexture" ) )
+	{
+		if ( r_ext_multitexture->value )
+		{
+			qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
+			qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glActiveTextureARB" );
+			qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
+
+			if ( qglActiveTextureARB )
+			{
+				GLint glint = 0;
+				qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glint );
+				glConfig.numTextureUnits = (int) glint;
+				if ( glConfig.numTextureUnits > 1 )
+				{
+					ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture\n" );
+				}
+				else
+				{
+					qglMultiTexCoord2fARB = NULL;
+					qglActiveTextureARB = NULL;
+					qglClientActiveTextureARB = NULL;
+					ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
+				}
+			}
+		}
+		else
+		{
+			ri.Printf( PRINT_ALL, "...ignoring GL_ARB_multitexture\n" );
+		}
+	}
+	else
+	{
+		ri.Printf( PRINT_ALL, "...GL_ARB_multitexture not found\n" );
+	}
+
 	// GL_EXT_compiled_vertex_array
 	if ( Q_stristr( glConfig.extensions_string, "GL_EXT_compiled_vertex_array" ) )
 	{
@@ -470,11 +514,6 @@ void GLimp_Init( void )
 		glConfig.renderer_string[strlen(glConfig.renderer_string) - 1] = 0;
 	Q_strncpyz( glConfig.version_string, (char *) qglGetString (GL_VERSION), sizeof( glConfig.version_string ) );
 	Q_strncpyz( glConfig.extensions_string, (char *) qglGetString (GL_EXTENSIONS), sizeof( glConfig.extensions_string ) );
-
-	// multitexturing
-	qglGetIntegerv( GL_MAX_TEXTURE_UNITS, (GLint *)&glConfig.numTextureUnits );
-	if( glConfig.numTextureUnits < 2 )
-		ri.Printf( PRINT_ALL, "Insufficient texture units for multitexturing\n" );
 
 	// initialize extensions
 	GLimp_InitExtensions( );
