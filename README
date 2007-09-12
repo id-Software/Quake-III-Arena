@@ -90,7 +90,6 @@ Makefile.local:
   USE_CURL_DLOPEN   - link with libcurl at runtime
   USE_CODEC_VORBIS  - enable Ogg Vorbis support
   USE_LOCAL_HEADERS - use headers local to ioq3 instead of system ones
-  USE_CCACHE        - use ccache compiler caching tool
   COPYDIR           - the target installation directory
 
 The defaults for these variables differ depending on the target platform.
