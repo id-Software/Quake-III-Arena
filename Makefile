@@ -842,7 +842,7 @@ makedirs:
 # QVM BUILD TOOLS
 #############################################################################
 
-TOOLS_CFLAGS = -O2 -Wall -Werror -fno-strict-aliasing -MMD \
+TOOLS_CFLAGS = -O2 -Wall -fno-strict-aliasing -MMD \
                -DTEMPDIR=\"$(TEMPDIR)\" -DSYSTEM=\"\" \
                -I$(Q3LCCSRCDIR) \
                -I$(LBURGDIR)
