@@ -573,7 +573,7 @@ void Sys_ParseArgs( int argc, char **argv )
 Sys_SigHandler
 =================
 */
-static void Sys_SigHandler( int signal )
+void Sys_SigHandler( int signal )
 {
 	static qboolean signalcaught = qfalse;
 
@@ -641,6 +641,7 @@ int main( int argc, char **argv )
 
 #ifndef _WIN32
 	// Windows doesn't have these signals
+	// see CON_CtrlHandler() in con_win32.c
 	signal( SIGHUP, Sys_SigHandler );
 	signal( SIGQUIT, Sys_SigHandler );
 	signal( SIGTRAP, Sys_SigHandler );

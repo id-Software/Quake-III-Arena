@@ -774,7 +774,7 @@ void SV_Frame( int msec ) {
 		// Running as a server, but no map loaded
 #ifdef DEDICATED
 		// Block until something interesting happens
-		NET_Sleep(-1);
+		Sys_Sleep(-1);
 #endif
 
 		return;

@@ -22,21 +22,113 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
+#include "sys_local.h"
 #include "windows.h"
 
+#define QCONSOLE_HISTORY 32
 
-#define QCONSOLE_THEME FOREGROUND_RED | \
-                       BACKGROUND_RED | \
-                       BACKGROUND_GREEN | \
-                       BACKGROUND_BLUE
+static WORD qconsole_attrib;
 
-#define QCONSOLE_INPUT_RECORDS 1024
+// saved console status
+static DWORD qconsole_orig_mode;
+static CONSOLE_CURSOR_INFO qconsole_orig_cursorinfo;
 
-// used to track key input
-static int qconsole_chars = 0;
+// cmd history
+static char qconsole_history[ QCONSOLE_HISTORY ][ MAX_EDIT_LINE ];
+static int qconsole_history_pos = -1;
+static int qconsole_history_oldest = 0;
 
-// used to restore original color theme 
-static int qconsole_orig_attrib;
+// current edit buffer
+static char qconsole_line[ MAX_EDIT_LINE ];
+static int qconsole_linelen = 0;
+
+static HANDLE qconsole_hout;
+static HANDLE qconsole_hin;
+
+/*
+==================
+CON_CtrlHandler
+
+The Windows Console doesn't use signals for terminating the application
+with Ctrl-C, logging off, window closing, etc.  Instead it uses a special
+handler routine.  Fortunately, the values for Ctrl signals don't seem to
+overlap with true signal codes that Windows provides, so calling
+Sys_SigHandler() with those numbers should be safe for generating unique
+shutdown messages.
+==================
+*/
+static BOOL WINAPI CON_CtrlHandler( DWORD sig )
+{
+	Sys_SigHandler( sig );
+	return TRUE;
+}
+
+/*
+==================
+CON_HistAdd
+==================
+*/
+static void CON_HistAdd( void )
+{
+	Q_strncpyz( qconsole_history[ qconsole_history_oldest ], qconsole_line,
+		sizeof( qconsole_history[ qconsole_history_oldest ] ) );
+
+	if( qconsole_history_oldest >= QCONSOLE_HISTORY - 1 )
+		qconsole_history_oldest = 0;
+	else
+		qconsole_history_oldest++;
+
+	qconsole_history_pos = qconsole_history_oldest;
+}
+
+/*
+==================
+CON_HistPrev
+==================
+*/
+static void CON_HistPrev( void )
+{
+	int pos;
+
+	pos = ( qconsole_history_pos < 1 ) ?
+		( QCONSOLE_HISTORY - 1 ) : ( qconsole_history_pos - 1 );
+
+	// don' t allow looping through history
+	if( pos == qconsole_history_oldest )
+		return;
+
+	qconsole_history_pos = pos;
+	Q_strncpyz( qconsole_line, qconsole_history[ qconsole_history_pos ], 
+		sizeof( qconsole_line ) );
+	qconsole_linelen = strlen( qconsole_line );
+}
+
+/*
+==================
+CON_HistNext
+==================
+*/
+static void CON_HistNext( void )
+{
+	int pos;
+
+	pos = ( qconsole_history_pos >= QCONSOLE_HISTORY - 1 ) ?
+		0 : ( qconsole_history_pos + 1 ); 
+
+	// clear the edit buffer if they try to advance to a future command
+	if( pos == qconsole_history_oldest )
+	{
+		qconsole_line[ 0 ] = '\0';
+		qconsole_linelen = 0;
+		return;
+	}
+
+	qconsole_history_pos = pos;
+	Q_strncpyz( qconsole_line, qconsole_history[ qconsole_history_pos ],
+		sizeof( qconsole_line ) );
+	qconsole_linelen = strlen( qconsole_line );
+}
+
 
 /*
 ==================
@@ -54,6 +146,46 @@ CON_Show
 */
 void CON_Show( void )
 {
+	CONSOLE_SCREEN_BUFFER_INFO binfo;
+	COORD writeSize = { MAX_EDIT_LINE, 1 };
+	COORD writePos = { 0, 0 };
+	SMALL_RECT writeArea = { 0, 0, 0, 0 };
+	int i;
+	CHAR_INFO line[ MAX_EDIT_LINE ];
+
+	GetConsoleScreenBufferInfo( qconsole_hout, &binfo );
+
+	// if we' re in the middle of printf, don't bother writing the buffer
+	if( binfo.dwCursorPosition.X != 0 )
+		return;
+
+	writeArea.Left = 0;
+	writeArea.Top = binfo.dwCursorPosition.Y; 
+	writeArea.Bottom = binfo.dwCursorPosition.Y; 
+	writeArea.Right = MAX_EDIT_LINE;
+
+	// build a space-padded CHAR_INFO array
+	for( i = 0; i < MAX_EDIT_LINE; i++ )
+	{
+		if( i < qconsole_linelen )
+			line[ i ].Char.AsciiChar = qconsole_line[ i ];
+		else
+			line[ i ].Char.AsciiChar = ' ';
+
+		line[ i ].Attributes =  qconsole_attrib;
+	}
+
+	if( qconsole_linelen > binfo.srWindow.Right )
+	{
+		WriteConsoleOutput( qconsole_hout, 
+			line + (qconsole_linelen - binfo.srWindow.Right ),
+			writeSize, writePos, &writeArea );
+	}
+	else
+	{
+		WriteConsoleOutput( qconsole_hout, line, writeSize,
+			writePos, &writeArea );
+	}
 }
 
 /*
@@ -63,15 +195,10 @@ CON_Shutdown
 */
 void CON_Shutdown( void )
 {
-  HANDLE hout;
-  COORD screen = { 0, 0 };
-  DWORD written;
-
-  hout = GetStdHandle( STD_OUTPUT_HANDLE );
-
-  SetConsoleTextAttribute( hout, qconsole_orig_attrib );
-  FillConsoleOutputAttribute( hout, qconsole_orig_attrib, 63999,
-                              screen, &written ); 
+	SetConsoleMode( qconsole_hin, qconsole_orig_mode );
+	SetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
+	CloseHandle( qconsole_hout );
+	CloseHandle( qconsole_hin );
 }
 
 /*
@@ -81,34 +208,43 @@ CON_Init
 */
 void CON_Init( void )
 {
-  HANDLE hout;
-  COORD screen = { 0, 0 };
-  DWORD written, read;
-  CONSOLE_SCREEN_BUFFER_INFO binfo;
-  SMALL_RECT rect;
-  WORD oldattrib;
+	CONSOLE_CURSOR_INFO curs;
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	int i;
 
-  hout = GetStdHandle( STD_OUTPUT_HANDLE );
+	// handle Ctrl-C or other console termination
+	SetConsoleCtrlHandler( CON_CtrlHandler, TRUE );
 
-  // remember original color theme
-  ReadConsoleOutputAttribute( hout, &oldattrib, 1, screen, &read );
-  qconsole_orig_attrib = oldattrib;
-  
-  SetConsoleTitle("ioquake3 Dedicated Server Console");
+	qconsole_hin = GetStdHandle( STD_INPUT_HANDLE );
+	if( qconsole_hin == INVALID_HANDLE_VALUE )
+		return;
 
-  SetConsoleTextAttribute( hout, QCONSOLE_THEME );
-  FillConsoleOutputAttribute( hout, QCONSOLE_THEME, 63999, screen, &written ); 
-  
-  // adjust console scroll to match up with cursor position  
-  GetConsoleScreenBufferInfo( hout, &binfo );
-  rect.Top = binfo.srWindow.Top;
-  rect.Left = binfo.srWindow.Left;
-  rect.Bottom = binfo.srWindow.Bottom;
-  rect.Right = binfo.srWindow.Right;
-  rect.Top += ( binfo.dwCursorPosition.Y - binfo.srWindow.Bottom ); 
-  rect.Bottom = binfo.dwCursorPosition.Y; 
-  SetConsoleWindowInfo( hout, TRUE, &rect );
+	qconsole_hout = GetStdHandle( STD_OUTPUT_HANDLE );
+	if( qconsole_hout == INVALID_HANDLE_VALUE )
+		return;
 
+	GetConsoleMode( qconsole_hin, &qconsole_orig_mode );
+
+	// allow mouse wheel scrolling
+	SetConsoleMode( qconsole_hin,
+		qconsole_orig_mode & ~ENABLE_MOUSE_INPUT );
+
+	FlushConsoleInputBuffer( qconsole_hin ); 
+
+	GetConsoleScreenBufferInfo( qconsole_hout, &info );
+	qconsole_attrib = info.wAttributes;
+
+	SetConsoleTitle("ioquake3 Dedicated Server Console");
+
+	// make cursor invisible
+	GetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
+	curs.dwSize = 1;
+	curs.bVisible = FALSE;
+	SetConsoleCursorInfo( qconsole_hout, &curs );
+
+	// initialize history
+	for( i = 0; i < QCONSOLE_HISTORY; i++ )
+		qconsole_history[ i ][ 0 ] = '\0';
 }
 
 /*
@@ -118,167 +254,102 @@ CON_ConsoleInput
 */
 char *CON_ConsoleInput( void )
 {
-  HANDLE hin, hout;
-  INPUT_RECORD buff[ QCONSOLE_INPUT_RECORDS ];
-  DWORD count = 0;
-  int i;
-  static char input[ 1024 ] = { "" };
-  int inputlen;
-  int newlinepos = -1;
-  CHAR_INFO line[ QCONSOLE_INPUT_RECORDS ];
-  int linelen = 0;
+	INPUT_RECORD buff[ MAX_EDIT_LINE ];
+	DWORD count = 0, events = 0;
+	WORD key = 0;
+	int i;
+	int newlinepos = -1;
 
-  inputlen = 0;
-  input[ 0 ] = '\0';
+	if( !GetNumberOfConsoleInputEvents( qconsole_hin, &events ) )
+		return NULL;
 
-  hin = GetStdHandle( STD_INPUT_HANDLE );
-  if( hin == INVALID_HANDLE_VALUE )
-    return NULL;
-  hout = GetStdHandle( STD_OUTPUT_HANDLE );
-  if( hout == INVALID_HANDLE_VALUE )
-    return NULL;
+	if( events < 1 )
+		return NULL;
+  
+	// if we have overflowed, start dropping oldest input events
+	if( events >= MAX_EDIT_LINE )
+	{
+		ReadConsoleInput( qconsole_hin, buff, 1, &events );
+		return NULL;
+	} 
 
-  if( !PeekConsoleInput( hin, buff, QCONSOLE_INPUT_RECORDS, &count ) )
-    return NULL;
+	if( !ReadConsoleInput( qconsole_hin, buff, events, &count ) )
+		return NULL;
 
-  // if we have overflowed, start dropping oldest input events
-  if( count == QCONSOLE_INPUT_RECORDS )
-  {
-    ReadConsoleInput( hin, buff, 1, &count );
-    return NULL;
-  } 
+	FlushConsoleInputBuffer( qconsole_hin );
 
-  for( i = 0; i < count; i++ )
-  {
-    if( buff[ i ].EventType == KEY_EVENT && buff[ i ].Event.KeyEvent.bKeyDown ) 
-    {
-      if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_RETURN )
-      {
-        newlinepos = i;
-        break;
-      }
+	for( i = 0; i < count; i++ )
+	{
+		if( buff[ i ].EventType != KEY_EVENT )
+			continue;
+		if( !buff[ i ].Event.KeyEvent.bKeyDown ) 
+			continue;
 
-      if( linelen < QCONSOLE_INPUT_RECORDS &&
-          buff[ i ].Event.KeyEvent.uChar.AsciiChar )
-      {
-        if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_BACK )
-        {
-          if( linelen > 0 )
-            linelen--;
-            
-        }
-        else
-        {
-          line[ linelen ].Attributes =  QCONSOLE_THEME;
-          line[ linelen++ ].Char.AsciiChar =
-            buff[ i ].Event.KeyEvent.uChar.AsciiChar;
-        }
-      }
-    }
-  }
+		key = buff[ i ].Event.KeyEvent.wVirtualKeyCode;
 
-  // provide visual feedback for incomplete commands
-  if( linelen != qconsole_chars )
-  {
-    CONSOLE_SCREEN_BUFFER_INFO binfo;
-    COORD writeSize = { QCONSOLE_INPUT_RECORDS, 1 };
-    COORD writePos = { 0, 0 };
-    SMALL_RECT writeArea = { 0, 0, 0, 0 };
-    int i;
+		if( key == VK_RETURN )
+		{
+			newlinepos = i;
+			break;
+		}
+		else if( key == VK_UP )
+		{
+			CON_HistPrev();
+			break;
+		}
+		else if( key == VK_DOWN )
+		{
+			CON_HistNext();
+			break;
+		}
+		else if( key == VK_TAB )
+		{
+			field_t f;
 
-    // keep track of this so we don't need to re-write to console every frame
-    qconsole_chars = linelen;
+			Q_strncpyz( f.buffer, qconsole_line,
+				sizeof( f.buffer ) );
+			Field_AutoComplete( &f );
+			Q_strncpyz( qconsole_line, f.buffer,
+				sizeof( qconsole_line ) );
+			qconsole_linelen = strlen( qconsole_line );
+			break;
+		}
 
-    GetConsoleScreenBufferInfo( hout, &binfo );
+		if( qconsole_linelen < sizeof( qconsole_line ) - 1 )
+		{
+			char c = buff[ i ].Event.KeyEvent.uChar.AsciiChar;
 
-    // adjust scrolling to cursor when typing
-    if( binfo.dwCursorPosition.Y > binfo.srWindow.Bottom )
-    {
-      SMALL_RECT rect;
+			if( key == VK_BACK )
+			{
+				int pos = ( qconsole_linelen > 0 ) ?
+					qconsole_linelen - 1 : 0; 
 
-      rect.Top = binfo.srWindow.Top;
-      rect.Left = binfo.srWindow.Left;
-      rect.Bottom = binfo.srWindow.Bottom;
-      rect.Right = binfo.srWindow.Right;
+				qconsole_line[ pos ] = '\0';
+				qconsole_linelen = pos;
+			}
+			else if( c )
+			{
+				qconsole_line[ qconsole_linelen++ ] = c;
+				qconsole_line[ qconsole_linelen ] = '\0'; 
+			}
+		}
+	}
 
-      rect.Top += ( binfo.dwCursorPosition.Y - binfo.srWindow.Bottom ); 
-      rect.Bottom = binfo.dwCursorPosition.Y; 
-      
-      SetConsoleWindowInfo( hout, TRUE, &rect );
-      GetConsoleScreenBufferInfo( hout, &binfo );
-    }
-    
-    writeArea.Left = 0;
-    writeArea.Top = binfo.srWindow.Bottom; 
-    writeArea.Bottom = binfo.srWindow.Bottom; 
-    writeArea.Right = QCONSOLE_INPUT_RECORDS;
+	CON_Show();
 
-    // pad line with ' ' to handle VK_BACK
-    for( i = linelen; i < QCONSOLE_INPUT_RECORDS; i++ )
-    {
-      line[ i ].Char.AsciiChar = ' '; 
-      line[ i ].Attributes =  QCONSOLE_THEME;
-    }
+	if( newlinepos < 0)
+		return NULL;
 
-    if( linelen > binfo.srWindow.Right )
-    {
-      WriteConsoleOutput( hout, line + (linelen - binfo.srWindow.Right ),
-                          writeSize, writePos, &writeArea );
-    }
-    else
-    {
-      WriteConsoleOutput( hout, line, writeSize, writePos, &writeArea );
-    }
+	if( !qconsole_linelen )
+	{
+		Com_Printf( "\n" );
+		return NULL;
+	}
 
-    if( binfo.dwCursorPosition.X != linelen )
-    {
-      COORD cursorPos = { 0, 0 };
+	CON_HistAdd();
+	Com_Printf( "%s\n", qconsole_line );
 
-      cursorPos.X = linelen;
-      cursorPos.Y = binfo.srWindow.Bottom;
-      SetConsoleCursorPosition( hout, cursorPos );
-    }
-  }
+	qconsole_linelen = 0;
 
-  // don't touch the input buffer if this is an incomplete command
-  if( newlinepos < 0)
-  {
-    return NULL;
-  }
-  else
-  {
-    // add a newline
-    COORD cursorPos = { 0, 0 };
-    CONSOLE_SCREEN_BUFFER_INFO binfo;
-
-    GetConsoleScreenBufferInfo( hout, &binfo );
-    cursorPos.Y = binfo.srWindow.Bottom + 1;
-    SetConsoleCursorPosition( hout, cursorPos );
-  }
-
-
-  if( !ReadConsoleInput( hin, buff, newlinepos+1, &count ) )
-    return NULL;
-
-  for( i = 0; i < count; i++ )
-  {
-    if( buff[ i ].EventType == KEY_EVENT && buff[ i ].Event.KeyEvent.bKeyDown ) 
-    {
-      if( buff[ i ].Event.KeyEvent.wVirtualKeyCode == VK_BACK )
-      {
-        if( inputlen > 0 )
-          input[ --inputlen ] = '\0';
-        continue;
-      }
-      if( inputlen < ( sizeof( input ) - 1 ) &&
-          buff[ i ].Event.KeyEvent.uChar.AsciiChar )
-      {
-        input[ inputlen++ ] = buff[ i ].Event.KeyEvent.uChar.AsciiChar;
-        input[ inputlen ] = '\0'; 
-      }
-    }
-  }
-  if( !inputlen )
-    return NULL;
-  return input;
+	return qconsole_line;
 }

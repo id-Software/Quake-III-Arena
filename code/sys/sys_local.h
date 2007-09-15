@@ -38,3 +38,5 @@ char *CON_ConsoleInput(void);
 #ifdef MACOS_X
 char *Sys_StripAppBundle( char *pwd );
 #endif
+
+void Sys_SigHandler( int signal );

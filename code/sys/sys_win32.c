@@ -508,3 +508,20 @@ void Sys_FreeFileList( char **list )
 
 	Z_Free( list );
 }
+
+
+/*
+==============
+Sys_Sleep
+
+Block execution for msec or until input is recieved.
+==============
+*/
+void Sys_Sleep( int msec )
+{
+	if( msec < 0 )
+		WaitForSingleObject( GetStdHandle( STD_INPUT_HANDLE ), INFINITE );
+	else
+		WaitForSingleObject( GetStdHandle( STD_INPUT_HANDLE ), msec );
+}
+
