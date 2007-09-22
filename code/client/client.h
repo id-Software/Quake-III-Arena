@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../cgame/cg_public.h"
 #include "../game/bg_public.h"
 
-#if USE_CURL
+#ifdef USE_CURL
 #include "cl_curl.h"
 #endif /* USE_CURL */
 

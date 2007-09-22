@@ -689,7 +689,7 @@ CL_ShutdownAll
 */
 void CL_ShutdownAll(void) {
 
-#if USE_CURL
+#ifdef USE_CURL
 	CL_cURL_Shutdown();
 #endif
 	// clear sounds
@@ -1451,7 +1451,7 @@ Called when all downloading has been completed
 */
 void CL_DownloadsComplete( void ) {
 
-#if USE_CURL
+#ifdef USE_CURL
 	// if we downloaded with cURL
 	if(clc.cURLUsed) { 
 		clc.cURLUsed = qfalse;
@@ -1579,7 +1579,7 @@ void CL_NextDownload(void) {
 			*s++ = 0;
 		else
 			s = localName + strlen(localName); // point at the nul byte
-#if USE_CURL
+#ifdef USE_CURL
 		if(!(cl_allowDownload->integer & DLF_NO_REDIRECT)) {
 			if(clc.sv_allowDownload & DLF_NO_REDIRECT) {
 				Com_Printf("WARNING: server does not "
@@ -2205,7 +2205,7 @@ void CL_Frame ( int msec ) {
 		return;
 	}
 
-#if USE_CURL
+#ifdef USE_CURL
 	if(clc.downloadCURLM) {
 		CL_cURL_PerformDownload();
 		// we can't process frames normally when in disconnected
@@ -2698,7 +2698,7 @@ void CL_Init( void ) {
 	cl_showMouseRate = Cvar_Get ("cl_showmouserate", "0", 0);
 
 	cl_allowDownload = Cvar_Get ("cl_allowDownload", "0", CVAR_ARCHIVE);
-#if USE_CURL
+#ifdef USE_CURL
 	cl_cURLLib = Cvar_Get("cl_cURLLib", DEFAULT_CURL_LIB, CVAR_ARCHIVE);
 #endif
 

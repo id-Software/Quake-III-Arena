@@ -92,11 +92,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  **********************************************************************/
 
-#ifdef Q3_VM
-
 #include "../game/bg_lib.h"
 
-#else
+#ifndef Q3_VM
 
 #include <assert.h>
 #include <math.h>

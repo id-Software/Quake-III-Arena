@@ -28,12 +28,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
-#if USE_OPENAL_DLOPEN
+#ifdef USE_OPENAL_DLOPEN
 #define AL_NO_PROTOTYPES
 #define ALC_NO_PROTOTYPES
 #endif
 
-#if USE_LOCAL_HEADERS
+#ifdef USE_LOCAL_HEADERS
 #include "../AL/al.h"
 #include "../AL/alc.h"
 #else
@@ -47,7 +47,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #endif
 
-#if USE_OPENAL_DLOPEN
+#ifdef USE_OPENAL_DLOPEN
 extern LPALENABLE qalEnable;
 extern LPALDISABLE qalDisable;
 extern LPALISENABLED qalIsEnabled;

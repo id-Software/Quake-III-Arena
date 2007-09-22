@@ -185,21 +185,21 @@ ifeq ($(PLATFORM),linux)
     -pipe -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1
+    BASE_CFLAGS += -DUSE_OPENAL
     ifeq ($(USE_OPENAL_DLOPEN),1)
-      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CURL),1)
-    BASE_CFLAGS += -DUSE_CURL=1
+    BASE_CFLAGS += -DUSE_CURL
     ifeq ($(USE_CURL_DLOPEN),1)
-      BASE_CFLAGS += -DUSE_CURL_DLOPEN=1
+      BASE_CFLAGS += -DUSE_CURL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
@@ -338,25 +338,25 @@ ifeq ($(PLATFORM),darwin)
   BASE_CFLAGS += -gfull
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1
+    BASE_CFLAGS += -DUSE_OPENAL
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LDFLAGS += -framework OpenAL
     else
-      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CURL),1)
-    BASE_CFLAGS += -DUSE_CURL=1
+    BASE_CFLAGS += -DUSE_CURL
     ifneq ($(USE_CURL_DLOPEN),1)
       CLIENT_LDFLAGS += -lcurl
     else
-      BASE_CFLAGS += -DUSE_CURL_DLOPEN=1
+      BASE_CFLAGS += -DUSE_CURL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
@@ -405,18 +405,18 @@ endif
     -DUSE_ICON -I$(SDLHDIR)/include
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN=1
+    BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN
   endif
 
   ifeq ($(USE_CURL),1)
-    BASE_CFLAGS += -DUSE_CURL=1
+    BASE_CFLAGS += -DUSE_CURL
     ifneq ($(USE_CURL_DLOPEN),1)
       BASE_CFLAGS += -DCURL_STATICLIB
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
   OPTIMIZE = -O3 -march=i586 -fno-omit-frame-pointer -ffast-math \
@@ -479,14 +479,14 @@ ifeq ($(PLATFORM),freebsd)
     -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1
+    BASE_CFLAGS += -DUSE_OPENAL
     ifeq ($(USE_OPENAL_DLOPEN),1)
-      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN=1
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    BASE_CFLAGS += -DUSE_CODEC_VORBIS=1
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
   ifeq ($(ARCH),axp)
@@ -709,7 +709,7 @@ ifdef DEFAULT_BASEDIR
 endif
 
 ifeq ($(USE_LOCAL_HEADERS),1)
-  BASE_CFLAGS += -DUSE_LOCAL_HEADERS=1
+  BASE_CFLAGS += -DUSE_LOCAL_HEADERS
 endif
 
 ifeq ($(GENERATE_DEPENDENCIES),1)
@@ -1354,6 +1354,7 @@ Q3CGOBJ_ = \
   $(B)/baseq3/game/bg_misc.o \
   $(B)/baseq3/game/bg_pmove.o \
   $(B)/baseq3/game/bg_slidemove.o \
+  $(B)/baseq3/game/bg_lib.o \
   $(B)/baseq3/cgame/cg_consolecmds.o \
   $(B)/baseq3/cgame/cg_draw.o \
   $(B)/baseq3/cgame/cg_drawtools.o \
@@ -1376,7 +1377,7 @@ Q3CGOBJ_ = \
   $(B)/baseq3/qcommon/q_shared.o
 
 Q3CGOBJ = $(Q3CGOBJ_) $(B)/baseq3/cgame/cg_syscalls.o
-Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm)
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT): $(Q3CGOBJ)
 	$(echo_cmd) "LD $@"
@@ -1395,6 +1396,7 @@ MPCGOBJ_ = \
   $(B)/missionpack/game/bg_misc.o \
   $(B)/missionpack/game/bg_pmove.o \
   $(B)/missionpack/game/bg_slidemove.o \
+  $(B)/missionpack/game/bg_lib.o \
   $(B)/missionpack/cgame/cg_consolecmds.o \
   $(B)/missionpack/cgame/cg_newdraw.o \
   $(B)/missionpack/cgame/cg_draw.o \
@@ -1419,7 +1421,7 @@ MPCGOBJ_ = \
   $(B)/missionpack/qcommon/q_shared.o
 
 MPCGOBJ = $(MPCGOBJ_) $(B)/missionpack/cgame/cg_syscalls.o
-MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
+MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm)
 
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT): $(MPCGOBJ)
 	$(echo_cmd) "LD $@"
@@ -1447,6 +1449,7 @@ Q3GOBJ_ = \
   $(B)/baseq3/game/bg_misc.o \
   $(B)/baseq3/game/bg_pmove.o \
   $(B)/baseq3/game/bg_slidemove.o \
+  $(B)/baseq3/game/bg_lib.o \
   $(B)/baseq3/game/g_active.o \
   $(B)/baseq3/game/g_arenas.o \
   $(B)/baseq3/game/g_bot.o \
@@ -1471,7 +1474,7 @@ Q3GOBJ_ = \
   $(B)/baseq3/qcommon/q_shared.o
 
 Q3GOBJ = $(Q3GOBJ_) $(B)/baseq3/game/g_syscalls.o
-Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm)
 
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT): $(Q3GOBJ)
 	$(echo_cmd) "LD $@"
@@ -1497,6 +1500,7 @@ MPGOBJ_ = \
   $(B)/missionpack/game/bg_misc.o \
   $(B)/missionpack/game/bg_pmove.o \
   $(B)/missionpack/game/bg_slidemove.o \
+  $(B)/missionpack/game/bg_lib.o \
   $(B)/missionpack/game/g_active.o \
   $(B)/missionpack/game/g_arenas.o \
   $(B)/missionpack/game/g_bot.o \
@@ -1521,7 +1525,7 @@ MPGOBJ_ = \
   $(B)/missionpack/qcommon/q_shared.o
 
 MPGOBJ = $(MPGOBJ_) $(B)/missionpack/game/g_syscalls.o
-MPGVMOBJ = $(MPGOBJ_:%.o=%.asm) $(B)/missionpack/game/bg_lib.asm
+MPGVMOBJ = $(MPGOBJ_:%.o=%.asm)
 
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT): $(MPGOBJ)
 	$(echo_cmd) "LD $@"
@@ -1540,6 +1544,7 @@ $(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
 Q3UIOBJ_ = \
   $(B)/baseq3/ui/ui_main.o \
   $(B)/baseq3/game/bg_misc.o \
+  $(B)/baseq3/game/bg_lib.o \
   $(B)/baseq3/ui/ui_addbots.o \
   $(B)/baseq3/ui/ui_atoms.o \
   $(B)/baseq3/ui/ui_cdkey.o \
@@ -1583,7 +1588,7 @@ Q3UIOBJ_ = \
   $(B)/baseq3/qcommon/q_shared.o
 
 Q3UIOBJ = $(Q3UIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
-Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+Q3UIVMOBJ = $(Q3UIOBJ_:%.o=%.asm)
 
 $(B)/baseq3/ui$(ARCH).$(SHLIBEXT): $(Q3UIOBJ)
 	$(echo_cmd) "LD $@"
@@ -1605,12 +1610,13 @@ MPUIOBJ_ = \
   $(B)/missionpack/ui/ui_shared.o \
   \
   $(B)/missionpack/game/bg_misc.o \
+  $(B)/missionpack/game/bg_lib.o \
   \
   $(B)/missionpack/qcommon/q_math.o \
   $(B)/missionpack/qcommon/q_shared.o
 
 MPUIOBJ = $(MPUIOBJ_) $(B)/missionpack/ui/ui_syscalls.o
-MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm) $(B)/baseq3/game/bg_lib.asm
+MPUIVMOBJ = $(MPUIOBJ_:%.o=%.asm)
 
 $(B)/missionpack/ui$(ARCH).$(SHLIBEXT): $(MPUIOBJ)
 	$(echo_cmd) "LD $@"

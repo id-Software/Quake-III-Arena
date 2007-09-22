@@ -3,6 +3,8 @@
 // bg_lib,c -- standard C library replacement routines used by code
 // compiled for the virtual machine
 
+#ifdef Q3_VM
+
 #include "../qcommon/q_shared.h"
 
 /*-
@@ -42,10 +44,6 @@ static char sccsid[] = "@(#)qsort.c	8.1 (Berkeley) 6/4/93";
 #endif
 static const char rcsid[] =
 #endif /* LIBC_SCCS and not lint */
-
-#if !defined( Q3_VM )
-typedef int		 cmp_t(const void *, const void *);
-#endif
 
 static char* med3(char *, char *, char *, cmp_t *);
 static void	 swapfunc(char *, char *, int, int);
@@ -186,10 +184,6 @@ loop:	SWAPINIT(a, es);
 
 //==================================================================================
 
-
-// this file is excluded from release builds because of intrinsics
-#if defined ( Q3_VM )
-
 size_t strlen( const char *string ) {
 	const char	*s;
 
@@ -262,9 +256,7 @@ char *strstr( const char *string, const char *strCharSet ) {
 	}
 	return (char *)0;
 }
-#endif
 
-#if defined ( Q3_VM )
 int tolower( int c ) {
 	if ( c >= 'A' && c <= 'Z' ) {
 		c += 'a' - 'A';
@@ -279,9 +271,6 @@ int toupper( int c ) {
 	}
 	return c;
 }
-
-#endif
-//#ifndef _MSC_VER
 
 void *memmove( void *dest, const void *src, size_t count ) {
 	int		i;
@@ -750,11 +739,9 @@ double atan2( double y, double x ) {
 
 #endif
 
-#ifdef Q3_VM
 double tan( double x ) {
 	return sin(x) / cos(x);
 }
-#endif
 
 
 static int randSeed = 0;
@@ -904,7 +891,6 @@ double _atof( const char **stringPtr ) {
 }
 
 
-#if defined ( Q3_VM )
 int atoi( const char *string ) {
 	int		sign;
 	int		value;
@@ -1248,11 +1234,7 @@ reswitch:
 			break;
 		case 'f':
 			AddFloat( &buf_p, *(double *)arg, width, prec );
-#ifdef Q3_VM
-			arg += 1;	// everything is 32 bit in my compiler
-#else
-			arg += 2;
-#endif
+			arg += 1;	// everything is 32 bit
 			break;
 		case 's':
 			AddString( &buf_p, (char *)*arg, width, prec );

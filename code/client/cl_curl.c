@@ -20,11 +20,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#if USE_CURL
+#ifdef USE_CURL
 #include "client.h"
 cvar_t *cl_cURLLib;
 
-#if USE_CURL_DLOPEN
+#ifdef USE_CURL_DLOPEN
 #include "../sys/sys_loadlib.h"
 
 char* (*qcurl_version)(void);
@@ -88,7 +88,7 @@ CL_cURL_Init
 */
 qboolean CL_cURL_Init()
 {
-#if USE_CURL_DLOPEN
+#ifdef USE_CURL_DLOPEN
 	if(cURLLib)
 		return qtrue;
 
@@ -156,7 +156,7 @@ CL_cURL_Shutdown
 void CL_cURL_Shutdown( void )
 {
 	CL_cURL_Cleanup();
-#if USE_CURL_DLOPEN
+#ifdef USE_CURL_DLOPEN
 	if(cURLLib)
 	{
 		Sys_UnloadLibrary(cURLLib);

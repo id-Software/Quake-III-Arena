@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // compiled for the virtual machine
 
 // This file is NOT included on native builds
-#ifndef BG_LIB_H
+#if !defined( BG_LIB_H ) && defined( Q3_VM )
 #define BG_LIB_H
 
 //Ignore __attribute__ on non-gcc platforms

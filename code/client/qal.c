@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // Dynamically loads OpenAL
 
-#if USE_OPENAL
+#ifdef USE_OPENAL
 
 #include "qal.h"
 
-#if USE_OPENAL_DLOPEN
+#ifdef USE_OPENAL_DLOPEN
 
 #include "../sys/sys_loadlib.h"
 
