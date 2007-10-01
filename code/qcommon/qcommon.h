@@ -689,10 +689,12 @@ MISC
 
 // vsnprintf is ISO/IEC 9899:1999
 // abstracting this to make it portable
-#ifdef WIN32
+#ifdef _WIN32
 #define Q_vsnprintf _vsnprintf
+#define Q_snprintf _snprintf
 #else
 #define Q_vsnprintf vsnprintf
+#define Q_snprintf snprintf
 #endif
 
 // centralizing the declarations for cl_cdkey

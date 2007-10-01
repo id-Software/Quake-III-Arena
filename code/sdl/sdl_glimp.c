@@ -115,6 +115,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	int tcolorbits, tdepthbits, tstencilbits;
 	int i = 0;
 	SDL_Surface *vidscreen = NULL;
+	Uint32 flags = SDL_OPENGL;
 
 	ri.Printf( PRINT_ALL, "Initializing OpenGL display\n");
 
@@ -127,7 +128,6 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	}
 	ri.Printf( PRINT_ALL, " %d %d\n", glConfig.vidWidth, glConfig.vidHeight);
 
-	Uint32 flags = SDL_OPENGL;
 	if (fullscreen)
 	{
 		flags |= SDL_FULLSCREEN;
