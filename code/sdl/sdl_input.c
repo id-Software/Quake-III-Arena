@@ -651,7 +651,7 @@ static void IN_ProcessEvents( void )
 	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
 			return;
 
-	if( cls.keyCatchers == 0 && keyRepeatEnabled )
+	if( Key_GetCatcher( ) == 0 && keyRepeatEnabled )
 	{
 		SDL_EnableKeyRepeat( 0, 0 );
 		keyRepeatEnabled = qfalse;
@@ -730,7 +730,7 @@ void IN_Frame (void)
 	IN_JoyMove( );
 
 	// Release the mouse if the console if down and we're windowed
-	if( ( cls.keyCatchers & KEYCATCH_CONSOLE ) && !r_fullscreen->integer )
+	if( ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) && !r_fullscreen->integer )
 		IN_DeactivateMouse( );
 	else
 		IN_ActivateMouse( );
