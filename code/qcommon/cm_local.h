@@ -185,6 +185,8 @@ void CM_StoreBrushes( leafList_t *ll, int nodenum );
 void CM_BoxLeafnums_r( leafList_t *ll, int nodenum );
 
 cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle );
+qboolean CM_BoundsIntersect( const vec3_t mins, const vec3_t maxs, const vec3_t mins2, const vec3_t maxs2 );
+qboolean CM_BoundsIntersectPoint( const vec3_t mins, const vec3_t maxs, const vec3_t point );
 
 // cm_patch.c
 
