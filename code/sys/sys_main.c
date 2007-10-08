@@ -246,18 +246,17 @@ Sys_ANSIColorify
 Transform Q3 colour codes to ANSI escape sequences
 =================
 */
-static void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
+//XXX: function should behave like others that colorize strings
+static void Sys_ANSIColorify( const char *msg, char *buffer, unsigned bufferSize )
 {
-	int   msgLength, pos;
+	int   msgLength;
 	int   i, j;
 	char  *escapeCode;
-	char  tempBuffer[ 7 ];
 
 	if( !msg || !buffer )
 		return;
 
 	msgLength = strlen( msg );
-	pos = 0;
 	i = 0;
 	buffer[ 0 ] = '\0';
 
@@ -265,8 +264,11 @@ static void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
 	{
 		if( msg[ i ] == '\n' )
 		{
-			Com_sprintf( tempBuffer, 7, "%c[0m\n", 0x1B );
-			strncat( buffer, tempBuffer, bufferSize );
+			unsigned len = 4;
+			if(bufferSize <= len) goto out;
+			strcpy( buffer, "\x1b[m\n");
+			buffer += len;
+			bufferSize -= len;
 			i++;
 		}
 		else if( msg[ i ] == Q_COLOR_ESCAPE )
@@ -276,6 +278,7 @@ static void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
 			if( i < msgLength )
 			{
 				escapeCode = NULL;
+				// XXX: no need for that loop
 				for( j = 0; j < CON_colorTableSize; j++ )
 				{
 					if( msg[ i ] == CON_colorTable[ j ].Q3color )
@@ -287,8 +290,11 @@ static void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
 
 				if( escapeCode )
 				{
-					Com_sprintf( tempBuffer, 7, "%c[%sm", 0x1B, escapeCode );
-					strncat( buffer, tempBuffer, bufferSize );
+					unsigned len = 3 + strlen(escapeCode);
+					if(bufferSize <= len) goto out;
+					Com_sprintf( buffer, len+1, "\x1b[%sm", escapeCode );
+					buffer += len;
+					bufferSize -= len;
 				}
 
 				i++;
@@ -296,10 +302,14 @@ static void Sys_ANSIColorify( const char *msg, char *buffer, int bufferSize )
 		}
 		else
 		{
-			Com_sprintf( tempBuffer, 7, "%c", msg[ i++ ] );
-			strncat( buffer, tempBuffer, bufferSize );
+			if(bufferSize <= 1) goto out;
+			*buffer++ = msg[ i++ ];
+			*buffer = 0;
+			--bufferSize;
 		}
 	}
+out:
+	return;
 }
 
 /*
