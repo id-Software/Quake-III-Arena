@@ -220,96 +220,73 @@ void Sys_Init(void)
 	Cvar_Set( "username", Sys_GetCurrentUser( ) );
 }
 
-static struct Q3ToAnsiColorTable_s
-{
-	char Q3color;
-	char *ANSIcolor;
-} CON_colorTable[ ] =
-{
-	{ COLOR_BLACK,    "30" },
-	{ COLOR_RED,      "31" },
-	{ COLOR_GREEN,    "32" },
-	{ COLOR_YELLOW,   "33" },
-	{ COLOR_BLUE,     "34" },
-	{ COLOR_CYAN,     "36" },
-	{ COLOR_MAGENTA,  "35" },
-	{ COLOR_WHITE,    "0" }
-};
-
-static int CON_colorTableSize =
-	sizeof( CON_colorTable ) / sizeof( CON_colorTable[ 0 ] );
-
 /*
 =================
-Sys_ANSIColorify
+Sys_AnsiColorPrint
 
 Transform Q3 colour codes to ANSI escape sequences
 =================
 */
-//XXX: function should behave like others that colorize strings
-static void Sys_ANSIColorify( const char *msg, char *buffer, unsigned bufferSize )
+static void Sys_AnsiColorPrint( const char *msg )
 {
-	int   msgLength;
-	int   i, j;
-	char  *escapeCode;
-
-	if( !msg || !buffer )
-		return;
-
-	msgLength = strlen( msg );
-	i = 0;
-	buffer[ 0 ] = '\0';
-
-	while( i < msgLength )
+	static char buffer[ MAXPRINTMSG ];
+	int         length = 0;
+	static int  q3ToAnsi[ 8 ] =
 	{
-		if( msg[ i ] == '\n' )
-		{
-			unsigned len = 4;
-			if(bufferSize <= len) goto out;
-			strcpy( buffer, "\x1b[m\n");
-			buffer += len;
-			bufferSize -= len;
-			i++;
-		}
-		else if( msg[ i ] == Q_COLOR_ESCAPE )
-		{
-			i++;
+		30, // COLOR_BLACK
+		31, // COLOR_RED
+		32, // COLOR_GREEN
+		33, // COLOR_YELLOW
+		34, // COLOR_BLUE
+		36, // COLOR_CYAN
+		35, // COLOR_MAGENTA
+		0   // COLOR_WHITE
+	};
 
-			if( i < msgLength )
+	while( *msg )
+	{
+		if( Q_IsColorString( msg ) || *msg == '\n' )
+		{
+			// First empty the buffer
+			if( length > 0 )
 			{
-				escapeCode = NULL;
-				// XXX: no need for that loop
-				for( j = 0; j < CON_colorTableSize; j++ )
-				{
-					if( msg[ i ] == CON_colorTable[ j ].Q3color )
-					{
-						escapeCode = CON_colorTable[ j ].ANSIcolor;
-						break;
-					}
-				}
+				buffer[ length ] = '\0';
+				fputs( buffer, stderr );
+				length = 0;
+			}
 
-				if( escapeCode )
-				{
-					unsigned len = 3 + strlen(escapeCode);
-					if(bufferSize <= len) goto out;
-					Com_sprintf( buffer, len+1, "\x1b[%sm", escapeCode );
-					buffer += len;
-					bufferSize -= len;
-				}
-
-				i++;
+			if( *msg == '\n' )
+			{
+				// Issue a reset and then the newline
+				fputs( "\033[0m\n", stderr );
+				msg++;
+			}
+			else
+			{
+				// Print the color code
+				Com_sprintf( buffer, sizeof( buffer ), "\033[%dm",
+						q3ToAnsi[ ColorIndex( *( msg + 1 ) ) ] );
+				fputs( buffer, stderr );
+				msg += 2;
 			}
 		}
 		else
 		{
-			if(bufferSize <= 1) goto out;
-			*buffer++ = msg[ i++ ];
-			*buffer = 0;
-			--bufferSize;
+			if( length >= MAXPRINTMSG - 1 )
+				break;
+
+			buffer[ length ] = *msg;
+			length++;
+			msg++;
 		}
 	}
-out:
-	return;
+
+	// Empty anything still left in the buffer
+	if( length > 0 )
+	{
+		buffer[ length ] = '\0';
+		fputs( buffer, stderr );
+	}
 }
 
 /*
@@ -324,11 +301,7 @@ void Sys_Print( const char *msg )
 #endif
 
 	if( com_ansiColor && com_ansiColor->integer )
-	{
-		char ansiColorString[ MAXPRINTMSG ];
-		Sys_ANSIColorify( msg, ansiColorString, MAXPRINTMSG );
-		fputs( ansiColorString, stderr );
-	}
+    Sys_AnsiColorPrint( msg );
 	else
 		fputs(msg, stderr);
 
