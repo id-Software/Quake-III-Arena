@@ -301,7 +301,7 @@ void Sys_Print( const char *msg )
 #endif
 
 	if( com_ansiColor && com_ansiColor->integer )
-    Sys_AnsiColorPrint( msg );
+		Sys_AnsiColorPrint( msg );
 	else
 		fputs(msg, stderr);
 
