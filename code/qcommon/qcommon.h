@@ -926,6 +926,9 @@ void CL_FlushMemory( void );
 void CL_StartHunkUsers( qboolean rendererOnly );
 // start all the client stuff using the hunk
 
+void Key_KeynameCompletion( void(*callback)(const char *s) );
+// for keyname autocompletion
+
 void Key_WriteBindings( fileHandle_t f );
 // for writing the config files
 

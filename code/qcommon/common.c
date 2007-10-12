@@ -3085,6 +3085,40 @@ static char *Field_FindFirstSeparator( char *s )
 	return NULL;
 }
 
+#ifndef DEDICATED
+/*
+===============
+Field_CompleteKeyname
+===============
+*/
+static void Field_CompleteKeyname( void )
+{
+	matchCount = 0;
+	shortestMatch[ 0 ] = 0;
+
+	Key_KeynameCompletion( FindMatches );
+
+	if( matchCount == 0 )
+		return;
+
+	Q_strncpyz( &completionField->buffer[ strlen( completionField->buffer ) -
+		strlen( completionString ) ], shortestMatch,
+		sizeof( completionField->buffer ) );
+	completionField->cursor = strlen( completionField->buffer );
+
+	if( matchCount == 1 )
+	{
+		Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
+		completionField->cursor++;
+		return;
+	}
+
+	Com_Printf( "]%s\n", completionField->buffer );
+	
+	Key_KeynameCompletion( PrintMatches );
+}
+#endif
+
 /*
 ===============
 Field_CompleteFilename
@@ -3101,8 +3135,9 @@ static void Field_CompleteFilename( const char *dir,
 	if( matchCount == 0 )
 		return;
 
-	Q_strcat( completionField->buffer, sizeof( completionField->buffer ),
-			shortestMatch + strlen( completionString ) );
+	Q_strncpyz( &completionField->buffer[ strlen( completionField->buffer ) -
+		strlen( completionString ) ], shortestMatch,
+		sizeof( completionField->buffer ) );
 	completionField->cursor = strlen( completionField->buffer );
 
 	if( matchCount == 1 )
@@ -3143,20 +3178,36 @@ static void Field_CompleteCommand( char *cmd,
 	else
 		completionString = Cmd_Argv( completionArgument - 1 );
 
+#ifndef DEDICATED
+	// Unconditionally add a '\' to the start of the buffer
+	if( completionField->buffer[ 0 ] &&
+			completionField->buffer[ 0 ] != '\\' )
+	{
+		if( completionField->buffer[ 0 ] != '/' )
+		{
+			// Buffer is full, refuse to complete
+			if( strlen( completionField->buffer ) + 1 >=
+				sizeof( completionField->buffer ) )
+				return;
+
+			memmove( &completionField->buffer[ 1 ],
+				&completionField->buffer[ 0 ],
+				strlen( completionField->buffer ) + 1 );
+			completionField->cursor++;
+		}
+
+		completionField->buffer[ 0 ] = '\\';
+	}
+#endif
+
 	if( completionArgument > 1 )
 	{
 		const char *baseCmd = Cmd_Argv( 0 );
 
 #ifndef DEDICATED
-		// If the very first token does not have a leading \ or /,
-		// refuse to autocomplete
-		if( cmd == completionField->buffer )
-		{
-			if( baseCmd[ 0 ] != '\\' && baseCmd[ 0 ] != '/' )
-				return;
-
+		// This should always be true
+		if( baseCmd[ 0 ] == '\\' || baseCmd[ 0 ] == '/' )
 			baseCmd++;
-		}
 #endif
 
 		if( ( p = Field_FindFirstSeparator( cmd ) ) )
@@ -3187,13 +3238,6 @@ static void Field_CompleteCommand( char *cmd,
 			{
 				Field_CompleteFilename( "", "txt", qfalse );
 			}
-			else if( !Q_stricmp( baseCmd, "demo" ) && completionArgument == 2 )
-			{
-				char demoExt[ 16 ];
-
-				Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", PROTOCOL_VERSION );
-				Field_CompleteFilename( "demos", demoExt, qtrue );
-			}
 			else if( ( !Q_stricmp( baseCmd, "toggle" ) ||
 						!Q_stricmp( baseCmd, "vstr" ) ||
 						!Q_stricmp( baseCmd, "set" ) ||
@@ -3208,6 +3252,14 @@ static void Field_CompleteCommand( char *cmd,
 				if( p > cmd )
 					Field_CompleteCommand( p, qfalse, qtrue );
 			}
+#ifndef DEDICATED
+			else if( !Q_stricmp( baseCmd, "demo" ) && completionArgument == 2 )
+			{
+				char demoExt[ 16 ];
+
+				Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", PROTOCOL_VERSION );
+				Field_CompleteFilename( "demos", demoExt, qtrue );
+			}
 			else if( !Q_stricmp( baseCmd, "rcon" ) && completionArgument == 2 )
 			{
 				// Skip "rcon "
@@ -3216,14 +3268,26 @@ static void Field_CompleteCommand( char *cmd,
 				if( p > cmd )
 					Field_CompleteCommand( p, qtrue, qtrue );
 			}
-			else if( !Q_stricmp( baseCmd, "bind" ) && completionArgument >= 3 )
+			else if( !Q_stricmp( baseCmd, "bind" ) )
 			{
-				// Skip "bind <key> "
-				p = Com_SkipTokens( cmd, 2, " " );
+				if( completionArgument == 2 )
+				{
+					// Skip "bind "
+					p = Com_SkipTokens( cmd, 1, " " );
 
-				if( p > cmd )
-					Field_CompleteCommand( p, qtrue, qtrue );
+					if( p > cmd )
+						Field_CompleteKeyname( );
+				}
+				else if( completionArgument >= 3 )
+				{
+					// Skip "bind <key> "
+					p = Com_SkipTokens( cmd, 2, " " );
+
+					if( p > cmd )
+						Field_CompleteCommand( p, qtrue, qtrue );
+				}
 			}
+#endif
 		}
 	}
 	else
@@ -3244,23 +3308,11 @@ static void Field_CompleteCommand( char *cmd,
 			Cvar_CommandCompletion( FindMatches );
 
 		if( matchCount == 0 )
-			return;	// no matches
+			return; // no matches
 
-		if( cmd == completionField->buffer )
-		{
-#ifndef DEDICATED
-			Com_sprintf( completionField->buffer,
-					sizeof( completionField->buffer ), "\\%s", shortestMatch );
-#else
-			Com_sprintf( completionField->buffer,
-					sizeof( completionField->buffer ), "%s", shortestMatch );
-#endif
-		}
-		else
-		{
-			Q_strcat( completionField->buffer, sizeof( completionField->buffer ),
-					shortestMatch + strlen( completionString ) );
-		}
+		Q_strncpyz( &completionField->buffer[ strlen( completionField->buffer ) -
+			strlen( completionString ) ], shortestMatch,
+			sizeof( completionField->buffer ) );
 
 		completionField->cursor = strlen( completionField->buffer );
 
