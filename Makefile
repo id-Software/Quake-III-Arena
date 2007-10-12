@@ -257,6 +257,11 @@ ifeq ($(PLATFORM),linux)
     # linux32 make ...
     BASE_CFLAGS += -m32
     LDFLAGS+=-m32
+  else
+  ifeq ($(ARCH),ppc64)
+    BASE_CFLAGS += -m64
+    LDFLAGS += -m64
+  endif
   endif
 
   DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
