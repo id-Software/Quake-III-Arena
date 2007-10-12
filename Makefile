@@ -538,6 +538,63 @@ ifeq ($(PLATFORM),freebsd)
 else # ifeq freebsd
 
 #############################################################################
+# SETUP AND BUILD -- OPENBSD
+#############################################################################
+
+ifeq ($(PLATFORM),openbsd)
+
+  #default to i386, no tests done on anything else
+  ARCH=i386
+
+
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -DUSE_ICON $(shell sdl-config --cflags)
+
+  ifeq ($(USE_OPENAL),1)
+    BASE_CFLAGS += -DUSE_OPENAL
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    BASE_CFLAGS += -DUSE_CODEC_VORBIS
+  endif
+
+  BASE_CFLAGS += -DNO_VM_COMPILED -I/usr/X11R6/include -I/usr/local/include
+  RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 \
+    -march=pentium -fomit-frame-pointer -pipe -ffast-math \
+    -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+    -funroll-loops -fstrength-reduce
+  HAVE_VM_COMPILED=false
+
+  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+
+  SHLIBEXT=so
+  SHLIBCFLAGS=-fPIC
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+
+  THREAD_LDFLAGS=-lpthread
+  LDFLAGS=-lm
+
+  CLIENT_LDFLAGS =
+
+  CLIENT_LDFLAGS += $(shell sdl-config --libs) -lGL
+
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lopenal
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+  endif
+
+
+else # ifeq openbsd
+
+#############################################################################
 # SETUP AND BUILD -- NETBSD
 #############################################################################
 
@@ -670,6 +727,7 @@ endif #Linux
 endif #darwin
 endif #mingw32
 endif #FreeBSD
+endif #OpenBSD
 endif #NetBSD
 endif #IRIX
 endif #SunOS
