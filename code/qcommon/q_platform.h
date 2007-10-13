@@ -170,6 +170,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __FreeBSD__
 
+#include <sys/types.h>
 #include <machine/endian.h>
 
 #define OS_STRING "freebsd"
@@ -196,6 +197,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __OpenBSD__
 
+#include <sys/types.h>
 #include <machine/endian.h>
 
 #define OS_STRING "openbsd"
@@ -221,6 +223,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // This is very much like the FreeBSD one and can probably be merged
 #ifdef __NetBSD__
 
+#include <sys/types.h>
 #include <machine/endian.h>
 
 #define OS_STRING "netbsd"
