@@ -44,12 +44,12 @@ PLATFORM=$(COMPILE_PLATFORM)
 endif
 export PLATFORM
 
-ifndef ARCH
-ARCH=$(COMPILE_ARCH)
+ifeq ($(COMPILE_ARCH),powerpc)
+  COMPILE_ARCH=ppc
 endif
 
-ifeq ($(ARCH),powerpc)
-  ARCH=ppc
+ifndef ARCH
+ARCH=$(COMPILE_ARCH)
 endif
 export ARCH
 

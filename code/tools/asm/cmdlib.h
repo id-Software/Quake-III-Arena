@@ -115,14 +115,6 @@ void	ExtractFileExtension( const char *path, char *dest );
 
 int 	ParseNum (const char *str);
 
-short	BigShort (short l);
-short	LittleShort (short l);
-int		BigLong (int l);
-int		LittleLong (int l);
-float	BigFloat (float l);
-float	LittleFloat (float l);
-
-
 char *COM_Parse (char *data);
 
 extern	char		com_token[1024];
