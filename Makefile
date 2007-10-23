@@ -131,6 +131,7 @@ LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
+TOOLS_OPTIMIZE=-g -O2 -Wall -fno-strict-aliasing
 LOKISETUPDIR=misc/setup
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
@@ -909,11 +910,15 @@ makedirs:
 # QVM BUILD TOOLS
 #############################################################################
 
-TOOLS_CFLAGS = -O2 -Wall -fno-strict-aliasing -MMD \
+TOOLS_CFLAGS = $(TOOLS_OPTIMIZE) \
                -DTEMPDIR=\"$(TEMPDIR)\" -DSYSTEM=\"\" \
                -I$(Q3LCCSRCDIR) \
                -I$(LBURGDIR)
 TOOLS_LDFLAGS =
+
+ifeq ($(GENERATE_DEPENDENCIES),1)
+	TOOLS_CFLAGS += -MMD
+endif
 
 define DO_TOOLS_CC
 $(echo_cmd) "TOOLS_CC $<"
