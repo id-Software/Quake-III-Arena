@@ -122,6 +122,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef __linux__
 
+#include <endian.h>
+
 #define OS_STRING "linux"
 #define ID_INLINE inline
 #define PATH_SEP '/'
