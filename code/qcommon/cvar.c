@@ -497,9 +497,6 @@ Handles variable inspection and changing from the console
 */
 qboolean Cvar_Command( void ) {
 	cvar_t	*v;
-	char		string[ TRUNCATE_LENGTH ];
-	char		resetString[ TRUNCATE_LENGTH ];
-	char		latchedString[ TRUNCATE_LENGTH ];
 
 	// check variables
 	v = Cvar_FindVar (Cmd_Argv(0));
@@ -509,25 +506,22 @@ qboolean Cvar_Command( void ) {
 
 	// perform a variable print or set
 	if ( Cmd_Argc() == 1 ) {
-		Com_TruncateLongString( string, v->string );
-		Com_TruncateLongString( resetString, v->resetString );
 		Com_Printf ("\"%s\" is:\"%s" S_COLOR_WHITE "\"",
-				v->name, string );
+				v->name, v->string );
 
 		if ( !( v->flags & CVAR_ROM ) ) {
-			if ( !Q_stricmp( string, resetString ) ) {
+			if ( !Q_stricmp( v->string, v->resetString ) ) {
 				Com_Printf (", the default" );
 			} else {
 				Com_Printf (" default:\"%s" S_COLOR_WHITE "\"",
-						resetString );
+						v->resetString );
 			}
 		}
 
 		Com_Printf ("\n");
 
 		if ( v->latchedString ) {
-			Com_TruncateLongString( latchedString, v->latchedString );
-			Com_Printf( "latched: \"%s\"\n", latchedString );
+			Com_Printf( "latched: \"%s\"\n", v->latchedString );
 		}
 		return qtrue;
 	}
