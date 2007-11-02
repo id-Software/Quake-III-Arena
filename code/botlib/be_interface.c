@@ -136,7 +136,7 @@ qboolean BotLibSetup(char *str)
 int Export_BotLibSetup(void)
 {
 	int		errnum;
-	char		logfilename[MAX_QPATH];
+	char		logfilename[MAX_OSPATH];
 	char		*homedir, *gamedir;
 	
 	bot_developer = LibVarGetValue("bot_developer");

@@ -366,7 +366,12 @@ ifeq ($(PLATFORM),darwin)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
-  BASE_CFLAGS += -D_THREAD_SAFE=1 -I$(SDLHDIR)/include
+  BASE_CFLAGS += -D_THREAD_SAFE=1
+
+  ifeq ($(USE_LOCAL_HEADERS),1)
+    BASE_CFLAGS += -I$(SDLHDIR)/include
+  endif
+
   # We copy sdlmain before ranlib'ing it so that subversion doesn't think
   #  the file has been modified by each build.
   LIBSDLMAIN=$(B)/libSDLmain.a
@@ -408,7 +413,11 @@ endif
   ARCH=x86
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -DUSE_ICON -I$(SDLHDIR)/include
+    -DUSE_ICON
+
+  ifeq ($(USE_LOCAL_HEADERS),1)
+    BASE_CFLAGS += -I$(SDLHDIR)/include
+  endif
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN

@@ -19,13 +19,11 @@ along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-#include <unistd.h>
+
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -34,8 +32,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <errno.h>
 
 #ifndef DEDICATED
-#include "SDL.h"
-#include "SDL_cpuinfo.h"
+#ifdef USE_LOCAL_HEADERS
+#	include "SDL.h"
+#	include "SDL_cpuinfo.h"
+#else
+#	include <SDL.h>
+#	include <SDL_cpuinfo.h>
+#endif
 #endif
 
 #include "sys_local.h"
@@ -163,10 +166,7 @@ void Sys_Exit( int ex )
 #endif
 
 #ifdef NDEBUG
-	// _exit is called instead of exit since there are rumours of
-	// GL libraries installing atexit calls that we don't want to call
-	// FIXME: get some testing done with plain exit
-	_exit(ex);
+	exit(ex);
 #else
 	// Cause a backtrace on error exits
 	assert( ex == 0 );
@@ -436,7 +436,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 {
 	void  *libHandle;
 	void  (*dllEntry)( intptr_t (*syscallptr)(intptr_t, ...) );
-	char  curpath[MAX_OSPATH];
 	char  fname[MAX_OSPATH];
 	char  *basepath;
 	char  *homepath;
@@ -445,7 +444,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 
 	assert( name );
 
-	getcwd(curpath, sizeof(curpath));
 	Q_snprintf (fname, sizeof(fname), "%s" ARCH_STRING DLL_EXT, name);
 
 	// TODO: use fs_searchpaths from files.c

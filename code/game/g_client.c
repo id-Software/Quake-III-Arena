@@ -629,7 +629,7 @@ static void ClientCleanName( const char *in, char *out, int outSize ) {
 		}
 
 		// don't allow leading spaces
-		if( !*p && ch == ' ' ) {
+		if( colorlessLen == 0 && ch == ' ' ) {
 			continue;
 		}
 
@@ -658,11 +658,15 @@ static void ClientCleanName( const char *in, char *out, int outSize ) {
 		}
 
 		// don't allow too many consecutive spaces
+		// don't count spaces in colorlessLen
 		if( ch == ' ' ) {
 			spaces++;
 			if( spaces > 3 ) {
 				continue;
 			}
+			*out++ = ch;
+			len++;
+			continue;
 		}
 		else {
 			spaces = 0;

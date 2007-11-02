@@ -57,7 +57,12 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+#ifndef __MINGW32__
+IDI_ICON1               ICON    DISCARDABLE     "../quake3.ico"
+#else
 IDI_ICON1               ICON    DISCARDABLE     "misc/quake3.ico"
+#endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

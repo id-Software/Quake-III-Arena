@@ -1357,7 +1357,6 @@ void WriteVmFile( void ) {
 	vmHeader_t	header;
 	FILE	*f;
 	int		headerSize;
-	int i;
 
 	report( "%i total errors\n", errorCount );
 
@@ -1403,9 +1402,13 @@ void WriteVmFile( void ) {
 	report( "Writing to %s\n", imageName );
 
 #ifdef Q3_BIG_ENDIAN
-	// byte swap the header
-	for ( i = 0 ; i < sizeof( vmHeader_t ) / 4 ; i++ ) {
-		((int *)&header)[i] = LittleLong( ((int *)&header)[i] );
+	{
+		int i;
+
+		// byte swap the header
+		for ( i = 0 ; i < sizeof( vmHeader_t ) / 4 ; i++ ) {
+			((int *)&header)[i] = LittleLong( ((int *)&header)[i] );
+		}
 	}
 #endif
 
