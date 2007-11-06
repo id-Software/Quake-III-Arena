@@ -835,7 +835,7 @@ endef
 
 define DO_AS
 $(echo_cmd) "AS $<"
-$(Q)$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+$(Q)$(CC) $(CFLAGS) -x assembler-with-cpp -o $@ -c $<
 endef
 
 define DO_DED_CC
