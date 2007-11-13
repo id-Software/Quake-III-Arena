@@ -1,7 +1,7 @@
 #!/bin/bash
 
-: ${MAKESELF:=/usr/share/loki_setup/makeself}
-: ${SETUPIMAGE:=/usr/share/loki_setup/image}
+: ${MAKESELF:=/usr/share/loki-setup/makeself}
+: ${SETUPIMAGE:=/usr/share/loki-setup/image}
 
 : ${VERSION:=0.0_`date +%Y%m%d%H%M`}
 : ${RELEASE:=0}
@@ -9,7 +9,7 @@
 set -e
 set -x
 
-arch=`uname -m`
+shopt -s nullglob
 
 rm -rf image
 mkdir image
@@ -24,82 +24,89 @@ rm -f image/quake3.png
 cp ../quake3.png image/quake3.png
 
 ### binaries
-src="../../../../../build"
+topdir="../.."
 
-mkdir image/tmp
-pushd image/tmp
-mkdir baseq3 demoq3 missionpack
-# 32 bit binaries
-install -m 755 $src/release-linux-i386/ioquake3.i386 ioquake3.i386
-install -m 755 $src/release-linux-i386/ioq3ded.i386 ioq3ded.i386
-install -m 644 $src/release-linux-i386/baseq3/*.so baseq3
-install -m 644 $src/release-linux-i386/missionpack/*.so missionpack
-pushd demoq3
-ln -s ../baseq3/*.so .
-popd
-popd
+echo "changequote(\`[', \`]')dnl" > defines.m4
+echo "define(VERSION,$VERSION)dnl" >> defines.m4
 
-tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.i386.tar .
-rm -rf ./image/tmp
+copystartscript()
+{
+	local arch="$1"
+	mkdir -p image/bin/Linux/$arch
+	if [ "$arch" = x86_64 ]; then
+		ln -s x86_64 image/bin/Linux/amd64
+	fi
+	install -m 755 ioquake3.sh image/bin/Linux/$arch/ioquake3
+	install -m 755 ioq3demo.sh image/bin/Linux/$arch/ioq3demo
+}
 
-mkdir image/tmp
-pushd image/tmp
-mkdir baseq3 demoq3 missionpack
-# 64 bit binaries
-install -m 755 $src/release-linux-x86_64/ioquake3.x86_64 ioquake3.x86_64
-install -m 755 $src/release-linux-x86_64/ioq3ded.x86_64 ioq3ded.x86_64
-install -m 644 $src/release-linux-x86_64/baseq3/*.so baseq3
-install -m 644 $src/release-linux-x86_64/missionpack/*.so missionpack
-pushd demoq3
-ln -s ../baseq3/*.so .
-popd
-popd
+archs=()
+for arch in $topdir/build/release-*; do
+	arch=${arch##*-}
+	case "$arch" in
+		i386) echo "define(HAVE_I386,yes)dnl" >> defines.m4
+			copystartscript x86
+		;;
+		x86_64) echo "define(HAVE_X86_64,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		ppc) echo "define(HAVE_PPC,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		*)
+			echo "architecture $arch unsupported"
+			continue;
+		;;
+	esac
+	archs[${#archs[@]}]=$arch
+done
 
-tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.x86_64.tar .
-rm -rf image/tmp
+for arch in "${archs[@]}"; do
+	dst=image/tmp
+	mkdir $dst
+	mkdir $dst/baseq3 $dst/demoq3 $dst/missionpack
+	install -m 755 $topdir/build/release-linux-$arch/ioquake3.$arch $dst/ioquake3.$arch
+	install -m 755 $topdir/build/release-linux-$arch/ioq3ded.$arch $dst/ioq3ded.$arch
+	install -m 644 $topdir/build/release-linux-$arch/baseq3/*.so $dst/baseq3
+	install -m 644 $topdir/build/release-linux-$arch/missionpack/*.so $dst/missionpack
+	for i in cgame qagame ui; do
+		ln -s ../baseq3/$i$arch.so $dst/demoq3
+	done
 
-mkdir image/tmp
-pushd image/tmp
-mkdir baseq3 demoq3 missionpack
-# ppc binaries
-install -m 755 $src/release-linux-ppc/ioquake3.ppc ioquake3.ppc
-install -m 755 $src/release-linux-ppc/ioq3ded.ppc ioq3ded.ppc
-install -m 644 $src/release-linux-ppc/baseq3/*.so baseq3
-install -m 644 $src/release-linux-ppc/missionpack/*.so missionpack
-pushd demoq3
-ln -s ../baseq3/*.so .
-popd
-popd
-
-tar --owner=root --group=root -C ./image/tmp -cf ./image/ioquake3.ppc.tar .
-rm -rf image/tmp
+	tar --owner=root --group=root -C $dst -cf ./image/ioquake3.$arch.tar .
+	rm -rf ./image/tmp
+done
 
 # patch pk3 files
-install -m 644 ./idpatchpk3s.tar image/idpatchpk3s.tar
-install -m 644 ./idtapatchpk3s.tar image/idtapatchpk3s.tar
-
-### setup.xml
-sed 's/@VERSION@/'$VERSION'/g' < setup.xml > image/setup.data/setup.xml
+if [ -e ./idpatchpk3s.tar -a -e ./idtapatchpk3s.tar ]; then
+	install -m 644 ./idpatchpk3s.tar image/idpatchpk3s.tar
+	install -m 644 ./idtapatchpk3s.tar image/idtapatchpk3s.tar
+	install -m 644 ./id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
+	echo "define(HAVE_PATCHPK3,yes)dnl" >> defines.m4
+elif [ -e quake3-latest-pk3s.zip ]; then
+	unzip quake3-latest-pk3s.zip
+	chmod 644 quake3-latest-pk3s/*/*.pk3
+	tar -C quake3-latest-pk3s/baseq3 -cf image/idpatchpk3s.tar .
+	tar -C quake3-latest-pk3s/missionpack -cf image/idtapatchpk3s.tar .
+	rm -r quake3-latest-pk3s
+	install -m 644 id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
+	echo "define(HAVE_PATCHPK3,yes)dnl" >> defines.m4
+fi
 
 ### uninstall script
 install -m 755 ./preuninstall.sh image/preuninstall.sh
 
-### start script
-mkdir -p image/bin/Linux/x86
-mkdir -p image/bin/Linux/x86_64
-mkdir -p image/bin/Linux/ppc
-
-install -m 755 ioquake3.sh image/bin/Linux/x86/ioquake3
-install -m 755 ioq3demo.sh image/bin/Linux/x86/ioq3demo
-install -m 755 ioquake3.sh image/bin/Linux/x86_64/ioquake3
-install -m 755 ioq3demo.sh image/bin/Linux/x86_64/ioq3demo
-install -m 755 ioquake3.sh image/bin/Linux/ppc/ioquake3
-install -m 755 ioq3demo.sh image/bin/Linux/ppc/ioq3demo
 
 ### README, COPYING and EULA
-install -m 644 ../../../README image/README
-install -m 644 ../../../COPYING.txt image/COPYING
-install -m 644 ./id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
+install -m 644 $topdir/README image/README
+install -m 644 $topdir/COPYING.txt image/COPYING
+
+# create setup.xml
+m4 defines.m4 setup.xml.in > image/setup.data/setup.xml
 
 ### makeself installer
-$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE.run "ioquake3 $VERSION-$RELEASE" ./setup.sh
+ARCH=
+if [ "${#archs[@]}" -eq 1 ]; then
+	ARCH=.$arch
+fi
+$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE$ARCH.run "ioquake3 $VERSION-$RELEASE" ./setup.sh
