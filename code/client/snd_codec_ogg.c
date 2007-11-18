@@ -251,7 +251,7 @@ snd_stream_t *S_OGG_CodecOpenStream(const char *filename)
 	vf = Z_Malloc(sizeof(OggVorbis_File));
 	if(!vf)
 	{
-		S_CodecUtilClose(stream);
+		S_CodecUtilClose(&stream);
 
 		return NULL;
 	}
@@ -261,7 +261,7 @@ snd_stream_t *S_OGG_CodecOpenStream(const char *filename)
 	{
 		Z_Free(vf);
 
-		S_CodecUtilClose(stream);
+		S_CodecUtilClose(&stream);
 
 		return NULL;
 	}
@@ -273,7 +273,7 @@ snd_stream_t *S_OGG_CodecOpenStream(const char *filename)
 
 		Z_Free(vf);
 
-		S_CodecUtilClose(stream);
+		S_CodecUtilClose(&stream);
 
 		return NULL;
 	}
@@ -285,7 +285,7 @@ snd_stream_t *S_OGG_CodecOpenStream(const char *filename)
 
 		Z_Free(vf);
 
-		S_CodecUtilClose(stream);
+		S_CodecUtilClose(&stream);
 
 		return NULL;  
 	}
@@ -298,7 +298,7 @@ snd_stream_t *S_OGG_CodecOpenStream(const char *filename)
 
 		Z_Free(vf);
 
-		S_CodecUtilClose(stream);
+		S_CodecUtilClose(&stream);
 
 		return NULL;  
 	}
@@ -343,7 +343,7 @@ void S_OGG_CodecCloseStream(snd_stream_t *stream)
 	Z_Free(stream->ptr);
 
 	// close the stream
-	S_CodecUtilClose(stream);
+	S_CodecUtilClose(&stream);
 }
 
 /*

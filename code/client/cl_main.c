@@ -889,6 +889,8 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	// Stop recording any video
 	if( CL_VideoRecording( ) ) {
+		// Finish rendering current frame
+		SCR_UpdateScreen( );
 		CL_CloseAVI( );
 	}
 	CL_UpdateGUID( NULL, 0 );

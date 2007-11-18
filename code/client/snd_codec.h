@@ -77,7 +77,7 @@ int S_CodecReadStream(snd_stream_t *stream, int bytes, void *buffer);
 
 // Util functions (used by codecs)
 snd_stream_t *S_CodecUtilOpen(const char *filename, snd_codec_t *codec);
-void S_CodecUtilClose(snd_stream_t *stream);
+void S_CodecUtilClose(snd_stream_t **stream);
 
 // WAV Codec
 extern snd_codec_t wav_codec;

@@ -255,7 +255,7 @@ snd_stream_t *S_WAV_CodecOpenStream(const char *filename)
 	// Read the RIFF header
 	if(!S_ReadRIFFHeader(rv->file, &rv->info))
 	{
-		S_CodecUtilClose(rv);
+		S_CodecUtilClose(&rv);
 		return NULL;
 	}
 
@@ -269,7 +269,7 @@ S_WAV_CodecCloseStream
 */
 void S_WAV_CodecCloseStream(snd_stream_t *stream)
 {
-	S_CodecUtilClose(stream);
+	S_CodecUtilClose(&stream);
 }
 
 /*

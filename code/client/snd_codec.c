@@ -226,8 +226,9 @@ snd_stream_t *S_CodecUtilOpen(const char *filename, snd_codec_t *codec)
 S_CodecUtilClose
 =================
 */
-void S_CodecUtilClose(snd_stream_t *stream)
+void S_CodecUtilClose(snd_stream_t **stream)
 {
-	FS_FCloseFile(stream->file);
-	Z_Free(stream);
+	FS_FCloseFile((*stream)->file);
+	Z_Free(*stream);
+	*stream = NULL;
 }
