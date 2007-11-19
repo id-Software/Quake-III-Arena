@@ -168,7 +168,7 @@ void CON_Shutdown( void )
 	}
 
   // Restore blocking to stdin reads
-  fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NDELAY );
+  fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NONBLOCK );
 }
 
 /*
@@ -256,7 +256,7 @@ void CON_Init( void )
 	signal(SIGTTOU, SIG_IGN);
 
 	// Make stdin reads non-blocking
-	fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) | O_NDELAY );
+	fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) | O_NONBLOCK );
 
 	if (isatty(STDIN_FILENO)!=1)
 	{
