@@ -284,6 +284,8 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 	cvar_vars = var;
 
 	var->flags = flags;
+	// note what types of cvars have been modified (userinfo, archive, serverinfo, systeminfo)
+	cvar_modifiedFlags |= var->flags;
 
 	hash = generateHashValue(var_name);
 	var->hashNext = hashTable[hash];

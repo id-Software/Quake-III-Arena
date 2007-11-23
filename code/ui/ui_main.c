@@ -578,7 +578,6 @@ static void Text_Paint_Limit(float *maxX, float x, float y, float scale, vec4_t 
 void UI_ShowPostGame(qboolean newHigh) {
 	trap_Cvar_Set ("cg_cameraOrbit", "0");
 	trap_Cvar_Set("cg_thirdPerson", "0");
-	trap_Cvar_Set( "sv_killserver", "1" );
 	uiInfo.soundHighScore = newHigh;
   _UI_SetActiveMenu(UIMENU_POSTGAME);
 }
