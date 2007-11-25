@@ -6,8 +6,8 @@
 
 COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
-ifeq ($(COMPILE_PLATFORM),darwin)
-  # Apple does some things a little differently...
+ifeq ($(COMPILE_PLATFORM),sunos)
+  # Solaris uname and GNU uname differ
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 else
   COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
@@ -794,6 +794,9 @@ ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
 
+# Require a minimum version of SDL
+BASE_CFLAGS += -DMINSDL_MAJOR=1 -DMINSDL_MINOR=2 -DMINSDL_PATCH=7
+
 ifeq ($(V),1)
 echo_cmd=@:
 Q=
@@ -866,7 +869,7 @@ release:
 
 # Create the build directories, check libraries and print out
 # an informational message, then start building
-targets: makedirs libversioncheck
+targets: makedirs
 	@echo ""
 	@echo "Building ioquake3 in $(B):"
 	@echo "  PLATFORM: $(PLATFORM)"
@@ -1053,29 +1056,6 @@ $(B)/tools/asm/%.o: $(Q3ASMDIR)/%.c
 $(Q3ASM): $(Q3ASMOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $^
-
-
-#############################################################################
-# LIBRARY VERSION CHECKS
-#############################################################################
-
-MINSDL_MAJOR  = 1
-MINSDL_MINOR  = 2
-MINSDL_PATCH  = 7
-
-BASE_CFLAGS += -DMINSDL_MAJOR=$(MINSDL_MAJOR) \
-               -DMINSDL_MINOR=$(MINSDL_MINOR) \
-               -DMINSDL_PATCH=$(MINSDL_PATCH)
-
-libversioncheck:
-	@/bin/echo -e "#include \"SDL_version.h\"\n" \
-		"#if SDL_VERSION_ATLEAST(" \
-		"$(MINSDL_MAJOR),$(MINSDL_MINOR),$(MINSDL_PATCH)" \
-		")\nMINSDL_PASSED\n#endif" | \
-		$(CC) $(BASE_CFLAGS) -E - | grep -q MINSDL_PASSED || \
-		( /bin/echo "SDL version" \
-		"$(MINSDL_MAJOR).$(MINSDL_MINOR).$(MINSDL_PATCH)" \
-		"or greater required" && exit 1 )
 
 
 #############################################################################
@@ -1924,6 +1904,6 @@ TOOLSOBJ_D_FILES=$(filter %.d,$(TOOLSOBJ:%.o=%.d))
 -include $(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
 
 .PHONY: all clean clean2 clean-debug clean-release copyfiles \
-	debug default dist distclean installer libversioncheck makedirs \
+	debug default dist distclean installer makedirs \
 	release targets \
 	toolsclean toolsclean2 toolsclean-debug toolsclean-release

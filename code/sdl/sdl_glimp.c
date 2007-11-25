@@ -396,9 +396,9 @@ static void GLimp_InitExtensions( void )
 	{
 		if ( r_ext_multitexture->value )
 		{
-			qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
-			qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
+			qglMultiTexCoord2fARB = SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
+			qglActiveTextureARB = SDL_GL_GetProcAddress( "glActiveTextureARB" );
+			qglClientActiveTextureARB = SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
 
 			if ( qglActiveTextureARB )
 			{
