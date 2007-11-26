@@ -636,12 +636,15 @@ else # ifeq netbsd
 # SETUP AND BUILD -- IRIX
 #############################################################################
 
-ifeq ($(PLATFORM),irix)
+ifeq ($(PLATFORM),irix64)
 
   ARCH=mips  #default to MIPS
 
-  BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 -mips3 \
-    -nostdinc -I. -I$(ROOT)/usr/include -DNO_VM_COMPILED
+  CC = c99
+  MKDIR = mkdir -p
+
+  BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 \
+    -I. $(shell sdl-config --cflags) -I$(ROOT)/usr/include -DNO_VM_COMPILED
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
@@ -649,8 +652,10 @@ ifeq ($(PLATFORM),irix)
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared
 
-  LDFLAGS=-ldl -lm
-  CLIENT_LDFLAGS=-L/usr/X11/$(LIB) -lGL -lX11 -lXext -lm
+  LDFLAGS=-ldl -lm -lgen
+  # FIXME: The X libraries probably aren't necessary?
+  CLIENT_LDFLAGS=-L/usr/X11/$(LIB) $(shell sdl-config --libs) -lGL \
+    -lX11 -lXext -lm
 
 else # ifeq IRIX
 
@@ -793,9 +798,6 @@ endif
 ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
-
-# Require a minimum version of SDL
-BASE_CFLAGS += -DMINSDL_MAJOR=1 -DMINSDL_MINOR=2 -DMINSDL_PATCH=7
 
 ifeq ($(V),1)
 echo_cmd=@:

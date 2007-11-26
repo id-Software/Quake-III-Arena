@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS;USE_OPENAL;_CRT_SECURE_NO_DEPRECATE;MINSDL_MAJOR=1;MINSDL_MINOR=2;MINSDL_PATCH=7;BOTLIB;USE_ICON;USE_CURL"
+				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS;USE_OPENAL;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"

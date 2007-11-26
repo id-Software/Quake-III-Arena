@@ -50,6 +50,7 @@ static qboolean	winsockInitialized = qfalse;
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #ifdef MACOS_X
