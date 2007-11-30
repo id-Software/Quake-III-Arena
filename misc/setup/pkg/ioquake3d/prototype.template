@@ -1,6 +1,5 @@
 !default 0755 root bin
 i pkginfo
-i copyright
 i depend
 i postinstall
 i postremove

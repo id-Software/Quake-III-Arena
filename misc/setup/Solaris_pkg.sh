@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Source directory
-MOUNT_DIR="../../.."
+MOUNT_DIR="../.."
 
 # Solaris stuff
 PLATFORM=`uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'`
@@ -29,9 +29,9 @@ DATA_PKGFILE="${PKG_DATA_NAME}-${BUILD_VERSION}-${PKG_VERSION}-${ARCH}.pkg"
 
 # build directories
 BUILD_DIR="${MOUNT_DIR}/build/release-${PLATFORM}-${ARCH}"
-PKG_SRC_DIR="${MOUNT_DIR}/code/unix/setup/pkg/${PKG_SOLARIS_NAME}"
+PKG_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_SOLARIS_NAME}"
 PKG_BUILD_DIR="/tmp/ioquake3-build/${PKG_SOLARIS_NAME}-${BUILD_VERSION}"
-PKG_DATA_SRC_DIR="${MOUNT_DIR}/code/unix/setup/pkg/${PKG_DATA_NAME}"
+PKG_DATA_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_DATA_NAME}"
 PKG_DATA_BUILD_DIR="/usr/local/src/quake3-data/quake3"
 
 # Tools
@@ -80,8 +80,8 @@ if [ -d ${BUILD_DIR} ]; then
 
 	for EXEC_SH in ioq3ded.sh ioquake3.sh
 	do
-		if [ -f ${MOUNT_DIR}/code/unix/setup/pkg/${EXEC_SH} ]; then
-        		${INSTALL_BIN} ${MOUNT_DIR}/code/unix/setup/pkg/${EXEC_SH} ${PKG_BUILD_DIR}/${EXEC_SH}
+		if [ -f ${MOUNT_DIR}/misc/setup/pkg/${EXEC_SH} ]; then
+        		${INSTALL_BIN} ${MOUNT_DIR}/misc/setup/pkg/${EXEC_SH} ${PKG_BUILD_DIR}/${EXEC_SH}
 		fi
 	done
 
@@ -118,7 +118,7 @@ if [ -d ${BUILD_DIR} ]; then
 		fi
 	fi
 	if [ -f ${EULA_DIR}/id_patch_pk3s_Q3A_EULA.txt ]; then
-	${INSTALL_DATA} ${EULA_DIR}/id_patch_pk3s_Q3A_EULA.txt ${PKG_DATA_SRC_DIR}/copyright
+		${INSTALL_DATA} ${EULA_DIR}/id_patch_pk3s_Q3A_EULA.txt ${PKG_DATA_SRC_DIR}/copyright
 	fi
 
         ${PKGPROTO} ${PKG_DATA_BUILD_DIR}=quake3 | \

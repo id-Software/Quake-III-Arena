@@ -702,6 +702,7 @@ ifeq ($(PLATFORM),sunos)
     BASE_CFLAGS += -m32
     LDFLAGS += -m32
     BASE_CFLAGS += -I/usr/X11/include/NVIDIA
+    CLIENT_LDFLAGS += -L/usr/X11/lib/NVIDIA -R/usr/X11/lib/NVIDIA
   endif
   endif
 
@@ -722,7 +723,7 @@ ifeq ($(PLATFORM),sunos)
 
   BOTCFLAGS=-O0
 
-  CLIENT_LDFLAGS=$(shell sdl-config --libs) -lGL
+  CLIENT_LDFLAGS +=$(shell sdl-config --libs) -lGL
 
 else # ifeq sunos
 
