@@ -525,3 +525,43 @@ void Sys_Sleep( int msec )
 		WaitForSingleObject( GetStdHandle( STD_INPUT_HANDLE ), msec );
 }
 
+/*
+==============
+Sys_ErrorDialog
+
+Display an error message
+==============
+*/
+void Sys_ErrorDialog( const char *error )
+{
+	if( MessageBox( NULL, va( "%s. Copy console log to clipboard?", error ),
+			NULL, MB_YESNO|MB_ICONERROR ) == IDYES )
+	{
+		HGLOBAL memoryHandle;
+		char *clipMemory;
+
+		memoryHandle = GlobalAlloc( GMEM_MOVEABLE|GMEM_DDESHARE, CON_LogSize( ) + 1 );
+		clipMemory = (char *)GlobalLock( memoryHandle );
+
+		if( clipMemory )
+		{
+			char *p = clipMemory;
+			char buffer[ 1024 ];
+			unsigned int size;
+
+			while( ( size = CON_LogRead( buffer, sizeof( buffer ) ) ) > 0 )
+			{
+				Com_Memcpy( p, buffer, size );
+				p += size;
+			}
+
+			*p = '\0';
+
+			if( OpenClipboard( NULL ) && EmptyClipboard( ) )
+				SetClipboardData( CF_TEXT, memoryHandle );
+
+			GlobalUnlock( clipMemory );
+			CloseClipboard( );
+		}
+	}
+}

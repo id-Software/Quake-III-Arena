@@ -2872,7 +2872,7 @@ static void FS_CheckPak0( void )
 		if(!fs_gamedirvar->string[0]
 		|| !Q_stricmp( fs_gamedirvar->string, BASEGAME )
 		|| !Q_stricmp( fs_gamedirvar->string, "missionpack" ))
-			Com_Error(ERR_FATAL, "\n*** you need to install Quake III Arena in order to play ***");
+			Com_Error(ERR_FATAL, "You need to install Quake III Arena in order to play");
 	}
 }
 

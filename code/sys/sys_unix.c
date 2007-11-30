@@ -19,6 +19,11 @@ along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
+
+#include "../qcommon/q_shared.h"
+#include "../qcommon/qcommon.h"
+#include "sys_local.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -29,9 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/time.h>
 #include <pwd.h>
 #include <libgen.h>
-
-#include "../qcommon/q_shared.h"
-#include "../qcommon/qcommon.h"
 
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
@@ -475,4 +477,34 @@ void Sys_Sleep( int msec )
 		timeout.tv_usec = (msec%1000)*1000;
 		select((fileno(stdin) + 1), &fdset, NULL, NULL, &timeout);
 	}
+}
+
+/*
+==============
+Sys_ErrorDialog
+
+Display an error message
+==============
+*/
+void Sys_ErrorDialog( const char *error )
+{
+	char buffer[ 1024 ];
+	unsigned int size;
+	fileHandle_t f;
+	const char *fileName = "crashlog.txt";
+
+	Sys_Print( va( "%s\n", error ) );
+
+	// Write console log to file
+	f = FS_FOpenFileWrite( fileName );
+	if( !f )
+	{
+		Com_Printf( "ERROR: couldn't open %s\n", fileName );
+		return;
+	}
+
+	while( ( size = CON_LogRead( buffer, sizeof( buffer ) ) ) > 0 )
+		FS_Write( buffer, size, f );
+
+	FS_FCloseFile( f );
 }
