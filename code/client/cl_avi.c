@@ -250,14 +250,17 @@ void CL_WriteAVIHeader( void )
           WRITE_2BYTES( 1 );                    //biPlanes
           WRITE_2BYTES( 24 );                   //biBitCount
 
-          if( afd.motionJpeg )   {              //biCompression
+          if( afd.motionJpeg )                  //biCompression
+          {
             WRITE_STRING( "MJPG" );
             WRITE_4BYTES( afd.width *
-              afd.height );                     //biSizeImage
-          } else {
+                afd.height );                   //biSizeImage
+          }
+          else
+          {
             WRITE_4BYTES( 0 );                  // BI_RGB
             WRITE_4BYTES( afd.width *
-            afd.height*3 );                     //biSizeImage
+                afd.height * 3 );               //biSizeImage
           }
 
           WRITE_4BYTES( 0 );                    //biXPelsPetMeter
@@ -391,10 +394,14 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   }
   else if( Q_stricmp( Cvar_VariableString( "s_backend" ), "OpenAL" ) )
   {
-    if( afd.a.bits == 16 && afd.a.channels == 2 )
-      afd.audio = qtrue;
+    if( afd.a.bits != 16 || afd.a.channels != 2 )
+    {
+      Com_Printf( S_COLOR_YELLOW "WARNING: Audio format of %d bit/%d channels not supported",
+          afd.a.bits, afd.a.channels );
+      afd.audio = qfalse;
+    }
     else
-      afd.audio = qfalse; //FIXME: audio not implemented for this case
+      afd.audio = qtrue;
   }
   else
   {
@@ -542,7 +549,7 @@ void CL_WriteAVIAudioFrame( const byte *pcmBuffer, int size )
     WRITE_4BYTES( bytesInBuffer );
 
     SafeFS_Write( buffer, 8, afd.f );
-    SafeFS_Write( pcmBuffer, bytesInBuffer, afd.f );
+    SafeFS_Write( pcmCaptureBuffer, bytesInBuffer, afd.f );
     SafeFS_Write( padding, paddingSize, afd.f );
     afd.fileSize += ( chunkSize + paddingSize );
 
