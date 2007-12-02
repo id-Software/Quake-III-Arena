@@ -1150,6 +1150,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\code\sys\con_log.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\sys\con_passive.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\qcommon\cvar.c"
 				>
 				<FileConfiguration

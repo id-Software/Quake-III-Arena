@@ -27,8 +27,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_LOG 32768
 
 static char          consoleLog[ MAX_LOG ];
-static unsigned int  write = 0;
-static unsigned int  read = 0;
+static unsigned int  writePos = 0;
+static unsigned int  readPos = 0;
 
 /*
 ==================
@@ -37,10 +37,10 @@ CON_LogSize
 */
 unsigned int CON_LogSize( void )
 {
-	if( read <= write )
-		return write - read;
+	if( readPos <= writePos )
+		return writePos - readPos;
 	else
-		return write + MAX_LOG - read;
+		return writePos + MAX_LOG - readPos;
 }
 
 /*
@@ -67,19 +67,19 @@ unsigned int CON_LogWrite( const char *in )
 	while( CON_LogFree( ) < length && CON_LogSize( ) > 0 )
 	{
 		// Free enough space
-		while( consoleLog[ read ] != '\n' && CON_LogSize( ) > 1 )
-			read = ( read + 1 ) % MAX_LOG;
+		while( consoleLog[ readPos ] != '\n' && CON_LogSize( ) > 1 )
+			readPos = ( readPos + 1 ) % MAX_LOG;
 
 		// Skip past the '\n'
-		read = ( read + 1 ) % MAX_LOG;
+		readPos = ( readPos + 1 ) % MAX_LOG;
 	}
 
 	if( CON_LogFree( ) < length )
 		return 0;
 
-	if( write + length > MAX_LOG )
+	if( writePos + length > MAX_LOG )
 	{
-		firstChunk  = MAX_LOG - write;
+		firstChunk  = MAX_LOG - writePos;
 		secondChunk = length - firstChunk;
 	}
 	else
@@ -88,10 +88,10 @@ unsigned int CON_LogWrite( const char *in )
 		secondChunk = 0;
 	}
 
-	Com_Memcpy( consoleLog + write, in, firstChunk );
+	Com_Memcpy( consoleLog + writePos, in, firstChunk );
 	Com_Memcpy( consoleLog, in + firstChunk, secondChunk );
 
-	write = ( write + length ) % MAX_LOG;
+	writePos = ( writePos + length ) % MAX_LOG;
 
 	return length;
 }
@@ -109,9 +109,9 @@ unsigned int CON_LogRead( char *out, unsigned int outSize )
 	if( CON_LogSize( ) < outSize )
 		outSize = CON_LogSize( );
 
-	if( read + outSize > MAX_LOG )
+	if( readPos + outSize > MAX_LOG )
 	{
-		firstChunk  = MAX_LOG - read;
+		firstChunk  = MAX_LOG - readPos;
 		secondChunk = outSize - firstChunk;
 	}
 	else
@@ -120,10 +120,10 @@ unsigned int CON_LogRead( char *out, unsigned int outSize )
 		secondChunk = 0;
 	}
 
-	Com_Memcpy( out, consoleLog + read, firstChunk );
+	Com_Memcpy( out, consoleLog + readPos, firstChunk );
 	Com_Memcpy( out + firstChunk, out, secondChunk );
 
-	read = ( read + outSize ) % MAX_LOG;
+	readPos = ( readPos + outSize ) % MAX_LOG;
 
 	return outSize;
 }
