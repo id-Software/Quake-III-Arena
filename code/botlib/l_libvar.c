@@ -84,9 +84,9 @@ libvar_t *LibVarAlloc(char *var_name)
 {
 	libvar_t *v;
 
-	v = (libvar_t *) GetMemory(sizeof(libvar_t) + strlen(var_name) + 1);
+	v = (libvar_t *) GetMemory(sizeof(libvar_t));
 	Com_Memset(v, 0, sizeof(libvar_t));
-	v->name = (char *) v + sizeof(libvar_t);
+	v->name = (char *) GetMemory(strlen(var_name)+1);
 	strcpy(v->name, var_name);
 	//add the variable in the list
 	v->next = libvarlist;
@@ -102,6 +102,7 @@ libvar_t *LibVarAlloc(char *var_name)
 void LibVarDeAlloc(libvar_t *v)
 {
 	if (v->string) FreeMemory(v->string);
+	FreeMemory(v->name);
 	FreeMemory(v);
 } //end of the function LibVarDeAlloc
 //===========================================================================
