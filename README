@@ -21,8 +21,7 @@ for further development. Some of the major features currently implemented are:
   * Colorized terminal output
   * Optional Ogg Vorbis support
   * Much improved QVM tools
-  * Support for various esoteric operating systems (see
-    http://ioquake3.org/?page=status)
+  * Support for various esoteric operating systems
   * cl_guid support
   * HTTP/FTP download redirection (using cURL)
   * Multiuser support on Windows systems (user specific game data
@@ -342,7 +341,7 @@ supports. We don't neccesarily care about all the installers being identical,
 but we have some general guidelines:
 
   * Please include the id patch pk3s in your installer, which are available
-    from http://ioquake3.org/?page=getdata subject to agreement to the id
+    from http://ioquake3.org/patch-data/ subject to agreement to the id
     EULA. Your installer shall also ask the user to agree to this EULA (which
     is in the /web/include directory for your convenience) and subsequently
     refuse to continue the installation of the patch pk3s and pak0.pk3 if they
@@ -375,7 +374,6 @@ but we have some general guidelines:
 ------------------------------------------------------------------ Credits -----
 
 Maintainers
-  Aaron Gyes <floam at sh dot nu>
   Ludwig Nussel <ludwig.nussel@suse.de>
   Thilo Schulz <arny@ats.s.bawue.de>
   Tim Angus <tim@ngus.net>
@@ -389,3 +387,4 @@ Significant contributions from
   Stuart Dalton <badcdev@gmail.com>
   Vincent S. Cojot <vincent at cojot dot name>
   optical <alex@rigbo.se>
+  Aaron Gyes <floam at sh dot nu>
