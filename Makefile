@@ -6,15 +6,15 @@
 
 COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
-COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/x86/)
+COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 
 ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
+  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 endif
 ifeq ($(COMPILE_PLATFORM),darwin)
   # Apple does some things a little differently...
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
+  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 endif
 
 ifeq ($(COMPILE_PLATFORM),mingw32)
