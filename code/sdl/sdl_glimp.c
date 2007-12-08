@@ -110,6 +110,46 @@ void GLimp_LogComment( char *comment )
 {
 }
 
+static void set_available_modes(void)
+{
+  char buf[MAX_STRING_CHARS];
+  SDL_Rect **modes;
+  size_t len = 0;
+  int i;
+
+  modes = SDL_ListModes(NULL, SDL_OPENGL | SDL_FULLSCREEN);
+
+  if (!modes)
+  {
+    ri.Printf( PRINT_WARNING, "Can't get list of available modes\n");
+    return;
+  }
+
+  if (modes == (SDL_Rect **)-1)
+  {
+    ri.Printf( PRINT_ALL, "Display supports any resolution\n");
+    return; // can set any resolution
+  }
+
+  for (i = 0; modes[i]; ++i)
+  {
+    if(snprintf(NULL, 0, "%ux%u ", modes[i]->w, modes[i]->h) < (int)sizeof(buf)-len)
+    {
+      len += sprintf(buf+len, "%ux%u ", modes[i]->w, modes[i]->h);
+    }
+    else
+    {
+      ri.Printf( PRINT_WARNING, "Skipping mode %ux%x, buffer too small\n", modes[i]->w, modes[i]->h);
+    }
+  }
+  if(len)
+  {
+    buf[strlen(buf)-1] = 0;
+    ri.Printf( PRINT_ALL, "Available modes: '%s'\n", buf);
+    ri.Cvar_Set( "r_availableModes", buf );
+  }
+}
+
 /*
 ===============
 GLimp_SetMode
@@ -274,6 +314,8 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		glConfig.stencilBits = tstencilbits;
 		break;
 	}
+
+	set_available_modes();
 
 	if (!vidscreen)
 	{
@@ -525,6 +567,8 @@ void GLimp_Init( void )
 
 	// initialize extensions
 	GLimp_InitExtensions( );
+
+	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
 
 	// This depends on SDL_INIT_VIDEO, hence having it here
 	IN_Init( );

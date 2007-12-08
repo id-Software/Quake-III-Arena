@@ -24,6 +24,66 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void GraphicsOptions_MenuInit( void );
 
+static const char *builtin_resolutions[] =
+{
+	"320x240",
+	"400x300",
+	"512x384",
+	"640x480",
+	"800x600",
+	"960x720",
+	"1024x768",
+	"1152x864",
+	"1280x1024",
+	"1600x1200",
+	"2048x1536",
+	"856x480 wide screen",
+	NULL
+};
+
+static char resbuf[MAX_STRING_CHARS];
+static const char* detected_resolutions[32];
+
+static const char** reslist = builtin_resolutions;
+static int use_builtin_resolutions = qtrue;
+
+static int det2builtinres(int mode)
+{
+	int i;
+
+	if(use_builtin_resolutions)
+		return mode;
+
+	if(mode < 0)
+		return -1;
+
+	for(i = 0; builtin_resolutions[i]; ++i)
+	{
+		if(!strcmp(builtin_resolutions[i], detected_resolutions[mode]))
+			return i;
+	}
+	return -1;
+}
+
+static int builtin2detres(int mode)
+{
+	int i;
+
+	if(use_builtin_resolutions)
+		return mode;
+
+	if(mode < 0)
+		return -1;
+
+	for(i = 0; detected_resolutions[i]; ++i)
+	{
+		if(!strcmp(builtin_resolutions[mode], detected_resolutions[i]))
+			return i;
+	}
+	return -1;
+}
+
+
 /*
 =======================================================================
 
@@ -480,7 +540,28 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 	}
 	trap_Cvar_SetValue( "r_picmip", 3 - s_graphicsoptions.tq.curvalue );
 	trap_Cvar_SetValue( "r_allowExtensions", s_graphicsoptions.allow_extensions.curvalue );
-	trap_Cvar_SetValue( "r_mode", s_graphicsoptions.mode.curvalue );
+
+	if(!use_builtin_resolutions)
+	{
+		// search for builtin mode that matches the detected mode
+		int i;
+		int mode = s_graphicsoptions.mode.curvalue;
+		i = det2builtinres(mode);
+		if(i == -1)
+		{
+			char w[16], h[16];
+			Q_strncpyz(w, detected_resolutions[mode], sizeof(w));
+			*strchr(w, 'x') = 0;
+			Q_strncpyz(h, strchr(detected_resolutions[mode], 'x')+1, sizeof(h));
+			trap_Cvar_Set( "r_customwidth", w);
+			trap_Cvar_Set( "r_customheight", h);
+		}
+
+		trap_Cvar_SetValue( "r_mode", i );
+	}
+	else
+		trap_Cvar_SetValue( "r_mode", s_graphicsoptions.mode.curvalue );
+
 	trap_Cvar_SetValue( "r_fullscreen", s_graphicsoptions.fs.curvalue );
 	trap_Cvar_SetValue( "r_colorbits", 0 );
 	trap_Cvar_SetValue( "r_depthbits", 0 );
@@ -615,9 +696,33 @@ GraphicsOptions_SetMenuItems
 static void GraphicsOptions_SetMenuItems( void )
 {
 	s_graphicsoptions.mode.curvalue = trap_Cvar_VariableValue( "r_mode" );
+	s_graphicsoptions.mode.curvalue = builtin2detres(s_graphicsoptions.mode.curvalue);
 	if ( s_graphicsoptions.mode.curvalue < 0 )
 	{
-		s_graphicsoptions.mode.curvalue = 3;
+		if(use_builtin_resolutions)
+		{
+			s_graphicsoptions.mode.curvalue = 3;
+		}
+		else
+		{
+			int i;
+			char buf[MAX_STRING_CHARS];
+			trap_Cvar_VariableStringBuffer("r_customwidth", buf, sizeof(buf)-2);
+			buf[strlen(buf)+1] = 0;
+			buf[strlen(buf)] = 'x';
+			trap_Cvar_VariableStringBuffer("r_customheight", buf+strlen(buf), sizeof(buf)-strlen(buf));
+
+			for(i = 0; detected_resolutions[i]; ++i)
+			{
+				if(!strcmp(buf, detected_resolutions[i]))
+				{
+					s_graphicsoptions.mode.curvalue = i;
+					break;
+				}
+			}
+			if ( s_graphicsoptions.mode.curvalue < 0 )
+				s_graphicsoptions.mode.curvalue = 0;
+		}
 	}
 	s_graphicsoptions.fs.curvalue = trap_Cvar_VariableValue("r_fullscreen");
 	s_graphicsoptions.allow_extensions.curvalue = trap_Cvar_VariableValue("r_allowExtensions");
@@ -743,22 +848,6 @@ void GraphicsOptions_MenuInit( void )
 		NULL
 	};
 
-	static const char *resolutions[] = 
-	{
-		"320x240",
-		"400x300",
-		"512x384",
-		"640x480",
-		"800x600",
-		"960x720",
-		"1024x768",
-		"1152x864",
-		"1280x1024",
-		"1600x1200",
-		"2048x1536",
-		"856x480 wide screen",
-		NULL
-	};
 	static const char *filter_names[] =
 	{
 		"Bilinear",
@@ -783,6 +872,26 @@ void GraphicsOptions_MenuInit( void )
 
 	// zero set all our globals
 	memset( &s_graphicsoptions, 0 ,sizeof(graphicsoptions_t) );
+
+
+	Q_strncpyz(resbuf, UI_Cvar_VariableString("r_availableModes"), sizeof(resbuf));
+	if(*resbuf)
+	{
+		char* s = resbuf;
+		unsigned i = 0;
+		while( s && i < sizeof(detected_resolutions)/sizeof(detected_resolutions[0])-1)
+		{
+			detected_resolutions[i++] = s;
+			s = strchr(s, ' ');
+			if(s) *s++ = '\0';
+		}
+		detected_resolutions[i] = NULL;
+		if(i)
+		{
+			reslist = detected_resolutions;
+			use_builtin_resolutions = 0;
+		}
+	}
 
 	GraphicsOptions_Cache();
 
@@ -888,7 +997,7 @@ void GraphicsOptions_MenuInit( void )
 	s_graphicsoptions.mode.generic.flags    = QMF_PULSEIFFOCUS|QMF_SMALLFONT;
 	s_graphicsoptions.mode.generic.x        = 400;
 	s_graphicsoptions.mode.generic.y        = y;
-	s_graphicsoptions.mode.itemnames        = resolutions;
+	s_graphicsoptions.mode.itemnames        = reslist;
 	s_graphicsoptions.mode.generic.callback = GraphicsOptions_Event;
 	s_graphicsoptions.mode.generic.id       = ID_MODE;
 	y += BIGCHAR_HEIGHT+2;
