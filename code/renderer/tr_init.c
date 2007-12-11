@@ -23,10 +23,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 
-glconfig_t	glConfig;
-qboolean	textureFilterAnisotropic = qfalse;
-int		maxAnisotropy = 0;
-                
+glconfig_t  glConfig;
+qboolean    textureFilterAnisotropic = qfalse;
+int         maxAnisotropy = 0;
+float       displayAspect = 0.0f;
+
 glstate_t	glState;
 
 static void GfxInfo_f( void );

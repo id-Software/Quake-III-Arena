@@ -24,66 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void GraphicsOptions_MenuInit( void );
 
-static const char *builtin_resolutions[] =
-{
-	"320x240",
-	"400x300",
-	"512x384",
-	"640x480",
-	"800x600",
-	"960x720",
-	"1024x768",
-	"1152x864",
-	"1280x1024",
-	"1600x1200",
-	"2048x1536",
-	"856x480 wide screen",
-	NULL
-};
-
-static char resbuf[MAX_STRING_CHARS];
-static const char* detected_resolutions[32];
-
-static const char** reslist = builtin_resolutions;
-static int use_builtin_resolutions = qtrue;
-
-static int det2builtinres(int mode)
-{
-	int i;
-
-	if(use_builtin_resolutions)
-		return mode;
-
-	if(mode < 0)
-		return -1;
-
-	for(i = 0; builtin_resolutions[i]; ++i)
-	{
-		if(!strcmp(builtin_resolutions[i], detected_resolutions[mode]))
-			return i;
-	}
-	return -1;
-}
-
-static int builtin2detres(int mode)
-{
-	int i;
-
-	if(use_builtin_resolutions)
-		return mode;
-
-	if(mode < 0)
-		return -1;
-
-	for(i = 0; detected_resolutions[i]; ++i)
-	{
-		if(!strcmp(builtin_resolutions[mode], detected_resolutions[i]))
-			return i;
-	}
-	return -1;
-}
-
-
 /*
 =======================================================================
 
@@ -378,6 +318,77 @@ static InitialVideoOptions_s s_ivo_templates[] =
 
 #define NUM_IVO_TEMPLATES ( sizeof( s_ivo_templates ) / sizeof( s_ivo_templates[0] ) )
 
+static const char *builtinResolutions[ ] =
+{
+	"320x240",
+	"400x300",
+	"512x384",
+	"640x480",
+	"800x600",
+	"960x720",
+	"1024x768",
+	"1152x864",
+	"1280x1024",
+	"1600x1200",
+	"2048x1536",
+	"856x480 wide screen",
+	NULL
+};
+
+static char resbuf[ MAX_STRING_CHARS ];
+static const char* detectedResolutions[ 32 ];
+
+static const char** resolutions = builtinResolutions;
+static qboolean resolutionsDetected = qfalse;
+
+/*
+=================
+GraphicsOptions_FindBuiltinResolution
+=================
+*/
+static int GraphicsOptions_FindBuiltinResolution( int mode )
+{
+	int i;
+
+	if( !resolutionsDetected )
+		return mode;
+
+	if( mode < 0 )
+		return -1;
+
+	for( i = 0; builtinResolutions[ i ]; i++ )
+	{
+		if( !strcmp( builtinResolutions[ i ], detectedResolutions[ mode ] ) )
+			return i;
+	}
+
+	return -1;
+}
+
+/*
+=================
+GraphicsOptions_FindDetectedResolution
+=================
+*/
+static int GraphicsOptions_FindDetectedResolution( int mode )
+{
+	int i;
+
+	if( !resolutionsDetected )
+		return mode;
+
+	if( mode < 0 )
+		return -1;
+
+	for( i = 0; detectedResolutions[ i ]; i++ )
+	{
+		if( !strcmp( builtinResolutions[ mode ], detectedResolutions[ i ] ) )
+			return i;
+	}
+
+	return -1;
+}
+
 /*
 =================
 GraphicsOptions_GetInitialVideo
@@ -541,23 +552,22 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 	trap_Cvar_SetValue( "r_picmip", 3 - s_graphicsoptions.tq.curvalue );
 	trap_Cvar_SetValue( "r_allowExtensions", s_graphicsoptions.allow_extensions.curvalue );
 
-	if(!use_builtin_resolutions)
+	if( resolutionsDetected )
 	{
 		// search for builtin mode that matches the detected mode
-		int i;
-		int mode = s_graphicsoptions.mode.curvalue;
-		i = det2builtinres(mode);
-		if(i == -1)
+		int mode = GraphicsOptions_FindBuiltinResolution( s_graphicsoptions.mode.curvalue );
+		if( mode == -1 )
 		{
-			char w[16], h[16];
-			Q_strncpyz(w, detected_resolutions[mode], sizeof(w));
-			*strchr(w, 'x') = 0;
-			Q_strncpyz(h, strchr(detected_resolutions[mode], 'x')+1, sizeof(h));
-			trap_Cvar_Set( "r_customwidth", w);
-			trap_Cvar_Set( "r_customheight", h);
+			char w[ 16 ], h[ 16 ];
+			Q_strncpyz( w, detectedResolutions[ s_graphicsoptions.mode.curvalue ], sizeof( w ) );
+			*strchr( w, 'x' ) = 0;
+			Q_strncpyz( h,
+					strchr( detectedResolutions[ s_graphicsoptions.mode.curvalue ], 'x' ) + 1, sizeof( h ) );
+			trap_Cvar_Set( "r_customwidth", w );
+			trap_Cvar_Set( "r_customheight", h );
 		}
 
-		trap_Cvar_SetValue( "r_mode", i );
+		trap_Cvar_SetValue( "r_mode", mode );
 	}
 	else
 		trap_Cvar_SetValue( "r_mode", s_graphicsoptions.mode.curvalue );
@@ -695,15 +705,12 @@ GraphicsOptions_SetMenuItems
 */
 static void GraphicsOptions_SetMenuItems( void )
 {
-	s_graphicsoptions.mode.curvalue = trap_Cvar_VariableValue( "r_mode" );
-	s_graphicsoptions.mode.curvalue = builtin2detres(s_graphicsoptions.mode.curvalue);
+	s_graphicsoptions.mode.curvalue =
+		GraphicsOptions_FindDetectedResolution( trap_Cvar_VariableValue( "r_mode" ) );
+
 	if ( s_graphicsoptions.mode.curvalue < 0 )
 	{
-		if(use_builtin_resolutions)
-		{
-			s_graphicsoptions.mode.curvalue = 3;
-		}
-		else
+		if( resolutionsDetected )
 		{
 			int i;
 			char buf[MAX_STRING_CHARS];
@@ -712,9 +719,9 @@ static void GraphicsOptions_SetMenuItems( void )
 			buf[strlen(buf)] = 'x';
 			trap_Cvar_VariableStringBuffer("r_customheight", buf+strlen(buf), sizeof(buf)-strlen(buf));
 
-			for(i = 0; detected_resolutions[i]; ++i)
+			for(i = 0; detectedResolutions[i]; ++i)
 			{
-				if(!strcmp(buf, detected_resolutions[i]))
+				if(!strcmp(buf, detectedResolutions[i]))
 				{
 					s_graphicsoptions.mode.curvalue = i;
 					break;
@@ -722,6 +729,10 @@ static void GraphicsOptions_SetMenuItems( void )
 			}
 			if ( s_graphicsoptions.mode.curvalue < 0 )
 				s_graphicsoptions.mode.curvalue = 0;
+		}
+		else
+		{
+			s_graphicsoptions.mode.curvalue = 3;
 		}
 	}
 	s_graphicsoptions.fs.curvalue = trap_Cvar_VariableValue("r_fullscreen");
@@ -878,18 +889,20 @@ void GraphicsOptions_MenuInit( void )
 	if(*resbuf)
 	{
 		char* s = resbuf;
-		unsigned i = 0;
-		while( s && i < sizeof(detected_resolutions)/sizeof(detected_resolutions[0])-1)
+		unsigned int i = 0;
+		while( s && i < sizeof(detectedResolutions)/sizeof(detectedResolutions[0])-1)
 		{
-			detected_resolutions[i++] = s;
+			detectedResolutions[i++] = s;
 			s = strchr(s, ' ');
-			if(s) *s++ = '\0';
+			if( s )
+				*s++ = '\0';
 		}
-		detected_resolutions[i] = NULL;
-		if(i)
+		detectedResolutions[ i ] = NULL;
+
+		if( i > 0 )
 		{
-			reslist = detected_resolutions;
-			use_builtin_resolutions = 0;
+			resolutions = detectedResolutions;
+			resolutionsDetected = qtrue;
 		}
 	}
 
@@ -997,7 +1010,7 @@ void GraphicsOptions_MenuInit( void )
 	s_graphicsoptions.mode.generic.flags    = QMF_PULSEIFFOCUS|QMF_SMALLFONT;
 	s_graphicsoptions.mode.generic.x        = 400;
 	s_graphicsoptions.mode.generic.y        = y;
-	s_graphicsoptions.mode.itemnames        = reslist;
+	s_graphicsoptions.mode.itemnames        = resolutions;
 	s_graphicsoptions.mode.generic.callback = GraphicsOptions_Event;
 	s_graphicsoptions.mode.generic.id       = ID_MODE;
 	y += BIGCHAR_HEIGHT+2;
