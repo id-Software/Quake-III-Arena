@@ -25,82 +25,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef USE_OPENAL
 
+#ifdef USE_OPENAL_DLOPEN
+#define AL_NO_PROTOTYPES
+#define ALC_NO_PROTOTYPES
+#endif
+
 #include "qal.h"
 
 #ifdef USE_OPENAL_DLOPEN
 
 #include "../sys/sys_loadlib.h"
-
-LPALENABLE qalEnable;
-LPALDISABLE qalDisable;
-LPALISENABLED qalIsEnabled;
-LPALGETSTRING qalGetString;
-LPALGETBOOLEANV qalGetBooleanv;
-LPALGETINTEGERV qalGetIntegerv;
-LPALGETFLOATV qalGetFloatv;
-LPALGETDOUBLEV qalGetDoublev;
-LPALGETBOOLEAN qalGetBoolean;
-LPALGETINTEGER qalGetInteger;
-LPALGETFLOAT qalGetFloat;
-LPALGETDOUBLE qalGetDouble;
-LPALGETERROR qalGetError;
-LPALISEXTENSIONPRESENT qalIsExtensionPresent;
-LPALGETPROCADDRESS qalGetProcAddress;
-LPALGETENUMVALUE qalGetEnumValue;
-LPALLISTENERF qalListenerf;
-LPALLISTENER3F qalListener3f;
-LPALLISTENERFV qalListenerfv;
-LPALLISTENERI qalListeneri;
-LPALGETLISTENERF qalGetListenerf;
-LPALGETLISTENER3F qalGetListener3f;
-LPALGETLISTENERFV qalGetListenerfv;
-LPALGETLISTENERI qalGetListeneri;
-LPALGENSOURCES qalGenSources;
-LPALDELETESOURCES qalDeleteSources;
-LPALISSOURCE qalIsSource;
-LPALSOURCEF qalSourcef;
-LPALSOURCE3F qalSource3f;
-LPALSOURCEFV qalSourcefv;
-LPALSOURCEI qalSourcei;
-LPALGETSOURCEF qalGetSourcef;
-LPALGETSOURCE3F qalGetSource3f;
-LPALGETSOURCEFV qalGetSourcefv;
-LPALGETSOURCEI qalGetSourcei;
-LPALSOURCEPLAYV qalSourcePlayv;
-LPALSOURCESTOPV qalSourceStopv;
-LPALSOURCEREWINDV qalSourceRewindv;
-LPALSOURCEPAUSEV qalSourcePausev;
-LPALSOURCEPLAY qalSourcePlay;
-LPALSOURCESTOP qalSourceStop;
-LPALSOURCEREWIND qalSourceRewind;
-LPALSOURCEPAUSE qalSourcePause;
-LPALSOURCEQUEUEBUFFERS qalSourceQueueBuffers;
-LPALSOURCEUNQUEUEBUFFERS qalSourceUnqueueBuffers;
-LPALGENBUFFERS qalGenBuffers;
-LPALDELETEBUFFERS qalDeleteBuffers;
-LPALISBUFFER qalIsBuffer;
-LPALBUFFERDATA qalBufferData;
-LPALGETBUFFERF qalGetBufferf;
-LPALGETBUFFERI qalGetBufferi;
-LPALDOPPLERFACTOR qalDopplerFactor;
-LPALDOPPLERVELOCITY qalDopplerVelocity;
-LPALDISTANCEMODEL qalDistanceModel;
-
-LPALCCREATECONTEXT qalcCreateContext;
-LPALCMAKECONTEXTCURRENT qalcMakeContextCurrent;
-LPALCPROCESSCONTEXT qalcProcessContext;
-LPALCSUSPENDCONTEXT qalcSuspendContext;
-LPALCDESTROYCONTEXT qalcDestroyContext;
-LPALCGETCURRENTCONTEXT qalcGetCurrentContext;
-LPALCGETCONTEXTSDEVICE qalcGetContextsDevice;
-LPALCOPENDEVICE qalcOpenDevice;
-LPALCCLOSEDEVICE qalcCloseDevice;
-LPALCGETERROR qalcGetError;
-LPALCISEXTENSIONPRESENT qalcIsExtensionPresent;
-LPALCGETPROCADDRESS qalcGetProcAddress;
-LPALCGETENUMVALUE qalcGetEnumValue;
-LPALCGETSTRING qalcGetString;
-LPALCGETINTEGERV qalcGetIntegerv;
 
 static void *OpenALLib = NULL;
 
