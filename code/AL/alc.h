@@ -107,7 +107,7 @@ ALCAPI void            ALCAPIENTRY alcCaptureStop( ALCdevice *device );
 ALCAPI void            ALCAPIENTRY alcCaptureSamples( ALCdevice *device, ALCvoid *buffer, ALCsizei samples );
 
 #else /* ALC_NO_PROTOTYPES */
-
+/*
 ALCAPI ALCcontext *    (ALCAPIENTRY *alcCreateContext)( ALCdevice *device, const ALCint* attrlist );
 ALCAPI ALCboolean      (ALCAPIENTRY *alcMakeContextCurrent)( ALCcontext *context );
 ALCAPI void            (ALCAPIENTRY *alcProcessContext)( ALCcontext *context );
@@ -128,7 +128,7 @@ ALCAPI ALCboolean      (ALCAPIENTRY *alcCaptureCloseDevice)( ALCdevice *device )
 ALCAPI void            (ALCAPIENTRY *alcCaptureStart)( ALCdevice *device );
 ALCAPI void            (ALCAPIENTRY *alcCaptureStop)( ALCdevice *device );
 ALCAPI void            (ALCAPIENTRY *alcCaptureSamples)( ALCdevice *device, ALCvoid *buffer, ALCsizei samples );
-
+*/
 /* Type definitions */
 typedef ALCcontext *   (ALCAPIENTRY *LPALCCREATECONTEXT) (ALCdevice *device, const ALCint *attrlist);
 typedef ALCboolean     (ALCAPIENTRY *LPALCMAKECONTEXTCURRENT)( ALCcontext *context );

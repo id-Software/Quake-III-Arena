@@ -339,6 +339,7 @@ ALAPI void ALAPIENTRY alDistanceModel( ALenum distanceModel );
 
 #else /* AL_NO_PROTOTYPES */
 
+/*
 void          (ALAPIENTRY *alEnable)( ALenum capability );
 void          (ALAPIENTRY *alDisable)( ALenum capability ); 
 ALboolean     (ALAPIENTRY *alIsEnabled)( ALenum capability ); 
@@ -412,7 +413,7 @@ void          (ALAPIENTRY *alDopplerFactor)( ALfloat value );
 void          (ALAPIENTRY *alDopplerVelocity)( ALfloat value );
 void          (ALAPIENTRY *alSpeedOfSound)( ALfloat value );
 void          (ALAPIENTRY *alDistanceModel)( ALenum distanceModel );
-
+*/
 /* Type Definitions */
 
 typedef void           (ALAPIENTRY *LPALENABLE)( ALenum capability );
