@@ -25,11 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef USE_OPENAL
 
-#ifdef USE_OPENAL_DLOPEN
-#define AL_NO_PROTOTYPES
-#define ALC_NO_PROTOTYPES
-#endif
-
 #include "qal.h"
 
 #ifdef USE_OPENAL_DLOPEN
