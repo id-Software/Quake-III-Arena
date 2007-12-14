@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef MACOS_X_ACCELERATION_HACK
 #include <IOKit/hidsystem/IOHIDLib.h>
 #include <IOKit/hidsystem/IOHIDParameter.h>
-#include <drivers/event_status_driver.h>
+#include <IOKit/hidsystem/event_status_driver.h>
 #endif
 
 //#define KBD_DBG

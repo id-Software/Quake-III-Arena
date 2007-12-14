@@ -283,45 +283,46 @@ ifeq ($(PLATFORM),darwin)
   CLIENT_LDFLAGS=
   LDFLAGS=
   OPTIMIZE=
+  
+  ifndef MACOSX_SDK_DIR
+  	MACOSX_SDK_DIR="/Developer/SDKs/MacOSX10.5.sdk"
+  endif
+
+  # building the QVMs on MacOSX is broken, atm.
+  BUILD_GAME_QVM=0
+  
   ifeq ($(BUILD_MACOSX_UB),ppc)
-    CC=gcc-3.3
+    CC=gcc-4.0
     BASE_CFLAGS += -arch ppc -DSMP \
       -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 -nostdinc \
-      -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
-      -I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
-      -isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include
-    # when using the 10.2 SDK we are not allowed the two-level namespace so
-    # in order to get the OpenAL dlopen() stuff to work without major
-    # modifications, the controversial -m linker flag must be used.  this
-    # throws a ton of multiply defined errors which cannot be suppressed.
+      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
+      -I"$(MACOSX_SDK_DIR)"/usr/lib/gcc/i686-apple-darwin9/4.0.1/include \
+      -isystem "$(MACOSX_SDK_DIR)"/usr/include
     LDFLAGS += -arch ppc \
-      -L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
-      -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
-      -Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk,-m
+      -L"$(MACOSX_SDK_DIR)"/usr/lib/gcc/darwin/4.0 \
+      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
+      -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
     ARCH=ppc
 
     # OS X 10.2 sdk lacks dlopen() so ded would need libSDL anyway
-    BUILD_SERVER=0
+#    BUILD_SERVER=0
 
-    # because of a problem with linking on 10.2 this will generate multiply
-    # defined symbol errors.  The errors can be turned into warnings with
-    # the -m linker flag, but you can't shut up the warnings
-    USE_OPENAL_DLOPEN=1
   else
+
   ifeq ($(BUILD_MACOSX_UB),i386)
     CC=gcc-4.0
     BASE_CFLAGS += -arch i386 -DSMP \
       -mmacosx-version-min=10.4 \
       -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -nostdinc \
-      -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
-      -I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
-      -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
+      -I"$(MACOSX_SDK_DIR)"/usr/lib/gcc/i686-apple-darwin9/4.0.1/include \
+      -isystem "$(MACOSX_SDK_DIR)"/usr/include
     LDFLAGS = -arch i386 -mmacosx-version-min=10.4 \
-      -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1 \
-      -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
-      -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk
+      -L"$(MACOSX_SDK_DIR)"/usr/lib/gcc/i686-apple-darwin9/4.0.1 \
+      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
+      -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
     ARCH=i386
-    BUILD_SERVER=0
+#    BUILD_SERVER=0
   else
     # for whatever reason using the headers in the MacOSX SDKs tend to throw
     # errors even though they are identical to the system ones which don't
@@ -342,9 +343,6 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
-
-  # Always include debug symbols...you can strip the binary later...
-  BASE_CFLAGS += -gfull
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
