@@ -3272,13 +3272,13 @@ void CL_GlobalServers_f( void ) {
 	// reset the list, waiting for response
 	// -1 is used to distinguish a "no response"
 
+	NET_StringToAdr( cl_master->string, &to );
+
 	if( cls.masterNum == 1 ) {
-		NET_StringToAdr( cl_master->string, &to );
 		cls.nummplayerservers = -1;
 		cls.pingUpdateSource = AS_MPLAYER;
 	}
 	else {
-		NET_StringToAdr( cl_master->string, &to );
 		cls.numglobalservers = -1;
 		cls.pingUpdateSource = AS_GLOBAL;
 	}
