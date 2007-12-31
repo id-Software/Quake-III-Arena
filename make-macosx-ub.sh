@@ -6,7 +6,6 @@ PKGINFO=APPLIOQ3
 ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-ub
 BASEDIR=baseq3
-SDKDIR=""
 MPACKDIR=missionpack
 Q3_VERSION=`grep "\#define Q3_VERSION" code/qcommon/q_shared.h | \
 	sed -e 's/.*".* \([^ ]*\)"/\1/'`;
@@ -39,26 +38,78 @@ if [ ! -f Makefile ]; then
 	echo "This script must be run from the ioquake3 build directory";
 fi
 
-# this is kind of a hack to find out the latest SDK to use. I assume that newer SDKs appear later in this for loop,
-# thus the last valid one is the one we want.
-
-for availsdks in /Developer/SDKs/*
+# we want to use the oldest available SDK for max compatiblity
+unset PPC_SDK_DIR
+unset X86_SDK_DIR
+unset PPC_SDK_INC
+unset X86_SDK_INC
+unset PPC_SDK_LIB
+unset X86_SDK_LIB
+unset PPC_SDK_OPENAL_DLOPEN
+for availsdks in $(find /Developer/SDKs -type d -maxdepth 1 -mindepth 1 -name "MacOSX*" -exec basename {} \; | sort -r)
 do
-	if [ -d $availsdks ]
-	then
-		SDKDIR="$availsdks"
-	fi
+	case "$availsdks" in
+	'MacOSX10.5u.sdk')
+		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.5u.sdk
+		X86_SDK_DIR=/Developer/SDKs/MacOSX10.5u.sdk
+		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin9/4.0.1/include
+		X86_SDK_INC=usr/lib/gcc/i686-apple-darwin9/4.0.1/include
+		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin9/4.0.1
+		X86_SDK_LIB=usr/lib/gcc/i686-apple-darwin9/4.0.1
+		PPC_SDK_OPENAL_DLOPEN=0
+	;;
+	'MacOSX10.4u.sdk')
+		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.4u.sdk
+		X86_SDK_DIR=/Developer/SDKs/MacOSX10.4u.sdk
+		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin8/4.0.1/include
+		X86_SDK_INC=usr/lib/gcc/i686-apple-darwin8/4.0.1/include
+		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin8/4.0.1
+		X86_SDK_LIB=usr/lib/gcc/i686-apple-darwin8/4.0.1
+		PPC_SDK_OPENAL_DLOPEN=0
+	;;
+	'MacOSX10.3.9.sdk')
+		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.3.9.sdk
+		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin7/4.0.1/include
+		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin7/4.0.1
+		PPC_SDK_OPENAL_DLOPEN=1
+	;;
+	'MacOSX10.2.8.sdk')
+		# no longer supported due to lack of dlfcn.h 
+		#PPC_SDK_DIR=/Developer/SDKs/MacOSX10.2.8.sdk
+		#PPC_SDK_INC=usr/include/gcc/darwin/3.3
+		#PPC_SDK_LIB=usr/lib/gcc/darwin/3.3
+		#PPC_SDK_OPENAL_DLOPEN=1
+	;;
+	*)
+		echo "WARNING: detected unknown MacOSX SDK ($availsdks)"
+	esac
 done
 
-if [ -z $SDKDIR ]
-then
-	echo "MacOSX SDK is missing. Please install a recent version of the MacOSX SDK."
+if [ -z $PPC_SDK_DIR ] || [ -z $X86_SDK_DIR ];  then
+	echo "Error detecting compatible Mac OS X SDK."
 	exit 1;
-else
-	echo "Using $SDKDIR for compilation"
 fi
 
-(BUILD_MACOSX_UB=ppc make && BUILD_MACOSX_UB=i386 make) || exit 1;
+if [ $PPC_SDK_DIR != "/Developer/SDKs/MacOSX10.3.9.sdk" ]; then
+	echo "WARNING: missing MacOS10.3.9.sdk.  Resulting binary may not be compatible with Mac OS X 10.3"
+	sleep 1
+fi
+if [ $X86_SDK_DIR != "/Developer/SDKs/MacOSX10.4u.sdk" ]; then
+	echo "WARNING: missing MacOS10.4u.sdk.  Resulting binary may not be compatible with Mac OS X 10.4"
+	sleep 1
+fi
+
+echo "Using $PPC_SDK_DIR for PowerPC"
+echo "Using $X86_SDK_DIR for Intel"
+
+(USE_OPENAL_DLOPEN=$PPC_SDK_OPENAL_DLOPEN \
+ MACOSX_SDK_DIR=$PPC_SDK_DIR \
+ MACOSX_SDK_INC=$PPC_SDK_INC \
+ MACOSX_SDK_LIB=$PPC_SDK_LIB BUILD_MACOSX_UB=ppc make \
+&&
+ MACOSX_SDK_DIR=$X86_SDK_DIR \
+ MACOSX_SDK_INC=$X86_SDK_INC \
+ MACOSX_SDK_LIB=$X86_SDK_LIB BUILD_MACOSX_UB=i386 make ) || exit 1 
 
 echo "Creating .app bundle $DESTDIR/$APPBUNDLE"
 if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR ]; then
