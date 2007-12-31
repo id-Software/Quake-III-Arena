@@ -49,9 +49,9 @@ unset PPC_SDK_OPENAL_DLOPEN
 for availsdks in $(find /Developer/SDKs -type d -maxdepth 1 -mindepth 1 -name "MacOSX*" -exec basename {} \; | sort -r)
 do
 	case "$availsdks" in
-	'MacOSX10.5u.sdk')
-		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.5u.sdk
-		X86_SDK_DIR=/Developer/SDKs/MacOSX10.5u.sdk
+	'MacOSX10.5.sdk')
+		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.5.sdk
+		X86_SDK_DIR=/Developer/SDKs/MacOSX10.5.sdk
 		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin9/4.0.1/include
 		X86_SDK_INC=usr/lib/gcc/i686-apple-darwin9/4.0.1/include
 		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin9/4.0.1
@@ -61,10 +61,10 @@ do
 	'MacOSX10.4u.sdk')
 		PPC_SDK_DIR=/Developer/SDKs/MacOSX10.4u.sdk
 		X86_SDK_DIR=/Developer/SDKs/MacOSX10.4u.sdk
-		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin8/4.0.1/include
-		X86_SDK_INC=usr/lib/gcc/i686-apple-darwin8/4.0.1/include
-		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin8/4.0.1
-		X86_SDK_LIB=usr/lib/gcc/i686-apple-darwin8/4.0.1
+		PPC_SDK_INC=usr/lib/gcc/powerpc-apple-darwin9/4.0.1/include
+		X86_SDK_INC=usr/lib/gcc/i686-apple-darwin9/4.0.1/include
+		PPC_SDK_LIB=usr/lib/gcc/powerpc-apple-darwin9/4.0.1
+		X86_SDK_LIB=usr/lib/gcc/i686-apple-darwin9/4.0.1
 		PPC_SDK_OPENAL_DLOPEN=0
 	;;
 	'MacOSX10.3.9.sdk')

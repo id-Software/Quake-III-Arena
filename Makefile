@@ -289,12 +289,12 @@ ifeq ($(PLATFORM),darwin)
   
   ifeq ($(BUILD_MACOSX_UB),ppc)
     CC=gcc-4.0
-    BASE_CFLAGS += -arch ppc -DSMP \
+    BASE_CFLAGS += -arch ppc -mmacosx-version-min=10.4 -DSMP \
       -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 -nostdinc \
       -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
       -I"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_INC)" \
       -isystem "$(MACOSX_SDK_DIR)"/usr/include
-    LDFLAGS += -arch ppc \
+    LDFLAGS += -arch ppc -mmacosx-version-min=10.4 \
       -L"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_LIB)" \
       -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
       -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
@@ -309,7 +309,7 @@ ifeq ($(PLATFORM),darwin)
       -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
       -I"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_INC)" \
       -isystem "$(MACOSX_SDK_DIR)"/usr/include
-    LDFLAGS = -arch i386 -mmacosx-version-min=10.4 \
+    LDFLAGS += -arch i386 -mmacosx-version-min=10.4 \
       -L"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_LIB)" \
       -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
       -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
