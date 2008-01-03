@@ -854,6 +854,12 @@ targets: makedirs
 		echo "    $$i"; \
 	done
 	@echo ""
+	@echo "  LDFLAGS:"
+	@for i in $(LDFLAGS); \
+	do \
+		echo "    $$i"; \
+	done
+	@echo ""
 	@echo "  Output:"
 	@for i in $(TARGETS); \
 	do \

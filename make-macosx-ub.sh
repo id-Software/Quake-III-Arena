@@ -90,7 +90,7 @@ if [ -d /Developer/SDKs/MacOSX10.4u.sdk ]; then
 	X86_SDK=/Developer/SDKs/MacOSX10.4u.sdk
 	X86_CFLAGS="-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk \
 			-DMAC_OS_X_VERSION_MIN_REQUIRED=1040"
-	LDFLAGS="-arch i386 \
+	X86_LDFLAGS="-arch i386 \
 			-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
 			-mmacosx-version-min=10.4"
 	X86_ENV="CFLAGS=$CFLAGS LDFLAGS=$LDFLAGS"
