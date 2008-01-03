@@ -49,8 +49,7 @@ For Windows, using MinGW
 
 For Mac OS X, building a Universal Binary
   1. Install MacOSX SDK packages from XCode.  For maximum compatibility,
-     be sure to install MacOSX10.3.9.sdk and MacOSX10.4u.sdk.  
-     (MacOSX10.2.8.sdk no longer supported)
+     install MacOSX10.4u.sdk and MacOSX10.3.9.sdk, and MacOSX10.2.8.sdk.
   2. Change to the directory containing this README file.
   3. Run './make-macosx-ub.sh'
   4. Copy the resulting ioquake3.app in /build/release-darwin-ub to your
