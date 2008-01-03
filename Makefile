@@ -23,11 +23,21 @@ ifeq ($(COMPILE_PLATFORM),mingw32)
   endif
 endif
 
-BUILD_CLIENT     =
-BUILD_CLIENT_SMP =
-BUILD_SERVER     =
-BUILD_GAME_SO    =
-BUILD_GAME_QVM   =
+ifndef BUILD_CLIENT
+  BUILD_CLIENT     =
+endif
+ifndef BUILD_CLIENT_SMP
+  BUILD_CLIENT_SMP =
+endif
+ifndef BUILD_SERVER
+  BUILD_SERVER     =
+endif
+ifndef BUILD_GAME_SO
+  BUILD_GAME_SO    =
+endif
+ifndef BUILD_GAME_QVM
+  BUILD_GAME_QVM   =
+endif
 
 ifneq ($(PLATFORM),darwin)
   BUILD_CLIENT_SMP = 0
@@ -279,49 +289,13 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),darwin)
   HAVE_VM_COMPILED=true
-  BASE_CFLAGS=
   CLIENT_LDFLAGS=
-  LDFLAGS=
   OPTIMIZE=
   
   # building the QVMs on MacOSX is broken, atm.
   BUILD_GAME_QVM=0
   
-  ifeq ($(BUILD_MACOSX_UB),ppc)
-    CC=gcc-4.0
-    BASE_CFLAGS += -arch ppc -mmacosx-version-min=10.4 -DSMP \
-      -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 -nostdinc \
-      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
-      -I"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_INC)" \
-      -isystem "$(MACOSX_SDK_DIR)"/usr/include
-    LDFLAGS += -arch ppc -mmacosx-version-min=10.4 \
-      -L"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_LIB)" \
-      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
-      -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
-    ARCH=ppc
-
-  else
-  ifeq ($(BUILD_MACOSX_UB),i386)
-    CC=gcc-4.0
-    BASE_CFLAGS += -arch i386 -DSMP \
-      -mmacosx-version-min=10.4 \
-      -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -nostdinc \
-      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
-      -I"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_INC)" \
-      -isystem "$(MACOSX_SDK_DIR)"/usr/include
-    LDFLAGS += -arch i386 -mmacosx-version-min=10.4 \
-      -L"$(MACOSX_SDK_DIR)"/"$(MACOSX_SDK_LIB)" \
-      -F"$(MACOSX_SDK_DIR)"/System/Library/Frameworks \
-      -Wl,-syslibroot,"$(MACOSX_SDK_DIR)"
-    ARCH=i386
-  else
-    # for whatever reason using the headers in the MacOSX SDKs tend to throw
-    # errors even though they are identical to the system ones which don't
-    # therefore we shut up warning flags when running the universal build
-    # script as much as possible.
-    BASE_CFLAGS += -Wall -Wimplicit -Wstrict-prototypes
-  endif
-  endif
+  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
 
   ifeq ($(ARCH),ppc)
     OPTIMIZE += -faltivec -O3
