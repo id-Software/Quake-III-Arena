@@ -85,7 +85,7 @@ void BotDumpNodeSwitches(bot_state_t *bs) {
 	ClientName(bs->client, netname, sizeof(netname));
 	BotAI_Print(PRT_MESSAGE, "%s at %1.1f switched more than %d AI nodes\n", netname, FloatTime(), MAX_NODESWITCHES);
 	for (i = 0; i < numnodeswitches; i++) {
-		BotAI_Print(PRT_MESSAGE, nodeswitch[i]);
+		BotAI_Print(PRT_MESSAGE, "%s", nodeswitch[i]);
 	}
 	BotAI_Print(PRT_FATAL, "");
 }
@@ -102,7 +102,7 @@ void BotRecordNodeSwitch(bot_state_t *bs, char *node, char *str, char *s) {
 	Com_sprintf(nodeswitch[numnodeswitches], 144, "%s at %2.1f entered %s: %s from %s\n", netname, FloatTime(), node, str, s);
 #ifdef DEBUG
 	if (0) {
-		BotAI_Print(PRT_MESSAGE, nodeswitch[numnodeswitches]);
+		BotAI_Print(PRT_MESSAGE, "%s", nodeswitch[numnodeswitches]);
 	}
 #endif //DEBUG
 	numnodeswitches++;

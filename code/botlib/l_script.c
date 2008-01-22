@@ -1428,6 +1428,6 @@ void PS_SetBaseFolder(char *path)
 #ifdef BSPC
 	sprintf(basefolder, path);
 #else
-	Com_sprintf(basefolder, sizeof(basefolder), path);
+	Com_sprintf(basefolder, sizeof(basefolder), "%s", path);
 #endif
 } //end of the function PS_SetBaseFolder

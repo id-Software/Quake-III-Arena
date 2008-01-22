@@ -4991,7 +4991,7 @@ static void UI_BuildQ3Model_List( void )
 			if (Q_stricmpn(skinname, "icon_", 5) == 0 && !(Q_stricmp(skinname,"icon_blue") == 0 || Q_stricmp(skinname,"icon_red") == 0))
 			{
 				if (Q_stricmp(skinname, "icon_default") == 0) {
-					Com_sprintf( scratch, sizeof(scratch), dirptr);
+					Com_sprintf( scratch, sizeof(scratch), "%s", dirptr);
 				} else {
 					Com_sprintf( scratch, sizeof(scratch), "%s/%s",dirptr, skinname + 5);
 				}
@@ -5003,7 +5003,7 @@ static void UI_BuildQ3Model_List( void )
 					}
 				}
 				if (!dirty) {
-					Com_sprintf( uiInfo.q3HeadNames[uiInfo.q3HeadCount], sizeof(uiInfo.q3HeadNames[uiInfo.q3HeadCount]), scratch);
+					Com_sprintf( uiInfo.q3HeadNames[uiInfo.q3HeadCount], sizeof(uiInfo.q3HeadNames[uiInfo.q3HeadCount]), "%s", scratch);
 					uiInfo.q3HeadIcons[uiInfo.q3HeadCount++] = trap_R_RegisterShaderNoMip(va("models/players/%s/%s",dirptr,skinname));
 				}
 			}
