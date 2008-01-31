@@ -317,6 +317,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
 		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
+#if 0 // See http://bugzilla.icculus.org/show_bug.cgi?id=3526
 		// If not allowing software GL, demand accelerated
 		if( !r_allowSoftwareGL->integer )
 		{
@@ -326,6 +327,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 						"visual with libSDL < 1.2.10\n" );
 			}
 		}
+#endif
 
 		if( SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, r_swapInterval->integer ) < 0 )
 			ri.Printf( PRINT_ALL, "r_swapInterval requires libSDL >= 1.2.10\n" );
