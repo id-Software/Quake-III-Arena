@@ -23,6 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "../qcommon/puff.h"
 
+// we could limit the png size to a lower value here
+#ifndef INT_MAX
+#define INT_MAX 0x1fffffff
+#endif
+
 /*
 =================
 PNG LOADING
@@ -287,7 +292,7 @@ static void CloseBufferedFile(struct BufferedFile *BF)
  *  Get a pointer to the requested bytes.
  */
 
-static void *BufferedFileRead(struct BufferedFile *BF, int Length)
+static void *BufferedFileRead(struct BufferedFile *BF, unsigned Length)
 {
 	void *RetVal;
 
@@ -329,9 +334,9 @@ static void *BufferedFileRead(struct BufferedFile *BF, int Length)
  *  Rewind the buffer.
  */
 
-static qboolean BufferedFileRewind(struct BufferedFile *BF, int Offset)
+static qboolean BufferedFileRewind(struct BufferedFile *BF, unsigned Offset)
 {
-	int BytesRead; 
+	unsigned BytesRead; 
 
 	/*
 	 *  input verification
@@ -346,7 +351,7 @@ static qboolean BufferedFileRewind(struct BufferedFile *BF, int Offset)
 	 *  special trick to rewind to the beginning of the buffer
 	 */
 
-	if(Offset == -1)
+	if(Offset == (unsigned)-1)
 	{
 		BF->Ptr       = BF->Buffer;
 		BF->BytesLeft = BF->Length;
@@ -383,7 +388,7 @@ static qboolean BufferedFileRewind(struct BufferedFile *BF, int Offset)
  *  Skip some bytes.
  */
 
-static qboolean BufferedFileSkip(struct BufferedFile *BF, int Offset)
+static qboolean BufferedFileSkip(struct BufferedFile *BF, unsigned Offset)
 {
 	/*
 	 *  input verification
@@ -2041,9 +2046,12 @@ void LoadPNG(const char *name, byte **pic, int *width, int *height)
 	 *  Check if Width and Height are valid.
 	 */
 
-	if(!((IHDR_Width > 0) && (IHDR_Height > 0)))
+	if(!((IHDR_Width > 0) && (IHDR_Height > 0))
+	|| IHDR_Width > INT_MAX / Q3IMAGE_BYTESPERPIXEL / IHDR_Height)
 	{
 		CloseBufferedFile(ThePNG);
+
+		Com_Printf(S_COLOR_YELLOW "%s: invalid image size\n", name);
 
 		return; 
 	}
