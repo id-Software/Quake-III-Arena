@@ -56,6 +56,7 @@ void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height
   unsigned row_stride;		/* physical row width in output buffer */
   unsigned pixelcount, memcount;
   unsigned char *out;
+  int len;
   byte	*fbuffer;
   byte  *buf;
 
@@ -65,8 +66,8 @@ void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height
    * requires it in order to read binary files.
    */
 
-  ri.FS_ReadFile ( ( char * ) filename, (void **)&fbuffer);
-  if (!fbuffer) {
+  len = ri.FS_ReadFile ( ( char * ) filename, (void **)&fbuffer);
+  if (!fbuffer || len < 0) {
 	return;
   }
 
@@ -84,7 +85,7 @@ void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height
 
   /* Step 2: specify data source (eg, a file) */
 
-  jpeg_stdio_src(&cinfo, fbuffer);
+  jpeg_mem_src(&cinfo, fbuffer, len);
 
   /* Step 3: read file parameters with jpeg_read_header() */
 

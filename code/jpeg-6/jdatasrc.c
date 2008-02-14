@@ -20,13 +20,18 @@
 #include "jpeglib.h"
 #include "jerror.h"
 
+#ifndef MIN
+#define MIN(a, b) ((a)<(b)?(a):(b))
+#endif
+
 
 /* Expanded data source object for stdio input */
 
 typedef struct {
   struct jpeg_source_mgr pub;	/* public fields */
 
-  unsigned char *infile;		/* source stream */
+  unsigned char *inbuf;		/* source stream */
+  size_t inbufbytes;
   JOCTET * buffer;		/* start of buffer */
   boolean start_of_file;	/* have we gotten any data yet? */
 } my_source_mgr;
@@ -91,13 +96,26 @@ METHODDEF boolean
 fill_input_buffer (j_decompress_ptr cinfo)
 {
   my_src_ptr src = (my_src_ptr) cinfo->src;
+  size_t nbytes = MIN(src->inbufbytes, INPUT_BUF_SIZE);
 
-  memcpy( src->buffer, src->infile, INPUT_BUF_SIZE );
+  if(!nbytes)
+  {
+    WARNMS(cinfo, JWRN_JPEG_EOF);
+    /* Insert a fake EOI marker */
+    src->buffer[0] = (JOCTET) 0xFF;
+    src->buffer[1] = (JOCTET) JPEG_EOI;
+    nbytes = 2;
+  }
+  else
+  {
+    memcpy( src->buffer, src->inbuf, nbytes);
 
-  src->infile += INPUT_BUF_SIZE;
+    src->inbuf += nbytes;
+    src->inbufbytes -= nbytes;
+  }
 
   src->pub.next_input_byte = src->buffer;
-  src->pub.bytes_in_buffer = INPUT_BUF_SIZE;
+  src->pub.bytes_in_buffer = nbytes;
   src->start_of_file = FALSE;
 
   return TRUE;
@@ -171,7 +189,7 @@ term_source (j_decompress_ptr cinfo)
  */
 
 GLOBAL void
-jpeg_stdio_src (j_decompress_ptr cinfo, unsigned char *infile)
+jpeg_mem_src (j_decompress_ptr cinfo, unsigned char *inbuf, size_t size)
 {
   my_src_ptr src;
 
@@ -198,7 +216,8 @@ jpeg_stdio_src (j_decompress_ptr cinfo, unsigned char *infile)
   src->pub.skip_input_data = skip_input_data;
   src->pub.resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->pub.term_source = term_source;
-  src->infile = infile;
+  src->inbuf = inbuf;
+  src->inbufbytes = size;
   src->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
   src->pub.next_input_byte = NULL; /* until buffer loaded */
 }
