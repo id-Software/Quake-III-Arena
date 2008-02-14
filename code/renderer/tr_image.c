@@ -810,20 +810,20 @@ BMP LOADING
 typedef struct
 {
 	char id[2];
-	unsigned long fileSize;
-	unsigned long reserved0;
-	unsigned long bitmapDataOffset;
-	unsigned long bitmapHeaderSize;
-	unsigned long width;
-	unsigned long height;
+	unsigned fileSize;
+	unsigned reserved0;
+	unsigned bitmapDataOffset;
+	unsigned bitmapHeaderSize;
+	unsigned width;
+	unsigned height;
 	unsigned short planes;
 	unsigned short bitsPerPixel;
-	unsigned long compression;
-	unsigned long bitmapDataSize;
-	unsigned long hRes;
-	unsigned long vRes;
-	unsigned long colors;
-	unsigned long importantColors;
+	unsigned compression;
+	unsigned bitmapDataSize;
+	unsigned hRes;
+	unsigned vRes;
+	unsigned colors;
+	unsigned importantColors;
 	unsigned char palette[256][4];
 } BMPHeader_t;
 
@@ -834,58 +834,82 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 	byte	*pixbuf;
 	int		row, column;
 	byte	*buf_p;
-	byte	*buffer;
+	byte	*end;
+	byte	*buffer = NULL;
 	int		length;
 	BMPHeader_t bmpHeader;
 	byte		*bmpRGBA;
 
 	*pic = NULL;
 
+	if(width)
+		*width = 0;
+
+	if(height)
+		*height = 0;
+
 	//
 	// load the file
 	//
 	length = ri.FS_ReadFile( ( char * ) name, (void **)&buffer);
-	if (!buffer) {
+	if (!buffer || length < 0) {
 		return;
 	}
 
+	if (length < 54)
+	{
+		ri.Error( ERR_DROP, "LoadBMP: header too short (%s)\n", name );
+	}
+
 	buf_p = buffer;
+	end = buffer + length;
 
 	bmpHeader.id[0] = *buf_p++;
 	bmpHeader.id[1] = *buf_p++;
-	bmpHeader.fileSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.fileSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.reserved0 = LittleLong( * ( long * ) buf_p );
+	bmpHeader.reserved0 = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapDataOffset = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapDataOffset = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapHeaderSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapHeaderSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.width = LittleLong( * ( long * ) buf_p );
+	bmpHeader.width = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.height = LittleLong( * ( long * ) buf_p );
+	bmpHeader.height = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
 	bmpHeader.planes = LittleShort( * ( short * ) buf_p );
 	buf_p += 2;
 	bmpHeader.bitsPerPixel = LittleShort( * ( short * ) buf_p );
 	buf_p += 2;
-	bmpHeader.compression = LittleLong( * ( long * ) buf_p );
+	bmpHeader.compression = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.bitmapDataSize = LittleLong( * ( long * ) buf_p );
+	bmpHeader.bitmapDataSize = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.hRes = LittleLong( * ( long * ) buf_p );
+	bmpHeader.hRes = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.vRes = LittleLong( * ( long * ) buf_p );
+	bmpHeader.vRes = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.colors = LittleLong( * ( long * ) buf_p );
+	bmpHeader.colors = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-	bmpHeader.importantColors = LittleLong( * ( long * ) buf_p );
+	bmpHeader.importantColors = LittleLong( * ( int * ) buf_p );
 	buf_p += 4;
-
-	Com_Memcpy( bmpHeader.palette, buf_p, sizeof( bmpHeader.palette ) );
 
 	if ( bmpHeader.bitsPerPixel == 8 )
-		buf_p += 1024;
+	{
+		if (buf_p + sizeof(bmpHeader.palette) > end)
+			ri.Error( ERR_DROP, "LoadBMP: header too short (%s)\n", name );
+
+		Com_Memcpy( bmpHeader.palette, buf_p, sizeof( bmpHeader.palette ) );
+		buf_p += sizeof(bmpHeader.palette);
+	}
+
+	if (buffer + bmpHeader.bitmapDataOffset > end)
+	{
+		ri.Error( ERR_DROP, "LoadBMP: invalid offset value in header (%s)\n", name );
+	}
+
+	buf_p = buffer + bmpHeader.bitmapDataOffset;
 
 	if ( bmpHeader.id[0] != 'B' && bmpHeader.id[1] != 'M' ) 
 	{
@@ -893,7 +917,7 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 	}
 	if ( bmpHeader.fileSize != length )
 	{
-		ri.Error( ERR_DROP, "LoadBMP: header size does not match file size (%d vs. %d) (%s)\n", bmpHeader.fileSize, length, name );
+		ri.Error( ERR_DROP, "LoadBMP: header size does not match file size (%u vs. %u) (%s)\n", bmpHeader.fileSize, length, name );
 	}
 	if ( bmpHeader.compression != 0 )
 	{
@@ -902,6 +926,18 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 	if ( bmpHeader.bitsPerPixel < 8 )
 	{
 		ri.Error( ERR_DROP, "LoadBMP: monochrome and 4-bit BMP files not supported (%s)\n", name );
+	}
+
+	switch ( bmpHeader.bitsPerPixel )
+	{
+		case 8:
+		case 16:
+		case 24:
+		case 32:
+			break;
+		default:
+			ri.Error( ERR_DROP, "LoadBMP: illegal pixel_size '%hu' in file '%s'\n", bmpHeader.bitsPerPixel, name );
+			break;
 	}
 
 	columns = bmpHeader.width;
@@ -914,6 +950,10 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 	    || ((numPixels * 4) / columns) / 4 != rows)
 	{
 	  ri.Error (ERR_DROP, "LoadBMP: %s has an invalid image size\n", name);
+	}
+	if(buf_p + numPixels*bmpHeader.bitsPerPixel/8 > end)
+	{
+	  ri.Error (ERR_DROP, "LoadBMP: file truncated (%s)\n", name);
 	}
 
 	if ( width ) 
@@ -971,9 +1011,6 @@ static void LoadBMP( const char *name, byte **pic, int *width, int *height )
 				*pixbuf++ = green;
 				*pixbuf++ = blue;
 				*pixbuf++ = alpha;
-				break;
-			default:
-				ri.Error( ERR_DROP, "LoadBMP: illegal pixel_size '%d' in file '%s'\n", bmpHeader.bitsPerPixel, name );
 				break;
 			}
 		}
