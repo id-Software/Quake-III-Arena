@@ -22,13 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_image.c
 #include "tr_local.h"
 
-
-#include "tr_image_bmp.h"
-#include "tr_image_jpg.h"
-#include "tr_image_pcx.h"
-#include "tr_image_png.h"
-#include "tr_image_tga.h"
-
 static byte			 s_intensitytable[256];
 static unsigned char s_gammatable[256];
 
@@ -801,12 +794,12 @@ typedef struct
 // when there are multiple images of different formats available
 static imageExtToLoaderMap_t imageLoaders[ ] =
 {
-	{ "tga",  LoadTGA },
-	{ "jpg",  LoadJPG },
-	{ "jpeg", LoadJPG },
-	{ "png",  LoadPNG },
-	{ "pcx",  LoadPCX },
-	{ "bmp",  LoadBMP }
+	{ "tga",  R_LoadTGA },
+	{ "jpg",  R_LoadJPG },
+	{ "jpeg", R_LoadJPG },
+	{ "png",  R_LoadPNG },
+	{ "pcx",  R_LoadPCX },
+	{ "bmp",  R_LoadBMP }
 };
 
 static int numImageLoaders = sizeof( imageLoaders ) /

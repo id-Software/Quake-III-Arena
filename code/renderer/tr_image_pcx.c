@@ -48,7 +48,7 @@ typedef struct {
 	unsigned char	data[];
 } pcx_t;
 
-void LoadPCX ( const char *filename, byte **pic, int *width, int *height)
+void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 {
 	byte	*raw;
 	byte	*end;

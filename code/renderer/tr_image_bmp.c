@@ -42,7 +42,7 @@ typedef struct
 	unsigned char palette[256][4];
 } BMPHeader_t;
 
-void LoadBMP( const char *name, byte **pic, int *width, int *height )
+void R_LoadBMP( const char *name, byte **pic, int *width, int *height )
 {
 	int		columns, rows;
 	unsigned	numPixels;
