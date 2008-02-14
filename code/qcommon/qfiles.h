@@ -69,50 +69,6 @@ typedef struct {
 	int		jtrgLength;			// number of jump table targets
 } vmHeader_t;
 
-
-/*
-========================================================================
-
-PCX files are used for 8 bit images
-
-========================================================================
-*/
-
-typedef struct {
-    char	manufacturer;
-    char	version;
-    char	encoding;
-    char	bits_per_pixel;
-    unsigned short	xmin,ymin,xmax,ymax;
-    unsigned short	hres,vres;
-    unsigned char	palette[48];
-    char	reserved;
-    char	color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
-    char	filler[58];
-    unsigned char	data;			// unbounded
-} pcx_t;
-
-
-/*
-========================================================================
-
-TGA files are used for 24/32 bit images
-
-========================================================================
-*/
-
-typedef struct _TargaHeader {
-	unsigned char 	id_length, colormap_type, image_type;
-	unsigned short	colormap_index, colormap_length;
-	unsigned char	colormap_size;
-	unsigned short	x_origin, y_origin, width, height;
-	unsigned char	pixel_size, attributes;
-} TargaHeader;
-
-
-
 /*
 ========================================================================
 
