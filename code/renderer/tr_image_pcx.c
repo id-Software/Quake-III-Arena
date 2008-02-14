@@ -1,6 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
+              2008 Ludwig Nussel
 
 This file is part of Quake III Arena source code.
 
@@ -31,40 +32,54 @@ PCX files are used for 8 bit images
 */
 
 typedef struct {
-    char	manufacturer;
-    char	version;
-    char	encoding;
-    char	bits_per_pixel;
-    unsigned short	xmin,ymin,xmax,ymax;
-    unsigned short	hres,vres;
-    unsigned char	palette[48];
-    char	reserved;
-    char	color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
-    char	filler[58];
-    unsigned char	data;			// unbounded
+	char	manufacturer;
+	char	version;
+	char	encoding;
+	char	bits_per_pixel;
+	unsigned short	xmin,ymin,xmax,ymax;
+	unsigned short	hres,vres;
+	unsigned char	palette[48];
+	char	reserved;
+	char	color_planes;
+	unsigned short	bytes_per_line;
+	unsigned short	palette_type;
+	unsigned short	hscreensize, vscreensize;
+	char	filler[54];
+	unsigned char	data[];
 } pcx_t;
 
-
-static void _LoadPCX ( const char *filename, byte **pic, byte **palette, int *width, int *height)
+void LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 {
 	byte	*raw;
+	byte	*end;
 	pcx_t	*pcx;
-	int		x, y;
 	int		len;
-	int		dataByte, runLength;
+	unsigned char	dataByte = 0, runLength = 0;
 	byte	*out, *pix;
-	unsigned		xmax, ymax;
+	unsigned short w, h;
+	byte	*pic8;
+	byte	*palette;
+	int	i;
+	unsigned size = 0;
 
+	if (width)
+		*width = 0;
+	if (height)
+		*height = 0;
 	*pic = NULL;
-	*palette = NULL;
 
 	//
 	// load the file
 	//
 	len = ri.FS_ReadFile( ( char * ) filename, (void **)&raw);
-	if (!raw) {
+	if (!raw || len < 0) {
+		return;
+	}
+
+	if((unsigned)len < sizeof(pcx_t))
+	{
+		ri.Printf (PRINT_ALL, "PCX truncated: %s\n", filename);
+		ri.FS_FreeFile (raw);
 		return;
 	}
 
@@ -72,95 +87,85 @@ static void _LoadPCX ( const char *filename, byte **pic, byte **palette, int *wi
 	// parse the PCX file
 	//
 	pcx = (pcx_t *)raw;
-	raw = &pcx->data;
+	end = raw+len;
 
-  	xmax = LittleShort(pcx->xmax);
-    ymax = LittleShort(pcx->ymax);
+	w = LittleShort(pcx->xmax)+1;
+	h = LittleShort(pcx->ymax)+1;
 
 	if (pcx->manufacturer != 0x0a
 		|| pcx->version != 5
 		|| pcx->encoding != 1
+		|| pcx->color_planes != 1
 		|| pcx->bits_per_pixel != 8
-		|| xmax >= 1024
-		|| ymax >= 1024)
+		|| w >= 1024
+		|| h >= 1024)
 	{
-		ri.Printf (PRINT_ALL, "Bad pcx file %s (%i x %i) (%i x %i)\n", filename, xmax+1, ymax+1, pcx->xmax, pcx->ymax);
+		ri.Printf (PRINT_ALL, "Bad or unsupported pcx file %s (%dx%d@%d)\n", filename, w, h, pcx->bits_per_pixel);
 		return;
 	}
 
-	out = ri.Malloc ( (ymax+1) * (xmax+1) );
+	pix = pic8 = ri.Malloc ( size );
 
-	*pic = out;
-
-	pix = out;
-
-	if (palette)
+	raw = pcx->data;
+	// FIXME: should use bytes_per_line but original q3 didn't do that either
+	while(pix < pic8+size)
 	{
-		*palette = ri.Malloc(768);
-		Com_Memcpy (*palette, (byte *)pcx + len - 768, 768);
+		if(runLength > 0) {
+			*pix++ = dataByte;
+			--runLength;
+			continue;
+		}
+
+		if(raw+1 > end)
+			break;
+		dataByte = *raw++;
+
+		if((dataByte & 0xC0) == 0xC0)
+		{
+			if(raw+1 > end)
+				break;
+			runLength = dataByte & 0x3F;
+			dataByte = *raw++;
+		}
+		else
+			runLength = 1;
+	}
+
+	if(pix < pic8+size)
+	{
+		ri.Printf (PRINT_ALL, "PCX file truncated: %s\n", filename);
+		ri.FS_FreeFile (pcx);
+		ri.Free (pic8);
+	}
+
+	if (raw-(byte*)pcx >= end - (byte*)769 || end[-769] != 0x0c)
+	{
+		ri.Printf (PRINT_ALL, "PCX missing palette: %s\n", filename);
+		ri.FS_FreeFile (pcx);
+		ri.Free (pic8);
+		return;
+	}
+
+	palette = end-768;
+
+	pix = out = ri.Malloc(4 * size );
+	for (i = 0 ; i < size ; i++)
+	{
+		unsigned char p = pic8[i];
+		pix[0] = palette[p*3];
+		pix[1] = palette[p*3 + 1];
+		pix[2] = palette[p*3 + 2];
+		pix[3] = 255;
+		pix += 4;
 	}
 
 	if (width)
-		*width = xmax+1;
+		*width = w;
 	if (height)
-		*height = ymax+1;
-// FIXME: use bytes_per_line here?
+		*height = h;
 
-	for (y=0 ; y<=ymax ; y++, pix += xmax+1)
-	{
-		for (x=0 ; x<=xmax ; )
-		{
-			dataByte = *raw++;
-
-			if((dataByte & 0xC0) == 0xC0)
-			{
-				runLength = dataByte & 0x3F;
-				dataByte = *raw++;
-			}
-			else
-				runLength = 1;
-
-			while(runLength-- > 0)
-				pix[x++] = dataByte;
-		}
-
-	}
-
-	if ( raw - (byte *)pcx > len)
-	{
-		ri.Printf (PRINT_DEVELOPER, "PCX file %s was malformed", filename);
-		ri.Free (*pic);
-		*pic = NULL;
-	}
+	*pic = out;
 
 	ri.FS_FreeFile (pcx);
-}
-
-
-void LoadPCX ( const char *filename, byte **pic, int *width, int *height) {
-	byte	*palette;
-	byte	*pic8;
-	int		i, c, p;
-	byte	*pic32;
-
-	_LoadPCX (filename, &pic8, &palette, width, height);
-	if (!pic8) {
-		*pic = NULL;
-		return;
-	}
-
-	// LoadPCX32 ensures width, height < 1024
-	c = (*width) * (*height);
-	pic32 = *pic = ri.Malloc(4 * c );
-	for (i = 0 ; i < c ; i++) {
-		p = pic8[i];
-		pic32[0] = palette[p*3];
-		pic32[1] = palette[p*3 + 1];
-		pic32[2] = palette[p*3 + 2];
-		pic32[3] = 255;
-		pic32 += 4;
-	}
-
 	ri.Free (pic8);
-	ri.Free (palette);
 }
