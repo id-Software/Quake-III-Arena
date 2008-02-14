@@ -2442,6 +2442,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\jpeg-6\jcapistd.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\jpeg-6\jccoefct.c"
 					>
 				</File>
@@ -2891,6 +2895,26 @@
 				</File>
 				<File
 					RelativePath="..\..\code\renderer\tr_image.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\renderer\tr_image_bmp.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\renderer\tr_image_jpg.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\renderer\tr_image_pcx.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\renderer\tr_image_png.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\renderer\tr_image_tga.c"
 					>
 				</File>
 				<File
