@@ -91,6 +91,7 @@ void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 
 	w = LittleShort(pcx->xmax)+1;
 	h = LittleShort(pcx->ymax)+1;
+	size = w*h;
 
 	if (pcx->manufacturer != 0x0a
 		|| pcx->version != 5
