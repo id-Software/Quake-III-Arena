@@ -1132,6 +1132,7 @@ Q3OBJ = \
   $(B)/client/l_struct.o \
   \
   $(B)/client/jcapimin.o \
+  $(B)/client/jcapistd.o \
   $(B)/client/jchuff.o   \
   $(B)/client/jcinit.o \
   $(B)/client/jccoefct.o  \
