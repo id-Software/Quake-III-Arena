@@ -1177,21 +1177,34 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 	byte	*pixbuf;
 	int		row, column;
 	byte	*buf_p;
-	byte	*buffer;
+	byte	*end;
+	byte	*buffer = NULL;
 	TargaHeader	targa_header;
 	byte		*targa_rgba;
+	int length;
 
 	*pic = NULL;
+
+	if(width)
+		*width = 0;
+	if(height)
+		*height = 0;
 
 	//
 	// load the file
 	//
-	ri.FS_ReadFile ( ( char * ) name, (void **)&buffer);
-	if (!buffer) {
+	length = ri.FS_ReadFile ( ( char * ) name, (void **)&buffer);
+	if (!buffer || length < 0) {
 		return;
 	}
 
+	if(length < 18)
+	{
+		ri.Error( ERR_DROP, "LoadTGA: header too short (%s)\n", name );
+	}
+
 	buf_p = buffer;
+	end = buffer + length;
 
 	targa_header.id_length = buf_p[0];
 	targa_header.colormap_type = buf_p[1];
@@ -1237,24 +1250,29 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 	rows = targa_header.height;
 	numPixels = columns * rows * 4;
 
-	if (width)
-		*width = columns;
-	if (height)
-		*height = rows;
-
 	if(!columns || !rows || numPixels > 0x7FFFFFFF || numPixels / columns / 4 != rows)
 	{
 		ri.Error (ERR_DROP, "LoadTGA: %s has an invalid image size\n", name);
 	}
 
+
 	targa_rgba = ri.Malloc (numPixels);
-	*pic = targa_rgba;
 
 	if (targa_header.id_length != 0)
+	{
+		if (buf_p + targa_header.id_length > end)
+			ri.Error( ERR_DROP, "LoadTGA: header too short (%s)\n", name );
+
 		buf_p += targa_header.id_length;  // skip TARGA image comment
+	}
 	
 	if ( targa_header.image_type==2 || targa_header.image_type == 3 )
 	{ 
+		if(buf_p + columns*rows*targa_header.pixel_size/8 > end)
+		{
+			ri.Error (ERR_DROP, "LoadTGA: file truncated (%s)\n", name);
+		}
+
 		// Uncompressed RGB or gray scale image
 		for(row=rows-1; row>=0; row--) 
 		{
@@ -1312,9 +1330,13 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
+				if(buf_p + 1 > end)
+					ri.Error (ERR_DROP, "LoadTGA: file truncated (%s)\n", name);
 				packetHeader= *buf_p++;
 				packetSize = 1 + (packetHeader & 0x7f);
 				if (packetHeader & 0x80) {        // run-length packet
+					if(buf_p + targa_header.pixel_size/8 > end)
+						ri.Error (ERR_DROP, "LoadTGA: file truncated (%s)\n", name);
 					switch (targa_header.pixel_size) {
 						case 24:
 								blue = *buf_p++;
@@ -1350,6 +1372,9 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 					}
 				}
 				else {                            // non run-length packet
+
+					if(buf_p + targa_header.pixel_size/8*packetSize > end)
+						ri.Error (ERR_DROP, "LoadTGA: file truncated (%s)\n", name);
 					for(j=0;j<packetSize;j++) {
 						switch (targa_header.pixel_size) {
 							case 24:
@@ -1414,9 +1439,15 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
     ri.Printf( PRINT_WARNING, "WARNING: '%s' TGA file header declares top-down image, ignoring\n", name);
   }
 
+  if (width)
+	  *width = columns;
+  if (height)
+	  *height = rows;
+
+  *pic = targa_rgba;
+
   ri.FS_FreeFile (buffer);
 }
-
 static void LoadJPG( const char *filename, unsigned char **pic, int *width, int *height ) {
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
