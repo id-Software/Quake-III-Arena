@@ -832,9 +832,6 @@ static qboolean UnfilterImage(uint8_t  *DecompressedData,
 
 	/*
 	 *  input verification
-	 *
-	 *  ImageHeight and BytesPerScanline are not checked,
-	 *  because these can be zero in some interlace passes.
 	 */
 
 	if(!(DecompressedData && BytesPerPixel))
@@ -842,6 +839,14 @@ static qboolean UnfilterImage(uint8_t  *DecompressedData,
 		return(qfalse);
 	}
 
+	/*
+	 *  ImageHeight and BytesPerScanline can be zero in small interlaced images.
+	 */
+
+	if((!ImageHeight) || (!BytesPerScanline))
+	{
+		return(qtrue);
+	}
 
 	/*
 	 *  Set the pointer to the start of the decompressed Data.
@@ -1101,7 +1106,7 @@ static qboolean ConvertPixel(struct PNG_Chunk_IHDR *IHDR,
 					{
 						if((TransparentColour[1] == DecompPtr[0]) &&
 								(TransparentColour[3] == DecompPtr[1]) &&
-								(TransparentColour[5] == DecompPtr[3]))
+								(TransparentColour[5] == DecompPtr[2]))
 						{
 							OutPtr[3] = 0x00;
 						}
@@ -1828,9 +1833,13 @@ static qboolean DecodeImageInterlaced(struct PNG_Chunk_IHDR *IHDR,
 
 			/*
 			 *  skip FilterType
+			 *  but only when the pass has a width bigger than zero
 			 */
 
-			DecompPtr++;
+			if(BytesPerScanline[a])
+			{
+				DecompPtr++;
+			}
 
 			/*
 			 *  Reset the pixel count.
