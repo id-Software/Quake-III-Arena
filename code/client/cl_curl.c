@@ -100,13 +100,28 @@ qboolean CL_cURL_Init()
 		return qfalse;
 #else
 		char fn[1024];
-		Q_strncpyz( fn, Sys_Cwd( ), sizeof( fn ) );
-		strncat(fn, "/", sizeof(fn)-strlen(fn)-1);
-		strncat(fn, cl_cURLLib->string, sizeof(fn)-strlen(fn)-1);
 
-		if( (cURLLib = Sys_LoadLibrary(fn)) == 0 )
+		// On some linux distributions there is no libcurl.so symlink, but only libcurl.so.4
+
+		Q_strncpyz(fn, cl_cURLLib->string, sizeof(fn));
+		strncat(fn, ".4", sizeof(fn)-strlen(fn)-1);
+
+		if((cURLLib = Sys_LoadLibrary(fn)) == 0)
 		{
-			return qfalse;
+			Q_strncpyz(fn, cl_cURLLib->string, sizeof(fn));
+			strncat(fn, ".3", sizeof(fn)-strlen(fn)-1);
+
+			if((cURLLib = Sys_LoadLibrary(fn)) == 0)
+			{
+				Q_strncpyz( fn, Sys_Cwd( ), sizeof( fn ) );
+				strncat(fn, "/", sizeof(fn)-strlen(fn)-1);
+				strncat(fn, cl_cURLLib->string, sizeof(fn)-strlen(fn)-1);
+
+				if( (cURLLib = Sys_LoadLibrary(fn)) == 0 )
+				{
+					return qfalse;
+				}
+			}
 		}
 #endif /* _WIN32 */
 	}
