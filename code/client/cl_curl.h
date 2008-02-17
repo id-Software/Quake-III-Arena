@@ -34,7 +34,8 @@ extern cvar_t *cl_cURLLib;
 #elif defined(MACOS_X)
 #define DEFAULT_CURL_LIB "libcurl.dylib"
 #else
-#define DEFAULT_CURL_LIB "libcurl.so"
+#define DEFAULT_CURL_LIB "libcurl.so.4"
+#define ALTERNATE_CURL_LIB "libcurl.so.3"
 #endif
 
 #ifdef USE_LOCAL_HEADERS
