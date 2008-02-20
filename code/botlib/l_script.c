@@ -554,7 +554,7 @@ int PS_ReadName(script_t *script, token_t *token)
 // Changes Globals:		-
 //============================================================================
 void NumberValue(char *string, int subtype, unsigned long int *intvalue,
-															double *floatvalue)
+															float *floatvalue)
 {
 	unsigned long int dotfound = 0;
 
@@ -573,13 +573,13 @@ void NumberValue(char *string, int subtype, unsigned long int *intvalue,
 			} //end if
 			if (dotfound)
 			{
-				*floatvalue = *floatvalue + (double) (*string - '0') /
-																	(double) dotfound;
+				*floatvalue = *floatvalue + (float) (*string - '0') /
+																	(float) dotfound;
 				dotfound *= 10;
 			} //end if
 			else
 			{
-				*floatvalue = *floatvalue * 10.0 + (double) (*string - '0');
+				*floatvalue = *floatvalue * 10.0 + (float) (*string - '0');
 			} //end else
 			string++;
 		} //end while
@@ -1148,10 +1148,10 @@ void StripSingleQuotes(char *string)
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-double ReadSignedFloat(script_t *script)
+float ReadSignedFloat(script_t *script)
 {
 	token_t token;
-	double sign = 1.0;
+	float sign = 1.0;
 
 	PS_ExpectAnyToken(script, &token);
 	if (!strcmp(token.string, "-"))
