@@ -3317,7 +3317,7 @@ void FS_Restart( int checksumFeed ) {
 	if ( Q_stricmp(fs_gamedirvar->string, lastValidGame) ) {
 		// skip the q3config.cfg if "safe" is on the command line
 		if ( !Com_SafeMode() ) {
-			Cbuf_AddText ("exec q3config.cfg\n");
+			Cbuf_AddText ("exec " Q3CONFIG_CFG "\n");
 		}
 	}
 

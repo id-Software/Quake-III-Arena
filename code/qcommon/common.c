@@ -2537,7 +2537,7 @@ void Com_Init( char *commandLine ) {
 
 	// skip the q3config.cfg if "safe" is on the command line
 	if ( !Com_SafeMode() ) {
-		Cbuf_AddText ("exec q3config.cfg\n");
+		Cbuf_AddText ("exec " Q3CONFIG_CFG "\n");
 	}
 
 	Cbuf_AddText ("exec autoexec.cfg\n");
@@ -2690,7 +2690,7 @@ void Com_WriteConfiguration( void ) {
 	}
 	cvar_modifiedFlags &= ~CVAR_ARCHIVE;
 
-	Com_WriteConfigToFile( "q3config.cfg" );
+	Com_WriteConfigToFile( Q3CONFIG_CFG );
 
 	// not needed for dedicated
 #ifndef DEDICATED
