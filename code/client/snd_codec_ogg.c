@@ -198,15 +198,19 @@ int S_OGG_Callback_close(void *datasource)
 // ftell() replacement
 long S_OGG_Callback_tell(void *datasource)
 {
+	snd_stream_t   *stream;
+
 	// check if input is valid
 	if(!datasource)
 	{
-		errno = EBADF; 
+		errno = EBADF;
 		return -1;
 	}
 
-	// we keep track of the file position in stream->pos
-	return (long) (((snd_stream_t *) datasource) -> pos);
+	// snd_stream_t in the generic pointer
+	stream = (snd_stream_t *) datasource;
+
+	return (long) FS_FTell(stream->file);
 }
 
 // the callback structure
