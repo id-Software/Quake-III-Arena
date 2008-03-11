@@ -128,7 +128,7 @@ int S_OGG_Callback_seek(void *datasource, ogg_int64_t offset, int whence)
 			retVal = FS_Seek(stream->file, (long) offset, FS_SEEK_SET);
 
 			// something has gone wrong, so we return here
-			if(!(retVal == 0))
+			if(retVal < 0)
 			{
 			 return retVal;
 			}
@@ -144,7 +144,7 @@ int S_OGG_Callback_seek(void *datasource, ogg_int64_t offset, int whence)
 			retVal = FS_Seek(stream->file, (long) offset, FS_SEEK_CUR);
 
 			// something has gone wrong, so we return here
-			if(!(retVal == 0))
+			if(retVal < 0)
 			{
 			 return retVal;
 			}
@@ -163,7 +163,7 @@ int S_OGG_Callback_seek(void *datasource, ogg_int64_t offset, int whence)
 			retVal = FS_Seek(stream->file, (long) stream->length + (long) offset, FS_SEEK_SET);
 
 			// something has gone wrong, so we return here
-			if(!(retVal == 0))
+			if(retVal < 0)
 			{
 			 return retVal;
 			}
