@@ -156,7 +156,7 @@ struct vm_s {
 	int			numSymbols;
 	struct vmSymbol_s	*symbols;
 
-	int			callLevel;			// for debug indenting
+	int			callLevel;		// counts recursive VM_Call
 	int			breakFunction;		// increment breakCount on function entry to this
 	int			breakCount;
 

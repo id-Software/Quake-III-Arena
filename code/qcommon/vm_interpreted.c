@@ -376,8 +376,6 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	*(int *)&image[ programStack + 4 ] = 0;	// return stack
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
-	vm->callLevel = 0;
-	
 	VM_Debug(0);
 
 //	vm_debugLevel=2;
@@ -516,7 +514,7 @@ nextInstruction2:
 			if ( programCounter < 0 ) {
 				// system call
 				int		r;
-				int		temp;
+//				int		temp;
 #ifdef DEBUG_VM
 				int		stomped;
 
@@ -525,7 +523,7 @@ nextInstruction2:
 				}
 #endif
 				// save the stack to allow recursive VM entry
-				temp = vm->callLevel;
+//				temp = vm->callLevel;
 				vm->programStack = programStack - 4;
 #ifdef DEBUG_VM
 				stomped = *(int *)&image[ programStack + 4 ];
@@ -558,7 +556,7 @@ nextInstruction2:
 				opStack++;
 				*opStack = r;
 				programCounter = *(int *)&image[ programStack ];
-				vm->callLevel = temp;
+//				vm->callLevel = temp;
 #ifdef DEBUG_VM
 				if ( vm_debugLevel ) {
 					Com_Printf( "%s<--- %s\n", DEBUGSTR, VM_ValueToSymbol( vm, programCounter ) );
@@ -599,7 +597,7 @@ nextInstruction2:
 //					vm_debugLevel = 2;
 //					VM_StackTrace( vm, programCounter, programStack );
 				}
-				vm->callLevel++;
+//				vm->callLevel++;
 			}
 #endif
 			goto nextInstruction;
@@ -614,7 +612,7 @@ nextInstruction2:
 #ifdef DEBUG_VM
 			profileSymbol = VM_ValueToFunctionSymbol( vm, programCounter );
 			if ( vm_debugLevel ) {
-				vm->callLevel--;
+//				vm->callLevel--;
 				Com_Printf( "%s<--- %s\n", DEBUGSTR, VM_ValueToSymbol( vm, programCounter ) );
 			}
 #endif
