@@ -801,6 +801,12 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 		return 0;
 
 	case UI_CMD_EXECUTETEXT:
+		if(args[1] == 0
+		&& (!strncmp(VMA(2), "snd_restart", 11) || !strncmp(VMA(2), "vid_restart", 11)))
+		{
+			Com_Printf (S_COLOR_YELLOW "turning EXEC_NOW '%.11s' into EXEC_INSERT\n", (const char*)VMA(2));
+			args[1] = EXEC_INSERT;
+		}
 		Cbuf_ExecuteText( args[1], VMA(2) );
 		return 0;
 
