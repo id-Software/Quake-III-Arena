@@ -234,7 +234,7 @@ void emit(const char* fmt, ...)
 	va_list ap;
 	char line[4096];
 	va_start(ap, fmt);
-	vsnprintf(line, sizeof(line), fmt, ap);
+	Q_vsnprintf(line, sizeof(line), fmt, ap);
 	va_end(ap);
 	assemble_line(line, strlen(line));
 }
