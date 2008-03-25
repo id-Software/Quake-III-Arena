@@ -92,9 +92,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
  **********************************************************************/
 
+#ifdef Q3_VM
+
 #include "../game/bg_lib.h"
 
-#ifndef Q3_VM
+typedef int intptr_t;
+
+#else
 
 #include <assert.h>
 #include <math.h>
@@ -106,29 +110,37 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ctype.h>
 #include <limits.h>
 
+// vsnprintf is ISO/IEC 9899:1999
+// abstracting this to make it portable
+#ifdef _WIN32
+  #define Q_vsnprintf _vsnprintf
+  #define Q_snprintf _snprintf
+#else
+  #define Q_vsnprintf vsnprintf
+  #define Q_snprintf snprintf
 #endif
+
+#ifdef _MSC_VER
+  #include <io.h>
+
+  typedef __int64 int64_t;
+  typedef __int32 int32_t;
+  typedef __int16 int16_t;
+  typedef __int8 int8_t;
+  typedef unsigned __int64 uint64_t;
+  typedef unsigned __int32 uint32_t;
+  typedef unsigned __int16 uint16_t;
+  typedef unsigned __int8 uint8_t;
+#else
+  #include <stdint.h>
+#endif
+
+#endif
+
 
 #include "q_platform.h"
 
 //=============================================================
-
-#ifdef Q3_VM
-   typedef int intptr_t;
-#else
-  #ifndef _MSC_VER
-    #include <stdint.h>
-  #else
-    #include <io.h>
-    typedef __int64 int64_t;
-    typedef __int32 int32_t;
-    typedef __int16 int16_t;
-    typedef __int8 int8_t;
-    typedef unsigned __int64 uint64_t;
-    typedef unsigned __int32 uint32_t;
-    typedef unsigned __int16 uint16_t;
-    typedef unsigned __int8 uint8_t;
-  #endif
-#endif
 
 typedef unsigned char 		byte;
 

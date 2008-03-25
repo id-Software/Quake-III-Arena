@@ -1523,7 +1523,7 @@ static void SV_RankError( const char* fmt, ... )
 	char	text[1024];
 
 	va_start( arg_ptr, fmt );
-	vsprintf( text, fmt, arg_ptr );
+	Q_vsnprintf(text, sizeof(text), fmt, arg_ptr );
 	va_end( arg_ptr );
 
 	Com_DPrintf( "****************************************\n" );
