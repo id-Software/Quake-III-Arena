@@ -296,6 +296,33 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 
 /*
 ============
+Cvar_Print
+
+Prints the value, default, and latched string of the given variable
+============
+*/
+void Cvar_Print( cvar_t *v ) {
+	Com_Printf ("\"%s\" is:\"%s" S_COLOR_WHITE "\"",
+			v->name, v->string );
+
+	if ( !( v->flags & CVAR_ROM ) ) {
+		if ( !Q_stricmp( v->string, v->resetString ) ) {
+			Com_Printf (", the default" );
+		} else {
+			Com_Printf (" default:\"%s" S_COLOR_WHITE "\"",
+					v->resetString );
+		}
+	}
+
+	Com_Printf ("\n");
+
+	if ( v->latchedString ) {
+		Com_Printf( "latched: \"%s\"\n", v->latchedString );
+	}
+}
+
+/*
+============
 Cvar_Set2
 ============
 */
@@ -508,23 +535,7 @@ qboolean Cvar_Command( void ) {
 
 	// perform a variable print or set
 	if ( Cmd_Argc() == 1 ) {
-		Com_Printf ("\"%s\" is:\"%s" S_COLOR_WHITE "\"",
-				v->name, v->string );
-
-		if ( !( v->flags & CVAR_ROM ) ) {
-			if ( !Q_stricmp( v->string, v->resetString ) ) {
-				Com_Printf (", the default" );
-			} else {
-				Com_Printf (" default:\"%s" S_COLOR_WHITE "\"",
-						v->resetString );
-			}
-		}
-
-		Com_Printf ("\n");
-
-		if ( v->latchedString ) {
-			Com_Printf( "latched: \"%s\"\n", v->latchedString );
-		}
+		Cvar_Print( v );
 		return qtrue;
 	}
 
@@ -533,6 +544,18 @@ qboolean Cvar_Command( void ) {
 	return qtrue;
 }
 
+
+/*
+============
+Cvar_Print_f
+
+Prints the contents of a cvar 
+(preferred over Cvar_Command where cvar names and commands conflict)
+============
+*/
+void Cvar_Print_f( void ) {
+	Cvar_Print (Cvar_FindVar (Cmd_Argv(1)) );
+}
 
 /*
 ============
@@ -565,11 +588,19 @@ weren't declared in C code.
 */
 void Cvar_Set_f( void ) {
 	int		i, c, l, len;
-	char	combined[MAX_STRING_TOKENS];
+	char	cmd[5], combined[MAX_STRING_TOKENS];
+	cvar_t *v;
 
 	c = Cmd_Argc();
-	if ( c < 3 ) {
-		Com_Printf ("usage: set <variable> <value>\n");
+	Q_strncpyz( cmd, Cmd_Argv(0), sizeof( cmd ) );
+
+	if ( c < 2 ) {
+		Com_Printf ("usage: %s <variable> <value>\n", cmd);
+		return;
+	}
+	if ( c == 2 ) {
+		v = Cvar_FindVar (Cmd_Argv(1));
+		Cvar_Print( v );
 		return;
 	}
 
@@ -586,73 +617,24 @@ void Cvar_Set_f( void ) {
 		}
 		l += len;
 	}
-	Cvar_Set2 (Cmd_Argv(1), combined, qfalse);
-}
-
-/*
-============
-Cvar_SetU_f
-
-As Cvar_Set, but also flags it as userinfo
-============
-*/
-void Cvar_SetU_f( void ) {
-	cvar_t	*v;
-
-	if ( Cmd_Argc() != 3 ) {
-		Com_Printf ("usage: setu <variable> <value>\n");
+	v = Cvar_Set2 (Cmd_Argv(1), combined, qfalse);
+	if( !v ) {
 		return;
 	}
-	Cvar_Set_f();
-	v = Cvar_FindVar( Cmd_Argv( 1 ) );
-	if ( !v ) {
-		return;
+	switch( cmd[3] ) {
+		default:
+		case '\0':
+			break;
+		case 'u':
+			v->flags |= CVAR_USERINFO;
+			break;
+		case 's':
+			v->flags |= CVAR_SERVERINFO;
+			break;
+		case 'a':
+			v->flags |= CVAR_ARCHIVE;
+			break;
 	}
-	v->flags |= CVAR_USERINFO;
-}
-
-/*
-============
-Cvar_SetS_f
-
-As Cvar_Set, but also flags it as userinfo
-============
-*/
-void Cvar_SetS_f( void ) {
-	cvar_t	*v;
-
-	if ( Cmd_Argc() != 3 ) {
-		Com_Printf ("usage: sets <variable> <value>\n");
-		return;
-	}
-	Cvar_Set_f();
-	v = Cvar_FindVar( Cmd_Argv( 1 ) );
-	if ( !v ) {
-		return;
-	}
-	v->flags |= CVAR_SERVERINFO;
-}
-
-/*
-============
-Cvar_SetA_f
-
-As Cvar_Set, but also flags it as archived
-============
-*/
-void Cvar_SetA_f( void ) {
-	cvar_t	*v;
-
-	if ( Cmd_Argc() != 3 ) {
-		Com_Printf ("usage: seta <variable> <value>\n");
-		return;
-	}
-	Cvar_Set_f();
-	v = Cvar_FindVar( Cmd_Argv( 1 ) );
-	if ( !v ) {
-		return;
-	}
-	v->flags |= CVAR_ARCHIVE;
 }
 
 /*
@@ -940,11 +922,12 @@ Reads in all archived cvars
 void Cvar_Init (void) {
 	cvar_cheats = Cvar_Get("sv_cheats", "1", CVAR_ROM | CVAR_SYSTEMINFO );
 
+	Cmd_AddCommand ("print", Cvar_Print_f);
 	Cmd_AddCommand ("toggle", Cvar_Toggle_f);
 	Cmd_AddCommand ("set", Cvar_Set_f);
-	Cmd_AddCommand ("sets", Cvar_SetS_f);
-	Cmd_AddCommand ("setu", Cvar_SetU_f);
-	Cmd_AddCommand ("seta", Cvar_SetA_f);
+	Cmd_AddCommand ("sets", Cvar_Set_f);
+	Cmd_AddCommand ("setu", Cvar_Set_f);
+	Cmd_AddCommand ("seta", Cvar_Set_f);
 	Cmd_AddCommand ("reset", Cvar_Reset_f);
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
 	Cmd_AddCommand ("cvar_restart", Cvar_Restart_f);
