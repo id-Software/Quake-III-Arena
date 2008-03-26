@@ -1286,7 +1286,7 @@ static int dopr (char *buffer, size_t maxlen, const char *format, va_list args)
 	flags |= DP_F_UNSIGNED;
 	if (cflags == DP_C_SHORT)
 //	  value = (unsigned short int) va_arg (args, unsigned short int); // Thilo: This does not work because the rcc compiler cannot do that cast correctly.
-	  value = va_arg (args, unsigned int) & 0xFFFF;			  // Using this workaround instead.
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1); // Using this workaround instead.
 	else if (cflags == DP_C_LONG)
 	  value = va_arg (args, unsigned long int);
 	else if (cflags == DP_C_LLONG)
@@ -1298,7 +1298,7 @@ static int dopr (char *buffer, size_t maxlen, const char *format, va_list args)
       case 'u':
 	flags |= DP_F_UNSIGNED;
 	if (cflags == DP_C_SHORT)
-	  value = va_arg (args, unsigned int) & 0xFFFF;
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1);
 	else if (cflags == DP_C_LONG)
 	  value = va_arg (args, unsigned long int);
 	else if (cflags == DP_C_LLONG)
@@ -1312,7 +1312,7 @@ static int dopr (char *buffer, size_t maxlen, const char *format, va_list args)
       case 'x':
 	flags |= DP_F_UNSIGNED;
 	if (cflags == DP_C_SHORT)
-	  value = va_arg (args, unsigned int) & 0xFFFF;
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1);
 	else if (cflags == DP_C_LONG)
 	  value = va_arg (args, unsigned long int);
 	else if (cflags == DP_C_LLONG)
