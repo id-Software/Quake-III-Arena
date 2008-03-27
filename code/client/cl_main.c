@@ -778,10 +778,6 @@ void CL_MapLoading( void ) {
 		Q_strncpyz( cls.servername, "localhost", sizeof(cls.servername) );
 		cls.state = CA_CHALLENGING;		// so the connect screen is drawn
 		Key_SetCatcher( 0 );
-		/* Execute next line twice, so that the connect image gets written into both, front- and
-		 * back buffer. This is necessary to prevent a flashing screen on map startup, as the UI gets
-		 * killed for a short time and cannot update the screen. */
-		SCR_UpdateScreen();
 		SCR_UpdateScreen();
 		clc.connectTime = -RETRANSMIT_TIMEOUT;
 		NET_StringToAdr( cls.servername, &clc.serverAddress);
