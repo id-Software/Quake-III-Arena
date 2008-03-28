@@ -656,10 +656,10 @@ ifeq ($(PLATFORM),sunos)
   OPTIMIZE = -O3 -ffast-math -funroll-loops
 
   ifeq ($(ARCH),sparc)
-    OPTIMIZE = -O3 -ffast-math -falign-loops=2 \
-      -falign-jumps=2 -falign-functions=2 -fstrength-reduce \
-      -mtune=ultrasparc -mv8plus -mno-faster-structs \
-      -funroll-loops
+    OPTIMIZE = -O3 -ffast-math \
+      -fstrength-reduce -falign-functions=2 \
+      -mtune=ultrasparc3 -mv8plus -mno-faster-structs \
+      -funroll-loops #-mv8plus
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math \
