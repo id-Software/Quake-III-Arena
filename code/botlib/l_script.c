@@ -1363,8 +1363,6 @@ script_t *LoadScriptFile(const char *filename)
 	} //end if
 	fclose(fp);
 #endif
-	//
-	script->length = COM_Compress(script->buffer);
 
 	return script;
 } //end of the function LoadScriptFile
