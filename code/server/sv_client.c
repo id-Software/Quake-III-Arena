@@ -88,50 +88,61 @@ void SV_GetChallenge( netadr_t from ) {
 		return;
 	}
 
-	// look up the authorize server's IP
-	if ( !svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD ) {
-		Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
-		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress ) ) {
-			Com_Printf( "Couldn't resolve address\n" );
+	// Drop the authorize stuff if this client is coming in via v6 as the auth server does not support ipv6.
+	if(challenge->adr.type == NA_IP)
+	{
+		// look up the authorize server's IP
+		if ( !svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD ) {
+			Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
+			if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress, NA_IP ) ) {
+				Com_Printf( "Couldn't resolve address\n" );
+				return;
+			}
+			svs.authorizeAddress.port = BigShort( PORT_AUTHORIZE );
+			Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", AUTHORIZE_SERVER_NAME,
+				svs.authorizeAddress.ip[0], svs.authorizeAddress.ip[1],
+				svs.authorizeAddress.ip[2], svs.authorizeAddress.ip[3],
+				BigShort( svs.authorizeAddress.port ) );
+		}
+
+		// if they have been challenging for a long time and we
+		// haven't heard anything from the authorize server, go ahead and
+		// let them in, assuming the id server is down
+		if ( svs.time - challenge->firstTime > AUTHORIZE_TIMEOUT ) {
+			Com_DPrintf( "authorize server timed out\n" );
+
+			challenge->pingTime = svs.time;
+			NET_OutOfBandPrint( NS_SERVER, challenge->adr, 
+				"challengeResponse %i", challenge->challenge );
 			return;
 		}
-		svs.authorizeAddress.port = BigShort( PORT_AUTHORIZE );
-		Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", AUTHORIZE_SERVER_NAME,
-			svs.authorizeAddress.ip[0], svs.authorizeAddress.ip[1],
-			svs.authorizeAddress.ip[2], svs.authorizeAddress.ip[3],
-			BigShort( svs.authorizeAddress.port ) );
+
+		// otherwise send their ip to the authorize server
+		if ( svs.authorizeAddress.type != NA_BAD ) {
+			cvar_t	*fs;
+			char	game[1024];
+
+			Com_DPrintf( "sending getIpAuthorize for %s\n", NET_AdrToString( from ));
+		
+			strcpy(game, BASEGAME);
+			fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
+			if (fs && fs->string[0] != 0) {
+				strcpy(game, fs->string);
+			}
+		
+			// the 0 is for backwards compatibility with obsolete sv_allowanonymous flags
+			// getIpAuthorize <challenge> <IP> <game> 0 <auth-flag>
+			NET_OutOfBandPrint( NS_SERVER, svs.authorizeAddress,
+				"getIpAuthorize %i %i.%i.%i.%i %s 0 %s",  svs.challenges[i].challenge,
+				from.ip[0], from.ip[1], from.ip[2], from.ip[3], game, sv_strictAuth->string );
+		}
 	}
-
-	// if they have been challenging for a long time and we
-	// haven't heard anything from the authorize server, go ahead and
-	// let them in, assuming the id server is down
-	if ( svs.time - challenge->firstTime > AUTHORIZE_TIMEOUT ) {
-		Com_DPrintf( "authorize server timed out\n" );
-
+	else
+	{
 		challenge->pingTime = svs.time;
+		
 		NET_OutOfBandPrint( NS_SERVER, challenge->adr, 
 			"challengeResponse %i", challenge->challenge );
-		return;
-	}
-
-	// otherwise send their ip to the authorize server
-	if ( svs.authorizeAddress.type != NA_BAD ) {
-		cvar_t	*fs;
-		char	game[1024];
-
-		Com_DPrintf( "sending getIpAuthorize for %s\n", NET_AdrToString( from ));
-		
-		strcpy(game, BASEGAME);
-		fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-		if (fs && fs->string[0] != 0) {
-			strcpy(game, fs->string);
-		}
-		
-		// the 0 is for backwards compatibility with obsolete sv_allowanonymous flags
-		// getIpAuthorize <challenge> <IP> <game> 0 <auth-flag>
-		NET_OutOfBandPrint( NS_SERVER, svs.authorizeAddress,
-			"getIpAuthorize %i %i.%i.%i.%i %s 0 %s",  svs.challenges[i].challenge,
-			from.ip[0], from.ip[1], from.ip[2], from.ip[3], game, sv_strictAuth->string );
 	}
 }
 
@@ -284,9 +295,8 @@ void SV_DirectConnect( netadr_t from ) {
 
 		for (i=0 ; i<MAX_CHALLENGES ; i++) {
 			if (NET_CompareAdr(from, svs.challenges[i].adr)) {
-				if ( challenge == svs.challenges[i].challenge ) {
-					break;		// good
-				}
+				if ( challenge == svs.challenges[i].challenge )
+					break;
 			}
 		}
 		if (i == MAX_CHALLENGES) {

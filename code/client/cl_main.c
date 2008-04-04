@@ -780,7 +780,7 @@ void CL_MapLoading( void ) {
 		Key_SetCatcher( 0 );
 		SCR_UpdateScreen();
 		clc.connectTime = -RETRANSMIT_TIMEOUT;
-		NET_StringToAdr( cls.servername, &clc.serverAddress);
+		NET_StringToAdr( cls.servername, &clc.serverAddress, NA_UNSPEC);
 		// we don't need a challenge on the localhost
 
 		CL_CheckForResend();
@@ -808,7 +808,7 @@ CL_UpdateGUID
 update cl_guid using QKEY_FILE and optional prefix
 ====================
 */
-static void CL_UpdateGUID( char *prefix, int prefix_len )
+static void CL_UpdateGUID( const char *prefix, int prefix_len )
 {
 	fileHandle_t f;
 	int len;
@@ -941,7 +941,7 @@ void CL_RequestMotd( void ) {
 		return;
 	}
 	Com_Printf( "Resolving %s\n", UPDATE_SERVER_NAME );
-	if ( !NET_StringToAdr( UPDATE_SERVER_NAME, &cls.updateServer  ) ) {
+	if ( !NET_StringToAdr( UPDATE_SERVER_NAME, &cls.updateServer, NA_IP ) ) {
 		Com_Printf( "Couldn't resolve address\n" );
 		return;
 	}
@@ -1011,7 +1011,7 @@ void CL_RequestAuthorization( void ) {
 
 	if ( !cls.authorizeServer.port ) {
 		Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
-		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &cls.authorizeServer  ) ) {
+		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &cls.authorizeServer, NA_IP ) ) {
 			Com_Printf( "Couldn't resolve address\n" );
 			return;
 		}
@@ -1145,11 +1145,27 @@ CL_Connect_f
 */
 void CL_Connect_f( void ) {
 	char	*server;
-	char	serverString[ 22 ];
+	const char	*serverString;
+	int argc = Cmd_Argc();
+	netadrtype_t family = NA_UNSPEC;
 
-	if ( Cmd_Argc() != 2 ) {
-		Com_Printf( "usage: connect [server]\n");
+	if ( argc != 2 && argc != 3 ) {
+		Com_Printf( "usage: connect [-4|-6] server\n");
 		return;	
+	}
+	
+	if(argc == 2)
+		server = Cmd_Argv(1);
+	else
+	{
+		if(!strcmp(Cmd_Argv(1), "-4"))
+			family = NA_IP;
+		else if(!strcmp(Cmd_Argv(1), "-6"))
+			family = NA_IP6;
+		else
+			Com_Printf( "warning: only -4 or -6 as address type understood.\n");
+		
+		server = Cmd_Argv(2);
 	}
 
 	Cvar_Set("ui_singlePlayerActive", "0");
@@ -1159,8 +1175,6 @@ void CL_Connect_f( void ) {
 
 	// clear any previous "server full" type messages
 	clc.serverMessage[0] = 0;
-
-	server = Cmd_Argv (1);
 
 	if ( com_sv_running->integer && !strcmp( server, "localhost" ) ) {
 		// if running a local server, kill it
@@ -1180,7 +1194,7 @@ void CL_Connect_f( void ) {
 
 	Q_strncpyz( cls.servername, server, sizeof(cls.servername) );
 
-	if (!NET_StringToAdr( cls.servername, &clc.serverAddress) ) {
+	if (!NET_StringToAdr(cls.servername, &clc.serverAddress, family) ) {
 		Com_Printf ("Bad server address\n");
 		cls.state = CA_DISCONNECTED;
 		return;
@@ -1188,12 +1202,10 @@ void CL_Connect_f( void ) {
 	if (clc.serverAddress.port == 0) {
 		clc.serverAddress.port = BigShort( PORT_SERVER );
 	}
-	Com_sprintf( serverString, sizeof( serverString ), "%i.%i.%i.%i:%i",
-                clc.serverAddress.ip[0], clc.serverAddress.ip[1],
-                clc.serverAddress.ip[2], clc.serverAddress.ip[3],
-                BigShort( clc.serverAddress.port ) );
- 
-	Com_Printf( "%s resolved to %s\n", cls.servername, serverString );
+
+	serverString = NET_AdrToStringwPort(clc.serverAddress);
+
+	Com_Printf( "%s resolved to %s\n", cls.servername, serverString);
 
 	if( cl_guidServerUniq->integer )
 		CL_UpdateGUID( serverString, strlen( serverString ) );
@@ -1260,7 +1272,7 @@ void CL_Rcon_f( void ) {
 
 			return;
 		}
-		NET_StringToAdr (rconAddress->string, &to);
+		NET_StringToAdr (rconAddress->string, &to, NA_UNSPEC);
 		if (to.port == 0) {
 			to.port = BigShort (PORT_SERVER);
 		}
@@ -1697,8 +1709,8 @@ void CL_CheckForResend( void ) {
 
 	switch ( cls.state ) {
 	case CA_CONNECTING:
-		// requesting a challenge
-		if ( !Sys_IsLANAddress( clc.serverAddress ) ) {
+		// requesting a challenge .. IPv6 users always get in as authorize server supports no ipv6.
+		if ( clc.serverAddress.type == NA_IP && !Sys_IsLANAddress( clc.serverAddress ) ) {
 			CL_RequestAuthorization();
 		}
 		NET_OutOfBandPrint(NS_CLIENT, clc.serverAddress, "getchallenge");
@@ -1968,7 +1980,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	// challenge from the server we are connecting to
 	if ( !Q_stricmp(c, "challengeResponse") ) {
 		if ( cls.state != CA_CONNECTING ) {
-			Com_Printf( "Unwanted challenge response received.  Ignored.\n" );
+			Com_DPrintf( "Unwanted challenge response received.  Ignored.\n" );
 		} else {
 			// start sending challenge repsonse instead of challenge request packets
 			clc.challenge = atoi(Cmd_Argv(1));
@@ -3059,7 +3071,7 @@ int CL_ServerStatus( char *serverAddress, char *serverStatusString, int maxLen )
 		return qfalse;
 	}
 	// get the address
-	if ( !NET_StringToAdr( serverAddress, &to ) ) {
+	if ( !NET_StringToAdr( serverAddress, &to, NA_UNSPEC) ) {
 		return qfalse;
 	}
 	serverStatus = CL_GetServerStatus( to );
@@ -3262,7 +3274,7 @@ void CL_GlobalServers_f( void ) {
 	// reset the list, waiting for response
 	// -1 is used to distinguish a "no response"
 
-	NET_StringToAdr( cl_master->string, &to );
+	NET_StringToAdr( cl_master->string, &to, NA_IP );
 
 	if( cls.masterNum == 1 ) {
 		cls.nummplayerservers = -1;
@@ -3465,17 +3477,33 @@ void CL_Ping_f( void ) {
 	netadr_t	to;
 	ping_t*		pingptr;
 	char*		server;
+	int			argc;
+	netadrtype_t	family = NA_UNSPEC;
 
-	if ( Cmd_Argc() != 2 ) {
-		Com_Printf( "usage: ping [server]\n");
+	argc = Cmd_Argc();
+
+	if ( argc != 2 && argc != 3 ) {
+		Com_Printf( "usage: ping [-4|-6] server\n");
 		return;	
+	}
+	
+	if(argc == 2)
+		server = Cmd_Argv(1);
+	else
+	{
+		if(!strcmp(Cmd_Argv(1), "-4"))
+			family = NA_IP;
+		else if(!strcmp(Cmd_Argv(1), "-6"))
+			family = NA_IP6;
+		else
+			Com_Printf( "warning: only -4 or -6 as address type understood.\n");
+		
+		server = Cmd_Argv(2);
 	}
 
 	Com_Memset( &to, 0, sizeof(netadr_t) );
 
-	server = Cmd_Argv(1);
-
-	if ( !NET_StringToAdr( server, &to ) ) {
+	if ( !NET_StringToAdr( server, &to, family ) ) {
 		return;
 	}
 
@@ -3603,32 +3631,53 @@ CL_ServerStatus_f
 ==================
 */
 void CL_ServerStatus_f(void) {
-	netadr_t	to;
+	netadr_t	to, *toptr = NULL;
 	char		*server;
 	serverStatus_t *serverStatus;
+	int			argc;
+	netadrtype_t	family = NA_UNSPEC;
 
-	Com_Memset( &to, 0, sizeof(netadr_t) );
+	argc = Cmd_Argc();
 
-	if ( Cmd_Argc() != 2 ) {
-		if ( cls.state != CA_ACTIVE || clc.demoplaying ) {
+	if ( argc != 2 && argc != 3 )
+	{
+		if (cls.state != CA_ACTIVE || clc.demoplaying)
+		{
 			Com_Printf ("Not connected to a server.\n");
-			Com_Printf( "Usage: serverstatus [server]\n");
-			return;	
+			Com_Printf( "usage: serverstatus [-4|-6] server\n");
+			return;
 		}
-		server = cls.servername;
+
+		toptr = &clc.serverAddress;
 	}
-	else {
-		server = Cmd_Argv(1);
+	
+	if(!toptr)
+	{
+		Com_Memset( &to, 0, sizeof(netadr_t) );
+	
+		if(argc == 2)
+			server = Cmd_Argv(1);
+		else
+		{
+			if(!strcmp(Cmd_Argv(1), "-4"))
+				family = NA_IP;
+			else if(!strcmp(Cmd_Argv(1), "-6"))
+				family = NA_IP6;
+			else
+				Com_Printf( "warning: only -4 or -6 as address type understood.\n");
+		
+			server = Cmd_Argv(2);
+		}
+
+		toptr = &to;
+		if ( !NET_StringToAdr( server, toptr, family ) )
+			return;
 	}
 
-	if ( !NET_StringToAdr( server, &to ) ) {
-		return;
-	}
+	NET_OutOfBandPrint( NS_CLIENT, *toptr, "getstatus" );
 
-	NET_OutOfBandPrint( NS_CLIENT, to, "getstatus" );
-
-	serverStatus = CL_GetServerStatus( to );
-	serverStatus->address = to;
+	serverStatus = CL_GetServerStatus( *toptr );
+	serverStatus->address = *toptr;
 	serverStatus->print = qtrue;
 	serverStatus->pending = qtrue;
 }
