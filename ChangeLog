@@ -1,3 +1,71 @@
+2008-04-04 Various contributors
+	+ Solaris fixes
+	+ Replace vsprintf function in bg_lib.c with vsnprintf implementation started by Patrick Powell
+	+ Compile bg_* files separately for each game module, as originally intended
+	+ Write q3config_server.cfg for the server, to avoid reseting client variables
+		after running a dedicated server
+	+ Split image decoders into their own files
+	+ OS X build updates for most compatibility
+	+ Slackbuild
+	+ Detect available resolutions and offer them in the in game menus
+	+ A few botlib fixes
+	+ Fix poppy captured audio when recording videos
+	+ Extend console logging on crash errors
+	+ Merge *BSD platform definitions in q_platform.h
+	+ IRIX support
+	+ Remove all the old bat/sh QVM building scripts
+	+ Make master server used client configurable (cl_master)
+	+ Fix to QVM compilation on big endian architectures
+	+ OpenBSD support
+	+ Autocomplete key names
+	+ Don't build client command completion on the dedicated server
+	+ Don't apply colour escape chars on input fields
+	+ Rewrite of the win32 dedicated console
+	+ Improved Makefile startup time
+	+ Build dedicated server binary on Windows
+	+ Bump Q3_VERSION to 1.35
+	+ Replacement of platform specific backends with a generic SDL one
+	+ Merge win_net.c and unix_net.c to net_ip.c
+	+ Demote input related console information to developer only so that it doesn't
+		spam the console every time input settings are changed
+	+ PNG texture support
+	+ Cleanup of tabulation in R_LoadImage
+	+ Fixes to console scrolling
+	+ New x86_64 vm that doesn't use gas
+	+ Early out AABB collision optimisation
+	+ Generate QVM dependicies in a better way
+	+ Build process is quieter
+	+ Replace horrendously long list of Makefile build rules with set of inference rules
+	+ Allow CC to be overridden externally to the Makefile
+	+ Move storage of console history from a cvar to a file in order to alleviate
+		security concerns
+	+ Fix bug where transparent surfaces wouldn't draw over skyboxes
+	+ Add input sanitising to various sound playing functions called from mods
+	+ Explicitly set OpenAL distance attenuation model
+	+ Increased the number of registers used for the opStack in the PPC vm from
+		12 to 16
+	+ Fix endian issue in MDR loading
+	+ Add cURL support for HTTP/FTP downloading
+	+ Disable video command when not playing back a demo
+	+ Print the SVN version string in Com_Init()
+	+ OpenAL device enumeration support
+	+ Fix 100% CPU usage on idle dedicated servers
+	+ Windows home directory support
+	+ Improve correctness of AVI files created by video command
+	+ Better SDL joystick support
+	+ sv_minRate
+	+ [cl|sv]_packetdelay
+	+ Various security fixes
+	+ Fix JIT compiler code execution on NX-protected win32 OS
+	+ Fix r_overBrightBits variable getting ignored on Linux
+	+ cl_guid for semi-reliable server authentication
+	+ Anisotropic texture filtering
+	+ Video export doesn't crap out with sv_pure 1 anymore
+	+ Video export doesn't crap out when writing > 2Gb files anymore
+	+ Fix to a bug where servers with long uptimes (~27 days) would consume 100%
+		CPU if the running game did not set the nextmap cvar
+	+ Some OSes no longer requires a vid_restart when changing r_fullscreen
+
 2006-01-24 Various contributors
 	+ Persistent console history
 	+ Added code to sleep a bit when q3 has no focus and sleep a lot when it's

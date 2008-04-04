@@ -144,7 +144,7 @@ New cvars
 New commands
   video [filename]        - start video capture (use with demo command)
   stopvideo               - stop video capture
-  print	                  - print out the contents of a cvar
+  print                   - print out the contents of a cvar
 
 
 ------------------------------------------------------------ Miscellaneous -----
