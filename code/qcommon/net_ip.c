@@ -55,7 +55,9 @@ static qboolean	winsockInitialized = qfalse;
 #include <sys/types.h>
 #include <sys/time.h>
 #include <unistd.h>
+#ifndef __sun
 #include <ifaddrs.h>
+#endif
 
 #ifdef __sun
 #include <sys/filio.h>
@@ -1079,7 +1081,28 @@ void NET_AddLocalNetmask(struct sockaddr *sa, int position)
 	}
 }
 
-#ifdef _WIN32
+#if defined(__linux__) || defined(MACOSX) || defined(__BSD__)
+void NET_GetLocalAddress(void)
+{
+	struct ifaddrs *ifap, *search;
+	int retval;
+
+	if(getifaddrs(&ifap))
+		Com_Printf("NET_GetLocalAddress: Unable to get list of network interfaces: %s\n", NET_ErrorString());
+	else
+	{
+		for(search = ifap; search; search = search->ifa_next)
+		{
+			if((retval = NET_AddLocalAddress(search->ifa_addr)) >= 0)
+				NET_AddLocalNetmask(search->ifa_netmask, retval);
+		}
+	
+		freeifaddrs(ifap);
+		
+		Sys_ShowIP();
+	}
+}
+#else
 void NET_GetLocalAddress( void ) {
 	char				hostname[256];
 	struct addrinfo		hint;
@@ -1107,96 +1130,6 @@ void NET_GetLocalAddress( void ) {
 	memset(localIP6mask, 0xFF, sizeof(localIP6mask));
 
 	Sys_ShowIP();
-}
-
-#else
-/* int NET_AddInterfaceToList(char (*interfaces)[IF_NAMESIZE], int numinterfaces, char *add)
-{
-	int index;
-	
-	for(index = 0; index < numinterfaces && index < MAX_IPS; index++)
-	{
-		if(!strcmp(interfaces[index], add))
-			break;
-	}
-	
-	if(index >= numinterfaces && index < MAX_IPS)
-	{
-		Q_strncpyz(interfaces[index], add, IF_NAMESIZE);
-		numinterfaces++;
-	}
-	
-	return numinterfaces;
-}*/
-
-void NET_GetLocalAddress(void)
-{
-	struct ifaddrs *ifap, *search;
-	int retval;
-
-	if(getifaddrs(&ifap))
-		Com_Printf("NET_GetLocalAddress: Unable to get list of network interfaces: %s\n", NET_ErrorString());
-	else
-	{
-		for(search = ifap; search; search = search->ifa_next)
-		{
-			if((retval = NET_AddLocalAddress(search->ifa_addr)) >= 0)
-				NET_AddLocalNetmask(search->ifa_netmask, retval);
-		}
-	
-		freeifaddrs(ifap);
-		
-		Sys_ShowIP();
-	}
-
-/*
-	char interfaces[MAX_IPS][IF_NAMESIZE];
-	int numinterfaces;
-	struct ifreq irbuf[MAX_IPS], ireq;
-	struct ifconf ifc;
-	int index, numdev;
-	
-	memset(interfaces, '\0', sizeof(interfaces));
-
-	ifc.ifc_req = irbuf;
-	
-	// compile a list of all available interfaces on this machine.
-	
-	if(ip_socket != INVALID_SOCKET)
-	{	
-		ifc.ifc_len = sizeof(irbuf);
-	
-		// Use our IP sockets for the ioctl stuff.
-		if(ioctl(ip_socket, SIOCGIFCONF, &ifc))
-		{
-			Com_Printf("NET_GetLocalAddress: Unable to get list of network interfaces: %s\n", NET_ErrorString());
-			return;
-		}
-		
-		numdev = ifc.ifc_len / sizeof(*irbuf);
-		
-		for(index = 0; index < numdev; index++)
-			numinterfaces = NET_AddInterfaceToList(interfaces, numinterfaces, irbuf[index].ifr_name);
-	}
-
-	if(ip6_socket != INVALID_SOCKET)
-	{	
-		ifc.ifc_len = sizeof(irbuf);
-
-		// Use our IP sockets for the ioctl stuff.
-		if(ioctl(ip6_socket, SIOCGIFCONF, &ifc))
-		{
-			Com_Printf("NET_GetLocalAddress: Unable to get list of network interfaces: %s\n", NET_ErrorString());
-			return;
-		}
-		
-		numdev = ifc.ifc_len / sizeof(*irbuf);
-		
-		for(index = 0; index < numdev; index++)
-			numinterfaces = NET_AddInterfaceToList(interfaces, numinterfaces, irbuf[index].ifr_name);
-	}
-	
-	*/
 }
 #endif
 
