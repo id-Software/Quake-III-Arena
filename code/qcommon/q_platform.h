@@ -175,6 +175,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/types.h>
 #include <machine/endian.h>
 
+#ifndef __BSD__
+  #define __BSD__
+#endif
+
 #if defined(__FreeBSD__)
 #define OS_STRING "freebsd"
 #elif defined(__OpenBSD__)
