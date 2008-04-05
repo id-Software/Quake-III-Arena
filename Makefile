@@ -381,6 +381,9 @@ endif
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON
 
+  # Require Windows XP or later
+  BASE_CFLAGS += -DWINVER=0x501
+
   ifeq ($(USE_LOCAL_HEADERS),1)
     BASE_CFLAGS += -I$(SDLHDIR)/include
   endif
@@ -412,7 +415,7 @@ endif
 
   BINEXT=.exe
 
-  LDFLAGS= -lwsock32 -lwinmm
+  LDFLAGS= -lws2_32 -lwinmm
   CLIENT_LDFLAGS = -mwindows -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_CURL),1)

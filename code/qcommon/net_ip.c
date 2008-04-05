@@ -24,12 +24,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 
 #ifdef _WIN32
-#include <Winsock2.h>
-#include <Ws2tcpip.h>
-#include <Wspiapi.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#if WINVER < 0x501
+#include <wspiapi.h>
+#else
+#include <ws2spi.h>
+#endif
 
 typedef int socklen_t;
-#define sa_family_t	ADDRESS_FAMILY
+typedef unsigned short sa_family_t;
 #define EAGAIN				WSAEWOULDBLOCK
 #define EADDRNOTAVAIL	WSAEADDRNOTAVAIL
 #define EAFNOSUPPORT	WSAEAFNOSUPPORT
@@ -524,7 +528,7 @@ Sys_SendPacket
 ==================
 */
 void Sys_SendPacket( int length, const void *data, netadr_t to ) {
-	int				ret;
+	int				ret = SOCKET_ERROR;
 	struct sockaddr_storage	addr;
 
 	if( to.type != NA_BROADCAST && to.type != NA_IP && to.type != NA_IP6 ) {
@@ -790,12 +794,14 @@ int NET_IP6Socket( char *net_interface, int port, int *err ) {
 		return INVALID_SOCKET;
 	}
 
+#ifdef IPV6_V6ONLY
 	// ipv4 addresses should not be allowed to connect via this socket.
 	if(setsockopt(newsocket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &i, sizeof(i)) == SOCKET_ERROR)
 	{
 		// win32 systems don't seem to support this anyways.
 		Com_DPrintf("WARNING: NET_IP6Socket: setsockopt IPV6_V6ONLY: %s\n", NET_ErrorString());
 	}
+#endif
 
 	// make it broadcast capable
 	if( setsockopt( newsocket, SOL_SOCKET, SO_BROADCAST, (char *) &i, sizeof(i) ) == SOCKET_ERROR ) {
