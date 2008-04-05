@@ -550,9 +550,9 @@ void Sys_SendPacket( int length, const void *data, netadr_t to ) {
 	}
 	else {
 		if(addr.ss_family == AF_INET)
-			ret = sendto( ip_socket, data, length, 0, (struct sockaddr *) &addr, sizeof(addr) );
-		else
-			ret = sendto( ip6_socket, data, length, 0, (struct sockaddr *) &addr, sizeof(addr) );
+			ret = sendto( ip_socket, data, length, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in) );
+		else if(addr.ss_family == AF_INET6)
+			ret = sendto( ip6_socket, data, length, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in6) );
 	}
 	if( ret == SOCKET_ERROR ) {
 		int err = socketError;
