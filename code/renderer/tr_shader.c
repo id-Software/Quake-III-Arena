@@ -2152,7 +2152,7 @@ static shader_t *FinishShader( void ) {
 	//
 	// set appropriate stage information
 	//
-	for ( stage = 0; stage < MAX_SHADER_STAGES; stage++ ) {
+	for ( stage = 0; stage < MAX_SHADER_STAGES; ) {
 		shaderStage_t *pStage = &stages[stage];
 
 		if ( !pStage->active ) {
@@ -2163,17 +2163,33 @@ static shader_t *FinishShader( void ) {
 		if ( !pStage->bundle[0].image[0] ) {
 			ri.Printf( PRINT_WARNING, "Shader %s has a stage with no image\n", shader.name );
 			pStage->active = qfalse;
+			stage++;
 			continue;
 		}
 
 		//
 		// ditch this stage if it's detail and detail textures are disabled
 		//
-		if ( pStage->isDetail && !r_detailTextures->integer ) {
-			if ( stage < ( MAX_SHADER_STAGES - 1 ) ) {
-				memmove( pStage, pStage + 1, sizeof( *pStage ) * ( MAX_SHADER_STAGES - stage - 1 ) );
-				Com_Memset(  pStage + 1, 0, sizeof( *pStage ) );
+		if ( pStage->isDetail && !r_detailTextures->integer )
+		{
+			int index;
+			
+			for(index = stage + 1; index < MAX_SHADER_STAGES; index++)
+			{
+				if(!stages[index].active)
+					break;
 			}
+			
+			if(index < MAX_SHADER_STAGES)
+				memmove(pStage, pStage + 1, sizeof(*pStage) * (index - stage));
+			else
+			{
+				if(stage + 1 < MAX_SHADER_STAGES)
+					memmove(pStage, pStage + 1, sizeof(*pStage) * (index - stage - 1));
+				
+				Com_Memset(&stages[index - 1], 0, sizeof(*stages));
+			}
+			
 			continue;
 		}
 
@@ -2242,6 +2258,8 @@ static shader_t *FinishShader( void ) {
 				}
 			}
 		}
+		
+		stage++;
 	}
 
 	// there are times when you will need to manually apply a sort to
