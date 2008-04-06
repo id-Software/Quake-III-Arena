@@ -40,6 +40,9 @@ vm_t	*currentVM = NULL;
 vm_t	*lastVM    = NULL;
 int		vm_debugLevel;
 
+// used by Com_Error to get rid of running vm's before longjmp
+static int forced_unload;
+
 #define	MAX_VM		3
 vm_t	vmTable[MAX_VM];
 
@@ -613,8 +616,12 @@ void VM_Free( vm_t *vm ) {
 	}
 
 	if(vm->callLevel) {
-		Com_Error( ERR_FATAL, "VM_Free(%s) on running vm", vm->name );
-		return;
+		if(!forced_unload) {
+			Com_Error( ERR_FATAL, "VM_Free(%s) on running vm", vm->name );
+			return;
+		} else {
+			Com_Printf( "forcefully unloading %s vm\n", vm->name );
+		}
 	}
 
 	if(vm->destroy)
@@ -646,6 +653,14 @@ void VM_Clear(void) {
 	for (i=0;i<MAX_VM; i++) {
 		VM_Free(&vmTable[i]);
 	}
+}
+
+void VM_Forced_Unload_Start(void) {
+	forced_unload = 1;
+}
+
+void VM_Forced_Unload_Done(void) {
+	forced_unload = 0;
 }
 
 void *VM_ArgPtr( intptr_t intValue ) {

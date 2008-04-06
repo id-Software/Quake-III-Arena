@@ -277,7 +277,9 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 
 	if (code == ERR_DISCONNECT || code == ERR_SERVERDISCONNECT) {
 		CL_Disconnect( qtrue );
+		VM_Forced_Unload_Start();
 		CL_FlushMemory( );
+		VM_Forced_Unload_Done();
 		// make sure we can get at our local stuff
 		FS_PureServerSetLoadedPaks("", "");
 		com_errorEntered = qfalse;
