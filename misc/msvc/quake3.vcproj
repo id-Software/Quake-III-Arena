@@ -72,7 +72,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib advapi32.lib winmm.lib wsock32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
+				AdditionalDependencies="user32.lib advapi32.lib winmm.lib ws2_32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
 				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -169,7 +169,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib advapi32.lib winmm.lib wsock32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
+				AdditionalDependencies="user32.lib advapi32.lib winmm.lib ws2_32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
 				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib advapi32.lib winmm.lib wsock32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
+				AdditionalDependencies="user32.lib advapi32.lib winmm.lib ws2_32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
 				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -363,7 +363,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib advapi32.lib winmm.lib wsock32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
+				AdditionalDependencies="user32.lib advapi32.lib winmm.lib ws2_32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
 				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
