@@ -599,7 +599,7 @@ void SkipBracedSection (char **program) {
 	depth = 0;
 	do {
 		token = COM_ParseExt( program, qtrue );
-		if( token[1] == 0 ) {
+		if( *program && token[1] == 0 ) {
 			if( token[0] == '{' ) {
 				depth++;
 			}
