@@ -404,13 +404,13 @@ static qboolean R_LoadMD3 (model_t *mod, int lod, void *buffer, const char *mod_
 }
 
 
+#ifdef RAVENMD4
 
 /*
 =================
 R_LoadMDR
 =================
 */
-#ifdef RAVENMD4
 static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char *mod_name ) 
 {
 	int					i, j, k, l;
@@ -444,10 +444,10 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 	
 	mod->type = MOD_MDR;
 
-	pinmodel->numFrames = LittleLong(pinmodel->numFrames);
-	pinmodel->numBones = LittleLong(pinmodel->numBones);
-	pinmodel->ofsFrames = LittleLong(pinmodel->ofsFrames);
-	
+	LL(pinmodel->numFrames);
+	LL(pinmodel->numBones);
+	LL(pinmodel->ofsFrames);
+
 	// This is a model that uses some type of compressed Bones. We don't want to uncompress every bone for each rendered frame
 	// over and over again, we'll uncompress it in this function already, so we must adjust the size of the target md4.
 	if(pinmodel->ofsFrames < 0)
@@ -458,6 +458,14 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 		size += pinmodel->numFrames * pinmodel->numBones * ((sizeof(mdrBone_t) - sizeof(mdrCompBone_t)));
 	}
 	
+	// simple bounds check
+	if(pinmodel->numBones < 0 ||
+		sizeof(*mdr) + pinmodel->numFrames * (sizeof(*frame) + (pinmodel->numBones - 1) * sizeof(*frame->bones)) > size)
+	{
+		ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+		return qfalse;
+	}
+
 	mod->dataSize += size;
 	mod->md4 = mdr = ri.Hunk_Alloc( size, h_low );
 
@@ -470,8 +478,8 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 	mdr->numBones = pinmodel->numBones;
 	mdr->numLODs = LittleLong(pinmodel->numLODs);
 	mdr->numTags = LittleLong(pinmodel->numTags);
-	// We don't care about offset values, we'll generate them ourselves while loading.
-	
+	// We don't care about the other offset values, we'll generate them ourselves while loading.
+
 	mod->numLods = mdr->numLODs;
 
 	if ( mdr->numFrames < 1 ) 
@@ -490,7 +498,7 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 				
 		// compressed model...				
 		cframe = (mdrCompFrame_t *)((byte *) pinmodel - pinmodel->ofsFrames);
-
+		
 		for(i = 0; i < mdr->numFrames; i++)
 		{
 			for(j = 0; j < 3; j++)
@@ -565,6 +573,13 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 	// swap all the LOD's
 	for ( l = 0 ; l < mdr->numLODs ; l++)
 	{
+		// simple bounds check
+		if((byte *) (lod + 1) > (byte *) mdr + size)
+		{
+			ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+			return qfalse;
+		}
+
 		lod->numSurfaces = LittleLong(curlod->numSurfaces);
 		
 		// swap all the surfaces
@@ -572,7 +587,15 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 		lod->ofsSurfaces = (int)((byte *) surf - (byte *) lod);
 		cursurf = (mdrSurface_t *) ((byte *)curlod + LittleLong(curlod->ofsSurfaces));
 		
-		for ( i = 0 ; i < lod->numSurfaces ; i++) {
+		for ( i = 0 ; i < lod->numSurfaces ; i++)
+		{
+			// simple bounds check
+			if((byte *) (surf + 1) > (byte *) mdr + size)
+			{
+				ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+				return qfalse;
+			}
+
 			// first do some copying stuff
 			
 			surf->ident = SF_MDR;
@@ -616,6 +639,15 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 			
 			for(j = 0; j < surf->numVerts; j++)
 			{
+				LL(curv->numWeights);
+			
+				// simple bounds check
+				if(curv->numWeights < 0 || (byte *) (v + 1) + (curv->numWeights - 1) * sizeof(*weight) > (byte *) mdr + size)
+				{
+					ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+					return qfalse;
+				}
+
 				v->normal[0] = LittleFloat(curv->normal[0]);
 				v->normal[1] = LittleFloat(curv->normal[1]);
 				v->normal[2] = LittleFloat(curv->normal[2]);
@@ -623,7 +655,7 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 				v->texCoords[0] = LittleFloat(curv->texCoords[0]);
 				v->texCoords[1] = LittleFloat(curv->texCoords[1]);
 				
-				v->numWeights = LittleLong(curv->numWeights);
+				v->numWeights = curv->numWeights;
 				weight = &v->weights[0];
 				curweight = &curv->weights[0];
 				
@@ -650,6 +682,13 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 			surf->ofsTriangles = (int)((byte *) tri - (byte *) surf);
 			curtri = (mdrTriangle_t *)((byte *) cursurf + LittleLong(cursurf->ofsTriangles));
 			
+			// simple bounds check
+			if(surf->numTriangles < 0 || (byte *) (tri + surf->numTriangles) > (byte *) mdr + size)
+			{
+				ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+				return qfalse;
+			}
+
 			for(j = 0; j < surf->numTriangles; j++)
 			{
 				tri->indexes[0] = LittleLong(curtri->indexes[0]);
@@ -680,6 +719,13 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 	tag = (mdrTag_t *) lod;
 	mdr->ofsTags = (int)((byte *) tag - (byte *) mdr);
 	curtag = (mdrTag_t *) ((byte *)pinmodel + LittleLong(pinmodel->ofsTags));
+
+	// simple bounds check
+	if(mdr->numTags < 0 || (byte *) (tag + mdr->numTags) > (byte *) mdr + size)
+	{
+		ri.Printf(PRINT_WARNING, "R_LoadMDR: %s has broken structure.\n", mod_name);
+		return qfalse;
+	}
 	
 	for (i = 0 ; i < mdr->numTags ; i++)
 	{
@@ -690,7 +736,7 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 		curtag++;
 	}
 	
-	// And finally we know the offset to the end.
+	// And finally we know the real offset to the end.
 	mdr->ofsEnd = (int)((byte *) tag - (byte *) mdr);
 
 	// phew! we're done.
