@@ -703,7 +703,7 @@ qboolean Sys_IsLANAddress( netadr_t adr ) {
 				
 				addrsize = sizeof(adr.ip);
 			}
-			else if(adr.type == NA_IP6)
+			else
 			{
 				compareip = (byte *) &((struct sockaddr_in6 *) &localIP[index].addr)->sin6_addr;
 				comparemask = (byte *) &((struct sockaddr_in6 *) &localIP[index].netmask)->sin6_addr;
