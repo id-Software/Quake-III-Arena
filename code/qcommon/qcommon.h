@@ -243,15 +243,18 @@ extern int demo_protocols[];
 #ifndef MASTER_SERVER_NAME
 #define MASTER_SERVER_NAME	"master.quake3arena.com"
 #endif
-#ifndef AUTHORIZE_SERVER_NAME
-#define	AUTHORIZE_SERVER_NAME	"authorize.quake3arena.com"
+
+#ifndef STANDALONE
+  #ifndef AUTHORIZE_SERVER_NAME
+    #define	AUTHORIZE_SERVER_NAME	"authorize.quake3arena.com"
+  #endif
+  #ifndef PORT_AUTHORIZE
+  #define	PORT_AUTHORIZE		27952
+  #endif
 #endif
 
 #define	PORT_MASTER			27950
 #define	PORT_UPDATE			27951
-#ifndef PORT_AUTHORIZE
-#define	PORT_AUTHORIZE		27952
-#endif
 #define	PORT_SERVER			27960
 #define	NUM_SERVER_PORTS	4		// broadcast scan this many ports after
 									// PORT_SERVER so a single machine can

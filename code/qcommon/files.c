@@ -2795,6 +2795,7 @@ static void FS_Startup( const char *gameName )
 	Com_Printf( "%d files in pk3 files\n", fs_packFiles );
 }
 
+#ifndef STANDALONE
 /*
 ===================
 FS_CheckPak0
@@ -2891,6 +2892,7 @@ static void FS_CheckPak0( void )
 			Com_Error(ERR_FATAL, "You need to install Quake III Arena in order to play");
 	}
 }
+#endif
 
 /*
 =====================
@@ -3262,7 +3264,9 @@ void FS_InitFilesystem( void ) {
 	// try to start up normally
 	FS_Startup( BASEGAME );
 
+#ifndef STANDALONE
 	FS_CheckPak0( );
+#endif
 
 	// if we can't find default.cfg, assume that the paths are
 	// busted and error out now, rather than getting an unreadable
@@ -3295,7 +3299,9 @@ void FS_Restart( int checksumFeed ) {
 	// try to start up normally
 	FS_Startup( BASEGAME );
 
+#ifndef STANDALONE
 	FS_CheckPak0( );
+#endif
 
 	// if we can't find default.cfg, assume that the paths are
 	// busted and error out now, rather than getting an unreadable

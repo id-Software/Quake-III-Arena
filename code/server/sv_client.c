@@ -81,6 +81,10 @@ void SV_GetChallenge( netadr_t from ) {
 		i = oldest;
 	}
 
+#ifdef STANDALONE
+	challenge->pingTime = svs.time;
+	NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i", challenge->challenge );
+#else
 	// if they are on a lan address, send the challengeResponse immediately
 	if ( Sys_IsLANAddress( from ) ) {
 		challenge->pingTime = svs.time;
@@ -144,8 +148,10 @@ void SV_GetChallenge( netadr_t from ) {
 		NET_OutOfBandPrint( NS_SERVER, challenge->adr, 
 			"challengeResponse %i", challenge->challenge );
 	}
+#endif
 }
 
+#ifndef STANDALONE
 /*
 ====================
 SV_AuthorizeIpPacket
@@ -216,6 +222,7 @@ void SV_AuthorizeIpPacket( netadr_t from ) {
 	// clear the challenge record so it won't timeout and let them through
 	Com_Memset( &svs.challenges[i], 0, sizeof( svs.challenges[i] ) );
 }
+#endif
 
 /*
 ==================
@@ -224,10 +231,6 @@ SV_DirectConnect
 A "connect" OOB command has been received
 ==================
 */
-
-#define PB_MESSAGE "PunkBuster Anti-Cheat software must be installed " \
-				"and Enabled in order to join this server. An updated game patch can be downloaded from " \
-				"www.idsoftware.com"
 
 void SV_DirectConnect( netadr_t from ) {
 	char		userinfo[MAX_INFO_STRING];

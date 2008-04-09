@@ -23,6 +23,9 @@ ifeq ($(COMPILE_PLATFORM),mingw32)
   endif
 endif
 
+ifndef BUILD_STANDALONE
+  BUILD_STANDALONE =
+endif
 ifndef BUILD_CLIENT
   BUILD_CLIENT     =
 endif
@@ -151,8 +154,15 @@ LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
 
 # extract version info
-VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | \
-  sed -e 's/[^"]*"\(.*\)"/\1/')
+# echo $(BUILD_CLIENT)
+
+ifeq ($(BUILD_STANDALONE),1)
+  VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | head -n 1 | \
+    sed -e 's/[^"]*"\(.*\)"/\1/')
+else
+  VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | tail -n 1 | \
+    sed -e 's/[^"]*"\(.*\)"/\1/')
+endif
 
 USE_SVN=
 ifeq ($(wildcard .svn),.svn)
@@ -758,6 +768,10 @@ endif
 
 ifeq ($(USE_LOCAL_HEADERS),1)
   BASE_CFLAGS += -DUSE_LOCAL_HEADERS
+endif
+
+ifeq ($(BUILD_STANDALONE),1)
+  BASE_CFLAGS += -DSTANDALONE
 endif
 
 ifeq ($(GENERATE_DEPENDENCIES),1)

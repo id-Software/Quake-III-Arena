@@ -1004,6 +1004,7 @@ If no response is received from the authorize server after two tries, the client
 in anyway.
 ===================
 */
+#ifndef STANDALONE
 void CL_RequestAuthorization( void ) {
 	char	nums[64];
 	int		i, j, l;
@@ -1047,7 +1048,7 @@ void CL_RequestAuthorization( void ) {
 
 	NET_OutOfBandPrint(NS_CLIENT, cls.authorizeServer, "getKeyAuthorize %i %s", fs->integer, nums );
 }
-
+#endif
 /*
 ======================================================================
 
@@ -1710,9 +1711,11 @@ void CL_CheckForResend( void ) {
 	switch ( cls.state ) {
 	case CA_CONNECTING:
 		// requesting a challenge .. IPv6 users always get in as authorize server supports no ipv6.
+#ifndef STANDALONE
 		if ( clc.serverAddress.type == NA_IP && !Sys_IsLANAddress( clc.serverAddress ) ) {
 			CL_RequestAuthorization();
 		}
+#endif
 		NET_OutOfBandPrint(NS_CLIENT, clc.serverAddress, "getchallenge");
 		break;
 		
