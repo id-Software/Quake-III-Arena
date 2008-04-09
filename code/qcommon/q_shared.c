@@ -921,6 +921,18 @@ char *Q_CleanStr( char *string ) {
 	return string;
 }
 
+int Q_CountChar(const char *string, char tocount)
+{
+	int count;
+	
+	for(count = 0; *string; string++)
+	{
+		if(*string == tocount)
+			count++;
+	}
+	
+	return count;
+}
 
 void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
 	int		len;

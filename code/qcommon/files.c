@@ -2475,7 +2475,7 @@ qboolean FS_idPak( char *pak, char *base ) {
 
 /*
 ================
-FS_idPak
+FS_CheckDirTraversal
 
 Check whether the string contains stuff like "../" to prevent directory traversal bugs
 and return qtrue if it does.

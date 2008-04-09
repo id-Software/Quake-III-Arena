@@ -1975,7 +1975,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 	c = Cmd_Argv(0);
 
-	Com_DPrintf ("CL packet %s: %s\n", NET_AdrToString(from), c);
+	Com_DPrintf ("CL packet %s: %s\n", NET_AdrToStringwPort(from), c);
 
 	// challenge from the server we are connecting to
 	if ( !Q_stricmp(c, "challengeResponse") ) {
@@ -2008,8 +2008,8 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 		}
 		if ( !NET_CompareBaseAdr( from, clc.serverAddress ) ) {
 			Com_Printf( "connectResponse from a different address.  Ignored.\n" );
-			Com_Printf( "%s should have been %s\n", NET_AdrToString( from ), 
-				NET_AdrToString( clc.serverAddress ) );
+			Com_Printf( "%s should have been %s\n", NET_AdrToStringwPort( from ), 
+				NET_AdrToStringwPort( clc.serverAddress ) );
 			return;
 		}
 		Netchan_Setup (NS_CLIENT, &clc.netchan, from, Cvar_VariableValue( "net_qport" ) );
@@ -2095,7 +2095,7 @@ void CL_PacketEvent( netadr_t from, msg_t *msg ) {
 	}
 
 	if ( msg->cursize < 4 ) {
-		Com_Printf ("%s: Runt packet\n",NET_AdrToString( from ));
+		Com_Printf ("%s: Runt packet\n", NET_AdrToStringwPort( from ));
 		return;
 	}
 
@@ -2104,7 +2104,7 @@ void CL_PacketEvent( netadr_t from, msg_t *msg ) {
 	//
 	if ( !NET_CompareAdr( from, clc.netchan.remoteAddress ) ) {
 		Com_DPrintf ("%s:sequenced packet without connection\n"
-			,NET_AdrToString( from ) );
+			, NET_AdrToStringwPort( from ) );
 		// FIXME: send a client disconnect?
 		return;
 	}
@@ -2924,7 +2924,6 @@ CL_ServerInfoPacket
 void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 	int		i, type;
 	char	info[MAX_INFO_STRING];
-	char*	str;
 	char	*infoString;
 	int		prot;
 
@@ -2955,12 +2954,12 @@ void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 			{
 				case NA_BROADCAST:
 				case NA_IP:
-					str = "udp";
 					type = 1;
 					break;
-
+				case NA_IP6:
+					type = 2;
+					break;
 				default:
-					str = "???";
 					type = 0;
 					break;
 			}
@@ -3013,7 +3012,7 @@ void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 		if (info[strlen(info)-1] != '\n') {
 			strncat(info, "\n", sizeof(info) - 1);
 		}
-		Com_Printf( "%s: %s", NET_AdrToString( from ), info );
+		Com_Printf( "%s: %s", NET_AdrToStringwPort( from ), info );
 	}
 }
 
@@ -3246,6 +3245,8 @@ void CL_LocalServers_f( void ) {
 
 			to.type = NA_BROADCAST;
 			NET_SendPacket( NS_CLIENT, strlen( message ), message, to );
+			to.type = NA_MULTICAST6;
+			NET_SendPacket( NS_CLIENT, strlen( message ), message, to );
 		}
 	}
 }
@@ -3318,7 +3319,7 @@ void CL_GetPing( int n, char *buf, int buflen, int *pingtime )
 		return;
 	}
 
-	str = NET_AdrToString( cl_pinglist[n].adr );
+	str = NET_AdrToStringwPort( cl_pinglist[n].adr );
 	Q_strncpyz( buf, str, buflen );
 
 	time = cl_pinglist[n].time;

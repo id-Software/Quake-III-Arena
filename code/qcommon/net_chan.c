@@ -686,10 +686,9 @@ qboolean	NET_StringToAdr( const char *s, netadr_t *a, netadrtype_t family ) {
 		return qtrue;
 	}
 
-	// look for a port number
 	Q_strncpyz( base, s, sizeof( base ) );
 	
-	if(*base == '[')
+	if(*base == '[' || Q_CountChar(base, ':') > 1)
 	{
 		// This is an ipv6 address, handle it specially.
 		search = strchr(base, ']');
@@ -702,10 +701,14 @@ qboolean	NET_StringToAdr( const char *s, netadr_t *a, netadrtype_t family ) {
 				port = search + 1;
 		}
 		
-		search = base + 1;
+		if(*base == '[')
+			search = base + 1;
+		else
+			search = base;
 	}
 	else
 	{
+		// look for a port number
 		port = strchr( base, ':' );
 		
 		if ( port ) {

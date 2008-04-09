@@ -251,25 +251,25 @@ static void LAN_GetServerAddressString( int source, int n, char *buf, int buflen
 	switch (source) {
 		case AS_LOCAL :
 			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.localServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.localServers[n].adr) , buflen );
 				return;
 			}
 			break;
 		case AS_MPLAYER :
 			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.mplayerServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.mplayerServers[n].adr) , buflen );
 				return;
 			}
 			break;
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.globalServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.globalServers[n].adr) , buflen );
 				return;
 			}
 			break;
 		case AS_FAVORITES :
 			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.favoriteServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.favoriteServers[n].adr) , buflen );
 				return;
 			}
 			break;
