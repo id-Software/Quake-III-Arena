@@ -667,6 +667,7 @@ static void Key_GetBindingBuf( int keynum, char *buf, int buflen ) {
 CLUI_GetCDKey
 ====================
 */
+#ifndef STANDALONE
 static void CLUI_GetCDKey( char *buf, int buflen ) {
 	cvar_t	*fs;
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
@@ -699,6 +700,7 @@ static void CLUI_SetCDKey( char *buf ) {
 		cvar_modifiedFlags |= CVAR_ARCHIVE;
 	}
 }
+#endif
 
 /*
 ====================
@@ -1005,6 +1007,7 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 	case UI_MEMORY_REMAINING:
 		return Hunk_MemoryRemaining();
 
+#ifndef STANDALONE
 	case UI_GET_CDKEY:
 		CLUI_GetCDKey( VMA(1), args[2] );
 		return 0;
@@ -1012,6 +1015,7 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 	case UI_SET_CDKEY:
 		CLUI_SetCDKey( VMA(1) );
 		return 0;
+#endif
 	
 	case UI_SET_PBCLSTATUS:
 		return 0;	
@@ -1093,9 +1097,10 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 		re.RemapShader( VMA(1), VMA(2), VMA(3) );
 		return 0;
 
+#ifndef STANDALONE
 	case UI_VERIFY_CDKEY:
 		return CL_CDKeyValidate(VMA(1), VMA(2));
-
+#endif
 
 		
 	default:
@@ -1167,6 +1172,7 @@ void CL_InitUI( void ) {
 		Cvar_SetCheatState();
 }
 
+#ifndef STANDALONE
 qboolean UI_usesUniqueCDKey( void ) {
 	if (uivm) {
 		return (VM_Call( uivm, UI_HASUNIQUECDKEY) == qtrue);
@@ -1174,6 +1180,7 @@ qboolean UI_usesUniqueCDKey( void ) {
 		return qfalse;
 	}
 }
+#endif
 
 /*
 ====================

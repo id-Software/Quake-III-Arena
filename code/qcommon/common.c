@@ -82,6 +82,7 @@ cvar_t	*com_cameraMode;
 cvar_t	*com_ansiColor;
 cvar_t	*com_unfocused;
 cvar_t	*com_minimized;
+cvar_t	*com_standalone;
 
 // com_speeds times
 int		time_game;
@@ -2351,6 +2352,8 @@ static void Com_Crash_f( void ) {
 	* ( int * ) 0 = 0x12345678;
 }
 
+#ifndef STANDALONE
+
 // TTimo: centralizing the cl_cdkey stuff after I discovered a buffer overflow problem with the dedicated server version
 //   not sure it's necessary to have different defaults for regular and dedicated, but I don't want to risk it
 //   https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=470
@@ -2469,6 +2472,7 @@ out:
 }
 #endif
 
+#endif // STANDALONE
 
 static void Com_DetectAltivec(void)
 {
@@ -2591,6 +2595,7 @@ void Com_Init( char *commandLine ) {
 
 	com_unfocused = Cvar_Get( "com_unfocused", "0", CVAR_ROM );
 	com_minimized = Cvar_Get( "com_minimized", "0", CVAR_ROM );
+	com_standalone = Cvar_Get( "com_standalone", "0", CVAR_INIT );
 
 	com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
 
@@ -2697,11 +2702,16 @@ void Com_WriteConfiguration( void ) {
 	// not needed for dedicated
 #ifndef DEDICATED
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-	if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
-		Com_WriteCDKey( fs->string, &cl_cdkey[16] );
-	} else {
-		Com_WriteCDKey( BASEGAME, cl_cdkey );
+#ifndef STANDALONE
+	if(!Cvar_VariableIntegerValue("com_standalone"))
+	{
+		if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
+			Com_WriteCDKey( fs->string, &cl_cdkey[16] );
+		} else {
+			Com_WriteCDKey( BASEGAME, cl_cdkey );
+		}
 	}
+#endif
 #endif
 }
 

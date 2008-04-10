@@ -740,8 +740,11 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand ("heartbeat", SV_Heartbeat_f);
 	Cmd_AddCommand ("kick", SV_Kick_f);
 #ifndef STANDALONE
-	Cmd_AddCommand ("banUser", SV_Ban_f);
-	Cmd_AddCommand ("banClient", SV_BanNum_f);
+	if(!Cvar_VariableIntegerValue("com_standalone"))
+	{
+		Cmd_AddCommand ("banUser", SV_Ban_f);
+		Cmd_AddCommand ("banClient", SV_BanNum_f);
+	}
 #endif
 	Cmd_AddCommand ("clientkick", SV_KickNum_f);
 	Cmd_AddCommand ("status", SV_Status_f);

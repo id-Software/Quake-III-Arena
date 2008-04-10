@@ -921,7 +921,7 @@ void NET_SetMulticast6(void)
 		Com_Printf("WARNING: NET_JoinMulticast6: Incorrect multicast address given, "
 			   "please set cvar %s to a sane value.\n", net_mcast6addr->name);
 		
-		Cvar_Set(net_enabled->name, va("%d", net_enabled->integer | NET_DISABLEMCAST));
+		Cvar_SetValue(net_enabled->name, net_enabled->integer | NET_DISABLEMCAST);
 		
 		return;
 	}

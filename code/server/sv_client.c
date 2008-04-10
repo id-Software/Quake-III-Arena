@@ -82,8 +82,11 @@ void SV_GetChallenge( netadr_t from ) {
 	}
 
 #ifdef STANDALONE
-	challenge->pingTime = svs.time;
-	NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i", challenge->challenge );
+	if(Cvar_VariableIntegerValue("com_standalone"))
+	{
+		challenge->pingTime = svs.time;
+		NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i", challenge->challenge );
+	}
 #else
 	// if they are on a lan address, send the challengeResponse immediately
 	if ( Sys_IsLANAddress( from ) ) {

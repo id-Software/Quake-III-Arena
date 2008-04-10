@@ -129,6 +129,7 @@ New cvars
 
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
+  com_standalone                    - Run in standalone mode.
   s_backend                         - read only, indicates the current sound
                                       backend
   s_muteWhenMinimized               - mute sound when minimized
@@ -195,14 +196,30 @@ Creating mods compatible with Q3 1.32b
   still exists when you read this) for more details.
 
 Creating stand-alone games
-  As ioquake3 is meant to be a reliable and stable code base, this engine is
-  ideal for your stand-alone game project. We made it easier for you to get a
-  binary that does not look for the original quake3 assets. The auth server
-  specific parts are disabled, too.
-  Just run make with the option BUILD_STANDALONE=1
+  Have you finished the daunting task of removing all dependencies on the
+  quake3 game data? Well, you probably now want to give your users the
+  opportunity to play the game without owning a copy of quake3, which
+  consequently means removing cd-key and auth server checks. As ioquake3 is
+  meant to be a reliable and stable code base for your game project, too, we
+  have included means to do that.
+  However, before you start compiling your own version of ioquake3, you have to
+  ask youself: Have we changed anything of importance in the engine at all?
+
+  If you must answer that question with "no", it probably makes no sense to
+  build your own binaries. You can still use the pre-built binaries on the
+  website. Just make sure the game is called with
+  +set com_standalone 1 +set fs_game <yourgamedir>
+  in links/scripts you install for your users to start the game. Note that the
+  com_standalone setting is rendered ineffective, if the binary detects pak
+  files in the directory "baseq3", so you cannot use that one as game dir.
+
+  If you really changed parts that would make vanilla ioquake3 incompatible
+  with your mod, we have included another way to conveniently build a
+  stand-alone binary. Just run make with the option BUILD_STANDALONE=1
   Don't forget to edit the PRODUCT_NAME and subsequent #defines in
   qcommon/q_shared.h and fill in your project info!
-  While a lot of work has been put into the ioquake3 that you can benefit from
+
+  While a lot of work has been put into ioquake3 that you can benefit from
   free of charge, it does not mean that you have no obligations to fulfill.
   Be aware that as soon as you start distributing your game with an engine
   based on our sources we expect you to fully comply with the requirements

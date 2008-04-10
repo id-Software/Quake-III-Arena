@@ -2661,8 +2661,10 @@ void FS_Shutdown( qboolean closemfp ) {
 #endif
 }
 
+#ifndef STANDALONE
 void Com_AppendCDKey( const char *filename );
 void Com_ReadCDKey( const char *filename );
+#endif
 
 /*
 ================
@@ -2712,7 +2714,6 @@ FS_Startup
 static void FS_Startup( const char *gameName )
 {
 	const char *homePath;
-	cvar_t	*fs;
 
 	Com_Printf( "----- FS_Startup -----\n" );
 
@@ -2764,11 +2765,18 @@ static void FS_Startup( const char *gameName )
 		}
 	}
 
-	Com_ReadCDKey(BASEGAME);
-	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-	if (fs && fs->string[0] != 0) {
-		Com_AppendCDKey( fs->string );
+#ifndef STANDALONE
+	if(!Cvar_VariableIntegerValue("com_standalone"))
+	{
+		cvar_t	*fs;
+
+		Com_ReadCDKey(BASEGAME);
+		fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
+		if (fs && fs->string[0] != 0) {
+			Com_AppendCDKey( fs->string );
+		}
 	}
+#endif
 
 	// add our commands
 	Cmd_AddCommand ("path", FS_Path_f);
@@ -2865,7 +2873,12 @@ static void FS_CheckPak0( void )
 		}
 	}
 
-	if(!founddemo && (foundPak & 0x1ff) != 0x1ff )
+	if( (!Cvar_VariableIntegerValue("com_standalone")	||
+	     !fs_gamedirvar->string[0]				||
+	     !Q_stricmp(fs_gamedirvar->string, BASEGAME)	||
+	     !Q_stricmp(fs_gamedirvar->string, "missionpack") )
+	     &&
+	     (!founddemo && (foundPak & 0x1ff) != 0x1ff) )
 	{
 		if((foundPak&1) != 1 )
 		{
@@ -2886,11 +2899,11 @@ static void FS_CheckPak0( void )
 			"the correct place and that every file\n"
 			"in the %s directory is present and readable.\n", BASEGAME);
 
-		if(!fs_gamedirvar->string[0]
-		|| !Q_stricmp( fs_gamedirvar->string, BASEGAME )
-		|| !Q_stricmp( fs_gamedirvar->string, "missionpack" ))
-			Com_Error(ERR_FATAL, "You need to install Quake III Arena in order to play");
+		Com_Error(ERR_FATAL, "You need to install Quake III Arena in order to play");
 	}
+	
+	if(foundPak & 1)
+		Cvar_Set("com_standalone", "0");
 }
 #endif
 

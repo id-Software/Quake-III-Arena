@@ -1712,9 +1712,8 @@ void CL_CheckForResend( void ) {
 	case CA_CONNECTING:
 		// requesting a challenge .. IPv6 users always get in as authorize server supports no ipv6.
 #ifndef STANDALONE
-		if ( clc.serverAddress.type == NA_IP && !Sys_IsLANAddress( clc.serverAddress ) ) {
+		if (!Cvar_VariableIntegerValue("com_standalone") && clc.serverAddress.type == NA_IP && !Sys_IsLANAddress( clc.serverAddress ) )
 			CL_RequestAuthorization();
-		}
 #endif
 		NET_OutOfBandPrint(NS_CLIENT, clc.serverAddress, "getchallenge");
 		break;
@@ -3695,6 +3694,7 @@ void CL_ShowIP_f(void) {
 	Sys_ShowIP();
 }
 
+#ifndef STANDALONE
 /*
 =================
 bool CL_CDKeyValidate
@@ -3758,5 +3758,4 @@ qboolean CL_CDKeyValidate( const char *key, const char *checksum ) {
 
 	return qfalse;
 }
-
-
+#endif
