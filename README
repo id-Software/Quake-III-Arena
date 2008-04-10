@@ -192,43 +192,58 @@ Creating mods compatible with Q3 1.32b
   Q3, it is necessary to pass the commandline option '-vq3' to your invocation
   of q3asm. This is because by default q3asm outputs an updated qvm format that
   is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
-  compiler. See http://www.quakesrc.org/forums/viewtopic.php?t=5665 (if it
-  still exists when you read this) for more details.
+  compiler.
 
-Creating stand-alone games
-  Have you finished the daunting task of removing all dependencies on the
-  quake3 game data? Well, you probably now want to give your users the
-  opportunity to play the game without owning a copy of quake3, which
-  consequently means removing cd-key and auth server checks. As ioquake3 is
-  meant to be a reliable and stable code base for your game project, too, we
-  have included means to do that.
+Creating standalone games
+  Have you finished the daunting task of removing all dependencies on the Q3
+  game data? You probably now want to give your users the opportunity to play
+  the game without owning a copy of Q3, which consequently means removing cd-key
+  and authentication server checks. In addition to being a straightforward Q3
+  client, ioquake3 also purports to be a reliable and stable code base on which
+  to base your game project.
+
   However, before you start compiling your own version of ioquake3, you have to
-  ask youself: Have we changed anything of importance in the engine at all?
+  ask yourself: Have we changed or will we need to change anything of importance
+  in the engine?
 
-  If you must answer that question with "no", it probably makes no sense to
-  build your own binaries. You can still use the pre-built binaries on the
-  website. Just make sure the game is called with
-  +set com_standalone 1 +set fs_game <yourgamedir>
-  in links/scripts you install for your users to start the game. Note that the
-  com_standalone setting is rendered ineffective, if the binary detects pak
+  If your answer to this question is "no", it probably makes no sense to build
+  your own binaries. Instead, you can just use the pre-built binaries on the
+  website. Just make sure the game is called with:
+
+    +set com_standalone 1 +set fs_game <yourgamedir>
+
+  in any links/scripts you install for your users to start the game. Note that
+  the com_standalone setting is rendered ineffective, if the binary detects pk3
   files in the directory "baseq3", so you cannot use that one as game dir.
 
-  If you really changed parts that would make vanilla ioquake3 incompatible
-  with your mod, we have included another way to conveniently build a
-  stand-alone binary. Just run make with the option BUILD_STANDALONE=1
-  Don't forget to edit the PRODUCT_NAME and subsequent #defines in
-  qcommon/q_shared.h and fill in your project info!
+  If you really changed parts that would make vanilla ioquake3 incompatible with
+  your mod, we have included another way to conveniently build a stand-alone
+  binary. Just run make with the option BUILD_STANDALONE=1. Don't forget to edit
+  the PRODUCT_NAME and subsequent #defines in qcommon/q_shared.h with
+  information appropriate for your project.
 
-  While a lot of work has been put into ioquake3 that you can benefit from
-  free of charge, it does not mean that you have no obligations to fulfill.
-  Be aware that as soon as you start distributing your game with an engine
-  based on our sources we expect you to fully comply with the requirements
-  as stated in the GPL. That includes making sources and modifications you made
-  to the ioquake3 engine as well as the game-code used to compile the .qvm
-  files for the game logic freely available to everyone.
-  This does NOT mean that you cannot market this game commercially. All assets
-  (e.g. textures, sounds, maps) created by yourself are your property and can
-  be sold like every other game you find in stores.
+  While a lot of work has been put into ioquake3 that you can benefit from free
+  of charge, it does not mean that you have no obligations to fulfil. Please be
+  aware that as soon as you start distributing your game with an engine based on
+  our sources we expect you to fully comply with the requirements as stated in
+  the GPL. That includes making sources and modifications you made to the
+  ioquake3 engine as well as the game-code used to compile the .qvm files for
+  the game logic freely available to everyone. Furthermore, note that the "QIIIA
+  Game Source License" prohibits distribution of mods that are intended to
+  operate on a version of Q3 not sanctioned by id software:
+
+    "with this Agreement, ID grants to you the non-exclusive and limited right
+    to distribute copies of the Software ... for operation only with the full
+    version of the software game QUAKE III ARENA"
+
+  This means that if you're creating a standalone game, you cannot use said
+  license on any portion of the product. As the only other license this code has
+  been released under is the GPL, this is the only option.
+
+  This does NOT mean that you cannot market this game commercially. The GPL does
+  not prohibit commercial exploitation and all assets (e.g. textures, sounds,
+  maps) created by yourself are your property and can be sold like every other
+  game you find in stores.
 
 cl_guid Support
   cl_guid is a cvar which is part of the client's USERINFO string.  Its value
