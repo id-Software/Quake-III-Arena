@@ -344,7 +344,7 @@ Please send all patches to bugzilla (https://bugzilla.icculus.org), or join the
 mailing list (quake3-subscribe@icculus.org) and submit your patch there.  The
 best case scenario is that you submit your patch to bugzilla, and then post the
 URL to the mailing list. If you're too lazy for either method, then it would be
-better if you emailed your patches to zakk@icculus.org directly than not at
+better if you emailed your patches to zachary@ioquake.org directly than not at
 all.
 
 The focus for ioquake3 to develop a stable base suitable for further
@@ -399,7 +399,7 @@ Maintainers
   Thilo Schulz <arny@ats.s.bawue.de>
   Tim Angus <tim@ngus.net>
   Tony J. White <tjw@tjw.org>
-  Zachary J. Slater <zakk@timedoctor.org>
+  Zachary J. Slater <zachary@ioquake.org>
 
 Significant contributions from
   Ryan C. Gordon <icculus@icculus.org>
