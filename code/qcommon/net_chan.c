@@ -673,17 +673,19 @@ void QDECL NET_OutOfBandData( netsrc_t sock, netadr_t adr, byte *format, int len
 NET_StringToAdr
 
 Traps "localhost" for loopback, passes everything else to system
+return 0 on address not found, 1 on address found with port, 2 on address found without port.
 =============
 */
-qboolean	NET_StringToAdr( const char *s, netadr_t *a, netadrtype_t family ) {
-	qboolean	r;
+int NET_StringToAdr( const char *s, netadr_t *a, netadrtype_t family )
+{
 	char	base[MAX_STRING_CHARS], *search;
 	char	*port = NULL;
 
 	if (!strcmp (s, "localhost")) {
 		Com_Memset (a, 0, sizeof(*a));
 		a->type = NA_LOOPBACK;
-		return qtrue;
+// as NA_LOOPBACK doesn't require ports report port was given.
+		return 1;
 	}
 
 	Q_strncpyz( base, s, sizeof( base ) );
@@ -719,19 +721,20 @@ qboolean	NET_StringToAdr( const char *s, netadr_t *a, netadrtype_t family ) {
 		search = base;
 	}
 
-	r = Sys_StringToAdr( search, a, family );
-
-	if ( !r ) {
+	if(!Sys_StringToAdr(search, a, family))
+	{
 		a->type = NA_BAD;
-		return qfalse;
+		return 0;
 	}
 
-	if ( port ) {
-		a->port = BigShort( (short)atoi( port ) );
-	} else {
-		a->port = BigShort( PORT_SERVER );
+	if(port)
+	{
+		a->port = BigShort((short) atoi(port));
+		return 1;
 	}
-
-	return qtrue;
+	else
+	{
+		a->port = BigShort(PORT_SERVER);
+		return 2;
+	}
 }
-

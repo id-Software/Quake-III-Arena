@@ -264,11 +264,6 @@ typedef struct {
 } serverInfo_t;
 
 typedef struct {
-	byte	ip[4];
-	unsigned short	port;
-} serverAddress_t;
-
-typedef struct {
 	connstate_t	state;				// connection status
 
 	qboolean	cddialog;			// bring up the cd needed dialog next frame
@@ -295,17 +290,12 @@ typedef struct {
 	serverInfo_t  globalServers[MAX_GLOBAL_SERVERS];
 	// additional global servers
 	int			numGlobalServerAddresses;
-	serverAddress_t		globalServerAddresses[MAX_GLOBAL_SERVERS];
+	netadr_t		globalServerAddresses[MAX_GLOBAL_SERVERS];
 
 	int			numfavoriteservers;
 	serverInfo_t	favoriteServers[MAX_OTHER_SERVERS];
 
-	int			nummplayerservers;
-	serverInfo_t	mplayerServers[MAX_OTHER_SERVERS];
-
 	int pingUpdateSource;		// source currently pinging or updating
-
-	int masterNum;
 
 	// update server info
 	netadr_t	updateServer;
