@@ -2784,7 +2784,7 @@ void CL_Init( void ) {
 
 	SCR_Init ();
 
-	Cbuf_Execute ();
+//	Cbuf_Execute ();
 
 	Cvar_Set( "cl_running", "1" );
 

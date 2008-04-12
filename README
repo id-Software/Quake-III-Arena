@@ -143,11 +143,34 @@ New cvars
   sv_dlURL                          - the base of the HTTP or FTP site that
                                       holds custom pk3 files for your server
 
+  net_ip6                           - IPv6 address to bind to
+  net_port6                         - port to bind to using the ipv6 address
+  net_enabled                       - enable networking, bitmask. Add up
+                                      number for option to enable it:
+                                      enable ipv4 networking:    1
+                                      enable ipv6 networking:    2
+                                      prioritise ipv6 over ipv4: 4
+                                      disable multicast support: 8
+  net_mcast6addr                    - multicast address to use for scanning for
+                                      ipv6 servers on the local network
+  net_mcastiface                    - outgoing interface to use for scan
+                                      
+
 New commands
   video [filename]        - start video capture (use with demo command)
   stopvideo               - stop video capture
+
   print                   - print out the contents of a cvar
 
+  banaddr <range>         - ban an ip address range from joining a game on this
+                            server, valid <range> is either playernum or CIDR
+                            notation address range.
+  exceptaddr <range>      - exempt an ip address range from a ban.
+  bandel <num>            - delete ban <num>
+  exceptdel <num>         - delete exception <num>
+  listbans                - list all currently active bans and exceptions
+  rehashbans              - reload the banlist from serverbans.dat
+  flushbans               - delete all bans
 
 ------------------------------------------------------------ Miscellaneous -----
 

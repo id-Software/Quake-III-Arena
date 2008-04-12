@@ -235,6 +235,86 @@ A "connect" OOB command has been received
 ==================
 */
 
+qboolean SV_IsBanned(netadr_t *from, qboolean isexception)
+{
+	int index, addrlen, curbyte, netmask, cmpmask;
+	serverBan_t *curban;
+	byte *addrfrom, *addrban;
+	qboolean differed;
+	
+	if(from->type == NA_IP)
+		addrlen = sizeof(from->ip);
+	else if(from->type == NA_IP6)
+		addrlen = sizeof(from->ip6);
+	else
+		return qfalse;
+
+	if(!isexception)
+	{
+		// If this is a query for a ban, first check whether the client is excepted
+		if(SV_IsBanned(from, qtrue))
+			return qfalse;
+	}
+	
+	for(index = 0; index < serverBansCount; index++)
+	{
+		curban = &serverBans[index];
+		
+		if(curban->isexception == isexception && from->type == curban->ip.type)
+		{
+			if(from->type == NA_IP)
+			{
+				addrfrom = from->ip;
+				addrban = curban->ip.ip;
+			}
+			else
+			{
+				addrfrom = from->ip6;
+				addrban = curban->ip.ip6;
+			}
+			
+			differed = qfalse;
+			curbyte = 0;
+			
+			for(netmask = curban->subnet; netmask > 7; netmask -= 8)
+			{
+				if(addrfrom[curbyte] != addrban[curbyte])
+				{
+					differed = qtrue;
+					break;
+				}
+				
+				curbyte++;
+			}
+			
+			if(differed)
+				continue;
+				
+			if(netmask)
+			{
+				cmpmask = (1 << netmask) - 1;
+				cmpmask <<= 8 - netmask;
+				
+				if((addrfrom[curbyte] & cmpmask) == (addrban[curbyte] & cmpmask))
+					return qtrue;
+			}
+			else
+				return qtrue;
+			
+		}
+	}
+	
+	return qfalse;
+}
+
+/*
+==================
+SV_DirectConnect
+
+A "connect" OOB command has been received
+==================
+*/
+
 void SV_DirectConnect( netadr_t from ) {
 	char		userinfo[MAX_INFO_STRING];
 	int			i;
@@ -252,6 +332,13 @@ void SV_DirectConnect( netadr_t from ) {
 	char		*ip;
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
+	
+	// Check whether this client is banned.
+	if(SV_IsBanned(&from, qfalse))
+	{
+		NET_OutOfBandPrint(NS_SERVER, from, "print\nYou are banned from this server.\n");
+		return;
+	}
 
 	Q_strncpyz( userinfo, Cmd_Argv(1), sizeof(userinfo) );
 
@@ -821,11 +908,13 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 			}
 		}
 
+		cl->download = 0;
+
 		// We open the file here
 		if ( !(sv_allowDownload->integer & DLF_ENABLE) ||
 			(sv_allowDownload->integer & DLF_NO_UDP) ||
 			idPack || unreferenced ||
-			( cl->downloadSize = FS_SV_FOpenFileRead( cl->downloadName, &cl->download ) ) <= 0 ) {
+			( cl->downloadSize = FS_SV_FOpenFileRead( cl->downloadName, &cl->download ) ) < 0 ) {
 			// cannot auto-download file
 			if(unreferenced)
 			{
@@ -868,6 +957,10 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 			MSG_WriteString( msg, errorMessage );
 
 			*cl->downloadName = 0;
+			
+			if(cl->download)
+				FS_FCloseFile(cl->download);
+			
 			return;
 		}
  
