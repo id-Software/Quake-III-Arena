@@ -1843,7 +1843,7 @@ void CL_ServersResponsePacket( netadr_t from, msg_t *msg ) {
 	int				numservers;
 	byte*			buffptr;
 	byte*			buffend;
-	netadrtype_t		family;
+	netadrtype_t		family = NA_IP;
 	
 	Com_Printf("CL_ServersResponsePacket\n");
 
