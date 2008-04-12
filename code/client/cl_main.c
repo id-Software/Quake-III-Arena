@@ -1843,7 +1843,6 @@ void CL_ServersResponsePacket( netadr_t from, msg_t *msg ) {
 	int				numservers;
 	byte*			buffptr;
 	byte*			buffend;
-	netadrtype_t		family = NA_IP;
 	
 	Com_Printf("CL_ServersResponsePacket\n");
 
@@ -1857,47 +1856,43 @@ void CL_ServersResponsePacket( netadr_t from, msg_t *msg ) {
 	numservers = 0;
 	buffptr    = msg->data;
 	buffend    = buffptr + msg->cursize;
-	while (buffptr+1 < buffend)
-	{
-		// advance to initial token
-		do
-		{
-			if (*buffptr == '\\')
-			{
-				family = NA_IP;
-				break;
-			}
-			else if(*buffptr == '/')
-			{
-				family = NA_IP6;
-				break;
-			}
-			
-			buffptr++;
-		}
-		while (buffptr < buffend);
 
-		buffptr++;
+	// advance to initial token
+	do
+	{
+		if(*buffptr == '\\' || *buffptr == '/')
+			break;
 		
-		if(family == NA_IP)
+		buffptr++;
+	} while (buffptr < buffend);
+
+	while (buffptr + 1 < buffend)
+	{
+		if (*buffptr == '\\')
 		{
-			if (buffend - buffptr < sizeof(addresses[numservers].ip) + sizeof(addresses[numservers].port) + sizeof("\\EOT") - 1)
+			buffptr++;
+
+			if (buffend - buffptr < sizeof(addresses[numservers].ip) + sizeof(addresses[numservers].port) + 1)
 				break;
-			
+
 			for(i = 0; i < sizeof(addresses[numservers].ip); i++)
 				addresses[numservers].ip[i] = *buffptr++;
+
+			addresses[numservers].type = NA_IP;
 		}
 		else
 		{
-			if (buffend - buffptr < sizeof(addresses[numservers].ip6) + sizeof(addresses[numservers].port) + sizeof("\\EOT") - 1)
+			buffptr++;
+
+			if (buffend - buffptr < sizeof(addresses[numservers].ip6) + sizeof(addresses[numservers].port) + 1)
 				break;
 			
 			for(i = 0; i < sizeof(addresses[numservers].ip6); i++)
 				addresses[numservers].ip6[i] = *buffptr++;
+			
+			addresses[numservers].type = NA_IP6;
 		}
-
-		addresses[numservers].type = family;
-
+			
 		// parse out port
 		addresses[numservers].port = (*buffptr++) << 8;
 		addresses[numservers].port += *buffptr++;
@@ -1912,8 +1907,9 @@ void CL_ServersResponsePacket( netadr_t from, msg_t *msg ) {
 			break;
 
 		// parse out EOT
-		if (buffptr[1] == 'E' && buffptr[2] == 'O' && buffptr[3] == 'T')
-			break;
+		// not anymore.. as servers from 69.79.84.0/24 can screw up the server list with this.
+//		if (buffptr[1] == 'E' && buffptr[2] == 'O' && buffptr[3] == 'T')
+//			break;
 	}
 
 	count = cls.numglobalservers;
