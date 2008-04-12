@@ -608,7 +608,7 @@ void Sys_SendPacket( int length, const void *data, netadr_t to ) {
 		(ip6_socket == INVALID_SOCKET && to.type == NA_MULTICAST6) )
 		return;
 
-	if(net_enabled->integer & NET_DISABLEMCAST)
+	if(to.type == NA_MULTICAST6 && (net_enabled->integer & NET_DISABLEMCAST))
 		return;
 
 	memset(&addr, 0, sizeof(addr));
@@ -950,7 +950,7 @@ void NET_JoinMulticast6(void)
 {
 	int err;
 	
-	if(ip6_socket == INVALID_SOCKET || multicast6_socket != INVALID_SOCKET || net_enabled->integer & NET_DISABLEMCAST)
+	if(ip6_socket == INVALID_SOCKET || multicast6_socket != INVALID_SOCKET || (net_enabled->integer & NET_DISABLEMCAST))
 		return;
 	
 	if(IN6_IS_ADDR_MULTICAST(&boundto.sin6_addr) || IN6_IS_ADDR_UNSPECIFIED(&boundto.sin6_addr))
