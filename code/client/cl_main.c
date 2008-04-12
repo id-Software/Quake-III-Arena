@@ -1905,11 +1905,6 @@ void CL_ServersResponsePacket( netadr_t from, msg_t *msg ) {
 		numservers++;
 		if (numservers >= MAX_SERVERSPERPACKET)
 			break;
-
-		// parse out EOT
-		// not anymore.. as servers from 69.79.84.0/24 can screw up the server list with this.
-//		if (buffptr[1] == 'E' && buffptr[2] == 'O' && buffptr[3] == 'T')
-//			break;
 	}
 
 	count = cls.numglobalservers;
