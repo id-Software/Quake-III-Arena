@@ -18,7 +18,6 @@ Linux (we can get by with a source-only on this)
 MacOS X
 
 For 1.35+:
-* IPv6 support
 * Graphical "ioquake3" watermark in videos, optional, on by default
 * Gamma stuff while recording videos.
 * Application for OS X at least to launch mods with appropriate hunkmegs, etc.
