@@ -229,9 +229,9 @@ void SV_AuthorizeIpPacket( netadr_t from ) {
 
 /*
 ==================
-SV_DirectConnect
+SV_IsBanned
 
-A "connect" OOB command has been received
+Check whether a certain address is banned
 ==================
 */
 
