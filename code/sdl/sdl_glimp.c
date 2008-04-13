@@ -166,7 +166,8 @@ static void GLimp_DetectAvailableModes(void)
 
 	for( numModes = 0; modes[ numModes ]; numModes++ );
 
-	qsort( modes, numModes, sizeof( SDL_Rect* ), GLimp_CompareModes );
+	if(numModes > 1)
+		qsort( modes+1, numModes-1, sizeof( SDL_Rect* ), GLimp_CompareModes );
 
 	for( i = 0; i < numModes; i++ )
 	{
