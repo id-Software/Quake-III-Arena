@@ -1,0 +1,127 @@
+; NSIS description file for ioquake3 installer
+;
+; EDIT WITH CARE!
+;
+; This file is used to automatically build the installers in the
+; openSUSE build service, don't break this!
+;
+; you have to copy SDL.dll here manually
+
+; The name of the installer
+Name "ioquake3"
+
+; The file to write
+OutFile "ioquake3-XXXVERSIONXXX-XXXRELEASEXXX.x86.exe"
+
+; The default installation directory
+InstallDir $PROGRAMFILES\ioquake3
+
+; Registry key to check for directory (so if you install again, it will 
+; overwrite the old one automatically)
+InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
+
+;--------------------------------
+
+; Pages
+
+Page components
+Page directory
+Page instfiles
+
+UninstPage uninstConfirm
+UninstPage instfiles
+
+;--------------------------------
+
+; The stuff to install
+Section "ioquake3 (required)"
+
+  SectionIn RO
+  
+  ; Set output path to the installation directory.
+  SetOutPath $INSTDIR
+  
+  ; Put file there
+  File "../../build/release-mingw32-x86/ioq3ded.x86.exe"
+  File "../../build/release-mingw32-x86/ioquake3.x86.exe"
+  File "../../COPYING.txt"
+  File "../../README.txt"
+  File "../../id-readme.txt"
+
+  SetOutPath "$INSTDIR\baseq3"
+  File "../../build/release-mingw32-x86/baseq3/cgamex86.dll"
+  File "../../build/release-mingw32-x86/baseq3/qagamex86.dll"
+  File "../../build/release-mingw32-x86/baseq3/uix86.dll"
+  SetOutPath "$INSTDIR\missionpack"
+  File "../../build/release-mingw32-x86/missionpack/cgamex86.dll"
+  File "../../build/release-mingw32-x86/missionpack/qagamex86.dll"
+  File "../../build/release-mingw32-x86/missionpack/uix86.dll"
+  
+  ; Write the installation path into the registry
+  WriteRegStr HKLM SOFTWARE\ioquake3 "Install_Dir" "$INSTDIR"
+  
+  ; Write the uninstall keys for Windows
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "DisplayName" "ioquake3"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoRepair" 1
+  WriteUninstaller "uninstall.exe"
+  
+SectionEnd
+
+; Optional section (can be disabled by the user)
+Section "Start Menu Shortcuts"
+
+  CreateDirectory "$SMPROGRAMS\ioquake3"
+  CreateShortCut "$SMPROGRAMS\ioquake3\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\ioquake3\ioquake3.lnk" "$INSTDIR\ioquake3.x86.exe" "" "$INSTDIR\ioquake3.x86.exe" 0
+  
+SectionEnd
+
+Section "SDL.dll"
+
+  SetOutPath $INSTDIR
+  
+  File "SDL.dll"
+
+SectionEnd
+
+
+;--------------------------------
+
+; Uninstaller
+
+Section "Uninstall"
+  
+  ; Remove registry keys
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3"
+  DeleteRegKey HKLM SOFTWARE\ioquake3
+
+  ; Remove files and uninstaller
+  Delete $INSTDIR\baseq3\cgamex86.dll
+  Delete $INSTDIR\baseq3\qagamex86.dll
+  Delete $INSTDIR\baseq3\uix86.dll
+  Delete $INSTDIR\missionpack\cgamex86.dll
+  Delete $INSTDIR\missionpack\qagamex86.dll
+  Delete $INSTDIR\missionpack\uix86.dll
+  Delete $INSTDIR\ioquake3.x86.exe
+  Delete $INSTDIR\ioq3ded.x86.exe
+
+  Delete $INSTDIR\COPYING.txt
+  Delete $INSTDIR\README.txt
+  Delete $INSTDIR\id-readme.txt
+
+  Delete $INSTDIR\SDL.dll
+
+  Delete $INSTDIR\uninstall.exe
+
+  ; Remove shortcuts, if any
+  Delete "$SMPROGRAMS\ioquake3\*.lnk"
+
+  ; Remove directories used
+  RMDir "$SMPROGRAMS\ioquake3"
+  RMDir "$INSTDIR\baseq3"
+  RMDir "$INSTDIR\missionpack"
+  RMDir "$INSTDIR"
+
+SectionEnd

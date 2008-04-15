@@ -149,6 +149,7 @@ Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
 LOKISETUPDIR=misc/setup
+NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
@@ -1947,7 +1948,11 @@ ifneq ($(BUILD_GAME_SO),0)
 endif
 
 clean: clean-debug clean-release
+ifeq ($(PLATFORM),mingw32)
+	@$(MAKE) -C $(NSISDIR) clean
+else
 	@$(MAKE) -C $(LOKISETUPDIR) clean
+endif
 
 clean-debug:
 	@$(MAKE) clean2 B=$(BD)
@@ -1979,7 +1984,11 @@ distclean: clean toolsclean
 	@rm -rf $(BUILD_DIR)
 
 installer: release
+ifeq ($(PLATFORM),mingw32)
+	@$(MAKE) VERSION=$(VERSION) -C $(NSISDIR) V=$(V)
+else
 	@$(MAKE) VERSION=$(VERSION) -C $(LOKISETUPDIR) V=$(V)
+endif
 
 dist:
 	rm -rf ioquake3-$(SVN_VERSION)
