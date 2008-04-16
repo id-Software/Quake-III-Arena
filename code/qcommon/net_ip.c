@@ -928,7 +928,7 @@ void NET_SetMulticast6(void)
 	
 	memcpy(&curgroup.ipv6mr_multiaddr, &addr.sin6_addr, sizeof(curgroup.ipv6mr_multiaddr));
 
-	if(!*net_mcast6iface->string)
+	if(*net_mcast6iface->string)
 	{
 #ifdef _WIN32
 		curgroup.ipv6mr_interface = atoi(net_mcast6iface->string);
