@@ -1194,7 +1194,13 @@ NET_GetLocalAddress
 void NET_AddLocalAddress(char *ifname, struct sockaddr *addr, struct sockaddr *netmask)
 {
 	int addrlen;
-	sa_family_t family = addr->sa_family;
+	sa_family_t family;
+	
+	// only add addresses that have all required info.
+	if(!addr || !netmask || !ifname)
+		return;
+	
+	family = addr->sa_family;
 
 	if(numIP < MAX_IPS)
 	{
