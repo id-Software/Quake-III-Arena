@@ -5,7 +5,7 @@
 ; This file is used to automatically build the installers in the
 ; openSUSE build service, don't break this!
 ;
-; you have to copy SDL.dll here manually
+; you have to copy SDL.dll and libcurl-4.dll here manually
 
 ; The name of the installer
 Name "ioquake3"
@@ -86,6 +86,13 @@ Section "SDL.dll"
 
 SectionEnd
 
+Section "libcurl"
+
+  SetOutPath $INSTDIR
+  
+  File "libcurl-4.dll"
+
+SectionEnd
 
 ;--------------------------------
 
@@ -112,6 +119,8 @@ Section "Uninstall"
   Delete $INSTDIR\id-readme.txt
 
   Delete $INSTDIR\SDL.dll
+
+  Delete $INSTDIR\libcurl-4.dll
 
   Delete $INSTDIR\uninstall.exe
 
