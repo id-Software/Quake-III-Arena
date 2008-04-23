@@ -303,9 +303,6 @@ ifeq ($(PLATFORM),darwin)
   CLIENT_LDFLAGS=
   OPTIMIZE=
   
-  # building the QVMs on MacOSX is broken, atm.
-  BUILD_GAME_QVM=0
-  
   BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
 
   ifeq ($(ARCH),ppc)
