@@ -8,7 +8,7 @@ int	optopt;
 char    *optarg;
 
 int
-getopt (int argc, char *const argv[], const char *opts)
+lcc_getopt (int argc, char *const argv[], const char *opts)
 {
 	static int sp = 1;
 	int c;

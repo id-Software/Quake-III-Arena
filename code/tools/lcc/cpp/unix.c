@@ -4,7 +4,7 @@
 #include <string.h>
 #include "cpp.h"
 
-extern	int getopt(int, char *const *, const char *);
+extern	int lcc_getopt(int, char *const *, const char *);
 extern	char	*optarg, rcsid[];
 extern	int	optind;
 int	verbose;
@@ -23,7 +23,7 @@ setup(int argc, char **argv)
 	int   numIncludeDirs = 0;
 
 	setup_kwtab();
-	while ((c = getopt(argc, argv, "MNOVv+I:D:U:F:lg")) != -1)
+	while ((c = lcc_getopt(argc, argv, "MNOVv+I:D:U:F:lg")) != -1)
 		switch (c) {
 		case 'N':
 			for (i=0; i<NINCLUDE; i++)
