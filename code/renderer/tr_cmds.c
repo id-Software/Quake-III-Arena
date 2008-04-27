@@ -435,6 +435,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 			{
 				// clear both, front and backbuffer.
 				qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+				qglClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 				
 				qglDrawBuffer(GL_FRONT);
 				qglClear(GL_COLOR_BUFFER_BIT);
