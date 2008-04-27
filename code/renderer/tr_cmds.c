@@ -486,11 +486,9 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 		{
 			cmd->commandId = RC_DRAW_BUFFER;
 
-			if(stereoFrame == STEREO_CENTER && r_anaglyphMode->modified)
+			if(r_anaglyphMode->modified)
 			{
-				if(!r_anaglyphMode->integer)
-					qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
+				qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 				r_anaglyphMode->modified = qfalse;
 			}
 
