@@ -154,7 +154,21 @@ New cvars
   net_mcast6addr                    - multicast address to use for scanning for
                                       ipv6 servers on the local network
   net_mcastiface                    - outgoing interface to use for scan
-                                      
+
+  r_zProj                           - distance of observer camera to projection
+                                      plane
+  r_greyscale                       - render black and white images
+  r_anaglyphMode                    - Enable rendering of anaglyph images
+                                      red-cyan glasses:    1
+                                      red-blue:            2
+                                      red-green:           3
+                                      To swap the colors for both sides just
+                                      add 3 to the value for the wanted color
+                                      combination. For red-blue and red-green
+                                      you probably want to enable r_greyscale.
+  r_stereoSeparation                - Control eye separation. Resulting
+                                      separation is r_zProj divided by this
+                                      value.
 
 New commands
   video [filename]        - start video capture (use with demo command)

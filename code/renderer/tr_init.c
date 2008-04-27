@@ -50,10 +50,17 @@ cvar_t	*r_displayRefresh;
 cvar_t	*r_detailTextures;
 
 cvar_t	*r_znear;
+cvar_t	*r_zproj;
+cvar_t	*r_stereoSeparation;
 
 cvar_t	*r_smp;
 cvar_t	*r_showSmp;
 cvar_t	*r_skipBackEnd;
+
+cvar_t	*r_stereoEnabled;
+cvar_t	*r_anaglyphMode;
+
+cvar_t	*r_greyscale;
 
 cvar_t	*r_ignorehwgamma;
 cvar_t	*r_measureOverdraw;
@@ -93,7 +100,6 @@ cvar_t	*r_logFile;
 cvar_t	*r_stencilbits;
 cvar_t	*r_depthbits;
 cvar_t	*r_colorbits;
-cvar_t	*r_stereo;
 cvar_t	*r_primitives;
 cvar_t	*r_texturebits;
 
@@ -916,7 +922,6 @@ void R_Register( void )
 	r_detailTextures = ri.Cvar_Get( "r_detailtextures", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_texturebits = ri.Cvar_Get( "r_texturebits", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_colorbits = ri.Cvar_Get( "r_colorbits", "0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_stereo = ri.Cvar_Get( "r_stereo", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_stencilbits = ri.Cvar_Get( "r_stencilbits", "8", CVAR_ARCHIVE | CVAR_LATCH );
 	r_depthbits = ri.Cvar_Get( "r_depthbits", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_overBrightBits = ri.Cvar_Get ("r_overBrightBits", "1", CVAR_ARCHIVE | CVAR_LATCH );
@@ -931,7 +936,9 @@ void R_Register( void )
 	r_uiFullScreen = ri.Cvar_Get( "r_uifullscreen", "0", 0);
 	r_subdivisions = ri.Cvar_Get ("r_subdivisions", "4", CVAR_ARCHIVE | CVAR_LATCH);
 	r_smp = ri.Cvar_Get( "r_smp", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_stereoEnabled = ri.Cvar_Get( "r_stereoEnabled", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_ignoreFastPath = ri.Cvar_Get( "r_ignoreFastPath", "1", CVAR_ARCHIVE | CVAR_LATCH );
+	r_greyscale = ri.Cvar_Get("r_greyscale", "0", CVAR_ARCHIVE | CVAR_LATCH);
 
 	//
 	// temporary latched variables that can only change over a restart
@@ -951,6 +958,8 @@ void R_Register( void )
 	r_flares = ri.Cvar_Get ("r_flares", "0", CVAR_ARCHIVE );
 	r_znear = ri.Cvar_Get( "r_znear", "4", CVAR_CHEAT );
 	AssertCvarRange( r_znear, 0.001f, 200, qtrue );
+	r_zproj = ri.Cvar_Get( "r_zproj", "64", CVAR_ARCHIVE );
+	r_stereoSeparation = ri.Cvar_Get( "r_stereoSeparation", "32", CVAR_ARCHIVE );
 	r_ignoreGLErrors = ri.Cvar_Get( "r_ignoreGLErrors", "1", CVAR_ARCHIVE );
 	r_fastsky = ri.Cvar_Get( "r_fastsky", "0", CVAR_ARCHIVE );
 	r_inGameVideo = ri.Cvar_Get( "r_inGameVideo", "1", CVAR_ARCHIVE );
@@ -972,6 +981,8 @@ void R_Register( void )
 
 	r_ambientScale = ri.Cvar_Get( "r_ambientScale", "0.6", CVAR_CHEAT );
 	r_directedScale = ri.Cvar_Get( "r_directedScale", "1", CVAR_CHEAT );
+
+	r_anaglyphMode = ri.Cvar_Get("r_anaglyphMode", "0", CVAR_ARCHIVE);
 
 	//
 	// temporary variables that can change at any time

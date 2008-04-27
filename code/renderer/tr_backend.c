@@ -607,14 +607,38 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			qglLoadMatrixf( backEnd.or.modelMatrix );
 
 			//
-			// change depthrange if needed
+			// change depthrange. Also change projection matrix so first person weapon does not look like coming
+			// out of the screen.
 			//
-			if ( oldDepthRange != depthRange ) {
-				if ( depthRange ) {
+			if (oldDepthRange != depthRange)
+			{
+				if (depthRange)
+				{
+					if(backEnd.viewParms.stereoFrame != STEREO_CENTER)
+					{
+						viewParms_t temp = backEnd.viewParms;
+					
+						R_SetupProjection(&temp, r_znear->value, qfalse);
+
+						qglMatrixMode(GL_PROJECTION);
+						qglLoadMatrixf(temp.projectionMatrix);
+						qglMatrixMode(GL_MODELVIEW);
+					}
+
 					qglDepthRange (0, 0.3);
-				} else {
+				}
+				else
+				{
+					if(backEnd.viewParms.stereoFrame != STEREO_CENTER)
+					{
+						qglMatrixMode(GL_PROJECTION);
+						qglLoadMatrixf(backEnd.viewParms.projectionMatrix);
+						qglMatrixMode(GL_MODELVIEW);
+					}
+
 					qglDepthRange (0, 1);
 				}
+
 				oldDepthRange = depthRange;
 			}
 
@@ -988,6 +1012,42 @@ void RB_ShowImages( void ) {
 
 }
 
+/*
+=============
+RB_ColorMask
+
+=============
+*/
+const void *RB_ColorMask(const void *data)
+{
+	const colorMaskCommand_t *cmd = data;
+	
+	qglColorMask(cmd->rgba[0], cmd->rgba[1], cmd->rgba[2], cmd->rgba[3]);
+	
+	return (const void *)(cmd + 1);
+}
+
+/*
+=============
+RB_ClearDepth
+
+=============
+*/
+const void *RB_ClearDepth(const void *data)
+{
+	const clearDepthCommand_t *cmd = data;
+	
+	if(tess.numIndexes)
+		RB_EndSurface();
+
+	// texture swapping test
+	if (r_showImages->integer)
+		RB_ShowImages();
+
+	qglClear(GL_DEPTH_BUFFER_BIT);
+	
+	return (const void *)(cmd + 1);
+}
 
 /*
 =============
@@ -1084,7 +1144,12 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_VIDEOFRAME:
 			data = RB_TakeVideoFrameCmd( data );
 			break;
-
+		case RC_COLORMASK:
+			data = RB_ColorMask(data);
+			break;
+		case RC_CLEARDEPTH:
+			data = RB_ClearDepth(data);
+			break;
 		case RC_END_OF_LIST:
 		default:
 			// stop rendering on this thread

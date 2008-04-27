@@ -155,6 +155,7 @@ void RB_ShadowTessEnd( void ) {
 	int		i;
 	int		numTris;
 	vec3_t	lightDir;
+	GLboolean rgba[4];
 
 	// we can only do this if we have enough space in the vertex buffers
 	if ( tess.numVertexes >= SHADER_MAX_VERTEXES / 2 ) {
@@ -215,6 +216,7 @@ void RB_ShadowTessEnd( void ) {
 	qglColor3f( 0.2f, 0.2f, 0.2f );
 
 	// don't write to the color buffer
+	qglGetBooleanv(GL_COLOR_WRITEMASK, rgba);
 	qglColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 
 	qglEnable( GL_STENCIL_TEST );
@@ -245,7 +247,7 @@ void RB_ShadowTessEnd( void ) {
 
 
 	// reenable writing to the color buffer
-	qglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	qglColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
 

@@ -381,7 +381,7 @@ void R_RotateForViewer (void)
 /*
 ** SetFarClip
 */
-static void SetFarClip( void )
+static void R_SetFarClip( void )
 {
 	float	farthestCornerDistance = 0;
 	int		i;
@@ -442,96 +442,140 @@ static void SetFarClip( void )
 	tr.viewParms.zFar = sqrt( farthestCornerDistance );
 }
 
+/*
+=================
+R_SetupFrustum
+
+Set up the culling frustum planes for the current view using the results we got from computing the first two rows of
+the projection matrix.
+=================
+*/
+void R_SetupFrustum (viewParms_t *dest, float xmin, float xmax, float ymax, float zProj, float stereoSep)
+{
+	vec3_t ofsorigin;
+	float oppleg, adjleg, length;
+	int i;
+	
+	if(stereoSep == 0)
+	{
+		// symmetric case can be simplified
+		VectorCopy(dest->or.origin, ofsorigin);
+
+		length = sqrt(xmax * xmax + zProj * zProj);
+		oppleg = xmax / length;
+		adjleg = zProj / length;
+
+		VectorScale(dest->or.axis[0], oppleg, dest->frustum[0].normal);
+		VectorMA(dest->frustum[0].normal, adjleg, dest->or.axis[1], dest->frustum[0].normal);
+
+		VectorScale(dest->or.axis[0], oppleg, dest->frustum[1].normal);
+		VectorMA(dest->frustum[1].normal, -adjleg, dest->or.axis[1], dest->frustum[1].normal);
+	}
+	else
+	{
+		// In stereo rendering, due to the modification of the projection matrix, dest->or.origin is not the
+		// actual origin that we're rendering so offset the tip of the view pyramid.
+		VectorMA(dest->or.origin, stereoSep, dest->or.axis[1], ofsorigin);
+	
+		oppleg = xmax + stereoSep;
+		length = sqrt(oppleg * oppleg + zProj * zProj);
+		VectorScale(dest->or.axis[0], oppleg / length, dest->frustum[0].normal);
+		VectorMA(dest->frustum[0].normal, zProj / length, dest->or.axis[1], dest->frustum[0].normal);
+
+		oppleg = xmin + stereoSep;
+		length = sqrt(oppleg * oppleg + zProj * zProj);
+		VectorScale(dest->or.axis[0], -oppleg / length, dest->frustum[1].normal);
+		VectorMA(dest->frustum[1].normal, -zProj / length, dest->or.axis[1], dest->frustum[1].normal);
+	}
+
+	length = sqrt(ymax * ymax + zProj * zProj);
+	oppleg = ymax / length;
+	adjleg = zProj / length;
+
+	VectorScale(dest->or.axis[0], oppleg, dest->frustum[2].normal);
+	VectorMA(dest->frustum[2].normal, adjleg, dest->or.axis[2], dest->frustum[2].normal);
+
+	VectorScale(dest->or.axis[0], oppleg, dest->frustum[3].normal);
+	VectorMA(dest->frustum[3].normal, -adjleg, dest->or.axis[2], dest->frustum[3].normal);
+	
+	for (i=0 ; i<4 ; i++) {
+		dest->frustum[i].type = PLANE_NON_AXIAL;
+		dest->frustum[i].dist = DotProduct (ofsorigin, dest->frustum[i].normal);
+		SetPlaneSignbits( &dest->frustum[i] );
+	}
+}
 
 /*
 ===============
 R_SetupProjection
 ===============
 */
-void R_SetupProjection( void ) {
+void R_SetupProjection(viewParms_t *dest, float zProj, qboolean computeFrustum)
+{
 	float	xmin, xmax, ymin, ymax;
-	float	width, height, depth;
-	float	zNear, zFar;
+	float	width, height, stereoSep;
 
-	// dynamically compute far clip plane distance
-	SetFarClip();
+	/*
+	 * offset the view origin of the viewer for stereo rendering 
+	 * by setting the projection matrix appropriately.
+	 */
+	 
+	if(dest->stereoFrame == STEREO_LEFT)
+		stereoSep = zProj / r_stereoSeparation->value;
+	else if(dest->stereoFrame == STEREO_RIGHT)
+		stereoSep = zProj / -r_stereoSeparation->value;
+	else
+		stereoSep = 0;
 
-	//
-	// set up projection matrix
-	//
-	zNear	= r_znear->value;
-	zFar	= tr.viewParms.zFar;
-
-	ymax = zNear * tan( tr.refdef.fov_y * M_PI / 360.0f );
+	ymax = zProj * tan(dest->fovY * M_PI / 360.0f);
 	ymin = -ymax;
 
-	xmax = zNear * tan( tr.refdef.fov_x * M_PI / 360.0f );
+	xmax = zProj * tan(dest->fovX * M_PI / 360.0f);
 	xmin = -xmax;
 
 	width = xmax - xmin;
 	height = ymax - ymin;
-	depth = zFar - zNear;
+	
+	dest->projectionMatrix[0] = 2 * zProj / width;
+	dest->projectionMatrix[4] = 0;
+	dest->projectionMatrix[8] = (xmax + xmin + 2 * stereoSep) / width;
+	dest->projectionMatrix[12] = 2 * zProj * stereoSep / width;
 
-	tr.viewParms.projectionMatrix[0] = 2 * zNear / width;
-	tr.viewParms.projectionMatrix[4] = 0;
-	tr.viewParms.projectionMatrix[8] = ( xmax + xmin ) / width;	// normally 0
-	tr.viewParms.projectionMatrix[12] = 0;
+	dest->projectionMatrix[1] = 0;
+	dest->projectionMatrix[5] = 2 * zProj / height;
+	dest->projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
+	dest->projectionMatrix[13] = 0;
 
-	tr.viewParms.projectionMatrix[1] = 0;
-	tr.viewParms.projectionMatrix[5] = 2 * zNear / height;
-	tr.viewParms.projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
-	tr.viewParms.projectionMatrix[13] = 0;
-
-	tr.viewParms.projectionMatrix[2] = 0;
-	tr.viewParms.projectionMatrix[6] = 0;
-	tr.viewParms.projectionMatrix[10] = -( zFar + zNear ) / depth;
-	tr.viewParms.projectionMatrix[14] = -2 * zFar * zNear / depth;
-
-	tr.viewParms.projectionMatrix[3] = 0;
-	tr.viewParms.projectionMatrix[7] = 0;
-	tr.viewParms.projectionMatrix[11] = -1;
-	tr.viewParms.projectionMatrix[15] = 0;
+	dest->projectionMatrix[3] = 0;
+	dest->projectionMatrix[7] = 0;
+	dest->projectionMatrix[11] = -1;
+	dest->projectionMatrix[15] = 0;
+	
+	// Now that we have all the data for the projection matrix we can also setup the view frustum.
+	if(computeFrustum)
+		R_SetupFrustum(dest, xmin, xmax, ymax, zProj, stereoSep);
 }
 
 /*
-=================
-R_SetupFrustum
+===============
+R_SetupProjectionZ
 
-Setup that culling frustum planes for the current view
-=================
+Sets the z-component transformation part in the projection matrix
+===============
 */
-void R_SetupFrustum (void) {
-	int		i;
-	float	xs, xc;
-	float	ang;
+void R_SetupProjectionZ(viewParms_t *dest)
+{
+	float zNear, zFar, depth;
+	
+	zNear	= r_znear->value;
+	zFar	= dest->zFar;	
+	depth	= zFar - zNear;
 
-	ang = tr.viewParms.fovX / 180 * M_PI * 0.5f;
-	xs = sin( ang );
-	xc = cos( ang );
-
-	VectorScale( tr.viewParms.or.axis[0], xs, tr.viewParms.frustum[0].normal );
-	VectorMA( tr.viewParms.frustum[0].normal, xc, tr.viewParms.or.axis[1], tr.viewParms.frustum[0].normal );
-
-	VectorScale( tr.viewParms.or.axis[0], xs, tr.viewParms.frustum[1].normal );
-	VectorMA( tr.viewParms.frustum[1].normal, -xc, tr.viewParms.or.axis[1], tr.viewParms.frustum[1].normal );
-
-	ang = tr.viewParms.fovY / 180 * M_PI * 0.5f;
-	xs = sin( ang );
-	xc = cos( ang );
-
-	VectorScale( tr.viewParms.or.axis[0], xs, tr.viewParms.frustum[2].normal );
-	VectorMA( tr.viewParms.frustum[2].normal, xc, tr.viewParms.or.axis[2], tr.viewParms.frustum[2].normal );
-
-	VectorScale( tr.viewParms.or.axis[0], xs, tr.viewParms.frustum[3].normal );
-	VectorMA( tr.viewParms.frustum[3].normal, -xc, tr.viewParms.or.axis[2], tr.viewParms.frustum[3].normal );
-
-	for (i=0 ; i<4 ; i++) {
-		tr.viewParms.frustum[i].type = PLANE_NON_AXIAL;
-		tr.viewParms.frustum[i].dist = DotProduct (tr.viewParms.or.origin, tr.viewParms.frustum[i].normal);
-		SetPlaneSignbits( &tr.viewParms.frustum[i] );
-	}
+	dest->projectionMatrix[2] = 0;
+	dest->projectionMatrix[6] = 0;
+	dest->projectionMatrix[10] = -( zFar + zNear ) / depth;
+	dest->projectionMatrix[14] = -2 * zFar * zNear / depth;
 }
-
 
 /*
 =================
@@ -1251,7 +1295,12 @@ void R_GenerateDrawSurfs( void ) {
 	// this needs to be done before entities are
 	// added, because they use the projection
 	// matrix for lod calculation
-	R_SetupProjection ();
+
+	// dynamically compute far clip plane distance
+	R_SetFarClip();
+
+	// we know the size of the clipping volume. Now set the rest of the projection matrix.
+	R_SetupProjectionZ (&tr.viewParms);
 
 	R_AddEntitySurfaces ();
 }
@@ -1336,7 +1385,7 @@ void R_RenderView (viewParms_t *parms) {
 	// set viewParms.world
 	R_RotateForViewer ();
 
-	R_SetupFrustum ();
+	R_SetupProjection(&tr.viewParms, r_zproj->value, qtrue);
 
 	R_GenerateDrawSurfs();
 

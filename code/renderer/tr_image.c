@@ -558,7 +558,16 @@ static void Upload32( unsigned *data,
 	c = width*height;
 	scan = ((byte *)data);
 	samples = 3;
-	if (!lightMap) {
+
+	if(lightMap)
+	{
+		if(r_greyscale->integer)
+			internalFormat = GL_LUMINANCE;
+		else
+			internalFormat = GL_RGB;
+	}
+	else
+	{
 		for ( i = 0; i < c; i++ )
 		{
 			if ( scan[i*4+0] > rMax )
@@ -582,41 +591,64 @@ static void Upload32( unsigned *data,
 		// select proper internal format
 		if ( samples == 3 )
 		{
-			if ( glConfig.textureCompression == TC_S3TC )
+			if(r_greyscale->integer)
 			{
-				internalFormat = GL_RGB4_S3TC;
-			}
-			else if ( r_texturebits->integer == 16 )
-			{
-				internalFormat = GL_RGB5;
-			}
-			else if ( r_texturebits->integer == 32 )
-			{
-				internalFormat = GL_RGB8;
+				if(r_texturebits->integer == 16)
+					internalFormat = GL_LUMINANCE8;
+				else if(r_texturebits->integer == 32)
+					internalFormat = GL_LUMINANCE16;
+				else
+					internalFormat = GL_LUMINANCE;
 			}
 			else
 			{
-				internalFormat = 3;
+				if ( glConfig.textureCompression == TC_S3TC )
+				{
+					internalFormat = GL_RGB4_S3TC;
+				}
+				else if ( r_texturebits->integer == 16 )
+				{
+					internalFormat = GL_RGB5;
+				}
+				else if ( r_texturebits->integer == 32 )
+				{
+					internalFormat = GL_RGB8;
+				}
+				else
+				{
+					internalFormat = GL_RGB;
+				}
 			}
 		}
 		else if ( samples == 4 )
 		{
-			if ( r_texturebits->integer == 16 )
+			if(r_greyscale->integer)
 			{
-				internalFormat = GL_RGBA4;
-			}
-			else if ( r_texturebits->integer == 32 )
-			{
-				internalFormat = GL_RGBA8;
+				if(r_texturebits->integer == 16)
+					internalFormat = GL_LUMINANCE8_ALPHA8;
+				else if(r_texturebits->integer == 32)
+					internalFormat = GL_LUMINANCE16_ALPHA16;
+				else
+					internalFormat = GL_LUMINANCE_ALPHA;
 			}
 			else
 			{
-				internalFormat = 4;
+				if ( r_texturebits->integer == 16 )
+				{
+					internalFormat = GL_RGBA4;
+				}
+				else if ( r_texturebits->integer == 32 )
+				{
+					internalFormat = GL_RGBA8;
+				}
+				else
+				{
+					internalFormat = GL_RGBA;
+				}
 			}
 		}
-	} else {
-		internalFormat = 3;
 	}
+
 	// copy or resample data as appropriate for first MIP level
 	if ( ( scaled_width == width ) && 
 		( scaled_height == height ) ) {

@@ -155,7 +155,6 @@ LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
 
 # extract version info
-# echo $(BUILD_CLIENT)
 
 ifeq ($(BUILD_STANDALONE),1)
   VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | head -n 1 | \

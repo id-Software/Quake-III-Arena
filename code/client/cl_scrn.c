@@ -474,7 +474,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 		case CA_LOADING:
 		case CA_PRIMED:
 			// draw the game information screen and loading progress
-			CL_CGameRendering( stereoFrame );
+			CL_CGameRendering(STEREO_CENTER);
 
 			// also draw the connection information, so it doesn't
 			// flash away too briefly on local or lan games
@@ -483,7 +483,8 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			VM_Call( uivm, UI_DRAW_CONNECT_SCREEN, qtrue );
 			break;
 		case CA_ACTIVE:
-			CL_CGameRendering( stereoFrame );
+			// always supply STEREO_CENTER as vieworg offset is now done by the engine.
+			CL_CGameRendering(STEREO_CENTER);
 			SCR_DrawDemoRecording();
 			break;
 		}
@@ -528,7 +529,7 @@ void SCR_UpdateScreen( void ) {
 	if(uivm)
 	{
 		// if running in stereo, we need to draw the frame twice
-		if ( cls.glconfig.stereoEnabled ) {
+		if ( cls.glconfig.stereoEnabled || Cvar_VariableIntegerValue("r_anaglyphMode")) {
 			SCR_DrawScreenField( STEREO_LEFT );
 			SCR_DrawScreenField( STEREO_RIGHT );
 		} else {
