@@ -91,9 +91,6 @@ void R_InitCommandBuffers( void ) {
 			ri.Printf( PRINT_ALL, "...failed.\n" );
 		}
 	}
-
-	if(r_stereoEnabled->integer)
-		glConfig.stereoEnabled = qtrue;
 }
 
 /*

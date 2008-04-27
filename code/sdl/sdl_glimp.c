@@ -316,6 +316,18 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
 		SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
 		SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
+
+		if(r_stereoEnabled->integer)
+		{
+			glConfig.stereoEnabled = qtrue;
+			SDL_GL_SetAttribute(SDL_GL_STEREO, 1);
+		}
+		else
+		{
+			glConfig.stereoEnabled = qfalse;
+			SDL_GL_SetAttribute(SDL_GL_STEREO, 0);
+		}
+		
 		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 #if 0 // See http://bugzilla.icculus.org/show_bug.cgi?id=3526
