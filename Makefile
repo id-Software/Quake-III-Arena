@@ -102,7 +102,11 @@ USE_OPENAL=1
 endif
 
 ifndef USE_OPENAL_DLOPEN
-USE_OPENAL_DLOPEN=0
+  ifeq ($(PLATFORM),mingw32)
+    USE_OPENAL_DLOPEN=1
+  else
+    USE_OPENAL_DLOPEN=0
+  endif
 endif
 
 ifndef USE_CURL
@@ -153,6 +157,16 @@ NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
+
+# set PKG_CONFIG_PATH to influence this, e.g.
+# PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
+CURL_CFLAGS=$(shell pkg-config --cflags libcurl)
+CURL_LIBS=$(shell pkg-config --libs libcurl)
+OPENAL_CFLAGS=$(shell pkg-config --cflags openal)
+OPENAL_LIBS=$(shell pkg-config --libs openal)
+# FIXME: introduce CLIENT_CFLAGS
+SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
+SDL_LIBS=$(shell pkg-config --libs sdl)
 
 # extract version info
 
@@ -391,18 +405,13 @@ endif
   # Require Windows XP or later
   BASE_CFLAGS += -DWINVER=0x501
 
-  ifeq ($(USE_LOCAL_HEADERS),1)
-    BASE_CFLAGS += -I$(SDLHDIR)/include
-  endif
-
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL=1 -DUSE_OPENAL_DLOPEN
-  endif
-
-  ifeq ($(USE_CURL),1)
-    BASE_CFLAGS += -DUSE_CURL
-    ifneq ($(USE_CURL_DLOPEN),1)
-      BASE_CFLAGS += -DCURL_STATICLIB
+    BASE_CFLAGS += -DUSE_OPENAL
+    BASE_CFLAGS += $(OPENAL_CFLAGS)
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
+    else
+      CLIENT_LDFLAGS += $(OPENAL_LDFLAGS)
     endif
   endif
 
@@ -426,8 +435,15 @@ endif
   CLIENT_LDFLAGS = -mwindows -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_CURL),1)
+    BASE_CFLAGS += -DUSE_CURL
+    BASE_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LDFLAGS += $(LIBSDIR)/win32/libcurl.a
+      ifeq ($(USE_LOCAL_HEADERS),1)
+        BASE_CFLAGS += -DCURL_STATICLIB
+        CLIENT_LDFLAGS += $(LIBSDIR)/win32/libcurl.a
+      else
+        CLIENT_LDFLAGS += $(CURL_LIBS)
+      endif
     endif
   endif
 
@@ -445,9 +461,17 @@ endif
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   # libmingw32 must be linked before libSDLmain
-  CLIENT_LDFLAGS += -lmingw32 \
-                    $(LIBSDIR)/win32/libSDLmain.a \
-                    $(LIBSDIR)/win32/libSDL.dll.a
+  CLIENT_LDFLAGS += -lmingw32
+  ifeq ($(USE_LOCAL_HEADERS),1)
+    BASE_CFLAGS += -I$(SDLHDIR)/include
+    CLIENT_LDFLAGS += $(LIBSDIR)/win32/libSDLmain.a \
+                      $(LIBSDIR)/win32/libSDL.dll.a
+  else
+    BASE_CFLAGS += $(SDL_CFLAGS)
+    CLIENT_LDFLAGS += $(SDL_LIBS)
+  endif
+
+
 
   BUILD_CLIENT_SMP = 0
 
