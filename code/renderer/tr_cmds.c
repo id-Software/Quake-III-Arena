@@ -336,7 +336,7 @@ for each RE_EndFrame
 */
 void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 	drawBufferCommand_t	*cmd = NULL;
-	colorMaskCommand_t *colcmd;
+	colorMaskCommand_t *colcmd = NULL;
 
 	if ( !tr.registered ) {
 		return;
