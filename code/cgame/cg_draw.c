@@ -1861,7 +1861,8 @@ CROSSHAIR
 CG_DrawCrosshair
 =================
 */
-static void CG_DrawCrosshair(void) {
+static void CG_DrawCrosshair(void)
+{
 	float		w, h;
 	qhandle_t	hShader;
 	float		f;
@@ -1913,6 +1914,82 @@ static void CG_DrawCrosshair(void) {
 	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w), 
 		y + cg.refdef.y + 0.5 * (cg.refdef.height - h), 
 		w, h, 0, 0, 1, 1, hShader );
+}
+
+/*
+=================
+CG_DrawCrosshair3D
+=================
+*/
+static void CG_DrawCrosshair3D(void)
+{
+	float		w, h;
+	qhandle_t	hShader;
+	float		f;
+	int			ca;
+
+	trace_t trace;
+	vec3_t endpos;
+	float stereoSep, zProj, maxdist, xmax;
+	char rendererinfos[128];
+	refEntity_t ent;
+
+	if ( !cg_drawCrosshair.integer ) {
+		return;
+	}
+
+	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) {
+		return;
+	}
+
+	if ( cg.renderingThirdPerson ) {
+		return;
+	}
+
+	w = h = cg_crosshairSize.value;
+
+	// pulse the size of the crosshair when picking up items
+	f = cg.time - cg.itemPickupBlendTime;
+	if ( f > 0 && f < ITEM_BLOB_TIME ) {
+		f /= ITEM_BLOB_TIME;
+		w *= ( 1 + f );
+		h *= ( 1 + f );
+	}
+
+	ca = cg_drawCrosshair.integer;
+	if (ca < 0) {
+		ca = 0;
+	}
+	hShader = cgs.media.crosshairShader[ ca % NUM_CROSSHAIRS ];
+
+	// Use a different method rendering the crosshair so players don't see two of them when
+	// focusing their eyes at distant objects with high stereo separation
+	// We are going to trace to the next shootable object and place the crosshair in front of it.
+
+	// first get all the important renderer information
+	trap_Cvar_VariableStringBuffer("r_zProj", rendererinfos, sizeof(rendererinfos));
+	zProj = atof(rendererinfos);
+	trap_Cvar_VariableStringBuffer("r_stereoSeparation", rendererinfos, sizeof(rendererinfos));
+	stereoSep = zProj / atof(rendererinfos);
+	
+	xmax = zProj * tan(cg.refdef.fov_x * M_PI / 360.0f);
+	
+	// let the trace run through until a change in stereo separation of the crosshair becomes less than one pixel.
+	maxdist = cgs.glconfig.vidWidth * stereoSep * zProj / (2 * xmax);
+	VectorMA(cg.refdef.vieworg, maxdist, cg.refdef.viewaxis[0], endpos);
+	CG_Trace(&trace, cg.refdef.vieworg, NULL, NULL, endpos, 0, MASK_SHOT);
+	
+	memset(&ent, 0, sizeof(ent));
+	ent.reType = RT_SPRITE;
+	ent.renderfx = RF_DEPTHHACK | RF_CROSSHAIR;
+	
+	VectorCopy(trace.endpos, ent.origin);
+	
+	// scale the crosshair so it appears the same size for all distances
+	ent.radius = w / 640 * xmax * trace.fraction * maxdist / zProj;
+	ent.customShader = hShader;
+
+	trap_R_AddRefEntityToScene(&ent);
 }
 
 
@@ -2439,7 +2516,8 @@ void CG_DrawTimedMenus( void ) {
 CG_Draw2D
 =================
 */
-static void CG_Draw2D( void ) {
+static void CG_Draw2D(stereoFrame_t stereoFrame)
+{
 #ifdef MISSIONPACK
 	if (cgs.orderPending && cg.time > cgs.orderTime) {
 		CG_CheckOrderPending();
@@ -2466,7 +2544,10 @@ static void CG_Draw2D( void ) {
 */
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
 		CG_DrawSpectator();
-		CG_DrawCrosshair();
+
+		if(stereoFrame == STEREO_CENTER)
+			CG_DrawCrosshair();
+
 		CG_DrawCrosshairNames();
 	} else {
 		// don't draw any status if dead or the scoreboard is being explicitly shown
@@ -2486,7 +2567,8 @@ static void CG_Draw2D( void ) {
 #ifdef MISSIONPACK
 			CG_DrawProxWarning();
 #endif      
-			CG_DrawCrosshair();
+			if(stereoFrame == STEREO_CENTER)
+				CG_DrawCrosshair();
 			CG_DrawCrosshairNames();
 			CG_DrawWeaponSelect();
 
@@ -2550,9 +2632,6 @@ Perform all drawing needed to completely fill the screen
 =====================
 */
 void CG_DrawActive( stereoFrame_t stereoView ) {
-	float		separation;
-	vec3_t		baseOrg;
-
 	// optionally draw the info screen instead
 	if ( !cg.snap ) {
 		CG_DrawInformation();
@@ -2566,41 +2645,17 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		return;
 	}
 
-	switch ( stereoView ) {
-	case STEREO_CENTER:
-		separation = 0;
-		break;
-	case STEREO_LEFT:
-		separation = -cg_stereoSeparation.value / 2;
-		break;
-	case STEREO_RIGHT:
-		separation = cg_stereoSeparation.value / 2;
-		break;
-	default:
-		separation = 0;
-		CG_Error( "CG_DrawActive: Undefined stereoView" );
-	}
-
-
 	// clear around the rendered view if sized down
 	CG_TileClear();
 
-	// offset vieworg appropriately if we're doing stereo separation
-	VectorCopy( cg.refdef.vieworg, baseOrg );
-	if ( separation != 0 ) {
-		VectorMA( cg.refdef.vieworg, -separation, cg.refdef.viewaxis[1], cg.refdef.vieworg );
-	}
+	if(stereoView != STEREO_CENTER)
+		CG_DrawCrosshair3D();
 
 	// draw 3D view
 	trap_R_RenderScene( &cg.refdef );
 
-	// restore original viewpoint if running stereo
-	if ( separation != 0 ) {
-		VectorCopy( baseOrg, cg.refdef.vieworg );
-	}
-
 	// draw status bar and other floating elements
- 	CG_Draw2D();
+ 	CG_Draw2D(stereoView);
 }
 
 

@@ -228,6 +228,17 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 			Z_Free( var->resetString );
 			var->resetString = CopyString( var_value );
 
+			if(flags & CVAR_ROM)
+			{
+				// this variable was set by the user,
+				// so force it to value given by the engine.
+
+				if(var->latchedString)
+					Z_Free(var->latchedString);
+				
+				var->latchedString = CopyString(var_value);
+			}
+
 			// ZOID--needs to be set so that cvars the game sets as 
 			// SERVERINFO get sent to clients
 			cvar_modifiedFlags |= flags;
@@ -239,16 +250,6 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 			// we don't have a reset string yet
 			Z_Free( var->resetString );
 			var->resetString = CopyString( var_value );
-			
-			// if there is no reset string yet this means the variable was set by the user,
-			// so force it to value given by the engine.
-			if(var->flags & CVAR_ROM)
-			{
-				if(var->latchedString)
-					Z_Free(var->latchedString);
-				
-				var->latchedString = CopyString(var_value);
-			}
 		} else if ( var_value[0] && strcmp( var->resetString, var_value ) ) {
 			Com_DPrintf( "Warning: cvar \"%s\" given initial values: \"%s\" and \"%s\"\n",
 				var_name, var->resetString, var_value );

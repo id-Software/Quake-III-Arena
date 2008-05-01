@@ -319,9 +319,9 @@ void R_SetColorMode(GLboolean *rgba, stereoFrame_t stereoFrame, int colormode)
 		rgba[0] = GL_FALSE;
 		
 		if(colormode == MODE_RED_BLUE)
-			rgba[1] = 0;
+			rgba[1] = GL_FALSE;
 		else if(colormode == MODE_RED_GREEN)
-			rgba[2] = 0;
+			rgba[2] = GL_FALSE;
 	}
 }
 

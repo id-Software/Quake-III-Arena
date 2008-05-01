@@ -24,27 +24,33 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define __TR_TYPES_H
 
 
-#define	MAX_DLIGHTS		32			// can't be increased, because bit flags are used on surfaces
-#define	MAX_ENTITIES	1023		// can't be increased without changing drawsurf bit packing
+#define	MAX_DLIGHTS		32		// can't be increased, because bit flags are used on surfaces
+#define	MAX_ENTITIES		1023		// can't be increased without changing drawsurf bit packing
 
 // renderfx flags
-#define	RF_MINLIGHT			1		// allways have some light (viewmodel, some items)
-#define	RF_THIRD_PERSON		2		// don't draw through eyes, only mirrors (player bodies, chat sprites)
-#define	RF_FIRST_PERSON		4		// only draw through eyes (view weapon, damage blood blob)
-#define	RF_DEPTHHACK		8		// for view weapon Z crunching
-#define	RF_NOSHADOW			64		// don't add stencil shadows
+#define	RF_MINLIGHT		0x0001		// allways have some light (viewmodel, some items)
+#define	RF_THIRD_PERSON		0x0002		// don't draw through eyes, only mirrors (player bodies, chat sprites)
+#define	RF_FIRST_PERSON		0x0004		// only draw through eyes (view weapon, damage blood blob)
+#define	RF_DEPTHHACK		0x0008		// for view weapon Z crunching
 
-#define RF_LIGHTING_ORIGIN	128		// use refEntity->lightingOrigin instead of refEntity->origin
-									// for lighting.  This allows entities to sink into the floor
-									// with their origin going solid, and allows all parts of a
-									// player to get the same lighting
-#define	RF_SHADOW_PLANE		256		// use refEntity->shadowPlane
-#define	RF_WRAP_FRAMES		512		// mod the model frames by the maxframes to allow continuous
-									// animation without needing to know the frame count
+#define RF_CROSSHAIR		0x0010		// This item is a cross hair and will draw over everything similar to
+						// DEPTHHACK in stereo rendering mode, with the difference that the
+						// projection matrix won't be hacked to reduce the stereo separation as
+						// is done for the gun.
+
+#define	RF_NOSHADOW		0x0040		// don't add stencil shadows
+
+#define RF_LIGHTING_ORIGIN	0x0080		// use refEntity->lightingOrigin instead of refEntity->origin
+						// for lighting.  This allows entities to sink into the floor
+						// with their origin going solid, and allows all parts of a
+						// player to get the same lighting
+
+#define	RF_SHADOW_PLANE		0x0100		// use refEntity->shadowPlane
+#define	RF_WRAP_FRAMES		0x0200		// mod the model frames by the maxframes to allow continuous
 
 // refdef flags
-#define RDF_NOWORLDMODEL	1		// used for player configuration screen
-#define RDF_HYPERSPACE		4		// teleportation effect
+#define RDF_NOWORLDMODEL	0x0001		// used for player configuration screen
+#define RDF_HYPERSPACE		0x0004		// teleportation effect
 
 typedef struct {
 	vec3_t		xyz;
