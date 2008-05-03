@@ -156,19 +156,22 @@ New cvars
   net_mcastiface                    - outgoing interface to use for scan
 
   r_zProj                           - distance of observer camera to projection
-                                      plane
+                                      plane in quake3 standard units
   r_greyscale                       - render black and white images
+  r_stereoEnabled                   - enable stereo rendering for techniques
+                                      like shutter glasses (untested)
   r_anaglyphMode                    - Enable rendering of anaglyph images
                                       red-cyan glasses:    1
                                       red-blue:            2
                                       red-green:           3
-                                      To swap the colors for both sides just
-                                      add 3 to the value for the wanted color
-                                      combination. For red-blue and red-green
-                                      you probably want to enable r_greyscale.
+                                      To swap the colors for left and right eye
+                                      just add 3 to the value for the wanted
+                                      color combination. For red-blue and
+                                      red-green you probably want to enable
+                                      r_greyscale.
   r_stereoSeparation                - Control eye separation. Resulting
                                       separation is r_zProj divided by this
-                                      value.
+                                      value in quake3 standard units.
 
 New commands
   video [filename]        - start video capture (use with demo command)
