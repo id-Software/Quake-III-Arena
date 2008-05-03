@@ -172,6 +172,9 @@ New cvars
   r_stereoSeparation                - Control eye separation. Resulting
                                       separation is r_zProj divided by this
                                       value in quake3 standard units.
+                                      See also
+                                      http://wiki.ioquake3.org/Stereo_Rendering
+                                      for more information.
 
 New commands
   video [filename]        - start video capture (use with demo command)
