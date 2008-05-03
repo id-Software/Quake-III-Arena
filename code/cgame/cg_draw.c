@@ -976,7 +976,8 @@ CG_DrawUpperRight
 
 =====================
 */
-static void CG_DrawUpperRight( void ) {
+static void CG_DrawUpperRight(stereoFrame_t stereoFrame)
+{
 	float	y;
 
 	y = 0;
@@ -987,7 +988,7 @@ static void CG_DrawUpperRight( void ) {
 	if ( cg_drawSnapshot.integer ) {
 		y = CG_DrawSnapshot( y );
 	}
-	if ( cg_drawFPS.integer ) {
+	if (cg_drawFPS.integer && (stereoFrame == STEREO_CENTER || stereoFrame == STEREO_RIGHT)) {
 		y = CG_DrawFPS( y );
 	}
 	if ( cg_drawTimer.integer ) {
@@ -2594,10 +2595,10 @@ static void CG_Draw2D(stereoFrame_t stereoFrame)
 
 #ifdef MISSIONPACK
 	if (!cg_paused.integer) {
-		CG_DrawUpperRight();
+		CG_DrawUpperRight(stereoFrame);
 	}
 #else
-	CG_DrawUpperRight();
+	CG_DrawUpperRight(stereoFrame);
 #endif
 
 #ifndef MISSIONPACK
