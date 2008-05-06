@@ -168,26 +168,16 @@ OPENAL_LIBS=$(shell pkg-config --libs openal)
 SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
 SDL_LIBS=$(shell pkg-config --libs sdl)
 
-# extract version info
-
-ifeq ($(BUILD_STANDALONE),1)
-  VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | head -n 1 | \
-    sed -e 's/[^"]*"\(.*\)"/\1/')
-else
-  VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | tail -n 1 | \
-    sed -e 's/[^"]*"\(.*\)"/\1/')
-endif
+# version info
+VERSION=1.35
 
 USE_SVN=
 ifeq ($(wildcard .svn),.svn)
   SVN_REV=$(shell LANG=C svnversion .)
   ifneq ($(SVN_REV),)
-    SVN_VERSION=$(VERSION)_SVN$(SVN_REV)
+    VERSION:=$(VERSION)_SVN$(SVN_REV)
     USE_SVN=1
   endif
-endif
-ifneq ($(USE_SVN),1)
-    SVN_VERSION=$(VERSION)
 endif
 
 
@@ -801,9 +791,7 @@ else
   DEPEND_CFLAGS =
 endif
 
-ifeq ($(USE_SVN),1)
-  BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
-endif
+BASE_CFLAGS += -DPRODUCT_VERSION=\\\"$(VERSION)\\\"
 
 ifeq ($(V),1)
 echo_cmd=@:
@@ -918,6 +906,7 @@ targets: makedirs
 	@echo "Building ioquake3 in $(B):"
 	@echo "  PLATFORM: $(PLATFORM)"
 	@echo "  ARCH: $(ARCH)"
+	@echo "  VERSION: $(VERSION)"
 	@echo "  COMPILE_PLATFORM: $(COMPILE_PLATFORM)"
 	@echo "  COMPILE_ARCH: $(COMPILE_ARCH)"
 	@echo "  CC: $(CC)"
@@ -2011,10 +2000,10 @@ else
 endif
 
 dist:
-	rm -rf ioquake3-$(SVN_VERSION)
-	svn export . ioquake3-$(SVN_VERSION)
-	tar --owner=root --group=root --force-local -cjf ioquake3-$(SVN_VERSION).tar.bz2 ioquake3-$(SVN_VERSION)
-	rm -rf ioquake3-$(SVN_VERSION)
+	rm -rf ioquake3-$(VERSION)
+	svn export . ioquake3-$(VERSION)
+	tar --owner=root --group=root --force-local -cjf ioquake3-$(VERSION).tar.bz2 ioquake3-$(VERSION)
+	rm -rf ioquake3-$(VERSION)
 
 #############################################################################
 # DEPENDENCIES

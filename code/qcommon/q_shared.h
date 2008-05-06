@@ -28,23 +28,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef STANDALONE
   #define PRODUCT_NAME			"iofoo3"
-  #define PRODUCT_VERSION		"-1"
   #define BASEGAME			"foobar"
   #define CLIENT_WINDOW_TITLE     	"changeme"
   #define CLIENT_WINDOW_MIN_TITLE 	"changeme2"
 #else
   #define PRODUCT_NAME			"ioq3"
-  #define PRODUCT_VERSION		"1.35"
   #define BASEGAME			"baseq3"
   #define CLIENT_WINDOW_TITLE     	"ioquake3"
   #define CLIENT_WINDOW_MIN_TITLE 	"ioq3"
 #endif
 
-#ifdef SVN_VERSION
-# define Q3_VERSION PRODUCT_NAME " " SVN_VERSION
-#else
-# define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
-#endif
+#define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
 
 #define MAX_TEAMNAME 32
 
