@@ -476,9 +476,9 @@ typedef struct src_s
 } src_t;
 
 #ifdef MACOS_X
-  #define MAX_SRC 64
+	#define MAX_SRC 64
 #else
-  #define MAX_SRC 128
+	#define MAX_SRC 128
 #endif
 static src_t srcList[MAX_SRC];
 static int srcCount = 0;
@@ -873,10 +873,13 @@ S_AL_UpdateEntityPosition
 static
 void S_AL_UpdateEntityPosition( int entityNum, const vec3_t origin )
 {
-	S_AL_SanitiseVector( (vec_t *)origin );
+	vec3_t sanOrigin;
+
+	VectorCopy( origin, sanOrigin );
+	S_AL_SanitiseVector( sanOrigin );
 	if ( entityNum < 0 || entityNum > MAX_GENTITIES )
 		Com_Error( ERR_DROP, "S_UpdateEntityPosition: bad entitynum %i", entityNum );
-	VectorCopy( origin, entityList[entityNum].origin );
+	VectorCopy( sanOrigin, entityList[entityNum].origin );
 }
 
 /*
@@ -894,8 +897,8 @@ static qboolean S_AL_CheckInput(int entityNum, sfxHandle_t sfx)
 	if (sfx < 0 || sfx >= numSfx)
 	{
 		Com_Printf(S_COLOR_RED "ERROR: S_AL_CheckInput: handle %i out of range\n", sfx);
-                return qtrue;
-        }
+		return qtrue;
+	}
 
 	return qfalse;
 }
@@ -1070,12 +1073,17 @@ S_AL_AddLoopingSound
 static
 void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	vec3_t sanOrigin, sanVelocity;
+
 	if(S_AL_CheckInput(entityNum, sfx))
 		return;
 
-	S_AL_SanitiseVector( (vec_t *)origin );
-	S_AL_SanitiseVector( (vec_t *)velocity );
-	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
+	VectorCopy( origin, sanOrigin );
+	VectorCopy( velocity, sanVelocity );
+	S_AL_SanitiseVector( sanOrigin );
+	S_AL_SanitiseVector( sanVelocity );
+
+	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, sanOrigin, sanVelocity, entityNum);
 }
 
 /*
@@ -1086,20 +1094,24 @@ S_AL_AddRealLoopingSound
 static
 void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
 {
+	vec3_t sanOrigin, sanVelocity;
+
 	if(S_AL_CheckInput(entityNum, sfx))
 		return;
 
-	S_AL_SanitiseVector( (vec_t *)origin );
-	S_AL_SanitiseVector( (vec_t *)velocity );
+	VectorCopy( origin, sanOrigin );
+	VectorCopy( velocity, sanVelocity );
+	S_AL_SanitiseVector( sanOrigin );
+	S_AL_SanitiseVector( sanVelocity );
 
 	// There are certain maps (*cough* Q3:TA mpterra*) that have large quantities
 	// of ET_SPEAKERS in the PVS at any given time. OpenAL can't cope with mixing
 	// large numbers of sounds, so this culls them by distance
-	if( DistanceSquared( origin, lastListenerOrigin ) > (s_alMaxDistance->value + s_alGraceDistance->value) *
+	if( DistanceSquared( sanOrigin, lastListenerOrigin ) > (s_alMaxDistance->value + s_alGraceDistance->value) *
 							    (s_alMaxDistance->value + s_alGraceDistance->value) )
 		return;
 
-	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
+	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, sanOrigin, sanVelocity, entityNum);
 }
 
 /*

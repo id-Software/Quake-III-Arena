@@ -160,13 +160,15 @@ TEMPDIR=/tmp
 
 # set PKG_CONFIG_PATH to influence this, e.g.
 # PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
-CURL_CFLAGS=$(shell pkg-config --cflags libcurl)
-CURL_LIBS=$(shell pkg-config --libs libcurl)
-OPENAL_CFLAGS=$(shell pkg-config --cflags openal)
-OPENAL_LIBS=$(shell pkg-config --libs openal)
-# FIXME: introduce CLIENT_CFLAGS
-SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
-SDL_LIBS=$(shell pkg-config --libs sdl)
+ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
+  CURL_CFLAGS=$(shell pkg-config --cflags libcurl)
+  CURL_LIBS=$(shell pkg-config --libs libcurl)
+  OPENAL_CFLAGS=$(shell pkg-config --cflags openal)
+  OPENAL_LIBS=$(shell pkg-config --libs openal)
+  # FIXME: introduce CLIENT_CFLAGS
+  SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
+  SDL_LIBS=$(shell pkg-config --libs sdl)
+endif
 
 # version info
 VERSION=1.35
@@ -383,9 +385,9 @@ else # ifeq darwin
 
 ifeq ($(PLATFORM),mingw32)
 
-ifndef WINDRES
-WINDRES=windres
-endif
+  ifndef WINDRES
+    WINDRES=windres
+  endif
 
   ARCH=x86
 
