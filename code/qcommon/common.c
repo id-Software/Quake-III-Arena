@@ -277,6 +277,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		Cvar_Set("com_errorMessage", com_errorMessage);
 
 	if (code == ERR_DISCONNECT || code == ERR_SERVERDISCONNECT) {
+		SV_Shutdown( "Server disconnected" );
 		CL_Disconnect( qtrue );
 		VM_Forced_Unload_Start();
 		CL_FlushMemory( );
