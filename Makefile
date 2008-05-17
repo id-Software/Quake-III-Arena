@@ -311,7 +311,8 @@ ifeq ($(PLATFORM),darwin)
   BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
 
   ifeq ($(ARCH),ppc)
-    OPTIMIZE += -faltivec -O3
+    BASE_CFLAGS += -faltivec
+    OPTIMIZE += -O3
   endif
   ifeq ($(ARCH),i386)
     OPTIMIZE += -march=prescott -mfpmath=sse

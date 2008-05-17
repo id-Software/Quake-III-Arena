@@ -266,12 +266,20 @@ Sys_StringToSockaddr
 static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int sadr_len, sa_family_t family)
 {
 	struct addrinfo hints, *res = NULL, *search;
+	struct addrinfo *hintsp;
 	int retval;
 	
 	memset(sadr, '\0', sizeof(*sadr));
 	memset(&hints, '\0', sizeof(hints));
-	
-	hints.ai_family = family;
+
+	// workaround for buggy MacOSX getaddrinfo implementation that doesn't handle AF_UNSPEC in hints correctly.
+	if(family == AF_UNSPEC)
+		hintsp = NULL;
+	else
+	{
+		hintsp = &hints;
+		hintsp->ai_family = family;
+	}
 	
 	retval = getaddrinfo(s, NULL, &hints, &res);
 
