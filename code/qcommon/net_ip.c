@@ -281,7 +281,7 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 		hintsp->ai_family = family;
 	}
 	
-	retval = getaddrinfo(s, NULL, &hints, &res);
+	retval = getaddrinfo(s, NULL, hintsp, &res);
 
 	if(!retval)
 	{
