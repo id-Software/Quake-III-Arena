@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../botlib/botlib.h"
 
+#include "libmumblelink.h"
+
 extern	botlib_export_t	*botlib_export;
 
 extern qboolean loadCamera(const char *name);
@@ -907,6 +909,13 @@ void CL_FirstSnapshot( void ) {
 		Cbuf_AddText( cl_activeAction->string );
 		Cvar_Set( "activeAction", "" );
 	}
+
+#ifdef USE_MUMBLE
+	if ((cl_useMumble->integer) && !mumble_islinked()) {
+		int ret = mumble_link(CLIENT_WINDOW_TITLE);
+		Com_Printf("Mumble: Linking to Mumble application %s\n", ret==0?"ok":"failed");
+	}
+#endif
 }
 
 /*

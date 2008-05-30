@@ -367,6 +367,11 @@ extern	cvar_t	*cl_inGameVideo;
 extern	cvar_t	*cl_lanForcePackets;
 extern	cvar_t	*cl_autoRecordDemo;
 
+#ifdef USE_MUMBLE
+extern	cvar_t	*cl_useMumble;
+extern	cvar_t	*cl_mumbleScale;
+#endif
+
 //=================================================
 
 //
