@@ -33,7 +33,7 @@ void S_StopBackgroundTrack( void );
 
 // cinematics and voice-over-network will send raw samples
 // 1.0 volume will be direct output of source samples
-void S_RawSamples (int samples, int rate, int width, int channels, 
+void S_RawSamples (int stream, int samples, int rate, int width, int channels,
 				   const byte *data, float volume);
 
 // stop all sounds and the background track
@@ -70,3 +70,13 @@ void S_ClearSoundBuffer( void );
 void SNDDMA_Activate( void );
 
 void S_UpdateBackgroundTrack( void );
+
+
+#if USE_VOIP
+void S_StartCapture( void );
+int S_AvailableCaptureSamples( void );
+void S_Capture( int samples, byte *data );
+void S_StopCapture( void );
+void S_MasterGain( float gain );
+#endif
+

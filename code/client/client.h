@@ -34,6 +34,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "cl_curl.h"
 #endif /* USE_CURL */
 
+#if USE_VOIP
+#include "speex/speex.h"
+#endif
+
 // file full of random crap that gets used to create cl_guid
 #define QKEY_FILE "qkey"
 #define QKEY_SIZE 2048
@@ -225,6 +229,30 @@ typedef struct {
 	int			timeDemoMaxDuration;	// maximum frame duration
 	unsigned char	timeDemoDurations[ MAX_TIMEDEMO_DURATIONS ];	// log of frame durations
 
+#if USE_VOIP
+	qboolean speexInitialized;
+	int speexFrameSize;
+
+	// incoming data...
+	// !!! FIXME: convert from parallel arrays to array of a struct.
+	SpeexBits speexDecoderBits[MAX_CLIENTS];
+	void *speexDecoder[MAX_CLIENTS];
+	byte voipIncomingGeneration[MAX_CLIENTS];
+	int voipIncomingSequence[MAX_CLIENTS];
+	qboolean voipIgnore[MAX_CLIENTS];
+	qboolean voipMuteAll;
+
+	// outgoing data...
+	SpeexBits speexEncoderBits;
+	void *speexEncoder;
+	int voipOutgoingDataSize;
+	int voipOutgoingDataFrames;
+	int voipOutgoingSequence;
+	byte voipOutgoingGeneration;
+	byte voipOutgoingData[1024];
+	float voipPower;
+#endif
+
 	// big stuff at end of structure so most offsets are 15 bits or less
 	netchan_t	netchan;
 } clientConnection_t;
@@ -372,6 +400,12 @@ extern	cvar_t	*cl_useMumble;
 extern	cvar_t	*cl_mumbleScale;
 #endif
 
+#if USE_VOIP
+extern	cvar_t	*cl_voipSend;
+extern	cvar_t	*cl_voipGainDuringCapture;
+extern	cvar_t	*voip;
+#endif
+
 //=================================================
 
 //
@@ -426,6 +460,10 @@ extern	kbutton_t	in_mlook, in_klook;
 extern 	kbutton_t 	in_strafe;
 extern 	kbutton_t 	in_speed;
 
+#if USE_VOIP
+extern 	kbutton_t 	in_voiprecord;
+#endif
+
 void CL_InitInput (void);
 void CL_SendCmd (void);
 void CL_ClearState (void);
@@ -446,6 +484,11 @@ void Key_SetCatcher( int catcher );
 //
 extern int cl_connectedToPureServer;
 extern int cl_connectedToCheatServer;
+
+#if USE_VOIP
+extern int cl_connectedToVoipServer;
+void CL_Voip_f( void );
+#endif
 
 void CL_SystemInfoChanged( void );
 void CL_ParseServerMessage( msg_t *msg );

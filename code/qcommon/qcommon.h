@@ -274,7 +274,11 @@ enum svc_ops_e {
 	svc_serverCommand,			// [string] to be executed by client game module
 	svc_download,				// [short] size [size bytes]
 	svc_snapshot,
-	svc_EOF
+	svc_EOF,
+
+#if USE_VOIP
+	svc_voip
+#endif
 };
 
 
@@ -287,7 +291,11 @@ enum clc_ops_e {
 	clc_move,				// [[usercmd_t]
 	clc_moveNoDelta,		// [[usercmd_t]
 	clc_clientCommand,		// [string] message
-	clc_EOF
+	clc_EOF,
+
+#if USE_VOIP
+	clc_voip,   // packet of voice data.
+#endif
 };
 
 /*

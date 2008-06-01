@@ -631,11 +631,11 @@ S_PaintChannels
 void S_PaintChannels( int endtime ) {
 	int 	i;
 	int 	end;
+	int 	stream;
 	channel_t *ch;
 	sfx_t	*sc;
 	int		ltime, count;
 	int		sampleOffset;
-
 
 	snd_vol = s_volume->value*255;
 
@@ -648,30 +648,18 @@ void S_PaintChannels( int endtime ) {
 			end = s_paintedtime + PAINTBUFFER_SIZE;
 		}
 
-		// clear the paint buffer to either music or zeros
-		if ( s_rawend < s_paintedtime ) {
-			if ( s_rawend ) {
-				//Com_DPrintf ("background sound underrun\n");
-			}
-			Com_Memset(paintbuffer, 0, (end - s_paintedtime) * sizeof(portable_samplepair_t));
-		} else {
-			// copy from the streaming sound source
-			int		s;
-			int		stop;
-
-			stop = (end < s_rawend) ? end : s_rawend;
-
-			for ( i = s_paintedtime ; i < stop ; i++ ) {
-				s = i&(MAX_RAW_SAMPLES-1);
-				paintbuffer[i-s_paintedtime] = s_rawsamples[s];
-			}
-//		if (i != end)
-//			Com_Printf ("partial stream\n");
-//		else
-//			Com_Printf ("full stream\n");
-			for ( ; i < end ; i++ ) {
-				paintbuffer[i-s_paintedtime].left =
-				paintbuffer[i-s_paintedtime].right = 0;
+		// clear the paint buffer and mix any raw samples...
+		Com_Memset(paintbuffer, 0, sizeof (paintbuffer));
+		for (stream = 0; stream < MAX_RAW_STREAMS; stream++) {
+			if ( s_rawend[stream] >= s_paintedtime ) {
+				// copy from the streaming sound source
+				const portable_samplepair_t *rawsamples = s_rawsamples[stream];
+				const int stop = (end < s_rawend[stream]) ? end : s_rawend[stream];
+				for ( i = s_paintedtime ; i < stop ; i++ ) {
+					const int s = i&(MAX_RAW_SAMPLES-1);
+					paintbuffer[i-s_paintedtime].left += rawsamples[s].left;
+					paintbuffer[i-s_paintedtime].right += rawsamples[s].right;
+				}
 			}
 		}
 

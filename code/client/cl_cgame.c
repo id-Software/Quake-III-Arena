@@ -916,6 +916,26 @@ void CL_FirstSnapshot( void ) {
 		Com_Printf("Mumble: Linking to Mumble application %s\n", ret==0?"ok":"failed");
 	}
 #endif
+
+#if USE_VOIP
+	if (!clc.speexInitialized) {
+		int i;
+		speex_bits_init(&clc.speexEncoderBits);
+		speex_bits_reset(&clc.speexEncoderBits);
+		clc.speexEncoder = speex_encoder_init(&speex_nb_mode);
+		for (i = 0; i < MAX_CLIENTS; i++) {
+			speex_bits_init(&clc.speexDecoderBits[i]);
+			speex_bits_reset(&clc.speexDecoderBits[i]);
+			clc.speexDecoder[i] = speex_decoder_init(&speex_nb_mode);
+			clc.voipIgnore[i] = qfalse;
+		}
+		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_FRAME_SIZE,
+		                  &clc.speexFrameSize);
+		clc.speexInitialized = qtrue;
+		clc.voipMuteAll = qfalse;
+		Cmd_AddCommand ("voip", CL_Voip_f);
+	}
+#endif
 }
 
 /*

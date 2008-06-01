@@ -33,6 +33,12 @@ cvar_t	*cl_useMumble;
 cvar_t	*cl_mumbleScale;
 #endif
 
+#if USE_VOIP
+cvar_t	*cl_voipSend;
+cvar_t	*cl_voipGainDuringCapture;
+cvar_t	*voip;
+#endif
+
 cvar_t	*cl_nodelta;
 cvar_t	*cl_debugMove;
 
@@ -167,6 +173,200 @@ void CL_UpdateMumble(void)
 }
 #endif
 
+
+#if USE_VOIP
+static
+void CL_UpdateVoipIgnore(const char *idstr, qboolean ignore)
+{
+	if ((*idstr >= '0') && (*idstr <= '9')) {
+		const int id = atoi(idstr);
+		if ((id >= 0) && (id < MAX_CLIENTS)) {
+			clc.voipIgnore[id] = ignore;
+			CL_AddReliableCommand(va("voip %s %d",
+			                         ignore ? "ignore" : "unignore", id));
+			Com_Printf("VoIP: %s ignoring player #%d\n",
+			            ignore ? "Now" : "No longer", id);
+		}
+	}
+}
+
+void CL_Voip_f( void )
+{
+	const char *cmd = Cmd_Argv(1);
+	const char *reason = NULL;
+
+	if (cls.state != CA_ACTIVE)
+		reason = "Not connected to a server";
+	else if (!clc.speexInitialized)
+		reason = "Speex not initialized";
+	else if (!cl_connectedToVoipServer)
+		reason = "Server doesn't support VoIP";
+	else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
+		reason = "running in single-player mode";
+
+	if (reason != NULL) {
+		Com_Printf("VoIP: command ignored: %s\n", reason);
+		return;
+	}
+
+	if (strcmp(cmd, "ignore") == 0) {
+		CL_UpdateVoipIgnore(Cmd_Argv(2), qtrue);
+	} else if (strcmp(cmd, "unignore") == 0) {
+		CL_UpdateVoipIgnore(Cmd_Argv(2), qfalse);
+	} else if (strcmp(cmd, "muteall") == 0) {
+		Com_Printf("VoIP: muting incoming voice\n");
+		CL_AddReliableCommand("voip muteall");
+		clc.voipMuteAll = qtrue;
+	} else if (strcmp(cmd, "unmuteall") == 0) {
+		Com_Printf("VoIP: unmuting incoming voice\n");
+		CL_AddReliableCommand("voip unmuteall");
+		clc.voipMuteAll = qfalse;
+	}
+}
+
+
+/*
+===============
+CL_CaptureVoip
+
+Record more audio from the hardware if required and encode it into Speex
+ data for later transmission.
+===============
+*/
+static
+void CL_CaptureVoip(void)
+{
+	qboolean initialFrame = qfalse;
+	qboolean finalFrame = qfalse;
+
+#if USE_MUMBLE
+	// if we're using Mumble, don't try to handle VoIP transmission ourselves.
+	if (cl_useMumble->integer)
+		return;
+#endif
+
+	if (!clc.speexInitialized)
+		return;  // just in case this gets called at a bad time.
+
+	if (clc.voipOutgoingDataSize > 0)
+		return;  // packet is pending transmission, don't record more yet.
+
+	if (cl_voipSend->modified) {
+		qboolean dontCapture = qfalse;
+		if (cls.state != CA_ACTIVE)
+			dontCapture = qtrue;  // not connected to a server.
+		else if (!cl_connectedToVoipServer)
+			dontCapture = qtrue;  // server doesn't support VoIP.
+		else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
+			dontCapture = qtrue;  // single player game.
+
+		cl_voipSend->modified = qfalse;
+
+		if (dontCapture) {
+			cl_voipSend->integer = 0;
+			return;
+		}
+
+		if (cl_voipSend->integer) {
+			initialFrame = qtrue;
+		} else {
+			finalFrame = qtrue;
+		}
+	}
+
+	// try to get more audio data from the sound card...
+
+	if (initialFrame) {
+		float gain = cl_voipGainDuringCapture->value;
+		if (gain < 0.0f) gain = 0.0f; else if (gain >= 1.0f) gain = 1.0f;
+		S_MasterGain(cl_voipGainDuringCapture->value);
+		S_StartCapture();
+		clc.voipPower = 0.0f;
+		clc.voipOutgoingSequence = 0;
+		clc.voipOutgoingGeneration++;
+		if (clc.voipOutgoingGeneration == 0) // don't have a zero generation...
+			clc.voipOutgoingGeneration = 1;  //  ...so new clients won't match.
+	}
+
+	if ((cl_voipSend->integer) || (finalFrame)) { // user wants to capture audio?
+		// !!! FIXME: 8000, MONO16, 4096 samples are hardcoded in snd_openal.c
+		int samples = S_AvailableCaptureSamples();
+		const int mult = (finalFrame) ? 1 : 12; // 12 == 240ms of audio.
+
+		// enough data buffered in audio hardware to process yet?
+		if (samples >= (clc.speexFrameSize * mult)) {
+			// audio capture is always MONO16 (and that's what speex wants!).
+			static int16_t sampbuffer[4096];  // !!! FIXME: don't hardcode.
+			int16_t voipPower = 0;
+			int speexFrames = 0;
+			int wpos = 0;
+			int pos = 0;
+
+			if (samples > (clc.speexFrameSize * 12))
+				samples = (clc.speexFrameSize * 12);
+
+			// !!! FIXME: maybe separate recording from encoding, so voipPower
+			// !!! FIXME:  updates faster than 4Hz?
+
+			samples -= samples % clc.speexFrameSize;
+			S_Capture(samples, (byte *) sampbuffer);  // grab from audio card.
+
+			// this will probably generate multiple speex packets each time.
+			while (samples > 0) {
+				int i, bytes;
+
+				// Check the "power" of this packet...
+				for (i = 0; i < clc.speexFrameSize; i++) {
+					int16_t s = sampbuffer[i+pos];
+					if (s < 0)
+						s = -s;
+					if (s > voipPower)
+						voipPower = s;  // !!! FIXME: this isn't very clever.
+				}
+
+				// Encode raw audio samples into Speex data...
+				speex_bits_reset(&clc.speexEncoderBits);
+				speex_encode_int(clc.speexEncoder, &sampbuffer[pos],
+				                 &clc.speexEncoderBits);
+				bytes = speex_bits_write(&clc.speexEncoderBits,
+				                         (char *) &clc.voipOutgoingData[wpos+1],
+				                         sizeof (clc.voipOutgoingData) - (wpos+1));
+				assert((bytes > 0) && (bytes < 256));
+				clc.voipOutgoingData[wpos] = (byte) bytes;
+				wpos += bytes + 1;
+
+				// look at the data for the next packet...
+				pos += clc.speexFrameSize;
+				samples -= clc.speexFrameSize;
+				speexFrames++;
+			}
+			clc.voipPower = ((float) voipPower) / 32767.0f;
+			clc.voipOutgoingDataSize = wpos;
+			clc.voipOutgoingDataFrames = speexFrames;
+
+			Com_DPrintf("Outgoing VoIP data: %d frames, %d bytes, %f power\n",
+			            speexFrames, wpos, clc.voipPower);
+
+			#if 0
+			static FILE *encio = NULL;
+			if (encio == NULL) encio = fopen("outgoing-encoded.bin", "wb");
+			if (encio != NULL) { fwrite(clc.voipOutgoingData, wpos, 1, encio); fflush(encio); }
+			static FILE *decio = NULL;
+			if (decio == NULL) decio = fopen("outgoing-decoded.bin", "wb");
+			if (decio != NULL) { fwrite(sampbuffer, speexFrames * clc.speexFrameSize * 2, 1, decio); fflush(decio); }
+			#endif
+		}
+	}
+
+	// User requested we stop recording, and we've now processed the last of
+	//  any previously-buffered data. Pause the capture device, etc.
+	if (finalFrame) {
+		S_StopCapture();
+		S_MasterGain(1.0f);
+		clc.voipPower = 0.0f;  // force this value so it doesn't linger.
+	}
+}
+#endif
 
 /*
 =======================================================================
@@ -905,6 +1105,25 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 #endif
 
+#if USE_VOIP
+	if (cl_voipSend->integer) {
+		Cvar_Set("cl_voipSend", "0");
+		CL_CaptureVoip();  // clean up any state...
+	}
+
+	if (clc.speexInitialized) {
+		int i;
+		speex_bits_destroy(&clc.speexEncoderBits);
+		speex_encoder_destroy(clc.speexEncoder);
+		for (i = 0; i < MAX_CLIENTS; i++) {
+			speex_bits_destroy(&clc.speexDecoderBits[i]);
+			speex_decoder_destroy(clc.speexDecoder[i]);
+		}
+	}
+
+	Cmd_RemoveCommand ("voip");
+#endif
+
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
 		clc.demofile = 0;
@@ -938,6 +1157,11 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	// not connected to a pure server anymore
 	cl_connectedToPureServer = qfalse;
+
+#if USE_VOIP
+	// not connected to voip server anymore.
+	cl_connectedToVoipServer = qfalse;
+#endif
 
 	// Stop recording any video
 	if( CL_VideoRecording( ) ) {
@@ -2359,9 +2583,14 @@ void CL_Frame ( int msec ) {
 	// update audio
 	S_Update();
 
+#if USE_VOIP
+	CL_CaptureVoip();
+#endif
+
 #ifdef USE_MUMBLE
 	CL_UpdateMumble();
 #endif
+
 	// advance local effects for next frame
 	SCR_RunCinematic();
 
@@ -2779,6 +3008,12 @@ void CL_Init( void ) {
 #ifdef USE_MUMBLE
 	cl_useMumble = Cvar_Get ("cl_useMumble", "0", CVAR_ARCHIVE);
 	cl_mumbleScale = Cvar_Get ("cl_mumbleScale", "0.0254", CVAR_ARCHIVE);
+#endif
+
+#if USE_VOIP
+	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
+	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
+	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 #endif
 
 	// userinfo

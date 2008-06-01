@@ -52,6 +52,10 @@ kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
 kbutton_t	in_strafe, in_speed;
 kbutton_t	in_up, in_down;
 
+#if USE_VOIP
+kbutton_t	in_voiprecord;
+#endif
+
 kbutton_t	in_buttons[16];
 
 
@@ -215,6 +219,11 @@ void IN_SpeedDown(void) {IN_KeyDown(&in_speed);}
 void IN_SpeedUp(void) {IN_KeyUp(&in_speed);}
 void IN_StrafeDown(void) {IN_KeyDown(&in_strafe);}
 void IN_StrafeUp(void) {IN_KeyUp(&in_strafe);}
+
+#if USE_VOIP
+void IN_VoipRecordDown(void) {IN_KeyDown(&in_voiprecord);}
+void IN_VoipRecordUp(void) {IN_KeyUp(&in_voiprecord);}
+#endif
 
 void IN_Button0Down(void) {IN_KeyDown(&in_buttons[0]);}
 void IN_Button0Up(void) {IN_KeyUp(&in_buttons[0]);}
@@ -547,6 +556,14 @@ usercmd_t CL_CreateCmd( void ) {
 	// get basic movement from joystick
 	CL_JoystickMove( &cmd );
 
+#if USE_VOIP
+	if ( ( in_voiprecord.active ) && ( !cl_voipSend->integer ) ) {
+		Cvar_Set("cl_voipSend", "1");
+	} else if ( ( !in_voiprecord.active ) && ( cl_voipSend->integer ) ) {
+		Cvar_Set("cl_voipSend", "0");
+	}
+#endif
+
 	// check to make sure the angles haven't wrapped
 	if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
 		cl.viewangles[PITCH] = oldAngles[PITCH] + 90;
@@ -740,6 +757,24 @@ void CL_WritePacket( void ) {
 		count = MAX_PACKET_USERCMDS;
 		Com_Printf("MAX_PACKET_USERCMDS\n");
 	}
+
+	#if USE_VOIP
+	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
+		MSG_WriteByte (&buf, clc_voip);
+		MSG_WriteByte (&buf, clc.voipOutgoingGeneration);
+		MSG_WriteLong (&buf, clc.voipOutgoingSequence);
+		MSG_WriteByte (&buf, clc.voipOutgoingDataFrames);
+		MSG_WriteLong (&buf, 0x7FFFFFFF);  // !!! FIXME: send to specific people.
+		MSG_WriteLong (&buf, 0x7FFFFFFF);  // !!! FIXME: send to specific people.
+		MSG_WriteLong (&buf, 0x7FFFFFFF);  // !!! FIXME: send to specific people.
+		MSG_WriteShort (&buf, clc.voipOutgoingDataSize);
+		MSG_WriteData (&buf, clc.voipOutgoingData, clc.voipOutgoingDataSize);
+		clc.voipOutgoingSequence += clc.voipOutgoingDataFrames;
+		clc.voipOutgoingDataSize = 0;
+		clc.voipOutgoingDataFrames = 0;
+	} else
+	#endif
+
 	if ( count >= 1 ) {
 		if ( cl_showSend->integer ) {
 			Com_Printf( "(%i)", count );
@@ -896,6 +931,11 @@ void CL_InitInput( void ) {
 	Cmd_AddCommand ("-button14", IN_Button14Up);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
+
+#if USE_VOIP
+	Cmd_AddCommand ("+voiprecord", IN_VoipRecordDown);
+	Cmd_AddCommand ("-voiprecord", IN_VoipRecordUp);
+#endif
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", 0);
 	cl_debugMove = Cvar_Get ("cl_debugMove", "0", 0);

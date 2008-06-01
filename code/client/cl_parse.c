@@ -32,7 +32,12 @@ char *svc_strings[256] = {
 	"svc_baseline",	
 	"svc_serverCommand",
 	"svc_download",
-	"svc_snapshot"
+	"svc_snapshot",
+	"svc_EOF",
+
+#if USE_VOIP
+	"svc_voip"
+#endif
 };
 
 void SHOWNET( msg_t *msg, char *s) {
@@ -327,6 +332,10 @@ void CL_ParseSnapshot( msg_t *msg ) {
 int cl_connectedToPureServer;
 int cl_connectedToCheatServer;
 
+#if USE_VOIP
+int cl_connectedToVoipServer;
+#endif
+
 /*
 ==================
 CL_SystemInfoChanged
@@ -354,6 +363,11 @@ void CL_SystemInfoChanged( void ) {
 	if ( clc.demoplaying ) {
 		return;
 	}
+
+#if USE_VOIP
+	s = Info_ValueForKey( systemInfo, "sv_voip" );
+	cl_connectedToVoipServer = atoi( s );
+#endif
 
 	s = Info_ValueForKey( systemInfo, "sv_cheats" );
 	cl_connectedToCheatServer = atoi( s );
@@ -621,6 +635,162 @@ void CL_ParseDownload ( msg_t *msg ) {
 	}
 }
 
+#if USE_VOIP
+static
+qboolean CL_ShouldIgnoreVoipSender(int sender)
+{
+	if (!voip->integer)
+		return qtrue;  // VoIP is disabled.
+	else if (sender == clc.clientNum)
+		return qtrue;  // this is us, don't output our own voice.
+	else if (clc.voipMuteAll)
+		return qtrue;  // all channels are muted with extreme prejudice.
+	else if (clc.voipIgnore[sender])
+		return qtrue;  // just ignoring this guy.
+
+	return qfalse;  // !!! FIXME: implement per-channel muting.
+}
+
+/*
+=====================
+CL_ParseVoip
+
+A VoIP message has been received from the server
+=====================
+*/
+static
+void CL_ParseVoip ( msg_t *msg ) {
+	static short decoded[4096];  // !!! FIXME: don't hardcode.
+
+	const int sender = MSG_ReadShort(msg);
+	const int generation = MSG_ReadByte(msg);
+	const int sequence = MSG_ReadLong(msg);
+	const int frames = MSG_ReadByte(msg);
+	const int packetsize = MSG_ReadShort(msg);
+	char encoded[1024];
+	int seqdiff = sequence - clc.voipIncomingSequence[sender];
+	int written = 0;
+	int i;
+
+	Com_DPrintf("VoIP: %d-byte packet from client %d\n", packetsize, sender);
+
+	if (sender < 0)
+		return;   // short/invalid packet, bail.
+	else if (generation < 0)
+		return;   // short/invalid packet, bail.
+	else if (sequence < 0)
+		return;   // short/invalid packet, bail.
+	else if (frames < 0)
+		return;   // short/invalid packet, bail.
+	else if (packetsize < 0)
+		return;   // short/invalid packet, bail.
+
+	if (packetsize > sizeof (encoded)) {  // overlarge packet?
+		int bytesleft = packetsize;
+		while (bytesleft) {
+			int br = bytesleft;
+			if (br > sizeof (encoded))
+				br = sizeof (encoded);
+			MSG_ReadData(msg, encoded, br);
+			bytesleft -= br;
+		}
+		return;   // overlarge packet, bail.
+	}
+
+	if (!clc.speexInitialized) {
+		MSG_ReadData(msg, encoded, packetsize);  // skip payload.
+		return;   // can't handle VoIP without libspeex!
+	} else if (sender >= MAX_CLIENTS) {
+		MSG_ReadData(msg, encoded, packetsize);  // skip payload.
+		return;   // bogus sender.
+	} else if (CL_ShouldIgnoreVoipSender(sender)) {
+		MSG_ReadData(msg, encoded, packetsize);  // skip payload.
+		return;   // Channel is muted, bail.
+	}
+
+	// !!! FIXME: make sure data is narrowband? Does decoder handle this?
+
+	Com_DPrintf("VoIP: packet accepted!\n");
+
+	// This is a new "generation" ... a new recording started, reset the bits.
+	if (generation != clc.voipIncomingGeneration[sender]) {
+		Com_DPrintf("VoIP: new generation %d!\n", generation);
+		speex_bits_reset(&clc.speexDecoderBits[sender]);
+		clc.voipIncomingGeneration[sender] = generation;
+		seqdiff = 0;
+	} else if (seqdiff < 0) {   // we're ahead of the sequence?!
+		// This shouldn't happen unless the packet is corrupted or something.
+		Com_DPrintf("VoIP: misordered sequence! %d < %d!\n",
+		            sequence, clc.voipIncomingSequence[sender]);
+		// reset the bits just in case.
+		speex_bits_reset(&clc.speexDecoderBits[sender]);
+		seqdiff = 0;
+	} else if (seqdiff > 100) { // more than 2 seconds of audio dropped?
+		// just start over.
+		Com_DPrintf("VoIP: Dropped way too many (%d) frames from client #%d\n",
+		            seqdiff, sender);
+		speex_bits_reset(&clc.speexDecoderBits[sender]);
+		seqdiff = 0;
+	}
+
+	if (seqdiff != 0) {
+		Com_DPrintf("VoIP: Dropped %d frames from client #%d\n",
+		            seqdiff, sender);
+		// tell speex that we're missing frames...
+		for (i = 0; i < seqdiff; i++) {
+			assert((written + clc.speexFrameSize) * 2 < sizeof (decoded));
+			speex_decode_int(clc.speexDecoder[sender], NULL, decoded + written);
+			written += clc.speexFrameSize;
+		}
+	}
+
+	for (i = 0; i < frames; i++) {
+		char encoded[256];
+		const int len = MSG_ReadByte(msg);
+		if (len < 0) {
+			Com_DPrintf("VoIP: Short packet!\n");
+			break;
+		}
+		MSG_ReadData(msg, encoded, len);
+
+		// shouldn't happen, but just in case...
+		if ((written + clc.speexFrameSize) * 2 > sizeof (decoded)) {
+			Com_DPrintf("VoIP: playback %d bytes, %d samples, %d frames\n",
+			            written * 2, written, i);
+			S_RawSamples(sender + 1, written, 8000, 2, 1,
+			             (const byte *) decoded, 1.0f);  // !!! FIXME: hardcoding!
+			written = 0;
+		}
+
+		speex_bits_read_from(&clc.speexDecoderBits[sender], encoded, len);
+		speex_decode_int(clc.speexDecoder[sender],
+		                 &clc.speexDecoderBits[sender], decoded + written);
+
+		#if 0
+		static FILE *encio = NULL;
+		if (encio == NULL) encio = fopen("incoming-encoded.bin", "wb");
+		if (encio != NULL) { fwrite(encoded, len, 1, encio); fflush(encio); }
+		static FILE *decio = NULL;
+		if (decio == NULL) decio = fopen("incoming-decoded.bin", "wb");
+		if (decio != NULL) { fwrite(decoded+written, clc.speexFrameSize*2, 1, decio); fflush(decio); }
+		#endif
+
+		written += clc.speexFrameSize;
+	}
+
+	Com_DPrintf("VoIP: playback %d bytes, %d samples, %d frames\n",
+	            written * 2, written, i);
+
+	if (written > 0) {
+		S_RawSamples(sender + 1, written, 8000, 2, 1,
+		             (const byte *) decoded, 1.0f);  // !!! FIXME: hardcoding!
+	}
+
+	clc.voipIncomingSequence[sender] = sequence + frames;
+}
+#endif
+
+
 /*
 =====================
 CL_ParseCommandString
@@ -714,6 +884,11 @@ void CL_ParseServerMessage( msg_t *msg ) {
 		case svc_download:
 			CL_ParseDownload( msg );
 			break;
+#if USE_VOIP
+		case svc_voip:
+			CL_ParseVoip( msg );
+			break;
+#endif
 		}
 	}
 }
