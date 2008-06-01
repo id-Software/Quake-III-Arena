@@ -3007,17 +3007,6 @@ void CL_Init( void ) {
 
 	cl_guidServerUniq = Cvar_Get ("cl_guidServerUniq", "1", CVAR_ARCHIVE);
 
-#ifdef USE_MUMBLE
-	cl_useMumble = Cvar_Get ("cl_useMumble", "0", CVAR_ARCHIVE);
-	cl_mumbleScale = Cvar_Get ("cl_mumbleScale", "0.0254", CVAR_ARCHIVE);
-#endif
-
-#if USE_VOIP
-	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
-	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
-	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE);
-#endif
-
 	// userinfo
 	Cvar_Get ("name", "UnnamedPlayer", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get ("rate", "3000", CVAR_USERINFO | CVAR_ARCHIVE );
@@ -3037,6 +3026,29 @@ void CL_Init( void ) {
 
 	Cvar_Get ("password", "", CVAR_USERINFO);
 	Cvar_Get ("cg_predictItems", "1", CVAR_USERINFO | CVAR_ARCHIVE );
+
+#ifdef USE_MUMBLE
+	cl_useMumble = Cvar_Get ("cl_useMumble", "0", CVAR_ARCHIVE);
+	cl_mumbleScale = Cvar_Get ("cl_mumbleScale", "0.0254", CVAR_ARCHIVE);
+#endif
+
+#if USE_VOIP
+	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
+	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
+	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE);
+
+	// If your data rate is too low, you'll get Connection Interrupted warnings
+	//  when VoIP packets arrive, even if you have a broadband connection.
+	//  This might work on rates lower than 25000, but for safety's sake, we'll
+	//  just demand it. Who doesn't have at least a DSL line now, anyhow? If
+	//  you don't, you don't need VoIP.  :)
+	if ((voip->integer) && (Cvar_VariableIntegerValue("rate") < 25000)) {
+		Com_Printf("Your network rate is too slow for VoIP.\n");
+		Com_Printf("Set 'Data Rate' to 'LAN/Cable/xDSL' in 'Setup/System/Network' and restart.\n");
+		Com_Printf("Until then, VoIP is disabled.\n");
+		Cvar_Set("voip", "0");
+	}
+#endif
 
 
 	// cgame might not be initialized before menu is used
