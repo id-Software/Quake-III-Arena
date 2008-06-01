@@ -259,6 +259,8 @@ void CL_CaptureVoip(void)
 			dontCapture = qtrue;  // server doesn't support VoIP.
 		else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
 			dontCapture = qtrue;  // single player game.
+		else if ( voip->integer == 0 )
+			dontCapture = qtrue;  // client has VoIP support disabled.
 
 		cl_voipSend->modified = qfalse;
 
