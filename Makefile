@@ -155,6 +155,7 @@ NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
 Q3UIDIR=$(MOUNT_DIR)/q3_ui
 JPDIR=$(MOUNT_DIR)/jpeg-6
+SPEEXDIR=$(MOUNT_DIR)/libspeex
 Q3ASMDIR=$(MOUNT_DIR)/tools/asm
 LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
@@ -245,7 +246,7 @@ ifeq ($(PLATFORM),linux)
   endif
 
   ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP
+    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
@@ -301,10 +302,6 @@ ifeq ($(PLATFORM),linux)
 
   ifeq ($(USE_MUMBLE),1)
     CLIENT_LDFLAGS += -lrt
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    CLIENT_LDFLAGS += -lspeex
   endif
 
   ifeq ($(ARCH),i386)
@@ -375,8 +372,7 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP
-    CLIENT_LDFLAGS += -lspeex
+    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
@@ -450,7 +446,7 @@ ifeq ($(PLATFORM),mingw32)
   endif
 
   ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP
+    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   OPTIMIZE = -O3 -march=i586 -fno-omit-frame-pointer -ffast-math \
@@ -483,10 +479,6 @@ ifeq ($(PLATFORM),mingw32)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    CLIENT_LDFLAGS += -lspeex
   endif
 
   ifeq ($(ARCH),x86)
@@ -547,7 +539,7 @@ ifeq ($(PLATFORM),freebsd)
   endif
 
   ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP
+    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   ifeq ($(ARCH),axp)
@@ -590,11 +582,6 @@ ifeq ($(PLATFORM),freebsd)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
-  ifeq ($(USE_VOIP),1)
-    CLIENT_LDFLAGS += -lspeex
-  endif
-
-
 else # ifeq freebsd
 
 #############################################################################
@@ -626,7 +613,7 @@ ifeq ($(PLATFORM),openbsd)
   endif
 
   ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP
+    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   BASE_CFLAGS += -DNO_VM_COMPILED -I/usr/X11R6/include -I/usr/local/include
@@ -658,11 +645,6 @@ ifeq ($(PLATFORM),openbsd)
   ifeq ($(USE_CODEC_VORBIS),1)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
-
-  ifeq ($(USE_VOIP),1)
-    CLIENT_LDFLAGS += -lspeex
-  endif
-
 
 else # ifeq openbsd
 
@@ -1332,6 +1314,47 @@ Q3OBJ = \
   $(B)/client/jmemnobs.o \
   $(B)/client/jutils.o \
   \
+  $(B)/client/bits.o \
+  $(B)/client/buffer.o \
+  $(B)/client/cb_search.o \
+  $(B)/client/exc_10_16_table.o \
+  $(B)/client/exc_10_32_table.o \
+  $(B)/client/exc_20_32_table.o \
+  $(B)/client/exc_5_256_table.o \
+  $(B)/client/exc_5_64_table.o \
+  $(B)/client/exc_8_128_table.o \
+  $(B)/client/fftwrap.o \
+  $(B)/client/filterbank.o \
+  $(B)/client/filters.o \
+  $(B)/client/gain_table.o \
+  $(B)/client/gain_table_lbr.o \
+  $(B)/client/hexc_10_32_table.o \
+  $(B)/client/hexc_table.o \
+  $(B)/client/high_lsp_tables.o \
+  $(B)/client/jitter.o \
+  $(B)/client/kiss_fft.o \
+  $(B)/client/kiss_fftr.o \
+  $(B)/client/lpc.o \
+  $(B)/client/lsp.o \
+  $(B)/client/lsp_tables_nb.o \
+  $(B)/client/ltp.o \
+  $(B)/client/mdf.o \
+  $(B)/client/modes.o \
+  $(B)/client/modes_wb.o \
+  $(B)/client/nb_celp.o \
+  $(B)/client/preprocess.o \
+  $(B)/client/quant_lsp.o \
+  $(B)/client/resample.o \
+  $(B)/client/sb_celp.o \
+  $(B)/client/smallft.o \
+  $(B)/client/speex.o \
+  $(B)/client/speex_callbacks.o \
+  $(B)/client/speex_header.o \
+  $(B)/client/stereo.o \
+  $(B)/client/vbr.o \
+  $(B)/client/vq.o \
+  $(B)/client/window.o \
+  \
   $(B)/client/tr_animation.o \
   $(B)/client/tr_backend.o \
   $(B)/client/tr_bsp.o \
@@ -1860,6 +1883,9 @@ $(B)/client/%.o: $(BLIBDIR)/%.c
 	$(DO_BOT_CC)
 
 $(B)/client/%.o: $(JPDIR)/%.c
+	$(DO_CC)
+
+$(B)/client/%.o: $(SPEEXDIR)/%.c
 	$(DO_CC)
 
 $(B)/client/%.o: $(RDIR)/%.c
