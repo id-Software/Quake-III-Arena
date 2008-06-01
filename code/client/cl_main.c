@@ -3028,14 +3028,14 @@ void CL_Init( void ) {
 	Cvar_Get ("cg_predictItems", "1", CVAR_USERINFO | CVAR_ARCHIVE );
 
 #ifdef USE_MUMBLE
-	cl_useMumble = Cvar_Get ("cl_useMumble", "0", CVAR_ARCHIVE);
+	cl_useMumble = Cvar_Get ("cl_useMumble", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	cl_mumbleScale = Cvar_Get ("cl_mumbleScale", "0.0254", CVAR_ARCHIVE);
 #endif
 
 #if USE_VOIP
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
-	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE);
+	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
 	// If your data rate is too low, you'll get Connection Interrupted warnings
 	//  when VoIP packets arrive, even if you have a broadband connection.
