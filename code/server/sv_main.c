@@ -412,7 +412,9 @@ void SVC_Info( netadr_t from ) {
 	Info_SetValueForKey( infostring, "pure", va("%i", sv_pure->integer ) );
 
 #if USE_VOIP
-	Info_SetValueForKey( infostring, "voip", va("%i", sv_voip->integer ) );
+	if (sv_voip->integer) {
+		Info_SetValueForKey( infostring, "voip", va("%i", sv_voip->integer ) );
+	}
 #endif
 
 	if( sv_minPing->integer ) {
