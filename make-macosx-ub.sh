@@ -151,6 +151,9 @@ if [ ! -d $DESTDIR ]; then
 	mkdir -p $DESTDIR
 fi
 
+# For parallel make on multicore boxes...
+NCPU=`sysctl -n hw.ncpu`
+
 # ppc dedicated server
 echo "Building Dedicated Server using $PPC_SERVER_SDK"
 sleep 2
@@ -158,7 +161,7 @@ if [ -d build/release-darwin-ppc ]; then
 	rm -r build/release-darwin-ppc
 fi
 (ARCH=ppc BUILD_CLIENT_SMP=0 BUILD_CLIENT=0 BUILD_GAME_VM=0 BUILD_GAME_SO=0 \
-	CFLAGS=$PPC_SERVER_CFLAGS LDFLAGS=$PPC_SERVER_LDFLAGS make) || exit 1;
+	CFLAGS=$PPC_SERVER_CFLAGS LDFLAGS=$PPC_SERVER_LDFLAGS make -j$NCPU) || exit 1;
 cp build/release-darwin-ppc/ioq3ded.ppc $DESTDIR
 
 # ppc client
@@ -166,13 +169,13 @@ if [ -d build/release-darwin-ppc ]; then
 	rm -r build/release-darwin-ppc
 fi
 (ARCH=ppc USE_OPENAL_DLOPEN=1 BUILD_SERVER=0 CC=$PPC_CLIENT_CC \
-	CFLAGS=$PPC_CLIENT_CFLAGS LDFLAGS=$PPC_CLIENT_LDFLAGS make) || exit 1;
+	CFLAGS=$PPC_CLIENT_CFLAGS LDFLAGS=$PPC_CLIENT_LDFLAGS make -j$NCPU) || exit 1;
 
 # intel client and server
 if [ -d build/release-darwin-i386 ]; then
 	rm -r build/release-darwin-i386
 fi
-(ARCH=i386 CFLAGS=$X86_CFLAGS LDFLAGS=$X86_LDFLAGS make) || exit 1;
+(ARCH=i386 CFLAGS=$X86_CFLAGS LDFLAGS=$X86_LDFLAGS make -j$NCPU) || exit 1;
 
 echo "Creating .app bundle $DESTDIR/$APPBUNDLE"
 if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR ]; then
