@@ -101,6 +101,11 @@ LPALCGETPROCADDRESS qalcGetProcAddress;
 LPALCGETENUMVALUE qalcGetEnumValue;
 LPALCGETSTRING qalcGetString;
 LPALCGETINTEGERV qalcGetIntegerv;
+LPALCCAPTUREOPENDEVICE qalcCaptureOpenDevice;
+LPALCCAPTURECLOSEDEVICE qalcCaptureCloseDevice;
+LPALCCAPTURESTART qalcCaptureStart;
+LPALCCAPTURESTOP qalcCaptureStop;
+LPALCCAPTURESAMPLES qalcCaptureSamples;
 
 static void *OpenALLib = NULL;
 
@@ -229,6 +234,11 @@ qboolean QAL_Init(const char *libname)
 	qalcGetEnumValue = GPA("alcGetEnumValue");
 	qalcGetString = GPA("alcGetString");
 	qalcGetIntegerv = GPA("alcGetIntegerv");
+	qalcCaptureOpenDevice = GPA("alcCaptureOpenDevice");
+	qalcCaptureCloseDevice = GPA("alcCaptureCloseDevice");
+	qalcCaptureStart = GPA("alcCaptureStart");
+	qalcCaptureStop = GPA("alcCaptureStop");
+	qalcCaptureSamples = GPA("alcCaptureSamples");
 
 	if(alinit_fail)
 	{
@@ -323,6 +333,11 @@ void QAL_Shutdown( void )
 	qalcGetEnumValue = NULL;
 	qalcGetString = NULL;
 	qalcGetIntegerv = NULL;
+	qalcCaptureOpenDevice = NULL;
+	qalcCaptureCloseDevice = NULL;
+	qalcCaptureStart = NULL;
+	qalcCaptureStop = NULL;
+	qalcCaptureSamples = NULL;
 }
 #else
 qboolean QAL_Init(const char *libname)
