@@ -241,14 +241,6 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
-  ifeq ($(USE_MUMBLE),1)
-    BASE_CFLAGS += -DUSE_MUMBLE
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
-  endif
-
   OPTIMIZE = -O3 -ffast-math -funroll-loops -fomit-frame-pointer
 
   ifeq ($(ARCH),x86_64)
@@ -367,14 +359,6 @@ ifeq ($(PLATFORM),darwin)
     CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
   endif
 
-  ifeq ($(USE_MUMBLE),1)
-    BASE_CFLAGS += -DUSE_MUMBLE
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
-  endif
-
   BASE_CFLAGS += -D_THREAD_SAFE=1
 
   ifeq ($(USE_LOCAL_HEADERS),1)
@@ -439,14 +423,6 @@ ifeq ($(PLATFORM),mingw32)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
-
-  ifeq ($(USE_MUMBLE),1)
-    BASE_CFLAGS += -DUSE_MUMBLE
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   OPTIMIZE = -O3 -march=i586 -fno-omit-frame-pointer -ffast-math \
@@ -534,14 +510,6 @@ ifeq ($(PLATFORM),freebsd)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
-  ifeq ($(USE_MUMBLE),1)
-    BASE_CFLAGS += -DUSE_MUMBLE
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
-  endif
-
   ifeq ($(ARCH),axp)
     BASE_CFLAGS += -DNO_VM_COMPILED
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
@@ -606,14 +574,6 @@ ifeq ($(PLATFORM),openbsd)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
-
-  ifeq ($(USE_MUMBLE),1)
-    BASE_CFLAGS += -DUSE_MUMBLE
-  endif
-
-  ifeq ($(USE_VOIP),1)
-    BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   endif
 
   BASE_CFLAGS += -DNO_VM_COMPILED -I/usr/X11R6/include -I/usr/local/include
@@ -825,6 +785,14 @@ ifneq ($(BUILD_GAME_QVM),0)
       $(B)/missionpack/vm/cgame.qvm \
       $(B)/missionpack/vm/ui.qvm
   endif
+endif
+
+ifeq ($(USE_MUMBLE),1)
+  BASE_CFLAGS += -DUSE_MUMBLE
+endif
+
+ifeq ($(USE_VOIP),1)
+  BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
 endif
 
 ifdef DEFAULT_BASEDIR
