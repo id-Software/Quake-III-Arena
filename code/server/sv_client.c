@@ -1371,8 +1371,10 @@ void SV_UserinfoChanged( client_t *cl ) {
 	}
 	
 #if USE_VOIP
+	// in the future, (val) will be a protocol version string, so only
+	//  accept explicitly 1, not generally non-zero.
 	val = Info_ValueForKey (cl->userinfo, "voip");
-	cl->hasVoip = (strlen(val) && atoi(val)) ? qtrue : qfalse;
+	cl->hasVoip = (atoi(val) == 1) ? qtrue : qfalse;
 #endif
 
 	// TTimo

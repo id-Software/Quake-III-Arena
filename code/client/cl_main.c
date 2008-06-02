@@ -3037,6 +3037,12 @@ void CL_Init( void ) {
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
 	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
+	// This is a protocol version number.
+	if ( (voip->integer < 0) || (voip->integer > 1) ) {
+		Com_Printf("WARNING: voip cvar must be 0 or 1. Setting to 1.");
+		Cvar_Set ("voip", "1");
+	}
+
 	// If your data rate is too low, you'll get Connection Interrupted warnings
 	//  when VoIP packets arrive, even if you have a broadband connection.
 	//  This might work on rates lower than 25000, but for safety's sake, we'll

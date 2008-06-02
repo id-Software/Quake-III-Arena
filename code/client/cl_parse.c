@@ -365,8 +365,10 @@ void CL_SystemInfoChanged( void ) {
 	}
 
 #if USE_VOIP
+	// in the future, (val) will be a protocol version string, so only
+	//  accept explicitly 1, not generally non-zero.
 	s = Info_ValueForKey( systemInfo, "sv_voip" );
-	cl_connectedToVoipServer = atoi( s );
+	cl_connectedToVoipServer = (atoi( s ) == 1);
 #endif
 
 	s = Info_ValueForKey( systemInfo, "sv_cheats" );
