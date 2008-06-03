@@ -92,7 +92,7 @@ char	*MSG_ReadBigString (msg_t *sb);
 char	*MSG_ReadStringLine (msg_t *sb);
 float	MSG_ReadAngle16 (msg_t *sb);
 void	MSG_ReadData (msg_t *sb, void *buffer, int size);
-
+int		MSG_LookaheadByte (msg_t *msg);
 
 void MSG_WriteDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
 void MSG_ReadDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
@@ -276,9 +276,10 @@ enum svc_ops_e {
 	svc_snapshot,
 	svc_EOF,
 
-#if USE_VOIP
-	svc_voip
-#endif
+	// svc_extension follows a svc_EOF, followed by another svc_* ...
+	//  this keeps legacy clients compatible.
+	svc_extension,
+	svc_voip,     // not wrapped in USE_VOIP, so this value is reserved.
 };
 
 
@@ -293,9 +294,10 @@ enum clc_ops_e {
 	clc_clientCommand,		// [string] message
 	clc_EOF,
 
-#if USE_VOIP
-	clc_voip,   // packet of voice data.
-#endif
+	// clc_extension follows a clc_EOF, followed by another clc_* ...
+	//  this keeps legacy servers compatible.
+	clc_extension,
+	clc_voip,   // not wrapped in USE_VOIP, so this value is reserved.
 };
 
 /*
@@ -1111,6 +1113,11 @@ void	Huff_offsetReceive (node_t *node, int *ch, byte *fin, int *offset);
 void	Huff_offsetTransmit (huff_t *huff, int ch, byte *fout, int *offset);
 void	Huff_putBit( int bit, byte *fout, int *offset);
 int		Huff_getBit( byte *fout, int *offset);
+
+// don't use if you don't know what you're doing.
+int		Huff_getBloc(void);
+void	Huff_setBloc(int _bloc);
+
 
 extern huffman_t clientHuffTables;
 

@@ -760,6 +760,8 @@ void CL_WritePacket( void ) {
 
 	#if USE_VOIP
 	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
+		MSG_WriteByte (&buf, clc_EOF);  // placate legacy servers.
+		MSG_WriteByte (&buf, clc_extension);
 		MSG_WriteByte (&buf, clc_voip);
 		MSG_WriteByte (&buf, clc.voipOutgoingGeneration);
 		MSG_WriteLong (&buf, clc.voipOutgoingSequence);

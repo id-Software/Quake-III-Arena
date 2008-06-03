@@ -34,10 +34,8 @@ char *svc_strings[256] = {
 	"svc_download",
 	"svc_snapshot",
 	"svc_EOF",
-
-#if USE_VOIP
-	"svc_voip"
-#endif
+	"svc_extension",
+	"svc_voip",
 };
 
 void SHOWNET( msg_t *msg, char *s) {
@@ -854,13 +852,26 @@ void CL_ParseServerMessage( msg_t *msg ) {
 
 		cmd = MSG_ReadByte( msg );
 
-		if ( cmd == svc_EOF) {
+		// See if this is an extension command after the EOF, which means we
+		//  got data that a legacy client should ignore.
+		if ((cmd == svc_EOF) && (MSG_LookaheadByte( msg ) == svc_extension)) {
+			SHOWNET( msg, "EXTENSION" );
+			MSG_ReadByte( msg );  // throw the svc_extension byte away.
+			cmd = MSG_ReadByte( msg );  // something legacy clients can't do!
+			// sometimes you get a svc_extension at end of stream...dangling
+			//  bits in the huffman decoder giving a bogus value?
+			if (cmd == -1) {
+				cmd = svc_EOF;
+			}
+		}
+
+		if (cmd == svc_EOF) {
 			SHOWNET( msg, "END OF MESSAGE" );
 			break;
 		}
 
 		if ( cl_shownet->integer >= 2 ) {
-			if ( !svc_strings[cmd] ) {
+			if ( (cmd < 0) || (!svc_strings[cmd]) ) {
 				Com_Printf( "%3i:BAD CMD %i\n", msg->readcount-1, cmd );
 			} else {
 				SHOWNET( msg, svc_strings[cmd] );
@@ -886,11 +897,11 @@ void CL_ParseServerMessage( msg_t *msg ) {
 		case svc_download:
 			CL_ParseDownload( msg );
 			break;
-#if USE_VOIP
 		case svc_voip:
+#if USE_VOIP
 			CL_ParseVoip( msg );
-			break;
 #endif
+			break;
 		}
 	}
 }

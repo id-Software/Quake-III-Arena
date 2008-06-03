@@ -39,6 +39,16 @@ void	Huff_putBit( int bit, byte *fout, int *offset) {
 	*offset = bloc;
 }
 
+int		Huff_getBloc(void)
+{
+	return bloc;
+}
+
+void	Huff_setBloc(int _bloc)
+{
+	bloc = _bloc;
+}
+
 int		Huff_getBit( byte *fin, int *offset) {
 	int t;
 	bloc = *offset;

@@ -1108,6 +1108,14 @@ void SV_WriteVoipToClient( client_t *cl, msg_t *msg )
 		if (totalbytes > MAX_DOWNLOAD_BLKSIZE)
 			break;
 
+		// You have to start with a svc_EOF, so legacy clients drop the
+		//  rest of this packet. Otherwise, those without VoIP support will
+		//  see the svc_voip command, then panic and disconnect.
+		// Generally we don't send VoIP packets to legacy clients, but this
+		//  serves as both a safety measure and a means to keep demo files
+		//  compatible.
+		MSG_WriteByte( msg, svc_EOF );
+		MSG_WriteByte( msg, svc_extension );
 		MSG_WriteByte( msg, svc_voip );
 		MSG_WriteShort( msg, packet->sender );
 		MSG_WriteByte( msg, (byte) packet->generation );
@@ -1880,9 +1888,23 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	// read optional clientCommand strings
 	do {
 		c = MSG_ReadByte( msg );
+
+		// See if this is an extension command after the EOF, which means we
+		//  got data that a legacy server should ignore.
+		if ((c == clc_EOF) && (MSG_LookaheadByte( msg ) == clc_extension)) {
+			MSG_ReadByte( msg );  // throw the clc_extension byte away.
+			c = MSG_ReadByte( msg );  // something legacy servers can't do!
+			// sometimes you get a clc_extension at end of stream...dangling
+			//  bits in the huffman decoder giving a bogus value?
+			if (c == -1) {
+				c = clc_EOF;
+			}
+		}
+
 		if ( c == clc_EOF ) {
 			break;
 		}
+
 		if ( c != clc_clientCommand ) {
 			break;
 		}
@@ -1899,8 +1921,8 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		SV_UserMove( cl, msg, qtrue );
 	} else if ( c == clc_moveNoDelta ) {
 		SV_UserMove( cl, msg, qfalse );
-#if USE_VOIP
 	} else if ( c == clc_voip ) {
+#if USE_VOIP
 		SV_UserVoip( cl, msg );
 #endif
 	} else if ( c != clc_EOF ) {
