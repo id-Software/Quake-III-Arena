@@ -3037,7 +3037,7 @@ void CL_Init( void ) {
 #if USE_VOIP
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
-	voip = Cvar_Get ("voip", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
+	voip = Cvar_Get ("voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
 	// This is a protocol version number.
 	if ( (voip->integer < 0) || (voip->integer > 1) ) {
