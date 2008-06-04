@@ -928,6 +928,7 @@ void CL_FirstSnapshot( void ) {
 			speex_bits_reset(&clc.speexDecoderBits[i]);
 			clc.speexDecoder[i] = speex_decoder_init(&speex_nb_mode);
 			clc.voipIgnore[i] = qfalse;
+			clc.voipGain[i] = 1.0f;
 		}
 		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_FRAME_SIZE,
 		                  &clc.speexFrameSize);

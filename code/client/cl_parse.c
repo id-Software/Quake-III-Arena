@@ -647,6 +647,8 @@ qboolean CL_ShouldIgnoreVoipSender(int sender)
 		return qtrue;  // all channels are muted with extreme prejudice.
 	else if (clc.voipIgnore[sender])
 		return qtrue;  // just ignoring this guy.
+	else if (clc.voipGain[sender] == 0.0f)
+		return qtrue;  // too quiet to play.
 
 	return qfalse;  // !!! FIXME: implement per-channel muting.
 }
@@ -758,7 +760,7 @@ void CL_ParseVoip ( msg_t *msg ) {
 			Com_DPrintf("VoIP: playback %d bytes, %d samples, %d frames\n",
 			            written * 2, written, i);
 			S_RawSamples(sender + 1, written, 8000, 2, 1,
-			             (const byte *) decoded, 1.0f);  // !!! FIXME: hardcoding!
+			             (const byte *) decoded, clc.voipGain[sender]);  // !!! FIXME: hardcoding!
 			written = 0;
 		}
 

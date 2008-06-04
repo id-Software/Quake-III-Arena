@@ -190,6 +190,20 @@ void CL_UpdateVoipIgnore(const char *idstr, qboolean ignore)
 	}
 }
 
+static
+void CL_UpdateVoipGain(const char *idstr, float gain)
+{
+	if ((*idstr >= '0') && (*idstr <= '9')) {
+		const int id = atoi(idstr);
+		if (gain < 0.0f)
+			gain = 0.0f;
+		if ((id >= 0) && (id < MAX_CLIENTS)) {
+			clc.voipGain[id] = gain;
+			Com_Printf("VoIP: player #%d gain now set to %f\n", id, gain);
+		}
+	}
+}
+
 void CL_Voip_f( void )
 {
 	const char *cmd = Cmd_Argv(1);
@@ -213,6 +227,8 @@ void CL_Voip_f( void )
 		CL_UpdateVoipIgnore(Cmd_Argv(2), qtrue);
 	} else if (strcmp(cmd, "unignore") == 0) {
 		CL_UpdateVoipIgnore(Cmd_Argv(2), qfalse);
+	} else if (strcmp(cmd, "gain") == 0) {
+		CL_UpdateVoipGain(Cmd_Argv(2), atof(Cmd_Argv(3)));
 	} else if (strcmp(cmd, "muteall") == 0) {
 		Com_Printf("VoIP: muting incoming voice\n");
 		CL_AddReliableCommand("voip muteall");
