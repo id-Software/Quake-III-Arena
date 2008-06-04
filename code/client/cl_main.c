@@ -35,6 +35,7 @@ cvar_t	*cl_mumbleScale;
 
 #if USE_VOIP
 cvar_t	*cl_voipSend;
+cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
 cvar_t	*voip;
 #endif
@@ -3052,6 +3053,7 @@ void CL_Init( void ) {
 
 #if USE_VOIP
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
+	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
 	voip = Cvar_Get ("voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 

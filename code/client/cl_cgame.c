@@ -935,6 +935,8 @@ void CL_FirstSnapshot( void ) {
 		clc.speexInitialized = qtrue;
 		clc.voipMuteAll = qfalse;
 		Cmd_AddCommand ("voip", CL_Voip_f);
+		Cvar_Set("cl_voipSendTarget", "all");
+		clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0x7FFFFFFF;
 	}
 #endif
 }

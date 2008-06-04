@@ -244,6 +244,9 @@ typedef struct {
 	qboolean voipMuteAll;
 
 	// outgoing data...
+	int voipTarget1;  // these three ints make up a bit mask of 92 bits.
+	int voipTarget2;  //  the bits say who a VoIP pack is addressed to:
+	int voipTarget3;  //  (1 << clientnum). See cl_voipSendTarget cvar.
 	SpeexBits speexEncoderBits;
 	void *speexEncoder;
 	int voipOutgoingDataSize;
@@ -402,7 +405,11 @@ extern	cvar_t	*cl_mumbleScale;
 #endif
 
 #if USE_VOIP
+// cl_voipSendTarget is a string: "all" to broadcast to everyone, "none" to
+//  send to no one, or a comma-separated list of client numbers:
+//  "0,7,2,23" ... an empty string is treated like "all".
 extern	cvar_t	*cl_voipSend;
+extern	cvar_t	*cl_voipSendTarget;
 extern	cvar_t	*cl_voipGainDuringCapture;
 extern	cvar_t	*voip;
 #endif
