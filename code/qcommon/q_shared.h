@@ -38,6 +38,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define CLIENT_WINDOW_MIN_TITLE 	"ioq3"
 #endif
 
+#ifdef _MSC_VER
+  #define PRODUCT_VERSION "1.35"
+#endif
+
 #define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
 
 #define MAX_TEAMNAME 32
