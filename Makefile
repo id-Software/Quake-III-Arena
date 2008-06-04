@@ -296,6 +296,10 @@ ifeq ($(PLATFORM),linux)
     CLIENT_LDFLAGS += -lrt
   endif
 
+ifeq ($(USE_LOCAL_HEADERS),1)
+    BASE_CFLAGS += -I$(SDLHDIR)/include
+  endif
+
   ifeq ($(ARCH),i386)
     # linux32 make ...
     BASE_CFLAGS += -m32
