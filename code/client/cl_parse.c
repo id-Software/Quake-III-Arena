@@ -785,7 +785,7 @@ void CL_ParseVoip ( msg_t *msg ) {
 
 	if (written > 0) {
 		S_RawSamples(sender + 1, written, 8000, 2, 1,
-		             (const byte *) decoded, 1.0f);  // !!! FIXME: hardcoding!
+		             (const byte *) decoded, clc.voipGain[sender]);  // !!! FIXME: hardcoding!
 	}
 
 	clc.voipIncomingSequence[sender] = sequence + frames;
