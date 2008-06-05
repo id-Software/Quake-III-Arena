@@ -7,6 +7,8 @@
 ;
 ; you have to copy SDL.dll and libcurl-4.dll here manually
 
+!include "MUI2.nsh"
+
 ; The name of the installer
 Name "ioquake3"
 
@@ -21,15 +23,25 @@ InstallDir $PROGRAMFILES\ioquake3
 InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
 
 ;--------------------------------
+;Interface Settings
 
-; Pages
+!define MUI_ABORTWARNING
 
-Page components
-Page directory
-Page instfiles
+;--------------------------------
+;Pages
 
-UninstPage uninstConfirm
-UninstPage instfiles
+#!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+  
+;--------------------------------
+;Languages
+ 
+!insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
 
