@@ -133,6 +133,10 @@ ifndef USE_VOIP
 USE_VOIP=1
 endif
 
+ifndef USE_INTERNAL_SPEEX
+USE_INTERNAL_SPEEX=1
+endif
+
 ifndef USE_LOCAL_HEADERS
 USE_LOCAL_HEADERS=1
 endif
@@ -796,7 +800,12 @@ ifeq ($(USE_MUMBLE),1)
 endif
 
 ifeq ($(USE_VOIP),1)
-  BASE_CFLAGS += -DUSE_VOIP -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
+  BASE_CFLAGS += -DUSE_VOIP
+  ifeq ($(USE_INTERNAL_SPEEX),1)
+    BASE_CFLAGS += -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
+  else
+    CLIENT_LDFLAGS += -lspeex
+  endif
 endif
 
 ifdef DEFAULT_BASEDIR
@@ -1338,7 +1347,7 @@ ifeq ($(ARCH),x86)
     $(B)/client/snapvectora.o
 endif
 
-ifeq ($(USE_VOIP),1)
+ifeq ($(USE_INTERNAL_SPEEX),1)
 Q3OBJ += \
   $(B)/client/bits.o \
   $(B)/client/buffer.o \
