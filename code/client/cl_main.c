@@ -34,6 +34,7 @@ cvar_t	*cl_mumbleScale;
 #endif
 
 #if USE_VOIP
+cvar_t	*cl_voipUseVAD;
 cvar_t	*cl_voipSend;
 cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
@@ -242,6 +243,18 @@ void CL_Voip_f( void )
 }
 
 
+static
+void CL_VoipNewGeneration(void)
+{
+	// don't have a zero generation so new clients won't match, and don't
+	//  wrap to negative so MSG_ReadLong() doesn't "fail."
+	clc.voipOutgoingGeneration++;
+	if (clc.voipOutgoingGeneration <= 0)
+		clc.voipOutgoingGeneration = 1;
+	clc.voipPower = 0.0f;
+	clc.voipOutgoingSequence = 0;
+}
+
 /*
 ===============
 CL_CaptureVoip
@@ -253,6 +266,7 @@ Record more audio from the hardware if required and encode it into Speex
 static
 void CL_CaptureVoip(void)
 {
+	const qboolean useVad = (cl_voipUseVAD->integer != 0);
 	qboolean initialFrame = qfalse;
 	qboolean finalFrame = qfalse;
 
@@ -267,6 +281,17 @@ void CL_CaptureVoip(void)
 
 	if (clc.voipOutgoingDataSize > 0)
 		return;  // packet is pending transmission, don't record more yet.
+
+	if (cl_voipUseVAD->modified) {
+		int useVadi = (int) useVad;
+		speex_preprocess_ctl(clc.speexPreprocessor,
+		                     SPEEX_PREPROCESS_SET_VAD, &useVadi);
+		cl_voipUseVAD->modified = qfalse;
+		Cvar_Set("cl_voipSend", (useVad) ? "1" : "0");
+	}
+
+	if ((useVad) && (!cl_voipSend->integer))
+		Cvar_Set("cl_voipSend", "1");  // lots of things reset this.
 
 	if (cl_voipSend->modified) {
 		qboolean dontCapture = qfalse;
@@ -302,11 +327,7 @@ void CL_CaptureVoip(void)
 		if (gain < 0.0f) gain = 0.0f; else if (gain >= 1.0f) gain = 1.0f;
 		S_MasterGain(cl_voipGainDuringCapture->value);
 		S_StartCapture();
-		clc.voipPower = 0.0f;
-		clc.voipOutgoingSequence = 0;
-		clc.voipOutgoingGeneration++;
-		if (clc.voipOutgoingGeneration == 0) // don't have a zero generation...
-			clc.voipOutgoingGeneration = 1;  //  ...so new clients won't match.
+		CL_VoipNewGeneration();
 	}
 
 	if ((cl_voipSend->integer) || (finalFrame)) { // user wants to capture audio?
@@ -318,6 +339,7 @@ void CL_CaptureVoip(void)
 			// audio capture is always MONO16 (and that's what speex wants!).
 			//  2048 will cover 12 uncompressed frames in narrowband mode.
 			static int16_t sampbuffer[2048];
+			qboolean isVoice = qfalse;
 			int16_t voipPower = 0;
 			int speexFrames = 0;
 			int wpos = 0;
@@ -334,22 +356,25 @@ void CL_CaptureVoip(void)
 
 			// this will probably generate multiple speex packets each time.
 			while (samples > 0) {
+				int16_t *sampptr = &sampbuffer[pos];
 				int i, bytes;
 
-				// Check the "power" of this packet...
+				// check the "power" of this packet...
 				for (i = 0; i < clc.speexFrameSize; i++) {
-					int16_t s = sampbuffer[i+pos];
+					int16_t s = sampptr[i];
 					if (s < 0)
 						s = -s;
 					if (s > voipPower)
 						voipPower = s;  // !!! FIXME: this isn't very clever.
 				}
 
-				speex_preprocess_run(clc.speexPreprocessor, &sampbuffer[pos]);
+				// preprocess samples to remove noise, check for voice...
+				if (speex_preprocess_run(clc.speexPreprocessor, sampptr))
+					isVoice = qtrue;  // player is probably speaking.
 
-				// Encode raw audio samples into Speex data...
+				// encode raw audio samples into Speex data...
 				speex_bits_reset(&clc.speexEncoderBits);
-				speex_encode_int(clc.speexEncoder, &sampbuffer[pos],
+				speex_encode_int(clc.speexEncoder, sampptr,
 				                 &clc.speexEncoderBits);
 				bytes = speex_bits_write(&clc.speexEncoderBits,
 				                         (char *) &clc.voipOutgoingData[wpos+1],
@@ -363,21 +388,26 @@ void CL_CaptureVoip(void)
 				samples -= clc.speexFrameSize;
 				speexFrames++;
 			}
-			clc.voipPower = ((float) voipPower) / 32767.0f;
-			clc.voipOutgoingDataSize = wpos;
-			clc.voipOutgoingDataFrames = speexFrames;
 
-			Com_DPrintf("Outgoing VoIP data: %d frames, %d bytes, %f power\n",
-			            speexFrames, wpos, clc.voipPower);
+			if ((useVad) && (!isVoice)) {
+				CL_VoipNewGeneration();  // no talk for at least 1/4 second.
+			} else {
+				clc.voipPower = ((float) voipPower) / 32767.0f;
+				clc.voipOutgoingDataSize = wpos;
+				clc.voipOutgoingDataFrames = speexFrames;
 
-			#if 0
-			static FILE *encio = NULL;
-			if (encio == NULL) encio = fopen("outgoing-encoded.bin", "wb");
-			if (encio != NULL) { fwrite(clc.voipOutgoingData, wpos, 1, encio); fflush(encio); }
-			static FILE *decio = NULL;
-			if (decio == NULL) decio = fopen("outgoing-decoded.bin", "wb");
-			if (decio != NULL) { fwrite(sampbuffer, speexFrames * clc.speexFrameSize * 2, 1, decio); fflush(decio); }
-			#endif
+				Com_DPrintf("VoIP: Send %d frames, %d bytes, %f power\n",
+				            speexFrames, wpos, clc.voipPower);
+
+				#if 0
+				static FILE *encio = NULL;
+				if (encio == NULL) encio = fopen("voip-outgoing-encoded.bin", "wb");
+				if (encio != NULL) { fwrite(clc.voipOutgoingData, wpos, 1, encio); fflush(encio); }
+				static FILE *decio = NULL;
+				if (decio == NULL) decio = fopen("voip-outgoing-decoded.bin", "wb");
+				if (decio != NULL) { fwrite(sampbuffer, speexFrames * clc.speexFrameSize * 2, 1, decio); fflush(decio); }
+				#endif
+			}
 		}
 	}
 
@@ -3057,6 +3087,7 @@ void CL_Init( void ) {
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
 	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
+	cl_voipUseVAD = Cvar_Get ("cl_voipUseVAD", "0", CVAR_ARCHIVE);
 	voip = Cvar_Get ("voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
 	// This is a protocol version number.

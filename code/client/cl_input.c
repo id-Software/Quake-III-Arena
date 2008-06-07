@@ -221,8 +221,17 @@ void IN_StrafeDown(void) {IN_KeyDown(&in_strafe);}
 void IN_StrafeUp(void) {IN_KeyUp(&in_strafe);}
 
 #if USE_VOIP
-void IN_VoipRecordDown(void) {IN_KeyDown(&in_voiprecord);}
-void IN_VoipRecordUp(void) {IN_KeyUp(&in_voiprecord);}
+void IN_VoipRecordDown(void)
+{
+	IN_KeyDown(&in_voiprecord);
+	Cvar_Set("cl_voipSend", "1");
+}
+
+void IN_VoipRecordUp(void)
+{
+	IN_KeyUp(&in_voiprecord);
+	Cvar_Set("cl_voipSend", "0");
+}
 #endif
 
 void IN_Button0Down(void) {IN_KeyDown(&in_buttons[0]);}
@@ -555,14 +564,6 @@ usercmd_t CL_CreateCmd( void ) {
 
 	// get basic movement from joystick
 	CL_JoystickMove( &cmd );
-
-#if USE_VOIP
-	if ( ( in_voiprecord.active ) && ( !cl_voipSend->integer ) ) {
-		Cvar_Set("cl_voipSend", "1");
-	} else if ( ( !in_voiprecord.active ) && ( cl_voipSend->integer ) ) {
-		Cvar_Set("cl_voipSend", "0");
-	}
-#endif
 
 	// check to make sure the angles haven't wrapped
 	if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
