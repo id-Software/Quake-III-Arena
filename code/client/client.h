@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #if USE_VOIP
 #include "speex/speex.h"
+#include "speex/speex_preprocess.h"
 #endif
 
 // file full of random crap that gets used to create cl_guid
@@ -248,6 +249,7 @@ typedef struct {
 	int voipTarget1;  // these three ints make up a bit mask of 92 bits.
 	int voipTarget2;  //  the bits say who a VoIP pack is addressed to:
 	int voipTarget3;  //  (1 << clientnum). See cl_voipSendTarget cvar.
+	SpeexPreprocessState *speexPreprocessor;
 	SpeexBits speexEncoderBits;
 	void *speexEncoder;
 	int voipOutgoingDataSize;

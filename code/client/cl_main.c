@@ -345,6 +345,8 @@ void CL_CaptureVoip(void)
 						voipPower = s;  // !!! FIXME: this isn't very clever.
 				}
 
+				speex_preprocess_run(clc.speexPreprocessor, &sampbuffer[pos]);
+
 				// Encode raw audio samples into Speex data...
 				speex_bits_reset(&clc.speexEncoderBits);
 				speex_encode_int(clc.speexEncoder, &sampbuffer[pos],
@@ -1136,12 +1138,12 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		int i;
 		speex_bits_destroy(&clc.speexEncoderBits);
 		speex_encoder_destroy(clc.speexEncoder);
+		speex_preprocess_state_destroy(clc.speexPreprocessor);
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			speex_bits_destroy(&clc.speexDecoderBits[i]);
 			speex_decoder_destroy(clc.speexDecoder[i]);
 		}
 	}
-
 	Cmd_RemoveCommand ("voip");
 #endif
 

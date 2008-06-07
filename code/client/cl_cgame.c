@@ -922,12 +922,20 @@ void CL_FirstSnapshot( void ) {
 		int i;
 		speex_bits_init(&clc.speexEncoderBits);
 		speex_bits_reset(&clc.speexEncoderBits);
+
 		clc.speexEncoder = speex_encoder_init(&speex_nb_mode);
 
 		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_FRAME_SIZE,
 		                  &clc.speexFrameSize);
 		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_SAMPLING_RATE,
-		                  &clc.speexSamplingRate);
+		                  &clc.speexSampleRate);
+
+		clc.speexPreprocessor = speex_preprocess_state_init(clc.speexFrameSize,
+		                                                  clc.speexSampleRate);
+
+		i = 1;
+		speex_preprocess_ctl(clc.speexPreprocessor,
+		                     SPEEX_PREPROCESS_SET_DENOISE, &i);
 
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			speex_bits_init(&clc.speexDecoderBits[i]);
