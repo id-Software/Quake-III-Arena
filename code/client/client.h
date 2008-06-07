@@ -232,6 +232,7 @@ typedef struct {
 #if USE_VOIP
 	qboolean speexInitialized;
 	int speexFrameSize;
+	int speexSampleRate;
 
 	// incoming data...
 	// !!! FIXME: convert from parallel arrays to array of a struct.

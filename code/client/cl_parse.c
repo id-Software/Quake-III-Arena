@@ -759,8 +759,8 @@ void CL_ParseVoip ( msg_t *msg ) {
 		if ((written + clc.speexFrameSize) * 2 > sizeof (decoded)) {
 			Com_DPrintf("VoIP: playback %d bytes, %d samples, %d frames\n",
 			            written * 2, written, i);
-			S_RawSamples(sender + 1, written, 8000, 2, 1,
-			             (const byte *) decoded, clc.voipGain[sender]);  // !!! FIXME: hardcoding!
+			S_RawSamples(sender + 1, written, clc.speexSampleRate, 2, 1,
+			             (const byte *) decoded, clc.voipGain[sender]);
 			written = 0;
 		}
 
@@ -784,8 +784,8 @@ void CL_ParseVoip ( msg_t *msg ) {
 	            written * 2, written, i);
 
 	if (written > 0) {
-		S_RawSamples(sender + 1, written, 8000, 2, 1,
-		             (const byte *) decoded, clc.voipGain[sender]);  // !!! FIXME: hardcoding!
+		S_RawSamples(sender + 1, written, clc.speexSampleRate, 2, 1,
+		             (const byte *) decoded, clc.voipGain[sender]);
 	}
 
 	clc.voipIncomingSequence[sender] = sequence + frames;

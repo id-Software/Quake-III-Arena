@@ -310,14 +310,14 @@ void CL_CaptureVoip(void)
 	}
 
 	if ((cl_voipSend->integer) || (finalFrame)) { // user wants to capture audio?
-		// !!! FIXME: 8000, MONO16, 4096 samples are hardcoded in snd_openal.c
 		int samples = S_AvailableCaptureSamples();
 		const int mult = (finalFrame) ? 1 : 12; // 12 == 240ms of audio.
 
 		// enough data buffered in audio hardware to process yet?
 		if (samples >= (clc.speexFrameSize * mult)) {
 			// audio capture is always MONO16 (and that's what speex wants!).
-			static int16_t sampbuffer[4096];  // !!! FIXME: don't hardcode.
+			//  2048 will cover 12 uncompressed frames in narrowband mode.
+			static int16_t sampbuffer[2048];
 			int16_t voipPower = 0;
 			int speexFrames = 0;
 			int wpos = 0;

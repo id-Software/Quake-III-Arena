@@ -923,6 +923,12 @@ void CL_FirstSnapshot( void ) {
 		speex_bits_init(&clc.speexEncoderBits);
 		speex_bits_reset(&clc.speexEncoderBits);
 		clc.speexEncoder = speex_encoder_init(&speex_nb_mode);
+
+		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_FRAME_SIZE,
+		                  &clc.speexFrameSize);
+		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_SAMPLING_RATE,
+		                  &clc.speexSamplingRate);
+
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			speex_bits_init(&clc.speexDecoderBits[i]);
 			speex_bits_reset(&clc.speexDecoderBits[i]);
@@ -930,8 +936,6 @@ void CL_FirstSnapshot( void ) {
 			clc.voipIgnore[i] = qfalse;
 			clc.voipGain[i] = 1.0f;
 		}
-		speex_encoder_ctl(clc.speexEncoder, SPEEX_GET_FRAME_SIZE,
-		                  &clc.speexFrameSize);
 		clc.speexInitialized = qtrue;
 		clc.voipMuteAll = qfalse;
 		Cmd_AddCommand ("voip", CL_Voip_f);
