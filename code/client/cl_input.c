@@ -759,34 +759,35 @@ void CL_WritePacket( void ) {
 	}
 
 	#if USE_VOIP
-	// Move cl_voipSendTarget from a string to a
-	if (cl_voipSendTarget->modified) {
-		const char *target = cl_voipSendTarget->string;
-		if ((*target == '\0') || (Q_stricmp(target, "all") == 0)) {
-			clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0x7FFFFFFF;
-		} else if (Q_stricmp(target, "none") == 0) {
-			clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
-		} else {
-			clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
-			const char *ptr = target;
-			do {
-				if ((*ptr == ',') || (*ptr == '\0')) {
-					const int val = atoi(target);
-					target = ptr + 1;
-					if ((val >= 0) && (val < 31)) {
-						clc.voipTarget1 |= (1 << (val-0));
-					} else if ((val >= 31) && (val < 62)) {
-						clc.voipTarget2 |= (1 << (val-31));
-					} else if ((val >= 62) && (val < 93)) {
-						clc.voipTarget3 |= (1 << (val-62));
-					}
-				}
-			} while (*(ptr++));
-		}
-		cl_voipSendTarget->modified = qfalse;
-	}
-
 	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
+		// Move cl_voipSendTarget from a string to the bitmasks if needed.
+		if (cl_voipSendTarget->modified) {
+			const char *target = cl_voipSendTarget->string;
+			if ((*target == '\0') || (Q_stricmp(target, "all") == 0)) {
+				const int all = 0x7FFFFFFF;
+				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = all;
+			} else if (Q_stricmp(target, "none") == 0) {
+				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
+			} else {
+				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
+				const char *ptr = target;
+				do {
+					if ((*ptr == ',') || (*ptr == '\0')) {
+						const int val = atoi(target);
+						target = ptr + 1;
+						if ((val >= 0) && (val < 31)) {
+							clc.voipTarget1 |= (1 << (val-0));
+						} else if ((val >= 31) && (val < 62)) {
+							clc.voipTarget2 |= (1 << (val-31));
+						} else if ((val >= 62) && (val < 93)) {
+							clc.voipTarget3 |= (1 << (val-62));
+						}
+					}
+				} while (*(ptr++));
+			}
+			cl_voipSendTarget->modified = qfalse;
+		}
+
 		MSG_WriteByte (&buf, clc_EOF);  // placate legacy servers.
 		MSG_WriteByte (&buf, clc_extension);
 		MSG_WriteByte (&buf, clc_voip);
