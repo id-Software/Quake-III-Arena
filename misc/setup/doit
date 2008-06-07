@@ -96,6 +96,10 @@ fi
 ### uninstall script
 install -m 755 ./preuninstall.sh image/preuninstall.sh
 
+# desktop file handling
+install -m 755 ./install-desktop-files.sh image/install-desktop-files.sh
+install -m 755 /usr/bin/xdg-desktop-menu image/xdg-desktop-menu
+install -m 644 ioquake3.desktop image/ioquake3.desktop.in
 
 ### README, COPYING and EULA
 install -m 644 $topdir/README image/README

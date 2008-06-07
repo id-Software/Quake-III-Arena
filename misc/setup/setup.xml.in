@@ -6,6 +6,8 @@
 	promptbinaries="yes"
 	reinstall="yes"
 	nopromptoverwrite="yes"
+	nomenuitems="yes"
+	postinstall="install-desktop-files.sh"
 	preuninstall="preuninstall.sh">
   <readme>
     README
@@ -42,6 +44,16 @@ ifelse(HAVE_PPC,yes,dnl
      <help>you need the binaries to play the game</help>
     </option>
 )dnl
+    <option install="true">
+     Desktop menu entries
+     <files mode="0755">
+       xdg-desktop-menu
+     </files>
+     <files>
+       ioquake3.desktop.in
+     </files>
+    </option>
+
     <option install="true" show="false">
       shared data
       <files>
