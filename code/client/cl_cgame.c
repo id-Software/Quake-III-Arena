@@ -937,6 +937,10 @@ void CL_FirstSnapshot( void ) {
 		speex_preprocess_ctl(clc.speexPreprocessor,
 		                     SPEEX_PREPROCESS_SET_DENOISE, &i);
 
+		i = 1;
+		speex_preprocess_ctl(clc.speexPreprocessor,
+		                     SPEEX_PREPROCESS_SET_AGC, &i);
+
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			speex_bits_init(&clc.speexDecoderBits[i]);
 			speex_bits_reset(&clc.speexDecoderBits[i]);
