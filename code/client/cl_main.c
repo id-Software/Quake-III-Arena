@@ -1155,8 +1155,12 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 #if USE_VOIP
 	if (cl_voipSend->integer) {
+		int tmp = cl_voipUseVAD->integer;
+		cl_voipUseVAD->integer = 0;  // disable this for a moment.
+		clc.voipOutgoingDataSize = 0;  // dump any pending VoIP transmission.
 		Cvar_Set("cl_voipSend", "0");
 		CL_CaptureVoip();  // clean up any state...
+		cl_voipUseVAD->integer = tmp;
 	}
 
 	if (clc.speexInitialized) {
