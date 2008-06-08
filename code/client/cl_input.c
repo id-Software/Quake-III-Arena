@@ -800,6 +800,31 @@ void CL_WritePacket( void ) {
 		MSG_WriteLong (&buf, clc.voipTarget3);
 		MSG_WriteShort (&buf, clc.voipOutgoingDataSize);
 		MSG_WriteData (&buf, clc.voipOutgoingData, clc.voipOutgoingDataSize);
+
+		// If we're recording a demo, we have to fake a server packet with
+		//  this VoIP data so it gets to disk; the server doesn't send it
+		//  back to us, and we might as well eliminate concerns about dropped
+		//  and misordered packets here.
+		if ( clc.demorecording && !clc.demowaiting ) {
+			const int voipSize = clc.voipOutgoingDataSize;
+			msg_t fakemsg;
+			byte fakedata[MAX_MSGLEN];
+			MSG_Init (&fakemsg, fakedata, sizeof (fakedata));
+			MSG_Bitstream (&fakemsg);
+			MSG_WriteLong (&fakemsg, clc.reliableAcknowledge);
+			MSG_WriteByte (&fakemsg, svc_EOF);
+			MSG_WriteByte (&fakemsg, svc_extension);
+			MSG_WriteByte (&fakemsg, svc_voip);
+			MSG_WriteShort (&fakemsg, clc.clientNum);
+			MSG_WriteByte (&fakemsg, clc.voipOutgoingGeneration);
+			MSG_WriteLong (&fakemsg, clc.voipOutgoingSequence);
+			MSG_WriteByte (&fakemsg, clc.voipOutgoingDataFrames);
+			MSG_WriteShort (&fakemsg, clc.voipOutgoingDataSize );
+			MSG_WriteData (&fakemsg, clc.voipOutgoingData, voipSize);
+			MSG_WriteByte (&fakemsg, svc_EOF);
+			CL_WriteDemoMessage (&fakemsg, 0);
+		}
+
 		clc.voipOutgoingSequence += clc.voipOutgoingDataFrames;
 		clc.voipOutgoingDataSize = 0;
 		clc.voipOutgoingDataFrames = 0;
