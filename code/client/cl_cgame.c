@@ -937,10 +937,6 @@ void CL_FirstSnapshot( void ) {
 		speex_preprocess_ctl(clc.speexPreprocessor,
 		                     SPEEX_PREPROCESS_SET_DENOISE, &i);
 
-		i = (cl_voipUseVAD->integer != 0);
-		speex_preprocess_ctl(clc.speexPreprocessor,
-		                     SPEEX_PREPROCESS_SET_VAD, &i);
-
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			speex_bits_init(&clc.speexDecoderBits[i]);
 			speex_bits_reset(&clc.speexDecoderBits[i]);

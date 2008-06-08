@@ -283,11 +283,8 @@ void CL_CaptureVoip(void)
 		return;  // packet is pending transmission, don't record more yet.
 
 	if (cl_voipUseVAD->modified) {
-		int useVadi = (int) useVad;
-		speex_preprocess_ctl(clc.speexPreprocessor,
-		                     SPEEX_PREPROCESS_SET_VAD, &useVadi);
-		cl_voipUseVAD->modified = qfalse;
 		Cvar_Set("cl_voipSend", (useVad) ? "1" : "0");
+		cl_voipUseVAD->modified = qfalse;
 	}
 
 	if ((useVad) && (!cl_voipSend->integer))
@@ -339,8 +336,7 @@ void CL_CaptureVoip(void)
 			// audio capture is always MONO16 (and that's what speex wants!).
 			//  2048 will cover 12 uncompressed frames in narrowband mode.
 			static int16_t sampbuffer[2048];
-			qboolean isVoice = qfalse;
-			int16_t voipPower = 0;
+			float voipPower = 0.0f;
 			int speexFrames = 0;
 			int wpos = 0;
 			int pos = 0;
@@ -359,18 +355,14 @@ void CL_CaptureVoip(void)
 				int16_t *sampptr = &sampbuffer[pos];
 				int i, bytes;
 
+				// preprocess samples to remove noise...
+				speex_preprocess_run(clc.speexPreprocessor, sampptr);
+
 				// check the "power" of this packet...
 				for (i = 0; i < clc.speexFrameSize; i++) {
-					int16_t s = sampptr[i];
-					if (s < 0)
-						s = -s;
-					if (s > voipPower)
-						voipPower = s;  // !!! FIXME: this isn't very clever.
+					const float s = fabs((float) sampptr[i]);
+					voipPower += s * s;
 				}
-
-				// preprocess samples to remove noise, check for voice...
-				if (speex_preprocess_run(clc.speexPreprocessor, sampptr))
-					isVoice = qtrue;  // player is probably speaking.
 
 				// encode raw audio samples into Speex data...
 				speex_bits_reset(&clc.speexEncoderBits);
@@ -389,10 +381,12 @@ void CL_CaptureVoip(void)
 				speexFrames++;
 			}
 
-			if ((useVad) && (!isVoice)) {
-				CL_VoipNewGeneration();  // no talk for at least 1/4 second.
+			clc.voipPower = voipPower / (32768.0f * 32768.0f *
+			              ((float) (clc.speexFrameSize * speexFrames)));
+
+			if ((useVad) && (clc.voipPower > 0.25f)) {
+				CL_VoipNewGeneration();  // no "talk" for at least 1/4 second.
 			} else {
-				clc.voipPower = ((float) voipPower) / 32767.0f;
 				clc.voipOutgoingDataSize = wpos;
 				clc.voipOutgoingDataFrames = speexFrames;
 
