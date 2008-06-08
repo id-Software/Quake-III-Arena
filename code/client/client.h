@@ -412,6 +412,7 @@ extern	cvar_t	*cl_mumbleScale;
 //  send to no one, or a comma-separated list of client numbers:
 //  "0,7,2,23" ... an empty string is treated like "all".
 extern	cvar_t	*cl_voipUseVAD;
+extern	cvar_t	*cl_voipVADThreshold;
 extern	cvar_t	*cl_voipSend;
 extern	cvar_t	*cl_voipSendTarget;
 extern	cvar_t	*cl_voipGainDuringCapture;
