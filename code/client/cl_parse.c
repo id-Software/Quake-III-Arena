@@ -650,7 +650,7 @@ qboolean CL_ShouldIgnoreVoipSender(int sender)
 	else if (clc.voipGain[sender] == 0.0f)
 		return qtrue;  // too quiet to play.
 
-	return qfalse;  // !!! FIXME: implement per-channel muting.
+	return qfalse;
 }
 
 /*
