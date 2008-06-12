@@ -780,7 +780,7 @@ int NET_IPSocket( char *net_interface, int port, int *err ) {
 		Com_Printf( "Opening IP socket: %s:%i\n", net_interface, port );
 	}
 	else {
-		Com_Printf( "Opening IP socket: localhost:%i\n", port );
+		Com_Printf( "Opening IP socket: 0.0.0.0:%i\n", port );
 	}
 
 	if( ( newsocket = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP ) ) == INVALID_SOCKET ) {
@@ -804,7 +804,7 @@ int NET_IPSocket( char *net_interface, int port, int *err ) {
 //		return newsocket;
 	}
 
-	if( !net_interface || !net_interface[0] || !Q_stricmp(net_interface, "localhost") ) {
+	if( !net_interface || !net_interface[0]) {
 		address.sin_family = AF_INET;
 		address.sin_addr.s_addr = INADDR_ANY;
 	}
@@ -855,7 +855,7 @@ int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, i
 			Com_Printf( "Opening IP6 socket: %s:%i\n", net_interface, port );
 	}
 	else
-		Com_Printf( "Opening IP6 socket: localhost:%i\n", port );
+		Com_Printf( "Opening IP6 socket: [::]:%i\n", port );
 
 	if( ( newsocket = socket( PF_INET6, SOCK_DGRAM, IPPROTO_UDP ) ) == INVALID_SOCKET ) {
 		*err = socketError;
@@ -884,7 +884,7 @@ int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, i
 	}
 #endif
 
-	if( !net_interface || !net_interface[0] || !Q_stricmp(net_interface, "localhost") ) {
+	if( !net_interface || !net_interface[0]) {
 		address.sin6_family = AF_INET6;
 		address.sin6_addr = in6addr_any;
 	}
@@ -1316,8 +1316,8 @@ void NET_OpenIP( void ) {
 	int		port;
 	int		port6;
 
-	net_ip = Cvar_Get( "net_ip", "localhost", CVAR_LATCH );
-	net_ip6 = Cvar_Get( "net_ip6", "localhost", CVAR_LATCH );
+	net_ip = Cvar_Get( "net_ip", "0.0.0.0", CVAR_LATCH );
+	net_ip6 = Cvar_Get( "net_ip6", "::", CVAR_LATCH );
 	net_port = Cvar_Get( "net_port", va( "%i", PORT_SERVER ), CVAR_LATCH );
 	net_port6 = Cvar_Get( "net_port6", va( "%i", PORT_SERVER ), CVAR_LATCH );
 	
