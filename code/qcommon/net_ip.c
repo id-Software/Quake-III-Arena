@@ -1329,6 +1329,27 @@ void NET_OpenIP( void ) {
 	// automatically scan for a valid port, so multiple
 	// dedicated servers can be started without requiring
 	// a different net_port for each one
+
+	if(net_enabled->integer & NET_ENABLEV6)
+	{
+		for( i = 0 ; i < 10 ; i++ )
+		{
+			ip6_socket = NET_IP6Socket(net_ip6->string, port6 + i, &boundto, &err);
+			if (ip6_socket != INVALID_SOCKET)
+			{
+				Cvar_SetValue( "net_port6", port6 + i );
+				break;
+			}
+			else
+			{
+				if(err == EAFNOSUPPORT)
+					break;
+			}
+		}
+		if(ip6_socket == INVALID_SOCKET)
+			Com_Printf( "WARNING: Couldn't bind to a v6 ip address.\n");
+	}
+
 	if(net_enabled->integer & NET_ENABLEV4)
 	{
 		for( i = 0 ; i < 10 ; i++ ) {
@@ -1350,26 +1371,6 @@ void NET_OpenIP( void ) {
 		
 		if(ip_socket == INVALID_SOCKET)
 			Com_Printf( "WARNING: Couldn't bind to a v4 ip address.\n");
-	}
-	
-	if(net_enabled->integer & NET_ENABLEV6)
-	{
-		for( i = 0 ; i < 10 ; i++ )
-		{
-			ip6_socket = NET_IP6Socket(net_ip6->string, port6 + i, &boundto, &err);
-			if (ip6_socket != INVALID_SOCKET)
-			{
-				Cvar_SetValue( "net_port6", port6 + i );
-				break;
-			}
-			else
-			{
-				if(err == EAFNOSUPPORT)
-					break;
-			}
-		}
-		if(ip6_socket == INVALID_SOCKET)
-			Com_Printf( "WARNING: Couldn't bind to a v6 ip address.\n");
 	}
 }
 
