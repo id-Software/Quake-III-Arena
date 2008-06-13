@@ -182,6 +182,7 @@ void R_ImageList_f( void ) {
 			ri.Printf( PRINT_ALL, "RGB8" );
 			break;
 		case GL_RGB4_S3TC:
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
 			ri.Printf( PRINT_ALL, "S3TC " );
 			break;
 		case GL_RGBA4:
@@ -602,7 +603,11 @@ static void Upload32( unsigned *data,
 			}
 			else
 			{
-				if ( glConfig.textureCompression == TC_S3TC )
+				if ( glConfig.textureCompression == TC_S3TC_ARB )
+				{
+					internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				}
+				else if ( glConfig.textureCompression == TC_S3TC )
 				{
 					internalFormat = GL_RGB4_S3TC;
 				}
