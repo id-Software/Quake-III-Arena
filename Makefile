@@ -606,7 +606,7 @@ ifeq ($(PLATFORM),openbsd)
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lopenal
+      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lossaudio -lopenal
     endif
   endif
 
