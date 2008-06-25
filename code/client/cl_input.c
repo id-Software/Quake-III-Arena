@@ -763,7 +763,19 @@ void CL_WritePacket( void ) {
 	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
 		// Move cl_voipSendTarget from a string to the bitmasks if needed.
 		if (cl_voipSendTarget->modified) {
+			char buffer[32];
 			const char *target = cl_voipSendTarget->string;
+
+			if (Q_stricmp(target, "attacker") == 0) {
+				int player = VM_Call( cgvm, CG_LAST_ATTACKER );
+				Com_sprintf(buffer, sizeof (buffer), "%d", player);
+				target = buffer;
+			} else if (Q_stricmp(target, "crosshair") == 0) {
+				int player = VM_Call( cgvm, CG_CROSSHAIR_PLAYER );
+				Com_sprintf(buffer, sizeof (buffer), "%d", player);
+				target = buffer;
+			}
+
 			if ((*target == '\0') || (Q_stricmp(target, "all") == 0)) {
 				const int all = 0x7FFFFFFF;
 				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = all;
