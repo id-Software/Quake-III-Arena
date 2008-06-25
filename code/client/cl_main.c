@@ -39,6 +39,7 @@ cvar_t	*cl_voipVADThreshold;
 cvar_t	*cl_voipSend;
 cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
+cvar_t	*cl_voipShowMeter;
 cvar_t	*voip;
 #endif
 
@@ -382,8 +383,9 @@ void CL_CaptureVoip(void)
 				speexFrames++;
 			}
 
-			clc.voipPower = voipPower / (32768.0f * 32768.0f *
-			              ((float) (clc.speexFrameSize * speexFrames)));
+			clc.voipPower = (voipPower / (32768.0f * 32768.0f *
+			                 ((float) (clc.speexFrameSize * speexFrames)))) *
+			                 100.0f;
 
 			if ((useVad) && (clc.voipPower < cl_voipVADThreshold->value)) {
 				CL_VoipNewGeneration();  // no "talk" for at least 1/4 second.
@@ -3088,7 +3090,8 @@ void CL_Init( void ) {
 	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
 	cl_voipUseVAD = Cvar_Get ("cl_voipUseVAD", "0", CVAR_ARCHIVE);
-	cl_voipVADThreshold = Cvar_Get ("cl_voipVADThreshold", "0.0025", CVAR_ARCHIVE);
+	cl_voipVADThreshold = Cvar_Get ("cl_voipVADThreshold", "0.25", CVAR_ARCHIVE);
+	cl_voipShowMeter = Cvar_Get ("cl_voipShowMeter", "1", CVAR_ARCHIVE);
 	voip = Cvar_Get ("voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
 	// This is a protocol version number.
