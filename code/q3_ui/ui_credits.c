@@ -59,7 +59,7 @@ static void UI_CreditMenu_Draw_ioq3( void ) {
 		"Aaron Gyes",
 		"Ludwig Nussel",
 		"Julian Priestley",
-		"Sirroco Six",
+		"Scirocco Six",
 		"Thilo Schulz",
 		"Zachary J. Slater",
 		"Tony J. White",
