@@ -107,6 +107,14 @@ Section "libcurl"
 
 SectionEnd
 
+Section "OpenAL-Soft library"
+
+  SetOutPath $INSTDIR
+  
+  File "openal32.dll"
+
+SectionEnd
+
 ;--------------------------------
 
 ; Uninstaller
