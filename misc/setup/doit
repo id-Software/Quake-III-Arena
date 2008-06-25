@@ -102,6 +102,7 @@ install -m 755 /usr/bin/xdg-desktop-menu image/xdg-desktop-menu
 install -m 644 ioquake3.desktop image/ioquake3.desktop.in
 
 ### README, COPYING and EULA
+install -m 644 $topdir/voip-readme.txt image/voip-readme.txt
 install -m 644 $topdir/README image/README
 install -m 644 $topdir/COPYING.txt image/COPYING
 

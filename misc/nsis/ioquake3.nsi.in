@@ -59,6 +59,7 @@ Section "ioquake3 (required)"
   File "../../COPYING.txt"
   File "../../README.txt"
   File "../../id-readme.txt"
+  File "../../voip-readme.txt"
 
   SetOutPath "$INSTDIR\baseq3"
   File "../../build/release-mingw32-x86/baseq3/cgamex86.dll"
@@ -129,6 +130,7 @@ Section "Uninstall"
   Delete $INSTDIR\COPYING.txt
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\id-readme.txt
+  Delete $INSTDIR\voip-readme.txt
 
   Delete $INSTDIR\SDL.dll
 
@@ -137,7 +139,8 @@ Section "Uninstall"
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any
-  Delete "$SMPROGRAMS\ioquake3\*.lnk"
+  Delete "$SMPROGRAMS\ioquake3\Uninstall.lnk"
+  Delete "$SMPROGRAMS\ioquake3\ioquake3.lnk"
 
   ; Remove directories used
   RMDir "$SMPROGRAMS\ioquake3"

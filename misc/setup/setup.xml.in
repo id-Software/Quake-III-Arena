@@ -59,6 +59,7 @@ ifelse(HAVE_PPC,yes,dnl
       <files>
 	quake3.png
 	COPYING
+	voip-readme.txt
       </files>
     </option>
   </component>
