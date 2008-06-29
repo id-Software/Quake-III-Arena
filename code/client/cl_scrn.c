@@ -364,7 +364,7 @@ void SCR_DrawVoipMeter( void ) {
 	else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
 		return;  // single player game.
 	else if (clc.demoplaying)
-		return ;  // playing back a demo.
+		return;  // playing back a demo.
 	else if (!voip->integer)
 		return;  // client has VoIP support disabled.
 
