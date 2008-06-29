@@ -354,10 +354,19 @@ void SCR_DrawVoipMeter( void ) {
 	int limit, i;
 
 	if (!cl_voipShowMeter->integer)
-		return;
-
-	if (!cl_voipSend->integer)
-		return;
+		return;  // player doesn't want to show meter at all.
+	else if (!cl_voipSend->integer)
+		return;  // not recording at the moment.
+	else if (cls.state != CA_ACTIVE)
+		return;  // not connected to a server.
+	else if (!cl_connectedToVoipServer)
+		return;  // server doesn't support VoIP.
+	else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
+		return;  // single player game.
+	else if (clc.demoplaying)
+		return ;  // playing back a demo.
+	else if (!voip->integer)
+		return;  // client has VoIP support disabled.
 
 	limit = (int) (clc.voipPower * 10.0f);
 	if (limit > 10)
