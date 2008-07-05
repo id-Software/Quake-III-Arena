@@ -136,7 +136,8 @@ static const char *IN_TranslateSDLToQ3Key(SDL_keysym *keysym, int *key)
 			case SDLK_RCTRL:        *key = K_CTRL;          break;
 
 			case SDLK_RMETA:
-			case SDLK_LMETA:
+			case SDLK_LMETA:        *key = K_COMMAND;       break;
+
 			case SDLK_RALT:
 			case SDLK_LALT:         *key = K_ALT;           break;
 
@@ -288,18 +289,17 @@ static void IN_ActivateMouse( void )
 
 	if( !mouseActive )
 	{
-		SDL_WM_GrabInput( SDL_GRAB_ON );
 		SDL_ShowCursor( 0 );
-
 #ifdef MACOS_X_CURSOR_HACK
 		// This is a bug in the current SDL/macosx...have to toggle it a few
 		//  times to get the cursor to hide.
 		SDL_ShowCursor( 1 );
 		SDL_ShowCursor( 0 );
 #endif
+		SDL_WM_GrabInput( SDL_GRAB_ON );
 	}
 
-	// in_nograb makes no sense unless fullscreen
+	// in_nograb makes no sense in fullscreen mode
 	if( !r_fullscreen->integer )
 	{
 		if( in_nograb->modified || !mouseActive )
@@ -347,8 +347,9 @@ static void IN_DeactivateMouse( void )
 
 	if( mouseActive )
 	{
-		SDL_ShowCursor( 1 );
 		SDL_WM_GrabInput( SDL_GRAB_OFF );
+		SDL_WarpMouse( glConfig.vidWidth >> 1, glConfig.vidHeight >> 1 );
+		SDL_ShowCursor( 1 );
 
 		mouseActive = qfalse;
 	}
@@ -719,6 +720,15 @@ static void IN_ProcessEvents( void )
 				}
 				break;
 
+			case SDL_ACTIVEEVENT:
+				if( e.active.state == SDL_APPINPUTFOCUS ) {
+					if( e.active.gain )
+						IN_ActivateMouse();
+					else
+						IN_DeactivateMouse();
+				}
+				break;
+
 			case SDL_QUIT:
 				Sys_Quit();
 				break;
@@ -741,8 +751,10 @@ void IN_Frame (void)
 {
 	IN_JoyMove( );
 
-	// Release the mouse if the console if down and we're windowed
-	if( ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) && !r_fullscreen->integer )
+	// Release the mouse if the console is down in windowed mode
+	// or if the window loses focus due to task switching
+	if( ( ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) && !r_fullscreen->integer ) ||
+	    !( SDL_GetAppState() & SDL_APPINPUTFOCUS ) )
 		IN_DeactivateMouse( );
 	else
 		IN_ActivateMouse( );

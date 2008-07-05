@@ -85,13 +85,23 @@ if [ -d ${BUILD_DIR} ]; then
 		fi
 	done
 
-	for EXEC_SO in cgamesparc.so qagamesparc.so uisparc.so
+	for EXEC_SO in cgamesparc.so qagamesparc.so uisparc.so cgamei386.so qagamei386.so uii386.so
 	do
 		if [ -f ${BUILD_DIR}/baseq3/${EXEC_SO} ]; then
         		${INSTALL_BIN} ${BUILD_DIR}/baseq3/${EXEC_SO} ${PKG_BUILD_DIR}/baseq3/${EXEC_SO}
 		fi
 		if [ -f ${BUILD_DIR}/missionpack/${EXEC_SO} ]; then
         		${INSTALL_BIN} ${BUILD_DIR}/missionpack/${EXEC_SO} ${PKG_BUILD_DIR}/missionpack/${EXEC_SO}
+		fi
+	done
+
+	for EXEC_VM in cgame.qvm qagame.qvm ui.qvm
+	do
+		if [ -f ${BUILD_DIR}/baseq3/vm/${EXEC_VM} ]; then
+        		${INSTALL_BIN} ${BUILD_DIR}/baseq3/vm/${EXEC_VM} ${PKG_BUILD_DIR}/baseq3/vm/${EXEC_VM}
+		fi
+		if [ -f ${BUILD_DIR}/missionpack/vm/${EXEC_VM} ]; then
+        		${INSTALL_BIN} ${BUILD_DIR}/missionpack/vm/${EXEC_VM} ${PKG_BUILD_DIR}/missionpack/vm/${EXEC_VM}
 		fi
 	done
 

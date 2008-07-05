@@ -204,9 +204,14 @@ control(Tokenrow *trp)
 			error(WARNING, "Syntax error in #endif");
 		break;
 
+	case KWARNING:
+		trp->tp = tp+1;
+		error(WARNING, "#warning directive: %r", trp);
+		break;
+
 	case KERROR:
 		trp->tp = tp+1;
-		error(WARNING, "#error directive: %r", trp);
+		error(ERROR, "#error directive: %r", trp);
 		break;
 
 	case KLINE:

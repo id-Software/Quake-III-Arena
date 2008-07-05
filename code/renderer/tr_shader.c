@@ -1432,7 +1432,6 @@ static qboolean ParseShader( char **text )
 		// stage definition
 		else if ( token[0] == '{' )
 		{
-			// 20051019 misantropia -- fix buffer overrun.
 			if ( s >= MAX_SHADER_STAGES ) {
 				ri.Printf( PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name );
 				return qfalse;
@@ -2447,6 +2446,10 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 	// lightmaps
 	if ( lightmapIndex >= 0 && lightmapIndex >= tr.numLightmaps ) {
 		lightmapIndex = LIGHTMAP_BY_VERTEX;
+	} else if ( lightmapIndex < LIGHTMAP_2D ) {
+		// negative lightmap indexes cause stray pointers (think tr.lightmaps[lightmapIndex])
+		ri.Printf( PRINT_WARNING, "WARNING: shader '%s' has invalid lightmap index of %d\n", name, lightmapIndex  );
+		lightmapIndex = LIGHTMAP_BY_VERTEX;
 	}
 
 	COM_StripExtension(name, strippedName, sizeof(strippedName));
@@ -2581,7 +2584,7 @@ qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_
 
 	hash = generateHashValue(name, FILE_HASH_SIZE);
 
-	// 20051020 misantropia -- probably not necessary since this function
+	// probably not necessary since this function
 	// only gets called from tr_font.c with lightmapIndex == LIGHTMAP_2D
 	// but better safe than sorry.
 	if ( lightmapIndex >= tr.numLightmaps ) {

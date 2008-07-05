@@ -131,7 +131,7 @@ typedef enum {
 	DATASEG,	// initialized 32 bit data, will be byte swapped
 	LITSEG,		// strings
 	BSSSEG,		// 0 filled
-	JTRGSEG,	// psuedo-segment that contains only jump table targets
+	JTRGSEG,	// pseudo-segment that contains only jump table targets
 	NUM_SEGMENTS
 } segmentName_t;
 
@@ -226,16 +226,14 @@ int		opcodesHash[ NUM_SOURCE_OPS ];
 
 
 
-int
-vreport (const char* fmt, va_list vp)
+static int vreport (const char* fmt, va_list vp)
 {
   if (options.verbose != qtrue)
       return 0;
   return vprintf(fmt, vp);
 }
 
-int
-report (const char *fmt, ...)
+static int report (const char *fmt, ...)
 {
   va_list va;
   int retval;
@@ -248,16 +246,14 @@ report (const char *fmt, ...)
 
 /* The chain-and-bucket hash table.  -PH */
 
-void
-hashtable_init (hashtable_t *H, int buckets)
+static void hashtable_init (hashtable_t *H, int buckets)
 {
   H->buckets = buckets;
   H->table = calloc(H->buckets, sizeof(*(H->table)));
   return;
 }
 
-hashtable_t *
-hashtable_new (int buckets)
+static hashtable_t *hashtable_new (int buckets)
 {
   hashtable_t *H;
 
@@ -268,8 +264,7 @@ hashtable_new (int buckets)
 
 /* No destroy/destructor.  No need. */
 
-void
-hashtable_add (hashtable_t *H, int hashvalue, void *datum)
+static void hashtable_add (hashtable_t *H, int hashvalue, void *datum)
 {
   hashchain_t *hc, **hb;
 
@@ -293,15 +288,13 @@ hashtable_add (hashtable_t *H, int hashvalue, void *datum)
   return;
 }
 
-hashchain_t *
-hashtable_get (hashtable_t *H, int hashvalue)
+static hashchain_t *hashtable_get (hashtable_t *H, int hashvalue)
 {
   hashvalue = (abs(hashvalue) % H->buckets);
   return (H->table[hashvalue]);
 }
 
-void
-hashtable_stats (hashtable_t *H)
+static void hashtable_stats (hashtable_t *H)
 {
   int len, empties, longest, nodes;
   int i;
@@ -341,8 +334,7 @@ hashtable_stats (hashtable_t *H)
 /* Kludge. */
 /* Check if symbol already exists. */
 /* Returns 0 if symbol does NOT already exist, non-zero otherwise. */
-int
-hashtable_symbol_exists (hashtable_t *H, int hash, char *sym)
+static int hashtable_symbol_exists (hashtable_t *H, int hash, char *sym)
 {
   hashchain_t *hc;
   symbol_t *s;
@@ -372,8 +364,7 @@ hashtable_symbol_exists (hashtable_t *H, int hash, char *sym)
 
 
 /* Comparator function for quicksorting. */
-int
-symlist_cmp (const void *e1, const void *e2)
+static int symlist_cmp (const void *e1, const void *e2)
 {
   const symbol_t *a, *b;
 
@@ -389,8 +380,7 @@ symlist_cmp (const void *e1, const void *e2)
   However, qsort(3) already exists, and I'm really lazy.
  -PH
 */
-void
-sort_symbols ()
+static void sort_symbols ()
 {
   int i, elems;
   symbol_t *s;
@@ -439,7 +429,7 @@ sort_symbols ()
 
  This function is one big evil hack to work around this problem.
 */
-int atoiNoCap (const char *s)
+static int atoiNoCap (const char *s)
 {
   INT64 l;
   union {
@@ -465,7 +455,7 @@ HashString
 =============
 */
 /* Default hash function of Kazlib 1.19, slightly modified. */
-unsigned int HashString (const char *key)
+static unsigned int HashString (const char *key)
 {
     static unsigned long randbox[] = {
     0x49848f1bU, 0xe6255dbaU, 0x36da5bdcU, 0x47bf94e9U,
@@ -494,7 +484,7 @@ unsigned int HashString (const char *key)
 CodeError
 ============
 */
-void CodeError( char *fmt, ... ) {
+static void CodeError( char *fmt, ... ) {
 	va_list		argptr;
 
 	errorCount++;
@@ -511,7 +501,7 @@ void CodeError( char *fmt, ... ) {
 EmitByte
 ============
 */
-void EmitByte( segment_t *seg, int v ) {
+static void EmitByte( segment_t *seg, int v ) {
 	if ( seg->imageUsed >= MAX_IMAGE ) {
 		Error( "MAX_IMAGE" );
 	}
@@ -524,7 +514,7 @@ void EmitByte( segment_t *seg, int v ) {
 EmitInt
 ============
 */
-void EmitInt( segment_t *seg, int v ) {
+static void EmitInt( segment_t *seg, int v ) {
 	if ( seg->imageUsed >= MAX_IMAGE - 4) {
 		Error( "MAX_IMAGE" );
 	}
@@ -542,7 +532,7 @@ DefineSymbol
 Symbols can only be defined on pass 0
 ============
 */
-void DefineSymbol( char *sym, int value ) {
+static void DefineSymbol( char *sym, int value ) {
 	/* Hand optimization by PhaethonH */
 	symbol_t	*s;
 	char		expanded[MAX_LINE_LENGTH];
@@ -598,7 +588,7 @@ LookupSymbol
 Symbols can only be evaluated on pass 1
 ============
 */
-int LookupSymbol( char *sym ) {
+static int LookupSymbol( char *sym ) {
 	symbol_t	*s;
 	char		expanded[MAX_LINE_LENGTH];
 	int			hash;
@@ -646,7 +636,7 @@ If a full line isn't parsed, returns NULL
 Otherwise returns the updated parse pointer
 ===============
 */
-char *ExtractLine( char *data ) {
+static char *ExtractLine( char *data ) {
 /* Goal:
 	 Given a string `data', extract one text line into buffer `lineBuffer' that
 	 is no longer than MAX_LINE_LENGTH characters long.  Return value is
@@ -688,7 +678,7 @@ Parse
 Parse a token out of linebuffer
 ==============
 */
-qboolean Parse( void ) {
+static qboolean Parse( void ) {
 	/* Hand-optimized by PhaethonH */
 	const char 	*p, *q;
 
@@ -724,7 +714,7 @@ qboolean Parse( void ) {
 ParseValue
 ==============
 */
-int	ParseValue( void ) {
+static int ParseValue( void ) {
 	Parse();
 	return atoiNoCap( token );
 }
@@ -735,7 +725,7 @@ int	ParseValue( void ) {
 ParseExpression
 ==============
 */
-int	ParseExpression(void) {
+static int ParseExpression(void) {
 	/* Hand optimization, PhaethonH */
 	int		i, j;
 	char	sym[MAX_LINE_LENGTH];
@@ -806,7 +796,7 @@ Note that the lit segment is read-write in the VM, so strings
 aren't read only as in some architectures.
 ==============
 */
-void HackToSegment( segmentName_t seg ) {
+static void HackToSegment( segmentName_t seg ) {
 	if ( currentSegment == &segment[seg] ) {
 		return;
 	}
@@ -1165,7 +1155,7 @@ AssembleLine
 
 ==============
 */
-void AssembleLine( void ) {
+static void AssembleLine( void ) {
 	hashchain_t *hc;
 	sourceOps_t *op;
 	int		i;
@@ -1320,7 +1310,7 @@ void InitTables( void ) {
 WriteMapFile
 ==============
 */
-void WriteMapFile( void ) {
+static void WriteMapFile( void ) {
 	FILE		*f;
 	symbol_t	*s;
 	char		imageName[MAX_OS_PATH];
@@ -1352,7 +1342,7 @@ void WriteMapFile( void ) {
 WriteVmFile
 ===============
 */
-void WriteVmFile( void ) {
+static void WriteVmFile( void ) {
 	char	imageName[MAX_OS_PATH];
 	vmHeader_t	header;
 	FILE	*f;
@@ -1431,7 +1421,7 @@ void WriteVmFile( void ) {
 Assemble
 ===============
 */
-void Assemble( void ) {
+static void Assemble( void ) {
 	int		i;
 	char	filename[MAX_OS_PATH];
 	char		*ptr;
@@ -1498,7 +1488,7 @@ ParseOptionFile
 
 =============
 */
-void ParseOptionFile( const char *filename ) {
+static void ParseOptionFile( const char *filename ) {
 	char		expanded[MAX_OS_PATH];
 	char		*text, *text_p;
 
@@ -1526,6 +1516,19 @@ void ParseOptionFile( const char *filename ) {
 	}
 }
 
+static void ShowHelp( char *argv0 ) {
+	Error("Usage: %s [OPTION]... [FILES]...\n\
+Assemble LCC bytecode assembly to Q3VM bytecode.\n\
+\n\
+    -o OUTPUT      Write assembled output to file OUTPUT.qvm\n\
+    -f LISTFILE    Read options and list of files to assemble from LISTFILE.q3asm\n\
+    -b BUCKETS     Set symbol hash table to BUCKETS buckets\n\
+    -v             Verbose compilation report\n\
+    -vq3           Produce a qvm file compatible with Q3 1.32b\n\
+    -h --help -?   Show this help\n\
+", argv0);
+}
+
 /*
 ==============
 main
@@ -1538,15 +1541,7 @@ int main( int argc, char **argv ) {
 //	_chdir( "/quake3/jccode/cgame/lccout" );	// hack for vc profiler
 
 	if ( argc < 2 ) {
-		Error("Usage: %s [OPTION]... [FILES]...\n\
-Assemble LCC bytecode assembly to Q3VM bytecode.\n\
-\n\
-    -o OUTPUT      Write assembled output to file OUTPUT.qvm\n\
-    -f LISTFILE    Read options and list of files to assemble from LISTFILE\n\
-    -b BUCKETS     Set symbol hash table to BUCKETS buckets\n\
-    -v             Verbose compilation report\n\
-    -vq3           Produce a qvm file compatible with Q3 1.32b\n\
-", argv[0]);
+		ShowHelp( argv[0] );
 	}
 
 	start = I_FloatTime ();
@@ -1559,6 +1554,12 @@ Assemble LCC bytecode assembly to Q3VM bytecode.\n\
 		if ( argv[i][0] != '-' ) {
 			break;
 		}
+		if( !strcmp( argv[ i ], "-h" ) || 
+		    !strcmp( argv[ i ], "--help" ) ||
+		    !strcmp( argv[ i ], "-?") ) {
+			ShowHelp( argv[0] );
+		}
+
 		if ( !strcmp( argv[i], "-o" ) ) {
 			if ( i == argc - 1 ) {
 				Error( "-o must preceed a filename" );
@@ -1614,6 +1615,10 @@ Motivation: not wanting to scrollback for pages to find asm error.
 	for ( ; i < argc ; i++ ) {
 		asmFileNames[ numAsmFiles ] = copystring( argv[ i ] );
 		numAsmFiles++;
+	}
+	// In some case it Segfault without this check
+	if ( numAsmFiles == 0 ) {
+		Error( "No file to assemble\n" );
 	}
 
 	InitTables();

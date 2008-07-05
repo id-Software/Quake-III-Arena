@@ -331,8 +331,9 @@ do the apropriate things.
 */
 void Com_Quit_f( void ) {
 	// don't try to shutdown if we are in a recursive error
+	char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
-		SV_Shutdown ("Server quit");
+		SV_Shutdown (p[0] ? p : "Server quit");
 		CL_Shutdown ();
 		Com_Shutdown ();
 		FS_Shutdown(qtrue);

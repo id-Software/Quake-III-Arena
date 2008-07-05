@@ -7,8 +7,7 @@ ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-ub
 BASEDIR=baseq3
 MPACKDIR=missionpack
-Q3_VERSION=`grep "\#define Q3_VERSION" code/qcommon/q_shared.h | \
-	sed -e 's/.*".* \([^ ]*\)"/\1/'`;
+Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 
 BIN_OBJ="
 	build/release-darwin-ppc/ioquake3-smp.ppc
@@ -38,10 +37,7 @@ if [ ! -f Makefile ]; then
 	echo "This script must be run from the ioquake3 build directory";
 fi
 
-TIGERHOST=0
-if uname -r | grep ^8. > /dev/null; then
-	TIGERHOST=1
-fi
+TIGERHOST=`uname -r | grep ^8.`
 
 # we want to use the oldest available SDK for max compatiblity
 unset PPC_CLIENT_SDK
@@ -190,7 +186,7 @@ fi
 cp $ICNS $DESTDIR/$APPBUNDLE/Contents/Resources/ioquake3.icns || exit 1;
 echo $PKGINFO > $DESTDIR/$APPBUNDLE/Contents/PkgInfo
 echo "
-	<?xml version=\"1.0\" encoding="UTF-8"?>
+	<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 	<!DOCTYPE plist
 		PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\"
 		\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
