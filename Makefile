@@ -964,7 +964,9 @@ targets: makedirs
 		echo "    $$i"; \
 	done
 	@echo ""
+ifneq ($(TARGETS),)
 	@$(MAKE) $(TARGETS) V=$(V)
+endif
 
 makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
