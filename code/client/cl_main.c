@@ -39,6 +39,7 @@ cvar_t	*cl_voipVADThreshold;
 cvar_t	*cl_voipSend;
 cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
+cvar_t	*cl_voipCaptureMult;
 cvar_t	*cl_voipShowMeter;
 cvar_t	*voip;
 #endif
@@ -268,6 +269,7 @@ Record more audio from the hardware if required and encode it into Speex
 static
 void CL_CaptureVoip(void)
 {
+	const float audioMult = cl_voipCaptureMult->value;
 	const qboolean useVad = (cl_voipUseVAD->integer != 0);
 	qboolean initialFrame = qfalse;
 	qboolean finalFrame = qfalse;
@@ -304,6 +306,8 @@ void CL_CaptureVoip(void)
 			dontCapture = qtrue;  // playing back a demo.
 		else if ( voip->integer == 0 )
 			dontCapture = qtrue;  // client has VoIP support disabled.
+		else if ( audioMult == 0.0f )
+			dontCapture = qtrue;  // basically silenced incoming audio.
 
 		cl_voipSend->modified = qfalse;
 
@@ -362,8 +366,10 @@ void CL_CaptureVoip(void)
 
 				// check the "power" of this packet...
 				for (i = 0; i < clc.speexFrameSize; i++) {
-					const float s = fabs((float) sampptr[i]);
+					const float flsamp = (float) sampptr[i];
+					const float s = fabs(flsamp);
 					voipPower += s * s;
+					sampptr[i] = (int16_t) ((flsamp) * audioMult);
 				}
 
 				// encode raw audio samples into Speex data...
@@ -3089,6 +3095,7 @@ void CL_Init( void ) {
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
 	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
+	cl_voipCaptureMult = Cvar_Get ("cl_voipCaptureMult", "2.0", CVAR_ARCHIVE);
 	cl_voipUseVAD = Cvar_Get ("cl_voipUseVAD", "0", CVAR_ARCHIVE);
 	cl_voipVADThreshold = Cvar_Get ("cl_voipVADThreshold", "0.25", CVAR_ARCHIVE);
 	cl_voipShowMeter = Cvar_Get ("cl_voipShowMeter", "1", CVAR_ARCHIVE);

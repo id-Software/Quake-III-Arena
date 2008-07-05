@@ -94,6 +94,12 @@ cl_voipShowMeter: Set to "1" (the default) to show a volume meter as you are
                   game can "hear" you. Set to "0" to disable the display of
                   the meter.
 
+cl_voipCaptureMult: Multiply recorded audio by this value after denoising.
+                    Defaults to 2.0 to _double_ the volume of your voice.
+                    This is to make you more audible if denoising eats away
+                    too much data. Set this to 1.0 to get no change, less to
+                    be quieter.
+
 
 
 Console commands:
