@@ -782,6 +782,14 @@ void SV_Frame( int msec ) {
 		return;
 	}
 
+#ifdef DEDICATED
+	if( com_dedicated->integer == 0 )
+	{
+		Com_Printf( "WARNING: dedicated must not be 0. Setting to 1.\n" );
+		Cvar_Set( "dedicated", "1" );
+	}
+#endif
+
 	if (!com_sv_running->integer)
 	{
 		// Running as a server, but no map loaded
