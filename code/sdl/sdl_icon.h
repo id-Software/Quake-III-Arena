@@ -1,17 +1,12 @@
-/*  GIMP header image file format (RGB): /Users/zakk/Desktop/things/svn/ioquake3/code/sdl/sdl_icon.h  */
+/* GIMP RGBA C-Source image dump (sdl_icon.h) */
 
-static unsigned int width = 32;
-static unsigned int height = 32;
-
-/*  Call this macro repeatedly.  After each use, the pixel data can be extracted  */
-
-#define HEADER_PIXEL(data,pixel) {\
-  pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \
-  pixel[1] = ((((data[1] - 33) & 0xF) << 4) | ((data[2] - 33) >> 2)); \
-  pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
-  data += 4; \
-}
-static char *header_data =
+static const struct {
+  unsigned int 	 width;
+  unsigned int 	 height;
+  unsigned int 	 bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
+  unsigned char	 pixel_data[32 * 32 * 4 + 1];
+} CLIENT_WINDOW_ICON = {
+  32, 32, 4,
 	"`````````````````````````````````````````````````````````````P\\_"
 	"_PL[`0T]````````````````````````````````````````````````````````"
 	"````````````````````````````````````````````````````````````OW2E"
@@ -76,4 +71,5 @@ static char *header_data =
 	"CUJ+TM\\/_`P\\`````P\\_`P\\_````````````````````````````````````````"
 	"````````````````````````````````````````````````````````````_PL["
 	"[_PL^@8V`P\\_````````````````````````````````````````````````````"
-	"";
+	"",
+};
