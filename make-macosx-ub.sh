@@ -37,7 +37,10 @@ if [ ! -f Makefile ]; then
 	echo "This script must be run from the ioquake3 build directory";
 fi
 
-TIGERHOST=`uname -r | grep ^8.`
+# We only care if we're >= 10.4, not if we're specifically Tiger.
+# "8" is the Darwin major kernel version.
+#TIGERHOST=`uname -r | grep ^8.`
+TIGERHOST=`uname -r |perl -w -p -e 's/\A(\d+)\..*\Z/$1/; $_ = (($_ >= 8) ? "1" : "0");'`
 
 # we want to use the oldest available SDK for max compatiblity
 unset PPC_CLIENT_SDK
