@@ -220,7 +220,7 @@ static void IN_PrintKey(const SDL_Event* event)
 IN_GetIOHandle
 ===============
 */
-static io_connect_t IN_GetIOHandle() // mac os x mouse accel hack
+static io_connect_t IN_GetIOHandle(void) // mac os x mouse accel hack
 {
 	io_connect_t iohandle = MACH_PORT_NULL;
 	kern_return_t status;
