@@ -1526,10 +1526,6 @@ void CL_Connect_f( void ) {
 	CL_Disconnect( qtrue );
 	Con_Close();
 
-	/* MrE: 2000-09-13: now called in CL_DownloadsComplete
-	CL_FlushMemory( );
-	*/
-
 	Q_strncpyz( cls.servername, server, sizeof(cls.servername) );
 
 	if (!NET_StringToAdr(cls.servername, &clc.serverAddress, family) ) {
@@ -2753,6 +2749,10 @@ void CL_StartHunkUsers( qboolean rendererOnly ) {
 	if ( !cls.soundRegistered ) {
 		cls.soundRegistered = qtrue;
 		S_BeginRegistration();
+	}
+
+	if( com_dedicated->integer ) {
+		return;
 	}
 
 	if ( !cls.uiStarted ) {
