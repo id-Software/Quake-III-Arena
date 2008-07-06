@@ -2552,7 +2552,7 @@ void CL_Frame ( int msec ) {
 		cls.cddialog = qfalse;
 		VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_NEED_CD );
 	} else	if ( cls.state == CA_DISCONNECTED && !( Key_GetCatcher( ) & KEYCATCH_UI )
-		&& !com_sv_running->integer ) {
+		&& !com_sv_running->integer && uivm ) {
 		// if disconnected, bring up the menu
 		S_StopAllSounds();
 		VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_MAIN );
