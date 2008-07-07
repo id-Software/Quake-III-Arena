@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "server.h"
 
-#if USE_VOIP
+#ifdef USE_VOIP
 cvar_t *sv_voip;
 #endif
 
@@ -411,9 +411,9 @@ void SVC_Info( netadr_t from ) {
 	Info_SetValueForKey( infostring, "gametype", va("%i", sv_gametype->integer ) );
 	Info_SetValueForKey( infostring, "pure", va("%i", sv_pure->integer ) );
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	if (sv_voip->integer) {
-		Info_SetValueForKey( infostring, "voip", va("%i", sv_voip->integer ) );
+		Info_SetValueForKey( infostring, "cl_voip", va("%i", sv_voip->integer ) );
 	}
 #endif
 

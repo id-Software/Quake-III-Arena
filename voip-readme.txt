@@ -37,7 +37,7 @@ sv_voip: set to "1" (the default) to enable server-side VoIP support. Set to
          "0" to disable. Without this, all VoIP packets are refused by the
          server, which means no one gets to use in-game VoIP.
 
-voip: set to "1" (the default) to enable client-side VoIP support. Set to "0"
+cl_voip: set to "1" (the default) to enable client-side VoIP support. Set to "0"
       to disable. Without this, you will neither be able to transmit voice nor
       hear other people.
 

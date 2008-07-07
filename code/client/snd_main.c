@@ -62,7 +62,7 @@ static qboolean S_ValidSoundInterface( soundInterface_t *si )
 	if( !si->SoundInfo ) return qfalse;
 	if( !si->SoundList ) return qfalse;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	if( !si->StartCapture ) return qfalse;
 	if( !si->AvailableCaptureSamples ) return qfalse;
 	if( !si->Capture ) return qfalse;
@@ -313,7 +313,7 @@ void S_SoundList( void )
 }
 
 
-#if USE_VOIP
+#ifdef USE_VOIP
 /*
 =================
 S_StartCapture

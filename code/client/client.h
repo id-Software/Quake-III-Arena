@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "cl_curl.h"
 #endif /* USE_CURL */
 
-#if USE_VOIP
+#ifdef USE_VOIP
 #include "speex/speex.h"
 #include "speex/speex_preprocess.h"
 #endif
@@ -230,7 +230,7 @@ typedef struct {
 	int			timeDemoMaxDuration;	// maximum frame duration
 	unsigned char	timeDemoDurations[ MAX_TIMEDEMO_DURATIONS ];	// log of frame durations
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	qboolean speexInitialized;
 	int speexFrameSize;
 	int speexSampleRate;
@@ -407,7 +407,7 @@ extern	cvar_t	*cl_useMumble;
 extern	cvar_t	*cl_mumbleScale;
 #endif
 
-#if USE_VOIP
+#ifdef USE_VOIP
 // cl_voipSendTarget is a string: "all" to broadcast to everyone, "none" to
 //  send to no one, or a comma-separated list of client numbers:
 //  "0,7,2,23" ... an empty string is treated like "all".
@@ -418,7 +418,7 @@ extern	cvar_t	*cl_voipSendTarget;
 extern	cvar_t	*cl_voipGainDuringCapture;
 extern	cvar_t	*cl_voipCaptureMult;
 extern	cvar_t	*cl_voipShowMeter;
-extern	cvar_t	*voip;
+extern	cvar_t	*cl_voip;
 #endif
 
 //=================================================
@@ -475,7 +475,7 @@ extern	kbutton_t	in_mlook, in_klook;
 extern 	kbutton_t 	in_strafe;
 extern 	kbutton_t 	in_speed;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 extern 	kbutton_t 	in_voiprecord;
 #endif
 
@@ -500,7 +500,7 @@ void Key_SetCatcher( int catcher );
 extern int cl_connectedToPureServer;
 extern int cl_connectedToCheatServer;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 extern int cl_connectedToVoipServer;
 void CL_Voip_f( void );
 #endif

@@ -121,7 +121,7 @@ void S_Base_SoundInfo(void) {
 }
 
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 void S_Base_StartCapture( void )
 {
@@ -1530,7 +1530,7 @@ qboolean S_Base_Init( soundInterface_t *si ) {
 	si->SoundInfo = S_Base_SoundInfo;
 	si->SoundList = S_Base_SoundList;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	si->StartCapture = S_Base_StartCapture;
 	si->AvailableCaptureSamples = S_Base_AvailableCaptureSamples;
 	si->Capture = S_Base_Capture;

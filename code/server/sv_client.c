@@ -1083,7 +1083,7 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 	}
 }
 
-#if USE_VOIP
+#ifdef USE_VOIP
 /*
 ==================
 SV_WriteVoipToClient
@@ -1378,10 +1378,10 @@ void SV_UserinfoChanged( client_t *cl ) {
 		cl->snapshotMsec = 50;
 	}
 	
-#if USE_VOIP
+#ifdef USE_VOIP
 	// in the future, (val) will be a protocol version string, so only
 	//  accept explicitly 1, not generally non-zero.
-	val = Info_ValueForKey (cl->userinfo, "voip");
+	val = Info_ValueForKey (cl->userinfo, "cl_voip");
 	cl->hasVoip = (atoi(val) == 1) ? qtrue : qfalse;
 #endif
 
@@ -1421,7 +1421,7 @@ static void SV_UpdateUserinfo_f( client_t *cl ) {
 }
 
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 void SV_UpdateVoipIgnore(client_t *cl, const char *idstr, qboolean ignore)
 {
@@ -1468,7 +1468,7 @@ static ucmd_t ucmds[] = {
 	{"stopdl", SV_StopDownload_f},
 	{"donedl", SV_DoneDownload_f},
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	{"voip", SV_Voip_f},
 #endif
 
@@ -1692,7 +1692,7 @@ static void SV_UserMove( client_t *cl, msg_t *msg, qboolean delta ) {
 }
 
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 qboolean SV_ShouldIgnoreVoipSender(const client_t *cl)
 {
@@ -1922,7 +1922,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	} else if ( c == clc_moveNoDelta ) {
 		SV_UserMove( cl, msg, qfalse );
 	} else if ( c == clc_voip ) {
-#if USE_VOIP
+#ifdef USE_VOIP
 		SV_UserVoip( cl, msg );
 #endif
 	} else if ( c != clc_EOF ) {

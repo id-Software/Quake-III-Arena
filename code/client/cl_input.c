@@ -52,7 +52,7 @@ kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
 kbutton_t	in_strafe, in_speed;
 kbutton_t	in_up, in_down;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 kbutton_t	in_voiprecord;
 #endif
 
@@ -220,7 +220,7 @@ void IN_SpeedUp(void) {IN_KeyUp(&in_speed);}
 void IN_StrafeDown(void) {IN_KeyDown(&in_strafe);}
 void IN_StrafeUp(void) {IN_KeyUp(&in_strafe);}
 
-#if USE_VOIP
+#ifdef USE_VOIP
 void IN_VoipRecordDown(void)
 {
 	IN_KeyDown(&in_voiprecord);
@@ -759,7 +759,7 @@ void CL_WritePacket( void ) {
 		Com_Printf("MAX_PACKET_USERCMDS\n");
 	}
 
-	#if USE_VOIP
+#ifdef USE_VOIP
 	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
 		// Move cl_voipSendTarget from a string to the bitmasks if needed.
 		if (cl_voipSendTarget->modified) {
@@ -841,7 +841,7 @@ void CL_WritePacket( void ) {
 		clc.voipOutgoingDataSize = 0;
 		clc.voipOutgoingDataFrames = 0;
 	} else
-	#endif
+#endif
 
 	if ( count >= 1 ) {
 		if ( cl_showSend->integer ) {
@@ -1000,7 +1000,7 @@ void CL_InitInput( void ) {
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	Cmd_AddCommand ("+voiprecord", IN_VoipRecordDown);
 	Cmd_AddCommand ("-voiprecord", IN_VoipRecordUp);
 #endif

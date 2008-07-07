@@ -1696,7 +1696,7 @@ void S_AL_MusicUpdate( void )
 static ALCdevice *alDevice;
 static ALCcontext *alContext;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static ALCdevice *alCaptureDevice;
 static cvar_t *s_alCapture;
 #endif
@@ -1844,7 +1844,7 @@ void S_AL_SoundList( void )
 {
 }
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 void S_AL_StartCapture( void )
 {
@@ -1925,7 +1925,7 @@ void S_AL_Shutdown( void )
 	qalcDestroyContext(alContext);
 	qalcCloseDevice(alDevice);
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	if (alCaptureDevice != NULL) {
 		qalcCaptureStop(alCaptureDevice);
 		qalcCaptureCloseDevice(alCaptureDevice);
@@ -2067,7 +2067,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	qalDopplerFactor( s_alDopplerFactor->value );
 	qalDopplerVelocity( s_alDopplerSpeed->value );
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	// !!! FIXME: some of these alcCaptureOpenDevice() values should be cvars.
 	// !!! FIXME: add support for capture device enumeration.
 	// !!! FIXME: add some better error reporting.
@@ -2122,7 +2122,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	si->SoundInfo = S_AL_SoundInfo;
 	si->SoundList = S_AL_SoundList;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	si->StartCapture = S_AL_StartCapture;
 	si->AvailableCaptureSamples = S_AL_AvailableCaptureSamples;
 	si->Capture = S_AL_Capture;

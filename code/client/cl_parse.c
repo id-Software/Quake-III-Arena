@@ -330,7 +330,7 @@ void CL_ParseSnapshot( msg_t *msg ) {
 int cl_connectedToPureServer;
 int cl_connectedToCheatServer;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 int cl_connectedToVoipServer;
 #endif
 
@@ -362,7 +362,7 @@ void CL_SystemInfoChanged( void ) {
 		return;
 	}
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	// in the future, (val) will be a protocol version string, so only
 	//  accept explicitly 1, not generally non-zero.
 	s = Info_ValueForKey( systemInfo, "sv_voip" );
@@ -635,11 +635,11 @@ void CL_ParseDownload ( msg_t *msg ) {
 	}
 }
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 qboolean CL_ShouldIgnoreVoipSender(int sender)
 {
-	if (!voip->integer)
+	if (!cl_voip->integer)
 		return qtrue;  // VoIP is disabled.
 	else if ((sender == clc.clientNum) && (!clc.demoplaying))
 		return qtrue;  // ignore own voice (unless playing back a demo).
@@ -900,7 +900,7 @@ void CL_ParseServerMessage( msg_t *msg ) {
 			CL_ParseDownload( msg );
 			break;
 		case svc_voip:
-#if USE_VOIP
+#ifdef USE_VOIP
 			CL_ParseVoip( msg );
 #endif
 			break;

@@ -726,6 +726,28 @@ char* Q_strrchr( const char* string, int c )
 	return sp;
 }
 
+qboolean Q_isanumber( const char *s )
+{
+#ifdef Q3_VM
+	//FIXME: implement
+	return qfalse;
+#else
+	char *p;
+
+	if( *s == '\0' )
+		return qfalse;
+
+	strtof( s, &p );
+
+	return *p == '\0';
+#endif
+}
+
+qboolean Q_isintegral( float f )
+{
+	return (int)f == f;
+}
+
 /*
 =============
 Q_strncpyz

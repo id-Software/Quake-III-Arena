@@ -917,7 +917,7 @@ void CL_FirstSnapshot( void ) {
 	}
 #endif
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	if (!clc.speexInitialized) {
 		int i;
 		speex_bits_init(&clc.speexEncoderBits);

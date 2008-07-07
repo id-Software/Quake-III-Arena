@@ -365,7 +365,7 @@ void SCR_DrawVoipMeter( void ) {
 		return;  // single player game.
 	else if (clc.demoplaying)
 		return;  // playing back a demo.
-	else if (!voip->integer)
+	else if (!cl_voip->integer)
 		return;  // client has VoIP support disabled.
 
 	limit = (int) (clc.voipPower * 10.0f);
@@ -528,9 +528,9 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			// always supply STEREO_CENTER as vieworg offset is now done by the engine.
 			CL_CGameRendering(stereoFrame);
 			SCR_DrawDemoRecording();
-			#if USE_VOIP
+#ifdef USE_VOIP
 			SCR_DrawVoipMeter();
-			#endif
+#endif
 			break;
 		}
 	}

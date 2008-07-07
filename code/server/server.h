@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	MAX_ENT_CLUSTERS	16
 
-#if USE_VOIP
+#ifdef USE_VOIP
 typedef struct voipServerPacket_s
 {
 	int generation;
@@ -179,7 +179,7 @@ typedef struct client_s {
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	qboolean hasVoip;
 	qboolean muteAllVoip;
 	qboolean ignoreVoipFromClient[MAX_CLIENTS];
@@ -284,7 +284,7 @@ extern	cvar_t	*sv_strictAuth;
 extern	serverBan_t serverBans[SERVER_MAXBANS];
 extern	int serverBansCount;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 extern	cvar_t	*sv_voip;
 #endif
 
@@ -345,7 +345,7 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd);
 
 void SV_WriteDownloadToClient( client_t *cl , msg_t *msg );
 
-#if USE_VOIP
+#ifdef USE_VOIP
 void SV_WriteVoipToClient( client_t *cl, msg_t *msg );
 #endif
 

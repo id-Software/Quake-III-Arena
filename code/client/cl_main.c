@@ -33,7 +33,7 @@ cvar_t	*cl_useMumble;
 cvar_t	*cl_mumbleScale;
 #endif
 
-#if USE_VOIP
+#ifdef USE_VOIP
 cvar_t	*cl_voipUseVAD;
 cvar_t	*cl_voipVADThreshold;
 cvar_t	*cl_voipSend;
@@ -41,7 +41,7 @@ cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
 cvar_t	*cl_voipCaptureMult;
 cvar_t	*cl_voipShowMeter;
-cvar_t	*voip;
+cvar_t	*cl_voip;
 #endif
 
 cvar_t	*cl_nodelta;
@@ -179,7 +179,7 @@ void CL_UpdateMumble(void)
 #endif
 
 
-#if USE_VOIP
+#ifdef USE_VOIP
 static
 void CL_UpdateVoipIgnore(const char *idstr, qboolean ignore)
 {
@@ -304,7 +304,7 @@ void CL_CaptureVoip(void)
 			dontCapture = qtrue;  // single player game.
 		else if (clc.demoplaying)
 			dontCapture = qtrue;  // playing back a demo.
-		else if ( voip->integer == 0 )
+		else if ( cl_voip->integer == 0 )
 			dontCapture = qtrue;  // client has VoIP support disabled.
 		else if ( audioMult == 0.0f )
 			dontCapture = qtrue;  // basically silenced incoming audio.
@@ -1162,7 +1162,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 #endif
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	if (cl_voipSend->integer) {
 		int tmp = cl_voipUseVAD->integer;
 		cl_voipUseVAD->integer = 0;  // disable this for a moment.
@@ -1219,7 +1219,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// not connected to a pure server anymore
 	cl_connectedToPureServer = qfalse;
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	// not connected to voip server anymore.
 	cl_connectedToVoipServer = qfalse;
 #endif
@@ -2640,7 +2640,7 @@ void CL_Frame ( int msec ) {
 	// update audio
 	S_Update();
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	CL_CaptureVoip();
 #endif
 
@@ -2812,6 +2812,7 @@ void CL_InitRef( void ) {
 	ri.FS_FileExists = FS_FileExists;
 	ri.Cvar_Get = Cvar_Get;
 	ri.Cvar_Set = Cvar_Set;
+	ri.Cvar_CheckRange = Cvar_CheckRange;
 
 	// cinematic stuff
 
@@ -2978,7 +2979,7 @@ CL_Init
 void CL_Init( void ) {
 	Com_Printf( "----- Client Initialization -----\n" );
 
-	Con_Init ();	
+	Con_Init ();
 
 	CL_ClearState ();
 
@@ -3035,7 +3036,7 @@ void CL_Init( void ) {
 
 	cl_conXOffset = Cvar_Get ("cl_conXOffset", "0", 0);
 #ifdef MACOS_X
-        // In game video is REALLY slow in Mac OS X right now due to driver slowness
+	// In game video is REALLY slow in Mac OS X right now due to driver slowness
 	cl_inGameVideo = Cvar_Get ("r_inGameVideo", "0", CVAR_ARCHIVE);
 #else
 	cl_inGameVideo = Cvar_Get ("r_inGameVideo", "1", CVAR_ARCHIVE);
@@ -3052,7 +3053,7 @@ void CL_Init( void ) {
 	m_forward = Cvar_Get ("m_forward", "0.25", CVAR_ARCHIVE);
 	m_side = Cvar_Get ("m_side", "0.25", CVAR_ARCHIVE);
 #ifdef MACOS_X
-        // Input is jittery on OS X w/o this
+	// Input is jittery on OS X w/o this
 	m_filter = Cvar_Get ("m_filter", "1", CVAR_ARCHIVE);
 #else
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_ARCHIVE);
@@ -3091,7 +3092,7 @@ void CL_Init( void ) {
 	cl_mumbleScale = Cvar_Get ("cl_mumbleScale", "0.0254", CVAR_ARCHIVE);
 #endif
 
-#if USE_VOIP
+#ifdef USE_VOIP
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
 	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
@@ -3099,24 +3100,21 @@ void CL_Init( void ) {
 	cl_voipUseVAD = Cvar_Get ("cl_voipUseVAD", "0", CVAR_ARCHIVE);
 	cl_voipVADThreshold = Cvar_Get ("cl_voipVADThreshold", "0.25", CVAR_ARCHIVE);
 	cl_voipShowMeter = Cvar_Get ("cl_voipShowMeter", "1", CVAR_ARCHIVE);
-	voip = Cvar_Get ("voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
 
 	// This is a protocol version number.
-	if ( (voip->integer < 0) || (voip->integer > 1) ) {
-		Com_Printf("WARNING: voip cvar must be 0 or 1. Setting to 1.");
-		Cvar_Set ("voip", "1");
-	}
+	cl_voip = Cvar_Get ("cl_voip", "1", CVAR_USERINFO | CVAR_ARCHIVE | CVAR_LATCH);
+	Cvar_CheckRange( cl_voip, 0, 1, qtrue );
 
 	// If your data rate is too low, you'll get Connection Interrupted warnings
 	//  when VoIP packets arrive, even if you have a broadband connection.
 	//  This might work on rates lower than 25000, but for safety's sake, we'll
 	//  just demand it. Who doesn't have at least a DSL line now, anyhow? If
 	//  you don't, you don't need VoIP.  :)
-	if ((voip->integer) && (Cvar_VariableIntegerValue("rate") < 25000)) {
+	if ((cl_voip->integer) && (Cvar_VariableIntegerValue("rate") < 25000)) {
 		Com_Printf("Your network rate is too slow for VoIP.\n");
 		Com_Printf("Set 'Data Rate' to 'LAN/Cable/xDSL' in 'Setup/System/Network' and restart.\n");
 		Com_Printf("Until then, VoIP is disabled.\n");
-		Cvar_Set("voip", "0");
+		Cvar_Set("cl_voip", "0");
 	}
 #endif
 
@@ -3161,7 +3159,7 @@ void CL_Init( void ) {
 
 	Cvar_Set( "cl_running", "1" );
 
-	CL_GenerateQKey();	
+	CL_GenerateQKey();
 	Cvar_Get( "cl_guid", "", CVAR_USERINFO | CVAR_ROM );
 	CL_UpdateGUID( NULL, 0 );
 
