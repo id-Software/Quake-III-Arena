@@ -737,7 +737,7 @@ qboolean Q_isanumber( const char *s )
 	if( *s == '\0' )
 		return qfalse;
 
-	strtof( s, &p );
+	strtod( s, &p );
 
 	return *p == '\0';
 #endif
