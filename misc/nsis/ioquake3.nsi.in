@@ -144,6 +144,8 @@ Section "Uninstall"
 
   Delete $INSTDIR\libcurl-4.dll
 
+  Delete $INSTDIR\openal32.dll
+
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any
