@@ -7,7 +7,6 @@ ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-ub
 BASEDIR=baseq3
 MPACKDIR=missionpack
-Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 
 BIN_OBJ="
 	build/release-darwin-ppc/ioquake3-smp.ppc
@@ -33,9 +32,14 @@ MPACK_OBJ="
 	build/release-darwin-ppc/$MPACKDIR/qagameppc.dylib
 	build/release-darwin-i386/$MPACKDIR/qagamei386.dylib
 "
+
+cd `dirname $0`
 if [ ! -f Makefile ]; then
-	echo "This script must be run from the ioquake3 build directory";
+	echo "This script must be run from the ioquake3 build directory"
+	exit 1
 fi
+
+Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 
 # We only care if we're >= 10.4, not if we're specifically Tiger.
 # "8" is the Darwin major kernel version.
@@ -123,6 +127,15 @@ if [ -d /Developer/SDKs/MacOSX10.2.8.sdk ] && [ -x /usr/bin/gcc-3.3 ] && [ $TIGE
 		-Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk,-m"
 fi
 
+if [ -z $PPC_CLIENT_SDK ] || [ -z $PPC_SERVER_SDK ] || [ -z $X86_SDK ]; then
+	echo "\
+ERROR: This script is for building a Universal Binary.  You cannot build
+       for a different architecture unless you have the proper Mac OS X SDKs
+       installed.  If you just want to to compile for your own system run
+       'make' instead of this script."
+	exit 1
+fi
+
 echo "Building PPC Dedicated Server against \"$PPC_SERVER_SDK\""
 echo "Building PPC Client against \"$PPC_CLIENT_SDK\""
 echo "Building X86 Client/Dedicated Server against \"$X86_SDK\""
@@ -134,15 +147,6 @@ WARNING: in order to build a binary with maximum compatibility you must
          build on Mac OS X 10.4 using Xcode 2.3 or 2.5 and have the
          MacOSX10.2.8, MacOSX10.3.9, and MacOSX10.4u SDKs installed
          from the Xcode install disk Packages folder."
-fi
-
-if [ -z $PPC_CLIENT_SDK ] || [ -z $PPC_SERVER_SDK ] || [ -z $X86_SDK ]; then
-	echo "\
-ERROR: This script is for building a Universal Binary.  You cannot build
-       for a different architecture unless you have the proper Mac OS X SDKs
-       installed.  If you just want to to compile for your own system run
-       'make' instead of this script."
-	exit 1
 fi
 sleep 3
 
