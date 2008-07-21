@@ -2849,11 +2849,11 @@ void Com_Frame( void ) {
 
 	// we may want to spin here if things are going too fast
 	if ( !com_dedicated->integer && !com_timedemo->integer ) {
-		if( com_minimized->integer && com_maxfpsMinimized->integer ) {
+		if( com_minimized->integer && com_maxfpsMinimized->integer > 0 ) {
 			minMsec = 1000 / com_maxfpsMinimized->integer;
-		} else if( com_unfocused->integer && com_maxfpsUnfocused->integer ) {
+		} else if( com_unfocused->integer && com_maxfpsUnfocused->integer > 0 ) {
 			minMsec = 1000 / com_maxfpsUnfocused->integer;
-		} else if( com_maxfps->integer ) {
+		} else if( com_maxfps->integer > 0 ) {
 			minMsec = 1000 / com_maxfps->integer;
 		} else {
 			minMsec = 1;
