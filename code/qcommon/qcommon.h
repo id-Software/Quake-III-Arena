@@ -803,7 +803,9 @@ extern	cvar_t	*com_journal;
 extern	cvar_t	*com_cameraMode;
 extern	cvar_t	*com_ansiColor;
 extern	cvar_t	*com_unfocused;
+extern	cvar_t	*com_maxfpsUnfocused;
 extern	cvar_t	*com_minimized;
+extern	cvar_t	*com_maxfpsMinimized;
 extern	cvar_t	*com_altivec;
 
 // both client and server must agree to pause

@@ -81,7 +81,9 @@ cvar_t  *sv_packetdelay;
 cvar_t	*com_cameraMode;
 cvar_t	*com_ansiColor;
 cvar_t	*com_unfocused;
+cvar_t	*com_maxfpsUnfocused;
 cvar_t	*com_minimized;
+cvar_t	*com_maxfpsMinimized;
 cvar_t	*com_standalone;
 
 // com_speeds times
@@ -2604,7 +2606,9 @@ void Com_Init( char *commandLine ) {
 	com_ansiColor = Cvar_Get( "com_ansiColor", "0", CVAR_ARCHIVE );
 
 	com_unfocused = Cvar_Get( "com_unfocused", "0", CVAR_ROM );
+	com_maxfpsUnfocused = Cvar_Get( "com_maxfpsUnfocused", "0", CVAR_ARCHIVE );
 	com_minimized = Cvar_Get( "com_minimized", "0", CVAR_ROM );
+	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_standalone = Cvar_Get( "com_standalone", "0", CVAR_INIT );
 
 	com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
@@ -2844,12 +2848,23 @@ void Com_Frame( void ) {
 	}
 
 	// we may want to spin here if things are going too fast
-	if ( !com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer ) {
-		minMsec = 1000 / com_maxfps->integer;
+	if ( !com_dedicated->integer && !com_timedemo->integer ) {
+		if( com_minimized->integer && com_maxfpsMinimized->integer ) {
+			minMsec = 1000 / com_maxfpsMinimized->integer;
+		} else if( com_unfocused->integer && com_maxfpsUnfocused->integer ) {
+			minMsec = 1000 / com_maxfpsUnfocused->integer;
+		} else if( com_maxfps->integer ) {
+			minMsec = 1000 / com_maxfps->integer;
+		} else {
+			minMsec = 1;
+		}
 	} else {
 		minMsec = 1;
 	}
+
+	msec = minMsec;
 	do {
+		Sys_Sleep( minMsec - msec );
 		com_frameTime = Com_EventLoop();
 		if ( lastTime > com_frameTime ) {
 			lastTime = com_frameTime;		// possible on first frame

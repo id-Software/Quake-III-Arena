@@ -441,42 +441,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 
 /*
 =================
-Sys_Idle
-=================
-*/
-static void Sys_Idle( void )
-{
-#ifndef DEDICATED
-	int appState = SDL_GetAppState( );
-	int sleep = 0;
-
-	// If we have no input focus at all, sleep a bit
-	if( !( appState & ( SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS ) ) )
-	{
-		Cvar_SetValue( "com_unfocused", 1 );
-		sleep += 16;
-	}
-	else
-		Cvar_SetValue( "com_unfocused", 0 );
-
-	// If we're minimised, sleep a bit more
-	if( !( appState & SDL_APPACTIVE ) )
-	{
-		Cvar_SetValue( "com_minimized", 1 );
-		sleep += 32;
-	}
-	else
-		Cvar_SetValue( "com_minimized", 0 );
-
-	if( !com_dedicated->integer && sleep )
-		SDL_Delay( sleep );
-#else
-	// Dedicated server idles via NET_Sleep
-#endif
-}
-
-/*
-=================
 Sys_ParseArgs
 =================
 */
@@ -602,7 +566,13 @@ int main( int argc, char **argv )
 
 	while( 1 )
 	{
-		Sys_Idle( );
+#ifndef DEDICATED
+		int appState = SDL_GetAppState( );
+
+		Cvar_SetValue( "com_unfocused",	!( appState & SDL_APPINPUTFOCUS ) );
+		Cvar_SetValue( "com_minimized", !( appState & SDL_APPACTIVE ) );
+#endif
+
 		IN_Frame( );
 		Com_Frame( );
 	}

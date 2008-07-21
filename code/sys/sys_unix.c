@@ -463,6 +463,9 @@ void Sys_Sleep( int msec )
 {
 	fd_set fdset;
 
+	if( msec == 0 )
+		return;
+
 	FD_ZERO(&fdset);
 	FD_SET(fileno(stdin), &fdset);
 	if( msec < 0 )

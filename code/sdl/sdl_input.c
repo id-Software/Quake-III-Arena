@@ -348,7 +348,7 @@ static void IN_DeactivateMouse( void )
 	if( mouseActive )
 	{
 		SDL_WM_GrabInput( SDL_GRAB_OFF );
-		SDL_WarpMouse( glConfig.vidWidth >> 1, glConfig.vidHeight >> 1 );
+		SDL_WarpMouse( glConfig.vidWidth / 2, glConfig.vidHeight / 2 );
 		SDL_ShowCursor( 1 );
 
 		mouseActive = qfalse;
@@ -713,15 +713,6 @@ static void IN_ProcessEvents( void )
 					}
 					Com_QueueEvent( 0, SE_KEY, b,
 						( e.type == SDL_MOUSEBUTTONDOWN ? qtrue : qfalse ), 0, NULL );
-				}
-				break;
-
-			case SDL_ACTIVEEVENT:
-				if( e.active.state == SDL_APPINPUTFOCUS ) {
-					if( e.active.gain )
-						IN_ActivateMouse();
-					else
-						IN_DeactivateMouse();
 				}
 				break;
 

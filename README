@@ -116,7 +116,7 @@ New cvars
   s_alRolloff                       - the value of AL_ROLLOFF_FACTOR for each
                                       source
   s_alGraceDistance                 - after having passed MaxDistance, length
-                                      until sounds are completely inaudible.
+                                      until sounds are completely inaudible
   s_alDriver                        - which OpenAL library to use
   s_alDevice                        - which OpenAL device to use
   s_alAvailableDevices              - list of available OpenAL devices
@@ -129,7 +129,9 @@ New cvars
 
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
-  com_standalone                    - Run in standalone mode.
+  com_standalone                    - Run in standalone mode
+  com_maxfpsUnfocused               - Maximum frames per second when unfocused
+  com_maxfpsMinimized               - Maximum frames per second when minimized
   s_backend                         - read only, indicates the current sound
                                       backend
   s_muteWhenMinimized               - mute sound when minimized
@@ -165,13 +167,13 @@ New cvars
                                       just add 3 to the value for the wanted
                                       color combination. For red-blue and
                                       red-green you probably want to enable
-                                      r_greyscale.
+                                      r_greyscale
   r_stereoSeparation                - Control eye separation. Resulting
                                       separation is r_zProj divided by this
                                       value in quake3 standard units.
                                       See also
                                       http://wiki.ioquake3.org/Stereo_Rendering
-                                      for more information.
+                                      for more information
 
 New commands
   video [filename]        - start video capture (use with demo command)
