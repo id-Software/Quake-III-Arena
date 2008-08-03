@@ -511,3 +511,15 @@ void Sys_ErrorDialog( const char *error )
 
 	FS_FCloseFile( f );
 }
+
+/*
+==============
+Sys_PlatformInit
+
+Unix specific initialisation
+==============
+*/
+void Sys_PlatformInit( void )
+{
+	// NOP
+}

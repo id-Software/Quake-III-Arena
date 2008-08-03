@@ -533,6 +533,8 @@ int main( int argc, char **argv )
 	}
 #endif
 
+	Sys_PlatformInit( );
+
 	Sys_ParseArgs( argc, argv );
 	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );

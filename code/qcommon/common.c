@@ -2864,7 +2864,14 @@ void Com_Frame( void ) {
 
 	msec = minMsec;
 	do {
-		Sys_Sleep( minMsec - msec );
+		int timeRemaining = minMsec - msec;
+
+		// The existing Sys_Sleep implementations aren't really
+		// precise enough to be of use beyond 100fps
+		// FIXME: implement a more precise sleep (RDTSC or something)
+		if( timeRemaining >= 10 )
+			Sys_Sleep( timeRemaining );
+
 		com_frameTime = Com_EventLoop();
 		if ( lastTime > com_frameTime ) {
 			lastTime = com_frameTime;		// possible on first frame
