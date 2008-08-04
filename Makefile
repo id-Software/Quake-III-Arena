@@ -424,6 +424,12 @@ ifeq ($(PLATFORM),mingw32)
     -DUSE_ICON
 
   # Require Windows XP or later
+  #
+  # IPv6 support requires a header wspiapi.h to work on earlier versions of
+  # windows. There is no MinGW equivalent of this header so we're forced to
+  # require XP. In theory this restriction can be removed if this header is
+  # obtained separately from the platform SDK. The MSVC build does not have
+  # this limitation.
   BASE_CFLAGS += -DWINVER=0x501
 
   ifeq ($(USE_OPENAL),1)
