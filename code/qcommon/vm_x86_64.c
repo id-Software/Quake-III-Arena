@@ -1040,7 +1040,7 @@ void VM_Destroy_Compiled(vm_t* self)
 #ifdef USE_GAS
 	munmap(self->codeBase, self->codeLength);
 #elif _WIN32
-	VirtualFree(self->codeBase, self->codeLength, MEM_RELEASE);
+	VirtualFree(self->codeBase, 0, MEM_RELEASE);
 #else
 	munmap(self->codeBase, self->codeLength);
 #endif

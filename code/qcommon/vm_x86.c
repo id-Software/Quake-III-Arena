@@ -1123,7 +1123,7 @@ void VM_Destroy_Compiled(vm_t* self)
 #ifdef VM_X86_MMAP
 	munmap(self->codeBase, self->codeLength);
 #elif _WIN32
-	VirtualFree(self->codeBase, self->codeLength, MEM_RELEASE);
+	VirtualFree(self->codeBase, 0, MEM_RELEASE);
 #else
 	free(self->codeBase);
 #endif
