@@ -47,6 +47,7 @@ unsigned int CON_LogRead( char *out, unsigned int outSize );
 char *Sys_StripAppBundle( char *pwd );
 #endif
 
+void Sys_GLimpInit( void );
 void Sys_PlatformInit( void );
 void Sys_SigHandler( int signal );
 void Sys_ErrorDialog( const char *error );
