@@ -1,0 +1,271 @@
+Index: src/video/wincommon/SDL_lowvideo.h
+===================================================================
+--- src/video/wincommon/SDL_lowvideo.h	(revision 3927)
++++ src/video/wincommon/SDL_lowvideo.h	(working copy)
+@@ -67,8 +67,14 @@
+ 	(SDL_strcmp(this->name, "directx") == 0)				\
+ )
+ 
+-#define DINPUT_FULLSCREEN()	DDRAW_FULLSCREEN()
++#define DINPUT_FULLSCREEN() 						\
++(									\
++	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
++	(strcmp(this->name, "directx") == 0)				\
++)
+ 
++#define DINPUT() (strcmp(this->name, "directx") == 0)
++
+ /* The main window -- and a function to set it for the audio */
+ #ifdef _WIN32_WCE
+ extern LPWSTR SDL_Appname;
+Index: src/video/wincommon/SDL_sysevents.c
+===================================================================
+--- src/video/wincommon/SDL_sysevents.c	(revision 3927)
++++ src/video/wincommon/SDL_sysevents.c	(working copy)
+@@ -431,27 +431,9 @@
+ 					posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+ 				}
+ 
+-				/* mouse has moved within the window */
+-				x = LOWORD(lParam);
+-				y = HIWORD(lParam);
+-				if ( mouse_relative ) {
+-					POINT center;
+-					center.x = (SDL_VideoSurface->w/2);
+-					center.y = (SDL_VideoSurface->h/2);
+-					x -= (Sint16)center.x;
+-					y -= (Sint16)center.y;
+-					if ( x || y ) {
+-						ClientToScreen(SDL_Window, &center);
+-						SetCursorPos(center.x, center.y);
+-						posted = SDL_PrivateMouseMotion(0, 1, x, y);
+-					}
+-				} else {
+-#ifdef _WIN32_WCE
+-					if (SDL_VideoSurface)
+-						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+-#endif
+-					posted = SDL_PrivateMouseMotion(0, 0, x, y);
+-				}
++				/* Mouse motion is handled in DIB_PumpEvents or
++				 * DX5_PumpEvents, depending on the video driver
++				 * in use */
+ 			}
+ 		}
+ 		return(0);
+@@ -480,7 +462,7 @@
+ 		case WM_XBUTTONDOWN:
+ 		case WM_XBUTTONUP: {
+ 			/* Mouse is handled by DirectInput when fullscreen */
+-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
++			if ( SDL_VideoSurface && ! DINPUT() ) {
+ 				WORD xbuttonval = 0;
+ 				Sint16 x, y;
+ 				Uint8 button, state;
+@@ -544,20 +526,8 @@
+ 						mouse_pressed = 0;
+ 					}
+ 				}
+-				if ( mouse_relative ) {
+-				/*	RJR: March 28, 2000
+-					report internal mouse position if in relative mode */
+-					x = 0; y = 0;
+-				} else {
+-					x = (Sint16)LOWORD(lParam);
+-					y = (Sint16)HIWORD(lParam);
+-#ifdef _WIN32_WCE
+-					if (SDL_VideoSurface)
+-						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+-#endif
+-				}
+ 				posted = SDL_PrivateMouseButton(
+-							state, button, x, y);
++							state, button, 0, 0);
+ 
+ 				/*
+ 				 * MSDN says:
+@@ -578,7 +548,7 @@
+ 
+ #if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)
+ 		case WM_MOUSEWHEEL: 
+-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
++			if ( SDL_VideoSurface && ! DINPUT() ) {
+ 				int move = (short)HIWORD(wParam);
+ 				if ( move ) {
+ 					Uint8 button;
+Index: src/video/windib/SDL_dibevents.c
+===================================================================
+--- src/video/windib/SDL_dibevents.c	(revision 3927)
++++ src/video/windib/SDL_dibevents.c	(working copy)
+@@ -262,6 +262,35 @@
+ 	return(DefWindowProc(hwnd, msg, wParam, lParam));
+ }
+ 
++static void DIB_GenerateMouseMotionEvent(void)
++{
++	extern int mouse_relative;
++	extern int posted;
++
++	POINT mouse;
++	GetCursorPos( &mouse );
++
++	if ( mouse_relative ) {
++		POINT center;
++		center.x = (SDL_VideoSurface->w/2);
++		center.y = (SDL_VideoSurface->h/2);
++		ClientToScreen(SDL_Window, &center);
++
++		mouse.x -= (Sint16)center.x;
++		mouse.y -= (Sint16)center.y;
++		if ( mouse.x || mouse.y ) {
++			SetCursorPos(center.x, center.y);
++			posted = SDL_PrivateMouseMotion(0, 1, mouse.x, mouse.y);
++		}
++	} else {
++#ifdef _WIN32_WCE
++		if (SDL_VideoSurface)
++			GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
++#endif
++		posted = SDL_PrivateMouseMotion(0, 0, mouse.x, mouse.y);
++	}
++}
++
+ void DIB_PumpEvents(_THIS)
+ {
+ 	MSG msg;
+@@ -271,6 +300,10 @@
+ 			DispatchMessage(&msg);
+ 		}
+ 	}
++
++	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
++		DIB_GenerateMouseMotionEvent( );
++	}
+ }
+ 
+ static HKL hLayoutUS = NULL;
+Index: src/video/windx5/SDL_dx5events.c
+===================================================================
+--- src/video/windx5/SDL_dx5events.c	(revision 3927)
++++ src/video/windx5/SDL_dx5events.c	(working copy)
+@@ -143,7 +143,12 @@
+ 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE),
+ 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE), handle_keyboard },
+ 	{ "mouse",
+-		&GUID_SysMouse, &c_dfDIMouse,
++		&GUID_SysMouse,
++#if DIRECTINPUT_VERSION >= 0x700
++		&c_dfDIMouse2,
++#else
++		&c_dfDIMouse,
++#endif
+ 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE),
+ 		(DISCL_FOREGROUND|DISCL_EXCLUSIVE), handle_mouse },
+ 	{ NULL, NULL, NULL, 0, 0, NULL }
+@@ -298,12 +303,6 @@
+ 		return;
+ 	}
+ 
+-	/* If we are in windowed mode, Windows is taking care of the mouse */
+-	if (  (SDL_PublicSurface->flags & SDL_OPENGL) ||
+-	     !(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
+-		return;
+-	}
+-
+ 	/* If the mouse was lost, regain some sense of mouse state */
+ 	if ( mouse_lost ) {
+ 		POINT mouse_pos;
+@@ -320,7 +319,11 @@
+ 		old_state = SDL_GetMouseState(NULL, NULL);
+ 		new_state = 0;
+ 		{ /* Get the new DirectInput button state for the mouse */
++#if DIRECTINPUT_VERSION >= 0x700
++			DIMOUSESTATE2 distate;
++#else
+ 			DIMOUSESTATE distate;
++#endif
+ 			HRESULT result;
+ 
+ 			result=IDirectInputDevice2_GetDeviceState(SDL_DIdev[1],
+@@ -429,6 +432,12 @@
+ 			case DIMOFS_BUTTON1:
+ 			case DIMOFS_BUTTON2:
+ 			case DIMOFS_BUTTON3:
++#if DIRECTINPUT_VERSION >= 0x700
++			case DIMOFS_BUTTON4:
++			case DIMOFS_BUTTON5:
++			case DIMOFS_BUTTON6:
++			case DIMOFS_BUTTON7:
++#endif
+ 				if ( xrel || yrel ) {
+ 					posted = SDL_PrivateMouseMotion(
+ 							0, 1, xrel, yrel);
+@@ -437,14 +446,13 @@
+ 				}
+ 				timestamp = 0;
+ 				button = (Uint8)(ptrbuf[i].dwOfs-DIMOFS_BUTTON0)+1;
+-				/* Button #2 on two button mice is button 3
+-				   (the middle button is button 2)
+-				 */
+-				if ( button == 2 ) {
+-					button = 3;
+-				} else
+-				if ( button == 3 ) {
+-					button = 2;
++				/* Map DI button numbers to SDL */
++				switch ( button ) {
++					case 2: button = SDL_BUTTON_RIGHT; break;
++					case 3: button = SDL_BUTTON_MIDDLE; break;
++					case 4: button = SDL_BUTTON_X1; break;
++					case 5: button = SDL_BUTTON_X2; break;
++					default: break;
+ 				}
+ 				if ( ptrbuf[i].dwData & 0x80 ) {
+ 					/* Grab mouse so we get mouse-up */
+Index: src/video/windx5/directx.h
+===================================================================
+--- src/video/windx5/directx.h	(revision 3927)
++++ src/video/windx5/directx.h	(working copy)
+@@ -72,7 +72,7 @@
+ /* We need these defines to mark what version of DirectX API we use */
+ #define DIRECTDRAW_VERSION  0x0700
+ #define DIRECTSOUND_VERSION 0x0500
+-#define DIRECTINPUT_VERSION 0x0500
++#define DIRECTINPUT_VERSION 0x0700
+ 
+ #ifdef __GNUC__
+ #define NONAMELESSUNION
+@@ -81,4 +81,20 @@
+ #include <dsound.h>
+ #include <dinput.h>
+ 
++#if DIRECTINPUT_VERSION >= 0x0700 && !defined(DIMOFS_BUTTON4)
++typedef struct _DIMOUSESTATE2 {
++    LONG    lX;
++    LONG    lY;
++    LONG    lZ;
++    BYTE    rgbButtons[8];
++} DIMOUSESTATE2, *LPDIMOUSESTATE2;
++
++#define DIMOFS_BUTTON4 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 4)
++#define DIMOFS_BUTTON5 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 5)
++#define DIMOFS_BUTTON6 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 6)
++#define DIMOFS_BUTTON7 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 7)
++
++extern const DIDATAFORMAT c_dfDIMouse2;
++#endif
++
+ #endif /* _directx_h */
+Index: configure.in
+===================================================================
+--- configure.in	(revision 3927)
++++ configure.in	(working copy)
+@@ -2442,7 +2442,7 @@
+         # Set up the system libraries we need
+         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm"
+         if test x$have_directx = xyes; then
+-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldxguid"
++            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldxguid -ldinput8"
+         fi
+         # The Win32 platform requires special setup
+         SOURCES="$SOURCES $srcdir/src/main/win32/*.rc"
