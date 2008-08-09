@@ -423,14 +423,10 @@ ifeq ($(PLATFORM),mingw32)
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON
 
-  # Require Windows XP or later
-  #
-  # IPv6 support requires a header wspiapi.h to work on earlier versions of
-  # windows. There is no MinGW equivalent of this header so we're forced to
-  # require XP. In theory this restriction can be removed if this header is
-  # obtained separately from the platform SDK. The MSVC build does not have
-  # this limitation.
-  BASE_CFLAGS += -DWINVER=0x501
+  # In the absence of wspiapi.h, require Windows XP or later
+  ifeq ($(shell test -e $(CMDIR)/wspiapi.h; echo $$?),1)
+    BASE_CFLAGS += -DWINVER=0x501
+  endif
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL

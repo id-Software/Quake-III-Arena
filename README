@@ -433,6 +433,14 @@ PNG support
 
   Restart GtkRadiant and PNG textures are now available.
 
+Building with MinGW for pre Windows XP
+  IPv6 support requires a header named "wspiapi.h" to abstract away from
+  differences in earlier versions of Windows' IPv6 stack. There is no MinGW
+  equivalent of this header and the Microsoft version is obviously not
+  redistributable, so in its absence we're forced to require Windows XP.
+  However if this header is acquired separately and placed in the qcommon/
+  directory, this restriction is lifted.
+
 
 ------------------------------------------------------------- Contributing -----
 
