@@ -78,6 +78,7 @@ typedef enum
 static SDL_Surface *screen = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
+cvar_t *r_sdlDriver;
 
 void (APIENTRYP qglActiveTextureARB) (GLenum texture);
 void (APIENTRYP qglClientActiveTextureARB) (GLenum texture);
@@ -423,6 +424,7 @@ static qboolean GLimp_StartDriverAndSetMode( int mode, qboolean fullscreen )
 
 		SDL_VideoDriverName( driverName, sizeof( driverName ) - 1 );
 		ri.Printf( PRINT_ALL, "SDL using driver \"%s\"\n", driverName );
+		Cvar_Set( "r_sdlDriver", driverName );
 	}
 
 	if (fullscreen && Cvar_VariableIntegerValue( "in_nograb" ) )
@@ -642,6 +644,7 @@ void GLimp_Init( void )
 	qboolean success = qtrue;
 
 	r_allowSoftwareGL = ri.Cvar_Get( "r_allowSoftwareGL", "0", CVAR_LATCH );
+	r_sdlDriver = ri.Cvar_Get( "r_sdlDriver", "", CVAR_ROM );
 
 	Sys_GLimpInit( );
 
@@ -731,6 +734,8 @@ void GLimp_EndFrame( void )
 		// SDL_WM_ToggleFullScreen didn't work, so do it the slow way
 		if( !sdlToggled )
 			Cbuf_AddText( "vid_restart" );
+
+		IN_Restart( );
 
 		r_fullscreen->modified = qfalse;
 	}

@@ -112,8 +112,7 @@ Restart the input subsystem
 */
 void Sys_In_Restart_f( void )
 {
-	IN_Shutdown();
-	IN_Init();
+	IN_Restart( );
 }
 
 /*
