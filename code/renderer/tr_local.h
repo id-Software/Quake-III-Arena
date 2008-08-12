@@ -103,7 +103,7 @@ typedef struct image_s {
 
 	qboolean	mipmap;
 	qboolean	allowPicmip;
-	int			wrapClampMode;		// GL_CLAMP or GL_REPEAT
+	int			wrapClampMode;		// GL_CLAMP_TO_EDGE or GL_REPEAT
 
 	struct image_s*	next;
 } image_t;
