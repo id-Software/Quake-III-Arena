@@ -76,6 +76,7 @@ typedef enum
 } rserr_t;
 
 static SDL_Surface *screen = NULL;
+static const SDL_VideoInfo *videoInfo = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
 cvar_t *r_sdlDriver;
@@ -150,8 +151,16 @@ static void GLimp_DetectAvailableModes(void)
 	SDL_Rect **modes;
 	int numModes;
 	int i;
+	SDL_PixelFormat *format = NULL;
 
-	modes = SDL_ListModes( NULL, SDL_OPENGL | SDL_FULLSCREEN );
+#if SDL_VERSION_ATLEAST(1, 2, 10)
+	format = videoInfo->vfmt;
+#	if MINSDL_PATCH >= 10
+#		error Ifdeffery no longer necessary, please remove
+#	endif
+#endif
+
+	modes = SDL_ListModes( format, SDL_OPENGL | SDL_FULLSCREEN );
 
 	if( !modes )
 	{
@@ -202,22 +211,32 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	int i = 0;
 	SDL_Surface *vidscreen = NULL;
 	Uint32 flags = SDL_OPENGL;
-	const SDL_VideoInfo *videoInfo;
 
 	ri.Printf( PRINT_ALL, "Initializing OpenGL display\n");
 
-	if( displayAspect == 0.0f )
-	{
 #if !SDL_VERSION_ATLEAST(1, 2, 10)
-		// 1.2.10 is needed to get the desktop resolution
-		displayAspect = 4.0f / 3.0f;
+	// 1.2.10 is needed to get the desktop resolution
+	displayAspect = 4.0f / 3.0f;
 #elif MINSDL_PATCH >= 10
 #	error Ifdeffery no longer necessary, please remove
 #else
+	if( videoInfo == NULL )
+	{
+		static SDL_VideoInfo sVideoInfo;
+		static SDL_PixelFormat sPixelFormat;
+
+		videoInfo = SDL_GetVideoInfo( );
+
+		// Take a copy of the videoInfo
+		Com_Memcpy( &sPixelFormat, videoInfo->vfmt, sizeof( SDL_PixelFormat ) );
+		sPixelFormat.palette = NULL; // Should already be the case
+		Com_Memcpy( &sVideoInfo, videoInfo, sizeof( SDL_VideoInfo ) );
+		sVideoInfo.vfmt = &sPixelFormat;
+		videoInfo = &sVideoInfo;
+
 		// Guess the display aspect ratio through the desktop resolution
 		// by assuming (relatively safely) that it is set at or close to
 		// the display's native aspect ratio
-		videoInfo = SDL_GetVideoInfo( );
 		displayAspect = (float)videoInfo->current_w / (float)videoInfo->current_h;
 #endif
 
