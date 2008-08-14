@@ -238,10 +238,10 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		// by assuming (relatively safely) that it is set at or close to
 		// the display's native aspect ratio
 		displayAspect = (float)videoInfo->current_w / (float)videoInfo->current_h;
-#endif
 
 		ri.Printf( PRINT_ALL, "Estimated display aspect: %.3f\n", displayAspect );
 	}
+#endif
 
 	ri.Printf (PRINT_ALL, "...setting mode %d:", mode );
 
