@@ -1272,18 +1272,17 @@ Q3OBJ = \
   \
   $(B)/client/jcapimin.o \
   $(B)/client/jcapistd.o \
-  $(B)/client/jchuff.o   \
-  $(B)/client/jcinit.o \
   $(B)/client/jccoefct.o  \
   $(B)/client/jccolor.o \
-  $(B)/client/jfdctflt.o \
   $(B)/client/jcdctmgr.o \
-  $(B)/client/jcphuff.o \
+  $(B)/client/jchuff.o   \
+  $(B)/client/jcinit.o \
   $(B)/client/jcmainct.o \
   $(B)/client/jcmarker.o \
   $(B)/client/jcmaster.o \
   $(B)/client/jcomapi.o \
   $(B)/client/jcparam.o \
+  $(B)/client/jcphuff.o \
   $(B)/client/jcprepct.o \
   $(B)/client/jcsample.o \
   $(B)/client/jdapimin.o \
@@ -1301,6 +1300,7 @@ Q3OBJ = \
   $(B)/client/jdsample.o \
   $(B)/client/jdtrans.o \
   $(B)/client/jerror.o \
+  $(B)/client/jfdctflt.o \
   $(B)/client/jidctflt.o \
   $(B)/client/jmemmgr.o \
   $(B)/client/jmemnobs.o \
