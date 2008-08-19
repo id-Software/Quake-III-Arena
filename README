@@ -136,6 +136,7 @@ New cvars
                                       backend
   s_muteWhenMinimized               - mute sound when minimized
   in_joystickNo                     - select which joystick to use
+  in_keyboardDebug                  - print keyboard debug info
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
   cl_guidServerUniq                 - makes cl_guid unique for each server
   cl_cURLLib                        - filename of cURL library to load

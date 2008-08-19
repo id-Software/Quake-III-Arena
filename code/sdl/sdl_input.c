@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "../sys/sys_local.h"
 
+#define ARRAYLEN(x) (sizeof(x)/sizeof(x[0]))
+
 #ifdef MACOS_X
 // Mouse acceleration needs to be disabled
 #define MACOS_X_ACCELERATION_HACK
@@ -48,7 +50,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <IOKit/hidsystem/event_status_driver.h>
 #endif
 
-//#define KBD_DBG
+static cvar_t *in_keyboardDebug     = NULL;
 
 static SDL_Joystick *stick = NULL;
 
@@ -66,23 +68,66 @@ static cvar_t *in_nograb;
 static cvar_t *in_joystick          = NULL;
 static cvar_t *in_joystickDebug     = NULL;
 static cvar_t *in_joystickThreshold = NULL;
+static cvar_t *in_joystickNo        = NULL;
+
+#define CTRL(a) ((a)-'a'+1)
+
+/*
+===============
+IN_PrintKey
+===============
+*/
+static void IN_PrintKey( const SDL_keysym *keysym, int key, qboolean down )
+{
+	if( down )
+		Com_Printf( "+ " );
+	else
+		Com_Printf( "  " );
+
+	Com_Printf( "0x%hx \"%s\"", keysym->scancode,
+			SDL_GetKeyName( keysym->sym ) );
+
+	if( keysym->mod & KMOD_LSHIFT )   Com_Printf( " KMOD_LSHIFT" );
+	if( keysym->mod & KMOD_RSHIFT )   Com_Printf( " KMOD_RSHIFT" );
+	if( keysym->mod & KMOD_LCTRL )    Com_Printf( " KMOD_LCTRL" );
+	if( keysym->mod & KMOD_RCTRL )    Com_Printf( " KMOD_RCTRL" );
+	if( keysym->mod & KMOD_LALT )     Com_Printf( " KMOD_LALT" );
+	if( keysym->mod & KMOD_RALT )     Com_Printf( " KMOD_RALT" );
+	if( keysym->mod & KMOD_LMETA )    Com_Printf( " KMOD_LMETA" );
+	if( keysym->mod & KMOD_RMETA )    Com_Printf( " KMOD_RMETA" );
+	if( keysym->mod & KMOD_NUM )      Com_Printf( " KMOD_NUM" );
+	if( keysym->mod & KMOD_CAPS )     Com_Printf( " KMOD_CAPS" );
+	if( keysym->mod & KMOD_MODE )     Com_Printf( " KMOD_MODE" );
+	if( keysym->mod & KMOD_RESERVED ) Com_Printf( " KMOD_RESERVED" );
+
+	if( keysym->unicode )
+	{
+		Com_Printf( " %d", keysym->unicode );
+
+		if( keysym->unicode > ' ' && keysym->unicode < '~' )
+			Com_Printf( "(%c)", (char)keysym->unicode );
+	}
+
+	Com_Printf( " %d(%s)\n", key, Key_KeynumToString( key ) );
+}
 
 /*
 ===============
 IN_TranslateSDLToQ3Key
 ===============
 */
-static const char *IN_TranslateSDLToQ3Key(SDL_keysym *keysym, int *key)
+static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
+	int *key, qboolean down )
 {
-	static char buf[2] = { '\0', '\0' };
-	*buf = '\0';
+	static char buf[ 2 ] = { '\0', '\0' };
 
+	*buf = '\0';
 	*key = 0;
 
-	// these happen to match the ASCII chars.
-	if ((keysym->sym >= ' ') && (keysym->sym <= '~'))
+	if( keysym->sym >= SDLK_SPACE && keysym->sym < SDLK_DELETE )
 	{
-		*key = (int) keysym->sym;
+		// These happen to match the ASCII chars
+		*key = (int)keysym->sym;
 	}
 	else
 	{
@@ -167,51 +212,38 @@ static const char *IN_TranslateSDLToQ3Key(SDL_keysym *keysym, int *key)
 			case SDLK_CAPSLOCK:     *key = K_CAPSLOCK;      break;
 
 			default:
-				if (keysym->sym >= SDLK_WORLD_0 && keysym->sym <= SDLK_WORLD_95)
-					*key = (keysym->sym - SDLK_WORLD_0) + K_WORLD_0;
+				if( keysym->sym >= SDLK_WORLD_0 && keysym->sym <= SDLK_WORLD_95 )
+					*key = ( keysym->sym - SDLK_WORLD_0 ) + K_WORLD_0;
 				break;
 		}
 	}
 
-	if( keysym->unicode <= 127 )  // maps to ASCII?
+	if( down && !( keysym->unicode & 0xFF80 ) )
 	{
-		char ch = (char) keysym->unicode;
-		if (ch == '~')
-			*key = '~'; // console HACK
+		char ch = (char)keysym->unicode & 0x7F;
 
-		// translate K_BACKSPACE to ctrl-h for MACOS_X (others?)
-		if (ch == K_BACKSPACE && keysym->sym != SDLK_DELETE)
+		switch( ch )
 		{
-			*key = 'h' - 'a' + 1;
-			buf[0] = *key;
+			// So the key marked ~ always drops the console
+			case '~': *key = '~'; break;
+
+			case 8: // backspace
+				if( *key != K_DEL )
+				{
+					// ctrl-h
+					*key = CTRL('h');
+					*buf = *key;
+				}
+				break;
+
+			default: *buf = ch; break;
 		}
-		else
-			buf[0] = ch;
 	}
+
+	if( in_keyboardDebug->integer )
+		IN_PrintKey( keysym, *key, down );
 
 	return buf;
-}
-
-/*
-===============
-IN_PrintKey
-===============
-*/
-static void IN_PrintKey(const SDL_Event* event)
-{
-#ifdef KBD_DBG
-	fprintf( stderr, "key name: %s", SDL_GetKeyName (event->key.keysym.sym ) );
-	if(event->key.keysym.unicode)
-	{
-		fprintf( stderr, " unicode: %hx", event->key.keysym.unicode );
-		if( event->key.keysym.unicode >= '0' &&
-				event->key.keysym.unicode <= '~')  // printable?
-		{
-			fprintf( stderr, " (%c)", (unsigned char)event->key.keysym.unicode );
-		}
-	}
-	fflush( stderr );
-#endif
 }
 
 #ifdef MACOS_X_ACCELERATION_HACK
@@ -389,12 +421,6 @@ static int hat_keys[16] = {
 };
 
 
-extern cvar_t *  in_joystick;
-extern cvar_t *  in_joystickDebug;
-extern cvar_t *  in_joystickThreshold;
-cvar_t *in_joystickNo;
-
-#define ARRAYLEN(x) (sizeof (x) / sizeof (x[0]))
 struct
 {
 	qboolean buttons[16];  // !!! FIXME: these might be too many.
@@ -690,13 +716,12 @@ static void IN_ProcessEvents( void )
 		keyRepeatEnabled = qtrue;
 	}
 
-	while (SDL_PollEvent(&e))
+	while( SDL_PollEvent( &e ) )
 	{
-		switch (e.type)
+		switch( e.type )
 		{
 			case SDL_KEYDOWN:
-				IN_PrintKey(&e);
-				p = IN_TranslateSDLToQ3Key(&e.key.keysym, &key);
+				p = IN_TranslateSDLToQ3Key( &e.key.keysym, &key, qtrue );
 				if( key )
 					Com_QueueEvent( 0, SE_KEY, key, qtrue, 0, NULL );
 
@@ -708,12 +733,12 @@ static void IN_ProcessEvents( void )
 				break;
 
 			case SDL_KEYUP:
-				IN_TranslateSDLToQ3Key(&e.key.keysym, &key);
+				IN_TranslateSDLToQ3Key( &e.key.keysym, &key, qfalse );
 				Com_QueueEvent( 0, SE_KEY, key, qfalse, 0, NULL );
 				break;
 
 			case SDL_MOUSEMOTION:
-				if (mouseActive)
+				if( mouseActive )
 					Com_QueueEvent( 0, SE_MOUSE, e.motion.xrel, e.motion.yrel, 0, NULL );
 				break;
 
@@ -721,7 +746,7 @@ static void IN_ProcessEvents( void )
 			case SDL_MOUSEBUTTONUP:
 				{
 					unsigned char b;
-					switch (e.button.button)
+					switch( e.button.button )
 					{
 						case 1:   b = K_MOUSE1;     break;
 						case 2:   b = K_MOUSE3;     break;
@@ -730,7 +755,7 @@ static void IN_ProcessEvents( void )
 						case 5:   b = K_MWHEELDOWN; break;
 						case 6:   b = K_MOUSE4;     break;
 						case 7:   b = K_MOUSE5;     break;
-						default:  b = K_AUX1 + (e.button.button - 8)%16; break;
+						default:  b = K_AUX1 + ( e.button.button - 8 ) % 16; break;
 					}
 					Com_QueueEvent( 0, SE_KEY, b,
 						( e.type == SDL_MOUSEBUTTONDOWN ? qtrue : qfalse ), 0, NULL );
@@ -738,7 +763,7 @@ static void IN_ProcessEvents( void )
 				break;
 
 			case SDL_QUIT:
-				Sys_Quit();
+				Sys_Quit( );
 				break;
 
 			default:
@@ -782,12 +807,14 @@ void IN_Init(void)
 
 	Com_DPrintf ("\n------- Input Initialization -------\n");
 
+	in_keyboardDebug = Cvar_Get( "in_keyboardDebug", "0", CVAR_ARCHIVE );
+
 	// mouse variables
 	in_mouse = Cvar_Get ("in_mouse", "1", CVAR_ARCHIVE);
 	in_nograb = Cvar_Get ("in_nograb", "0", CVAR_ARCHIVE);
 
 	in_joystick = Cvar_Get ("in_joystick", "0", CVAR_ARCHIVE|CVAR_LATCH);
-	in_joystickDebug = Cvar_Get ("in_debugjoystick", "0", CVAR_TEMP);
+	in_joystickDebug = Cvar_Get ("in_joystickDebug", "0", CVAR_TEMP);
 	in_joystickThreshold = Cvar_Get ("in_joystickThreshold", "0.15", CVAR_ARCHIVE);
 
 #ifdef MACOS_X_ACCELERATION_HACK
