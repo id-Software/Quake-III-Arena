@@ -226,6 +226,48 @@ echo "
 		<key>NSPrincipalClass</key>
 		<string>NSApplication</string>
 	</dict>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.text</string>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Configuration file</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.idsoftware.cfg</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>com.apple.ostype</key>
+				<string>TEXT</string>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cfg</string>
+					<string>config</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>com.pkware.zip-archive</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Pak archive</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.idsoftware.pk3</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>pk3</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	</plist>
 	" > $DESTDIR/$APPBUNDLE/Contents/Info.plist
 
