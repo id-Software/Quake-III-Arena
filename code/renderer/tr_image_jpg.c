@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #define JPEG_INTERNALS
-#include "../jpeg-6/jpeglib.h"
+#include "../jpeg-6b/jpeglib.h"
 
 void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *height ) {
   /* This struct contains the JPEG decompression parameters and pointers to

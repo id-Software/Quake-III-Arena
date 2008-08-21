@@ -1,0 +1,916 @@
+diff -u -w /home/tma/sources/jpeg-6b/jcdctmgr.c ./jcdctmgr.c
+--- /home/tma/sources/jpeg-6b/jcdctmgr.c	1996-01-13 19:15:12.000000000 +0000
++++ ./jcdctmgr.c	2008-08-22 00:07:09.000000000 +0100
+@@ -57,7 +57,6 @@
+   int ci, qtblno, i;
+   jpeg_component_info *compptr;
+   JQUANT_TBL * qtbl;
+-  DCTELEM * dtbl;
+ 
+   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
+        ci++, compptr++) {
+@@ -168,6 +167,8 @@
+ }
+ 
+ 
++/* code/jpeg-6b/jcdctmgr.c:184: warning: ‘forward_DCT’ defined but not used */
++#if 0
+ /*
+  * Perform forward DCT on one or more blocks of a component.
+  *
+@@ -262,6 +263,7 @@
+     }
+   }
+ }
++#endif
+ 
+ 
+ #ifdef DCT_FLOAT_SUPPORTED
+diff -u -w /home/tma/sources/jpeg-6b/jcmainct.c ./jcmainct.c
+--- /home/tma/sources/jpeg-6b/jcmainct.c	1996-01-06 23:24:59.000000000 +0000
++++ ./jcmainct.c	2008-08-22 00:10:21.000000000 +0100
+@@ -68,32 +68,32 @@
+ METHODDEF(void)
+ start_pass_main (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+ 
+   /* Do nothing in raw-data mode. */
+   if (cinfo->raw_data_in)
+     return;
+ 
+-  main->cur_iMCU_row = 0;	/* initialize counters */
+-  main->rowgroup_ctr = 0;
+-  main->suspended = FALSE;
+-  main->pass_mode = pass_mode;	/* save mode for use by process_data */
++  jmain->cur_iMCU_row = 0;	/* initialize counters */
++  jmain->rowgroup_ctr = 0;
++  jmain->suspended = FALSE;
++  jmain->pass_mode = pass_mode;	/* save mode for use by process_data */
+ 
+   switch (pass_mode) {
+   case JBUF_PASS_THRU:
+ #ifdef FULL_MAIN_BUFFER_SUPPORTED
+-    if (main->whole_image[0] != NULL)
++    if (jmain->whole_image[0] != NULL)
+       ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
+ #endif
+-    main->pub.process_data = process_data_simple_main;
++    jmain->pub.process_data = process_data_simple_main;
+     break;
+ #ifdef FULL_MAIN_BUFFER_SUPPORTED
+   case JBUF_SAVE_SOURCE:
+   case JBUF_CRANK_DEST:
+   case JBUF_SAVE_AND_PASS:
+-    if (main->whole_image[0] == NULL)
++    if (jmain->whole_image[0] == NULL)
+       ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
+-    main->pub.process_data = process_data_buffer_main;
++    jmain->pub.process_data = process_data_buffer_main;
+     break;
+ #endif
+   default:
+@@ -114,46 +114,46 @@
+ 			  JSAMPARRAY input_buf, JDIMENSION *in_row_ctr,
+ 			  JDIMENSION in_rows_avail)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+ 
+-  while (main->cur_iMCU_row < cinfo->total_iMCU_rows) {
+-    /* Read input data if we haven't filled the main buffer yet */
+-    if (main->rowgroup_ctr < DCTSIZE)
++  while (jmain->cur_iMCU_row < cinfo->total_iMCU_rows) {
++    /* Read input data if we haven't filled the jmain buffer yet */
++    if (jmain->rowgroup_ctr < DCTSIZE)
+       (*cinfo->prep->pre_process_data) (cinfo,
+ 					input_buf, in_row_ctr, in_rows_avail,
+-					main->buffer, &main->rowgroup_ctr,
++					jmain->buffer, &jmain->rowgroup_ctr,
+ 					(JDIMENSION) DCTSIZE);
+ 
+     /* If we don't have a full iMCU row buffered, return to application for
+      * more data.  Note that preprocessor will always pad to fill the iMCU row
+      * at the bottom of the image.
+      */
+-    if (main->rowgroup_ctr != DCTSIZE)
++    if (jmain->rowgroup_ctr != DCTSIZE)
+       return;
+ 
+     /* Send the completed row to the compressor */
+-    if (! (*cinfo->coef->compress_data) (cinfo, main->buffer)) {
++    if (! (*cinfo->coef->compress_data) (cinfo, jmain->buffer)) {
+       /* If compressor did not consume the whole row, then we must need to
+        * suspend processing and return to the application.  In this situation
+        * we pretend we didn't yet consume the last input row; otherwise, if
+        * it happened to be the last row of the image, the application would
+        * think we were done.
+        */
+-      if (! main->suspended) {
++      if (! jmain->suspended) {
+ 	(*in_row_ctr)--;
+-	main->suspended = TRUE;
++	jmain->suspended = TRUE;
+       }
+       return;
+     }
+     /* We did finish the row.  Undo our little suspension hack if a previous
+-     * call suspended; then mark the main buffer empty.
++     * call suspended; then mark the jmain buffer empty.
+      */
+-    if (main->suspended) {
++    if (jmain->suspended) {
+       (*in_row_ctr)++;
+-      main->suspended = FALSE;
++      jmain->suspended = FALSE;
+     }
+-    main->rowgroup_ctr = 0;
+-    main->cur_iMCU_row++;
++    jmain->rowgroup_ctr = 0;
++    jmain->cur_iMCU_row++;
+   }
+ }
+ 
+@@ -170,25 +170,25 @@
+ 			  JSAMPARRAY input_buf, JDIMENSION *in_row_ctr,
+ 			  JDIMENSION in_rows_avail)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   int ci;
+   jpeg_component_info *compptr;
+-  boolean writing = (main->pass_mode != JBUF_CRANK_DEST);
++  boolean writing = (jmain->pass_mode != JBUF_CRANK_DEST);
+ 
+-  while (main->cur_iMCU_row < cinfo->total_iMCU_rows) {
++  while (jmain->cur_iMCU_row < cinfo->total_iMCU_rows) {
+     /* Realign the virtual buffers if at the start of an iMCU row. */
+-    if (main->rowgroup_ctr == 0) {
++    if (jmain->rowgroup_ctr == 0) {
+       for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
+ 	   ci++, compptr++) {
+-	main->buffer[ci] = (*cinfo->mem->access_virt_sarray)
+-	  ((j_common_ptr) cinfo, main->whole_image[ci],
+-	   main->cur_iMCU_row * (compptr->v_samp_factor * DCTSIZE),
++	jmain->buffer[ci] = (*cinfo->mem->access_virt_sarray)
++	  ((j_common_ptr) cinfo, jmain->whole_image[ci],
++	   jmain->cur_iMCU_row * (compptr->v_samp_factor * DCTSIZE),
+ 	   (JDIMENSION) (compptr->v_samp_factor * DCTSIZE), writing);
+       }
+       /* In a read pass, pretend we just read some source data. */
+       if (! writing) {
+ 	*in_row_ctr += cinfo->max_v_samp_factor * DCTSIZE;
+-	main->rowgroup_ctr = DCTSIZE;
++	jmain->rowgroup_ctr = DCTSIZE;
+       }
+     }
+ 
+@@ -197,40 +197,40 @@
+     if (writing) {
+       (*cinfo->prep->pre_process_data) (cinfo,
+ 					input_buf, in_row_ctr, in_rows_avail,
+-					main->buffer, &main->rowgroup_ctr,
++					jmain->buffer, &jmain->rowgroup_ctr,
+ 					(JDIMENSION) DCTSIZE);
+       /* Return to application if we need more data to fill the iMCU row. */
+-      if (main->rowgroup_ctr < DCTSIZE)
++      if (jmain->rowgroup_ctr < DCTSIZE)
+ 	return;
+     }
+ 
+     /* Emit data, unless this is a sink-only pass. */
+-    if (main->pass_mode != JBUF_SAVE_SOURCE) {
+-      if (! (*cinfo->coef->compress_data) (cinfo, main->buffer)) {
++    if (jmain->pass_mode != JBUF_SAVE_SOURCE) {
++      if (! (*cinfo->coef->compress_data) (cinfo, jmain->buffer)) {
+ 	/* If compressor did not consume the whole row, then we must need to
+ 	 * suspend processing and return to the application.  In this situation
+ 	 * we pretend we didn't yet consume the last input row; otherwise, if
+ 	 * it happened to be the last row of the image, the application would
+ 	 * think we were done.
+ 	 */
+-	if (! main->suspended) {
++	if (! jmain->suspended) {
+ 	  (*in_row_ctr)--;
+-	  main->suspended = TRUE;
++	  jmain->suspended = TRUE;
+ 	}
+ 	return;
+       }
+       /* We did finish the row.  Undo our little suspension hack if a previous
+-       * call suspended; then mark the main buffer empty.
++       * call suspended; then mark the jmain buffer empty.
+        */
+-      if (main->suspended) {
++      if (jmain->suspended) {
+ 	(*in_row_ctr)++;
+-	main->suspended = FALSE;
++	jmain->suspended = FALSE;
+       }
+     }
+ 
+     /* If get here, we are done with this iMCU row.  Mark buffer empty. */
+-    main->rowgroup_ctr = 0;
+-    main->cur_iMCU_row++;
++    jmain->rowgroup_ctr = 0;
++    jmain->cur_iMCU_row++;
+   }
+ }
+ 
+@@ -238,21 +238,21 @@
+ 
+ 
+ /*
+- * Initialize main buffer controller.
++ * Initialize jmain buffer controller.
+  */
+ 
+ GLOBAL(void)
+ jinit_c_main_controller (j_compress_ptr cinfo, boolean need_full_buffer)
+ {
+-  my_main_ptr main;
++  my_main_ptr jmain;
+   int ci;
+   jpeg_component_info *compptr;
+ 
+-  main = (my_main_ptr)
++  jmain = (my_main_ptr)
+     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 				SIZEOF(my_main_controller));
+-  cinfo->main = (struct jpeg_c_main_controller *) main;
+-  main->pub.start_pass = start_pass_main;
++  cinfo->main = (struct jpeg_c_main_controller *) jmain;
++  jmain->pub.start_pass = start_pass_main;
+ 
+   /* We don't need to create a buffer in raw-data mode. */
+   if (cinfo->raw_data_in)
+@@ -267,7 +267,7 @@
+     /* Note we pad the bottom to a multiple of the iMCU height */
+     for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
+ 	 ci++, compptr++) {
+-      main->whole_image[ci] = (*cinfo->mem->request_virt_sarray)
++      jmain->whole_image[ci] = (*cinfo->mem->request_virt_sarray)
+ 	((j_common_ptr) cinfo, JPOOL_IMAGE, FALSE,
+ 	 compptr->width_in_blocks * DCTSIZE,
+ 	 (JDIMENSION) jround_up((long) compptr->height_in_blocks,
+@@ -279,12 +279,12 @@
+ #endif
+   } else {
+ #ifdef FULL_MAIN_BUFFER_SUPPORTED
+-    main->whole_image[0] = NULL; /* flag for no virtual arrays */
++    jmain->whole_image[0] = NULL; /* flag for no virtual arrays */
+ #endif
+     /* Allocate a strip buffer for each component */
+     for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
+ 	 ci++, compptr++) {
+-      main->buffer[ci] = (*cinfo->mem->alloc_sarray)
++      jmain->buffer[ci] = (*cinfo->mem->alloc_sarray)
+ 	((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 	 compptr->width_in_blocks * DCTSIZE,
+ 	 (JDIMENSION) (compptr->v_samp_factor * DCTSIZE));
+diff -u -w /home/tma/sources/jpeg-6b/jdatasrc.c ./jdatasrc.c
+--- /home/tma/sources/jpeg-6b/jdatasrc.c	1996-01-06 23:26:42.000000000 +0000
++++ ./jdatasrc.c	2008-08-22 00:00:59.000000000 +0100
+@@ -19,13 +19,17 @@
+ #include "jpeglib.h"
+ #include "jerror.h"
+ 
++#ifndef MIN
++#define MIN(a, b) ((a)<(b)?(a):(b))
++#endif
+ 
+ /* Expanded data source object for stdio input */
+ 
+ typedef struct {
+   struct jpeg_source_mgr pub;	/* public fields */
+ 
+-  FILE * infile;		/* source stream */
++  unsigned char *inbuf;		/* source stream */
++  size_t inbufbytes;
+   JOCTET * buffer;		/* start of buffer */
+   boolean start_of_file;	/* have we gotten any data yet? */
+ } my_source_mgr;
+@@ -90,18 +94,19 @@
+ fill_input_buffer (j_decompress_ptr cinfo)
+ {
+   my_src_ptr src = (my_src_ptr) cinfo->src;
+-  size_t nbytes;
+-
+-  nbytes = JFREAD(src->infile, src->buffer, INPUT_BUF_SIZE);
++  size_t nbytes = MIN(src->inbufbytes, INPUT_BUF_SIZE);
+ 
+   if (nbytes <= 0) {
+-    if (src->start_of_file)	/* Treat empty input file as fatal error */
+-      ERREXIT(cinfo, JERR_INPUT_EMPTY);
+     WARNMS(cinfo, JWRN_JPEG_EOF);
+     /* Insert a fake EOI marker */
+     src->buffer[0] = (JOCTET) 0xFF;
+     src->buffer[1] = (JOCTET) JPEG_EOI;
+     nbytes = 2;
++  } else {
++    memcpy( src->buffer, src->inbuf, nbytes);
++
++    src->inbuf += nbytes;
++    src->inbufbytes -= nbytes;
+   }
+ 
+   src->pub.next_input_byte = src->buffer;
+@@ -179,7 +184,7 @@
+  */
+ 
+ GLOBAL(void)
+-jpeg_stdio_src (j_decompress_ptr cinfo, FILE * infile)
++jpeg_mem_src (j_decompress_ptr cinfo, unsigned char *inbuf, size_t size)
+ {
+   my_src_ptr src;
+ 
+@@ -206,7 +211,8 @@
+   src->pub.skip_input_data = skip_input_data;
+   src->pub.resync_to_restart = jpeg_resync_to_restart; /* use default method */
+   src->pub.term_source = term_source;
+-  src->infile = infile;
++  src->inbuf = inbuf;
++  src->inbufbytes = size;
+   src->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
+   src->pub.next_input_byte = NULL; /* until buffer loaded */
+ }
+diff -u -w /home/tma/sources/jpeg-6b/jdmainct.c ./jdmainct.c
+--- /home/tma/sources/jpeg-6b/jdmainct.c	1996-01-06 23:27:17.000000000 +0000
++++ ./jdmainct.c	2008-08-22 00:13:48.000000000 +0100
+@@ -159,7 +159,7 @@
+  * This is done only once, not once per pass.
+  */
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   int ci, rgroup;
+   int M = cinfo->min_DCT_scaled_size;
+   jpeg_component_info *compptr;
+@@ -168,10 +168,10 @@
+   /* Get top-level space for component array pointers.
+    * We alloc both arrays with one call to save a few cycles.
+    */
+-  main->xbuffer[0] = (JSAMPIMAGE)
++  jmain->xbuffer[0] = (JSAMPIMAGE)
+     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 				cinfo->num_components * 2 * SIZEOF(JSAMPARRAY));
+-  main->xbuffer[1] = main->xbuffer[0] + cinfo->num_components;
++  jmain->xbuffer[1] = jmain->xbuffer[0] + cinfo->num_components;
+ 
+   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
+        ci++, compptr++) {
+@@ -184,9 +184,9 @@
+       (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 				  2 * (rgroup * (M + 4)) * SIZEOF(JSAMPROW));
+     xbuf += rgroup;		/* want one row group at negative offsets */
+-    main->xbuffer[0][ci] = xbuf;
++    jmain->xbuffer[0][ci] = xbuf;
+     xbuf += rgroup * (M + 4);
+-    main->xbuffer[1][ci] = xbuf;
++    jmain->xbuffer[1][ci] = xbuf;
+   }
+ }
+ 
+@@ -194,13 +194,13 @@
+ LOCAL(void)
+ make_funny_pointers (j_decompress_ptr cinfo)
+ /* Create the funny pointer lists discussed in the comments above.
+- * The actual workspace is already allocated (in main->buffer),
++ * The actual workspace is already allocated (in jmain->buffer),
+  * and the space for the pointer lists is allocated too.
+  * This routine just fills in the curiously ordered lists.
+  * This will be repeated at the beginning of each pass.
+  */
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   int ci, i, rgroup;
+   int M = cinfo->min_DCT_scaled_size;
+   jpeg_component_info *compptr;
+@@ -210,10 +210,10 @@
+        ci++, compptr++) {
+     rgroup = (compptr->v_samp_factor * compptr->DCT_scaled_size) /
+       cinfo->min_DCT_scaled_size; /* height of a row group of component */
+-    xbuf0 = main->xbuffer[0][ci];
+-    xbuf1 = main->xbuffer[1][ci];
++    xbuf0 = jmain->xbuffer[0][ci];
++    xbuf1 = jmain->xbuffer[1][ci];
+     /* First copy the workspace pointers as-is */
+-    buf = main->buffer[ci];
++    buf = jmain->buffer[ci];
+     for (i = 0; i < rgroup * (M + 2); i++) {
+       xbuf0[i] = xbuf1[i] = buf[i];
+     }
+@@ -240,7 +240,7 @@
+  * This changes the pointer list state from top-of-image to the normal state.
+  */
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   int ci, i, rgroup;
+   int M = cinfo->min_DCT_scaled_size;
+   jpeg_component_info *compptr;
+@@ -250,8 +250,8 @@
+        ci++, compptr++) {
+     rgroup = (compptr->v_samp_factor * compptr->DCT_scaled_size) /
+       cinfo->min_DCT_scaled_size; /* height of a row group of component */
+-    xbuf0 = main->xbuffer[0][ci];
+-    xbuf1 = main->xbuffer[1][ci];
++    xbuf0 = jmain->xbuffer[0][ci];
++    xbuf1 = jmain->xbuffer[1][ci];
+     for (i = 0; i < rgroup; i++) {
+       xbuf0[i - rgroup] = xbuf0[rgroup*(M+1) + i];
+       xbuf1[i - rgroup] = xbuf1[rgroup*(M+1) + i];
+@@ -269,7 +269,7 @@
+  * Also sets rowgroups_avail to indicate number of nondummy row groups in row.
+  */
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   int ci, i, rgroup, iMCUheight, rows_left;
+   jpeg_component_info *compptr;
+   JSAMPARRAY xbuf;
+@@ -286,12 +286,12 @@
+      * so we need only do it once.
+      */
+     if (ci == 0) {
+-      main->rowgroups_avail = (JDIMENSION) ((rows_left-1) / rgroup + 1);
++      jmain->rowgroups_avail = (JDIMENSION) ((rows_left-1) / rgroup + 1);
+     }
+     /* Duplicate the last real sample row rgroup*2 times; this pads out the
+      * last partial rowgroup and ensures at least one full rowgroup of context.
+      */
+-    xbuf = main->xbuffer[main->whichptr][ci];
++    xbuf = jmain->xbuffer[jmain->whichptr][ci];
+     for (i = 0; i < rgroup * 2; i++) {
+       xbuf[rows_left + i] = xbuf[rows_left-1];
+     }
+@@ -306,27 +306,27 @@
+ METHODDEF(void)
+ start_pass_main (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+ 
+   switch (pass_mode) {
+   case JBUF_PASS_THRU:
+     if (cinfo->upsample->need_context_rows) {
+-      main->pub.process_data = process_data_context_main;
++      jmain->pub.process_data = process_data_context_main;
+       make_funny_pointers(cinfo); /* Create the xbuffer[] lists */
+-      main->whichptr = 0;	/* Read first iMCU row into xbuffer[0] */
+-      main->context_state = CTX_PREPARE_FOR_IMCU;
+-      main->iMCU_row_ctr = 0;
++      jmain->whichptr = 0;	/* Read first iMCU row into xbuffer[0] */
++      jmain->context_state = CTX_PREPARE_FOR_IMCU;
++      jmain->iMCU_row_ctr = 0;
+     } else {
+       /* Simple case with no context needed */
+-      main->pub.process_data = process_data_simple_main;
++      jmain->pub.process_data = process_data_simple_main;
+     }
+-    main->buffer_full = FALSE;	/* Mark buffer empty */
+-    main->rowgroup_ctr = 0;
++    jmain->buffer_full = FALSE;	/* Mark buffer empty */
++    jmain->rowgroup_ctr = 0;
+     break;
+ #ifdef QUANT_2PASS_SUPPORTED
+   case JBUF_CRANK_DEST:
+     /* For last pass of 2-pass quantization, just crank the postprocessor */
+-    main->pub.process_data = process_data_crank_post;
++    jmain->pub.process_data = process_data_crank_post;
+     break;
+ #endif
+   default:
+@@ -346,14 +346,14 @@
+ 			  JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
+ 			  JDIMENSION out_rows_avail)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+   JDIMENSION rowgroups_avail;
+ 
+-  /* Read input data if we haven't filled the main buffer yet */
+-  if (! main->buffer_full) {
+-    if (! (*cinfo->coef->decompress_data) (cinfo, main->buffer))
++  /* Read input data if we haven't filled the jmain buffer yet */
++  if (! jmain->buffer_full) {
++    if (! (*cinfo->coef->decompress_data) (cinfo, jmain->buffer))
+       return;			/* suspension forced, can do nothing more */
+-    main->buffer_full = TRUE;	/* OK, we have an iMCU row to work with */
++    jmain->buffer_full = TRUE;	/* OK, we have an iMCU row to work with */
+   }
+ 
+   /* There are always min_DCT_scaled_size row groups in an iMCU row. */
+@@ -364,14 +364,14 @@
+    */
+ 
+   /* Feed the postprocessor */
+-  (*cinfo->post->post_process_data) (cinfo, main->buffer,
+-				     &main->rowgroup_ctr, rowgroups_avail,
++  (*cinfo->post->post_process_data) (cinfo, jmain->buffer,
++				     &jmain->rowgroup_ctr, rowgroups_avail,
+ 				     output_buf, out_row_ctr, out_rows_avail);
+ 
+   /* Has postprocessor consumed all the data yet? If so, mark buffer empty */
+-  if (main->rowgroup_ctr >= rowgroups_avail) {
+-    main->buffer_full = FALSE;
+-    main->rowgroup_ctr = 0;
++  if (jmain->rowgroup_ctr >= rowgroups_avail) {
++    jmain->buffer_full = FALSE;
++    jmain->rowgroup_ctr = 0;
+   }
+ }
+ 
+@@ -386,15 +386,15 @@
+ 			   JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
+ 			   JDIMENSION out_rows_avail)
+ {
+-  my_main_ptr main = (my_main_ptr) cinfo->main;
++  my_main_ptr jmain = (my_main_ptr) cinfo->main;
+ 
+-  /* Read input data if we haven't filled the main buffer yet */
+-  if (! main->buffer_full) {
++  /* Read input data if we haven't filled the jmain buffer yet */
++  if (! jmain->buffer_full) {
+     if (! (*cinfo->coef->decompress_data) (cinfo,
+-					   main->xbuffer[main->whichptr]))
++					   jmain->xbuffer[jmain->whichptr]))
+       return;			/* suspension forced, can do nothing more */
+-    main->buffer_full = TRUE;	/* OK, we have an iMCU row to work with */
+-    main->iMCU_row_ctr++;	/* count rows received */
++    jmain->buffer_full = TRUE;	/* OK, we have an iMCU row to work with */
++    jmain->iMCU_row_ctr++;	/* count rows received */
+   }
+ 
+   /* Postprocessor typically will not swallow all the input data it is handed
+@@ -402,47 +402,47 @@
+    * to exit and restart.  This switch lets us keep track of how far we got.
+    * Note that each case falls through to the next on successful completion.
+    */
+-  switch (main->context_state) {
++  switch (jmain->context_state) {
+   case CTX_POSTPONED_ROW:
+     /* Call postprocessor using previously set pointers for postponed row */
+-    (*cinfo->post->post_process_data) (cinfo, main->xbuffer[main->whichptr],
+-			&main->rowgroup_ctr, main->rowgroups_avail,
++    (*cinfo->post->post_process_data) (cinfo, jmain->xbuffer[jmain->whichptr],
++			&jmain->rowgroup_ctr, jmain->rowgroups_avail,
+ 			output_buf, out_row_ctr, out_rows_avail);
+-    if (main->rowgroup_ctr < main->rowgroups_avail)
++    if (jmain->rowgroup_ctr < jmain->rowgroups_avail)
+       return;			/* Need to suspend */
+-    main->context_state = CTX_PREPARE_FOR_IMCU;
++    jmain->context_state = CTX_PREPARE_FOR_IMCU;
+     if (*out_row_ctr >= out_rows_avail)
+       return;			/* Postprocessor exactly filled output buf */
+     /*FALLTHROUGH*/
+   case CTX_PREPARE_FOR_IMCU:
+     /* Prepare to process first M-1 row groups of this iMCU row */
+-    main->rowgroup_ctr = 0;
+-    main->rowgroups_avail = (JDIMENSION) (cinfo->min_DCT_scaled_size - 1);
++    jmain->rowgroup_ctr = 0;
++    jmain->rowgroups_avail = (JDIMENSION) (cinfo->min_DCT_scaled_size - 1);
+     /* Check for bottom of image: if so, tweak pointers to "duplicate"
+      * the last sample row, and adjust rowgroups_avail to ignore padding rows.
+      */
+-    if (main->iMCU_row_ctr == cinfo->total_iMCU_rows)
++    if (jmain->iMCU_row_ctr == cinfo->total_iMCU_rows)
+       set_bottom_pointers(cinfo);
+-    main->context_state = CTX_PROCESS_IMCU;
++    jmain->context_state = CTX_PROCESS_IMCU;
+     /*FALLTHROUGH*/
+   case CTX_PROCESS_IMCU:
+     /* Call postprocessor using previously set pointers */
+-    (*cinfo->post->post_process_data) (cinfo, main->xbuffer[main->whichptr],
+-			&main->rowgroup_ctr, main->rowgroups_avail,
++    (*cinfo->post->post_process_data) (cinfo, jmain->xbuffer[jmain->whichptr],
++			&jmain->rowgroup_ctr, jmain->rowgroups_avail,
+ 			output_buf, out_row_ctr, out_rows_avail);
+-    if (main->rowgroup_ctr < main->rowgroups_avail)
++    if (jmain->rowgroup_ctr < jmain->rowgroups_avail)
+       return;			/* Need to suspend */
+     /* After the first iMCU, change wraparound pointers to normal state */
+-    if (main->iMCU_row_ctr == 1)
++    if (jmain->iMCU_row_ctr == 1)
+       set_wraparound_pointers(cinfo);
+     /* Prepare to load new iMCU row using other xbuffer list */
+-    main->whichptr ^= 1;	/* 0=>1 or 1=>0 */
+-    main->buffer_full = FALSE;
++    jmain->whichptr ^= 1;	/* 0=>1 or 1=>0 */
++    jmain->buffer_full = FALSE;
+     /* Still need to process last row group of this iMCU row, */
+     /* which is saved at index M+1 of the other xbuffer */
+-    main->rowgroup_ctr = (JDIMENSION) (cinfo->min_DCT_scaled_size + 1);
+-    main->rowgroups_avail = (JDIMENSION) (cinfo->min_DCT_scaled_size + 2);
+-    main->context_state = CTX_POSTPONED_ROW;
++    jmain->rowgroup_ctr = (JDIMENSION) (cinfo->min_DCT_scaled_size + 1);
++    jmain->rowgroups_avail = (JDIMENSION) (cinfo->min_DCT_scaled_size + 2);
++    jmain->context_state = CTX_POSTPONED_ROW;
+   }
+ }
+ 
+@@ -469,21 +469,21 @@
+ 
+ 
+ /*
+- * Initialize main buffer controller.
++ * Initialize jmain buffer controller.
+  */
+ 
+ GLOBAL(void)
+ jinit_d_main_controller (j_decompress_ptr cinfo, boolean need_full_buffer)
+ {
+-  my_main_ptr main;
++  my_main_ptr jmain;
+   int ci, rgroup, ngroups;
+   jpeg_component_info *compptr;
+ 
+-  main = (my_main_ptr)
++  jmain = (my_main_ptr)
+     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 				SIZEOF(my_main_controller));
+-  cinfo->main = (struct jpeg_d_main_controller *) main;
+-  main->pub.start_pass = start_pass_main;
++  cinfo->main = (struct jpeg_d_main_controller *) jmain;
++  jmain->pub.start_pass = start_pass_main;
+ 
+   if (need_full_buffer)		/* shouldn't happen */
+     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
+@@ -504,7 +504,7 @@
+        ci++, compptr++) {
+     rgroup = (compptr->v_samp_factor * compptr->DCT_scaled_size) /
+       cinfo->min_DCT_scaled_size; /* height of a row group of component */
+-    main->buffer[ci] = (*cinfo->mem->alloc_sarray)
++    jmain->buffer[ci] = (*cinfo->mem->alloc_sarray)
+ 			((j_common_ptr) cinfo, JPOOL_IMAGE,
+ 			 compptr->width_in_blocks * compptr->DCT_scaled_size,
+ 			 (JDIMENSION) (rgroup * ngroups));
+diff -u -w /home/tma/sources/jpeg-6b/jerror.c ./jerror.c
+--- /home/tma/sources/jpeg-6b/jerror.c	1998-02-22 01:03:15.000000000 +0000
++++ ./jerror.c	2008-08-21 23:58:36.000000000 +0100
+@@ -18,6 +18,8 @@
+  * These routines are used by both the compression and decompression code.
+  */
+ 
++#include "../renderer/tr_local.h"
++
+ /* this is not a core library module, so it doesn't define JPEG_INTERNALS */
+ #include "jinclude.h"
+ #include "jpeglib.h"
+@@ -69,13 +71,15 @@
+ METHODDEF(void)
+ error_exit (j_common_ptr cinfo)
+ {
+-  /* Always display the message */
+-  (*cinfo->err->output_message) (cinfo);
++  char buffer[JMSG_LENGTH_MAX];
++
++  /* Create the message */
++  (*cinfo->err->format_message) (cinfo, buffer);
+ 
+   /* Let the memory manager delete any temp files before we die */
+   jpeg_destroy(cinfo);
+ 
+-  exit(EXIT_FAILURE);
++  ri.Error( ERR_FATAL, "%s\n", buffer );
+ }
+ 
+ 
+@@ -108,7 +112,7 @@
+ 	     MB_OK | MB_ICONERROR);
+ #else
+   /* Send it to stderr, adding a newline */
+-  fprintf(stderr, "%s\n", buffer);
++  ri.Printf(PRINT_ALL, "%s\n", buffer);
+ #endif
+ }
+ 
+diff -u -w /home/tma/sources/jpeg-6b/jinclude.h ./jinclude.h
+--- /home/tma/sources/jpeg-6b/jinclude.h	1994-04-01 21:29:31.000000000 +0100
++++ ./jinclude.h	2008-08-21 23:58:36.000000000 +0100
+@@ -15,9 +15,34 @@
+  */
+ 
+ 
++#ifdef _MSC_VER
++
++#pragma warning(disable : 4018)     // signed/unsigned mismatch
++#pragma warning(disable : 4032)
++#pragma warning(disable : 4051)
++#pragma warning(disable : 4057)		// slightly different base types
++#pragma warning(disable : 4100)		// unreferenced formal parameter
++#pragma warning(disable : 4115)
++#pragma warning(disable : 4125)		// decimal digit terminates octal escape sequence
++#pragma warning(disable : 4127)		// conditional expression is constant
++#pragma warning(disable : 4136)
++#pragma warning(disable : 4152)		// nonstandard extension, function/data pointer conversion in expression
++#pragma warning(disable : 4201)
++#pragma warning(disable : 4214)
++#pragma warning(disable : 4244)
++#pragma warning(disable : 4305)		// truncation from const double to float
++#pragma warning(disable : 4310)		// cast truncates constant value
++#pragma warning(disable:  4505) 	// unreferenced local function has been removed
++#pragma warning(disable : 4514)
++#pragma warning(disable : 4702)		// unreachable code
++#pragma warning(disable : 4711)		// selected for automatic inline expansion
++#pragma warning(disable : 4220)		// varargs matches remaining parameters
++#pragma warning(disable : 4761)		// integral size mismatch 
++#endif
++
+ /* Include auto-config file to find out which system include files we need. */
+ 
+-#include "jconfig.h"		/* auto configuration options */
++#include "../jpeg-6b/jconfig.h"		/* auto configuration options */
+ #define JCONFIG_INCLUDED	/* so that jpeglib.h doesn't do it again */
+ 
+ /*
+diff -u -w /home/tma/sources/jpeg-6b/jmemnobs.c ./jmemnobs.c
+--- /home/tma/sources/jpeg-6b/jmemnobs.c	1996-01-06 23:31:18.000000000 +0000
++++ ./jmemnobs.c	2008-08-21 23:58:36.000000000 +0100
+@@ -8,39 +8,35 @@
+  * This file provides a really simple implementation of the system-
+  * dependent portion of the JPEG memory manager.  This implementation
+  * assumes that no backing-store files are needed: all required space
+- * can be obtained from malloc().
++ * can be obtained from ri.Malloc().
+  * This is very portable in the sense that it'll compile on almost anything,
+  * but you'd better have lots of main memory (or virtual memory) if you want
+  * to process big images.
+  * Note that the max_memory_to_use option is ignored by this implementation.
+  */
+ 
++#include "../renderer/tr_local.h"
++
+ #define JPEG_INTERNALS
+ #include "jinclude.h"
+ #include "jpeglib.h"
+ #include "jmemsys.h"		/* import the system-dependent declarations */
+ 
+-#ifndef HAVE_STDLIB_H		/* <stdlib.h> should declare malloc(),free() */
+-extern void * malloc JPP((size_t size));
+-extern void free JPP((void *ptr));
+-#endif
+-
+-
+ /*
+  * Memory allocation and freeing are controlled by the regular library
+- * routines malloc() and free().
++ * routines ri.Malloc() and ri.Free().
+  */
+ 
+ GLOBAL(void *)
+ jpeg_get_small (j_common_ptr cinfo, size_t sizeofobject)
+ {
+-  return (void *) malloc(sizeofobject);
++  return (void *) ri.Malloc(sizeofobject);
+ }
+ 
+ GLOBAL(void)
+ jpeg_free_small (j_common_ptr cinfo, void * object, size_t sizeofobject)
+ {
+-  free(object);
++  ri.Free(object);
+ }
+ 
+ 
+@@ -54,13 +50,13 @@
+ GLOBAL(void FAR *)
+ jpeg_get_large (j_common_ptr cinfo, size_t sizeofobject)
+ {
+-  return (void FAR *) malloc(sizeofobject);
++  return (void FAR *) ri.Malloc(sizeofobject);
+ }
+ 
+ GLOBAL(void)
+ jpeg_free_large (j_common_ptr cinfo, void FAR * object, size_t sizeofobject)
+ {
+-  free(object);
++  ri.Free(object);
+ }
+ 
+ 
+diff -u -w /home/tma/sources/jpeg-6b/jmorecfg.h ./jmorecfg.h
+--- /home/tma/sources/jpeg-6b/jmorecfg.h	1997-08-10 00:58:56.000000000 +0100
++++ ./jmorecfg.h	2008-08-21 23:58:36.000000000 +0100
+@@ -157,7 +157,8 @@
+ 
+ /* INT32 must hold at least signed 32-bit values. */
+ 
+-#ifndef XMD_H			/* X11/xmd.h correctly defines INT32 */
++/* MinGW basetsd.h defines INT32 - don't redefine it */
++#if !(defined __MINGW32__ && defined _BASETSD_H)
+ typedef long INT32;
+ #endif
+ 
+@@ -210,8 +211,10 @@
+  */
+ 
+ #ifdef NEED_FAR_POINTERS
++#undef FAR
+ #define FAR  far
+ #else
++#undef FAR
+ #define FAR
+ #endif
+ 
+@@ -223,9 +226,7 @@
+  * Defining HAVE_BOOLEAN before including jpeglib.h should make it work.
+  */
+ 
+-#ifndef HAVE_BOOLEAN
+-typedef int boolean;
+-#endif
++typedef unsigned char boolean;
+ #ifndef FALSE			/* in case these macros already exist */
+ #define FALSE	0		/* values of boolean */
+ #endif
+@@ -260,8 +261,8 @@
+ 
+ /* Capability options common to encoder and decoder: */
+ 
+-#define DCT_ISLOW_SUPPORTED	/* slow but accurate integer algorithm */
+-#define DCT_IFAST_SUPPORTED	/* faster, less accurate integer method */
++#undef DCT_ISLOW_SUPPORTED	/* slow but accurate integer algorithm */
++#undef DCT_IFAST_SUPPORTED	/* faster, less accurate integer method */
+ #define DCT_FLOAT_SUPPORTED	/* floating-point: accurate, fast on fast HW */
+ 
+ /* Encoder capability options: */
+@@ -283,15 +284,15 @@
+ /* Decoder capability options: */
+ 
+ #undef  D_ARITH_CODING_SUPPORTED    /* Arithmetic coding back end? */
+-#define D_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
+-#define D_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
+-#define SAVE_MARKERS_SUPPORTED	    /* jpeg_save_markers() needed? */
+-#define BLOCK_SMOOTHING_SUPPORTED   /* Block smoothing? (Progressive only) */
+-#define IDCT_SCALING_SUPPORTED	    /* Output rescaling via IDCT? */
++#undef D_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
++#undef D_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
++#undef SAVE_MARKERS_SUPPORTED	    /* jpeg_save_markers() needed? */
++#undef BLOCK_SMOOTHING_SUPPORTED   /* Block smoothing? (Progressive only) */
++#undef IDCT_SCALING_SUPPORTED	    /* Output rescaling via IDCT? */
+ #undef  UPSAMPLE_SCALING_SUPPORTED  /* Output rescaling at upsample stage? */
+-#define UPSAMPLE_MERGING_SUPPORTED  /* Fast path for sloppy upsampling? */
+-#define QUANT_1PASS_SUPPORTED	    /* 1-pass color quantization? */
+-#define QUANT_2PASS_SUPPORTED	    /* 2-pass color quantization? */
++#undef UPSAMPLE_MERGING_SUPPORTED  /* Fast path for sloppy upsampling? */
++#undef QUANT_1PASS_SUPPORTED	    /* 1-pass color quantization? */
++#undef QUANT_2PASS_SUPPORTED	    /* 2-pass color quantization? */
+ 
+ /* more capability options later, no doubt */
+ 
+@@ -314,7 +315,7 @@
+ #define RGB_RED		0	/* Offset of Red in an RGB scanline element */
+ #define RGB_GREEN	1	/* Offset of Green */
+ #define RGB_BLUE	2	/* Offset of Blue */
+-#define RGB_PIXELSIZE	3	/* JSAMPLEs per RGB scanline element */
++#define RGB_PIXELSIZE	4	/* JSAMPLEs per RGB scanline element */
+ 
+ 
+ /* Definitions for speed-related optimizations. */
+diff -u -w /home/tma/sources/jpeg-6b/jpeglib.h ./jpeglib.h
+--- /home/tma/sources/jpeg-6b/jpeglib.h	1998-02-21 19:48:14.000000000 +0000
++++ ./jpeglib.h	2008-08-22 00:01:58.000000000 +0100
+@@ -21,9 +21,9 @@
+  */
+ 
+ #ifndef JCONFIG_INCLUDED	/* in case jinclude.h already did */
+-#include "jconfig.h"		/* widely used configuration options */
++#include "../jpeg-6b/jconfig.h"		/* widely used configuration options */
+ #endif
+-#include "jmorecfg.h"		/* seldom changed options */
++#include "../jpeg-6b/jmorecfg.h"		/* seldom changed options */
+ 
+ 
+ /* Version ID for the JPEG library.
+@@ -835,7 +835,7 @@
+ #define jpeg_destroy_compress	jDestCompress
+ #define jpeg_destroy_decompress	jDestDecompress
+ #define jpeg_stdio_dest		jStdDest
+-#define jpeg_stdio_src		jStdSrc
++#define jpeg_mem_src		jMemSrc
+ #define jpeg_set_defaults	jSetDefaults
+ #define jpeg_set_colorspace	jSetColorspace
+ #define jpeg_default_colorspace	jDefColorspace
+@@ -908,7 +908,7 @@
+ /* Standard data source and destination managers: stdio streams. */
+ /* Caller is responsible for opening the file before and closing after. */
+ EXTERN(void) jpeg_stdio_dest JPP((j_compress_ptr cinfo, FILE * outfile));
+-EXTERN(void) jpeg_stdio_src JPP((j_decompress_ptr cinfo, FILE * infile));
++EXTERN(void) jpeg_mem_src JPP((j_decompress_ptr cinfo, unsigned char *inbuf, size_t size));
+ 
+ /* Default parameter setup for compression */
+ EXTERN(void) jpeg_set_defaults JPP((j_compress_ptr cinfo));
+@@ -1089,8 +1089,8 @@
+  */
+ 
+ #ifdef JPEG_INTERNALS
+-#include "jpegint.h"		/* fetch private declarations */
+-#include "jerror.h"		/* fetch error codes too */
++#include "../jpeg-6b/jpegint.h"		/* fetch private declarations */
++#include "../jpeg-6b/jerror.h"		/* fetch error codes too */
+ #endif
+ 
+ #endif /* JPEGLIB_H */
