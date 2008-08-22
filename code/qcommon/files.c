@@ -298,6 +298,11 @@ char lastValidGame[MAX_OSPATH];
 FILE*		missingFiles = NULL;
 #endif
 
+/* C99 defines __func__ */
+#ifndef __func__
+#define __func__ "(unknown)"
+#endif
+
 /*
 ==============
 FS_Initialized
@@ -526,7 +531,7 @@ static void FS_CopyFile( char *fromOSPath, char *toOSPath ) {
 
 	Com_Printf( "copy %s to %s\n", fromOSPath, toOSPath );
 
-	FS_FilenameIsExecutable( toOSPath, __FUNCTION__ );
+	FS_FilenameIsExecutable( toOSPath, __func__ );
 
 	if (strstr(fromOSPath, "journal.dat") || strstr(fromOSPath, "journaldata.dat")) {
 		Com_Printf( "Ignoring journal files\n");
@@ -569,7 +574,7 @@ FS_Remove
 ===========
 */
 void FS_Remove( const char *osPath ) {
-	FS_FilenameIsExecutable( osPath, __FUNCTION__ );
+	FS_FilenameIsExecutable( osPath, __func__ );
 
 	remove( osPath );
 }
@@ -581,7 +586,7 @@ FS_HomeRemove
 ===========
 */
 void FS_HomeRemove( const char *homePath ) {
-	FS_FilenameIsExecutable( homePath, __FUNCTION__ );
+	FS_FilenameIsExecutable( homePath, __func__ );
 
 	remove( FS_BuildOSPath( fs_homepath->string,
 			fs_gamedir, homePath ) );
@@ -660,7 +665,7 @@ fileHandle_t FS_SV_FOpenFileWrite( const char *filename ) {
 		Com_Printf( "FS_SV_FOpenFileWrite: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __FUNCTION__ );
+	FS_FilenameIsExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;
@@ -771,7 +776,7 @@ void FS_SV_Rename( const char *from, const char *to ) {
 		Com_Printf( "FS_SV_Rename: %s --> %s\n", from_ospath, to_ospath );
 	}
 
-	FS_FilenameIsExecutable( to_ospath, __FUNCTION__ );
+	FS_FilenameIsExecutable( to_ospath, __func__ );
 
 	if (rename( from_ospath, to_ospath )) {
 		// Failed, try copying it and deleting the original
@@ -805,7 +810,7 @@ void FS_Rename( const char *from, const char *to ) {
 		Com_Printf( "FS_Rename: %s --> %s\n", from_ospath, to_ospath );
 	}
 
-	FS_FilenameIsExecutable( to_ospath, __FUNCTION__ );
+	FS_FilenameIsExecutable( to_ospath, __func__ );
 
 	if (rename( from_ospath, to_ospath )) {
 		// Failed, try copying it and deleting the original
@@ -868,7 +873,7 @@ fileHandle_t FS_FOpenFileWrite( const char *filename ) {
 		Com_Printf( "FS_FOpenFileWrite: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __FUNCTION__ );
+	FS_FilenameIsExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;
@@ -916,7 +921,7 @@ fileHandle_t FS_FOpenFileAppend( const char *filename ) {
 		Com_Printf( "FS_FOpenFileAppend: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __FUNCTION__ );
+	FS_FilenameIsExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;

@@ -992,8 +992,6 @@ If the delta removes the entity, entityState_t->number will be set to MAX_GENTIT
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-extern	cvar_t	*cl_shownet;
-
 void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to, 
 						 int number) {
 	int			i, lc;

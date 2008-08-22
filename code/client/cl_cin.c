@@ -135,7 +135,6 @@ static int				currentHandle = -1;
 static int				CL_handle = -1;
 
 extern int				s_soundtime;		// sample PAIRS
-extern int   			s_paintedtime; 		// sample PAIRS
 
 
 void CIN_CloseAllVideos(void) {

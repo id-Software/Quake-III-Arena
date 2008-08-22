@@ -41,6 +41,9 @@ endif
 ifndef BUILD_GAME_QVM
   BUILD_GAME_QVM   =
 endif
+ifndef BUILD_MISSIONPACK
+  BUILD_MISSIONPACK=
+endif
 
 ifneq ($(PLATFORM),darwin)
   BUILD_CLIENT_SMP = 0
@@ -786,10 +789,13 @@ ifneq ($(BUILD_GAME_SO),0)
   TARGETS += \
     $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT) \
     $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT) \
-    $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)     \
+    $(B)/baseq3/ui$(ARCH).$(SHLIBEXT)
+  ifneq ($(BUILD_MISSIONPACK),0)
+    TARGETS += \
     $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
     $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT) \
     $(B)/missionpack/ui$(ARCH).$(SHLIBEXT)
+  endif
 endif
 
 ifneq ($(BUILD_GAME_QVM),0)
@@ -797,10 +803,13 @@ ifneq ($(BUILD_GAME_QVM),0)
     TARGETS += \
       $(B)/baseq3/vm/cgame.qvm \
       $(B)/baseq3/vm/qagame.qvm \
-      $(B)/baseq3/vm/ui.qvm \
+      $(B)/baseq3/vm/ui.qvm
+    ifneq ($(BUILD_MISSIONPACK),0)
+      TARGETS += \
       $(B)/missionpack/vm/qagame.qvm \
       $(B)/missionpack/vm/cgame.qvm \
       $(B)/missionpack/vm/ui.qvm
+    endif
   endif
 endif
 
@@ -2048,6 +2057,7 @@ ifneq ($(BUILD_GAME_SO),0)
 					$(COPYDIR)/baseq3/.
 	$(INSTALL) -s -m 0755 $(BR)/baseq3/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/baseq3/.
+  ifneq ($(BUILD_MISSIONPACK),0)
 	-$(MKDIR) -p -m 0755 $(COPYDIR)/missionpack
 	$(INSTALL) -s -m 0755 $(BR)/missionpack/cgame$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
@@ -2055,6 +2065,7 @@ ifneq ($(BUILD_GAME_SO),0)
 					$(COPYDIR)/missionpack/.
 	$(INSTALL) -s -m 0755 $(BR)/missionpack/ui$(ARCH).$(SHLIBEXT) \
 					$(COPYDIR)/missionpack/.
+  endif
 endif
 
 clean: clean-debug clean-release
