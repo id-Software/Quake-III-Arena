@@ -725,18 +725,16 @@ void GLimp_EndFrame( void )
 	if( r_fullscreen->modified )
 	{
 		qboolean    fullscreen;
+		qboolean    needToToggle = qtrue;
 		qboolean    sdlToggled = qfalse;
 		SDL_Surface *s = SDL_GetVideoSurface( );
 
 		if( s )
 		{
 			// Find out the current state
-			if( s->flags & SDL_FULLSCREEN )
-				fullscreen = qtrue;
-			else
-				fullscreen = qfalse;
+			fullscreen = !!( s->flags & SDL_FULLSCREEN );
 				
-			if (r_fullscreen->integer && Cvar_VariableIntegerValue( "in_nograb" ))
+			if( r_fullscreen->integer && Cvar_VariableIntegerValue( "in_nograb" ) )
 			{
 				ri.Printf( PRINT_ALL, "Fullscreen not allowed with in_nograb 1\n");
 				ri.Cvar_Set( "r_fullscreen", "0" );
@@ -744,17 +742,20 @@ void GLimp_EndFrame( void )
 			}
 
 			// Is the state we want different from the current state?
-			if( !!r_fullscreen->integer != fullscreen )
+			needToToggle = !!r_fullscreen->integer != fullscreen;
+
+			if( needToToggle )
 				sdlToggled = SDL_WM_ToggleFullScreen( s );
-			else
-				sdlToggled = qtrue;
 		}
 
-		// SDL_WM_ToggleFullScreen didn't work, so do it the slow way
-		if( !sdlToggled )
-			Cbuf_AddText( "vid_restart" );
+		if( needToToggle )
+		{
+			// SDL_WM_ToggleFullScreen didn't work, so do it the slow way
+			if( !sdlToggled )
+				Cbuf_AddText( "vid_restart" );
 
-		IN_Restart( );
+			IN_Restart( );
+		}
 
 		r_fullscreen->modified = qfalse;
 	}
