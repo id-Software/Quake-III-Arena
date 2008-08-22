@@ -234,11 +234,17 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 					*key = CTRL('h');
 					*buf = *key;
 				}
+				else
+					*buf = ch;
 				break;
 
 			default: *buf = ch; break;
 		}
 	}
+
+	// Never allow a '~' SE_CHAR event to be generated
+	if( *key == '~' )
+		*buf = '\0';
 
 	if( in_keyboardDebug->integer )
 		IN_PrintKey( keysym, *key, down );
