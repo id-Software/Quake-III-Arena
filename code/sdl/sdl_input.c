@@ -169,7 +169,7 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 			case SDLK_F14:          *key = K_F14;           break;
 			case SDLK_F15:          *key = K_F15;           break;
 
-			case SDLK_BACKSPACE:    *key = K_BACKSPACE;     break; // ctrl-h
+			case SDLK_BACKSPACE:    *key = K_BACKSPACE;     break;
 			case SDLK_KP_PERIOD:    *key = K_KP_DEL;        break;
 			case SDLK_DELETE:       *key = K_DEL;           break;
 			case SDLK_PAUSE:        *key = K_PAUSE;         break;
@@ -227,16 +227,15 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 			// So the key marked ~ always drops the console
 			case '~': *key = '~'; break;
 
-			case 8: // backspace
+			case 127: // ASCII delete
 				if( *key != K_DEL )
 				{
 					// ctrl-h
 					*key = CTRL('h');
 					*buf = *key;
+					break;
 				}
-				else
-					*buf = ch;
-				break;
+				// fallthrough
 
 			default: *buf = ch; break;
 		}
