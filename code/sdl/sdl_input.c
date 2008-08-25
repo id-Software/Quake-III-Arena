@@ -218,25 +218,37 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 		}
 	}
 
-	if( down && !( keysym->unicode & 0xFF80 ) )
+	if( down )
 	{
-		char ch = (char)keysym->unicode & 0x7F;
-
-		switch( ch )
+		if( keysym->unicode && !( keysym->unicode & 0xFF80 ) )
 		{
-			// So the key marked ~ always drops the console
-			case '~': *key = '~'; break;
+			char ch = (char)keysym->unicode & 0x7F;
 
-			case 127: // ASCII delete
-				if( *key != K_DEL )
-				{
-					// ctrl-h
-					*buf = CTRL('h');
-					break;
-				}
-				// fallthrough
+			switch( ch )
+			{
+				// So the key marked ~ always drops the console
+				case '~': *key = '~'; break;
 
-			default: *buf = ch; break;
+				case 127: // ASCII delete
+					if( *key != K_DEL )
+					{
+						// ctrl-h
+						*buf = CTRL('h');
+						break;
+					}
+					// fallthrough
+
+				default: *buf = ch; break;
+			}
+		}
+		else
+		{
+			// Unicode character which isn't ASCII, possibly the character
+			// following a dead key. Fallback on what SDL calls the key
+
+			const char *keyString = SDL_GetKeyName( keysym->sym );
+			if( strlen( keyString ) == 1 )
+				*buf = *keyString;
 		}
 	}
 
@@ -277,6 +289,21 @@ static io_connect_t IN_GetIOHandle(void) // mac os x mouse accel hack
 	return iohandle;
 }
 #endif
+
+/*
+===============
+IN_GobbleMotionEvents
+===============
+*/
+static void IN_GobbleMotionEvents( void )
+{
+	SDL_Event dummy[ 1 ];
+
+	// Gobble any mouse motion events
+	SDL_PumpEvents( );
+	while( SDL_PeepEvents( dummy, 1, SDL_GETEVENT,
+		SDL_EVENTMASK( SDL_MOUSEMOTION ) ) ) { }
+}
 
 /*
 ===============
@@ -333,6 +360,8 @@ static void IN_ActivateMouse( void )
 		SDL_ShowCursor( 0 );
 #endif
 		SDL_WM_GrabInput( SDL_GRAB_ON );
+
+		IN_GobbleMotionEvents( );
 	}
 
 	// in_nograb makes no sense in fullscreen mode
@@ -391,6 +420,8 @@ static void IN_DeactivateMouse( void )
 
 	if( mouseActive )
 	{
+		IN_GobbleMotionEvents( );
+
 		SDL_WM_GrabInput( SDL_GRAB_OFF );
 
 		// Don't warp the mouse unless the cursor is within the window

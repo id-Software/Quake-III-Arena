@@ -3333,6 +3333,14 @@ static void Field_CompleteCommand( char *cmd,
 						Field_CompleteCommand( p, qtrue, qtrue );
 				}
 			}
+			else if( !Q_stricmp( baseCmd, "unbind" ) && completionArgument == 2 )
+			{
+				// Skip "unbind "
+				p = Com_SkipTokens( cmd, 1, " " );
+
+				if( p > cmd )
+					Field_CompleteKeyname( );
+			}
 #endif
 		}
 	}
