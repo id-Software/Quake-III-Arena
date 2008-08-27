@@ -3131,6 +3131,37 @@ static char *Field_FindFirstSeparator( char *s )
 	return NULL;
 }
 
+/*
+===============
+Field_Complete
+===============
+*/
+static qboolean Field_Complete( void )
+{
+	int completionOffset;
+
+	if( matchCount == 0 )
+		return qfalse;
+
+	completionOffset = strlen( completionField->buffer ) - strlen( completionString );
+
+	Q_strncpyz( &completionField->buffer[ completionOffset ], shortestMatch,
+		sizeof( completionField->buffer ) - completionOffset );
+
+	completionField->cursor = strlen( completionField->buffer );
+
+	if( matchCount == 1 )
+	{
+		Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
+		completionField->cursor++;
+		return qtrue;
+	}
+
+	Com_Printf( "]%s\n", completionField->buffer );
+
+	return qfalse;
+}
+
 #ifndef DEDICATED
 /*
 ===============
@@ -3144,24 +3175,8 @@ static void Field_CompleteKeyname( void )
 
 	Key_KeynameCompletion( FindMatches );
 
-	if( matchCount == 0 )
-		return;
-
-	Q_strncpyz( &completionField->buffer[ strlen( completionField->buffer ) -
-		strlen( completionString ) ], shortestMatch,
-		sizeof( completionField->buffer ) );
-	completionField->cursor = strlen( completionField->buffer );
-
-	if( matchCount == 1 )
-	{
-		Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
-		completionField->cursor++;
-		return;
-	}
-
-	Com_Printf( "]%s\n", completionField->buffer );
-	
-	Key_KeynameCompletion( PrintMatches );
+	if( !Field_Complete( ) )
+		Key_KeynameCompletion( PrintMatches );
 }
 #endif
 
@@ -3178,24 +3193,8 @@ static void Field_CompleteFilename( const char *dir,
 
 	FS_FilenameCompletion( dir, ext, stripExt, FindMatches );
 
-	if( matchCount == 0 )
-		return;
-
-	Q_strncpyz( &completionField->buffer[ strlen( completionField->buffer ) -
-		strlen( completionString ) ], shortestMatch,
-		sizeof( completionField->buffer ) );
-	completionField->cursor = strlen( completionField->buffer );
-
-	if( matchCount == 1 )
-	{
-		Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
-		completionField->cursor++;
-		return;
-	}
-
-	Com_Printf( "]%s\n", completionField->buffer );
-	
-	FS_FilenameCompletion( dir, ext, stripExt, PrintMatches );
+	if( !Field_Complete( ) )
+		FS_FilenameCompletion( dir, ext, stripExt, PrintMatches );
 }
 
 /*
@@ -3346,8 +3345,6 @@ static void Field_CompleteCommand( char *cmd,
 	}
 	else
 	{
-		int completionOffset;
-
 		if( completionString[0] == '\\' || completionString[0] == '/' )
 			completionString++;
 
@@ -3363,31 +3360,15 @@ static void Field_CompleteCommand( char *cmd,
 		if( doCvars )
 			Cvar_CommandCompletion( FindMatches );
 
-		if( matchCount == 0 )
-			return; // no matches
-
-		completionOffset = strlen( completionField->buffer ) - strlen( completionString );
-
-		Q_strncpyz( &completionField->buffer[ completionOffset ], shortestMatch,
-			sizeof( completionField->buffer ) - completionOffset );
-
-		completionField->cursor = strlen( completionField->buffer );
-
-		if( matchCount == 1 )
+		if( !Field_Complete( ) )
 		{
-			Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
-			completionField->cursor++;
-			return;
+			// run through again, printing matches
+			if( doCommands )
+				Cmd_CommandCompletion( PrintMatches );
+
+			if( doCvars )
+				Cvar_CommandCompletion( PrintCvarMatches );
 		}
-
-		Com_Printf( "]%s\n", completionField->buffer );
-
-		// run through again, printing matches
-		if( doCommands )
-			Cmd_CommandCompletion( PrintMatches );
-
-		if( doCvars )
-			Cvar_CommandCompletion( PrintCvarMatches );
 	}
 }
 
