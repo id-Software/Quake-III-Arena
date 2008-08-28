@@ -146,8 +146,8 @@ static qboolean IN_IsConsoleKey( keyNum_t key, const char *buf )
 		}
 	}
 
-	// If key is ASCII, use the character instead
-	if( key >= K_SPACE && key < K_BACKSPACE )
+	// Use the character in preference to the key name
+	if( *buf )
 		key = 0;
 
 	for( i = 0; i < numConsoleKeys; i++ )
