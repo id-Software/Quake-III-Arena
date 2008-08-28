@@ -77,7 +77,7 @@ static cvar_t *in_joystickNo        = NULL;
 IN_PrintKey
 ===============
 */
-static void IN_PrintKey( const SDL_keysym *keysym, int key, qboolean down )
+static void IN_PrintKey( const SDL_keysym *keysym, keyNum_t key, qboolean down )
 {
 	if( down )
 		Com_Printf( "+ " );
@@ -100,15 +100,66 @@ static void IN_PrintKey( const SDL_keysym *keysym, int key, qboolean down )
 	if( keysym->mod & KMOD_MODE )     Com_Printf( " KMOD_MODE" );
 	if( keysym->mod & KMOD_RESERVED ) Com_Printf( " KMOD_RESERVED" );
 
+	Com_Printf( " Q:%d(%s)", key, Key_KeynumToString( key ) );
+
 	if( keysym->unicode )
 	{
-		Com_Printf( " %d", keysym->unicode );
+		Com_Printf( " U:%d", keysym->unicode );
 
 		if( keysym->unicode > ' ' && keysym->unicode < '~' )
 			Com_Printf( "(%c)", (char)keysym->unicode );
 	}
 
-	Com_Printf( " %d(%s)\n", key, Key_KeynumToString( key ) );
+	Com_Printf( "\n" );
+}
+
+#define MAX_CONSOLE_KEYS 16
+
+/*
+===============
+IN_IsConsoleKey
+===============
+*/
+static qboolean IN_IsConsoleKey( keyNum_t key, const char *buf )
+{
+	static int consoleKeys[ MAX_CONSOLE_KEYS ];
+	static int numConsoleKeys = 0;
+	int i;
+
+	// Only parse the variable when it changes
+	if( cl_consoleKeys->modified )
+	{
+		char *text_p, *token;
+
+		cl_consoleKeys->modified = qfalse;
+		text_p = cl_consoleKeys->string;
+		numConsoleKeys = 0;
+
+		while( numConsoleKeys < MAX_CONSOLE_KEYS )
+		{
+			token = COM_Parse( &text_p );
+			if( !token[ 0 ] )
+				break;
+
+			consoleKeys[ numConsoleKeys++ ] =
+				Key_StringToKeynum( token );
+		}
+	}
+
+	// If key is ASCII, use the character instead
+	if( key >= K_SPACE && key < K_BACKSPACE )
+		key = 0;
+
+	for( i = 0; i < numConsoleKeys; i++ )
+	{
+		if( !consoleKeys[ i ] )
+			continue;
+
+		if( consoleKeys[ i ] == key || consoleKeys[ i ] == *buf )
+			return qtrue;
+	}
+
+	return qfalse;
 }
 
 /*
@@ -117,7 +168,7 @@ IN_TranslateSDLToQ3Key
 ===============
 */
 static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
-	int *key, qboolean down )
+	keyNum_t *key, qboolean down )
 {
 	static char buf[ 2 ] = { '\0', '\0' };
 
@@ -131,7 +182,7 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 	}
 	else
 	{
-		switch (keysym->sym)
+		switch( keysym->sym )
 		{
 			case SDLK_PAGEUP:       *key = K_PGUP;          break;
 			case SDLK_KP9:          *key = K_KP_PGUP;       break;
@@ -218,46 +269,34 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 		}
 	}
 
-	if( down )
+	if( down && keysym->unicode && !( keysym->unicode & 0xFF80 ) )
 	{
-		if( keysym->unicode && !( keysym->unicode & 0xFF80 ) )
+		char ch = (char)keysym->unicode & 0x7F;
+
+		switch( ch )
 		{
-			char ch = (char)keysym->unicode & 0x7F;
+			case 127: // ASCII delete
+				if( *key != K_DEL )
+				{
+					// ctrl-h
+					*buf = CTRL('h');
+					break;
+				}
+				// fallthrough
 
-			switch( ch )
-			{
-				// So the key marked ~ always drops the console
-				case '~': *key = '~'; break;
-
-				case 127: // ASCII delete
-					if( *key != K_DEL )
-					{
-						// ctrl-h
-						*buf = CTRL('h');
-						break;
-					}
-					// fallthrough
-
-				default: *buf = ch; break;
-			}
-		}
-		else
-		{
-			// Unicode character which isn't ASCII, possibly the character
-			// following a dead key. Fallback on what SDL calls the key
-
-			const char *keyString = SDL_GetKeyName( keysym->sym );
-			if( strlen( keyString ) == 1 )
-				*buf = *keyString;
+			default: *buf = ch; break;
 		}
 	}
 
-	// Never allow a '~' SE_CHAR event to be generated
-	if( *key == '~' )
-		*buf = '\0';
-
 	if( in_keyboardDebug->integer )
 		IN_PrintKey( keysym, *key, down );
+
+	if( IN_IsConsoleKey( *key, buf ) )
+	{
+		// Console keys can't be bound or generate characters
+		*key = K_CONSOLE;
+		*buf = '\0';
+	}
 
 	return buf;
 }
@@ -737,7 +776,7 @@ static void IN_ProcessEvents( void )
 {
 	SDL_Event e;
 	const char *p = NULL;
-	int key = 0;
+	keyNum_t key = 0;
 
 	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
 			return;

@@ -101,6 +101,10 @@ New cvars
   cl_autoRecordDemo                 - record a new demo on each map change
   cl_aviFrameRate                   - the framerate to use when capturing video
   cl_aviMotionJpeg                  - use the mjpeg codec when capturing video
+  cl_guidServerUniq                 - makes cl_guid unique for each server
+  cl_cURLLib                        - filename of cURL library to load
+  cl_consoleKeys                    - space delimited list of key names or
+                                      characters that toggle the console
 
   s_useOpenAL                       - use the OpenAL sound backend if available
   s_alPrecache                      - cache OpenAL sounds before use
@@ -138,8 +142,6 @@ New cvars
   in_joystickNo                     - select which joystick to use
   in_keyboardDebug                  - print keyboard debug info
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
-  cl_guidServerUniq                 - makes cl_guid unique for each server
-  cl_cURLLib                        - filename of cURL library to load
   sv_dlURL                          - the base of the HTTP or FTP site that
                                       holds custom pk3 files for your server
 
@@ -379,20 +381,39 @@ SDL Keyboard Differences
     * "Caps Lock" and "Num Lock" can not be used as normal binds since they
       do not send a KEYUP event until the key is pressed again.
 
-    * SDL > 1.2.9 does not support disabling "Dead Key" recognition.
-      In order to send "Dead Key" characters (e.g. ~, ', `, and ^), you
-      must key a Space (or sometimes the same character again) after the
-      character to send it on many international keyboard layouts.
+    * SDL > 1.2.9 does not support disabling dead key recognition. In order to
+      send dead key characters (e.g. ~, ', `, and ^), you must key a Space (or
+      sometimes the same character again) after the character to send it on
+      many international keyboard layouts.
 
     * The SDL client supports many more keys than the original Quake3 client.
       For example the keys: "Windows", "SysReq", "ScrollLock", and "Break".
-      For non-US keyboards, all of the so called "World" keys are now
-      supported as well as F13, F14, F15, and the country-specific
-      mode/meta keys.
+      For non-US keyboards, all of the so called "World" keys are now supported
+      as well as F13, F14, F15, and the country-specific mode/meta keys.
 
-  SDL's "Dead Key" behaviour makes the hard-coded toggleConsole binds ~ and `
-  annoying to use on many non-US keyboards.  In response, an additional
-  toggleConsole bind has been added on the key combination Shift-Esc.
+  On many international layouts the default console toggle keys are also dead
+  keys, meaning that dropping the console potentially results in
+  unintentionally initiating the keying of a dead key. Futhermore SDL 1.2's
+  dead key support is broken by design and Q3 doesn't support non-ASCII text
+  entry, so the chances are you won't get the correct character anyway.
+
+  If you use such a keyboard layout, you can set the cvar cl_consoleKeys. This
+  is a space delimited list of key names that will toggle the console. The key
+  names are the usual Q3 names e.g. "BACKSPACE", "PAUSE", "WINDOWS" etc. It's
+  also possible to use ASCII characters, either by hexadecimal number e.g.
+  "0x7e" (equivalent to ~) or directly by character. Some example values for
+  cl_consoleKeys:
+
+    "0x7e 0x60"               Toggle on ~ or ` (the default)
+    "WINDOWS"                 Toggle on the Windows key
+    "c"                       Toggle on the c character
+    "C"                       Toggle on the C character (Shift-c)
+    "PAUSE F1 PGUP"           Toggle on the Pause, F1 or Page Up keys
+
+  Note that when you elect a set of console keys or characters, they cannot
+  then be used for binding, nor will they generate characters when entering
+  text. Also, in addition to the nominated console keys, Shift-ESC is hard
+  coded to always toggle the console.
 
 Mouse Input On Windows
   ioq3 uses SDL to abstract away as much as possible from platform specific
