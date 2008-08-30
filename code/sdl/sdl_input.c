@@ -120,9 +120,24 @@ static void IN_PrintKey( const SDL_keysym *keysym, keyNum_t key, qboolean down )
 IN_IsConsoleKey
 ===============
 */
-static qboolean IN_IsConsoleKey( keyNum_t key, const char *buf )
+static qboolean IN_IsConsoleKey( keyNum_t key, const char character )
 {
-	static int consoleKeys[ MAX_CONSOLE_KEYS ];
+	typedef struct consoleKey_s
+	{
+		enum
+		{
+			KEY,
+			CHARACTER
+		} type;
+
+		union
+		{
+			keyNum_t key;
+			char character;
+		} u;
+	} consoleKey_t;
+
+	static consoleKey_t consoleKeys[ MAX_CONSOLE_KEYS ];
 	static int numConsoleKeys = 0;
 	int i;
 
@@ -137,26 +152,53 @@ static qboolean IN_IsConsoleKey( keyNum_t key, const char *buf )
 
 		while( numConsoleKeys < MAX_CONSOLE_KEYS )
 		{
+			consoleKey_t *c = &consoleKeys[ numConsoleKeys ];
+			char *keyName;
+
 			token = COM_Parse( &text_p );
 			if( !token[ 0 ] )
 				break;
 
-			consoleKeys[ numConsoleKeys++ ] =
-				Key_StringToKeynum( token );
+			c->u.key = Key_StringToKeynum( token );
+
+			// 0 isn't a key
+			if( c->u.key == 0 )
+				continue;
+
+			keyName = Key_KeynumToString( c->u.key );
+
+			if( strlen( keyName ) == 1 )
+			{
+				c->type = CHARACTER;
+				c->u.character = *keyName;
+			}
+			else
+				c->type = KEY;
+
+			numConsoleKeys++;
 		}
 	}
 
 	// Use the character in preference to the key name
-	if( *buf )
+	if( character != '\0' )
 		key = 0;
 
 	for( i = 0; i < numConsoleKeys; i++ )
 	{
-		if( !consoleKeys[ i ] )
-			continue;
+		consoleKey_t *c = &consoleKeys[ i ];
 
-		if( consoleKeys[ i ] == key || consoleKeys[ i ] == *buf )
-			return qtrue;
+		switch( c->type )
+		{
+			case KEY:
+				if( key && c->u.key == key )
+					return qtrue;
+				break;
+
+			case CHARACTER:
+				if( c->u.character == character )
+					return qtrue;
+				break;
+		}
 	}
 
 	return qfalse;
@@ -291,7 +333,7 @@ static const char *IN_TranslateSDLToQ3Key( SDL_keysym *keysym,
 	if( in_keyboardDebug->integer )
 		IN_PrintKey( keysym, *key, down );
 
-	if( IN_IsConsoleKey( *key, buf ) )
+	if( IN_IsConsoleKey( *key, *buf ) )
 	{
 		// Console keys can't be bound or generate characters
 		*key = K_CONSOLE;
