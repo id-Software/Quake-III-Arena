@@ -3141,7 +3141,7 @@ static qboolean Field_Complete( void )
 	int completionOffset;
 
 	if( matchCount == 0 )
-		return qfalse;
+		return qtrue;
 
 	completionOffset = strlen( completionField->buffer ) - strlen( completionString );
 
