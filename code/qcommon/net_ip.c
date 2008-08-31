@@ -227,6 +227,7 @@ static void NetadrToSockadr( netadr_t *a, struct sockaddr *s ) {
 		((struct sockaddr_in6 *)s)->sin6_family = AF_INET6;
 		((struct sockaddr_in6 *)s)->sin6_addr = * ((struct in6_addr *) &a->ip6);
 		((struct sockaddr_in6 *)s)->sin6_port = a->port;
+		((struct sockaddr_in6 *)s)->sin6_scope_id = a->scope_id;
 	}
 	else if(a->type == NA_MULTICAST6)
 	{
@@ -248,6 +249,7 @@ static void SockadrToNetadr( struct sockaddr *s, netadr_t *a ) {
 		a->type = NA_IP6;
 		memcpy(a->ip6, &((struct sockaddr_in6 *)s)->sin6_addr, sizeof(a->ip6));
 		a->port = ((struct sockaddr_in6 *)s)->sin6_port;
+		a->scope_id = ((struct sockaddr_in6 *)s)->sin6_scope_id;
 	}
 }
 
@@ -279,14 +281,11 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 	memset(sadr, '\0', sizeof(*sadr));
 	memset(&hints, '\0', sizeof(hints));
 
-	// workaround for buggy MacOSX getaddrinfo implementation that doesn't handle AF_UNSPEC in hints correctly.
-	if(family == AF_UNSPEC)
-		hintsp = NULL;
-	else
-	{
-		hintsp = &hints;
-		hintsp->ai_family = family;
-	}
+	hintsp = &hints;
+	hintsp->ai_family = family;
+	hintsp->ai_socktype = SOCK_DGRAM;
+	// FIXME: we should set "->ai_flags" to AI_PASSIVE if we intend
+	//        to use this structure for a bind() - instead of a sendto()
 	
 	retval = getaddrinfo(s, NULL, hintsp, &res);
 
@@ -399,7 +398,7 @@ qboolean	NET_CompareBaseAdr (netadr_t a, netadr_t b)
 	
 	if (a.type == NA_IP6)
 	{
-		if(!memcmp(a.ip6, b.ip6, sizeof(a.ip6)))
+		if(!memcmp(a.ip6, b.ip6, sizeof(a.ip6)) && a.scope_id == b.scope_id)
 				  return qtrue;
 		
 		return qfalse;
@@ -720,6 +719,8 @@ qboolean Sys_IsLANAddress( netadr_t adr ) {
 			}
 			else
 			{
+				// TODO? should we check the scope_id here?
+
 				compareip = (byte *) &((struct sockaddr_in6 *) &localIP[index].addr)->sin6_addr;
 				comparemask = (byte *) &((struct sockaddr_in6 *) &localIP[index].netmask)->sin6_addr;
 				compareadr = adr.ip6;

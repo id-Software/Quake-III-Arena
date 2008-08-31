@@ -38,6 +38,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define CLIENT_WINDOW_MIN_TITLE 	"ioq3"
 #endif
 
+#define GAMENAME BASEGAME
+
 #ifdef _MSC_VER
   #define PRODUCT_VERSION "1.35"
 #endif
