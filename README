@@ -433,7 +433,7 @@ Mouse Input On Windows
     * Low quality mouse input data when using the windib driver due to use of
       WM_MOUSEMOVE events. Use GetCursorPos API call instead.
 
-  The patch can be found in misc/sdl-win32-mouse-fixes.diff.
+  The patch can be found in misc/sdl-win32-fixes.diff.
 
 PNG support
   ioquake3 supports the use of PNG (Portable Network Graphic) images as

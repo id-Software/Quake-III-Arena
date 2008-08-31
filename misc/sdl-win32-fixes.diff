@@ -513,7 +513,19 @@ Index: src/video/windx5/SDL_dx5events.c
  	}
  }
  
-@@ -840,7 +912,7 @@
+@@ -516,10 +588,7 @@
+ 
+ 		/* The keyboard is handled via DirectInput */
+ 		case WM_SYSKEYUP:
+-		case WM_SYSKEYDOWN: {
+-			/* Pass syskey to DefWindwoProc (ALT-F4, etc.) */
+-		}
+-		break;
++		case WM_SYSKEYDOWN:
+ 		case WM_KEYUP:
+ 		case WM_KEYDOWN: {
+ 			/* Ignore windows keyboard messages */;
+@@ -840,7 +909,7 @@
  		keysym->unicode = vkey;
  #else
  		GetKeyboardState(keystate);
