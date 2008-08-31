@@ -264,19 +264,18 @@ Index: src/video/windib/SDL_dibevents.c
  void DIB_PumpEvents(_THIS)
  {
  	MSG msg;
-@@ -271,6 +301,11 @@
+@@ -271,6 +301,10 @@
  			DispatchMessage(&msg);
  		}
  	}
 +
-+	if ( SDL_GetAppState() & (SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ==
-+		(SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ) {
++	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
 +		DIB_GenerateMouseMotionEvent( );
 +	}
  }
  
  static HKL hLayoutUS = NULL;
-@@ -494,7 +529,7 @@
+@@ -494,7 +528,7 @@
  		Uint16	wchars[2];
  
  		GetKeyboardState(keystate);
