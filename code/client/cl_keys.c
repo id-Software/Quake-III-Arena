@@ -776,7 +776,6 @@ qboolean Key_IsDown( int keynum ) {
 	return keys[keynum].down;
 }
 
-
 /*
 ===================
 Key_StringToKeynum
@@ -801,28 +800,12 @@ int Key_StringToKeynum( char *str ) {
 	}
 
 	// check for hex code
-	if ( str[0] == '0' && str[1] == 'x' && strlen( str ) == 4) {
-		int		n1, n2;
-		
-		n1 = str[2];
-		if ( n1 >= '0' && n1 <= '9' ) {
-			n1 -= '0';
-		} else if ( n1 >= 'a' && n1 <= 'f' ) {
-			n1 = n1 - 'a' + 10;
-		} else {
-			n1 = 0;
-		}
+	if ( strlen( str ) == 4 ) {
+		int n = Com_HexStrToInt( str );
 
-		n2 = str[3];
-		if ( n2 >= '0' && n2 <= '9' ) {
-			n2 -= '0';
-		} else if ( n2 >= 'a' && n2 <= 'f' ) {
-			n2 = n2 - 'a' + 10;
-		} else {
-			n2 = 0;
+		if ( n >= 0 ) {
+			return n;
 		}
-
-		return n1 * 16 + n2;
 	}
 
 	// scan for a text match

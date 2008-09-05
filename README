@@ -399,15 +399,14 @@ SDL Keyboard Differences
 
   If you use such a keyboard layout, you can set the cvar cl_consoleKeys. This
   is a space delimited list of key names that will toggle the console. The key
-  names are the usual Q3 names e.g. "BACKSPACE", "PAUSE", "WINDOWS" etc. It's
-  also possible to use ASCII characters, either by hexadecimal number e.g.
-  "0x7e" (equivalent to ~) or directly by character. Some example values for
-  cl_consoleKeys:
+  names are the usual Q3 names e.g. "~", "`", "c", "BACKSPACE", "PAUSE",
+  "WINDOWS" etc. It's also possible to use ASCII characters, by hexadecimal
+  number. Some example values for cl_consoleKeys:
 
-    "0x7e 0x60"               Toggle on ~ or ` (the default)
+    "~ ` 0x7e 0x60"           Toggle on ~ or ` (the default)
     "WINDOWS"                 Toggle on the Windows key
-    "c"                       Toggle on the c character
-    "C"                       Toggle on the C character (Shift-c)
+    "c"                       Toggle on the c key
+    "0x43"                    Toggle on the C character (Shift-c)
     "PAUSE F1 PGUP"           Toggle on the Pause, F1 or Page Up keys
 
   Note that when you elect a set of console keys or characters, they cannot
