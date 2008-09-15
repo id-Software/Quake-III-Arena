@@ -3666,7 +3666,7 @@ void CL_GlobalServers_f( void ) {
 	// Use the extended query for IPv6 masters
 	if (to.type == NA_IP6 || to.type == NA_MULTICAST6)
 	{
-		cmdname = "getserversExt " GAMENAME;
+		cmdname = "getserversExt " GAMENAME_FOR_MASTER;
 
 		// TODO: test if we only have an IPv6 connection. If it's the case,
 		//       request IPv6 servers only by appending " ipv6" to the command
