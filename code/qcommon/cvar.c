@@ -1055,6 +1055,22 @@ void	Cvar_Update( vmCvar_t *vmCvar ) {
 	vmCvar->integer = cv->integer;
 }
 
+/*
+==================
+Cvar_CompleteCvarName
+==================
+*/
+void Cvar_CompleteCvarName( char *args, int argNum )
+{
+	if( argNum == 2 )
+	{
+		// Skip "<cmd> "
+		char *p = Com_SkipTokens( args, 1, " " );
+
+		if( p > args )
+			Field_CompleteCommand( p, qfalse, qtrue );
+	}
+}
 
 /*
 ============
@@ -1068,11 +1084,17 @@ void Cvar_Init (void) {
 
 	Cmd_AddCommand ("print", Cvar_Print_f);
 	Cmd_AddCommand ("toggle", Cvar_Toggle_f);
+	Cmd_SetCommandCompletionFunc( "toggle", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("set", Cvar_Set_f);
+	Cmd_SetCommandCompletionFunc( "set", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("sets", Cvar_Set_f);
+	Cmd_SetCommandCompletionFunc( "sets", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("setu", Cvar_Set_f);
+	Cmd_SetCommandCompletionFunc( "setu", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("seta", Cvar_Set_f);
+	Cmd_SetCommandCompletionFunc( "seta", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("reset", Cvar_Reset_f);
+	Cmd_SetCommandCompletionFunc( "reset", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
 	Cmd_AddCommand ("cvar_restart", Cvar_Restart_f);
 }

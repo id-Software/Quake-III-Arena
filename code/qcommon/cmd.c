@@ -313,6 +313,7 @@ typedef struct cmd_function_s
 	struct cmd_function_s	*next;
 	char					*name;
 	xcommand_t				function;
+	completionFunc_t	complete;
 } cmd_function_t;
 
 
@@ -584,8 +585,24 @@ void	Cmd_AddCommand( const char *cmd_name, xcommand_t function ) {
 	cmd = S_Malloc (sizeof(cmd_function_t));
 	cmd->name = CopyString( cmd_name );
 	cmd->function = function;
+	cmd->complete = NULL;
 	cmd->next = cmd_functions;
 	cmd_functions = cmd;
+}
+
+/*
+============
+Cmd_SetCommandCompletionFunc
+============
+*/
+void Cmd_SetCommandCompletionFunc( const char *command, completionFunc_t complete ) {
+	cmd_function_t	*cmd;
+
+	for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
+		if( !Q_stricmp( command, cmd->name ) ) {
+			cmd->complete = complete;
+		}
+	}
 }
 
 /*
@@ -626,6 +643,21 @@ void	Cmd_CommandCompletion( void(*callback)(const char *s) ) {
 	
 	for (cmd=cmd_functions ; cmd ; cmd=cmd->next) {
 		callback( cmd->name );
+	}
+}
+
+/*
+============
+Cmd_CompleteArgument
+============
+*/
+void Cmd_CompleteArgument( const char *command, char *args, int argNum ) {
+	cmd_function_t	*cmd;
+
+	for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
+		if( !Q_stricmp( command, cmd->name ) && cmd->complete ) {
+			cmd->complete( args, argNum );
+		}
 	}
 }
 
@@ -720,6 +752,17 @@ void Cmd_List_f (void)
 }
 
 /*
+==================
+Cmd_CompleteCfgName
+==================
+*/
+void Cmd_CompleteCfgName( char *args, int argNum ) {
+	if( argNum == 2 ) {
+		Field_CompleteFilename( "", "cfg", qfalse );
+	}
+}
+
+/*
 ============
 Cmd_Init
 ============
@@ -727,7 +770,9 @@ Cmd_Init
 void Cmd_Init (void) {
 	Cmd_AddCommand ("cmdlist",Cmd_List_f);
 	Cmd_AddCommand ("exec",Cmd_Exec_f);
+	Cmd_SetCommandCompletionFunc( "exec", Cmd_CompleteCfgName );
 	Cmd_AddCommand ("vstr",Cmd_Vstr_f);
+	Cmd_SetCommandCompletionFunc( "vstr", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 }
