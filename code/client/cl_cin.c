@@ -1193,8 +1193,8 @@ redump:
 	cinTable[currentHandle].roq_id		 = framedata[0] + framedata[1]*256;
 	cinTable[currentHandle].RoQFrameSize = framedata[2] + framedata[3]*256 + framedata[4]*65536;
 	cinTable[currentHandle].roq_flags	 = framedata[6] + framedata[7]*256;
-	cinTable[currentHandle].roqF0		 = (char)framedata[7];
-	cinTable[currentHandle].roqF1		 = (char)framedata[6];
+	cinTable[currentHandle].roqF0		 = (signed char)framedata[7];
+	cinTable[currentHandle].roqF1		 = (signed char)framedata[6];
 
 	if (cinTable[currentHandle].RoQFrameSize>65536||cinTable[currentHandle].roq_id==0x1084) {
 		Com_DPrintf("roq_size>65536||roq_id==0x1084\n");
