@@ -339,8 +339,15 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 Sys_SockaddrToString
 =============
 */
-static void Sys_SockaddrToString(char *dest, int destlen, struct sockaddr *input, int inputlen)
+static void Sys_SockaddrToString(char *dest, int destlen, struct sockaddr *input)
 {
+	socklen_t inputlen;
+
+	if (input->sa_family == AF_INET6)
+		inputlen = sizeof(struct sockaddr_in6);
+	else
+		inputlen = sizeof(struct sockaddr_in);
+
 	getnameinfo(input, inputlen, dest, destlen, NULL, 0, NI_NUMERICHOST);
 }
 
@@ -423,7 +430,7 @@ const char	*NET_AdrToString (netadr_t a)
 	
 		memset(&sadr, 0, sizeof(sadr));
 		NetadrToSockadr(&a, (struct sockaddr *) &sadr);
-		Sys_SockaddrToString(s, sizeof(s), (struct sockaddr *) &sadr, sizeof(sadr));
+		Sys_SockaddrToString(s, sizeof(s), (struct sockaddr *) &sadr);
 	}
 
 	return s;
@@ -758,7 +765,7 @@ void Sys_ShowIP(void) {
 
 	for(i = 0; i < numIP; i++)
 	{
-		Sys_SockaddrToString(addrbuf, sizeof(addrbuf), (struct sockaddr *) &localIP[i].addr, sizeof((*localIP).addr));
+		Sys_SockaddrToString(addrbuf, sizeof(addrbuf), (struct sockaddr *) &localIP[i].addr);
 
 		if(localIP[i].type == NA_IP)
 			Com_Printf( "IP: %s\n", addrbuf);
