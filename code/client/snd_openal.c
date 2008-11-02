@@ -1898,7 +1898,7 @@ void S_AL_SoundInfo( void )
 	Com_Printf( "  Version:    %s\n", qalGetString( AL_VERSION ) );
 	Com_Printf( "  Renderer:   %s\n", qalGetString( AL_RENDERER ) );
 	Com_Printf( "  AL Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
-	Com_Printf( "  ALC Extensions: %s\n", qalcGetString( NULL, ALC_EXTENSIONS ) );
+	Com_Printf( "  ALC Extensions: %s\n", qalcGetString( alDevice, ALC_EXTENSIONS ) );
 	if(qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT"))
 	{
 		Com_Printf("  Device:     %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
