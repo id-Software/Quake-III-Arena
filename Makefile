@@ -285,29 +285,29 @@ ifeq ($(PLATFORM),linux)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  THREAD_LDFLAGS=-lpthread
-  LDFLAGS=-ldl -lm
+  THREAD_LIBS=-lpthread
+  LIBS=-ldl -lm
 
-  CLIENT_LDFLAGS=$(shell sdl-config --libs) -lGL
+  CLIENT_LIBS=$(shell sdl-config --libs) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += -lopenal
+      CLIENT_LIBS += -lopenal
     endif
   endif
 
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LDFLAGS += -lcurl
+      CLIENT_LIBS += -lcurl
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
   ifeq ($(USE_MUMBLE),1)
-    CLIENT_LDFLAGS += -lrt
+    CLIENT_LIBS += -lrt
   endif
 
 ifeq ($(USE_LOCAL_HEADERS),1)
@@ -317,11 +317,9 @@ ifeq ($(USE_LOCAL_HEADERS),1)
   ifeq ($(ARCH),i386)
     # linux32 make ...
     BASE_CFLAGS += -m32
-    LDFLAGS+=-m32
   else
   ifeq ($(ARCH),ppc64)
     BASE_CFLAGS += -m64
-    LDFLAGS += -m64
   endif
   endif
 
@@ -336,7 +334,7 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),darwin)
   HAVE_VM_COMPILED=true
-  CLIENT_LDFLAGS=
+  CLIENT_LIBS=
   OPTIMIZE=
   
   BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
@@ -357,7 +355,7 @@ ifeq ($(PLATFORM),darwin)
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += -framework OpenAL
+      CLIENT_LIBS += -framework OpenAL
     else
       BASE_CFLAGS += -DUSE_OPENAL_DLOPEN
     endif
@@ -366,7 +364,7 @@ ifeq ($(PLATFORM),darwin)
   ifeq ($(USE_CURL),1)
     BASE_CFLAGS += -DUSE_CURL
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LDFLAGS += -lcurl
+      CLIENT_LIBS += -lcurl
     else
       BASE_CFLAGS += -DUSE_CURL_DLOPEN
     endif
@@ -374,7 +372,7 @@ ifeq ($(PLATFORM),darwin)
 
   ifeq ($(USE_CODEC_VORBIS),1)
     BASE_CFLAGS += -DUSE_CODEC_VORBIS
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
@@ -387,7 +385,7 @@ ifeq ($(PLATFORM),darwin)
   #  the file has been modified by each build.
   LIBSDLMAIN=$(B)/libSDLmain.a
   LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
-  CLIENT_LDFLAGS += -framework Cocoa -framework IOKit -framework OpenGL \
+  CLIENT_LIBS += -framework Cocoa -framework IOKit -framework OpenGL \
     $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
 
   OPTIMIZE += -ffast-math -falign-loops=16
@@ -457,8 +455,9 @@ ifeq ($(PLATFORM),mingw32)
 
   BINEXT=.exe
 
-  LDFLAGS= -lws2_32 -lwinmm
-  CLIENT_LDFLAGS = -mwindows -lgdi32 -lole32 -lopengl32
+  LIBS= -lws2_32 -lwinmm
+  CLIENT_LDFLAGS = -mwindows
+  CLIENT_LIBS = -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_CURL),1)
     BASE_CFLAGS += -DUSE_CURL
@@ -466,35 +465,34 @@ ifeq ($(PLATFORM),mingw32)
     ifneq ($(USE_CURL_DLOPEN),1)
       ifeq ($(USE_LOCAL_HEADERS),1)
         BASE_CFLAGS += -DCURL_STATICLIB
-        CLIENT_LDFLAGS += $(LIBSDIR)/win32/libcurl.a
+        CLIENT_LIBS += $(LIBSDIR)/win32/libcurl.a
       else
-        CLIENT_LDFLAGS += $(CURL_LIBS)
+        CLIENT_LIBS += $(CURL_LIBS)
       endif
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
   ifeq ($(ARCH),x86)
     # build 32bit
     BASE_CFLAGS += -m32
-    LDFLAGS+=-m32
   endif
 
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   # libmingw32 must be linked before libSDLmain
-  CLIENT_LDFLAGS += -lmingw32
+  CLIENT_LIBS += -lmingw32
   ifeq ($(USE_LOCAL_HEADERS),1)
     BASE_CFLAGS += -I$(SDLHDIR)/include
-    CLIENT_LDFLAGS += $(LIBSDIR)/win32/libSDLmain.a \
+    CLIENT_LIBS += $(LIBSDIR)/win32/libSDLmain.a \
                       $(LIBSDIR)/win32/libSDL.dll.a
   else
     BASE_CFLAGS += $(SDL_CFLAGS)
-    CLIENT_LDFLAGS += $(SDL_LIBS)
+    CLIENT_LIBS += $(SDL_LIBS)
   endif
 
 
@@ -552,22 +550,22 @@ ifeq ($(PLATFORM),freebsd)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  THREAD_LDFLAGS=-lpthread
+  THREAD_LIBS=-lpthread
   # don't need -ldl (FreeBSD)
-  LDFLAGS=-lm
+  LIBS=-lm
 
-  CLIENT_LDFLAGS =
+  CLIENT_LIBS =
 
-  CLIENT_LDFLAGS += $(shell sdl-config --libs) -lGL
+  CLIENT_LIBS += $(shell sdl-config --libs) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lopenal
+      CLIENT_LIBS += $(THREAD_LIBS) -lopenal
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
 else # ifeq freebsd
@@ -609,21 +607,21 @@ ifeq ($(PLATFORM),openbsd)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  THREAD_LDFLAGS=-lpthread
-  LDFLAGS=-lm
+  THREAD_LIBS=-lpthread
+  LIBS=-lm
 
-  CLIENT_LDFLAGS =
+  CLIENT_LIBS =
 
-  CLIENT_LDFLAGS += $(shell sdl-config --libs) -lGL
+  CLIENT_LIBS += $(shell sdl-config --libs) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += $(THREAD_LDFLAGS) -lossaudio -lopenal
+      CLIENT_LIBS += $(THREAD_LIBS) -lossaudio -lopenal
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_LDFLAGS += -lvorbisfile -lvorbis -logg
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
 else # ifeq openbsd
@@ -638,11 +636,11 @@ ifeq ($(PLATFORM),netbsd)
     ARCH=i386
   endif
 
-  LDFLAGS=-lm
+  LIBS=-lm
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
-  THREAD_LDFLAGS=-lpthread
+  THREAD_LIBS=-lpthread
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
@@ -677,9 +675,9 @@ ifeq ($(PLATFORM),irix64)
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared
 
-  LDFLAGS=-ldl -lm -lgen
+  LIBS=-ldl -lm -lgen
   # FIXME: The X libraries probably aren't necessary?
-  CLIENT_LDFLAGS=-L/usr/X11/$(LIB) $(shell sdl-config --libs) -lGL \
+  CLIENT_LIBS=-L/usr/X11/$(LIB) $(shell sdl-config --libs) -lGL \
     -lX11 -lXext -lm
 
 else # ifeq IRIX
@@ -725,7 +723,6 @@ ifeq ($(PLATFORM),sunos)
       -falign-functions=2 -fstrength-reduce
     HAVE_VM_COMPILED=true
     BASE_CFLAGS += -m32
-    LDFLAGS += -m32
     BASE_CFLAGS += -I/usr/X11/include/NVIDIA
     CLIENT_LDFLAGS += -L/usr/X11/lib/NVIDIA -R/usr/X11/lib/NVIDIA
   endif
@@ -743,12 +740,12 @@ ifeq ($(PLATFORM),sunos)
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
 
-  THREAD_LDFLAGS=-lpthread
-  LDFLAGS=-lsocket -lnsl -ldl -lm
+  THREAD_LIBS=-lpthread
+  LIBS=-lsocket -lnsl -ldl -lm
 
   BOTCFLAGS=-O0
 
-  CLIENT_LDFLAGS +=$(shell sdl-config --libs) -lGL
+  CLIENT_LIBS +=$(shell sdl-config --libs) -lGL
 
 else # ifeq sunos
 
@@ -822,7 +819,7 @@ ifeq ($(USE_VOIP),1)
   ifeq ($(USE_INTERNAL_SPEEX),1)
     BASE_CFLAGS += -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   else
-    CLIENT_LDFLAGS += -lspeex
+    CLIENT_LIBS += -lspeex
   endif
 endif
 
@@ -976,6 +973,12 @@ targets: makedirs
 		echo "    $$i"; \
 	done
 	@echo ""
+	@echo "  LIBS:"
+	@for i in $(LIBS); \
+	do \
+		echo "    $$i"; \
+	done
+	@echo ""
 	@echo "  Output:"
 	@for i in $(TARGETS); \
 	do \
@@ -1020,6 +1023,7 @@ TOOLS_CFLAGS = $(TOOLS_OPTIMIZE) \
                -DTEMPDIR=\"$(TEMPDIR)\" -DSYSTEM=\"\" \
                -I$(Q3LCCSRCDIR) \
                -I$(LBURGDIR)
+TOOLS_LIBS =
 TOOLS_LDFLAGS =
 
 ifeq ($(GENERATE_DEPENDENCIES),1)
@@ -1052,7 +1056,7 @@ $(B)/tools/lburg/%.o: $(LBURGDIR)/%.c
 
 $(LBURG): $(LBURGOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $^
+	$(Q)$(CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $^ $(TOOLS_LIBS)
 
 Q3RCCOBJ = \
   $(B)/tools/rcc/alloc.o \
@@ -1097,7 +1101,7 @@ $(B)/tools/rcc/%.o: $(Q3LCCSRCDIR)/%.c
 
 $(Q3RCC): $(Q3RCCOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $^
+	$(Q)$(CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $^ $(TOOLS_LIBS)
 
 Q3CPPOBJ = \
 	$(B)/tools/cpp/cpp.o \
@@ -1116,7 +1120,7 @@ $(B)/tools/cpp/%.o: $(Q3CPPDIR)/%.c
 
 $(Q3CPP): $(Q3CPPOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $^
+	$(Q)$(CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $^ $(TOOLS_LIBS)
 
 Q3LCCOBJ = \
 	$(B)/tools/etc/lcc.o \
@@ -1127,7 +1131,7 @@ $(B)/tools/etc/%.o: $(Q3LCCETCDIR)/%.c
 
 $(Q3LCC): $(Q3LCCOBJ) $(Q3RCC) $(Q3CPP)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $(Q3LCCOBJ)
+	$(Q)$(CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $(Q3LCCOBJ) $(TOOLS_LIBS)
 
 define DO_Q3LCC
 $(echo_cmd) "Q3LCC $<"
@@ -1179,7 +1183,7 @@ $(B)/tools/asm/%.o: $(Q3ASMDIR)/%.c
 
 $(Q3ASM): $(Q3ASMOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(TOOLS_LDFLAGS) -o $@ $^
+	$(Q)$(CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $^ $(TOOLS_LIBS)
 
 
 #############################################################################
@@ -1451,13 +1455,15 @@ Q3POBJ_SMP += \
 
 $(B)/ioquake3.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) -o $@ $(Q3OBJ) $(Q3POBJ) $(CLIENT_LDFLAGS) \
-		$(LDFLAGS) $(LIBSDLMAIN)
+	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) \
+		-o $@ $(Q3OBJ) $(Q3POBJ) \
+		$(LIBSDLMAIN) $(CLIENT_LIBS) $(LIBS)
 
 $(B)/ioquake3-smp.$(ARCH)$(BINEXT): $(Q3OBJ) $(Q3POBJ_SMP) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) -o $@ $(Q3OBJ) $(Q3POBJ_SMP) $(CLIENT_LDFLAGS) \
-		$(THREAD_LDFLAGS) $(LDFLAGS) $(LIBSDLMAIN)
+	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) $(THREAD_LDFLAGS) \
+		-o $@ $(Q3OBJ) $(Q3POBJ_SMP) \
+		$(THREAD_LIBS) $(LIBSDLMAIN) $(CLIENT_LIBS) $(LIBS)
 
 ifneq ($(strip $(LIBSDLMAIN)),)
 ifneq ($(strip $(LIBSDLMAINSRC)),)
@@ -1583,7 +1589,7 @@ endif
 
 $(B)/ioq3ded.$(ARCH)$(BINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(LIBS)
 
 
 
@@ -1623,7 +1629,7 @@ Q3CGVMOBJ = $(Q3CGOBJ_:%.o=%.asm)
 
 $(B)/baseq3/cgame$(ARCH).$(SHLIBEXT): $(Q3CGOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3CGOBJ)
 
 $(B)/baseq3/vm/cgame.qvm: $(Q3CGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
@@ -1667,7 +1673,7 @@ MPCGVMOBJ = $(MPCGOBJ_:%.o=%.asm)
 
 $(B)/missionpack/cgame$(ARCH).$(SHLIBEXT): $(MPCGOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPCGOBJ)
 
 $(B)/missionpack/vm/cgame.qvm: $(MPCGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
@@ -1720,7 +1726,7 @@ Q3GVMOBJ = $(Q3GOBJ_:%.o=%.asm)
 
 $(B)/baseq3/qagame$(ARCH).$(SHLIBEXT): $(Q3GOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3GOBJ)
 
 $(B)/baseq3/vm/qagame.qvm: $(Q3GVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
@@ -1771,7 +1777,7 @@ MPGVMOBJ = $(MPGOBJ_:%.o=%.asm)
 
 $(B)/missionpack/qagame$(ARCH).$(SHLIBEXT): $(MPGOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(MPGOBJ)
 
 $(B)/missionpack/vm/qagame.qvm: $(MPGVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
