@@ -357,10 +357,10 @@ void	*VM_ExplicitArgPtr( vm_t *vm, intptr_t intValue );
 static ID_INLINE float _vmf(intptr_t x)
 {
 	union {
-		intptr_t l;
+		int i;
 		float f;
 	} t;
-	t.l = x;
+	t.i = (int)x;
 	return t.f;
 }
 #define	VMF(x)	_vmf(args[x])
