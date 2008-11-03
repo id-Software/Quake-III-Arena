@@ -291,13 +291,9 @@ void MSG_WriteLong( msg_t *sb, int c ) {
 }
 
 void MSG_WriteFloat( msg_t *sb, float f ) {
-	union {
-		float	f;
-		int	l;
-	} dat;
-	
+	floatint_t dat;
 	dat.f = f;
-	MSG_WriteBits( sb, dat.l, 32 );
+	MSG_WriteBits( sb, dat.i, 32 );
 }
 
 void MSG_WriteString( msg_t *sb, const char *s ) {
@@ -423,13 +419,9 @@ int MSG_ReadLong( msg_t *msg ) {
 }
 
 float MSG_ReadFloat( msg_t *msg ) {
-	union {
-		byte	b[4];
-		float	f;
-		int	l;
-	} dat;
+	floatint_t dat;
 	
-	dat.l = MSG_ReadBits( msg, 32 );
+	dat.i = MSG_ReadBits( msg, 32 );
 	if ( msg->readcount > msg->cursize ) {
 		dat.f = -1;
 	}	
@@ -563,20 +555,22 @@ int	MSG_ReadDelta( msg_t *msg, int oldV, int bits ) {
 }
 
 void MSG_WriteDeltaFloat( msg_t *msg, float oldV, float newV ) {
+	floatint_t fi;
 	if ( oldV == newV ) {
 		MSG_WriteBits( msg, 0, 1 );
 		return;
 	}
+	fi.f = newV;
 	MSG_WriteBits( msg, 1, 1 );
-	MSG_WriteBits( msg, *(int *)&newV, 32 );
+	MSG_WriteBits( msg, fi.i, 32 );
 }
 
 float MSG_ReadDeltaFloat( msg_t *msg, float oldV ) {
 	if ( MSG_ReadBits( msg, 1 ) ) {
-		float	newV;
+		floatint_t fi;
 
-		*(int *)&newV = MSG_ReadBits( msg, 32 );
-		return newV;
+		fi.i = MSG_ReadBits( msg, 32 );
+		return fi.f;
 	}
 	return oldV;
 }
@@ -617,20 +611,22 @@ int	MSG_ReadDeltaKey( msg_t *msg, int key, int oldV, int bits ) {
 }
 
 void MSG_WriteDeltaKeyFloat( msg_t *msg, int key, float oldV, float newV ) {
+	floatint_t fi;
 	if ( oldV == newV ) {
 		MSG_WriteBits( msg, 0, 1 );
 		return;
 	}
+	fi.f = newV;
 	MSG_WriteBits( msg, 1, 1 );
-	MSG_WriteBits( msg, (*(int *)&newV) ^ key, 32 );
+	MSG_WriteBits( msg, fi.i ^ key, 32 );
 }
 
 float MSG_ReadDeltaKeyFloat( msg_t *msg, int key, float oldV ) {
 	if ( MSG_ReadBits( msg, 1 ) ) {
-		float	newV;
+		floatint_t fi;
 
-		*(int *)&newV = MSG_ReadBits( msg, 32 ) ^ key;
-		return newV;
+		fi.i = MSG_ReadBits( msg, 32 ) ^ key;
+		return fi.f;
 	}
 	return oldV;
 }

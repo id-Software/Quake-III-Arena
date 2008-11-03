@@ -40,8 +40,9 @@ static void I(defconst)(int suffix, int size, Value v) {
 	case P: print("byte %d %U\n", size, (unsigned long)v.p); return;
 	case F:
 		if (size == 4) {
-			float f = v.d;
-			print("byte 4 %u\n", *(unsigned *)&f);
+			floatint_t fi;
+			fi.f = v.d;
+			print("byte 4 %u\n", fi.ui);
 		} else {
 			unsigned *p = (unsigned *)&v.d;
 			print("byte 4 %u\n", p[swap]);
@@ -67,10 +68,10 @@ static void I(defsymbol)(Symbol p) {
 		case P: p->x.name = stringf("%U", p->u.c.v.p); break;
 		case F:
 			{	// JDC: added this to get inline floats
-				unsigned temp;
+				floatint_t temp;
 
-				*(float *)&temp = p->u.c.v.d;
-				p->x.name = stringf("%U", temp );
+				temp.f = p->u.c.v.d;
+				p->x.name = stringf("%U", temp.ui );
 			}
 			break;// JDC: added this
 		default: assert(0);

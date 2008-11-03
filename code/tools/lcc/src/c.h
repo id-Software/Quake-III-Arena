@@ -98,6 +98,12 @@ typedef struct {
 	void *xt;
 } Xtype;
 
+typedef union {
+	float f;
+	int i;
+	unsigned int ui;
+} floatint_t;
+
 #include "config.h"
 typedef struct metrics {
 	unsigned char size, align, outofline;
