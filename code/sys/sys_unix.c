@@ -231,7 +231,10 @@ char *Sys_Cwd( void )
 {
 	static char cwd[MAX_OSPATH];
 
-	getcwd( cwd, sizeof( cwd ) - 1 );
+	char *result = getcwd( cwd, sizeof( cwd ) - 1 );
+	if( result != cwd )
+		return NULL;
+
 	cwd[MAX_OSPATH-1] = 0;
 
 	return cwd;

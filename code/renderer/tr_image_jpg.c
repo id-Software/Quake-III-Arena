@@ -57,7 +57,10 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
   unsigned pixelcount, memcount;
   unsigned char *out;
   int len;
-  byte	*fbuffer;
+	union {
+		byte *b;
+		void *v;
+	} fbuffer;
   byte  *buf;
 
   /* In this example we want to open the input file before doing anything else,
@@ -66,8 +69,8 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
    * requires it in order to read binary files.
    */
 
-  len = ri.FS_ReadFile ( ( char * ) filename, (void **)&fbuffer);
-  if (!fbuffer || len < 0) {
+  len = ri.FS_ReadFile ( ( char * ) filename, &fbuffer.v);
+  if (!fbuffer.b || len < 0) {
 	return;
   }
 
@@ -85,7 +88,7 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
 
   /* Step 2: specify data source (eg, a file) */
 
-  jpeg_mem_src(&cinfo, fbuffer, len);
+  jpeg_mem_src(&cinfo, fbuffer.b, len);
 
   /* Step 3: read file parameters with jpeg_read_header() */
 
@@ -203,7 +206,7 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
    * so as to simplify the setjmp error logic above.  (Actually, I don't
    * think that jpeg_destroy can do an error exit, but why assume anything...)
    */
-  ri.FS_FreeFile (fbuffer);
+  ri.FS_FreeFile (fbuffer.v);
 
   /* At this point you may want to check to see whether any corrupt-data
    * warnings occurred (test whether jerr.pub.num_warnings is nonzero).

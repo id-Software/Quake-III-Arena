@@ -215,6 +215,10 @@ struct BufferedFile
 static struct BufferedFile *ReadBufferedFile(const char *name)
 {
 	struct BufferedFile *BF;
+	union {
+		byte *b;
+		void *v;
+	} buffer;
 
 	/*
 	 *  input verification
@@ -248,7 +252,8 @@ static struct BufferedFile *ReadBufferedFile(const char *name)
 	 *  Read the file.
 	 */
 
-	BF->Length = ri.FS_ReadFile((char *) name, (void **) &BF->Buffer);
+	BF->Length = ri.FS_ReadFile((char *) name, &buffer.v);
+	BF->Buffer = buffer.b;
 
 	/*
 	 *  Did we get it? Is it big enough?

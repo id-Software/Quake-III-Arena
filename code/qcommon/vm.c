@@ -218,7 +218,11 @@ VM_LoadSymbols
 */
 void VM_LoadSymbols( vm_t *vm ) {
 	int		len;
-	char	*mapfile, *text_p, *token;
+	union {
+		char	*c;
+		void	*v;
+	} mapfile;
+	char *text_p, *token;
 	char	name[MAX_QPATH];
 	char	symbols[MAX_QPATH];
 	vmSymbol_t	**prev, *sym;
@@ -235,8 +239,8 @@ void VM_LoadSymbols( vm_t *vm ) {
 
 	COM_StripExtension(vm->name, name, sizeof(name));
 	Com_sprintf( symbols, sizeof( symbols ), "vm/%s.map", name );
-	len = FS_ReadFile( symbols, (void **)&mapfile );
-	if ( !mapfile ) {
+	len = FS_ReadFile( symbols, &mapfile.v );
+	if ( !mapfile.c ) {
 		Com_Printf( "Couldn't load symbol file: %s\n", symbols );
 		return;
 	}
@@ -244,7 +248,7 @@ void VM_LoadSymbols( vm_t *vm ) {
 	numInstructions = vm->instructionPointersLength >> 2;
 
 	// parse the symbols
-	text_p = mapfile;
+	text_p = mapfile.c;
 	prev = &vm->symbols;
 	count = 0;
 
@@ -291,7 +295,7 @@ void VM_LoadSymbols( vm_t *vm ) {
 
 	vm->numSymbols = count;
 	Com_Printf( "%i symbols parsed from %s\n", count, symbols );
-	FS_FreeFile( mapfile );
+	FS_FreeFile( mapfile.v );
 }
 
 /*
@@ -364,47 +368,50 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	int					dataLength;
 	int					i;
 	char				filename[MAX_QPATH];
-	vmHeader_t	*header;
+	union {
+		vmHeader_t	*h;
+		void				*v;
+	} header;
 
 	// load the image
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
 	Com_Printf( "Loading vm file %s...\n", filename );
-	length = FS_ReadFile( filename, (void **)&header );
-	if ( !header ) {
+	length = FS_ReadFile( filename, &header.v );
+	if ( !header.h ) {
 		Com_Printf( "Failed.\n" );
 		VM_Free( vm );
 		return NULL;
 	}
 
-	if( LittleLong( header->vmMagic ) == VM_MAGIC_VER2 ) {
+	if( LittleLong( header.h->vmMagic ) == VM_MAGIC_VER2 ) {
 		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
 
 		// byte swap the header
 		for ( i = 0 ; i < sizeof( vmHeader_t ) / 4 ; i++ ) {
-			((int *)header)[i] = LittleLong( ((int *)header)[i] );
+			((int *)header.h)[i] = LittleLong( ((int *)header.h)[i] );
 		}
 
 		// validate
-		if ( header->jtrgLength < 0
-			|| header->bssLength < 0
-			|| header->dataLength < 0
-			|| header->litLength < 0
-			|| header->codeLength <= 0 ) {
+		if ( header.h->jtrgLength < 0
+			|| header.h->bssLength < 0
+			|| header.h->dataLength < 0
+			|| header.h->litLength < 0
+			|| header.h->codeLength <= 0 ) {
 			VM_Free( vm );
 			Com_Error( ERR_FATAL, "%s has bad header", filename );
 		}
-	} else if( LittleLong( header->vmMagic ) == VM_MAGIC ) {
+	} else if( LittleLong( header.h->vmMagic ) == VM_MAGIC ) {
 		// byte swap the header
 		// sizeof( vmHeader_t ) - sizeof( int ) is the 1.32b vm header size
 		for ( i = 0 ; i < ( sizeof( vmHeader_t ) - sizeof( int ) ) / 4 ; i++ ) {
-			((int *)header)[i] = LittleLong( ((int *)header)[i] );
+			((int *)header.h)[i] = LittleLong( ((int *)header.h)[i] );
 		}
 
 		// validate
-		if ( header->bssLength < 0
-			|| header->dataLength < 0
-			|| header->litLength < 0
-			|| header->codeLength <= 0 ) {
+		if ( header.h->bssLength < 0
+			|| header.h->dataLength < 0
+			|| header.h->litLength < 0
+			|| header.h->codeLength <= 0 ) {
 			VM_Free( vm );
 			Com_Error( ERR_FATAL, "%s has bad header", filename );
 		}
@@ -416,7 +423,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 
 	// round up to next power of 2 so all data operations can
 	// be mask protected
-	dataLength = header->dataLength + header->litLength + header->bssLength;
+	dataLength = header.h->dataLength + header.h->litLength + header.h->bssLength;
 	for ( i = 0 ; dataLength > ( 1 << i ) ; i++ ) {
 	}
 	dataLength = 1 << i;
@@ -431,33 +438,34 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	}
 
 	// copy the intialized data
-	Com_Memcpy( vm->dataBase, (byte *)header + header->dataOffset, header->dataLength + header->litLength );
+	Com_Memcpy( vm->dataBase, (byte *)header.h + header.h->dataOffset,
+		header.h->dataLength + header.h->litLength );
 
 	// byte swap the longs
-	for ( i = 0 ; i < header->dataLength ; i += 4 ) {
+	for ( i = 0 ; i < header.h->dataLength ; i += 4 ) {
 		*(int *)(vm->dataBase + i) = LittleLong( *(int *)(vm->dataBase + i ) );
 	}
 
-	if( header->vmMagic == VM_MAGIC_VER2 ) {
-		vm->numJumpTableTargets = header->jtrgLength >> 2;
+	if( header.h->vmMagic == VM_MAGIC_VER2 ) {
+		vm->numJumpTableTargets = header.h->jtrgLength >> 2;
 		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
 
 		if( alloc ) {
-			vm->jumpTableTargets = Hunk_Alloc( header->jtrgLength, h_high );
+			vm->jumpTableTargets = Hunk_Alloc( header.h->jtrgLength, h_high );
 		} else {
-			Com_Memset( vm->jumpTableTargets, 0, header->jtrgLength );
+			Com_Memset( vm->jumpTableTargets, 0, header.h->jtrgLength );
 		}
 
-		Com_Memcpy( vm->jumpTableTargets, (byte *)header + header->dataOffset +
-				header->dataLength + header->litLength, header->jtrgLength );
+		Com_Memcpy( vm->jumpTableTargets, (byte *)header.h + header.h->dataOffset +
+				header.h->dataLength + header.h->litLength, header.h->jtrgLength );
 
 		// byte swap the longs
-		for ( i = 0 ; i < header->jtrgLength ; i += 4 ) {
+		for ( i = 0 ; i < header.h->jtrgLength ; i += 4 ) {
 			*(int *)(vm->jumpTableTargets + i) = LittleLong( *(int *)(vm->jumpTableTargets + i ) );
 		}
 	}
 
-	return header;
+	return header.h;
 }
 
 /*

@@ -50,7 +50,10 @@ typedef struct {
 
 void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 {
-	byte	*raw;
+	union {
+		byte *b;
+		void *v;
+	} raw;
 	byte	*end;
 	pcx_t	*pcx;
 	int		len;
@@ -71,23 +74,23 @@ void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 	//
 	// load the file
 	//
-	len = ri.FS_ReadFile( ( char * ) filename, (void **)&raw);
-	if (!raw || len < 0) {
+	len = ri.FS_ReadFile( ( char * ) filename, &raw.v);
+	if (!raw.b || len < 0) {
 		return;
 	}
 
 	if((unsigned)len < sizeof(pcx_t))
 	{
 		ri.Printf (PRINT_ALL, "PCX truncated: %s\n", filename);
-		ri.FS_FreeFile (raw);
+		ri.FS_FreeFile (raw.v);
 		return;
 	}
 
 	//
 	// parse the PCX file
 	//
-	pcx = (pcx_t *)raw;
-	end = raw+len;
+	pcx = (pcx_t *)raw.b;
+	end = raw.b+len;
 
 	w = LittleShort(pcx->xmax)+1;
 	h = LittleShort(pcx->ymax)+1;
@@ -107,7 +110,7 @@ void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 
 	pix = pic8 = ri.Malloc ( size );
 
-	raw = pcx->data;
+	raw.b = pcx->data;
 	// FIXME: should use bytes_per_line but original q3 didn't do that either
 	while(pix < pic8+size)
 	{
@@ -117,16 +120,16 @@ void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 			continue;
 		}
 
-		if(raw+1 > end)
+		if(raw.b+1 > end)
 			break;
-		dataByte = *raw++;
+		dataByte = *raw.b++;
 
 		if((dataByte & 0xC0) == 0xC0)
 		{
-			if(raw+1 > end)
+			if(raw.b+1 > end)
 				break;
 			runLength = dataByte & 0x3F;
-			dataByte = *raw++;
+			dataByte = *raw.b++;
 		}
 		else
 			runLength = 1;
@@ -139,7 +142,7 @@ void R_LoadPCX ( const char *filename, byte **pic, int *width, int *height)
 		ri.Free (pic8);
 	}
 
-	if (raw-(byte*)pcx >= end - (byte*)769 || end[-769] != 0x0c)
+	if (raw.b-(byte*)pcx >= end - (byte*)769 || end[-769] != 0x0c)
 	{
 		ri.Printf (PRINT_ALL, "PCX missing palette: %s\n", filename);
 		ri.FS_FreeFile (pcx);

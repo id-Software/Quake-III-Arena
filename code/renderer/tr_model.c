@@ -83,7 +83,10 @@ asked for again.
 */
 qhandle_t RE_RegisterModel( const char *name ) {
 	model_t		*mod;
-	unsigned	*buf;
+	union {
+		unsigned *u;
+		void *v;
+	} buf;
 	int			lod;
 	int			ident;
 	qboolean	loaded = qfalse;
@@ -151,19 +154,19 @@ qhandle_t RE_RegisterModel( const char *name ) {
 	{
 		int filesize;
 		
-		filesize = ri.FS_ReadFile(name, (void **) &buf);
-		if(!buf)
+		filesize = ri.FS_ReadFile(name, (void **) &buf.v);
+		if(!buf.u)
 		{
 			ri.Printf (PRINT_WARNING,"RE_RegisterModel: couldn't load %s\n", name);
 			mod->type = MOD_BAD;
 			return 0;
 		}
 		
-		ident = LittleLong(*(unsigned *)buf);
+		ident = LittleLong(*(unsigned *)buf.u);
 		if(ident == MDR_IDENT)
-			loaded = R_LoadMDR(mod, buf, filesize, name);
+			loaded = R_LoadMDR(mod, buf.u, filesize, name);
 
-		ri.FS_FreeFile (buf);
+		ri.FS_FreeFile (buf.v);
 		
 		if(!loaded)
 		{
@@ -184,26 +187,26 @@ qhandle_t RE_RegisterModel( const char *name ) {
 		else
 			Com_sprintf(namebuf, sizeof(namebuf), "%s.%s", filename, fext);
 
-		ri.FS_ReadFile( namebuf, (void **)&buf );
-		if ( !buf ) {
+		ri.FS_ReadFile( namebuf, &buf.v );
+		if ( !buf.u ) {
 			continue;
 		}
 		
 		loadmodel = mod;
 		
-		ident = LittleLong(*(unsigned *)buf);
+		ident = LittleLong(*(unsigned *)buf.u);
 		if ( ident == MD4_IDENT ) {
-			loaded = R_LoadMD4( mod, buf, name );
+			loaded = R_LoadMD4( mod, buf.u, name );
 		} else {
 			if ( ident != MD3_IDENT ) {
 				ri.Printf (PRINT_WARNING,"RE_RegisterModel: unknown fileid for %s\n", name);
 				goto fail;
 			}
 
-			loaded = R_LoadMD3( mod, lod, buf, name );
+			loaded = R_LoadMD3( mod, lod, buf.u, name );
 		}
 		
-		ri.FS_FreeFile (buf);
+		ri.FS_FreeFile (buf.v);
 
 		if ( !loaded ) {
 			if ( lod == 0 ) {

@@ -1431,7 +1431,11 @@ qhandle_t RE_RegisterSkin( const char *name ) {
 	qhandle_t	hSkin;
 	skin_t		*skin;
 	skinSurface_t	*surf;
-	char		*text, *text_p;
+	union {
+		char *c;
+		void *v;
+	} text;
+	char		*text_p;
 	char		*token;
 	char		surfName[MAX_QPATH];
 
@@ -1480,12 +1484,12 @@ qhandle_t RE_RegisterSkin( const char *name ) {
 	}
 
 	// load and parse the skin file
-    ri.FS_ReadFile( name, (void **)&text );
-	if ( !text ) {
+    ri.FS_ReadFile( name, &text.v );
+	if ( !text.c ) {
 		return 0;
 	}
 
-	text_p = text;
+	text_p = text.c;
 	while ( text_p && *text_p ) {
 		// get surface name
 		token = CommaParse( &text_p );
@@ -1514,7 +1518,7 @@ qhandle_t RE_RegisterSkin( const char *name ) {
 		skin->numSurfaces++;
 	}
 
-	ri.FS_FreeFile( text );
+	ri.FS_FreeFile( text.v );
 
 
 	// never let a skin have 0 shaders

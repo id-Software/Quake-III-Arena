@@ -786,7 +786,7 @@ NET_IPSocket
 int NET_IPSocket( char *net_interface, int port, int *err ) {
 	SOCKET				newsocket;
 	struct sockaddr_in	address;
-	qboolean			_true = qtrue;
+	u_long				_true = 1;
 	int					i = 1;
 
 	*err = 0;
@@ -804,7 +804,7 @@ int NET_IPSocket( char *net_interface, int port, int *err ) {
 		return newsocket;
 	}
 	// make it non-blocking
-	if( ioctlsocket( newsocket, FIONBIO, (u_long *)&_true ) == SOCKET_ERROR ) {
+	if( ioctlsocket( newsocket, FIONBIO, &_true ) == SOCKET_ERROR ) {
 		Com_Printf( "WARNING: NET_IPSocket: ioctl FIONBIO: %s\n", NET_ErrorString() );
 		*err = socketError;
 		closesocket(newsocket);
@@ -857,7 +857,7 @@ NET_IP6Socket
 int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, int *err ) {
 	SOCKET				newsocket;
 	struct sockaddr_in6	address;
-	qboolean			_true = qtrue;
+	u_long				_true = 1;
 
 	*err = 0;
 
@@ -879,7 +879,7 @@ int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, i
 	}
 
 	// make it non-blocking
-	if( ioctlsocket( newsocket, FIONBIO, (u_long *)&_true ) == SOCKET_ERROR ) {
+	if( ioctlsocket( newsocket, FIONBIO, &_true ) == SOCKET_ERROR ) {
 		Com_Printf( "WARNING: NET_IP6Socket: ioctl FIONBIO: %s\n", NET_ErrorString() );
 		*err = socketError;
 		closesocket(newsocket);

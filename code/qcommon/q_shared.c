@@ -710,11 +710,12 @@ qboolean Q_isanumber( const char *s )
 	return qfalse;
 #else
 	char *p;
+	double d;
 
 	if( *s == '\0' )
 		return qfalse;
 
-	strtod( s, &p );
+	d = strtod( s, &p );
 
 	return *p == '\0';
 #endif
