@@ -972,25 +972,25 @@ targets: makedirs
 	@echo "  CC: $(CC)"
 	@echo ""
 	@echo "  CFLAGS:"
-	@for i in $(CFLAGS); \
+	-@for i in $(CFLAGS); \
 	do \
 		echo "    $$i"; \
 	done
 	@echo ""
 	@echo "  LDFLAGS:"
-	@for i in $(LDFLAGS); \
+	-@for i in $(LDFLAGS); \
 	do \
 		echo "    $$i"; \
 	done
 	@echo ""
 	@echo "  LIBS:"
-	@for i in $(LIBS); \
+	-@for i in $(LIBS); \
 	do \
 		echo "    $$i"; \
 	done
 	@echo ""
 	@echo "  Output:"
-	@for i in $(TARGETS); \
+	-@for i in $(TARGETS); \
 	do \
 		echo "    $$i"; \
 	done
