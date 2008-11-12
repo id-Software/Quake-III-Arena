@@ -237,7 +237,7 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes \
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -pipe -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
@@ -360,7 +360,7 @@ ifeq ($(PLATFORM),darwin)
     BASE_CFLAGS += -mstackrealign
   endif
 
-  BASE_CFLAGS += -DMACOS_X -fno-common -pipe
+  BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
@@ -431,7 +431,7 @@ ifeq ($(PLATFORM),mingw32)
 
   ARCH=x86
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes \
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON
 
   # In the absence of wspiapi.h, require Windows XP or later
@@ -524,7 +524,7 @@ ifeq ($(PLATFORM),freebsd)
   endif #alpha test
 
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes \
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
@@ -590,7 +590,7 @@ ifeq ($(PLATFORM),openbsd)
   ARCH=i386
 
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes \
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON $(shell sdl-config --cflags)
 
   ifeq ($(USE_OPENAL),1)
@@ -652,7 +652,7 @@ ifeq ($(PLATFORM),netbsd)
   SHLIBLDFLAGS=-shared $(LDFLAGS)
   THREAD_LIBS=-lpthread
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
   ifneq ($(ARCH),i386)
     BASE_CFLAGS += -DNO_VM_COMPILED
@@ -716,7 +716,7 @@ ifeq ($(PLATFORM),sunos)
   endif
 
 
-  BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes \
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -pipe -DUSE_ICON $(shell sdl-config --cflags)
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops
@@ -1028,7 +1028,7 @@ makedirs:
 # QVM BUILD TOOLS
 #############################################################################
 
-TOOLS_OPTIMIZE = -g -O2 -Wall
+TOOLS_OPTIMIZE = -g -O2 -Wall -fno-strict-aliasing
 TOOLS_CFLAGS = $(TOOLS_OPTIMIZE) \
                -DTEMPDIR=\"$(TEMPDIR)\" -DSYSTEM=\"\" \
                -I$(Q3LCCSRCDIR) \
