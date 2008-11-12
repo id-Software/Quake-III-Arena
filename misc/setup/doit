@@ -35,6 +35,8 @@ copystartscript()
 	mkdir -p image/bin/Linux/$arch
 	if [ "$arch" = x86_64 ]; then
 		ln -s x86_64 image/bin/Linux/amd64
+	elif [ "$arch" = ppc ]; then
+		ln -s ppc image/bin/Linux/ppc64
 	fi
 	install -m 755 ioquake3.sh image/bin/Linux/$arch/ioquake3
 	install -m 755 ioq3demo.sh image/bin/Linux/$arch/ioq3demo
@@ -51,6 +53,9 @@ for arch in $topdir/build/release-*; do
 			copystartscript $arch
 		;;
 		ppc) echo "define(HAVE_PPC,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		ppc64) echo "define(HAVE_PPC64,yes)dnl" >> defines.m4
 			copystartscript $arch
 		;;
 		*)
