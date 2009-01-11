@@ -413,7 +413,6 @@ void SVC_Info( netadr_t from ) {
 		va("%i", sv_maxclients->integer - sv_privateClients->integer ) );
 	Info_SetValueForKey( infostring, "gametype", va("%i", sv_gametype->integer ) );
 	Info_SetValueForKey( infostring, "pure", va("%i", sv_pure->integer ) );
-	Info_SetValueForKey( infostring, "gamename", GAMENAME_FOR_MASTER );
 
 #ifdef USE_VOIP
 	if (sv_voip->integer) {
