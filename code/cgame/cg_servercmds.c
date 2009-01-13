@@ -118,9 +118,20 @@ static void CG_ParseTeamInfo( void ) {
 	int		client;
 
 	numSortedTeamPlayers = atoi( CG_Argv( 1 ) );
+	if( numSortedTeamPlayers < 0 || numSortedTeamPlayers > TEAM_MAXOVERLAY )
+	{
+		CG_Error( "CG_ParseTeamInfo: numSortedTeamPlayers out of range (%d)",
+				numSortedTeamPlayers );
+		return;
+	}
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
 		client = atoi( CG_Argv( i * 6 + 2 ) );
+		if( client < 0 || client >= MAX_CLIENTS )
+		{
+		  CG_Error( "CG_ParseTeamInfo: bad client number: %d", client );
+		  return;
+		}
 
 		sortedTeamPlayers[i] = client;
 
