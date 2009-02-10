@@ -214,7 +214,7 @@
 			OutputDirectory="..\..\build\quake3_release"
 			IntermediateDirectory="..\..\build\quake3_release"
 			ConfigurationType="1"
-			UseOfMFC="0"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
 			<Tool
@@ -242,9 +242,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;USE_OPENAL;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL"
+				AdditionalIncludeDirectories="..\..\code\SDL12\include; ..\..\code\libcurl; ..\..\code\AL; ..\..\code\libspeex\include"
+				PreprocessorDefinitions="WIN32; NDEBUG; _WINDOWS; _CRT_SECURE_NO_DEPRECATE; BOTLIB; USE_ICON; USE_CURL; USE_CURL_DLOPEN; USE_LOCAL_HEADERS; USE_VOIP; HAVE_CONFIG_H"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)\quake3.pch"
@@ -267,7 +268,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib advapi32.lib winmm.lib ws2_32.lib openal32.lib SDLmain.lib SDL.lib OpenGL32.lib libcurl.lib"
+				AdditionalDependencies="user32.lib advapi32.lib winmm.lib wsock32.lib ws2_32.lib SDLmain.lib SDL.lib OpenGL32.lib msvcrt.lib"
 				OutputFile="$(OutDir)\ioquake3.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -2438,151 +2439,143 @@
 				Name="Source Files"
 				>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcapimin.c"
+					RelativePath="..\..\code\jpeg-6b\jcapimin.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcapistd.c"
+					RelativePath="..\..\code\jpeg-6b\jcapistd.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jccoefct.c"
+					RelativePath="..\..\code\jpeg-6b\jccoefct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jccolor.c"
+					RelativePath="..\..\code\jpeg-6b\jccolor.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcdctmgr.c"
+					RelativePath="..\..\code\jpeg-6b\jcdctmgr.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jchuff.c"
+					RelativePath="..\..\code\jpeg-6b\jchuff.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcinit.c"
+					RelativePath="..\..\code\jpeg-6b\jcinit.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcmainct.c"
+					RelativePath="..\..\code\jpeg-6b\jcmainct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcmarker.c"
+					RelativePath="..\..\code\jpeg-6b\jcmarker.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcmaster.c"
+					RelativePath="..\..\code\jpeg-6b\jcmaster.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcomapi.c"
+					RelativePath="..\..\code\jpeg-6b\jcomapi.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcparam.c"
+					RelativePath="..\..\code\jpeg-6b\jcparam.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcphuff.c"
+					RelativePath="..\..\code\jpeg-6b\jcphuff.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcprepct.c"
+					RelativePath="..\..\code\jpeg-6b\jcprepct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jcsample.c"
+					RelativePath="..\..\code\jpeg-6b\jcsample.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jctrans.c"
+					RelativePath="..\..\code\jpeg-6b\jdapimin.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdapimin.c"
+					RelativePath="..\..\code\jpeg-6b\jdapistd.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdapistd.c"
+					RelativePath="..\..\code\jpeg-6b\jdatasrc.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdatadst.c"
+					RelativePath="..\..\code\jpeg-6b\jdcoefct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdatasrc.c"
+					RelativePath="..\..\code\jpeg-6b\jdcolor.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdcoefct.c"
+					RelativePath="..\..\code\jpeg-6b\jddctmgr.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdcolor.c"
+					RelativePath="..\..\code\jpeg-6b\jdhuff.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jddctmgr.c"
+					RelativePath="..\..\code\jpeg-6b\jdinput.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdhuff.c"
+					RelativePath="..\..\code\jpeg-6b\jdmainct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdinput.c"
+					RelativePath="..\..\code\jpeg-6b\jdmarker.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdmainct.c"
+					RelativePath="..\..\code\jpeg-6b\jdmaster.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdmarker.c"
+					RelativePath="..\..\code\jpeg-6b\jdpostct.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdmaster.c"
+					RelativePath="..\..\code\jpeg-6b\jdsample.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdpostct.c"
+					RelativePath="..\..\code\jpeg-6b\jdtrans.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdsample.c"
+					RelativePath="..\..\code\jpeg-6b\jerror.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdtrans.c"
+					RelativePath="..\..\code\jpeg-6b\jfdctflt.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jerror.c"
+					RelativePath="..\..\code\jpeg-6b\jidctflt.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jfdctflt.c"
+					RelativePath="..\..\code\jpeg-6b\jmemmgr.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jidctflt.c"
+					RelativePath="..\..\code\jpeg-6b\jmemnobs.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jmemmgr.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\jpeg-6\jmemnobs.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\jpeg-6\jutils.c"
+					RelativePath="..\..\code\jpeg-6b\jutils.c"
 					>
 				</File>
 			</Filter>
@@ -2590,47 +2583,47 @@
 				Name="Header Files"
 				>
 				<File
-					RelativePath="..\..\code\jpeg-6\jchuff.h"
+					RelativePath="..\..\code\jpeg-6b\jchuff.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jconfig.h"
+					RelativePath="..\..\code\jpeg-6b\jconfig.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdct.h"
+					RelativePath="..\..\code\jpeg-6b\jdct.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jdhuff.h"
+					RelativePath="..\..\code\jpeg-6b\jdhuff.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jerror.h"
+					RelativePath="..\..\code\jpeg-6b\jerror.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jinclude.h"
+					RelativePath="..\..\code\jpeg-6b\jinclude.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jmemsys.h"
+					RelativePath="..\..\code\jpeg-6b\jmemsys.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jmorecfg.h"
+					RelativePath="..\..\code\jpeg-6b\jmorecfg.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jpegint.h"
+					RelativePath="..\..\code\jpeg-6b\jpegint.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jpeglib.h"
+					RelativePath="..\..\code\jpeg-6b\jpeglib.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\jpeg-6\jversion.h"
+					RelativePath="..\..\code\jpeg-6b\jversion.h"
 					>
 				</File>
 			</Filter>
@@ -2978,6 +2971,174 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="speex"
+			>
+			<File
+				RelativePath="..\..\code\libspeex\bits.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\buffer.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\cb_search.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_10_16_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_10_32_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_20_32_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_5_256_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_5_64_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\exc_8_128_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\fftwrap.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\filterbank.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\filters.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\gain_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\gain_table_lbr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\hexc_10_32_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\hexc_table.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\high_lsp_tables.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\jitter.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\kiss_fft.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\kiss_fftr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\lpc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\lsp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\lsp_tables_nb.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\ltp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\mdf.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\modes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\modes_wb.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\nb_celp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\preprocess.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\quant_lsp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\resample.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\sb_celp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\smallft.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\speex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\speex_callbacks.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\speex_header.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\stereo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\vbr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\vq.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\libspeex\window.c"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
