@@ -501,18 +501,19 @@ static qboolean FS_CreatePath (char *OSPath) {
 
 /*
 =================
-FS_FilenameIsExecutable
+FS_CheckFilenameIsNotExecutable
 
 ERR_FATAL if trying to maniuplate a file with the platform library extension
 =================
  */
-static void FS_FilenameIsExecutable( const char *filename, const char *function )
+static void FS_CheckFilenameIsNotExecutable( const char *filename,
+		const char *function )
 {
 	// Check if the filename ends with the library extension
-	if( !Q_stricmp( filename + strlen( filename ) - strlen( DLL_EXT ), DLL_EXT ) )
+	if( !Q_stricmp( COM_GetExtension( filename ), DLL_EXT ) )
 	{
-		Com_Error( ERR_FATAL, "%s: Not allowed to write '%s' due to %s extension\n",
-			function, filename, DLL_EXT );
+		Com_Error( ERR_FATAL, "%s: Not allowed to manipulate '%s' due "
+			"to %s extension\n", function, filename, DLL_EXT );
 	}
 }
 
@@ -531,7 +532,7 @@ static void FS_CopyFile( char *fromOSPath, char *toOSPath ) {
 
 	Com_Printf( "copy %s to %s\n", fromOSPath, toOSPath );
 
-	FS_FilenameIsExecutable( toOSPath, __func__ );
+	FS_CheckFilenameIsNotExecutable( toOSPath, __func__ );
 
 	if (strstr(fromOSPath, "journal.dat") || strstr(fromOSPath, "journaldata.dat")) {
 		Com_Printf( "Ignoring journal files\n");
@@ -574,7 +575,7 @@ FS_Remove
 ===========
 */
 void FS_Remove( const char *osPath ) {
-	FS_FilenameIsExecutable( osPath, __func__ );
+	FS_CheckFilenameIsNotExecutable( osPath, __func__ );
 
 	remove( osPath );
 }
@@ -586,7 +587,7 @@ FS_HomeRemove
 ===========
 */
 void FS_HomeRemove( const char *homePath ) {
-	FS_FilenameIsExecutable( homePath, __func__ );
+	FS_CheckFilenameIsNotExecutable( homePath, __func__ );
 
 	remove( FS_BuildOSPath( fs_homepath->string,
 			fs_gamedir, homePath ) );
@@ -665,7 +666,7 @@ fileHandle_t FS_SV_FOpenFileWrite( const char *filename ) {
 		Com_Printf( "FS_SV_FOpenFileWrite: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __func__ );
+	FS_CheckFilenameIsNotExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;
@@ -776,7 +777,7 @@ void FS_SV_Rename( const char *from, const char *to ) {
 		Com_Printf( "FS_SV_Rename: %s --> %s\n", from_ospath, to_ospath );
 	}
 
-	FS_FilenameIsExecutable( to_ospath, __func__ );
+	FS_CheckFilenameIsNotExecutable( to_ospath, __func__ );
 
 	if (rename( from_ospath, to_ospath )) {
 		// Failed, try copying it and deleting the original
@@ -810,7 +811,7 @@ void FS_Rename( const char *from, const char *to ) {
 		Com_Printf( "FS_Rename: %s --> %s\n", from_ospath, to_ospath );
 	}
 
-	FS_FilenameIsExecutable( to_ospath, __func__ );
+	FS_CheckFilenameIsNotExecutable( to_ospath, __func__ );
 
 	if (rename( from_ospath, to_ospath )) {
 		// Failed, try copying it and deleting the original
@@ -873,7 +874,7 @@ fileHandle_t FS_FOpenFileWrite( const char *filename ) {
 		Com_Printf( "FS_FOpenFileWrite: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __func__ );
+	FS_CheckFilenameIsNotExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;
@@ -921,7 +922,7 @@ fileHandle_t FS_FOpenFileAppend( const char *filename ) {
 		Com_Printf( "FS_FOpenFileAppend: %s\n", ospath );
 	}
 
-	FS_FilenameIsExecutable( ospath, __func__ );
+	FS_CheckFilenameIsNotExecutable( ospath, __func__ );
 
 	if( FS_CreatePath( ospath ) ) {
 		return 0;
