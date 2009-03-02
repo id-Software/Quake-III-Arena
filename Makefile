@@ -281,6 +281,9 @@ ifeq ($(PLATFORM),linux)
     BASE_CFLAGS += -maltivec
     HAVE_VM_COMPILED=true
   endif
+  ifeq ($(ARCH),sparc)
+    OPTIMIZE += -mtune=ultrasparc3 -mv8plus
+  endif
   endif
   endif
 
