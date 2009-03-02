@@ -2509,6 +2509,7 @@ Com_Init
 */
 void Com_Init( char *commandLine ) {
 	char	*s;
+	int	qport;
 
 	Com_Printf( "%s %s %s\n", Q3_VERSION, PLATFORM_STRING, __DATE__ );
 
@@ -2627,7 +2628,13 @@ void Com_Init( char *commandLine ) {
 	com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
 
 	Sys_Init();
-	Netchan_Init( Com_Milliseconds() & 0xffff );	// pick a port value that should be nice and random
+
+	// Pick a port value that should be nice and random.
+	// As machines get faster Com_Milliseconds can't be used
+	// anymore as it results in a smaller and smaller range of
+	// qport values.
+	Com_RandomBytes( (byte*)&qport, sizeof(int) );
+	Netchan_Init( qport & 0xffff );
 	VM_Init();
 	SV_Init();
 
