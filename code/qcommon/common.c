@@ -2629,12 +2629,10 @@ void Com_Init( char *commandLine ) {
 
 	Sys_Init();
 
-	// Pick a port value that should be nice and random.
-	// As machines get faster Com_Milliseconds can't be used
-	// anymore as it results in a smaller and smaller range of
-	// qport values.
+	// Pick a random port value
 	Com_RandomBytes( (byte*)&qport, sizeof(int) );
 	Netchan_Init( qport & 0xffff );
+
 	VM_Init();
 	SV_Init();
 
