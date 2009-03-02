@@ -283,6 +283,7 @@ ifeq ($(PLATFORM),linux)
   endif
   ifeq ($(ARCH),sparc)
     OPTIMIZE += -mtune=ultrasparc3 -mv8plus
+    HAVE_VM_COMPILED=true
   endif
   endif
   endif
@@ -1447,6 +1448,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
   ifeq ($(ARCH),ppc64)
     Q3OBJ += $(B)/client/vm_powerpc.o $(B)/client/vm_powerpc_asm.o
   endif
+  ifeq ($(ARCH),sparc)
+    Q3OBJ += $(B)/client/vm_sparc.o
+  endif
 endif
 
 ifeq ($(PLATFORM),mingw32)
@@ -1592,6 +1596,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
   endif
   ifeq ($(ARCH),ppc64)
     Q3DOBJ += $(B)/ded/vm_powerpc.o $(B)/ded/vm_powerpc_asm.o
+  endif
+  ifeq ($(ARCH),sparc)
+    Q3DOBJ += $(B)/ded/vm_sparc.o
   endif
 endif
 
