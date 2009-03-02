@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define id386 0
 #define idppc 0
 #define idppc_altivec 0
+#define idsparc 0
 
 #else
 
@@ -56,6 +57,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #define idppc 0
 #define idppc_altivec 0
+#endif
+
+#if defined(__sparc__) && !defined(C_ONLY)
+#define idsparc 1
+#else
+#define idsparc 0
 #endif
 
 #endif
