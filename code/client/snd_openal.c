@@ -1396,6 +1396,8 @@ S_AL_StreamDie
 static
 void S_AL_StreamDie( int stream )
 {
+	int		numBuffers;
+
 	if ((stream < 0) || (stream >= MAX_RAW_STREAMS))
 		return;
 
@@ -1404,6 +1406,16 @@ void S_AL_StreamDie( int stream )
 
 	streamPlaying[stream] = qfalse;
 	qalSourceStop(streamSources[stream]);
+
+	// Un-queue any buffers, and delete them
+	qalGetSourcei( streamSources[stream], AL_BUFFERS_PROCESSED, &numBuffers );
+	while( numBuffers-- )
+	{
+		ALuint buffer;
+		qalSourceUnqueueBuffers(streamSources[stream], 1, &buffer);
+		qalDeleteBuffers(1, &buffer);
+	}
+
 	S_AL_FreeStreamChannel(stream);
 }
 
