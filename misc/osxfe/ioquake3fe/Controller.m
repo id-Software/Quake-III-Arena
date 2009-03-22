@@ -9,12 +9,12 @@
 #import "Controller.h"
 #import "ErrorWindow.h"
 
+#define IOQ3_BUNDLE @"/Applications/ioquake3/ioquake3.app"
 #define IOQ3_BIN @"ioquake3.ub"
 
 @implementation Controller
 
-- (id)init
-{
+- (id)init {
 	[super init];
 	quakeData = [[NSMutableData alloc] initWithCapacity:1.0];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(readPipe:) name:NSFileHandleReadCompletionNotification object:nil];
@@ -22,14 +22,16 @@
 	return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[super dealloc];
 }
 
-- (IBAction)launch:(id)sender
-{
+- (IBAction)launch:(id)sender {
+	NSString *ioQuake3Path = [[NSBundle mainBundle] pathForAuxiliaryExecutable:IOQ3_BIN];
+	if (!ioQuake3Path) 
+		ioQuake3Path = [[NSBundle bundleWithPath:IOQ3_BUNDLE] pathForAuxiliaryExecutable:IOQ3_BIN];
+		
 	NSPipe *pipe = [NSPipe pipe];
 	quakeOut = [pipe fileHandleForReading];
 	[quakeOut readInBackgroundAndNotify];
@@ -41,13 +43,12 @@
 	NSString *args = [argsTextField stringValue];
 	if ([args length])
 		[quakeTask setArguments:[args componentsSeparatedByString:@" "]];
-		// tiger sucks
-		//[quakeTask setArguments:[args componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+//		[quakeTask setArguments:[args componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]]; // tiger
 			
 	BOOL die = NO;
 	
 	@try {
-		[quakeTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:IOQ3_BIN]];
+		[quakeTask setLaunchPath:ioQuake3Path];
 		[quakeTask launch];
 	}
 	@catch (NSException *e) {
@@ -56,8 +57,10 @@
 		  defaultButton:NSLocalizedString(@"OK", @"OK")
 		  alternateButton:nil
 		  otherButton:nil
-		  informativeTextWithFormat:NSLocalizedString(@"Something is probably wrong with the actual ioquake3 binary.", @"launch failed text")]
-		 runModal];
+//		  informativeTextWithFormat:NSLocalizedString(@"Something is probably wrong with the actual ioquake3 binary.", @"launch failed text")]
+//		  informativeTextWithFormat:NSLocalizedString([@"Unable to find the Quake binary at:\n" stringByAppendingString:ioQuake3Path], @"launch failed text")]
+		  informativeTextWithFormat:NSLocalizedString([[[e reason] stringByAppendingString:@"\n\nExecutable path was:\n"] stringByAppendingString:ioQuake3Path], @"launch failed text")]
+		  runModal];
 		die = YES;
 	}
 	@finally {
@@ -69,8 +72,7 @@
 	return;
 }
 
-- (void)readPipe:(NSNotification *)note
-{
+- (void)readPipe:(NSNotification *)note {
 	if ([note object] == quakeOut) {
 		NSData *outputData = [[note userInfo] objectForKey:NSFileHandleNotificationDataItem];
 		if ([outputData length])
@@ -80,18 +82,16 @@
 	}
 }
 
-- (void)taskNote:(NSNotification *)note
-{
+- (void)taskNote:(NSNotification *)note {
 	if ([note object] == quakeTask) {
 		if ([quakeTask isRunning] == NO) {
 			if ([quakeTask terminationStatus] != 0) {
 				ErrorWindow *ew = [[[ErrorWindow alloc] init] autorelease];
 				[ew bitch:[[[NSString alloc] initWithData:quakeData encoding:NSUTF8StringEncoding] autorelease]];
-			} else {
+			} 
+			else
 				[NSApp terminate:self];
-			}
 		}
 	}
 }
-
 @end

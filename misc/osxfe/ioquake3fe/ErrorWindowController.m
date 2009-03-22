@@ -12,8 +12,7 @@
 
 // yes, a whole class just so the fucking app will quit
 
-- (BOOL)windowShouldClose:(id)sender
-{
+- (BOOL)windowShouldClose:(id)sender {
 	[NSApp terminate:self];
 	return YES;
 }
