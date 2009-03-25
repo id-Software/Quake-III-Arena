@@ -14,6 +14,7 @@ for further development. Some of the major features currently implemented are:
   * OpenAL sound API support (multiple speaker support and better sound
     quality)
   * Full x86_64 support on Linux
+  * VoIP support, both in-game and external support through Mumble.
   * MinGW compilation support on Windows and cross compilation support on Linux
   * AVI video capture of demos
   * Much improved console autocompletion
