@@ -208,7 +208,7 @@ echo "
 		<key>CFBundleIconFile</key>
 		<string>ioquake3.icns</string>
 		<key>CFBundleIdentifier</key>
-		<string>org.icculus.quake3</string>
+		<string>org.ioquake.ioquake3</string>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
