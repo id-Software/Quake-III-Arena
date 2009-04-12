@@ -7,6 +7,16 @@
 ;
 ; you have to copy SDL.dll and libcurl-4.dll here manually
 
+!define MULTIUSER_MUI
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY "Software\ioquake3"
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "Install_Mode"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "Software\ioquake3"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "Install_Dir"
+!define MULTIUSER_INSTALLMODE_INSTDIR "ioquake3"
+!include MultiUser.nsh
+
 !include "MUI2.nsh"
 !define MUI_ICON "../quake3.ico"
 
@@ -17,11 +27,13 @@ Name "ioquake3"
 OutFile "ioquake3-XXXVERSIONXXX-XXXRELEASEXXX.x86.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\ioquake3
+; set by Multiuser.nsh
+;InstallDir $PROGRAMFILES\ioquake3
 
 ; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
+; handled by Multiuser.nsh
+;InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
 
 ;--------------------------------
 ;Interface Settings
@@ -31,6 +43,7 @@ InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
 ;--------------------------------
 ;Pages
 
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
 #!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
@@ -45,6 +58,16 @@ InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
 !insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
+
+;--------------------------------
+;Multiuser stuff
+Function .onInit
+  !insertmacro MULTIUSER_INIT
+FunctionEnd
+
+Function un.onInit
+  !insertmacro MULTIUSER_UNINIT
+FunctionEnd
 
 ; The stuff to install
 Section "ioquake3 (required)"
@@ -72,7 +95,8 @@ Section "ioquake3 (required)"
   File "../../build/release-mingw32-x86/missionpack/uix86.dll"
 
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\ioquake3 "Install_Dir" "$INSTDIR"
+  WriteRegStr SHCTX "Software\ioquake3" ${MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME} "$INSTDIR"
+  WriteRegStr SHCTX "Software\ioquake3" ${MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME} "$MultiUser.InstallMode"
 
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "DisplayName" "ioquake3"
@@ -124,7 +148,7 @@ Section "Uninstall"
 
   ; Remove registry keys
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3"
-  DeleteRegKey HKLM SOFTWARE\ioquake3
+  DeleteRegKey SHCTX "Software\ioquake3"
 
   ; Remove files and uninstaller
   Delete $INSTDIR\baseq3\cgamex86.dll
