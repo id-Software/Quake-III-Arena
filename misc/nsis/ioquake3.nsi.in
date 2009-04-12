@@ -8,6 +8,7 @@
 ; you have to copy SDL.dll and libcurl-4.dll here manually
 
 !include "MUI2.nsh"
+!define MUI_ICON "../quake3.ico"
 
 ; The name of the installer
 Name "ioquake3"
