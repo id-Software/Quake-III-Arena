@@ -190,7 +190,7 @@ ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
 endif
 
 # version info
-VERSION=1.35
+VERSION=1.36
 
 USE_SVN=
 ifeq ($(wildcard .svn),.svn)
