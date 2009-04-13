@@ -8,7 +8,8 @@
                    `---------- http://ioquake3.org --------'
 
 The intent of this project is to provide a baseline Quake 3 which may be used
-for further development. Some of the major features currently implemented are:
+for further development and baseq3 fun. 
+Some of the major features currently implemented are:
 
   * SDL backend
   * OpenAL sound API support (multiple speaker support and better sound
@@ -44,9 +45,9 @@ For *nix
   1. Change to the directory containing this readme.
   2. Run 'make'.
 
-For Windows, using MinGW
-  1. Download and install MinGW and MSys from http://www.mingw.org/.
-  2. Open an MSys terminal, and follow the instructions for compiling on *nix.
+For Windows,
+  1. Please refer to the excellent instructions here: 
+     http://wiki.ioquake3.org/Building_ioquake3
 
 For Mac OS X, building a Universal Binary
   1. Install MacOSX SDK packages from XCode.  For maximum compatibility,
