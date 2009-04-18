@@ -99,10 +99,10 @@ Section "ioquake3 (required)"
   WriteRegStr SHCTX "Software\ioquake3" ${MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME} "$MultiUser.InstallMode"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "DisplayName" "ioquake3"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoRepair" 1
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "DisplayName" "ioquake3"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoModify" 1
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
 SectionEnd
@@ -147,7 +147,7 @@ SectionEnd
 Section "Uninstall"
 
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3"
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3"
   DeleteRegKey SHCTX "Software\ioquake3"
 
   ; Remove files and uninstaller
