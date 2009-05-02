@@ -189,7 +189,7 @@ static void RB_SurfaceSprite( void ) {
 RB_SurfacePolychain
 =============
 */
-void RB_SurfacePolychain( srfPoly_t *p ) {
+static void RB_SurfacePolychain( srfPoly_t *p ) {
 	int		i;
 	int		numv;
 
@@ -223,7 +223,7 @@ void RB_SurfacePolychain( srfPoly_t *p ) {
 RB_SurfaceTriangles
 =============
 */
-void RB_SurfaceTriangles( srfTriangles_t *srf ) {
+static void RB_SurfaceTriangles( srfTriangles_t *srf ) {
 	int			i;
 	drawVert_t	*dv;
 	float		*xyz, *normal, *texCoords;
@@ -284,7 +284,7 @@ void RB_SurfaceTriangles( srfTriangles_t *srf ) {
 RB_SurfaceBeam
 ==============
 */
-void RB_SurfaceBeam( void ) 
+static void RB_SurfaceBeam( void )
 {
 #define NUM_BEAM_SEGS 6
 	refEntity_t *e;
@@ -454,7 +454,7 @@ static void DoRailDiscs( int numSegs, const vec3_t start, const vec3_t dir, cons
 /*
 ** RB_SurfaceRailRinges
 */
-void RB_SurfaceRailRings( void ) {
+static void RB_SurfaceRailRings( void ) {
 	refEntity_t *e;
 	int			numSegs;
 	int			len;
@@ -484,7 +484,7 @@ void RB_SurfaceRailRings( void ) {
 /*
 ** RB_SurfaceRailCore
 */
-void RB_SurfaceRailCore( void ) {
+static void RB_SurfaceRailCore( void ) {
 	refEntity_t *e;
 	int			len;
 	vec3_t		right;
@@ -514,7 +514,7 @@ void RB_SurfaceRailCore( void ) {
 /*
 ** RB_SurfaceLightningBolt
 */
-void RB_SurfaceLightningBolt( void ) {
+static void RB_SurfaceLightningBolt( void ) {
 	refEntity_t *e;
 	int			len;
 	vec3_t		right;
@@ -856,7 +856,7 @@ static void LerpMeshVertexes(md3Surface_t *surf, float backlerp)
 RB_SurfaceMesh
 =============
 */
-void RB_SurfaceMesh(md3Surface_t *surface) {
+static void RB_SurfaceMesh(md3Surface_t *surface) {
 	int				j;
 	float			backlerp;
 	int				*triangles;
@@ -903,7 +903,7 @@ void RB_SurfaceMesh(md3Surface_t *surface) {
 RB_SurfaceFace
 ==============
 */
-void RB_SurfaceFace( srfSurfaceFace_t *surf ) {
+static void RB_SurfaceFace( srfSurfaceFace_t *surf ) {
 	int			i;
 	unsigned	*indices, *tessIndexes;
 	float		*v;
@@ -993,7 +993,7 @@ RB_SurfaceGrid
 Just copy the grid of points and triangulate
 =============
 */
-void RB_SurfaceGrid( srfGridMesh_t *cv ) {
+static void RB_SurfaceGrid( srfGridMesh_t *cv ) {
 	int		i, j;
 	float	*xyz;
 	float	*texCoords;
@@ -1160,7 +1160,7 @@ RB_SurfaceAxis
 Draws x/y/z lines from the origin for orientation debugging
 ===================
 */
-void RB_SurfaceAxis( void ) {
+static void RB_SurfaceAxis( void ) {
 	GL_Bind( tr.whiteImage );
 	qglLineWidth( 3 );
 	qglBegin( GL_LINES );
@@ -1186,7 +1186,7 @@ RB_SurfaceEntity
 Entities that have a single procedurally generated surface
 ====================
 */
-void RB_SurfaceEntity( surfaceType_t *surfType ) {
+static void RB_SurfaceEntity( surfaceType_t *surfType ) {
 	switch( backEnd.currentEntity->e.reType ) {
 	case RT_SPRITE:
 		RB_SurfaceSprite();
@@ -1210,23 +1210,23 @@ void RB_SurfaceEntity( surfaceType_t *surfType ) {
 	return;
 }
 
-void RB_SurfaceBad( surfaceType_t *surfType ) {
+static void RB_SurfaceBad( surfaceType_t *surfType ) {
 	ri.Printf( PRINT_ALL, "Bad surface tesselated.\n" );
 }
 
-void RB_SurfaceFlare(srfFlare_t *surf)
+static void RB_SurfaceFlare(srfFlare_t *surf)
 {
 	if (r_flares->integer)
 		RB_AddFlare(surf, tess.fogNum, surf->origin, surf->color, surf->normal);
 }
 
-void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
+static void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
 	// all apropriate state must be set in RB_BeginSurface
 	// this isn't implemented yet...
 	qglCallList( surf->listNum );
 }
 
-void RB_SurfaceSkip( void *surf ) {
+static void RB_SurfaceSkip( void *surf ) {
 }
 
 
