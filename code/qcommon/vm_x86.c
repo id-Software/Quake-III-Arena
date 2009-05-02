@@ -214,6 +214,9 @@ __asm__(
 	"ret\n"
 	"0:\n\t" // system call
 	"notl  %eax\n\t"
+	"pushl %ebp\n\t"
+	"movl  %esp, %ebp\n\t"
+	"andl $-16, %esp\n\t" // align the stack so engine can use sse
 	"pushl %ecx\n\t"
 	"pushl %edi\n\t" // opStack
 	"pushl %esi\n\t" // programStack
@@ -221,6 +224,8 @@ __asm__(
 	"call  " CMANG(CallAsmCall) "\n\t"
 	"addl  $12, %esp\n\t"
 	"popl  %ecx\n\t"
+	"movl  %ebp, %esp\n\t"
+	"popl  %ebp\n\t"
 	"addl  $4, %edi\n\t"
 	"ret\n\t"
 #if defined __ELF__
