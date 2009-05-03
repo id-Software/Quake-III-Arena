@@ -187,6 +187,11 @@ ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
   # FIXME: introduce CLIENT_CFLAGS
   SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
   SDL_LIBS=$(shell pkg-config --libs sdl)
+else
+  ifeq ($(shell which sdl-config > /dev/null; echo $$?),0)
+    SDL_CFLAGS=$(shell sdl-config --cflags)
+    SDL_LIBS=$(shell sdl-config --libs)
+  endif
 endif
 
 # version info
@@ -238,7 +243,7 @@ ifeq ($(PLATFORM),linux)
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -pipe -DUSE_ICON $(shell sdl-config --cflags)
+    -pipe -DUSE_ICON $(SDL_CFLAGS)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
@@ -299,7 +304,7 @@ ifeq ($(PLATFORM),linux)
   THREAD_LIBS=-lpthread
   LIBS=-ldl -lm
 
-  CLIENT_LIBS=$(shell sdl-config --libs) -lGL
+  CLIENT_LIBS=$(SDL_LIBS) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -529,7 +534,7 @@ ifeq ($(PLATFORM),freebsd)
 
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -DUSE_ICON $(shell sdl-config --cflags)
+    -DUSE_ICON $(SDL_CFLAGS)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
@@ -570,7 +575,7 @@ ifeq ($(PLATFORM),freebsd)
 
   CLIENT_LIBS =
 
-  CLIENT_LIBS += $(shell sdl-config --libs) -lGL
+  CLIENT_LIBS += $(SDL_LIBS) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -595,7 +600,7 @@ ifeq ($(PLATFORM),openbsd)
 
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -DUSE_ICON $(shell sdl-config --cflags)
+    -DUSE_ICON $(SDL_CFLAGS)
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
@@ -626,7 +631,7 @@ ifeq ($(PLATFORM),openbsd)
 
   CLIENT_LIBS =
 
-  CLIENT_LIBS += $(shell sdl-config --libs) -lGL
+  CLIENT_LIBS += $(SDL_LIBS) -lGL
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -681,7 +686,7 @@ ifeq ($(PLATFORM),irix64)
   MKDIR = mkdir -p
 
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 \
-    -I. $(shell sdl-config --cflags) -I$(ROOT)/usr/include -DNO_VM_COMPILED
+    -I. $(SDL_CFLAGS) -I$(ROOT)/usr/include -DNO_VM_COMPILED
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
   DEBUG_CFLAGS=$(BASE_CFLAGS) -g
 
@@ -691,7 +696,7 @@ ifeq ($(PLATFORM),irix64)
 
   LIBS=-ldl -lm -lgen
   # FIXME: The X libraries probably aren't necessary?
-  CLIENT_LIBS=-L/usr/X11/$(LIB) $(shell sdl-config --libs) -lGL \
+  CLIENT_LIBS=-L/usr/X11/$(LIB) $(SDL_LIBS) -lGL \
     -lX11 -lXext -lm
 
 else # ifeq IRIX
@@ -719,9 +724,8 @@ ifeq ($(PLATFORM),sunos)
     endif
   endif
 
-
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -pipe -DUSE_ICON $(shell sdl-config --cflags)
+    -pipe -DUSE_ICON $(SDL_CFLAGS)
 
   OPTIMIZE = -O3 -ffast-math -funroll-loops
 
@@ -730,6 +734,7 @@ ifeq ($(PLATFORM),sunos)
       -fstrength-reduce -falign-functions=2 \
       -mtune=ultrasparc3 -mv8plus -mno-faster-structs \
       -funroll-loops #-mv8plus
+    HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),i386)
     OPTIMIZE = -O3 -march=i586 -fomit-frame-pointer -ffast-math \
@@ -759,7 +764,7 @@ ifeq ($(PLATFORM),sunos)
 
   BOTCFLAGS=-O0
 
-  CLIENT_LIBS +=$(shell sdl-config --libs) -lGL
+  CLIENT_LIBS +=$(SDL_LIBS) -lGL -lX11 -lXext -liconv -lm
 
 else # ifeq sunos
 
@@ -989,6 +994,12 @@ targets: makedirs
 	@echo ""
 	@echo "  LIBS:"
 	-@for i in $(LIBS); \
+	do \
+		echo "    $$i"; \
+	done
+	@echo ""
+	@echo "  CLIENT_LIBS:"
+	-@for i in $(CLIENT_LIBS); \
 	do \
 		echo "    $$i"; \
 	done
