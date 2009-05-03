@@ -5,6 +5,11 @@ MOUNT_DIR="../.."
 
 # Solaris stuff
 PLATFORM=`uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'`
+if [ "X${PLATFORM}" != "Xsunos" ]; then
+	echo "Unsupported platform! Must run this script on Solaris host!" ; exit 127
+fi
+
+
 if [ "X`uname -m`" = "Xi86pc" ]; then
 	ARCH=i386
 else
@@ -14,18 +19,19 @@ fi
 # Packages
 PKG_SOLARIS_NAME=ioquake3
 PKG_DATA_NAME=ioquake3d
+PKG_DEMO_NAME=ioquake3m
 BUILD_DATE="`/usr/bin/date '+%Y%m%d%H%M%S'`"
 SVNVERSION=/usr/local/bin/svnversion
-if [ -x /usr/local/bin/svnversion ]; then
-	SVN_BANNER=`/usr/local/bin/svnversion ${MOUNT_DIR}|sed -e 's/S$//' -e 's/M$//' `
-	BUILD_VERSION="1.34-r${SVN_BANNER}"
-else
-	BUILD_VERSION="1.34-rSVN"
+BUILD_VERSION="1.36_SVN"
+if [ -x "$SVNVERSION" ]; then
+	SVN_BANNER=`$SVNVERSION ${MOUNT_DIR}|sed -e 's/S$//' -e 's/M$//' `
+	BUILD_VERSION="${BUILD_VERSION}${SVN_BANNER}"
 fi
 PKG_VERSION="`date '+%Y%m%d%H%M'`"
 PKG_MAINT_ID="quake@cojot.name"
 SOLARIS_PKGFILE="${PKG_SOLARIS_NAME}-${BUILD_VERSION}-${PKG_VERSION}-${ARCH}.pkg"
-DATA_PKGFILE="${PKG_DATA_NAME}-${BUILD_VERSION}-${PKG_VERSION}-${ARCH}.pkg"
+DATA_PKGFILE="${PKG_DATA_NAME}-${BUILD_VERSION}-${PKG_VERSION}.pkg"
+DEMO_PKGFILE="${PKG_DEMO_NAME}-${BUILD_VERSION}-${PKG_VERSION}.pkg"
 
 # build directories
 BUILD_DIR="${MOUNT_DIR}/build/release-${PLATFORM}-${ARCH}"
@@ -33,6 +39,8 @@ PKG_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_SOLARIS_NAME}"
 PKG_BUILD_DIR="/tmp/ioquake3-build/${PKG_SOLARIS_NAME}-${BUILD_VERSION}"
 PKG_DATA_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_DATA_NAME}"
 PKG_DATA_BUILD_DIR="/usr/local/src/quake3-data/quake3"
+PKG_DEMO_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_DEMO_NAME}"
+PKG_DEMO_BUILD_DIR="/usr/local/src/quake3-demo/quake3"
 
 # Tools
 RM="/usr/bin/rm"
@@ -137,6 +145,32 @@ if [ -d ${BUILD_DIR} ]; then
                 -b ${PKG_DATA_SRC_DIR} -f ${PKG_DATA_SRC_DIR}/prototype \
                 -d /tmp -a ${ARCH} owner=root group=bin mode=0755
         ${PKGTRANS} -s /tmp ${BUILD_DIR}/pkg/${DATA_PKGFILE} ${PKG_DATA_NAME}
+
+	echo "Building ${BUILD_DIR}/pkg/${DEMO_PKGFILE}"
+        ${RM} -f ${BUILD_DIR}/pkg/${DEMO_PKGFILE}
+        ${TOUCH} ${BUILD_DIR}/pkg/${DEMO_PKGFILE}
+        ${SED} -e "/VERSION=/s/.*/VERSION=${BUILD_VERSION}.${PKG_VERSION}/" \
+                < ${PKG_DEMO_SRC_DIR}/pkginfo.template \
+                > ${PKG_DEMO_SRC_DIR}/pkginfo
+        ${CAT} ${PKG_DEMO_SRC_DIR}/prototype.template > ${PKG_DEMO_SRC_DIR}/prototype
+
+	if [ -d ${MOUNT_DIR}/../webspace/include ]; then
+		EULA_DIR=${MOUNT_DIR}/../webspace/include
+	else
+		if [ -d ${MOUNT_DIR}/../../webspace/include ]; then
+			EULA_DIR=${MOUNT_DIR}/../../webspace/include
+		fi
+	fi
+	if [ -f ${EULA_DIR}/id_patch_pk3s_Q3A_EULA.txt ]; then
+		${INSTALL_DEMO} ${EULA_DIR}/id_patch_pk3s_Q3A_EULA.txt ${PKG_DEMO_SRC_DIR}/copyright
+	fi
+
+        ${PKGPROTO} ${PKG_DEMO_BUILD_DIR}=quake3 | \
+                ${NAWK} '{ print $1,$2,$3,$4 }' >> ${PKG_DEMO_SRC_DIR}/prototype
+        ${PKGMK} -o -p "${PKG_MAINT_ID}${BUILD_DATE}" \
+                -b ${PKG_DEMO_SRC_DIR} -f ${PKG_DEMO_SRC_DIR}/prototype \
+                -d /tmp -a ${ARCH} owner=root group=bin mode=0755
+        ${PKGTRANS} -s /tmp ${BUILD_DIR}/pkg/${DEMO_PKGFILE} ${PKG_DEMO_NAME}
 else
 	echo "Directory ${BUILD_DIR} not found!"
 	exit 1
