@@ -187,7 +187,9 @@ ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
   # FIXME: introduce CLIENT_CFLAGS
   SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
   SDL_LIBS=$(shell pkg-config --libs sdl)
-else
+endif
+# Use sdl-config if all else fails
+ifeq ($(SDL_CFLAGS),)
   ifeq ($(shell which sdl-config > /dev/null; echo $$?),0)
     SDL_CFLAGS=$(shell sdl-config --cflags)
     SDL_LIBS=$(shell sdl-config --libs)
