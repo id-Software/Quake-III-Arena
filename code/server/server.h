@@ -394,6 +394,8 @@ int			SV_BotGetConsoleMessage( int client, char *buf, int size );
 int BotImport_DebugPolygonCreate(int color, int numPoints, vec3_t *points);
 void BotImport_DebugPolygonDelete(int id);
 
+void SV_BotInitBotLib(void);
+
 //============================================================
 //
 // high level object sorting to reduce interaction tests

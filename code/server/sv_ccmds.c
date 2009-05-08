@@ -518,7 +518,7 @@ SV_RehashBans_f
 Load saved bans from file.
 ==================
 */
-void SV_RehashBans_f(void)
+static void SV_RehashBans_f(void)
 {
 	int index, filelen;
 	fileHandle_t readfrom;
@@ -569,7 +569,7 @@ void SV_RehashBans_f(void)
 			
 			if(NET_StringToAdr(curpos + 2, &serverBans[index].ip, NA_UNSPEC))
 			{
-				serverBans[index].isexception = !(curpos[0] == '0');
+				serverBans[index].isexception = (curpos[0] != '0');
 				serverBans[index].subnet = atoi(maskpos);
 				
 				if(serverBans[index].ip.type == NA_IP &&
