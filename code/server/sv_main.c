@@ -102,6 +102,7 @@ SV_ReplacePendingServerCommands
 FIXME: This is ugly
 ======================
 */
+#if 0 // unused
 static int SV_ReplacePendingServerCommands( client_t *client, const char *cmd ) {
 	int i, index, csnum1, csnum2;
 
@@ -124,6 +125,7 @@ static int SV_ReplacePendingServerCommands( client_t *client, const char *cmd ) 
 	}
 	return qfalse;
 }
+#endif
 
 /*
 ======================
