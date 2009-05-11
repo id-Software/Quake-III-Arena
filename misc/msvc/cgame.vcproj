@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="cgame"
 	ProjectGUID="{C878E295-CB82-4B40-8ECF-5CE5525466FA}"
+	RootNamespace="cgame"
 	>
 	<Platforms>
 		<Platform
@@ -46,7 +47,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;MISSIONPACK;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;MISSIONPACK"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -57,6 +58,7 @@
 				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -81,7 +83,7 @@
 				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
-				ImportLibrary="$(IntDir)\/cgamex86.lib"
+				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -152,6 +154,7 @@
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -249,6 +252,7 @@
 				ProgramDataBaseFileName="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -344,6 +348,7 @@
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1495,18 +1500,14 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\code\cgame\cgame.def"
+		<Filter
+			Name="Resource Files"
 			>
-			<FileConfiguration
-				Name="Debug TA|Win32"
-				ExcludedFromBuild="true"
+			<File
+				RelativePath=".\cgame.def"
 				>
-				<Tool
-					Name="VCCustomBuildTool"
-				/>
-			</FileConfiguration>
-		</File>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
