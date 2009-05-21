@@ -595,7 +595,7 @@ static void SV_RehashBans_f(void)
 
 /*
 ==================
-SV_BanAddr_f
+SV_AddBanToList
 
 Ban a user from being able to play on this server based on his ip address.
 ==================
@@ -715,6 +715,14 @@ static void SV_AddBanToList(qboolean isexception)
 	serverBansCount++;
 }
 
+/*
+==================
+SV_DelBanFromList
+
+Remove a ban or an exception from the list.
+==================
+*/
+
 static void SV_DelBanFromList(qboolean isexception)
 {
 	int index, count, todel;
@@ -774,6 +782,14 @@ static void SV_DelBanFromList(qboolean isexception)
 	}
 }
 
+/*
+==================
+SV_ListBans_f
+
+List all bans and exceptions on console
+==================
+*/
+
 static void SV_ListBans_f(void)
 {
 	int index, count;
@@ -804,6 +820,14 @@ static void SV_ListBans_f(void)
 		}
 	}
 }
+
+/*
+==================
+SV_FlushBans_f
+
+Delete all bans and exceptions.
+==================
+*/
 
 static void SV_FlushBans_f(void)
 {
