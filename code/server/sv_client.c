@@ -234,18 +234,9 @@ Check whether a certain address is banned
 
 static qboolean SV_IsBanned(netadr_t *from, qboolean isexception)
 {
-	int index, addrlen, curbyte, netmask, cmpmask;
+	int index;
 	serverBan_t *curban;
-	byte *addrfrom, *addrban;
-	qboolean differed;
 	
-	if(from->type == NA_IP)
-		addrlen = sizeof(from->ip);
-	else if(from->type == NA_IP6)
-		addrlen = sizeof(from->ip6);
-	else
-		return qfalse;
-
 	if(!isexception)
 	{
 		// If this is a query for a ban, first check whether the client is excepted
@@ -257,47 +248,10 @@ static qboolean SV_IsBanned(netadr_t *from, qboolean isexception)
 	{
 		curban = &serverBans[index];
 		
-		if(curban->isexception == isexception && from->type == curban->ip.type)
+		if(curban->isexception == isexception)
 		{
-			if(from->type == NA_IP)
-			{
-				addrfrom = from->ip;
-				addrban = curban->ip.ip;
-			}
-			else
-			{
-				addrfrom = from->ip6;
-				addrban = curban->ip.ip6;
-			}
-			
-			differed = qfalse;
-			curbyte = 0;
-			
-			for(netmask = curban->subnet; netmask > 7; netmask -= 8)
-			{
-				if(addrfrom[curbyte] != addrban[curbyte])
-				{
-					differed = qtrue;
-					break;
-				}
-				
-				curbyte++;
-			}
-			
-			if(differed)
-				continue;
-				
-			if(netmask)
-			{
-				cmpmask = (1 << netmask) - 1;
-				cmpmask <<= 8 - netmask;
-				
-				if((addrfrom[curbyte] & cmpmask) == (addrban[curbyte] & cmpmask))
-					return qtrue;
-			}
-			else
+			if(NET_CompareBaseAdrMask(curban->ip, *from, curban->subnet))
 				return qtrue;
-			
 		}
 	}
 	

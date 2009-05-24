@@ -181,6 +181,8 @@ New cvars
                                       for more information
   r_sdlDriver                       - read only, indicates the SDL driver
                                       backend being used
+  sv_banFile                        - Name of the file that is used for storing
+                                      the server bans.
 
 New commands
   video [filename]        - start video capture (use with demo command)
@@ -192,8 +194,8 @@ New commands
                             server, valid <range> is either playernum or CIDR
                             notation address range.
   exceptaddr <range>      - exempt an ip address range from a ban.
-  bandel <num>            - delete ban <num>
-  exceptdel <num>         - delete exception <num>
+  bandel <range>          - delete ban (either range or ban number)
+  exceptdel <range>       - delete exception (either range or exception number)
   listbans                - list all currently active bans and exceptions
   rehashbans              - reload the banlist from serverbans.dat
   flushbans               - delete all bans

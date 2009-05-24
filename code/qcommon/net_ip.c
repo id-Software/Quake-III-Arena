@@ -382,37 +382,88 @@ qboolean Sys_StringToAdr( const char *s, netadr_t *a, netadrtype_t family ) {
 
 /*
 ===================
-NET_CompareBaseAdr
+NET_CompareBaseAdrMask
 
-Compares without the port
+Compare without port, and up to the bit number given in netmask.
 ===================
 */
-qboolean	NET_CompareBaseAdr (netadr_t a, netadr_t b)
+qboolean NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask)
 {
+	qboolean differed;
+	byte cmpmask, *addra, *addrb;
+	int curbyte;
+	
 	if (a.type != b.type)
 		return qfalse;
 
 	if (a.type == NA_LOOPBACK)
 		return qtrue;
 
-	if (a.type == NA_IP)
+	if(a.type == NA_IP)
 	{
-		if(!memcmp(a.ip, b.ip, sizeof(a.ip)))
-			return qtrue;
+		addra = (byte *) &a.ip;
+		addrb = (byte *) &b.ip;
 		
-		return qfalse;
+		if(netmask < 0 || netmask > 32)
+			netmask = 32;
 	}
-	
-	if (a.type == NA_IP6)
+	else if(a.type == NA_IP6)
 	{
-		if(!memcmp(a.ip6, b.ip6, sizeof(a.ip6)) && a.scope_id == b.scope_id)
-				  return qtrue;
+		addra = (byte *) &a.ip6;
+		addrb = (byte *) &b.ip6;
 		
+		if(netmask < 0 || netmask > 128)
+			netmask = 128;
+	}
+	else
+	{
+		Com_Printf ("NET_CompareBaseAdr: bad address type\n");
 		return qfalse;
 	}
 
-	Com_Printf ("NET_CompareBaseAdr: bad address type\n");
+	differed = qfalse;
+	curbyte = 0;
+
+	while(netmask > 7)
+	{
+		if(addra[curbyte] != addrb[curbyte])
+		{
+			differed = qtrue;
+			break;
+		}
+
+		curbyte++;
+		netmask -= 8;
+	}
+
+	if(differed)
+		return qfalse;
+
+	if(netmask)
+	{
+		cmpmask = (1 << netmask) - 1;
+		cmpmask <<= 8 - netmask;
+
+		if((addra[curbyte] & cmpmask) == (addrb[curbyte] & cmpmask))
+			return qtrue;
+	}
+	else
+		return qtrue;
+	
 	return qfalse;
+}
+
+
+/*
+===================
+NET_CompareBaseAdr
+
+Compares without the port
+===================
+*/
+qboolean NET_CompareBaseAdr (netadr_t a, netadr_t b)
+{
+	return NET_CompareBaseAdrMask(a, b, -1);
 }
 
 const char	*NET_AdrToString (netadr_t a)

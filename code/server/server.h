@@ -234,7 +234,6 @@ typedef struct {
 } serverStatic_t;
 
 #define SERVER_MAXBANS	1024
-#define SERVER_BANFILE	"serverbans.dat"
 // Structure for managing bans
 typedef struct
 {
@@ -280,6 +279,7 @@ extern	cvar_t	*sv_pure;
 extern	cvar_t	*sv_floodProtect;
 extern	cvar_t	*sv_lanForceRate;
 extern	cvar_t	*sv_strictAuth;
+extern	cvar_t	*sv_banFile;
 
 extern	serverBan_t serverBans[SERVER_MAXBANS];
 extern	int serverBansCount;
