@@ -136,7 +136,7 @@ Section "OpenAL-Soft library"
 
   SetOutPath $INSTDIR
 
-  File "openal32.dll"
+  File "OpenAL32.dll"
 
 SectionEnd
 
@@ -169,7 +169,7 @@ Section "Uninstall"
 
   Delete $INSTDIR\libcurl-4.dll
 
-  Delete $INSTDIR\openal32.dll
+  Delete $INSTDIR\OpenAL32.dll
 
   Delete $INSTDIR\uninstall.exe
 
