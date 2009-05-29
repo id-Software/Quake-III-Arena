@@ -200,6 +200,8 @@ New commands
   rehashbans              - reload the banlist from serverbans.dat
   flushbans               - delete all bans
 
+  net_restart             - restart network subsystem to change latched settings
+
 ------------------------------------------------------------ Miscellaneous -----
 
 Using shared libraries instead of qvm

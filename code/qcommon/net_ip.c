@@ -1377,11 +1377,6 @@ void NET_OpenIP( void ) {
 	int		port;
 	int		port6;
 
-	net_ip = Cvar_Get( "net_ip", "0.0.0.0", CVAR_LATCH );
-	net_ip6 = Cvar_Get( "net_ip6", "::", CVAR_LATCH );
-	net_port = Cvar_Get( "net_port", va( "%i", PORT_SERVER ), CVAR_LATCH );
-	net_port6 = Cvar_Get( "net_port6", va( "%i", PORT_SERVER ), CVAR_LATCH );
-	
 	port = net_port->integer;
 	port6 = net_port6->integer;
 
@@ -1445,14 +1440,8 @@ NET_GetCvars
 ====================
 */
 static qboolean NET_GetCvars( void ) {
-	qboolean	modified;
+	int modified;
 
-	modified = qfalse;
-
-	if( net_enabled && net_enabled->modified ) {
-		modified = qtrue;
-	}
-	
 #ifdef DEDICATED
 	// I want server owners to explicitly turn on ipv6 support.
 	net_enabled = Cvar_Get( "net_enabled", "1", CVAR_LATCH | CVAR_ARCHIVE );
@@ -1461,45 +1450,55 @@ static qboolean NET_GetCvars( void ) {
 	 * used if available due to ping */
 	net_enabled = Cvar_Get( "net_enabled", "3", CVAR_LATCH | CVAR_ARCHIVE );
 #endif
+	modified = net_enabled->modified;
+	net_enabled->modified = qfalse;
+
+	net_ip = Cvar_Get( "net_ip", "0.0.0.0", CVAR_LATCH );
+	modified += net_ip->modified;
+	net_ip->modified = qfalse;
+	
+	net_ip6 = Cvar_Get( "net_ip6", "::", CVAR_LATCH );
+	modified += net_ip6->modified;
+	net_ip6->modified = qfalse;
+	
+	net_port = Cvar_Get( "net_port", va( "%i", PORT_SERVER ), CVAR_LATCH );
+	modified += net_port->modified;
+	net_port->modified = qfalse;
+	
+	net_port6 = Cvar_Get( "net_port6", va( "%i", PORT_SERVER ), CVAR_LATCH );
+	modified += net_port6->modified;
+	net_port6->modified = qfalse;
 
 	// Some cvars for configuring multicast options which facilitates scanning for servers on local subnets.
-	if( net_mcast6addr && net_mcast6addr->modified ) {
-		modified = qtrue;
-	}
 	net_mcast6addr = Cvar_Get( "net_mcast6addr", NET_MULTICAST_IP6, CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_mcast6addr->modified;
+	net_mcast6addr->modified = qfalse;
 
-	if( net_mcast6iface && net_mcast6iface->modified ) {
-		modified = qtrue;
-	}
 	net_mcast6iface = Cvar_Get( "net_mcast6iface", "0", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_mcast6iface->modified; 
+	net_mcast6iface->modified = qfalse;
 
-	if( net_socksEnabled && net_socksEnabled->modified ) {
-		modified = qtrue;
-	}
 	net_socksEnabled = Cvar_Get( "net_socksEnabled", "0", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_socksEnabled->modified; 
+	net_socksEnabled->modified = qfalse;
 
-	if( net_socksServer && net_socksServer->modified ) {
-		modified = qtrue;
-	}
 	net_socksServer = Cvar_Get( "net_socksServer", "", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_socksServer->modified; 
+	net_socksServer->modified = qfalse;
 
-	if( net_socksPort && net_socksPort->modified ) {
-		modified = qtrue;
-	}
 	net_socksPort = Cvar_Get( "net_socksPort", "1080", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_socksPort->modified; 
+	net_socksPort->modified = qfalse;
 
-	if( net_socksUsername && net_socksUsername->modified ) {
-		modified = qtrue;
-	}
 	net_socksUsername = Cvar_Get( "net_socksUsername", "", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_socksUsername->modified; 
+	net_socksUsername->modified = qfalse;
 
-	if( net_socksPassword && net_socksPassword->modified ) {
-		modified = qtrue;
-	}
 	net_socksPassword = Cvar_Get( "net_socksPassword", "", CVAR_LATCH | CVAR_ARCHIVE );
+	modified += net_socksPassword->modified; 
+	net_socksPassword->modified = qfalse;
 
-
-	return modified;
+	return modified ? qtrue : qfalse;
 }
 
 
@@ -1603,10 +1602,9 @@ void NET_Init( void ) {
 	Com_Printf( "Winsock Initialized\n" );
 #endif
 
-	// this is really just to get the cvars registered
-	NET_GetCvars();
-
 	NET_Config( qtrue );
+	
+	Cmd_AddCommand ("net_restart", NET_Restart_f);
 }
 
 
@@ -1678,6 +1676,6 @@ void NET_Sleep( int msec ) {
 NET_Restart_f
 ====================
 */
-void NET_Restart( void ) {
+void NET_Restart_f( void ) {
 	NET_Config( networkingEnabled );
 }
