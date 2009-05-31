@@ -1306,8 +1306,12 @@ void CL_RequestMotd( void ) {
 		BigShort( cls.updateServer.port ) );
 	
 	info[0] = 0;
-
-	Com_sprintf( cls.updateChallenge, sizeof( cls.updateChallenge ), "%i", (random() << 16) ^ random());
+  // NOTE TTimo xoring against Com_Milliseconds, otherwise we may not have a true randomization
+  // only srand I could catch before here is tr_noise.c l:26 srand(1001)
+  // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=382
+  // NOTE: the Com_Milliseconds xoring only affects the lower 16-bit word,
+  //   but I decided it was enough randomization
+	Com_sprintf( cls.updateChallenge, sizeof( cls.updateChallenge ), "%i", ((rand() << 16) ^ rand()) ^ Com_Milliseconds());
 
 	Info_SetValueForKey( info, "challenge", cls.updateChallenge );
 	Info_SetValueForKey( info, "renderer", cls.glconfig.renderer_string );
