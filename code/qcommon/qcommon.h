@@ -132,8 +132,8 @@ NET
 #define	MAX_RELIABLE_COMMANDS	64			// max string commands buffered for restransmit
 
 typedef enum {
+	NA_BAD = 0,					// an address lookup failed
 	NA_BOT,
-	NA_BAD,					// an address lookup failed
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP,

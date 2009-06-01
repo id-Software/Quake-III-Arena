@@ -548,7 +548,7 @@ static void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
   } else if (!Q_stricmp(c, "getinfo")) {
 		SVC_Info( from );
 	} else if (!Q_stricmp(c, "getchallenge")) {
-		SV_GetChallenge( from );
+		SV_GetChallenge(from);
 	} else if (!Q_stricmp(c, "connect")) {
 		SV_DirectConnect( from );
 #ifndef STANDALONE
