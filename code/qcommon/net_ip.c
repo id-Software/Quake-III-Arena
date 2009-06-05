@@ -1654,8 +1654,7 @@ void NET_Sleep( int msec ) {
 	{
 		FD_SET(ip_socket, &fdset);
 
-		if(ip_socket > highestfd)
-			highestfd = ip_socket;
+		highestfd = ip_socket;
 	}
 	if(ip6_socket != INVALID_SOCKET)
 	{
@@ -1667,7 +1666,7 @@ void NET_Sleep( int msec ) {
 
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
-	select(ip_socket+1, &fdset, NULL, NULL, &timeout);
+	select(highestfd + 1, &fdset, NULL, NULL, &timeout);
 }
 
 
