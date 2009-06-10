@@ -525,7 +525,7 @@ void R_SetupProjection(viewParms_t *dest, float zProj, qboolean computeFrustum)
 		if(dest->stereoFrame == STEREO_LEFT)
 			stereoSep = zProj / stereoSep;
 		else if(dest->stereoFrame == STEREO_RIGHT)
-			stereoSep = zProj / stereoSep;
+			stereoSep = zProj / -stereoSep;
 		else
 			stereoSep = 0;
 	}
