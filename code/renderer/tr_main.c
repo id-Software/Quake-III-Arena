@@ -456,7 +456,7 @@ void R_SetupFrustum (viewParms_t *dest, float xmin, float xmax, float ymax, floa
 	float oppleg, adjleg, length;
 	int i;
 	
-	if(stereoSep == 0 && xmin != -xmax)
+	if(stereoSep == 0 && xmin == -xmax)
 	{
 		// symmetric case can be simplified
 		VectorCopy(dest->or.origin, ofsorigin);
