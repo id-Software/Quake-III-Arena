@@ -208,6 +208,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	int sdlcolorbits;
 	int colorbits, depthbits, stencilbits;
 	int tcolorbits, tdepthbits, tstencilbits;
+	int samples;
 	int i = 0;
 	SDL_Surface *vidscreen = NULL;
 	Uint32 flags = SDL_OPENGL;
@@ -270,6 +271,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	else
 		depthbits = r_depthbits->value;
 	stencilbits = r_stencilbits->value;
+	samples = r_ext_multisample->value;
 
 	for (i = 0; i < 16; i++)
 	{
@@ -336,6 +338,9 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, sdlcolorbits );
 		SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
 		SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
+
+		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, samples ? 1 : 0 );
+		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, samples );
 
 		if(r_stereoEnabled->integer)
 		{
@@ -674,6 +679,7 @@ void GLimp_Init( void )
 		{
 			ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
 					r_mode->integer, R_MODE_FALLBACK );
+			ri.Cvar_Set("r_ext_multisample", "0");
 			if( !GLimp_StartDriverAndSetMode( R_MODE_FALLBACK, r_fullscreen->integer ) )
 				success = qfalse;
 		}
