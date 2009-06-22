@@ -934,7 +934,7 @@ int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, i
 
 #ifdef IPV6_V6ONLY
 	{
-		int i;
+		int i = 1;
 
 		// ipv4 addresses should not be allowed to connect via this socket.
 		if(setsockopt(newsocket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &i, sizeof(i)) == SOCKET_ERROR)
