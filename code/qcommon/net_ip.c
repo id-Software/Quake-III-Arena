@@ -285,7 +285,7 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 		if(family == AF_UNSPEC)
 		{
 			// Decide here and now which protocol family to use
-			if((net_enabled->integer & NET_PRIOV6)
+			if(net_enabled->integer & NET_PRIOV6)
 			{
 				if(net_enabled->integer & NET_ENABLEV6)
 					search = SearchAddrInfo(res, AF_INET6);
