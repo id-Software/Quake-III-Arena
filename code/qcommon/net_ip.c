@@ -92,13 +92,6 @@ typedef int SOCKET;
 static qboolean usingSocks = qfalse;
 static int networkingEnabled = 0;
 
-#define NET_ENABLEV4		0x01
-#define NET_ENABLEV6		0x02
-// if this flag is set, always attempt ipv6 connections instead of ipv4 if a v6 address is found.
-#define NET_PRIOV6		0x04
-// disables ipv6 multicast support if set.
-#define NET_DISABLEMCAST	0x08
-
 static cvar_t	*net_enabled;
 
 static cvar_t	*net_socksEnabled;

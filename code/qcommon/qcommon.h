@@ -121,6 +121,14 @@ NET
 ==============================================================
 */
 
+#define NET_ENABLEV4            0x01
+#define NET_ENABLEV6            0x02
+// if this flag is set, always attempt ipv6 connections instead of ipv4 if a v6 address is found.
+#define NET_PRIOV6              0x04
+// disables ipv6 multicast support if set.
+#define NET_DISABLEMCAST        0x08
+
+
 #define	PACKET_BACKUP	32	// number of old messages that must be kept on client and
 							// server for delta comrpession and ping estimation
 #define	PACKET_MASK		(PACKET_BACKUP-1)
