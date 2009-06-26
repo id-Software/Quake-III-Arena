@@ -341,7 +341,8 @@ static void Sys_SockaddrToString(char *dest, int destlen, struct sockaddr *input
 	else
 		inputlen = sizeof(struct sockaddr_in);
 
-	getnameinfo(input, inputlen, dest, destlen, NULL, 0, NI_NUMERICHOST);
+	if(getnameinfo(input, inputlen, dest, destlen, NULL, 0, NI_NUMERICHOST) && destlen > 0)
+		*dest = '\0';
 }
 
 /*
@@ -1319,9 +1320,6 @@ void NET_GetLocalAddress( void ) {
 	char				hostname[256];
 	struct addrinfo		hint;
 	struct addrinfo 	*res = NULL;
-	struct addrinfo 	*search;
-	struct sockaddr_in mask4;
-	struct sockaddr_in6 mask6;
 
 	if(gethostname( hostname, 256 ) == SOCKET_ERROR)
 		return;
@@ -1333,29 +1331,36 @@ void NET_GetLocalAddress( void ) {
 	hint.ai_family = AF_UNSPEC;
 	hint.ai_socktype = SOCK_DGRAM;
 	
-	if(getaddrinfo(hostname, NULL, &hint, &res))
- 		return;
-
-	/* On operating systems where it's more difficult to find out the configured interfaces, we'll just assume a
-	 * netmask with all bits set. */
-	
-	memset(&mask4, 0, sizeof(mask4));
-	memset(&mask6, 0, sizeof(mask6));
-	mask4.sin_family = AF_INET;
-	memset(&mask4.sin_addr.s_addr, 0xFF, sizeof(mask4.sin_addr.s_addr));
-	mask6.sin6_family = AF_INET6;
-	memset(&mask6.sin6_addr, 0xFF, sizeof(mask6.sin6_addr));
-
-	// add all IPs from returned list.
-	for(search = res; search; search = search->ai_next)
+	if(!getaddrinfo(hostname, NULL, &hint, &res))
 	{
-		if(search->ai_family == AF_INET)
-			NET_AddLocalAddress("", search->ai_addr, (struct sockaddr *) &mask4);
-		else if(search->ai_family == AF_INET6)
-			NET_AddLocalAddress("", search->ai_addr, (struct sockaddr *) &mask6);
+		struct sockaddr_in mask4;
+		struct sockaddr_in6 mask6;
+		struct addrinfo 	*search;
+	
+		/* On operating systems where it's more difficult to find out the configured interfaces, we'll just assume a
+		 * netmask with all bits set. */
+	
+		memset(&mask4, 0, sizeof(mask4));
+		memset(&mask6, 0, sizeof(mask6));
+		mask4.sin_family = AF_INET;
+		memset(&mask4.sin_addr.s_addr, 0xFF, sizeof(mask4.sin_addr.s_addr));
+		mask6.sin6_family = AF_INET6;
+		memset(&mask6.sin6_addr, 0xFF, sizeof(mask6.sin6_addr));
+
+		// add all IPs from returned list.
+		for(search = res; search; search = search->ai_next)
+		{
+			if(search->ai_family == AF_INET)
+				NET_AddLocalAddress("", search->ai_addr, (struct sockaddr *) &mask4);
+			else if(search->ai_family == AF_INET6)
+				NET_AddLocalAddress("", search->ai_addr, (struct sockaddr *) &mask6);
+		}
+	
+		Sys_ShowIP();
 	}
 	
-	Sys_ShowIP();
+	if(res)
+		freeaddrinfo(res);
 }
 #endif
 
