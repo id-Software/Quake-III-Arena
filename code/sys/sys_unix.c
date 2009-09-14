@@ -518,6 +518,18 @@ void Sys_ErrorDialog( const char *error )
 
 /*
 ==============
+Sys_GLimpSafeInit
+
+Unix specific "safe" GL implementation initialisation
+==============
+*/
+void Sys_GLimpSafeInit( void )
+{
+	// NOP
+}
+
+/*
+==============
 Sys_GLimpInit
 
 Unix specific GL implementation initialisation

@@ -665,31 +665,35 @@ of OpenGL
 */
 void GLimp_Init( void )
 {
-	qboolean success = qtrue;
-
 	r_allowSoftwareGL = ri.Cvar_Get( "r_allowSoftwareGL", "0", CVAR_LATCH );
 	r_sdlDriver = ri.Cvar_Get( "r_sdlDriver", "", CVAR_ROM );
 
 	Sys_GLimpInit( );
 
-	// create the window and set up the context
-	if( !GLimp_StartDriverAndSetMode( r_mode->integer, r_fullscreen->integer ) )
+	// Create the window and set up the context
+	if( GLimp_StartDriverAndSetMode( r_mode->integer, r_fullscreen->integer ) )
+		goto success;
+
+	// Try again, this time in a platform specific "safe mode"
+	Sys_GLimpSafeInit( );
+
+	if( GLimp_StartDriverAndSetMode( r_mode->integer, r_fullscreen->integer ) )
+		goto success;
+
+	// Finally, try the default screen resolution
+	if( r_mode->integer != R_MODE_FALLBACK )
 	{
-		if( r_mode->integer != R_MODE_FALLBACK )
-		{
-			ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
-					r_mode->integer, R_MODE_FALLBACK );
-			ri.Cvar_Set("r_ext_multisample", "0");
-			if( !GLimp_StartDriverAndSetMode( R_MODE_FALLBACK, r_fullscreen->integer ) )
-				success = qfalse;
-		}
-		else
-			success = qfalse;
+		ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
+				r_mode->integer, R_MODE_FALLBACK );
+
+		if( GLimp_StartDriverAndSetMode( R_MODE_FALLBACK, r_fullscreen->integer ) )
+			goto success;
 	}
 
-	if( !success )
-		ri.Error( ERR_FATAL, "GLimp_Init() - could not load OpenGL subsystem\n" );
+	// Nothing worked, give up
+	ri.Error( ERR_FATAL, "GLimp_Init() - could not load OpenGL subsystem\n" );
 
+success:
 	// This values force the UI to disable driver selection
 	glConfig.driverType = GLDRV_ICD;
 	glConfig.hardwareType = GLHW_GENERIC;

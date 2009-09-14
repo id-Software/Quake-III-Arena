@@ -2104,7 +2104,7 @@ void CL_CheckForResend( void ) {
 		// The challenge request shall be followed by a client challenge so no malicious server can hijack this connection.
 		Com_sprintf(data, sizeof(data), "getchallenge %d", clc.challenge);
 
-		NET_OutOfBandPrint(NS_CLIENT, clc.serverAddress, data);
+		NET_OutOfBandPrint(NS_CLIENT, clc.serverAddress, "%s", data);
 		break;
 		
 	case CA_CHALLENGING:
