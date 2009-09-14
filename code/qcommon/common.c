@@ -1397,9 +1397,11 @@ void Com_InitSmallZoneMemory( void ) {
 void Com_InitZoneMemory( void ) {
 	cvar_t	*cv;
 
-	//FIXME: 05/01/06 com_zoneMegs is useless right now as neither q3config.cfg nor
-	// Com_StartupVariable have been executed by this point. The net result is that
-	// s_zoneTotal will always be set to the default value.
+	// Please note: com_zoneMegs can only be set on the command line, and
+	// not in q3config.cfg or Com_StartupVariable, as they haven't been
+	// executed by this point. It's a chicken and egg problem. We need the
+	// memory manager configured to handle those places where you would
+	// configure the memory manager.
 
 	// allocate the random block zone
 	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS_S, CVAR_LATCH | CVAR_ARCHIVE );
@@ -2550,11 +2552,11 @@ void Com_Init( char *commandLine ) {
 //	Swap_Init ();
 	Cbuf_Init ();
 
-	Com_InitZoneMemory();
-	Cmd_Init ();
-
 	// override anything from the config files with command line args
 	Com_StartupVariable( NULL );
+
+	Com_InitZoneMemory();
+	Cmd_Init ();
 
 	// get the developer cvar set as early as possible
 	Com_StartupVariable( "developer" );
