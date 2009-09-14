@@ -31,6 +31,7 @@ cvar_t *s_musicVolume;
 cvar_t *s_doppler;
 cvar_t *s_backend;
 cvar_t *s_muteWhenMinimized;
+cvar_t *s_muteWhenUnfocused;
 
 static soundInterface_t si;
 
@@ -228,7 +229,8 @@ S_Update
 */
 void S_Update( void )
 {
-	if( s_muteWhenMinimized->integer && com_minimized->integer ) {
+	if( ( s_muteWhenMinimized->integer && com_minimized->integer ) || 
+		( s_muteWhenUnfocused->integer && com_unfocused->integer ) ) {
 		S_StopAllSounds( );
 		return;
 	}
@@ -451,6 +453,7 @@ void S_Init( void )
 	s_doppler = Cvar_Get( "s_doppler", "1", CVAR_ARCHIVE );
 	s_backend = Cvar_Get( "s_backend", "", CVAR_ROM );
 	s_muteWhenMinimized = Cvar_Get( "s_muteWhenMinimized", "0", CVAR_ARCHIVE );
+	s_muteWhenUnfocused = Cvar_Get( "s_muteWhenUnfocused", "0", CVAR_ARCHIVE );
 
 	cv = Cvar_Get( "s_initsound", "1", 0 );
 	if( !cv->integer ) {
