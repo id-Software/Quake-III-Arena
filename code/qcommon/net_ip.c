@@ -267,7 +267,9 @@ Sys_StringToSockaddr
 */
 static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int sadr_len, sa_family_t family)
 {
-	struct addrinfo hints, *res = NULL, *search;
+	struct addrinfo hints;
+	struct addrinfo *res = NULL;
+	struct addrinfo *search = NULL;
 	struct addrinfo *hintsp;
 	int retval;
 	
