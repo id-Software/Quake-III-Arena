@@ -489,10 +489,10 @@ static void CodeError( char *fmt, ... ) {
 
 	errorCount++;
 
-	report( "%s:%i ", currentFileName, currentFileLine );
+	fprintf( stderr, "%s:%i ", currentFileName, currentFileLine );
 
 	va_start( argptr,fmt );
-	vprintf( fmt,argptr );
+	vfprintf( stderr, fmt, argptr );
 	va_end( argptr );
 }
 
