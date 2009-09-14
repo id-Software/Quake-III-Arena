@@ -192,8 +192,10 @@ void CL_UpdateVoipIgnore(const char *idstr, qboolean ignore)
 			                         ignore ? "ignore" : "unignore", id));
 			Com_Printf("VoIP: %s ignoring player #%d\n",
 			            ignore ? "Now" : "No longer", id);
+			return;
 		}
 	}
+	Com_Printf("VoIP: invalid player ID#\n");
 }
 
 static
@@ -234,7 +236,19 @@ void CL_Voip_f( void )
 	} else if (strcmp(cmd, "unignore") == 0) {
 		CL_UpdateVoipIgnore(Cmd_Argv(2), qfalse);
 	} else if (strcmp(cmd, "gain") == 0) {
-		CL_UpdateVoipGain(Cmd_Argv(2), atof(Cmd_Argv(3)));
+		if (Cmd_Argc() > 3) {
+			CL_UpdateVoipGain(Cmd_Argv(2), atof(Cmd_Argv(3)));
+		} else if (Q_isanumber(Cmd_Argv(2))) {
+			int id = atoi(Cmd_Argv(2));
+			if (id >= 0 && id < MAX_CLIENTS) {
+				Com_Printf("VoIP: current gain for player #%d "
+					"is %f\n", id, clc.voipGain[id]);
+			} else {
+				Com_Printf("VoIP: invalid player ID#\n");
+			}
+		} else {
+			Com_Printf("usage: voip gain <playerID#> [value]\n");
+		}
 	} else if (strcmp(cmd, "muteall") == 0) {
 		Com_Printf("VoIP: muting incoming voice\n");
 		CL_AddReliableCommand("voip muteall");
@@ -243,6 +257,10 @@ void CL_Voip_f( void )
 		Com_Printf("VoIP: unmuting incoming voice\n");
 		CL_AddReliableCommand("voip unmuteall");
 		clc.voipMuteAll = qfalse;
+	} else {
+		Com_Printf("usage: voip [un]ignore <playerID#>\n"
+		           "       voip [un]muteall\n"
+		           "       voip gain <playerID#> [value]\n");
 	}
 }
 
