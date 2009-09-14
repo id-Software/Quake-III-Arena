@@ -79,6 +79,7 @@ static SDL_Surface *screen = NULL;
 static const SDL_VideoInfo *videoInfo = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
+cvar_t *r_allowResize; // make window resizable
 cvar_t *r_sdlDriver;
 
 void (APIENTRYP qglActiveTextureARB) (GLenum texture);
@@ -214,6 +215,9 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	Uint32 flags = SDL_OPENGL;
 
 	ri.Printf( PRINT_ALL, "Initializing OpenGL display\n");
+
+	if ( r_allowResize->integer )
+		flags |= SDL_RESIZABLE;
 
 #if !SDL_VERSION_ATLEAST(1, 2, 10)
 	// 1.2.10 is needed to get the desktop resolution
@@ -667,6 +671,7 @@ void GLimp_Init( void )
 {
 	r_allowSoftwareGL = ri.Cvar_Get( "r_allowSoftwareGL", "0", CVAR_LATCH );
 	r_sdlDriver = ri.Cvar_Get( "r_sdlDriver", "", CVAR_ROM );
+	r_allowResize = ri.Cvar_Get( "r_allowResize", "0", CVAR_ARCHIVE );
 
 	Sys_GLimpInit( );
 
