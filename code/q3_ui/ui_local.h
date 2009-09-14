@@ -120,27 +120,27 @@ extern vmCvar_t	ui_ioq3;
 #define MTYPE_PTEXT				9
 #define MTYPE_BTEXT				10
 
-#define QMF_BLINK				0x00000001
-#define QMF_SMALLFONT			0x00000002
-#define QMF_LEFT_JUSTIFY		0x00000004
-#define QMF_CENTER_JUSTIFY		0x00000008
-#define QMF_RIGHT_JUSTIFY		0x00000010
-#define QMF_NUMBERSONLY			0x00000020	// edit field is only numbers
-#define QMF_HIGHLIGHT			0x00000040
-#define QMF_HIGHLIGHT_IF_FOCUS	0x00000080	// steady focus
-#define QMF_PULSEIFFOCUS		0x00000100	// pulse if focus
-#define QMF_HASMOUSEFOCUS		0x00000200
-#define QMF_NOONOFFTEXT			0x00000400
-#define QMF_MOUSEONLY			0x00000800	// only mouse input allowed
-#define QMF_HIDDEN				0x00001000	// skips drawing
-#define QMF_GRAYED				0x00002000	// grays and disables
-#define QMF_INACTIVE			0x00004000	// disables any input
-#define QMF_NODEFAULTINIT		0x00008000	// skip default initialization
-#define QMF_OWNERDRAW			0x00010000
-#define QMF_PULSE				0x00020000
-#define QMF_LOWERCASE			0x00040000	// edit field is all lower case
-#define QMF_UPPERCASE			0x00080000	// edit field is all upper case
-#define QMF_SILENT				0x00100000
+#define QMF_BLINK				((unsigned int) 0x00000001)
+#define QMF_SMALLFONT			((unsigned int) 0x00000002)
+#define QMF_LEFT_JUSTIFY		((unsigned int) 0x00000004)
+#define QMF_CENTER_JUSTIFY		((unsigned int) 0x00000008)
+#define QMF_RIGHT_JUSTIFY		((unsigned int) 0x00000010)
+#define QMF_NUMBERSONLY			((unsigned int) 0x00000020)	// edit field is only numbers
+#define QMF_HIGHLIGHT			((unsigned int) 0x00000040)
+#define QMF_HIGHLIGHT_IF_FOCUS	((unsigned int) 0x00000080)	// steady focus
+#define QMF_PULSEIFFOCUS		((unsigned int) 0x00000100)	// pulse if focus
+#define QMF_HASMOUSEFOCUS		((unsigned int) 0x00000200)
+#define QMF_NOONOFFTEXT			((unsigned int) 0x00000400)
+#define QMF_MOUSEONLY			((unsigned int) 0x00000800)	// only mouse input allowed
+#define QMF_HIDDEN				((unsigned int) 0x00001000)	// skips drawing
+#define QMF_GRAYED				((unsigned int) 0x00002000)	// grays and disables
+#define QMF_INACTIVE			((unsigned int) 0x00004000)	// disables any input
+#define QMF_NODEFAULTINIT		((unsigned int) 0x00008000)	// skip default initialization
+#define QMF_OWNERDRAW			((unsigned int) 0x00010000)
+#define QMF_PULSE				((unsigned int) 0x00020000)
+#define QMF_LOWERCASE			((unsigned int) 0x00040000)	// edit field is all lower case
+#define QMF_UPPERCASE			((unsigned int) 0x00080000)	// edit field is all upper case
+#define QMF_SILENT				((unsigned int) 0x00100000)
 
 // callback notifications
 #define QM_GOTFOCUS				1
@@ -175,7 +175,7 @@ typedef struct
 	int	bottom;
 	menuframework_s *parent;
 	int menuPosition;
-	unsigned flags;
+	unsigned int flags;
 
 	void (*callback)( void *self, int event );
 	void (*statusbar)( void *self );
