@@ -523,17 +523,17 @@ void SetTeam( gentity_t *ent, char *s ) {
 		if ( g_teamForceBalance.integer  ) {
 			int		counts[TEAM_NUM_TEAMS];
 
-			counts[TEAM_BLUE] = TeamCount( ent->client->ps.clientNum, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( ent->client->ps.clientNum, TEAM_RED );
+			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE );
+			counts[TEAM_RED] = TeamCount( clientNum, TEAM_RED );
 
 			// We allow a spread of two
 			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum, 
+				trap_SendServerCommand( clientNum, 
 					"cp \"Red team has too many players.\n\"" );
 				return; // ignore the request
 			}
 			if ( team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum, 
+				trap_SendServerCommand( clientNum, 
 					"cp \"Blue team has too many players.\n\"" );
 				return; // ignore the request
 			}
