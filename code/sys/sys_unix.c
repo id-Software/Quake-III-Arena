@@ -55,14 +55,14 @@ char *Sys_DefaultHomePath(void)
 			Q_strncpyz( homePath, p, sizeof( homePath ) );
 #ifdef MACOS_X
 			Q_strcat( homePath, sizeof( homePath ), "/Library" );
-			mkdir( homePath, 0777 );  /* just in case. */
+			mkdir( homePath, 0750 );  /* just in case. */
 			Q_strcat( homePath, sizeof( homePath ), "/Application Support" );
-			mkdir( homePath, 0777 );  /* just in case. */
+			mkdir( homePath, 0750 );  /* just in case. */
 			Q_strcat( homePath, sizeof( homePath ), "/Quake3" );
 #else
 			Q_strcat( homePath, sizeof( homePath ), "/.q3a" );
 #endif
-			if( mkdir( homePath, 0777 ) )
+			if( mkdir( homePath, 0750 ) )
 			{
 				if( errno != EEXIST )
 				{
