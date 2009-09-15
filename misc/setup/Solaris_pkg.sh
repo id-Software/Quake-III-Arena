@@ -37,10 +37,11 @@ DEMO_PKGFILE="${PKG_DEMO_NAME}-${BUILD_VERSION}-${PKG_VERSION}.pkg"
 BUILD_DIR="${MOUNT_DIR}/build/release-${PLATFORM}-${ARCH}"
 PKG_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_SOLARIS_NAME}"
 PKG_BUILD_DIR="/tmp/ioquake3-build/${PKG_SOLARIS_NAME}-${BUILD_VERSION}"
+PKG_EXTRA_BUILD_DIR="/usr/local/src/quake3-data/ioquake3/quake3"
 PKG_DATA_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_DATA_NAME}"
-PKG_DATA_BUILD_DIR="/usr/local/src/quake3-data/quake3"
+PKG_DATA_BUILD_DIR="/usr/local/src/quake3-data/ioquake3d/quake3"
 PKG_DEMO_SRC_DIR="${MOUNT_DIR}/misc/setup/pkg/${PKG_DEMO_NAME}"
-PKG_DEMO_BUILD_DIR="/usr/local/src/quake3-demo/quake3"
+PKG_DEMO_BUILD_DIR="/usr/local/src/quake3-data/ioquake3m/quake3"
 
 # Tools
 RM="/usr/bin/rm"
@@ -113,7 +114,7 @@ if [ -d ${BUILD_DIR} ]; then
 		fi
 	done
 
-        ${PKGPROTO} ${PKG_BUILD_DIR}=quake3 | \
+        ${PKGPROTO} ${PKG_BUILD_DIR}=quake3 ${PKG_EXTRA_BUILD_DIR}=quake3 | \
                 ${NAWK} '{ print $1,$2,$3,$4 }' >> ${PKG_SRC_DIR}/prototype
         ${PKGMK} -o -p "${PKG_MAINT_ID}${BUILD_DATE}" \
                 -b ${PKG_SRC_DIR} -f ${PKG_SRC_DIR}/prototype \
