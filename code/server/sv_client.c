@@ -531,12 +531,13 @@ or crashing -- SV_FinalMessage() will handle that
 void SV_DropClient( client_t *drop, const char *reason ) {
 	int		i;
 	challenge_t	*challenge;
+	const qboolean isBot = drop->netchan.remoteAddress.type == NA_BOT;
 
 	if ( drop->state == CS_ZOMBIE ) {
 		return;		// already dropped
 	}
 
-	if (drop->netchan.remoteAddress.type != NA_BOT) {
+	if ( !isBot ) {
 		// see if we already have a challenge for this ip
 		challenge = &svs.challenges[0];
 
@@ -556,7 +557,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 	// tell everyone why they got dropped
 	SV_SendServerCommand( NULL, "print \"%s" S_COLOR_WHITE " %s\n\"", drop->name, reason );
 
-
 	if (drop->download)	{
 		FS_FCloseFile( drop->download );
 		drop->download = 0;
@@ -569,15 +569,20 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 	// add the disconnect command
 	SV_SendServerCommand( drop, "disconnect \"%s\"", reason);
 
-	if ( drop->netchan.remoteAddress.type == NA_BOT ) {
+	if ( isBot ) {
 		SV_BotFreeClient( drop - svs.clients );
 	}
 
 	// nuke user info
 	SV_SetUserinfo( drop - svs.clients, "" );
 	
-	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
-	drop->state = CS_ZOMBIE;		// become free in a few seconds
+	if ( isBot ) {
+		// bots shouldn't go zombie, as there's no real net connection.
+		drop->state = CS_FREE;
+	} else {
+		Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
+		drop->state = CS_ZOMBIE;		// become free in a few seconds
+	}
 
 	// if this was the last client on the server, send a heartbeat
 	// to the master so it is known the server is empty
