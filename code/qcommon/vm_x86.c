@@ -178,8 +178,7 @@ _asm {
 #if defined(__MINGW32__) || defined(MACOS_X) // _ is prepended to compiled symbols
 #define CMANGVAR(sym) "_"#sym
 #define CMANGFUNC(sym) "_"#sym
-#else
-#if defined(__ICC) && (__ICC >= 1000)
+#elif defined(__ICC) && (__ICC >= 1000)
 #define CMANGVAR(sym) #sym".0"
 #define CMANGFUNC(sym) #sym
 #else
