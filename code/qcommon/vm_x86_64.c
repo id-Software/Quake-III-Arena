@@ -246,7 +246,7 @@ void emit(const char* fmt, ...)
 #else
 #define JMPIARG \
 	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
-	emit("jmpq *%rax");
+	emit("jmpq *%%rax");
 #endif
  
 // integer compare and jump
