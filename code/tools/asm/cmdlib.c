@@ -396,10 +396,12 @@ void Q_getwd (char *out)
 	int i = 0;
 
 #ifdef WIN32
-   _getcwd (out, 256);
+   if (_getcwd (out, 256) == NULL)
+     strcpy(out, ".");  /* shrug */
    strcat (out, "\\");
 #else
-   getcwd (out, 256);
+   if (getcwd (out, 256) == NULL)
+     strcpy(out, ".");  /* shrug */
    strcat (out, "/");
 #endif
 
