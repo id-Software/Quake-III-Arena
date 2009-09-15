@@ -17,6 +17,15 @@ ifeq ($(COMPILE_PLATFORM),darwin)
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
 endif
 
+ifeq ($(COMPILE_PLATFORM),freebsd)
+  ifeq ($(COMPILE_ARCH),amd64)
+    COMPILE_ARCH=x86_64
+  endif
+  ifeq ($(COMPILE_ARCH),i386)
+    COMPILE_ARCH=x86
+  endif
+endif
+
 ifeq ($(COMPILE_PLATFORM),mingw32)
   ifeq ($(COMPILE_ARCH),i386)
     COMPILE_ARCH=x86
@@ -532,15 +541,34 @@ else # ifeq mingw32
 
 ifeq ($(PLATFORM),freebsd)
 
-  ifneq (,$(findstring alpha,$(shell uname -m)))
-    ARCH=axp
-  else #default to i386
-    ARCH=i386
-  endif #alpha test
+  FREEBSD_ARCH = $(ARCH)
+  ifeq ($(ARCH),amd64)
+    ARCH = x86_64
+  endif
+  ifeq ($(ARCH),i386)
+    ARCH = x86
+  endif
 
+  ifeq ($(FREEBSD_ARCH),x86_64)
+    FREEBSD_ARCH = amd64
+  endif
+  ifeq ($(FREEBSD_ARCH),x86)
+    FREEBSD_ARCH = i386
+  endif
+
+  ifndef HOMEPATH
+    HOMEPATH = /.ioquake3
+  endif
+
+  ifndef DEFAULT_LIBDIR
+    DEFAULT_LIBDIR = /usr/local/lib/ioquake3
+  endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -DUSE_ICON $(SDL_CFLAGS)
+    -DUSE_ICON $(SDL_CFLAGS) -DMAP_ANONYMOUS=MAP_ANON \
+    -DHOMEPATH=\\\"$(HOMEPATH)\\\" \
+    -DDEFAULT_LIBDIR=\\\"$(DEFAULT_LIBDIR)\\\" \
+    $(shell make -f /dev/null -VCFLAGS MACHINE_ARCH=$(FREEBSD_ARCH))
 
   ifeq ($(USE_OPENAL),1)
     BASE_CFLAGS += -DUSE_OPENAL
@@ -558,14 +586,28 @@ ifeq ($(PLATFORM),freebsd)
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -ffast-math -funroll-loops \
       -fomit-frame-pointer -fexpensive-optimizations
   else
-  ifeq ($(ARCH),i386)
-    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 -mtune=pentiumpro \
-      -march=pentium -fomit-frame-pointer -pipe -ffast-math \
+  ifeq ($(ARCH),x86)
+    ifeq ($(CROSS_COMPILING),1)
+      BASE_CFLAGS += -m32
+    endif
+    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 \
+      -fomit-frame-pointer -pipe -ffast-math \
+      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+      -funroll-loops -fstrength-reduce
+    HAVE_VM_COMPILED=true
+  else
+  ifeq ($(ARCH),x86_64)
+    ifeq ($(CROSS_COMPILING),1)
+      BASE_CFLAGS += -m64
+    endif
+    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3 \
+      -fomit-frame-pointer -pipe -ffast-math \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -funroll-loops -fstrength-reduce
     HAVE_VM_COMPILED=true
   else
     BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
   endif
   endif
 
