@@ -1374,6 +1374,9 @@ void S_UpdateBackgroundTrack( void ) {
 		// decide how much data needs to be read from the file
 		fileSamples = bufferSamples * s_backgroundStream->info.rate / dma.speed;
 
+		if (!fileSamples)
+			return;
+
 		// our max buffer size
 		fileBytes = fileSamples * (s_backgroundStream->info.width * s_backgroundStream->info.channels);
 		if ( fileBytes > sizeof(raw) ) {
