@@ -265,10 +265,9 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 	else
 		glConfig.isFullscreen = qfalse;
 
-	if (!r_colorbits->value)
+	colorbits = r_colorbits->value;
+	if ((!colorbits) || (colorbits >= 32))
 		colorbits = 24;
-	else
-		colorbits = r_colorbits->value;
 
 	if (!r_depthbits->value)
 		depthbits = 24;
