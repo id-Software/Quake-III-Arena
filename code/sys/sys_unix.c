@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/time.h>
 #include <pwd.h>
 #include <libgen.h>
+#include <fcntl.h>
 
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
@@ -501,23 +502,39 @@ void Sys_ErrorDialog( const char *error )
 {
 	char buffer[ 1024 ];
 	unsigned int size;
-	fileHandle_t f;
+	int f = -1;
+	const char *homepath = Cvar_VariableString( "fs_homepath" );
+	const char *gamedir = Cvar_VariableString( "fs_gamedir" );
 	const char *fileName = "crashlog.txt";
+	char *ospath = FS_BuildOSPath( homepath, gamedir, fileName );
 
 	Sys_Print( va( "%s\n", error ) );
 
-	// Write console log to file
-	f = FS_FOpenFileWrite( fileName );
-	if( !f )
+	/* make sure the write path for the crashlog exists... */
+	if( FS_CreatePath( ospath ) ) {
+		Com_Printf( "ERROR: couldn't create path '%s' for crash log.\n", ospath );
+		return;
+	}
+
+	/* we might be crashing because we maxed out the Quake MAX_FILE_HANDLES,
+	   which will come through here, so we don't want to recurse forever by
+	   calling FS_FOpenFileWrite()...use the Unix system APIs instead. */
+	f = open(ospath, O_CREAT | O_TRUNC | O_WRONLY, 0640);
+	if( f == -1 )
 	{
 		Com_Printf( "ERROR: couldn't open %s\n", fileName );
 		return;
 	}
 
-	while( ( size = CON_LogRead( buffer, sizeof( buffer ) ) ) > 0 )
-		FS_Write( buffer, size, f );
+	/* We're crashing, so we don't care much if write() or close() fails. */
+	while( ( size = CON_LogRead( buffer, sizeof( buffer ) ) ) > 0 ) {
+		if (write( f, buffer, size ) != size) {
+			Com_Printf( "ERROR: couldn't fully write to %s\n", fileName );
+			break;
+		}
+	}
 
-	FS_FCloseFile( f );
+	close(f);
 }
 
 /*
