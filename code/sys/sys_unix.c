@@ -54,7 +54,9 @@ char *Sys_DefaultHomePath(void)
 		if( ( p = getenv( "HOME" ) ) != NULL )
 		{
 			Q_strncpyz( homePath, p, sizeof( homePath ) );
-#ifdef MACOS_X
+#ifdef HOMEPATH
+			Q_strcat( homePath, sizeof( homePath ), HOMEPATH );
+#elif defined(MACOS_X)
 			Q_strcat( homePath, sizeof( homePath ), "/Library" );
 			mkdir( homePath, 0750 );  /* just in case. */
 			Q_strcat( homePath, sizeof( homePath ), "/Application Support" );
