@@ -1502,6 +1502,11 @@ else
     $(B)/client/sys_unix.o
 endif
 
+ifeq ($(PLATFORM),darwin)
+  Q3OBJ += \
+    $(B)/client/sys_cocoa.o
+endif
+
 ifeq ($(USE_MUMBLE),1)
   Q3OBJ += \
     $(B)/client/libmumblelink.o
@@ -1652,6 +1657,12 @@ else
     $(B)/ded/sys_unix.o \
     $(B)/ded/con_tty.o
 endif
+
+# Not currently referenced in the dedicated server.
+#ifeq ($(PLATFORM),darwin)
+#  Q3DOBJ += \
+#    $(B)/ded/sys_cocoa.o
+#endif
 
 $(B)/ioq3ded$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
@@ -1979,6 +1990,9 @@ $(B)/clientsmp/%.o: $(SDLDIR)/%.c
 $(B)/client/%.o: $(SYSDIR)/%.c
 	$(DO_CC)
 
+$(B)/client/%.o: $(SYSDIR)/%.m
+	$(DO_CC)
+
 $(B)/client/%.o: $(SYSDIR)/%.rc
 	$(DO_WINDRES)
 
@@ -1996,6 +2010,9 @@ $(B)/ded/%.o: $(BLIBDIR)/%.c
 	$(DO_BOT_CC)
 
 $(B)/ded/%.o: $(SYSDIR)/%.c
+	$(DO_DED_CC)
+
+$(B)/ded/%.o: $(SYSDIR)/%.m
 	$(DO_DED_CC)
 
 $(B)/ded/%.o: $(SYSDIR)/%.rc

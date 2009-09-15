@@ -510,6 +510,11 @@ void Sys_ErrorDialog( const char *error )
 
 	Sys_Print( va( "%s\n", error ) );
 
+#if defined(MACOS_X) && !DEDICATED
+	if (!com_dedicated || !com_dedicated->integer)
+		Sys_Cocoa_MsgBox(error);
+#endif
+
 	/* make sure the write path for the crashlog exists... */
 	if( FS_CreatePath( ospath ) ) {
 		Com_Printf( "ERROR: couldn't create path '%s' for crash log.\n", ospath );
