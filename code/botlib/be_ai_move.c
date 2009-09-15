@@ -772,7 +772,7 @@ int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 		if (i != MAX_AVOIDREACH && avoidreachtries[i] > AVOIDREACH_TRIES)
 		{
 #ifdef DEBUG
-			if (bot_developer)
+			if (botDeveloper)
 			{
 				botimport.Print(PRT_MESSAGE, "avoiding reachability %d\n", avoidreach[i]);
 			} //end if
@@ -3076,7 +3076,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 						} //end if
 						else
 						{
-							if (bot_developer)
+							if (botDeveloper)
 							{
 								botimport.Print(PRT_MESSAGE, "client %d: on func_plat without reachability\n", ms->client);
 							} //end if
@@ -3106,7 +3106,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 						} //end if
 						else
 						{
-							if (bot_developer)
+							if (botDeveloper)
 							{
 								botimport.Print(PRT_MESSAGE, "client %d: on func_bobbing without reachability\n", ms->client);
 							} //end if
@@ -3208,7 +3208,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			else
 			{
 #ifdef DEBUG
-				if (bot_developer)
+				if (botDeveloper)
 				{
 					if (ms->reachability_time < AAS_Time())
 					{
@@ -3242,7 +3242,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			if (!AAS_AreaReachability(ms->areanum))
 			{
 #ifdef DEBUG
-				if (bot_developer)
+				if (botDeveloper)
 				{
 					botimport.Print(PRT_MESSAGE, "area %d no reachability\n", ms->areanum);
 				} //end if
@@ -3273,12 +3273,12 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			} //end if
 #ifdef DEBUG
 			
-			else if (bot_developer)
+			else if (botDeveloper)
 			{
 				botimport.Print(PRT_MESSAGE, "goal not reachable\n");
 				Com_Memset(&reach, 0, sizeof(aas_reachability_t)); //make compiler happy
 			} //end else
-			if (bot_developer)
+			if (botDeveloper)
 			{
 				//if still going for the same goal
 				if (ms->lastgoalareanum == goal->areanum)
@@ -3346,7 +3346,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			Com_Memset(&reach, 0, sizeof(aas_reachability_t));
 		} //end else
 #ifdef DEBUG
-		if (bot_developer)
+		if (botDeveloper)
 		{
 			if (result->failure)
 			{
@@ -3402,7 +3402,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 				} //end else
 			} //end if
 		} //end for
-		if (bot_developer)
+		if (botDeveloper)
 		{
 			//if a jumppad is found with the trace but no reachability is found
 			if (foundjumppad && !ms->lastreachnum)
@@ -3447,7 +3447,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			} //end switch
 			result->traveltype = reach.traveltype;
 #ifdef DEBUG
-			if (bot_developer)
+			if (botDeveloper)
 			{
 				if (result->failure)
 				{

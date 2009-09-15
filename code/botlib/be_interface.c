@@ -58,7 +58,7 @@ botlib_globals_t botlibglobals;
 botlib_export_t be_botlib_export;
 botlib_import_t botimport;
 //
-int bot_developer;
+int botDeveloper;
 //qtrue if the library is setup
 int botlibsetup = qfalse;
 
@@ -139,7 +139,7 @@ int Export_BotLibSetup(void)
 	char		logfilename[MAX_OSPATH];
 	char		*homedir, *gamedir;
 	
-	bot_developer = LibVarGetValue("bot_developer");
+	botDeveloper = LibVarGetValue("bot_developer");
  	memset( &botlibglobals, 0, sizeof(botlibglobals) );
 	//initialize byte swapping (litte endian etc.)
 //	Swap_Init();

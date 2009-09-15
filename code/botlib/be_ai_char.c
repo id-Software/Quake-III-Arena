@@ -416,7 +416,7 @@ int BotLoadCachedCharacter(char *charfile, float skill, int reload)
 		//
 		botimport.Print(PRT_MESSAGE, "loaded skill %d from %s\n", intskill, charfile);
 #ifdef DEBUG
-		if (bot_developer)
+		if (botDeveloper)
 		{
 			botimport.Print(PRT_MESSAGE, "skill %d loaded in %d msec from %s\n", intskill, Sys_MilliSeconds() - starttime, charfile);
 		} //end if
