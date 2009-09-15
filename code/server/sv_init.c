@@ -104,7 +104,7 @@ SV_SetConfigstring
 ===============
 */
 void SV_SetConfigstring (int index, const char *val) {
-	int		len, i;
+	int		i;
 	client_t	*client;
 
 	if ( index < 0 || index >= MAX_CONFIGSTRINGS ) {
@@ -140,8 +140,6 @@ void SV_SetConfigstring (int index, const char *val) {
 				continue;
 			}
 		
-
-			len = strlen( val );
 			SV_SendConfigstring(client, index);
 		}
 	}
