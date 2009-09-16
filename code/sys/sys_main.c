@@ -49,7 +49,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 static char binaryPath[ MAX_OSPATH ] = { 0 };
 static char installPath[ MAX_OSPATH ] = { 0 };
-static char libPath[ MAX_OSPATH ] = { 0 };
 
 /*
 =================
@@ -90,29 +89,6 @@ char *Sys_DefaultInstallPath(void)
 {
 	if (*installPath)
 		return installPath;
-	else
-		return Sys_Cwd();
-}
-
-/*
-=================
-Sys_SetDefaultLibPath
-=================
-*/
-void Sys_SetDefaultLibPath(const char *path)
-{
-	Q_strncpyz(libPath, path, sizeof(libPath));
-}
-
-/*
-=================
-Sys_DefaultLibPath
-=================
-*/
-char *Sys_DefaultLibPath(void)
-{
-	if (*libPath)
-		return libPath;
 	else
 		return Sys_Cwd();
 }
@@ -408,7 +384,6 @@ Used to load a development dll instead of a virtual machine
 #1 look down current path
 #2 look in fs_homepath
 #3 look in fs_basepath
-#4 look in fs_libpath
 =================
 */
 void *Sys_LoadDll( const char *name, char *fqpath ,
@@ -419,7 +394,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 	void  (*dllEntry)( intptr_t (*syscallptr)(intptr_t, ...) );
 	char  fname[MAX_OSPATH];
 	char  *basepath;
-	char  *libpath;
 	char  *homepath;
 	char  *pwdpath;
 	char  *gamedir;
@@ -431,7 +405,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 	// TODO: use fs_searchpaths from files.c
 	pwdpath = Sys_Cwd();
 	basepath = Cvar_VariableString( "fs_basepath" );
-	libpath = Cvar_VariableString( "fs_libpath" );
 	homepath = Cvar_VariableString( "fs_homepath" );
 	gamedir = Cvar_VariableString( "fs_game" );
 
@@ -442,9 +415,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 
 	if(!libHandle && basepath)
 		libHandle = Sys_TryLibraryLoad(basepath, gamedir, fname, fqpath);
-
-	if(!libHandle && libpath)
-		libHandle = Sys_TryLibraryLoad(libpath, gamedir, fname, fqpath);
 
 	if(!libHandle) {
 		Com_Printf ( "Sys_LoadDll(%s) failed to load library\n", name );
@@ -496,14 +466,6 @@ void Sys_ParseArgs( int argc, char **argv )
 #		define DEFAULT_BASEDIR Sys_StripAppBundle(Sys_BinaryPath())
 #	else
 #		define DEFAULT_BASEDIR Sys_BinaryPath()
-#	endif
-#endif
-
-#ifndef DEFAULT_LIBDIR
-#	ifdef MACOS_X
-#		define DEFAULT_LIBDIR Sys_StripAppBundle(Sys_BinaryPath())
-#	else
-#		define DEFAULT_LIBDIR Sys_BinaryPath()
 #	endif
 #endif
 
@@ -576,7 +538,6 @@ int main( int argc, char **argv )
 	Sys_ParseArgs( argc, argv );
 	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
-	Sys_SetDefaultLibPath( DEFAULT_LIBDIR );
 
 	// Concatenate the command line for passing to Com_Init
 	for( i = 1; i < argc; i++ )
