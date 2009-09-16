@@ -511,8 +511,10 @@ void Sys_ErrorDialog( const char *error )
 	Sys_Print( va( "%s\n", error ) );
 
 #if defined(MACOS_X) && !DEDICATED
+	/* This function has to be in a separate file, compiled as Objective-C. */
+	extern void Cocoa_MsgBox( const char *text );
 	if (!com_dedicated || !com_dedicated->integer)
-		Sys_Cocoa_MsgBox(error);
+		Cocoa_MsgBox(error);
 #endif
 
 	/* make sure the write path for the crashlog exists... */

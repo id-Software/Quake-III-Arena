@@ -46,7 +46,6 @@ unsigned int CON_LogRead( char *out, unsigned int outSize );
 
 #ifdef MACOS_X
 char *Sys_StripAppBundle( char *pwd );
-void Sys_Cocoa_MsgBox( const char *text );
 #endif
 
 void Sys_GLimpSafeInit( void );
