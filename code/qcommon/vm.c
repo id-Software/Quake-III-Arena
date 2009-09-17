@@ -423,7 +423,8 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 
 	// round up to next power of 2 so all data operations can
 	// be mask protected
-	dataLength = header.h->dataLength + header.h->litLength + header.h->bssLength;
+	dataLength = header.h->dataLength + header.h->litLength +
+		header.h->bssLength + STACK_SIZE;
 	for ( i = 0 ; dataLength > ( 1 << i ) ; i++ ) {
 	}
 	dataLength = 1 << i;
