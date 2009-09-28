@@ -251,7 +251,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		else
 		{
 			ri.Printf( PRINT_ALL,
-					"Cannot estimate display aspect, assuming 1.333f\n" );
+					"Cannot estimate display aspect, assuming 1.333\n" );
 		}
 	}
 #endif
