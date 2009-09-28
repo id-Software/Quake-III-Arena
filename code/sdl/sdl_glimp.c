@@ -239,12 +239,20 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		sVideoInfo.vfmt = &sPixelFormat;
 		videoInfo = &sVideoInfo;
 
-		// Guess the display aspect ratio through the desktop resolution
-		// by assuming (relatively safely) that it is set at or close to
-		// the display's native aspect ratio
-		displayAspect = (float)videoInfo->current_w / (float)videoInfo->current_h;
+		if( videoInfo->current_h > 0 )
+		{
+			// Guess the display aspect ratio through the desktop resolution
+			// by assuming (relatively safely) that it is set at or close to
+			// the display's native aspect ratio
+			displayAspect = (float)videoInfo->current_w / (float)videoInfo->current_h;
 
-		ri.Printf( PRINT_ALL, "Estimated display aspect: %.3f\n", displayAspect );
+			ri.Printf( PRINT_ALL, "Estimated display aspect: %.3f\n", displayAspect );
+		}
+		else
+		{
+			ri.Printf( PRINT_ALL,
+					"Cannot estimate display aspect, assuming 1.333f\n" );
+		}
 	}
 #endif
 
