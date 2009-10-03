@@ -25,7 +25,7 @@ Quick start for servers:
 Quick start for clients:
     - run a recent build of ioquake3.
     - Make sure your network settings are set to broadband.
-    - +set snd_useOpenAL 1
+    - +set s_useOpenAL 1
     - \bind q "+voiprecord"
     - Hook up a microphone, connect to a VoIP-supporting server.
     - hold down 'q' key and talk.
