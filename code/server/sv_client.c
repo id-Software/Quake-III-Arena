@@ -1397,7 +1397,7 @@ void SV_UpdateVoipIgnore(client_t *cl, const char *idstr, qboolean ignore)
 
 /*
 ==================
-SV_UpdateUserinfo_f
+SV_Voip_f
 ==================
 */
 static void SV_Voip_f( client_t *cl ) {
