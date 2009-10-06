@@ -593,7 +593,7 @@ static void emit_mov(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
 				crap("value too large for 16bit register");
 			emit1(0x66);
 		}
-		else if(!arg2.v.reg & R_64)
+		else if(!(arg2.v.reg & R_64))
 		{
 			if(!isu32(arg1.v.imm))
 				crap("value too large for 32bit register");
