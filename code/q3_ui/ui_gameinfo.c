@@ -169,7 +169,7 @@ static void UI_LoadArenas( void ) {
 	int			numdirs;
 	vmCvar_t	arenasFile;
 	char		filename[128];
-	char		dirlist[1024];
+	char		dirlist[2048];
 	char*		dirptr;
 	int			i, n;
 	int			dirlen;
@@ -188,7 +188,7 @@ static void UI_LoadArenas( void ) {
 	}
 
 	// get all arenas from .arena files
-	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
+	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 2048 );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
 		dirlen = strlen(dirptr);
