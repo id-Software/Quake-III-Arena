@@ -1093,6 +1093,10 @@ static void ServerOptions_InitBotNames( void ) {
 		}
 
 		botInfo = UI_GetBotInfoByName( bot );
+		if( !botInfo )
+		{
+			botInfo = UI_GetBotInfoByNumber( count );
+		}
 		bot = Info_ValueForKey( botInfo, "name" );
 
 		Q_strncpyz( s_serveroptions.playerNameBuffers[count], bot, sizeof(s_serveroptions.playerNameBuffers[count]) );
