@@ -916,7 +916,7 @@ void S_ByteSwapRawSamples( int samples, int width, int s_channels, const byte *d
 
 /*
 ============
-S_RawSamples
+S_Base_RawSamples
 
 Music streaming
 ============
@@ -937,10 +937,10 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 	}
 	rawsamples = s_rawsamples[stream];
 
-	intVolume = 256 * volume;
+	intVolume = 256 * volume * s_volume->value;
 
 	if ( s_rawend[stream] < s_soundtime ) {
-		Com_DPrintf( "S_RawSamples: resetting minimum: %i < %i\n", s_rawend[stream], s_soundtime );
+		Com_DPrintf( "S_Base_RawSamples: resetting minimum: %i < %i\n", s_rawend[stream], s_soundtime );
 		s_rawend[stream] = s_soundtime;
 	}
 
@@ -1018,7 +1018,7 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 	}
 
 	if ( s_rawend[stream] > s_soundtime + MAX_RAW_SAMPLES ) {
-		Com_DPrintf( "S_RawSamples: overflowed %i > %i\n", s_rawend[stream], s_soundtime );
+		Com_DPrintf( "S_Base_RawSamples: overflowed %i > %i\n", s_rawend[stream], s_soundtime );
 	}
 }
 
