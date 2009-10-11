@@ -467,14 +467,13 @@ void CL_AddReliableCommand(const char *cmd, qboolean isDisconnectCmd)
 	// we must drop the connection
 	// also leave one slot open for the disconnect command in this case.
 	
-	if (!com_errorEntered &&
-		(
-			(isDisconnectCmd && unacknowledged > MAX_RELIABLE_COMMANDS) ||
-			(!isDisconnectCmd && unacknowledged >= MAX_RELIABLE_COMMANDS)
-		)
-	   )
+	if ((isDisconnectCmd && unacknowledged > MAX_RELIABLE_COMMANDS) ||
+	    (!isDisconnectCmd && unacknowledged >= MAX_RELIABLE_COMMANDS))
 	{
-		Com_Error(ERR_DROP, "Client command overflow");
+		if(com_errorEntered)
+			return;
+		else
+			Com_Error(ERR_DROP, "Client command overflow");
 	}
 
 	Q_strncpyz(clc.reliableCommands[++clc.reliableSequence & (MAX_RELIABLE_COMMANDS - 1)],
