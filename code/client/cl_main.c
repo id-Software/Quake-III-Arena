@@ -189,7 +189,7 @@ void CL_UpdateVoipIgnore(const char *idstr, qboolean ignore)
 		if ((id >= 0) && (id < MAX_CLIENTS)) {
 			clc.voipIgnore[id] = ignore;
 			CL_AddReliableCommand(va("voip %s %d",
-			                         ignore ? "ignore" : "unignore", id));
+			                         ignore ? "ignore" : "unignore", id), qfalse);
 			Com_Printf("VoIP: %s ignoring player #%d\n",
 			            ignore ? "Now" : "No longer", id);
 			return;
@@ -251,11 +251,11 @@ void CL_Voip_f( void )
 		}
 	} else if (strcmp(cmd, "muteall") == 0) {
 		Com_Printf("VoIP: muting incoming voice\n");
-		CL_AddReliableCommand("voip muteall");
+		CL_AddReliableCommand("voip muteall", qfalse);
 		clc.voipMuteAll = qtrue;
 	} else if (strcmp(cmd, "unmuteall") == 0) {
 		Com_Printf("VoIP: unmuting incoming voice\n");
-		CL_AddReliableCommand("voip unmuteall");
+		CL_AddReliableCommand("voip unmuteall", qfalse);
 		clc.voipMuteAll = qfalse;
 	} else {
 		Com_Printf("usage: voip [un]ignore <playerID#>\n"
@@ -459,17 +459,26 @@ The given command will be transmitted to the server, and is gauranteed to
 not have future usercmd_t executed before it is executed
 ======================
 */
-void CL_AddReliableCommand( const char *cmd ) {
-	int		index;
-
+void CL_AddReliableCommand(const char *cmd, qboolean isDisconnectCmd)
+{
+	int unacknowledged = clc.reliableSequence - clc.reliableAcknowledge;
+	
 	// if we would be losing an old command that hasn't been acknowledged,
 	// we must drop the connection
-	if ( clc.reliableSequence - clc.reliableAcknowledge > MAX_RELIABLE_COMMANDS ) {
-		Com_Error( ERR_DROP, "Client command overflow" );
+	// also leave one slot open for the disconnect command in this case.
+	
+	if (!com_errorEntered &&
+		(
+			(isDisconnectCmd && unacknowledged > MAX_RELIABLE_COMMANDS) ||
+			(!isDisconnectCmd && unacknowledged >= MAX_RELIABLE_COMMANDS)
+		)
+	   )
+	{
+		Com_Error(ERR_DROP, "Client command overflow");
 	}
-	clc.reliableSequence++;
-	index = clc.reliableSequence & ( MAX_RELIABLE_COMMANDS - 1 );
-	Q_strncpyz( clc.reliableCommands[ index ], cmd, sizeof( clc.reliableCommands[ index ] ) );
+
+	Q_strncpyz(clc.reliableCommands[++clc.reliableSequence & (MAX_RELIABLE_COMMANDS - 1)],
+		   cmd, sizeof(*clc.reliableCommands));
 }
 
 /*
@@ -1235,7 +1244,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// send a disconnect message to the server
 	// send it a few times in case one is dropped
 	if ( cls.state >= CA_CONNECTED ) {
-		CL_AddReliableCommand( "disconnect" );
+		CL_AddReliableCommand("disconnect", qtrue);
 		CL_WritePacket();
 		CL_WritePacket();
 		CL_WritePacket();
@@ -1294,9 +1303,9 @@ void CL_ForwardCommandToServer( const char *string ) {
 	}
 
 	if ( Cmd_Argc() > 1 ) {
-		CL_AddReliableCommand( string );
+		CL_AddReliableCommand(string, qfalse);
 	} else {
-		CL_AddReliableCommand( cmd );
+		CL_AddReliableCommand(cmd, qfalse);
 	}
 }
 
@@ -1438,7 +1447,7 @@ void CL_ForwardToServer_f( void ) {
 	
 	// don't forward the first argument
 	if ( Cmd_Argc() > 1 ) {
-		CL_AddReliableCommand( Cmd_Args() );
+		CL_AddReliableCommand(Cmd_Args(), qfalse);
 	}
 }
 
@@ -1678,7 +1687,7 @@ void CL_SendPureChecksums( void ) {
 	// if we are pure we need to send back a command with our referenced pk3 checksums
 	Com_sprintf(cMsg, sizeof(cMsg), "cp %d %s", cl.serverId, FS_ReferencedPakPureChecksums());
 
-	CL_AddReliableCommand( cMsg );
+	CL_AddReliableCommand(cMsg, qfalse);
 }
 
 /*
@@ -1687,7 +1696,7 @@ CL_ResetPureClientAtServer
 =================
 */
 void CL_ResetPureClientAtServer( void ) {
-	CL_AddReliableCommand( va("vdr") );
+	CL_AddReliableCommand(va("vdr"), qfalse);
 }
 
 /*
@@ -1866,7 +1875,7 @@ void CL_DownloadsComplete( void ) {
 		FS_Restart(clc.checksumFeed); // We possibly downloaded a pak, restart the file system to load it
 
 		// inform the server so we get new gamestate info
-		CL_AddReliableCommand( "donedl" );
+		CL_AddReliableCommand("donedl", qfalse);
 
 		// by sending the donedl command we request a new gamestate
 		// so we don't want to load stuff yet
@@ -1933,7 +1942,7 @@ void CL_BeginDownload( const char *localName, const char *remoteName ) {
 	clc.downloadBlock = 0; // Starting new file
 	clc.downloadCount = 0;
 
-	CL_AddReliableCommand( va("download %s", remoteName) );
+	CL_AddReliableCommand(va("download %s", remoteName), qfalse);
 }
 
 /*
@@ -2592,7 +2601,7 @@ void CL_CheckUserinfo( void ) {
 	if(cvar_modifiedFlags & CVAR_USERINFO)
 	{
 		cvar_modifiedFlags &= ~CVAR_USERINFO;
-		CL_AddReliableCommand( va("userinfo \"%s\"", Cvar_InfoString( CVAR_USERINFO ) ) );
+		CL_AddReliableCommand(va("userinfo \"%s\"", Cvar_InfoString( CVAR_USERINFO ) ), qfalse);
 	}
 }
 

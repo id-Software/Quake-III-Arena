@@ -292,7 +292,7 @@ void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 	if(!(clc.sv_allowDownload & DLF_NO_DISCONNECT) &&
 		!clc.cURLDisconnected) {
 
-		CL_AddReliableCommand("disconnect");
+		CL_AddReliableCommand("disconnect", qtrue);
 		CL_WritePacket();
 		CL_WritePacket();
 		CL_WritePacket();
