@@ -249,7 +249,6 @@ static	int			fs_loadCount;			// total files read
 static	int			fs_loadStack;			// total files in memory
 static	int			fs_packFiles;			// total number of files in packs
 
-static int fs_fakeChkSum;
 static int fs_checksumFeed;
 
 typedef union qfile_gus {
@@ -1179,16 +1178,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 			fsh[*file].handleFiles.file.o = fopen (netpath, "rb");
 			if ( !fsh[*file].handleFiles.file.o ) {
 				continue;
-			}
-
-			if ( Q_stricmp( filename + l - 4, ".cfg" )		// for config files
-				&& Q_stricmp( filename + l - 5, ".menu" )	// menu files
-				&& Q_stricmp( filename + l - 5, ".game" )	// menu files
-				&& Q_stricmp( filename + l - strlen(demoExt), demoExt )	// menu files
-				&& Q_stricmp( filename + l - 4, ".dat" ) ) {	// for journal files
-
-				if(!(fs_fakeChkSum = random()))
-					fs_fakeChkSum = 0xdeadbeef;
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
@@ -3123,10 +3112,6 @@ const char *FS_ReferencedPakPureChecksums( void ) {
 				numPaks++;
 			}
 		}
-		if (fs_fakeChkSum != 0) {
-			// only added if a non-pure file is referenced
-			Q_strcat( info, sizeof( info ), va("%i ", fs_fakeChkSum ) );
-		}
 	}
 	// last checksum is the encoded number of referenced pk3s
 	checksum ^= numPaks;
@@ -3348,7 +3333,6 @@ void FS_Restart( int checksumFeed ) {
 
 	// set the checksum feed
 	fs_checksumFeed = checksumFeed;
-	fs_fakeChkSum = 0;
 
 	// clear pak references
 	FS_ClearPakReferences(0);
