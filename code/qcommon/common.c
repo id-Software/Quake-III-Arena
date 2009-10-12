@@ -2378,15 +2378,15 @@ void Com_Setenv_f(void)
 	{
 		char *arg2 = Cmd_ArgsFrom(2);
 		
-		#ifdef _MSC_VER
+#ifdef _WIN32
 		// windows already removes env variable if value is an empty string
 		_putenv_s(arg1, arg2);
-		#else
+#else
 		if(!*arg2)
 			unsetenv(arg1);
 		else
 			setenv(arg1, arg2, 1);
-		#endif
+#endif
 	}
 	else if(argc == 2)
 	{
