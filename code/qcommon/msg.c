@@ -311,9 +311,9 @@ void MSG_WriteString( msg_t *sb, const char *s ) {
 		}
 		Q_strncpyz( string, s, sizeof( string ) );
 
-		// get rid of 0xff chars, because old clients don't like them
+		// get rid of 0x80+ and '%' chars, because old clients don't like them
 		for ( i = 0 ; i < l ; i++ ) {
-			if ( ((byte *)string)[i] > 127 ) {
+			if ( ((byte *)string)[i] > 127 || string[i] == '%' ) {
 				string[i] = '.';
 			}
 		}
@@ -337,9 +337,9 @@ void MSG_WriteBigString( msg_t *sb, const char *s ) {
 		}
 		Q_strncpyz( string, s, sizeof( string ) );
 
-		// get rid of 0xff chars, because old clients don't like them
+		// get rid of 0x80+ and '%' chars, because old clients don't like them
 		for ( i = 0 ; i < l ; i++ ) {
-			if ( ((byte *)string)[i] > 127 ) {
+			if ( ((byte *)string)[i] > 127 || string[i] == '%' ) {
 				string[i] = '.';
 			}
 		}
@@ -525,6 +525,21 @@ void MSG_ReadData( msg_t *msg, void *data, int len ) {
 	}
 }
 
+// a string hasher which gives the same hash value even if the
+// string is later modified via the legacy MSG read/write code
+int MSG_HashKey(const char *string, int maxlen) {
+	int hash, i;
+
+	hash = 0;
+	for (i = 0; i < maxlen && string[i] != '\0'; i++) {
+		if (string[i] & 0x80 || string[i] == '%')
+			hash += '.' * (119 + i);
+		else
+			hash += string[i] * (119 + i);
+	}
+	hash = (hash ^ (hash >> 10) ^ (hash >> 20));
+	return hash;
+}
 
 /*
 =============================================================================
