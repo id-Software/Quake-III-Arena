@@ -1695,7 +1695,7 @@ CL_ResetPureClientAtServer
 =================
 */
 void CL_ResetPureClientAtServer( void ) {
-	CL_AddReliableCommand(va("vdr"), qfalse);
+	CL_AddReliableCommand("vdr", qfalse);
 }
 
 /*
