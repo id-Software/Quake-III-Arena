@@ -2364,7 +2364,7 @@ void Com_Setenv_f(void)
 		
 #ifdef _WIN32
 		// windows already removes env variable if value is an empty string
-		_putenv_s(arg1, arg2);
+		_putenv(va("%s=%s", arg1, arg2));
 #else
 		if(!*arg2)
 			unsetenv(arg1);
