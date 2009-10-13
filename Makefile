@@ -185,18 +185,18 @@ TEMPDIR=/tmp
 ifneq ($(BUILD_CLIENT),0)
   # set PKG_CONFIG_PATH to influence this, e.g.
   # PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
-  ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
-    CURL_CFLAGS=$(shell pkg-config --cflags libcurl)
-    CURL_LIBS=$(shell pkg-config --libs libcurl)
-    OPENAL_CFLAGS=$(shell pkg-config --cflags openal)
-    OPENAL_LIBS=$(shell pkg-config --libs openal)
+  ifeq ($(shell which pkg-config &> /dev/null; echo $$?),0)
+    CURL_CFLAGS=$(shell pkg-config --silence-errors --cflags libcurl)
+    CURL_LIBS=$(shell pkg-config --silence-errors --libs libcurl)
+    OPENAL_CFLAGS=$(shell pkg-config --silence-errors --cflags openal)
+    OPENAL_LIBS=$(shell pkg-config --silence-errors --libs openal)
     # FIXME: introduce CLIENT_CFLAGS
-    SDL_CFLAGS=$(shell pkg-config --cflags sdl|sed 's/-Dmain=SDL_main//')
-    SDL_LIBS=$(shell pkg-config --libs sdl)
+    SDL_CFLAGS=$(shell pkg-config --silence-errors --cflags sdl|sed 's/-Dmain=SDL_main//')
+    SDL_LIBS=$(shell pkg-config --silence-errors --libs sdl)
   endif
   # Use sdl-config if all else fails
   ifeq ($(SDL_CFLAGS),)
-    ifeq ($(shell which sdl-config > /dev/null; echo $$?),0)
+    ifeq ($(shell which sdl-config &> /dev/null; echo $$?),0)
       SDL_CFLAGS=$(shell sdl-config --cflags)
       SDL_LIBS=$(shell sdl-config --libs)
     endif
@@ -442,6 +442,10 @@ else # ifeq darwin
 #############################################################################
 
 ifeq ($(PLATFORM),mingw32)
+
+  # Some MinGW installations define CC to cc, but don't actually provide cc,
+  # so explicitly use gcc instead (which is the only option anyway)
+  CC=gcc
 
   ifndef WINDRES
     WINDRES=windres
@@ -2213,11 +2217,14 @@ dist:
 # DEPENDENCIES
 #############################################################################
 
-OBJ_D_FILES=$(filter %.d,$(OBJ:%.o=%.d))
-TOOLSOBJ_D_FILES=$(filter %.d,$(TOOLSOBJ:%.o=%.d))
--include $(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
+ifneq ($(B),)
+  OBJ_D_FILES=$(filter %.d,$(OBJ:%.o=%.d))
+  TOOLSOBJ_D_FILES=$(filter %.d,$(TOOLSOBJ:%.o=%.d))
+  -include $(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
+endif
 
 .PHONY: all clean clean2 clean-debug clean-release copyfiles \
 	debug default dist distclean installer makedirs \
 	release targets \
-	toolsclean toolsclean2 toolsclean-debug toolsclean-release
+	toolsclean toolsclean2 toolsclean-debug toolsclean-release \
+	$(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
