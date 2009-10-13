@@ -112,11 +112,7 @@ USE_OPENAL=1
 endif
 
 ifndef USE_OPENAL_DLOPEN
-  ifeq ($(PLATFORM),mingw32)
-    USE_OPENAL_DLOPEN=1
-  else
-    USE_OPENAL_DLOPEN=0
-  endif
+USE_OPENAL_DLOPEN=1
 endif
 
 ifndef USE_CURL
