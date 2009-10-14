@@ -441,7 +441,9 @@ ifeq ($(PLATFORM),mingw32)
 
   # Some MinGW installations define CC to cc, but don't actually provide cc,
   # so explicitly use gcc instead (which is the only option anyway)
-  CC=gcc
+  ifeq ($(shell which $(CC) > /dev/null; echo $$?),1)
+    CC=gcc
+  endif
 
   ifndef WINDRES
     WINDRES=windres
