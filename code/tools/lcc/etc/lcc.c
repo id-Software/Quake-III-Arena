@@ -217,14 +217,74 @@ char *basename(char *name) {
 
 #ifdef WIN32
 #include <process.h>
+
+static char *escapeDoubleQuotes(const char *string) {
+	int stringLength = strlen(string);
+	int bufferSize = stringLength + 1;
+	int i, j;
+	char *newString;
+
+	if (string == NULL)
+		return NULL;
+
+	for (i = 0; i < stringLength; i++) {
+		if (string[i] == '"')
+			bufferSize++;
+	}
+
+	newString = (char*)malloc(bufferSize);
+
+	if (newString == NULL)
+		return NULL;
+
+	for (i = 0, j = 0; i < stringLength; i++) {
+		if (string[i] == '"')
+			newString[j++] = '\\';
+
+		newString[j++] = string[i];
+	}
+
+	newString[j] = '\0';
+
+	return newString;
+}
+
+static int spawn(const char *cmdname, char **argv) {
+	int argc = 0;
+	char **newArgv = argv;
+	int i;
+	intptr_t exitStatus;
+
+	// _spawnvp removes double quotes from arguments, so we
+	// have to escape them manually
+	while (*newArgv++ != NULL)
+		argc++;
+
+	newArgv = (char **)malloc(sizeof(char*) * (argc + 1));
+
+	for (i = 0; i < argc; i++)
+		newArgv[i] = escapeDoubleQuotes(argv[i]);
+
+	newArgv[argc] = NULL;
+
+	exitStatus = _spawnvp(_P_WAIT, cmdname, (const char *const *)newArgv);
+
+	for (i = 0; i < argc; i++)
+		free(newArgv[i]);
+
+	free(newArgv);
+	return exitStatus;
+}
+
 #else
+
 #define _P_WAIT 0
 #ifndef __sun
 extern int fork(void);
 #endif
 extern int wait(int *);
 
-static int _spawnvp(int mode, const char *cmdname, char *argv[]) {
+static int spawn(const char *cmdname, char **argv) {
 	int pid, n, status;
 
 	switch (pid = fork()) {
@@ -292,11 +352,7 @@ static int callsys(char **av) {
 			fprintf(stderr, "\n");
 		}
 		if (verbose < 2)
-#ifndef WIN32
-			status = _spawnvp(_P_WAIT, executable, argv);
-#else
-			status = _spawnvp(_P_WAIT, executable, (const char* const*)argv);
-#endif
+			status = spawn(executable, argv);
 		if (status == -1) {
 			fprintf(stderr, "%s: ", progname);
 			perror(argv[0]);
