@@ -177,11 +177,13 @@ SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
 
+bin_path=$(shell which $(1) 2> /dev/null)
+
 # We won't need this if we only build the server
 ifneq ($(BUILD_CLIENT),0)
   # set PKG_CONFIG_PATH to influence this, e.g.
   # PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
-  ifeq ($(shell which pkg-config > /dev/null; echo $$?),0)
+  ifneq ($(call bin_path, pkg-config),)
     CURL_CFLAGS=$(shell pkg-config --silence-errors --cflags libcurl)
     CURL_LIBS=$(shell pkg-config --silence-errors --libs libcurl)
     OPENAL_CFLAGS=$(shell pkg-config --silence-errors --cflags openal)
@@ -192,7 +194,7 @@ ifneq ($(BUILD_CLIENT),0)
   endif
   # Use sdl-config if all else fails
   ifeq ($(SDL_CFLAGS),)
-    ifeq ($(shell which sdl-config > /dev/null; echo $$?),0)
+    ifneq ($(call bin_path, sdl-config),)
       SDL_CFLAGS=$(shell sdl-config --cflags)
       SDL_LIBS=$(shell sdl-config --libs)
     endif
@@ -441,7 +443,7 @@ ifeq ($(PLATFORM),mingw32)
 
   # Some MinGW installations define CC to cc, but don't actually provide cc,
   # so explicitly use gcc instead (which is the only option anyway)
-  ifeq ($(shell which $(CC) > /dev/null; echo $$?),1)
+  ifeq ($(call bin_path, $(CC)),)
     CC=gcc
   endif
 
