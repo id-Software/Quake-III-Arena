@@ -278,6 +278,15 @@ static void SV_MapRestart_f( void ) {
 	sv.serverId = com_frameTime;
 	Cvar_Set( "sv_serverid", va("%i", sv.serverId ) );
 
+	// if a map_restart occurs while a client is changing maps, we need
+	// to give them the correct time so that when they finish loading
+	// they don't violate the backwards time check in cl_cgame.c
+	for (i=0 ; i<sv_maxclients->integer ; i++) {
+		if (svs.clients[i].state >= CS_CONNECTED) {
+			svs.clients[i].oldServerTime = sv.restartTime;
+		}
+	}
+
 	// reset all the vm data in place without changing memory allocation
 	// note that we do NOT set sv.state = SS_LOADING, so configstrings that
 	// had been changed from their default values will generate broadcast updates
