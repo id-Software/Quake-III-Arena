@@ -173,7 +173,9 @@ void R_BoxSurfaces_r(mnode_t *node, vec3_t mins, vec3_t maxs, surfaceType_t **li
 				surf->viewCount = tr.viewCount;
 			}
 		}
-		else if (*(surfaceType_t *) (surf->data) != SF_GRID) surf->viewCount = tr.viewCount;
+		else if (*(surfaceType_t *) (surf->data) != SF_GRID &&
+			 *(surfaceType_t *) (surf->data) != SF_TRIANGLES)
+			surf->viewCount = tr.viewCount;
 		// check the viewCount because the surface may have
 		// already been added if it spans multiple leafs
 		if (surf->viewCount != tr.viewCount) {
@@ -263,7 +265,6 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 	vec3_t			clipPoints[2][MAX_VERTS_ON_POLY];
 	int				numClipPoints;
 	float			*v;
-	srfSurfaceFace_t *surf;
 	srfGridMesh_t	*cv;
 	drawVert_t		*dv;
 	vec3_t			normal;
@@ -399,25 +400,20 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 		}
 		else if (*surfaces[i] == SF_FACE) {
 
-			surf = ( srfSurfaceFace_t * ) surfaces[i];
+			srfSurfaceFace_t *surf = ( srfSurfaceFace_t * ) surfaces[i];
+
 			// check the normal of this face
 			if (DotProduct(surf->plane.normal, projectionDir) > -0.5) {
 				continue;
 			}
 
-			/*
-			VectorSubtract(clipPoints[0][0], clipPoints[0][1], v1);
-			VectorSubtract(clipPoints[0][2], clipPoints[0][1], v2);
-			CrossProduct(v1, v2, normal);
-			VectorNormalize(normal);
-			if (DotProduct(normal, projectionDir) > -0.5) continue;
-			*/
 			indexes = (int *)( (byte *)surf + surf->ofsIndices );
 			for ( k = 0 ; k < surf->numIndices ; k += 3 ) {
 				for ( j = 0 ; j < 3 ; j++ ) {
 					v = surf->points[0] + VERTEXSIZE * indexes[k+j];;
 					VectorMA( v, MARKER_OFFSET, surf->plane.normal, clipPoints[0][j] );
 				}
+
 				// add the fragments of this face
 				R_AddMarkFragments( 3 , clipPoints,
 								   numPlanes, normals, dists,
@@ -428,14 +424,29 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 					return returnedFragments;	// not enough space for more fragments
 				}
 			}
-			continue;
 		}
-		else {
-			// ignore all other world surfaces
-			// might be cool to also project polygons on a triangle soup
-			// however this will probably create huge amounts of extra polys
-			// even more than the projection onto curves
-			continue;
+		else if(*surfaces[i] == SF_TRIANGLES && r_marksOnTriangleMeshes->integer) {
+
+			srfTriangles_t *surf = (srfTriangles_t *) surfaces[i];
+
+			for (k = 0; k < surf->numIndexes; k += 3)
+			{
+				for(j = 0; j < 3; j++)
+				{
+					v = surf->verts[surf->indexes[k + j]].xyz;
+					VectorMA(v, MARKER_OFFSET, surf->verts[surf->indexes[k + j]].normal, clipPoints[0][j]);
+				}
+
+				// add the fragments of this face
+				R_AddMarkFragments(3, clipPoints,
+								   numPlanes, normals, dists,
+								   maxPoints, pointBuffer,
+								   maxFragments, fragmentBuffer, &returnedPoints, &returnedFragments, mins, maxs);
+				if(returnedFragments == maxFragments)
+				{
+					return returnedFragments;	// not enough space for more fragments
+				}
+			}
 		}
 	}
 	return returnedFragments;
