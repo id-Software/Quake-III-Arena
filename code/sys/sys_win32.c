@@ -650,5 +650,8 @@ void Sys_PlatformInit( void )
 	}
 	else
 		SDL_VIDEODRIVER_externallySet = qfalse;
+
+	// Don't redirect to stdout.txt and stderr.txt
+	_putenv( "SDL_STDIO_REDIRECT=0" );
 #endif
 }
