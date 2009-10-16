@@ -180,6 +180,10 @@ New cvars
                                       See also
                                       http://wiki.ioquake3.org/Stereo_Rendering
                                       for more information
+  r_marksOnTriangleMeshes           - Support impact marks on md3 models, MOD
+                                      developers should increase the mark
+                                      triangle limits in cg_marks.c if they
+                                      intend to use this.
   r_sdlDriver                       - read only, indicates the SDL driver
                                       backend being used
   sv_banFile                        - Name of the file that is used for storing
