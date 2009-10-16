@@ -282,7 +282,7 @@ static void SV_MapRestart_f( void ) {
 	// to give them the correct time so that when they finish loading
 	// they don't violate the backwards time check in cl_cgame.c
 	for (i=0 ; i<sv_maxclients->integer ; i++) {
-		if (svs.clients[i].state >= CS_CONNECTED) {
+		if (svs.clients[i].state == CS_PRIMED) {
 			svs.clients[i].oldServerTime = sv.restartTime;
 		}
 	}
