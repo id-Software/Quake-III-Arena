@@ -414,7 +414,7 @@ ifeq ($(PLATFORM),darwin)
   CLIENT_LIBS += -framework Cocoa -framework IOKit -framework OpenGL \
     $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
 
-  OPTIMIZE += -ffast-math -falign-loops=16
+  OPTIMIZE += -falign-loops=16
 
   ifneq ($(HAVE_VM_COMPILED),true)
     BASE_CFLAGS += -DNO_VM_COMPILED
