@@ -381,9 +381,8 @@ static void* Sys_TryLibraryLoad(const char* base, const char* gamedir, const cha
 Sys_LoadDll
 
 Used to load a development dll instead of a virtual machine
-#1 look down current path
-#2 look in fs_homepath
-#3 look in fs_basepath
+#1 look in fs_homepath
+#2 look in fs_basepath
 =================
 */
 void *Sys_LoadDll( const char *name, char *fqpath ,
@@ -395,7 +394,6 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 	char  fname[MAX_OSPATH];
 	char  *basepath;
 	char  *homepath;
-	char  *pwdpath;
 	char  *gamedir;
 
 	assert( name );
@@ -403,15 +401,11 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
 	Q_snprintf (fname, sizeof(fname), "%s" ARCH_STRING DLL_EXT, name);
 
 	// TODO: use fs_searchpaths from files.c
-	pwdpath = Sys_Cwd();
 	basepath = Cvar_VariableString( "fs_basepath" );
 	homepath = Cvar_VariableString( "fs_homepath" );
 	gamedir = Cvar_VariableString( "fs_game" );
 
-	libHandle = Sys_TryLibraryLoad(pwdpath, gamedir, fname, fqpath);
-
-	if(!libHandle && homepath)
-		libHandle = Sys_TryLibraryLoad(homepath, gamedir, fname, fqpath);
+	libHandle = Sys_TryLibraryLoad(homepath, gamedir, fname, fqpath);
 
 	if(!libHandle && basepath)
 		libHandle = Sys_TryLibraryLoad(basepath, gamedir, fname, fqpath);
