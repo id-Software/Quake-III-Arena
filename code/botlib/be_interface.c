@@ -136,29 +136,35 @@ qboolean BotLibSetup(char *str)
 int Export_BotLibSetup(void)
 {
 	int		errnum;
-	char		logfilename[MAX_OSPATH];
-	char		*homedir, *gamedir;
 	
 	botDeveloper = LibVarGetValue("bot_developer");
  	memset( &botlibglobals, 0, sizeof(botlibglobals) );
 	//initialize byte swapping (litte endian etc.)
 //	Swap_Init();
-	homedir = LibVarGetString("homedir");
-	gamedir = LibVarGetString("gamedir");
-	if (homedir[0]) {
-		if (gamedir[0]) {
-			Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, gamedir, PATH_SEP);
+
+	if(botDeveloper)
+	{
+		char *homedir, *gamedir;
+		char logfilename[MAX_OSPATH];
+
+		homedir = LibVarGetString("homedir");
+		gamedir = LibVarGetString("gamedir");
+
+		if (*homedir)
+		{
+			if(*gamedir)
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, gamedir, PATH_SEP);
+			else
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c" BASEGAME "%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
 		}
-		else {
-			Com_sprintf(logfilename, sizeof(logfilename), "%s%c" BASEGAME "%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
-		}
-	} else {
-		Com_sprintf(logfilename, sizeof(logfilename), "botlib.log");
+		else
+			Com_sprintf(logfilename, sizeof(logfilename), "botlib.log");
+	
+		Log_Open(logfilename);
 	}
-	Log_Open(logfilename);
-	//
+
 	botimport.Print(PRT_MESSAGE, "------- BotLib Initialization -------\n");
-	//
+
 	botlibglobals.maxclients = (int) LibVarValue("maxclients", "128");
 	botlibglobals.maxentities = (int) LibVarValue("maxentities", "1024");
 
