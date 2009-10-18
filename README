@@ -425,26 +425,6 @@ SDL Keyboard Differences
   text. Also, in addition to the nominated console keys, Shift-ESC is hard
   coded to always toggle the console.
 
-Mouse Input On Windows
-  ioq3 uses SDL to abstract away as much as possible from platform specific
-  implementation details. Unfortunately, SDL 1.2 suffers from a number of bugs
-  and limitations with respect to mouse input on the Windows platform. We
-  provide a patch against the SDL subversion 1.2 branch which fixes the
-  following problems:
-
-    * DirectX (and thus DirectInput) driver not functional when using an
-      OpenGL SDL_Surface.
-
-    * DirectX (and thus DirectInput) driver not functional in windowed mode.
-
-    * Mouse buttons 4-7 unusable with the DirectX driver due to DirectInput 5
-      not exposing the required functionality. Use DirectInput 7 instead.
-
-    * Low quality mouse input data when using the windib driver due to use of
-      WM_MOUSEMOVE events. Use GetCursorPos API call instead.
-
-  The patch can be found in misc/sdl-win32-fixes.diff.
-
 PNG support
   ioquake3 supports the use of PNG (Portable Network Graphic) images as
   textures. It should be noted that the use of such images in a map will
