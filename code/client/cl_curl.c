@@ -332,8 +332,7 @@ void CL_cURL_PerformDownload(void)
 			qcurl_easy_strerror(msg->data.result),
 			code, clc.downloadURL);
 	}
-	*clc.downloadTempName = *clc.downloadName = 0;
-	Cvar_Set( "cl_downloadName", "" );
+
 	CL_NextDownload();
 }
 #endif /* USE_CURL */

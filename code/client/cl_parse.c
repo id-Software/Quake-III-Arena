@@ -619,8 +619,6 @@ void CL_ParseDownload ( msg_t *msg ) {
 			// rename the file
 			FS_SV_Rename ( clc.downloadTempName, clc.downloadName );
 		}
-		*clc.downloadTempName = *clc.downloadName = 0;
-		Cvar_Set( "cl_downloadName", "" );
 
 		// send intentions now
 		// We need this because without it, we would hold the last nextdl and then start
