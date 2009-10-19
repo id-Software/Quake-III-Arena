@@ -2176,6 +2176,49 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\code\qcommon\ioapi.c"
+				>
+				<FileConfiguration
+					Name="Release TA|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions=""
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						PreprocessorDefinitions=""
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug TA|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						PreprocessorDefinitions=""
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\code\qcommon\vm.c"
 				>
 				<FileConfiguration
@@ -3144,6 +3187,34 @@
 			</File>
 			<File
 				RelativePath="..\..\code\libspeex\window.c"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="zlib"
+			>
+			<File
+				RelativePath="..\..\code\zlib\adler32.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\zlib\crc32.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\zlib\inffast.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\zlib\inflate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\zlib\inftrees.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\zlib\zutil.c"
 				>
 			</File>
 		</Filter>
