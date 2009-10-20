@@ -656,6 +656,15 @@ static void fltopandsecond() {
 
 #define assertInteger(depth)	assert(opStackRegType[depth] == 1)
 
+#define JUSED(x) \
+	do { \
+		if (x < 0 || x >= jusedSize) { \
+			Com_Error( ERR_DROP, \
+					"VM_CompileX86: jump target out of range at offset %d", pc ); \
+		} \
+		jused[x] = 1; \
+	} while(0)
+
 /*
 =================
 VM_Compile
@@ -666,20 +675,21 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	int		maxLength;
 	int		v;
 	int		i;
-        int		opStackDepth;
-	
+	int		opStackDepth;
+	int		jusedSize = header->instructionCount + 2;
+
 	int		mainFunction;
-	
+
 	// set up the into-to-float variables
-   	((int *)itofConvert)[0] = 0x43300000;
-   	((int *)itofConvert)[1] = 0x80000000;
-   	((int *)itofConvert)[2] = 0x43300000;
+	((int *)itofConvert)[0] = 0x43300000;
+	((int *)itofConvert)[1] = 0x80000000;
+	((int *)itofConvert)[2] = 0x43300000;
 
 	// allocate a very large temp buffer, we will shrink it later
 	maxLength = header->codeLength * 8;
 	buf = Z_Malloc( maxLength );
-	jused = Z_Malloc(header->instructionCount + 2);
-	Com_Memset(jused, 0, header->instructionCount+2);
+	jused = Z_Malloc(jusedSize);
+	Com_Memset(jused, 0, jusedSize);
 	
     // compile everything twice, so the second pass will have valid instruction
     // pointers for branches
@@ -762,7 +772,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackRegType[opStackDepth] = 1;
 		opStackDepth += 1;
 		if (code[pc] == OP_JUMP) {
-		    jused[v] = 1;
+		    JUSED(v);
 		}
 		break;
             case OP_LOCAL:
@@ -972,7 +982,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];                    
@@ -995,7 +1005,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];                    
@@ -1020,7 +1030,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1044,7 +1054,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1068,7 +1078,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1092,7 +1102,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-				jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1116,7 +1126,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1140,7 +1150,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1164,7 +1174,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1188,7 +1198,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1213,7 +1223,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1237,7 +1247,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 2, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1261,7 +1271,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1285,7 +1295,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1309,7 +1319,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 4, 1, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
@@ -1333,7 +1343,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		opStackLoadInstructionAddr[opStackDepth-2] = 0;
 		opStackDepth -= 2;
                 i = Constant4();
-		jused[i] = 1;
+				JUSED(i);
                 InstImm( "bc", PPC_BC, 12, 0, 8 );
                 if ( pass==1 ) {
                     v = vm->instructionPointers[ i ] - (int)&buf[compiledOfs];
