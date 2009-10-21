@@ -45,19 +45,19 @@ typedef char *  va_list;
 #define va_arg(ap,t)    ( *(t *)((ap += _INTSIZEOF(t)) - _INTSIZEOF(t)) )
 #define va_end(ap)      ( ap = (va_list)0 )
 
-#define CHAR_BIT      8         /* number of bits in a char */
-#define SCHAR_MIN   (-128)      /* minimum signed char value */
-#define SCHAR_MAX     127       /* maximum signed char value */
-#define UCHAR_MAX     0xff      /* maximum unsigned char value */
+#define CHAR_BIT      8             /* number of bits in a char */
+#define SCHAR_MAX     0x7f          /* maximum signed char value */
+#define SCHAR_MIN   (-SCHAR_MAX - 1) /* minimum signed char value */
+#define UCHAR_MAX     0xff          /* maximum unsigned char value */
 
-#define SHRT_MIN    (-32768)        /* minimum (signed) short value */
-#define SHRT_MAX      32767         /* maximum (signed) short value */
+#define SHRT_MAX      0x7fff        /* maximum (signed) short value */
+#define SHRT_MIN    (-SHRT_MAX - 1) /* minimum (signed) short value */
 #define USHRT_MAX     0xffff        /* maximum unsigned short value */
-#define INT_MIN     (-2147483647 - 1) /* minimum (signed) int value */
-#define INT_MAX       2147483647    /* maximum (signed) int value */
+#define INT_MAX       0x7fffffff    /* maximum (signed) int value */
+#define INT_MIN     (-INT_MAX - 1)  /* minimum (signed) int value */
 #define UINT_MAX      0xffffffff    /* maximum unsigned int value */
-#define LONG_MIN    (-2147483647L - 1) /* minimum (signed) long value */
-#define LONG_MAX      2147483647L   /* maximum (signed) long value */
+#define LONG_MAX      0x7fffffffL   /* maximum (signed) long value */
+#define LONG_MIN    (-LONG_MAX - 1) /* minimum (signed) long value */
 #define ULONG_MAX     0xffffffffUL  /* maximum unsigned long value */
 
 #define isalnum(c)  (isalpha(c) || isdigit(c))
@@ -95,8 +95,10 @@ int toupper( int c );
 
 double atof( const char *string );
 double _atof( const char **stringPtr );
+double strtod( const char *nptr, const char **endptr );
 int atoi( const char *string );
 int _atoi( const char **stringPtr );
+long strtol( const char *nptr, const char **endptr, int base );
 
 int Q_vsnprintf( char *buffer, size_t length, const char *fmt, va_list argptr );
 int Q_snprintf( char *buffer, size_t length, const char *fmt, ... ) __attribute__ ((format (printf, 3, 4)));
