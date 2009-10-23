@@ -880,7 +880,7 @@ endif
 ifeq ($(USE_INTERNAL_ZLIB),1)
   BASE_CFLAGS += -DNO_GZIP
 else
-  LDFLAGS += -lz
+  LIBS += -lz
 endif
 
 ifdef DEFAULT_BASEDIR
