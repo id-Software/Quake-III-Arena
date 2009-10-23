@@ -122,10 +122,13 @@ typedef struct alSfx_s
 {
 	char			filename[MAX_QPATH];
 	ALuint		buffer;					// OpenAL buffer
-	qboolean	isDefault;			// Couldn't be loaded - use default FX
+	qboolean	isDefault;				// Couldn't be loaded - use default FX
 	qboolean	inMemory;				// Sound is stored in memory
 	qboolean	isLocked;				// Sound is locked (can not be unloaded)
 	int				lastUsedTime;		// Time last used
+
+	int				loopCnt;		// number of loops using this sfx
+	int				masterLoopSrc;		// All other sources looping this buffer are synced to this master src
 } alSfx_t;
 
 static qboolean alBuffersInitialised = qfalse;
@@ -485,7 +488,7 @@ typedef struct src_s
 	int							isActive;		// Is this source currently in use?
 	int							isLocked;		// This is locked (un-allocatable)
 	int							isLooping;	// Is this a looping effect (attached to an entity)
-	int							isTracking;	// Is this object tracking it's owner
+	int							isTracking;	// Is this object tracking its owner
 
 	float							curGain;	// gain employed if source is within maxdistance.
 	float							scaleGain;	// Last gain value for this source. 0 if muted.
@@ -730,42 +733,91 @@ static void S_AL_SrcSetup(srcHandle_t src, sfxHandle_t sfx, alSrcPriority_t prio
 
 /*
 =================
+S_AL_NewLoopMaster
+Remove given source as loop master if it is the master and hand off master status to another source in this case.
+=================
+*/
+
+static void S_AL_NewLoopMaster(src_t *rmSource)
+{
+	int index;
+	src_t *curSource;
+	alSfx_t *curSfx;
+	
+	// Only ambient sources get synced anyways.
+	if(rmSource->priority != SRCPRI_AMBIENT)
+		return;
+	
+	curSfx = &knownSfx[rmSource->sfx];
+	curSfx->loopCnt--;
+	
+	if(rmSource == &srcList[curSfx->masterLoopSrc] && curSfx->loopCnt)
+	{
+		// Only if rmSource was the master and there is still another loop playing will we
+		// need to find a new master.
+	
+		for(index = 0; index < srcCount; index++)
+		{
+			curSource = &srcList[index];
+	
+			if(curSource->sfx == rmSource->sfx && curSource != rmSource &&
+			   curSource->isActive && curSource->isLooping && curSource->priority == SRCPRI_AMBIENT)
+			{
+				curSfx->masterLoopSrc = index;
+				return;
+			}
+		}
+	}
+}
+
+/*
+=================
 S_AL_SrcKill
 =================
 */
 static void S_AL_SrcKill(srcHandle_t src)
 {
+	src_t *curSource = &srcList[src];
+	
 	// I'm not touching it. Unlock it first.
-	if(srcList[src].isLocked)
+	if(curSource->isLocked)
 		return;
 
 	// Stop it if it's playing
-	if(srcList[src].isActive)
-		qalSourceStop(srcList[src].alSource);
+	if(curSource->isActive)
+		qalSourceStop(curSource->alSource);
 
-	// Remove the entity association
-	if((srcList[src].isLooping) && (srcList[src].entity != -1))
+	// Remove the entity association and loop master status
+	if(curSource->isLooping)
 	{
-		int ent = srcList[src].entity;
-		entityList[ent].srcAllocated = qfalse;
-		entityList[ent].srcIndex = -1;
-		entityList[ent].loopAddedThisFrame = qfalse;
-		entityList[ent].startLoopingSound = qfalse;
+		curSource->isLooping = qfalse;
+
+		if(curSource->entity != -1)
+		{
+			sentity_t *curEnt = &entityList[curSource->entity];
+			
+			curEnt->srcAllocated = qfalse;
+			curEnt->srcIndex = -1;
+			curEnt->loopAddedThisFrame = qfalse;
+			curEnt->startLoopingSound = qfalse;
+		}
+		
+		S_AL_NewLoopMaster(curSource);
 	}
 
 	// Remove the buffer
-	qalSourcei(srcList[src].alSource, AL_BUFFER, 0);
+	qalSourcei(curSource->alSource, AL_BUFFER, 0);
 
-	srcList[src].sfx = 0;
-	srcList[src].lastUsedTime = 0;
-	srcList[src].priority = 0;
-	srcList[src].entity = -1;
-	srcList[src].channel = -1;
-	srcList[src].isActive = qfalse;
-	srcList[src].isLocked = qfalse;
-	srcList[src].isLooping = qfalse;
-	srcList[src].isTracking = qfalse;
-	srcList[src].local = qfalse;
+	curSource->sfx = 0;
+	curSource->lastUsedTime = 0;
+	curSource->priority = 0;
+	curSource->entity = -1;
+	curSource->channel = -1;
+	curSource->isActive = qfalse;
+	curSource->isLocked = qfalse;
+	curSource->isLooping = qfalse;
+	curSource->isTracking = qfalse;
+	curSource->local = qfalse;
 }
 
 /*
@@ -1172,9 +1224,9 @@ void S_AL_SrcUpdate( void )
 			continue;
 
 		// Update source parameters
-		if((s_alGain->modified)||(s_volume->modified))
+		if((s_alGain->modified) || (s_volume->modified))
 			curSource->curGain = s_alGain->value * s_volume->value;
-		if((s_alRolloff->modified)&&(!curSource->local))
+		if((s_alRolloff->modified) && (!curSource->local))
 			qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
 		if(s_alMinDistance->modified)
 			qalSourcef(curSource->alSource, AL_REFERENCE_DISTANCE, s_alMinDistance->value);
@@ -1193,6 +1245,8 @@ void S_AL_SrcUpdate( void )
 					qalSourceStop(curSource->alSource);
 					qalSourcei(curSource->alSource, AL_BUFFER, 0);
 					sent->startLoopingSound = qtrue;
+					
+					S_AL_NewLoopMaster(curSource);
 				}
 
 				// The sound hasn't been started yet
@@ -1201,6 +1255,28 @@ void S_AL_SrcUpdate( void )
 					S_AL_SrcSetup(i, sent->loopSfx, sent->loopPriority,
 							entityNum, -1, curSource->local);
 					curSource->isLooping = qtrue;
+					
+					if(curSource->priority == SRCPRI_AMBIENT)
+					{
+						alSfx_t *curSfx = &knownSfx[curSource->sfx];
+
+						// If there are other ambient looping sources with the same sound,
+						// make sure the sound of these sources are in sync.
+						
+						if(curSfx->loopCnt)
+						{
+							int offset;
+							
+							// we already have a master loop playing, get buffer position.
+							qalGetSourcei(srcList[curSfx->masterLoopSrc].alSource, AL_SAMPLE_OFFSET, &offset);
+							qalSourcei(curSource->alSource, AL_SAMPLE_OFFSET, offset);
+						}
+						else
+							curSfx->masterLoopSrc = i; // This is now the new master source.
+						
+						curSfx->loopCnt++;
+					}
+					
 					qalSourcei(curSource->alSource, AL_LOOPING, AL_TRUE);
 					qalSourcePlay(curSource->alSource);
 
@@ -1218,9 +1294,14 @@ void S_AL_SrcUpdate( void )
 					qalSourcei(curSource->alSource, AL_SOURCE_RELATIVE, AL_FALSE);
 					qalSourcef(curSource->alSource, AL_ROLLOFF_FACTOR, s_alRolloff->value);
 				}
+				
+//				qalSourcef(curSource->alSource, AL_GAIN, curSource->curGain);
 			}
 			else
-				S_AL_SrcKill( i );
+			{
+//				qalSourcef(curSource->alSource, AL_GAIN, 0.0f);
+				S_AL_SrcKill(i);
+			}
 
 			continue;
 		}
