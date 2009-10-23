@@ -1359,7 +1359,7 @@ void S_AL_SrcUpdate( void )
 			else if(curSource->isPlaying)
 			{
 				S_AL_NewLoopMaster(curSource, qfalse);
-				qalSourcePause(curSource->alSource);
+				qalSourceStop(curSource->alSource);
 				curSource->isPlaying = qfalse;
 			}
 
