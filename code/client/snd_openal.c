@@ -815,7 +815,6 @@ static void S_AL_SrcKill(srcHandle_t src)
 	curSource->channel = -1;
 	curSource->isActive = qfalse;
 	curSource->isLocked = qfalse;
-	curSource->isLooping = qfalse;
 	curSource->isTracking = qfalse;
 	curSource->local = qfalse;
 }
