@@ -70,7 +70,7 @@ FIXME relevant?
 static void CON_FlushIn( void )
 {
 	char key;
-	while (read(0, &key, 1)!=-1);
+	while (read(STDIN_FILENO, &key, 1)!=-1);
 }
 
 /*
@@ -90,11 +90,11 @@ static void CON_Back( void )
 	size_t size;
 
 	key = '\b';
-	size = write(1, &key, 1);
+	size = write(STDOUT_FILENO, &key, 1);
 	key = ' ';
-	size = write(1, &key, 1);
+	size = write(STDOUT_FILENO, &key, 1);
 	key = '\b';
-	size = write(1, &key, 1);
+	size = write(STDOUT_FILENO, &key, 1);
 }
 
 /*
@@ -146,12 +146,12 @@ static void CON_Show( void )
 		if (ttycon_hide == 0)
 		{
 			size_t size;
-			size = write( 1, "]", 1 );
+			size = write(STDOUT_FILENO, "]", 1);
 			if (TTY_con.cursor)
 			{
 				for (i=0; i<TTY_con.cursor; i++)
 				{
-					size = write(1, TTY_con.buffer+i, 1);
+					size = write(STDOUT_FILENO, TTY_con.buffer+i, 1);
 				}
 			}
 		}
@@ -170,11 +170,11 @@ void CON_Shutdown( void )
 	if (ttycon_on)
 	{
 		CON_Back(); // Delete "]"
-		tcsetattr (0, TCSADRAIN, &TTY_tc);
+		tcsetattr (STDIN_FILENO, TCSADRAIN, &TTY_tc);
 	}
 
-  // Restore blocking to stdin reads
-  fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) & ~O_NONBLOCK );
+	// Restore blocking to stdin reads
+	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) & ~O_NONBLOCK);
 }
 
 /*
@@ -247,6 +247,19 @@ field_t *Hist_Next( void )
 
 /*
 ==================
+CON_SigCont
+Reinitialize console input after receiving SIGCONT, as on Linux the terminal seems to lose all
+set attributes if user did CTRL+Z and then does fg again.
+==================
+*/
+
+void CON_SigCont(int signum)
+{
+	CON_Init();
+}
+
+/*
+==================
 CON_Init
 
 Initialize the console input (tty mode if possible)
@@ -261,9 +274,12 @@ void CON_Init( void )
 	// then SIGTTIN or SIGTOU is emitted, if not caught, turns into a SIGSTP
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
+	
+	// If SIGCONT is received, reinitialize console
+	signal(SIGCONT, CON_SigCont);
 
 	// Make stdin reads non-blocking
-	fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) | O_NONBLOCK );
+	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK );
 
 	if (isatty(STDIN_FILENO) != 1
 	|| (term && (!strcmp(term, "raw") || !strcmp(term, "dumb"))))
@@ -275,7 +291,7 @@ void CON_Init( void )
 	}
 
 	Field_Clear(&TTY_con);
-	tcgetattr (0, &TTY_tc);
+	tcgetattr (STDIN_FILENO, &TTY_tc);
 	TTY_erase = TTY_tc.c_cc[VERASE];
 	TTY_eof = TTY_tc.c_cc[VEOF];
 	tc = TTY_tc;
@@ -298,7 +314,7 @@ void CON_Init( void )
 	tc.c_iflag &= ~(ISTRIP | INPCK);
 	tc.c_cc[VMIN] = 1;
 	tc.c_cc[VTIME] = 0;
-	tcsetattr (0, TCSADRAIN, &tc);
+	tcsetattr (STDIN_FILENO, TCSADRAIN, &tc);
 	ttycon_on = qtrue;
 }
 
@@ -316,9 +332,9 @@ char *CON_Input( void )
 	field_t *history;
 	size_t size;
 
-	if( ttycon_on )
+	if(ttycon_on)
 	{
-		avail = read(0, &key, 1);
+		avail = read(STDIN_FILENO, &key, 1);
 		if (avail != -1)
 		{
 			// we have something
@@ -355,13 +371,13 @@ char *CON_Input( void )
 					CON_Show();
 					return NULL;
 				}
-				avail = read(0, &key, 1);
+				avail = read(STDIN_FILENO, &key, 1);
 				if (avail != -1)
 				{
 					// VT 100 keys
 					if (key == '[' || key == 'O')
 					{
-						avail = read(0, &key, 1);
+						avail = read(STDIN_FILENO, &key, 1);
 						if (avail != -1)
 						{
 							switch (key)
@@ -407,7 +423,7 @@ char *CON_Input( void )
 			TTY_con.buffer[TTY_con.cursor] = key;
 			TTY_con.cursor++;
 			// print the current line (this is differential)
-			size = write(1, &key, 1);
+			size = write(STDOUT_FILENO, &key, 1);
 		}
 
 		return NULL;
@@ -419,15 +435,13 @@ char *CON_Input( void )
 		struct timeval timeout;
 
 		FD_ZERO(&fdset);
-		FD_SET(0, &fdset); // stdin
+		FD_SET(STDIN_FILENO, &fdset); // stdin
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 0;
-		if (select (1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
-		{
+		if(select (STDIN_FILENO + 1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(STDIN_FILENO, &fdset))
 			return NULL;
-		}
 
-		len = read (0, text, sizeof(text));
+		len = read(STDIN_FILENO, text, sizeof(text));
 		if (len == 0)
 		{ // eof!
 			stdin_active = qfalse;
