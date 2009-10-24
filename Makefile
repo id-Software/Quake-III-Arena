@@ -879,6 +879,9 @@ endif
 
 ifeq ($(USE_INTERNAL_ZLIB),1)
   BASE_CFLAGS += -DNO_GZIP
+  ifneq ($(USE_LOCAL_HEADERS),1)
+    BASE_CFLAGS += -I$(ZDIR)
+  endif
 else
   LIBS += -lz
 endif
