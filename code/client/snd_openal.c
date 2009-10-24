@@ -501,7 +501,7 @@ typedef struct src_s
 	float		curGain;		// gain employed if source is within maxdistance.
 	float		scaleGain;		// Last gain value for this source. 0 if muted.
 	
-	float		lastTimePos;		// On stopped loops, last time position in s
+	float		lastTimePos;		// On stopped loops, the last position in the buffer
 	int		lastSampleTime;		// Time when this was stopped
 	
 	qboolean	local;			// Is this local (relative to the cam)
@@ -758,7 +758,8 @@ static void S_AL_NewLoopMaster(src_t *rmSource, qboolean iskilled)
 	
 	curSfx = &knownSfx[rmSource->sfx];
 
-	curSfx->loopActiveCnt--;
+	if(rmSource->isPlaying)
+		curSfx->loopActiveCnt--;
 	if(iskilled)
 		curSfx->loopCnt--;
 	
@@ -798,9 +799,20 @@ static void S_AL_NewLoopMaster(src_t *rmSource, qboolean iskilled)
 				else
 					curSource = &srcList[firstInactive];
 
-				// this was the last not stopped source, save last sample position + time
-				qalGetSourcef(rmSource->alSource, AL_SEC_OFFSET, &curSource->lastTimePos);
-				curSource->lastSampleTime = Sys_Milliseconds();
+				if(rmSource->isPlaying)
+				{
+					// this was the last not stopped source, save last sample position + time
+					qalGetSourcef(rmSource->alSource, AL_SEC_OFFSET, &curSource->lastTimePos);
+					curSource->lastSampleTime = Sys_Milliseconds();
+				}
+				else
+				{
+					// second case: all loops using this sound have stopped due to listener being of of range,
+					// and now the inactive master gets deleted. Just move over the soundpos settings to the
+					// new master.
+					curSource->lastTimePos = rmSource->lastTimePos;
+					curSource->lastSampleTime = rmSource->lastSampleTime;
+				}
 			}
 		}
 	}
@@ -840,9 +852,11 @@ static void S_AL_SrcKill(srcHandle_t src)
 	}
 
 	// Stop it if it's playing
-	if(curSource->isActive)
+	if(curSource->isPlaying)
+	{
 		qalSourceStop(curSource->alSource);
-	curSource->isPlaying = qfalse;
+		curSource->isPlaying = qfalse;
+	}
 
 	// Remove the buffer
 	qalSourcei(curSource->alSource, AL_BUFFER, 0);
@@ -1340,7 +1354,6 @@ void S_AL_SrcUpdate( void )
 					qalSourcei(curSource->alSource, AL_LOOPING, AL_TRUE);
 					curSource->isPlaying = qtrue;
 					qalSourcePlay(curSource->alSource);
-
 				}
 
 				// Update locality
@@ -1370,6 +1383,7 @@ void S_AL_SrcUpdate( void )
 		qalGetSourcei(curSource->alSource, AL_SOURCE_STATE, &state);
 		if(state == AL_STOPPED)
 		{
+			curSource->isPlaying = qfalse;
 			S_AL_SrcKill(i);
 			continue;
 		}
