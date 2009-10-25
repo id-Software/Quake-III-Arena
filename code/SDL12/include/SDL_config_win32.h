@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 
 /* This is a set of defines to configure the SDL features */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__DMC__)
 #define HAVE_STDINT_H	1
 #elif defined(_MSC_VER)
 typedef signed __int8		int8_t;
@@ -45,6 +45,13 @@ typedef unsigned __int64    uintptr_t;
 typedef unsigned int   uintptr_t;
 #endif
 #define _UINTPTR_T_DEFINED
+#endif
+/* Older Visual C++ headers don't have the Win64-compatible typedefs... */
+#if ((_MSC_VER <= 1200) && (!defined(DWORD_PTR)))
+#define DWORD_PTR DWORD
+#endif
+#if ((_MSC_VER <= 1200) && (!defined(LONG_PTR)))
+#define LONG_PTR LONG
 #endif
 #else	/* !__GNUC__ && !_MSC_VER */
 typedef signed char int8_t;
@@ -164,6 +171,9 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_OPENGL	1
 #define SDL_VIDEO_OPENGL_WGL	1
 #endif
+
+/* Disable screensaver */
+#define SDL_VIDEO_DISABLE_SCREENSAVER	1
 
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,10 @@
     slouken@libsdl.org
 */
 
-/* Simple error message routines for SDL */
+/**
+ *  @file SDL_error.h
+ *  Simple error message routines for SDL
+ */
 
 #ifndef _SDL_error_h
 #define _SDL_error_h
@@ -33,12 +36,20 @@
 extern "C" {
 #endif
 
-/* Public functions */
+/** 
+ *  @name Public functions
+ */
+/*@{*/
 extern DECLSPEC void SDLCALL SDL_SetError(const char *fmt, ...);
 extern DECLSPEC char * SDLCALL SDL_GetError(void);
 extern DECLSPEC void SDLCALL SDL_ClearError(void);
+/*@}*/
 
-/* Private error message function - used internally */
+/**
+ *  @name Private functions
+ *  @internal Private error message function - used internally
+ */
+/*@{*/
 #define SDL_OutOfMemory()	SDL_Error(SDL_ENOMEM)
 #define SDL_Unsupported()	SDL_Error(SDL_UNSUPPORTED)
 typedef enum {
@@ -50,7 +61,7 @@ typedef enum {
 	SDL_LASTERROR
 } SDL_errorcode;
 extern DECLSPEC void SDLCALL SDL_Error(SDL_errorcode code);
-
+/*@}*/
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

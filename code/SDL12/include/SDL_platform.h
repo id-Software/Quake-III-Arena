@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,9 @@
     slouken@libsdl.org
 */
 
-/* Try to get a standard set of platform defines */
+/** @file SDL_platform.h
+ *  Try to get a standard set of platform defines
+ */
 
 #ifndef _SDL_platform_h
 #define _SDL_platform_h
@@ -29,13 +31,13 @@
 #undef __AIX__
 #define __AIX__		1
 #endif
-#if defined(AMIGA) || defined(__AMIGA) || defined(__amigados__)
-#undef __AMIGA__
-#define __AMIGA__	1
-#endif
 #if defined(__BEOS__)
 #undef __BEOS__
 #define __BEOS__	1
+#endif
+#if defined(__HAIKU__)
+#undef __HAIKU__
+#define __HAIKU__ 1
 #endif
 #if defined(bsdi) || defined(__bsdi) || defined(__bsdi__)
 #undef __BSDI__
@@ -45,9 +47,13 @@
 #undef __DREAMCAST__
 #define __DREAMCAST__	1
 #endif
-#if defined(__FreeBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 #undef __FREEBSD__
 #define __FREEBSD__	1
+#endif
+#if defined(__HAIKU__)
+#undef __HAIKU__
+#define __HAIKU__	1
 #endif
 #if defined(hpux) || defined(__hpux) || defined(__hpux__)
 #undef __HPUX__

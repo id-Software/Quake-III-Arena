@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,9 @@
 #define _SDL_config_macosx_h
 
 #include "SDL_platform.h"
+
+/* This gets us MAC_OS_X_VERSION_MIN_REQUIRED... */
+#include <AvailabilityMacros.h>
 
 /* This is a set of defines to configure the SDL features */
 
@@ -87,7 +90,6 @@
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_COREAUDIO	1
-#define SDL_AUDIO_DRIVER_SNDMGR	1
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
@@ -114,14 +116,30 @@
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_DUMMY	1
-#if TARGET_API_MAC_CARBON
+#if ((defined TARGET_API_MAC_CARBON) && (TARGET_API_MAC_CARBON))
 #define SDL_VIDEO_DRIVER_TOOLBOX	1
 #else
 #define SDL_VIDEO_DRIVER_QUARTZ	1
 #endif
+#define SDL_VIDEO_DRIVER_DGA 1
+#define SDL_VIDEO_DRIVER_X11 1
+#define SDL_VIDEO_DRIVER_X11_DGAMOUSE 1
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "/usr/X11R6/lib/libXrandr.2.dylib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER "/usr/X11R6/lib/libXrender.1.dylib"
+#define SDL_VIDEO_DRIVER_X11_VIDMODE 1
+#define SDL_VIDEO_DRIVER_X11_XINERAMA 1
+#define SDL_VIDEO_DRIVER_X11_XME 1
+#define SDL_VIDEO_DRIVER_X11_XRANDR 1
+#define SDL_VIDEO_DRIVER_X11_XV 1
 
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
+#define SDL_VIDEO_OPENGL_GLX 1
+
+/* Disable screensaver */
+#define SDL_VIDEO_DISABLE_SCREENSAVER	1
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1

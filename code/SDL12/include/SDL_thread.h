@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,10 +23,11 @@
 #ifndef _SDL_thread_h
 #define _SDL_thread_h
 
-/* Header for the SDL thread management routines 
-
-	These are independent of the other SDL routines.
-*/
+/** @file SDL_thread.h
+ *  Header for the SDL thread management routines 
+ *
+ *  @note These are independent of the other SDL routines.
+ */
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
@@ -40,25 +41,25 @@
 extern "C" {
 #endif
 
-/* The SDL thread structure, defined in SDL_thread.c */
+/** The SDL thread structure, defined in SDL_thread.c */
 struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
-/* Create a thread */
-#if (defined(__WIN32__) && !defined(HAVE_LIBC)) || defined(__OS2__)
-/*
-   We compile SDL into a DLL on OS/2. This means, that it's the DLL which
-   creates a new thread for the calling process with the SDL_CreateThread()
-   API. There is a problem with this, that only the RTL of the SDL.DLL will
-   be initialized for those threads, and not the RTL of the calling application!
-   To solve this, we make a little hack here.
-   We'll always use the caller's _beginthread() and _endthread() APIs to
-   start a new thread. This way, if it's the SDL.DLL which uses this API,
-   then the RTL of SDL.DLL will be used to create the new thread, and if it's
-   the application, then the RTL of the application will be used.
-   So, in short:
-   Always use the _beginthread() and _endthread() of the calling runtime library!
-*/
+/** Create a thread */
+#if ((defined(__WIN32__) && !defined(HAVE_LIBC)) || defined(__OS2__)) &&  !defined(__SYMBIAN32__)
+/**
+ *  We compile SDL into a DLL on OS/2. This means, that it's the DLL which
+ *  creates a new thread for the calling process with the SDL_CreateThread()
+ *  API. There is a problem with this, that only the RTL of the SDL.DLL will
+ *  be initialized for those threads, and not the RTL of the calling application!
+ *  To solve this, we make a little hack here.
+ *  We'll always use the caller's _beginthread() and _endthread() APIs to
+ *  start a new thread. This way, if it's the SDL.DLL which uses this API,
+ *  then the RTL of SDL.DLL will be used to create the new thread, and if it's
+ *  the application, then the RTL of the application will be used.
+ *  So, in short:
+ *  Always use the _beginthread() and _endthread() of the calling runtime library!
+ */
 #define SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #ifndef _WIN32_WCE
 #include <process.h> /* This has _beginthread() and _endthread() defined! */
@@ -92,21 +93,21 @@ extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *),
 extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data);
 #endif
 
-/* Get the 32-bit thread identifier for the current thread */
+/** Get the 32-bit thread identifier for the current thread */
 extern DECLSPEC Uint32 SDLCALL SDL_ThreadID(void);
 
-/* Get the 32-bit thread identifier for the specified thread,
-   equivalent to SDL_ThreadID() if the specified thread is NULL.
+/** Get the 32-bit thread identifier for the specified thread,
+ *  equivalent to SDL_ThreadID() if the specified thread is NULL.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_GetThreadID(SDL_Thread *thread);
 
-/* Wait for a thread to finish.
-   The return code for the thread function is placed in the area
-   pointed to by 'status', if 'status' is not NULL.
+/** Wait for a thread to finish.
+ *  The return code for the thread function is placed in the area
+ *  pointed to by 'status', if 'status' is not NULL.
  */
 extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread *thread, int *status);
 
-/* Forcefully kill a thread without worrying about its state */
+/** Forcefully kill a thread without worrying about its state */
 extern DECLSPEC void SDLCALL SDL_KillThread(SDL_Thread *thread);
 
 

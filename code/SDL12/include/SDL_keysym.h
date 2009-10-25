@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,16 @@
 #ifndef _SDL_keysym_h
 #define _SDL_keysym_h
 
-/* What we really want is a mapping of every raw key on the keyboard.
-   To support international keyboards, we use the range 0xA1 - 0xFF
-   as international virtual keycodes.  We'll follow in the footsteps of X11...
-   The names of the keys
+/** What we really want is a mapping of every raw key on the keyboard.
+ *  To support international keyboards, we use the range 0xA1 - 0xFF
+ *  as international virtual keycodes.  We'll follow in the footsteps of X11...
+ *  @brief The names of the keys
  */
- 
 typedef enum {
-	/* The keyboard syms have been cleverly chosen to map to ASCII */
+        /** @name ASCII mapped keysyms
+         *  The keyboard syms have been cleverly chosen to map to ASCII
+         */
+        /*@{*/
 	SDLK_UNKNOWN		= 0,
 	SDLK_FIRST		= 0,
 	SDLK_BACKSPACE		= 8,
@@ -108,8 +110,10 @@ typedef enum {
 	SDLK_z			= 122,
 	SDLK_DELETE		= 127,
 	/* End of ASCII mapped keysyms */
+        /*@}*/
 
-	/* International keyboard syms */
+	/** @name International keyboard syms */
+        /*@{*/
 	SDLK_WORLD_0		= 160,		/* 0xA0 */
 	SDLK_WORLD_1		= 161,
 	SDLK_WORLD_2		= 162,
@@ -206,8 +210,10 @@ typedef enum {
 	SDLK_WORLD_93		= 253,
 	SDLK_WORLD_94		= 254,
 	SDLK_WORLD_95		= 255,		/* 0xFF */
+        /*@}*/
 
-	/* Numeric keypad */
+	/** @name Numeric keypad */
+        /*@{*/
 	SDLK_KP0		= 256,
 	SDLK_KP1		= 257,
 	SDLK_KP2		= 258,
@@ -225,8 +231,10 @@ typedef enum {
 	SDLK_KP_PLUS		= 270,
 	SDLK_KP_ENTER		= 271,
 	SDLK_KP_EQUALS		= 272,
+        /*@}*/
 
-	/* Arrows + Home/End pad */
+	/** @name Arrows + Home/End pad */
+        /*@{*/
 	SDLK_UP			= 273,
 	SDLK_DOWN		= 274,
 	SDLK_RIGHT		= 275,
@@ -236,8 +244,10 @@ typedef enum {
 	SDLK_END		= 279,
 	SDLK_PAGEUP		= 280,
 	SDLK_PAGEDOWN		= 281,
+        /*@}*/
 
-	/* Function keys */
+	/** @name Function keys */
+        /*@{*/
 	SDLK_F1			= 282,
 	SDLK_F2			= 283,
 	SDLK_F3			= 284,
@@ -253,8 +263,10 @@ typedef enum {
 	SDLK_F13		= 294,
 	SDLK_F14		= 295,
 	SDLK_F15		= 296,
+        /*@}*/
 
-	/* Key state modifier keys */
+	/** @name Key state modifier keys */
+        /*@{*/
 	SDLK_NUMLOCK		= 300,
 	SDLK_CAPSLOCK		= 301,
 	SDLK_SCROLLOCK		= 302,
@@ -266,27 +278,30 @@ typedef enum {
 	SDLK_LALT		= 308,
 	SDLK_RMETA		= 309,
 	SDLK_LMETA		= 310,
-	SDLK_LSUPER		= 311,		/* Left "Windows" key */
-	SDLK_RSUPER		= 312,		/* Right "Windows" key */
-	SDLK_MODE		= 313,		/* "Alt Gr" key */
-	SDLK_COMPOSE		= 314,		/* Multi-key compose key */
+	SDLK_LSUPER		= 311,		/**< Left "Windows" key */
+	SDLK_RSUPER		= 312,		/**< Right "Windows" key */
+	SDLK_MODE		= 313,		/**< "Alt Gr" key */
+	SDLK_COMPOSE		= 314,		/**< Multi-key compose key */
+        /*@}*/
 
-	/* Miscellaneous function keys */
+	/** @name Miscellaneous function keys */
+        /*@{*/
 	SDLK_HELP		= 315,
 	SDLK_PRINT		= 316,
 	SDLK_SYSREQ		= 317,
 	SDLK_BREAK		= 318,
 	SDLK_MENU		= 319,
-	SDLK_POWER		= 320,		/* Power Macintosh power key */
-	SDLK_EURO		= 321,		/* Some european keyboards */
-	SDLK_UNDO		= 322,		/* Atari keyboard has Undo */
+	SDLK_POWER		= 320,		/**< Power Macintosh power key */
+	SDLK_EURO		= 321,		/**< Some european keyboards */
+	SDLK_UNDO		= 322,		/**< Atari keyboard has Undo */
+        /*@}*/
 
 	/* Add any other keys here */
 
 	SDLK_LAST
 } SDLKey;
 
-/* Enumeration of valid key mods (possibly OR'd together) */
+/** Enumeration of valid key mods (possibly OR'd together) */
 typedef enum {
 	KMOD_NONE  = 0x0000,
 	KMOD_LSHIFT= 0x0001,
