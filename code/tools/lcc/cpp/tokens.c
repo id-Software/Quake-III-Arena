@@ -290,7 +290,7 @@ void
 puttokens(Tokenrow *trp)
 {
 	Token *tp;
-	int len;
+	int len, wlen;
 	uchar *p;
 
 	if (verbose)
@@ -305,15 +305,15 @@ puttokens(Tokenrow *trp)
 		}
 		if (len>OBS/2) {		/* handle giant token */
 			if (wbp > wbuf)
-				write(1, wbuf, wbp-wbuf);
-			write(1, (char *)p, len);
+				wlen = write(1, wbuf, wbp-wbuf);
+			wlen = write(1, (char *)p, len);
 			wbp = wbuf;
 		} else {	
 			memcpy(wbp, p, len);
 			wbp += len;
 		}
 		if (wbp >= &wbuf[OBS]) {
-			write(1, wbuf, OBS);
+			wlen = write(1, wbuf, OBS);
 			if (wbp > &wbuf[OBS])
 				memcpy(wbuf, wbuf+OBS, wbp - &wbuf[OBS]);
 			wbp -= OBS;
@@ -327,8 +327,9 @@ puttokens(Tokenrow *trp)
 void
 flushout(void)
 {
+	int wlen;
 	if (wbp>wbuf) {
-		write(1, wbuf, wbp-wbuf);
+		wlen = write(1, wbuf, wbp-wbuf);
 		wbp = wbuf;
 	}
 }

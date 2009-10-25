@@ -40,7 +40,7 @@ doinclude(Tokenrow *trp)
 {
 	char fname[256], iname[256];
 	Includelist *ip;
-	int angled, len, fd, i;
+	int angled, len, wlen, fd, i;
 
 	trp->tp += 1;
 	if (trp->tp>=trp->lp)
@@ -92,9 +92,9 @@ doinclude(Tokenrow *trp)
 			break;
 	}
 	if ( Mflag>1 || (!angled&&Mflag==1) ) {
-		write(1,objname,strlen(objname));
-		write(1,iname,strlen(iname));
-		write(1,"\n",1);
+		wlen = write(1,objname,strlen(objname));
+		wlen = write(1,iname,strlen(iname));
+		wlen = write(1,"\n",1);
 	}
 	if (fd >= 0) {
 		if (++incdepth > 10)
