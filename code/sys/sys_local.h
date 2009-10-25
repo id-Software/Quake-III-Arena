@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Require a minimum version of SDL
 #define MINSDL_MAJOR 1
 #define MINSDL_MINOR 2
-#define MINSDL_PATCH 7
+#define MINSDL_PATCH 10
 
 // Input subsystem
 void IN_Init( void );
