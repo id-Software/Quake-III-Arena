@@ -717,7 +717,13 @@ success:
 	// This values force the UI to disable driver selection
 	glConfig.driverType = GLDRV_ICD;
 	glConfig.hardwareType = GLHW_GENERIC;
-	glConfig.deviceSupportsGamma = !!( SDL_SetGamma( 1.0f, 1.0f, 1.0f ) >= 0 );
+	glConfig.deviceSupportsGamma = SDL_SetGamma( 1.0f, 1.0f, 1.0f ) >= 0;
+
+	// Mysteriously, if you use an NVidia graphics card and multiple monitors,
+	// SDL_SetGamma will incorrectly return false... the first time; ask
+	// again and you get the correct answer. This is a suspected driver bug, see
+	// http://bugzilla.icculus.org/show_bug.cgi?id=4316
+	glConfig.deviceSupportsGamma = SDL_SetGamma( 1.0f, 1.0f, 1.0f ) >= 0;
 
 	// get our config strings
 	Q_strncpyz( glConfig.vendor_string, (char *) qglGetString (GL_VENDOR), sizeof( glConfig.vendor_string ) );
