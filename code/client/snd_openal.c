@@ -884,25 +884,51 @@ srcHandle_t S_AL_SrcAlloc( alSrcPriority_t priority, int entnum, int channel )
 	int weakest = -1;
 	int weakest_time = Sys_Milliseconds();
 	int weakest_pri = 999;
+	qboolean weakest_isplaying = qtrue;
+	int weakest_numloops = 0;
+	src_t *curSource;
 
 	for(i = 0; i < srcCount; i++)
 	{
+		curSource = &srcList[i];
+		
 		// If it's locked, we aren't even going to look at it
-		if(srcList[i].isLocked)
+		if(curSource->isLocked)
 			continue;
 
 		// Is it empty or not?
-		if((!srcList[i].isActive) && (empty == -1))
-			empty = i;
-		else if(srcList[i].priority < priority)
+		if(!curSource->isActive)
 		{
-			// If it's older or has lower priority, flag it as weak
-			if((srcList[i].priority < weakest_pri) ||
-				(srcList[i].lastUsedTime < weakest_time))
+			empty = i;
+			break;
+		}
+
+		if(curSource->isPlaying)
+		{
+			if(weakest_isplaying && curSource->priority < priority &&
+			   (curSource->priority < weakest_pri || curSource->lastUsedTime < weakest_time))
 			{
-				weakest_pri = srcList[i].priority;
-				weakest_time = srcList[i].lastUsedTime;
+				// If it's older or has lower priority, flag it as weak
+				weakest_pri = curSource->priority;
+				weakest_time = curSource->lastUsedTime;
 				weakest = i;
+			}
+		}
+		else
+		{
+			weakest_isplaying = qfalse;
+			
+			if(knownSfx[curSource->sfx].loopCnt > weakest_numloops ||
+			   curSource->priority < weakest_pri ||
+			   curSource->lastUsedTime < weakest_time)
+			{
+				// Sources currently not playing of course have lowest priority
+				// also try to always keep at least one loop master for every loop sound
+				weakest_pri = curSource->priority;
+				weakest_time = curSource->lastUsedTime;
+				weakest_numloops = knownSfx[curSource->sfx].loopCnt;
+				weakest = i;
+				weakest_isplaying = qfalse;
 			}
 		}
 
@@ -911,7 +937,7 @@ srcHandle_t S_AL_SrcAlloc( alSrcPriority_t priority, int entnum, int channel )
 		// causes incorrect behaviour versus defacto baseq3
 #if 0
 		// Is it an exact match, and not on channel 0?
-		if((srcList[i].entity == entnum) && (srcList[i].channel == channel) && (channel != 0))
+		if((curSource->entity == entnum) && (curSource->channel == channel) && (channel != 0))
 		{
 			S_AL_SrcKill(i);
 			return i;
