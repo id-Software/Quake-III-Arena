@@ -503,6 +503,7 @@ typedef struct src_s
 	
 	float		lastTimePos;		// On stopped loops, the last position in the buffer
 	int		lastSampleTime;		// Time when this was stopped
+	vec3_t		loopSpeakerPos;		// Origin of the loop speaker
 	
 	qboolean	local;			// Is this local (relative to the cam)
 } src_t;
@@ -581,8 +582,6 @@ static void S_AL_ScaleGain(src_t *chksrc, vec3_t origin)
 		if(chksrc->scaleGain != scaleFactor);
 		{
 			chksrc->scaleGain = scaleFactor;
-			// if(scaleFactor > 0.0f)
-			// Com_Printf("%f\n", scaleFactor);
 			qalSourcef(chksrc->alSource, AL_GAIN, chksrc->scaleGain);
 		}
 	}
@@ -1134,6 +1133,10 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 	int				src;
 	sentity_t	*sent = &entityList[ entityNum ];
 	src_t		*curSource;
+	vec3_t		sorigin, svelocity;
+
+	if(S_AL_CheckInput(entityNum, sfx))
+		return;
 
 	// Do we need to allocate a new source for this entity
 	if( !sent->srcAllocated )
@@ -1175,19 +1178,35 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 	{
 		curSource->local = qtrue;
 
-		qalSourcefv( curSource->alSource, AL_POSITION, vec3_origin );
-		qalSourcefv( curSource->alSource, AL_VELOCITY, vec3_origin );
+		VectorClear(sorigin);
+
+		qalSourcefv(curSource->alSource, AL_POSITION, sorigin);
+		qalSourcefv(curSource->alSource, AL_VELOCITY, sorigin);
 	}
 	else
 	{
 		curSource->local = qfalse;
 
-		qalSourcefv( curSource->alSource, AL_POSITION, (ALfloat *)sent->origin );
-		qalSourcefv( curSource->alSource, AL_VELOCITY, (ALfloat *)velocity );
-		
-	}
+		if(origin)
+			VectorCopy(origin, sorigin);
+		else
+			VectorCopy(sent->origin, sorigin);
 
-	S_AL_ScaleGain(curSource, sent->origin);
+		S_AL_SanitiseVector(sorigin);
+		
+		VectorCopy(sorigin, curSource->loopSpeakerPos);
+		
+		if(velocity)
+		{
+			VectorCopy(velocity, svelocity);
+			S_AL_SanitiseVector(svelocity);
+		}
+		else
+			VectorClear(svelocity);
+
+		qalSourcefv( curSource->alSource, AL_POSITION, (ALfloat *)sorigin );
+		qalSourcefv( curSource->alSource, AL_VELOCITY, (ALfloat *)velocity );
+	}
 }
 
 /*
@@ -1195,20 +1214,9 @@ static void S_AL_SrcLoop( alSrcPriority_t priority, sfxHandle_t sfx,
 S_AL_AddLoopingSound
 =================
 */
-static
-void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
+static void S_AL_AddLoopingSound(int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx)
 {
-	vec3_t sanOrigin, sanVelocity;
-
-	if(S_AL_CheckInput(entityNum, sfx))
-		return;
-
-	VectorCopy( origin, sanOrigin );
-	VectorCopy( velocity, sanVelocity );
-	S_AL_SanitiseVector( sanOrigin );
-	S_AL_SanitiseVector( sanVelocity );
-
-	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, sanOrigin, sanVelocity, entityNum);
+	S_AL_SrcLoop(SRCPRI_ENTITY, sfx, origin, velocity, entityNum);
 }
 
 /*
@@ -1216,27 +1224,9 @@ void S_AL_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velo
 S_AL_AddRealLoopingSound
 =================
 */
-static
-void S_AL_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx )
+static void S_AL_AddRealLoopingSound(int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx)
 {
-	vec3_t sanOrigin, sanVelocity;
-
-	if(S_AL_CheckInput(entityNum, sfx))
-		return;
-
-	VectorCopy( origin, sanOrigin );
-	VectorCopy( velocity, sanVelocity );
-	S_AL_SanitiseVector( sanOrigin );
-	S_AL_SanitiseVector( sanVelocity );
-
-	// There are certain maps (*cough* Q3:TA mpterra*) that have large quantities
-	// of ET_SPEAKERS in the PVS at any given time. OpenAL can't cope with mixing
-	// large numbers of sounds, so this culls them by distance
-	if( DistanceSquared( sanOrigin, lastListenerOrigin ) > (s_alMaxDistance->value + s_alGraceDistance->value) *
-							    (s_alMaxDistance->value + s_alGraceDistance->value) )
-		return;
-
-	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, sanOrigin, sanVelocity, entityNum);
+	S_AL_SrcLoop(SRCPRI_AMBIENT, sfx, origin, velocity, entityNum);
 }
 
 /*
@@ -1289,9 +1279,11 @@ void S_AL_SrcUpdate( void )
 		{
 			sentity_t *sent = &entityList[ entityNum ];
 
-			// If a looping effect hasn't been touched this frame, pause it
+			// If a looping effect hasn't been touched this frame, pause or kill it
 			if(sent->loopAddedThisFrame)
 			{
+				alSfx_t *curSfx;
+			
 				// The sound has changed without an intervening removal
 				if(curSource->isActive && !sent->startLoopingSound &&
 						curSource->sfx != sent->loopSfx)
@@ -1315,10 +1307,32 @@ void S_AL_SrcUpdate( void )
 					sent->startLoopingSound = qfalse;
 				}
 				
+				curSfx = &knownSfx[curSource->sfx];
+
+				S_AL_ScaleGain(curSource, curSource->loopSpeakerPos);
+				if(!curSource->scaleGain)
+				{
+					if(curSource->isPlaying)
+					{
+						// Sound is mute, stop playback until we are in range again
+						S_AL_NewLoopMaster(curSource, qfalse);
+						qalSourceStop(curSource->alSource);
+						curSource->isPlaying = qfalse;
+					}
+					else if(!curSfx->loopActiveCnt && curSfx->masterLoopSrc < 0)
+					{
+						// There are no loops yet, make this one master
+						curSource->lastTimePos = 0;
+						curSource->lastSampleTime = Sys_Milliseconds();
+						
+						curSfx->masterLoopSrc = i;
+					}
+					
+					continue;
+				}
+
 				if(!curSource->isPlaying)
 				{
-					alSfx_t *curSfx = &knownSfx[curSource->sfx];
-
 					// If there are other looping sources with the same sound,
 					// make sure the sound of these sources are in sync.
 						
@@ -1339,7 +1353,7 @@ void S_AL_SrcUpdate( void )
 						// to calculate offset so the player thinks the sources continued playing while they were inaudible.
 						
 						secofs = master->lastTimePos + (Sys_Milliseconds() - master->lastSampleTime) / 1000.0f;
-						secofs = fmodf(secofs, curSfx->info.samples / curSfx->info.rate);
+						secofs = fmodf(secofs, (float) curSfx->info.samples / curSfx->info.rate);
 						
 						qalSourcef(curSource->alSource, AL_SEC_OFFSET, secofs);
 
@@ -1369,12 +1383,17 @@ void S_AL_SrcUpdate( void )
 				}
 				
 			}
-			else if(curSource->isPlaying)
+			else if(curSource->priority == SRCPRI_AMBIENT)
 			{
-				S_AL_NewLoopMaster(curSource, qfalse);
-				qalSourceStop(curSource->alSource);
-				curSource->isPlaying = qfalse;
+				if(curSource->isPlaying)
+				{
+					S_AL_NewLoopMaster(curSource, qfalse);
+					qalSourceStop(curSource->alSource);
+					curSource->isPlaying = qfalse;
+				}
 			}
+			else
+				S_AL_SrcKill(i);
 
 			continue;
 		}
