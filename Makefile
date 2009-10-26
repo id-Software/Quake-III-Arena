@@ -281,7 +281,6 @@ ifeq ($(PLATFORM),linux)
     OPTIMIZE = -O3 -fomit-frame-pointer -ffast-math -funroll-loops \
       -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
       -fstrength-reduce
-    # experimental x86_64 jit compiler! you need GNU as
     HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),i386)

@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <unistd.h>
 #include <stdarg.h>
 
-//#define USE_GAS
 //#define DEBUG_VM
 
 #ifdef DEBUG_VM
@@ -47,16 +46,10 @@ static FILE* qdasmout;
 
 #define VM_X86_64_MMAP
 
-#ifndef USE_GAS
 void assembler_set_output(char* buf);
 size_t assembler_get_code_size(void);
 void assembler_init(int pass);
 void assemble_line(const char* input, size_t len);
-#ifdef Dfprintf
-#undef Dfprintf
-#define Dfprintf(args...)
-#endif
-#endif // USE_GAS
 
 static void VM_Destroy_Compiled(vm_t* self);
 
@@ -225,10 +218,6 @@ static unsigned char op_argsize[256] =
 	[OP_BLOCK_COPY] = 4,
 };
 
-#ifdef USE_GAS
-#define emit(x...) \
-	do { fprintf(fh_s, ##x); fputc('\n', fh_s); } while(0)
-#else
 void emit(const char* fmt, ...)
 {
 	va_list ap;
@@ -238,16 +227,10 @@ void emit(const char* fmt, ...)
 	va_end(ap);
 	assemble_line(line, strlen(line));
 }
-#endif // USE_GAS
 
-#ifdef USE_GAS
-#define JMPIARG \
-	emit("jmp i_%08x", iarg);
-#else
 #define JMPIARG \
 	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
 	emit("jmpq *%%rax");
-#endif
  
 // integer compare and jump
 #define IJ(op) \
@@ -335,102 +318,8 @@ void emit(const char* fmt, ...)
 
 static void* getentrypoint(vm_t* vm)
 {
-#ifdef USE_GAS
-       return vm->codeBase+64; // skip ELF header
-#else
        return vm->codeBase;
-#endif // USE_GAS
 }
-
-#ifdef USE_GAS
-char* mmapfile(const char* fn, size_t* size)
-{
-	int fd = -1;
-	char* mem = NULL;
-	struct stat stb;
-
-	fd = open(fn, O_RDONLY);
-	if(fd == -1)
-		goto out;
-
-	if(fstat(fd, &stb) == -1)
-		goto out;
-
-	*size = stb.st_size;
-
-	mem = mmap(NULL, stb.st_size, PROT_READ|PROT_EXEC, MAP_SHARED, fd, 0);
-	if(mem == (void*)-1)
-		mem = NULL;
-
-out:
-	if(fd != -1)
-		close(fd);
-
-	return mem;
-}
-
-static int doas(char* in, char* out, unsigned char** compiledcode)
-{
-	unsigned char* mem;
-	size_t size = -1;
-	pid_t pid;
-
-	Com_Printf("running assembler < %s > %s\n", in, out);
-	pid = fork();
-	if(pid == -1)
-	{
-		Com_Printf(S_COLOR_RED "can't fork\n");
-		return -1;
-	}
-
-	if(!pid)
-	{
-		char* const argv[] = {
-			"as",
-			"-o",
-			out,
-			in,
-			NULL
-		};
-
-		execvp(argv[0], argv);
-		_exit(-1);
-	}
-	else
-	{
-		int status;
-		if(waitpid(pid, &status, 0) == -1)
-		{
-			Com_Printf(S_COLOR_RED "can't wait for as: %s\n", strerror(errno));
-			return -1;
-		}
-
-		if(!WIFEXITED(status))
-		{
-			Com_Printf(S_COLOR_RED "as died\n");
-			return -1;
-		}
-		if(WEXITSTATUS(status))
-		{
-			Com_Printf(S_COLOR_RED "as failed with status %d\n", WEXITSTATUS(status));
-			return -1;
-		}
-	}
-
-	Com_Printf("done\n");
-
-	mem = (unsigned char*)mmapfile(out, &size);
-	if(!mem)
-	{
-		Com_Printf(S_COLOR_RED "can't mmap object file %s: %s\n", out, strerror(errno));
-		return -1;
-	}
-
-	*compiledcode = mem;
-
-	return size;
-}
-#endif // USE_GAS
 
 static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
 {
@@ -461,68 +350,10 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	unsigned char barg = 0;
 	int neednilabel = 0;
 	struct timeval tvstart =  {0, 0};
-
-#ifdef USE_GAS
-	byte* compiledcode;
-	int   compiledsize;
-	void* entryPoint;
-	char fn_s[2*MAX_QPATH]; // output file for assembler code
-	char fn_o[2*MAX_QPATH]; // file written by as
 #ifdef DEBUG_VM
 	char fn_d[MAX_QPATH]; // disassembled
 #endif
-	FILE* fh_s;
-	int fd_s, fd_o;
 
-	gettimeofday(&tvstart, NULL);
-
-	Com_Printf("compiling %s\n", vm->name);
-
-#ifdef DEBUG_VM
-	snprintf(fn_s, sizeof(fn_s), "%.63s.s", vm->name);
-	snprintf(fn_o, sizeof(fn_o), "%.63s.o", vm->name);
-	fd_s = open(fn_s, O_CREAT|O_WRONLY|O_TRUNC, 0644);
-	fd_o = open(fn_o, O_CREAT|O_WRONLY|O_TRUNC, 0644);
-#else
-	snprintf(fn_s, sizeof(fn_s), "/tmp/%.63s.s_XXXXXX", vm->name);
-	snprintf(fn_o, sizeof(fn_o), "/tmp/%.63s.o_XXXXXX", vm->name);
-	fd_s = mkstemp(fn_s);
-	fd_o = mkstemp(fn_o);
-#endif
-	if(fd_s == -1 || fd_o == -1)
-	{
-		if(fd_s != -1) close(fd_s);
-		if(fd_o != -1) close(fd_o);
-		unlink(fn_s);
-		unlink(fn_o);
-
-		Com_Printf(S_COLOR_RED "can't create temporary file %s for vm\n", fn_s);
-		vm->compiled = qfalse;
-		return;
-	}
-
-#ifdef DEBUG_VM
-	strcpy(fn_d,vm->name);
-	strcat(fn_d, ".qdasm");
-
-	qdasmout = fopen(fn_d, "w");
-#endif
-
-	fh_s = fdopen(fd_s, "wb");
-	if(!fh_s)
-	{
-		Com_Printf(S_COLOR_RED "can't write %s\n", fn_s);
-		vm->compiled = qfalse;
-		return;
-	}
-
-	emit("start:");
-	emit("or %%r8, %%r8"); // check whether to set up instruction pointers
-	emit("jnz main");
-	emit("jmp setupinstructionpointers");
-
-	emit("main:");
-#else  // USE_GAS
 	int pass;
 	size_t compiledOfs = 0;
 
@@ -543,7 +374,12 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	assembler_init(pass);
 
-#endif // USE_GAS
+#ifdef DEBUG_VM
+	strcpy(fn_d,vm->name);
+	strcat(fn_d, ".qdasm");
+
+	qdasmout = fopen(fn_d, "w");
+#endif
 
 	// translate all instructions
 	pc = 0;
@@ -554,12 +390,10 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		op = code[ pc ];
 		++pc;
 
-#ifndef USE_GAS
 		vm->instructionPointers[instruction] = assembler_get_code_size();
-#endif
 
 		/* store current instruction number in r15 for debugging */
-#if 1
+#if DEBUG_VM
 		emit("nop");
 		emit("movq $%d, %%r15", instruction);
 		emit("nop");
@@ -581,15 +415,11 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			Dfprintf(qdasmout, "%s\n", opnames[op]);
 		}
 
-#ifdef USE_GAS
-		emit("i_%08x:", instruction);
-#else
 		if(neednilabel)
 		{
 			emit("i_%08x:", instruction);
 			neednilabel = 0;
 		}
-#endif
 
 		switch ( op )
 		{
@@ -946,82 +776,20 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		}
 	}
 
-#ifdef USE_GAS
-	emit("setupinstructionpointers:");
-	emit("movq $%lu, %%rax", (unsigned long)vm->instructionPointers);
-	for ( instruction = 0; instruction < header->instructionCount; ++instruction )
-	{
-		emit("movl $i_%08x-start, %d(%%rax)", instruction, instruction*4);
-	}
-	emit("ret");
+	} // pass loop
 
-	emit("debugger:");
-	if(1);
-	{
-		int i = 6;
-		while(i--)
-		{
-			emit("nop");
-			emit("int3");
-		}
-	}
-
-	fflush(fh_s);
-	fclose(fh_s);
-
-	compiledsize = doas(fn_s, fn_o, &compiledcode);
-	if(compiledsize == -1)
-	{
-		vm->compiled = qfalse;
-		goto out;
-	}
-
-	vm->codeBase   = compiledcode; // remember to skip ELF header!
-	vm->codeLength = compiledsize;
-
-#else  // USE_GAS
-	}
 	assembler_init(0);
 
 	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
 		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
-#endif // USE_GAS
 
 	vm->destroy = VM_Destroy_Compiled;
-	
-#ifdef USE_GAS
-	entryPoint = getentrypoint(vm);
-
-//	__asm__ __volatile__ ("int3");
-	Com_Printf("computing jump table\n");
-
-	// call code with r8 set to zero to set up instruction pointers
-	__asm__ __volatile__ (
-		"	xorq %%r8,%%r8		\r\n" \
-		"	movq %0,%%r10		\r\n" \
-		"	callq *%%r10		\r\n" \
-		:
-		: "m" (entryPoint)
-		: "%r8", "%r10", "%rax"
-	);
 
 #ifdef DEBUG_VM
 	fflush(qdasmout);
 	fclose(qdasmout);
 #endif
-
-out:
-	close(fd_o);
-
-#ifndef DEBUG_VM
-	if(!com_developer->integer)
-	{
-		unlink(fn_o);
-		unlink(fn_s);
-	}
-#endif
-#endif // USE_GAS
-
+	
 	if(vm->compiled)
 	{
 		struct timeval tvdone =  {0, 0};
@@ -1037,9 +805,7 @@ out:
 
 void VM_Destroy_Compiled(vm_t* self)
 {
-#ifdef USE_GAS
-	munmap(self->codeBase, self->codeLength);
-#elif _WIN32
+#ifdef _WIN32
 	VirtualFree(self->codeBase, 0, MEM_RELEASE);
 #else
 	munmap(self->codeBase, self->codeLength);
