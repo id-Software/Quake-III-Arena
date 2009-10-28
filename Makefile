@@ -337,7 +337,7 @@ ifeq ($(PLATFORM),linux)
     CLIENT_LIBS += -lrt
   endif
 
-ifeq ($(USE_LOCAL_HEADERS),1)
+  ifeq ($(USE_LOCAL_HEADERS),1)
     BASE_CFLAGS += -I$(SDLHDIR)/include
   endif
 
