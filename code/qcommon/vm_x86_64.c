@@ -320,18 +320,19 @@ void emit(const char* fmt, ...)
 	emit(op " %%cl, %%eax"); \
 	emit("movl %%eax, 0(%%rsi)");
 
-#if 1
+#ifdef DEBUG_VM
+#define RANGECHECK(reg, bytes) \
+	emit("movl %%" #reg ", %%ecx"); \
+	emit("andl $0x%x, %%ecx", vm->dataMask &~(bytes-1)); \
+	emit("cmpl %%" #reg ", %%ecx"); \
+	emit("jz rc_ok_i_%08x", instruction); \
+	emit("movq $%lu, %%rax", (unsigned long)memviolation); \
+	emit("callq *%%rax"); \
+	emit("rc_ok_i_%08x:", instruction);
+#elif 1
+// check is too expensive, so just confine memory access
 #define RANGECHECK(reg, bytes) \
 	emit("andl $0x%x, %%" #reg, vm->dataMask &~(bytes-1));
-#elif 0
-#define RANGECHECK(reg, bytes) \
-	emit("pushl %%" #reg); \
-	emit("andl $0x%x, %%" #reg, ~vm->dataMask); \
-	emit("jz rangecheck_ok_i_%08x", instruction); \
-	emit("int3"); \
-	emit("rangecheck_ok_i_%08x:", instruction); \
-	emit("popl %%" #reg); \
-	emit("andl $0x%x, %%" #reg, vm->dataMask);
 #else
 #define RANGECHECK(reg, bytes)
 #endif
@@ -369,6 +370,14 @@ static void eop(void)
 	Com_Error(ERR_DROP, "end of program reached without return!\n");
 	exit(1);
 }
+
+#ifdef DEBUG_VM
+static void memviolation(void)
+{
+	Com_Error(ERR_DROP, "program tried to access memory outside VM\n");
+	exit(1);
+}
+#endif
 
 /*
 =================
