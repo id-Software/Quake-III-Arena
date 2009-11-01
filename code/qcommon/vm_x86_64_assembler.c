@@ -811,24 +811,34 @@ static void emit_call(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
 {
 	u8 rex, modrm, sib;
 
-	if(arg1.type != T_REGISTER || arg2.type != T_NONE)
+	if((arg1.type != T_REGISTER && arg1.type != T_IMMEDIATE) || arg2.type != T_NONE)
 		CRAP_INVALID_ARGS;
 
-	if(!arg1.absolute)
-		crap("call must be absolute");
+	if(arg1.type == T_REGISTER)
+	{
+		if(!arg1.absolute)
+			crap("call must be absolute");
 
-	if((arg1.v.reg & R_64) != R_64)
-		crap("register must be 64bit");
+		if((arg1.v.reg & R_64) != R_64)
+			crap("register must be 64bit");
 
-	arg1.v.reg ^= R_64; // no rex required for call
+		arg1.v.reg ^= R_64; // no rex required for call
 
-	compute_rexmodrmsib(&rex, &modrm, &sib, &arg2, &arg1);
+		compute_rexmodrmsib(&rex, &modrm, &sib, &arg2, &arg1);
 
-	modrm |= 0x2 << 3;
+		modrm |= 0x2 << 3;
 
-	if(rex) emit1(rex);
-	emit1(0xff);
-	emit1(modrm);
+		if(rex) emit1(rex);
+		emit1(0xff);
+		emit1(modrm);
+	}
+	else 
+	{
+		if(!isu32(arg1.v.imm))
+			crap("must be 32bit argument");
+		emit1(0xe8);
+		emit4(arg1.v.imm);
+	}
 }
 
 
