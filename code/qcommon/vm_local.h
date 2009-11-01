@@ -154,7 +154,7 @@ struct vm_s {
 	int			codeLength;
 
 	int			*instructionPointers;
-	int			instructionPointersLength;
+	int			instructionCount;
 
 	byte		*dataBase;
 	int			dataMask;

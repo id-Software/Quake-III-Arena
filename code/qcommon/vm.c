@@ -245,7 +245,7 @@ void VM_LoadSymbols( vm_t *vm ) {
 		return;
 	}
 
-	numInstructions = vm->instructionPointersLength >> 2;
+	numInstructions = vm->instructionCount;
 
 	// parse the symbols
 	text_p = mapfile.c;
@@ -571,8 +571,8 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 	}
 
 	// allocate space for the jump targets, which will be filled in by the compile/prep functions
-	vm->instructionPointersLength = header->instructionCount * 4;
-	vm->instructionPointers = Hunk_Alloc( vm->instructionPointersLength, h_high );
+	vm->instructionCount = header->instructionCount;
+	vm->instructionPointers = Hunk_Alloc( vm->instructionCount*4, h_high );
 
 	// copy or compile the instructions
 	vm->codeLength = header->codeLength;
@@ -888,7 +888,7 @@ void VM_VmInfo_f( void ) {
 			Com_Printf( "interpreted\n" );
 		}
 		Com_Printf( "    code length : %7i\n", vm->codeLength );
-		Com_Printf( "    table length: %7i\n", vm->instructionPointersLength );
+		Com_Printf( "    table length: %7i\n", vm->instructionCount*4 );
 		Com_Printf( "    data length : %7i\n", vm->dataMask + 1 );
 	}
 }
