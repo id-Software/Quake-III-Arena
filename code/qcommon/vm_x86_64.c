@@ -321,10 +321,10 @@ void emit(const char* fmt, ...)
 	emit("movl %%eax, 0(%%rsi)");
 
 #if 1
-#define RANGECHECK(reg) \
-	emit("andl $0x%x, %%" #reg, vm->dataMask);
+#define RANGECHECK(reg, bytes) \
+	emit("andl $0x%x, %%" #reg, vm->dataMask &~(bytes-1));
 #elif 0
-#define RANGECHECK(reg) \
+#define RANGECHECK(reg, bytes) \
 	emit("pushl %%" #reg); \
 	emit("andl $0x%x, %%" #reg, ~vm->dataMask); \
 	emit("jz rangecheck_ok_i_%08x", instruction); \
@@ -333,7 +333,7 @@ void emit(const char* fmt, ...)
 	emit("popl %%" #reg); \
 	emit("andl $0x%x, %%" #reg, vm->dataMask);
 #else
-#define RANGECHECK(reg)
+#define RANGECHECK(reg, bytes)
 #endif
 
 #ifdef DEBUG_VM
@@ -474,7 +474,6 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			case OP_ENTER:
 				MAYBE_EMIT_CONST();
 				emit("subl $%d, %%edi", iarg);
-				RANGECHECK(edi);
 				break;
 			case OP_LEAVE:
 				MAYBE_EMIT_CONST();
@@ -485,6 +484,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				MAYBE_EMIT_CONST();
 				emit("movl 0(%%rsi), %%eax");  // get instr from stack
 				emit("subq $4, %%rsi");
+				RANGECHECK(edi, 4);
 				emit("movl $%d, 0(%%r8, %%rdi, 1)", instruction+1);  // save next instruction
 				emit("orl %%eax, %%eax");
 				emit("jl callSyscall%d", instruction);
@@ -629,7 +629,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			case OP_LOAD1:
 				MAYBE_EMIT_CONST();
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
-				RANGECHECK(eax);
+				RANGECHECK(eax, 1);
 				emit("movb 0(%%r8, %%rax, 1), %%al"); // deref into eax
 				emit("andq $255, %%rax");
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
@@ -637,14 +637,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			case OP_LOAD2:
 				MAYBE_EMIT_CONST();
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
-				RANGECHECK(eax);
+				RANGECHECK(eax, 2);
 				emit("movw 0(%%r8, %%rax, 1), %%ax"); // deref into eax
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
 				break;
 			case OP_LOAD4:
 				MAYBE_EMIT_CONST();
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
-				RANGECHECK(eax); // not a pointer!?
+				RANGECHECK(eax, 4); // not a pointer!?
 				emit("movl 0(%%r8, %%rax, 1), %%eax"); // deref into eax
 				emit("movl %%eax, 0(%%rsi)"); // store on stack
 				break;
@@ -653,7 +653,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
 				emit("andq $255, %%rax");
 				emit("movl -4(%%rsi), %%ebx"); // get pointer from stack
-				RANGECHECK(ebx);
+				RANGECHECK(ebx, 1);
 				emit("movb %%al, 0(%%r8, %%rbx, 1)"); // store in memory
 				emit("subq $8, %%rsi");
 				break;
@@ -661,14 +661,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				MAYBE_EMIT_CONST();
 				emit("movl 0(%%rsi), %%eax"); // get value from stack
 				emit("movl -4(%%rsi), %%ebx"); // get pointer from stack
-				RANGECHECK(ebx);
+				RANGECHECK(ebx, 2);
 				emit("movw %%ax, 0(%%r8, %%rbx, 1)"); // store in memory
 				emit("subq $8, %%rsi");
 				break;
 			case OP_STORE4:
 				MAYBE_EMIT_CONST();
 				emit("movl -4(%%rsi), %%ebx"); // get pointer from stack
-				RANGECHECK(ebx);
+				RANGECHECK(ebx, 4);
 				emit("movl 0(%%rsi), %%ecx"); // get value from stack
 				emit("movl %%ecx, 0(%%r8, %%rbx, 1)"); // store in memory
 				emit("subq $8, %%rsi");
@@ -679,7 +679,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl 4(%%rsi), %%eax"); // get value from stack
 				emit("movl $0x%hhx, %%ebx", barg);
 				emit("addl %%edi, %%ebx");
-				RANGECHECK(ebx);
+				RANGECHECK(ebx, 4);
 				emit("movl %%eax, 0(%%r8,%%rbx, 1)"); // store in args space
 				break;
 			case OP_BLOCK_COPY:
