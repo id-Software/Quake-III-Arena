@@ -311,13 +311,11 @@ an OP_ENTER instruction, which will subtract space for
 locals from sp
 ==============
 */
-#define	MAX_STACK	256
-#define	STACK_MASK	(MAX_STACK-1)
 
 #define	DEBUGSTR va("%s%i", VM_Indent(vm), opStack-stack )
 
 int	VM_CallInterpreted( vm_t *vm, int *args ) {
-	int		stack[MAX_STACK];
+	int		stack[OPSTACK_SIZE];
 	int		*opStack;
 	int		programCounter;
 	int		programStack;
@@ -392,7 +390,7 @@ nextInstruction2:
 		if ( opStack < stack ) {
 			Com_Error( ERR_DROP, "VM opStack underflow" );
 		}
-		if ( opStack >= stack+MAX_STACK ) {
+		if ( opStack >= stack+OPSTACK_SIZE ) {
 			Com_Error( ERR_DROP, "VM opStack overflow" );
 		}
 

@@ -357,8 +357,6 @@ intptr_t QDECL VM_DllSyscall( intptr_t arg, ... ) {
 }
 
 
-#define	STACK_SIZE	0x20000
-
 /*
 =================
 VM_LoadQVM
@@ -427,7 +425,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	// round up to next power of 2 so all data operations can
 	// be mask protected
 	dataLength = header.h->dataLength + header.h->litLength +
-		header.h->bssLength + STACK_SIZE;
+		header.h->bssLength;
 	for ( i = 0 ; dataLength > ( 1 << i ) ; i++ ) {
 	}
 	dataLength = 1 << i;
@@ -606,7 +604,7 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 
 	// the stack is implicitly at the end of the image
 	vm->programStack = vm->dataMask + 1;
-	vm->stackBottom = vm->programStack - STACK_SIZE;
+	vm->stackBottom = vm->programStack - PROGRAM_STACK_SIZE;
 
 	Com_Printf("%s loaded in %d bytes on the hunk\n", module, remaining - Hunk_MemoryRemaining());
 
@@ -730,8 +728,6 @@ an OP_ENTER instruction, which will subtract space for
 locals from sp
 ==============
 */
-#define	MAX_STACK	256
-#define	STACK_MASK	(MAX_STACK-1)
 
 intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	vm_t	*oldVM;
