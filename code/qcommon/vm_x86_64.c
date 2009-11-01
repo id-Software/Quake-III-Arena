@@ -228,14 +228,27 @@ void emit(const char* fmt, ...)
 	assemble_line(line, strlen(line));
 }
 
-#define CHECK_IARG \
-	do { if(iarg < 0 || iarg >= header->instructionCount) { \
+#define CHECK_INSTR_REG(reg) \
+	emit("cmpl $%u, %%"#reg, header->instructionCount); \
+	emit("jb jmp_ok_i_%08x", instruction); \
+	emit("movq $%lu, %%rax", (unsigned long)jmpviolation); \
+	emit("callq *%%rax"); \
+	emit("jmp_ok_i_%08x:", instruction);
+
+#define PREPARE_JMP(reg) \
+	CHECK_INSTR_REG(reg) \
+	emit("movq $%lu, %%rbx", (unsigned long)vm->instructionPointers); \
+	emit("movl (%%rbx, %%rax, 4), %%eax"); \
+	emit("addq %%r10, %%rax");
+
+#define CHECK_INSTR(nr) \
+	do { if(nr < 0 || nr >= header->instructionCount) { \
 		Com_Error( ERR_DROP, \
-			"%s: jump target out of range at offset %d", __func__, pc ); \
+			"%s: jump target 0x%x out of range at offset %d", __func__, nr, pc ); \
 	} } while(0)
 
 #define JMPIARG \
-	CHECK_IARG; \
+	CHECK_INSTR(iarg); \
 	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
 	emit("jmpq *%%rax");
  
@@ -371,6 +384,12 @@ static void eop(void)
 	exit(1);
 }
 
+static void jmpviolation(void)
+{
+	Com_Error(ERR_DROP, "program tried to execute code outside VM\n");
+	exit(1);
+}
+
 #ifdef DEBUG_VM
 static void memviolation(void)
 {
@@ -490,19 +509,35 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("ret");
 				break;
 			case OP_CALL:
-				MAYBE_EMIT_CONST();
-				emit("movl 0(%%rsi), %%eax");  // get instr from stack
-				emit("subq $4, %%rsi");
 				RANGECHECK(edi, 4);
 				emit("movl $%d, 0(%%r8, %%rdi, 1)", instruction+1);  // save next instruction
-				emit("orl %%eax, %%eax");
-				emit("jl callSyscall%d", instruction);
-				emit("movq $%lu, %%rbx", (unsigned long)vm->instructionPointers);
-				emit("movl (%%rbx, %%rax, 4), %%eax"); // load new relative jump address
-				emit("addq %%r10, %%rax");
-				emit("callq *%%rax");
-				emit("jmp i_%08x", instruction+1);
-				emit("callSyscall%d:", instruction);
+				if(got_const)
+				{
+					if ((int)const_value < 0)
+						goto emit_do_syscall;
+
+					CHECK_INSTR(const_value);
+					emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[const_value]);
+					emit("callq *%%rax");
+					got_const = 0;
+					break;
+				}
+				else
+				{
+					MAYBE_EMIT_CONST();
+					emit("movl 0(%%rsi), %%eax");  // get instr from stack
+					emit("subq $4, %%rsi");
+
+					emit("orl %%eax, %%eax");
+					emit("jl callSyscall%d", instruction);
+
+					PREPARE_JMP(eax);
+					emit("callq *%%rax");
+
+					emit("jmp i_%08x", instruction+1);
+					emit("callSyscall%d:", instruction);
+				}
+emit_do_syscall:
 //				emit("fnsave 4(%%rsi)");
 				emit("push %%rsi");
 				emit("push %%rdi");
@@ -514,10 +549,15 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("andq $127, %%rbx");  //   |
 				emit("subq %%rbx, %%rsp"); // <-+
 				emit("push %%rbx");
-				emit("negl %%eax");        // convert to actual number
-				emit("decl %%eax");
-				                           // first argument already in rdi
-				emit("movq %%rax, %%rsi"); // second argument in rsi
+				if(got_const) {
+					got_const = 0;
+					emit("movq $%u, %%rsi", -1-const_value); // second argument in rsi
+				} else {
+					emit("negl %%eax");        // convert to actual number
+					emit("decl %%eax");
+					// first argument already in rdi
+					emit("movq %%rax, %%rsi"); // second argument in rsi
+				}
 				emit("movq $%lu, %%rax", (unsigned long)callAsmCall);
 				emit("callq *%%rax");
 				emit("pop %%rbx");
@@ -565,9 +605,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				} else {
 					emit("movl 0(%%rsi), %%eax"); // get instr from stack
 					emit("subq $4, %%rsi");
-					emit("movq $%lu, %%rbx", (unsigned long)vm->instructionPointers);
-					emit("movl (%%rbx, %%rax, 4), %%eax"); // load new relative jump address
-					emit("addq %%r10, %%rax");
+
+					PREPARE_JMP(eax);
 					emit("jmp *%%rax");
 				}
 				break;
