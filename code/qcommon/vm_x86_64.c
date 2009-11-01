@@ -228,7 +228,14 @@ void emit(const char* fmt, ...)
 	assemble_line(line, strlen(line));
 }
 
+#define CHECK_IARG \
+	do { if(iarg < 0 || iarg >= header->instructionCount) { \
+		Com_Error( ERR_DROP, \
+			"%s: jump target out of range at offset %d", __func__, pc ); \
+	} } while(0)
+
 #define JMPIARG \
+	CHECK_IARG; \
 	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
 	emit("jmpq *%%rax");
  
@@ -488,6 +495,9 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("subq $4, %%rsi");
 				break;
 			case OP_CONST:
+				if(code[pc] == OP_JUMP) {
+					CHECK_IARG;
+				}
 				emit("addq $4, %%rsi");
 				emit("movl $%d, 0(%%rsi)", iarg);
 				break;
