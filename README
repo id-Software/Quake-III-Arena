@@ -107,6 +107,9 @@ New cvars
   cl_cURLLib                        - filename of cURL library to load
   cl_consoleKeys                    - space delimited list of key names or
                                       characters that toggle the console
+  cl_mouseAccelStyle                - Set to 1 for QuakeLive mouse acceleration
+                                      behaviour, 0 for standard q3
+  cl_mouseAccelOffset               - Tuning the acceleration curve, see below
 
   s_useOpenAL                       - use the OpenAL sound backend if available
   s_alPrecache                      - cache OpenAL sounds before use
@@ -126,26 +129,28 @@ New cvars
   s_alDriver                        - which OpenAL library to use
   s_alDevice                        - which OpenAL device to use
   s_alAvailableDevices              - list of available OpenAL devices
-
   s_sdlBits                         - SDL bit resolution
   s_sdlSpeed                        - SDL sample rate
   s_sdlChannels                     - SDL number of channels
   s_sdlDevSamps                     - SDL DMA buffer size override
   s_sdlMixSamps                     - SDL mix buffer size override
+  s_backend                         - read only, indicates the current sound
+                                      backend
+  s_muteWhenMinimized               - mute sound when minimized
 
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
   com_standalone                    - Run in standalone mode
   com_maxfpsUnfocused               - Maximum frames per second when unfocused
   com_maxfpsMinimized               - Maximum frames per second when minimized
-  s_backend                         - read only, indicates the current sound
-                                      backend
-  s_muteWhenMinimized               - mute sound when minimized
+
   in_joystickNo                     - select which joystick to use
   in_keyboardDebug                  - print keyboard debug info
-  r_ext_texture_filter_anisotropic  - anisotropic texture filtering
+
   sv_dlURL                          - the base of the HTTP or FTP site that
                                       holds custom pk3 files for your server
+  sv_banFile                        - Name of the file that is used for storing
+                                      the server bans.
 
   net_ip6                           - IPv6 address to bind to
   net_port6                         - port to bind to using the ipv6 address
@@ -160,6 +165,7 @@ New cvars
   net_mcastiface                    - outgoing interface to use for scan
 
   r_allowResize                     - make window resizable (SDL only)
+  r_ext_texture_filter_anisotropic  - anisotropic texture filtering
   r_zProj                           - distance of observer camera to projection
                                       plane in quake3 standard units
   r_greyscale                       - render black and white images
@@ -186,8 +192,6 @@ New cvars
                                       intend to use this.
   r_sdlDriver                       - read only, indicates the SDL driver
                                       backend being used
-  sv_banFile                        - Name of the file that is used for storing
-                                      the server bans.
 
 New commands
   video [filename]        - start video capture (use with demo command)
@@ -224,6 +228,51 @@ Using Demo Data Files
   Please bear in mind that you will not be able to play online using the demo
   data, nor is it something that we like to spend much time maintaining or
   supporting.
+
+QuakeLive mouse acceleration (patch and this text written by TTimo from id)
+  I've been using an experimental mouse acceleration code for a while, and
+  decided to make it available to everyone. Don't be too worried if you don't
+  understand the explanations below, this is mostly intended for advanced
+  players:
+  To enable it, set cl_mouseAccelStyle 1 (0 is the default/legacy behavior)
+
+  New style is controlled with 3 cvars:
+
+  sensitivity
+  cl_mouseAccel
+  cl_mouseAccelOffset
+
+  The old code (cl_mouseAccelStyle 0) can be difficult to calibrate because if
+  you have a base sensitivity setup, as soon as you set a non zero acceleration
+  your base sensitivity at low speeds will change as well. The other problem
+  with style 0 is that you are stuck on a square (power of two) acceleration
+  curve.
+
+  The new code tries to solve both problems:
+
+  Once you setup your sensitivity to feel comfortable and accurate enough for
+  low mouse deltas with no acceleration (cl_mouseAccel 0), you can start
+  increasing cl_mouseAccel and tweaking cl_mouseAccelOffset to get the
+  amplification you want for high deltas with little effect on low mouse deltas.
+
+  cl_mouseAccel is a power value. Should be >= 1, 2 will be the same power curve
+  as style 0. The higher the value, the faster the amplification grows with the
+  mouse delta.
+
+  cl_mouseAccelOffset sets how much base mouse delta will be doubled by
+  acceleration. The closer to zero you bring it, the more acceleration will
+  happen at low speeds. This is also very useful if you are changing to a new
+  mouse with higher dpi, if you go from 500 to 1000 dpi, you can divide your
+  cl_mouseAccelOffset by two to keep the same overall 'feel' (you will likely
+  gain in precision when you do that, but that is not related to mouse
+  acceleration).
+
+  Mouse acceleration is tricky to configure, and when you do you'll have to
+  re-learn your aiming. But you will find that it's very much forth it in the
+  long run.
+
+  If you try the new acceleration code and start using it, I'd be very
+  interested by your feedback.
 
 64bit mods
   If you wish to compile external mods as shared libraries on a 64bit platform,
