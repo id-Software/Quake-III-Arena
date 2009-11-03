@@ -663,5 +663,5 @@ set/unset environment variables (empty value removes it)
 
 void Sys_SetEnv(const char *name, const char *value)
 {
-	_putenv(va("%s=%s", name, value);
+	_putenv(va("%s=%s", name, value));
 }
