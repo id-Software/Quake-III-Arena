@@ -192,6 +192,8 @@ New cvars
                                       intend to use this.
   r_sdlDriver                       - read only, indicates the SDL driver
                                       backend being used
+  r_noborder                        - Remove window decoration from window
+                                      managers, like borders and titlebar.
 
 New commands
   video [filename]        - start video capture (use with demo command)

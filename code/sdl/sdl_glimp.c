@@ -188,7 +188,7 @@ static void GLimp_DetectAvailableModes(void)
 GLimp_SetMode
 ===============
 */
-static int GLimp_SetMode( int mode, qboolean fullscreen )
+static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 {
 	const char*   glstring;
 	int sdlcolorbits;
@@ -249,7 +249,12 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 		glConfig.isFullscreen = qtrue;
 	}
 	else
+	{
+		if (noborder)
+			flags |= SDL_NOFRAME;
+
 		glConfig.isFullscreen = qfalse;
+	}
 
 	colorbits = r_colorbits->value;
 	if ((!colorbits) || (colorbits >= 32))
@@ -428,7 +433,7 @@ static int GLimp_SetMode( int mode, qboolean fullscreen )
 GLimp_StartDriverAndSetMode
 ===============
 */
-static qboolean GLimp_StartDriverAndSetMode( int mode, qboolean fullscreen )
+static qboolean GLimp_StartDriverAndSetMode(int mode, qboolean fullscreen, qboolean noborder)
 {
 	rserr_t err;
 
@@ -455,8 +460,8 @@ static qboolean GLimp_StartDriverAndSetMode( int mode, qboolean fullscreen )
 		r_fullscreen->modified = qfalse;
 		fullscreen = qfalse;
 	}
-
-	err = GLimp_SetMode( mode, fullscreen );
+	
+	err = GLimp_SetMode(mode, fullscreen, noborder);
 
 	switch ( err )
 	{
@@ -666,16 +671,18 @@ void GLimp_Init( void )
 	r_sdlDriver = ri.Cvar_Get( "r_sdlDriver", "", CVAR_ROM );
 	r_allowResize = ri.Cvar_Get( "r_allowResize", "0", CVAR_ARCHIVE );
 
+	Sys_SetEnv("SDL_VIDEO_CENTERED", "1");
+
 	Sys_GLimpInit( );
 
 	// Create the window and set up the context
-	if( GLimp_StartDriverAndSetMode( r_mode->integer, r_fullscreen->integer ) )
+	if(GLimp_StartDriverAndSetMode(r_mode->integer, r_fullscreen->integer, r_noborder->integer))
 		goto success;
 
 	// Try again, this time in a platform specific "safe mode"
 	Sys_GLimpSafeInit( );
 
-	if( GLimp_StartDriverAndSetMode( r_mode->integer, r_fullscreen->integer ) )
+	if(GLimp_StartDriverAndSetMode(r_mode->integer, r_fullscreen->integer, qfalse))
 		goto success;
 
 	// Finally, try the default screen resolution
@@ -684,7 +691,7 @@ void GLimp_Init( void )
 		ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
 				r_mode->integer, R_MODE_FALLBACK );
 
-		if( GLimp_StartDriverAndSetMode( R_MODE_FALLBACK, r_fullscreen->integer ) )
+		if(GLimp_StartDriverAndSetMode(R_MODE_FALLBACK, r_fullscreen->integer, qfalse))
 			goto success;
 	}
 
