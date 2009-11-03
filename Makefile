@@ -151,6 +151,10 @@ ifndef USE_LOCAL_HEADERS
 USE_LOCAL_HEADERS=1
 endif
 
+ifndef USE_DEBUG_CFLAGS
+USE_DEBUG_CFLAGS=-g -O0
+endif
+
 #############################################################################
 
 BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
@@ -350,7 +354,7 @@ ifeq ($(PLATFORM),linux)
   endif
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+  DEBUG_CFLAGS = $(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
 else # ifeq Linux
@@ -424,7 +428,7 @@ ifeq ($(PLATFORM),darwin)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -g -O0
+  DEBUG_CFLAGS = $(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
@@ -517,7 +521,7 @@ ifeq ($(PLATFORM),mingw32)
     BASE_CFLAGS += -m32
   endif
 
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g -O0
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
   # libmingw32 must be linked before libSDLmain
@@ -580,7 +584,7 @@ ifeq ($(PLATFORM),freebsd)
   endif
   endif
 
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -639,7 +643,7 @@ ifeq ($(PLATFORM),openbsd)
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG
   HAVE_VM_COMPILED=false
 
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   SHLIBEXT=so
   SHLIBNAME=.$(SHLIBEXT)
@@ -693,7 +697,7 @@ ifeq ($(PLATFORM),netbsd)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   BUILD_CLIENT = 0
   BUILD_GAME_QVM = 0
@@ -714,7 +718,7 @@ ifeq ($(PLATFORM),irix64)
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 \
     -I. $(SDL_CFLAGS) -I$(ROOT)/usr/include -DNO_VM_COMPILED
   RELEASE_CFLAGS=$(BASE_CFLAGS) -O3
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   SHLIBEXT=so
   SHLIBCFLAGS=
@@ -777,7 +781,7 @@ ifeq ($(PLATFORM),sunos)
     BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
-  DEBUG_CFLAGS = $(BASE_CFLAGS) -ggdb -O0
+  DEBUG_CFLAGS = $(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
 
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG $(OPTIMIZE)
 
@@ -798,7 +802,7 @@ else # ifeq sunos
 # SETUP AND BUILD -- GENERIC
 #############################################################################
   BASE_CFLAGS=-DNO_VM_COMPILED
-  DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+  DEBUG_CFLAGS=$(BASE_CFLAGS) $(USE_DEBUG_CFLAGS)
   RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O3
 
   SHLIBEXT=so
