@@ -999,7 +999,7 @@ void NET_SetMulticast6(void)
 	if(*net_mcast6iface->string)
 	{
 #ifdef _WIN32
-		curgroup.ipv6mr_interface = atoi(net_mcast6iface->string);
+		curgroup.ipv6mr_interface = net_mcast6iface->integer;
 #else
 		curgroup.ipv6mr_interface = if_nametoindex(net_mcast6iface->string);
 #endif
@@ -1474,7 +1474,11 @@ static qboolean NET_GetCvars( void ) {
 	modified += net_mcast6addr->modified;
 	net_mcast6addr->modified = qfalse;
 
+#ifdef _WIN32
 	net_mcast6iface = Cvar_Get( "net_mcast6iface", "0", CVAR_LATCH | CVAR_ARCHIVE );
+#else
+	net_mcast6iface = Cvar_Get( "net_mcast6iface", "", CVAR_LATCH | CVAR_ARCHIVE );
+#endif
 	modified += net_mcast6iface->modified; 
 	net_mcast6iface->modified = qfalse;
 
