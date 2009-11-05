@@ -1071,7 +1071,7 @@ qboolean	Sys_StringToAdr( const char *s, netadr_t *a, netadrtype_t family );
 qboolean	Sys_IsLANAddress (netadr_t adr);
 void		Sys_ShowIP(void);
 
-void	Sys_Mkdir( const char *path );
+qboolean Sys_Mkdir( const char *path );
 char	*Sys_Cwd( void );
 void	Sys_SetDefaultInstallPath(const char *path);
 char	*Sys_DefaultInstallPath(void);
@@ -1091,6 +1091,8 @@ void	Sys_FreeFileList( char **list );
 void	Sys_Sleep(int msec);
 
 qboolean Sys_LowPhysicalMemory( void );
+
+void Sys_SetEnv(const char *name, const char *value);
 
 /* This is based on the Adaptive Huffman algorithm described in Sayood's Data
  * Compression book.  The ranks are not actually stored, but implicitly defined

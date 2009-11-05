@@ -55,22 +55,11 @@ char *Sys_DefaultHomePath(void)
 		{
 			Q_strncpyz( homePath, p, sizeof( homePath ) );
 #ifdef MACOS_X
-			Q_strcat( homePath, sizeof( homePath ), "/Library" );
-			mkdir( homePath, 0750 );  /* just in case. */
-			Q_strcat( homePath, sizeof( homePath ), "/Application Support" );
-			mkdir( homePath, 0750 );  /* just in case. */
-			Q_strcat( homePath, sizeof( homePath ), "/Quake3" );
+			Q_strcat( homePath, sizeof( homePath ),
+					"/Library/Application Support/Quake3" );
 #else
 			Q_strcat( homePath, sizeof( homePath ), "/.q3a" );
 #endif
-			if( mkdir( homePath, 0750 ) )
-			{
-				if( errno != EEXIST )
-				{
-					Sys_Error( "Unable to create directory \"%s\", error is %s(%d)\n",
-							homePath, strerror( errno ), errno );
-				}
-			}
 		}
 	}
 
@@ -222,9 +211,14 @@ const char *Sys_Dirname( char *path )
 Sys_Mkdir
 ==================
 */
-void Sys_Mkdir( const char *path )
+qboolean Sys_Mkdir( const char *path )
 {
-	mkdir( path, 0777 );
+	int result = mkdir( path, 0750 );
+
+	if( result != 0 )
+		return errno == EEXIST;
+
+	return qtrue;
 }
 
 /*

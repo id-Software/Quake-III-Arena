@@ -492,7 +492,10 @@ qboolean FS_CreatePath (char *OSPath) {
 		if (*ofs == PATH_SEP) {	
 			// create the directory
 			*ofs = 0;
-			Sys_Mkdir (OSPath);
+			if (!Sys_Mkdir (OSPath)) {
+				Com_Error( ERR_FATAL, "FS_CreatePath: failed to create path \"%s\"\n",
+					OSPath );
+			}
 			*ofs = PATH_SEP;
 		}
 	}
@@ -2807,6 +2810,7 @@ static void FS_Startup( const char *gameName )
 	
 	// NOTE: same filtering below for mods and basegame
 	if (fs_homepath->string[0] && Q_stricmp(fs_homepath->string,fs_basepath->string)) {
+		FS_CreatePath ( fs_homepath->string );
 		FS_AddGameDirectory ( fs_homepath->string, gameName );
 	}
 
