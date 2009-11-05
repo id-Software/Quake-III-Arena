@@ -117,8 +117,12 @@ static int GLimp_CompareModes( const void *a, const void *b )
 	const float ASPECT_EPSILON = 0.001f;
 	SDL_Rect *modeA = *(SDL_Rect **)a;
 	SDL_Rect *modeB = *(SDL_Rect **)b;
-	float aspectDiffA = fabs( ( (float)modeA->w / (float)modeA->h ) - displayAspect );
-	float aspectDiffB = fabs( ( (float)modeB->w / (float)modeB->h ) - displayAspect );
+	float aspectA = (float)modeA->w / (float)modeA->h;
+	float aspectB = (float)modeB->w / (float)modeB->h;
+	int areaA = modeA->w * modeA->h;
+	int areaB = modeB->w * modeB->h;
+	float aspectDiffA = fabs( aspectA - displayAspect );
+	float aspectDiffB = fabs( aspectB - displayAspect );
 	float aspectDiffsDiff = aspectDiffA - aspectDiffB;
 
 	if( aspectDiffsDiff > ASPECT_EPSILON )
@@ -126,13 +130,9 @@ static int GLimp_CompareModes( const void *a, const void *b )
 	else if( aspectDiffsDiff < -ASPECT_EPSILON )
 		return -1;
 	else
-	{
-		if( modeA->w == modeB->w )
-			return modeA->h - modeB->h;
-		else
-			return modeA->w - modeB->w;
-	}
+		return areaA - areaB;
 }
+
 
 /*
 ===============
@@ -162,8 +162,8 @@ static void GLimp_DetectAvailableModes(void)
 
 	for( numModes = 0; modes[ numModes ]; numModes++ );
 
-	if(numModes > 1)
-		qsort( modes+1, numModes-1, sizeof( SDL_Rect* ), GLimp_CompareModes );
+	if( numModes > 1 )
+		qsort( modes, numModes, sizeof( SDL_Rect* ), GLimp_CompareModes );
 
 	for( i = 0; i < numModes; i++ )
 	{
