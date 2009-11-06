@@ -1308,6 +1308,25 @@ void Reached_Train( gentity_t *ent ) {
 
 	ent->s.pos.trDuration = length * 1000 / speed;
 
+	// Tequila comment: Be sure to send to clients after any fast move case
+	ent->r.svFlags &= ~SVF_NOCLIENT;
+
+	// Tequila comment: Fast move case
+	if(ent->s.pos.trDuration<1) {
+		// Tequila comment: As trDuration is used later in a division, we need to avoid that case now
+		// With null trDuration,
+		// the calculated rocks bounding box becomes infinite and the engine think for a short time
+		// any entity is riding that mover but not the world entity... In rare case, I found it
+		// can also stuck every map entities after func_door are used.
+		// The desired effect with very very big speed is to have instant move, so any not null duration
+		// lower than a frame duration should be sufficient.
+		// Afaik, the negative case don't have to be supported.
+		ent->s.pos.trDuration=1;
+
+		// Tequila comment: Don't send entity to clients so it becomes really invisible 
+		ent->r.svFlags |= SVF_NOCLIENT;
+	}
+
 	// looping sound
 	ent->s.loopSound = next->soundLoop;
 
