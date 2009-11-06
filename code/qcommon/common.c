@@ -2362,15 +2362,7 @@ void Com_Setenv_f(void)
 	{
 		char *arg2 = Cmd_ArgsFrom(2);
 		
-#ifdef _WIN32
-		// windows already removes env variable if value is an empty string
-		_putenv(va("%s=%s", arg1, arg2));
-#else
-		if(!*arg2)
-			unsetenv(arg1);
-		else
-			setenv(arg1, arg2, 1);
-#endif
+		Sys_SetEnv(arg1, arg2);
 	}
 	else if(argc == 2)
 	{
