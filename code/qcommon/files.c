@@ -2949,26 +2949,28 @@ static void FS_CheckPak0( void )
 	     &&
 	     (!founddemo && (foundPak & 0x1ff) != 0x1ff) )
 	{
+		char errorText[MAX_STRING_CHARS] = "";
+
 		if((foundPak&1) != 1 )
 		{
-			Com_Printf("\n\n"
-			"pak0.pk3 is missing. Please copy it\n"
-			"from your legitimate Q3 CDROM.\n");
+			Q_strcat(errorText, sizeof(errorText),
+				"\"pak0.pk3\" is missing. Please copy it "
+				"from your legitimate Q3 CDROM. ");
 		}
 
 		if((foundPak&0x1fe) != 0x1fe )
 		{
-			Com_Printf("\n\n"
-			"Point Release files are missing. Please\n"
-			"re-install the 1.32 point release.\n");
+			Q_strcat(errorText, sizeof(errorText),
+				"Point Release files are missing. Please "
+				"re-install the 1.32 point release. ");
 		}
 
-		Com_Printf("\n\n"
-			"Also check that your Q3 executable is in\n"
-			"the correct place and that every file\n"
-			"in the %s directory is present and readable.\n", BASEGAME);
+		Q_strcat(errorText, sizeof(errorText),
+			va("Also check that your ioq3 executable is in "
+			"the correct place and that every file "
+			"in the \"%s\" directory is present and readable", BASEGAME));
 
-		Com_Error(ERR_FATAL, "You need to install Quake III Arena in order to play");
+		Com_Error(ERR_FATAL, errorText);
 	}
 	
 	if(foundPak & 1)
