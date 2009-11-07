@@ -273,10 +273,11 @@ Sys_Mkdir
 */
 qboolean Sys_Mkdir( const char *path )
 {
-	int result = _mkdir( path );
-
-	if( result != 0 )
-		return errno == EEXIST;
+	if( !CreateDirectory( path, NULL ) )
+	{
+		if( GetLastError( ) != ERROR_ALREADY_EXISTS )
+			return qfalse;
+	}
 
 	return qtrue;
 }

@@ -437,10 +437,18 @@ Fix things up differently for win/unix/mac
 */
 static void FS_ReplaceSeparators( char *path ) {
 	char	*s;
+	qboolean lastCharWasSep = qfalse;
 
 	for ( s = path ; *s ; s++ ) {
 		if ( *s == '/' || *s == '\\' ) {
-			*s = PATH_SEP;
+			if ( !lastCharWasSep ) {
+				*s = PATH_SEP;
+				lastCharWasSep = qtrue;
+			} else {
+				memmove (s, s + 1, strlen (s));
+			}
+		} else {
+			lastCharWasSep = qfalse;
 		}
 	}
 }
@@ -464,7 +472,7 @@ char *FS_BuildOSPath( const char *base, const char *game, const char *qpath ) {
 	}
 
 	Com_sprintf( temp, sizeof(temp), "/%s/%s", game, qpath );
-	FS_ReplaceSeparators( temp );	
+	FS_ReplaceSeparators( temp );
 	Com_sprintf( ospath[toggle], sizeof( ospath[0] ), "%s%s", base, temp );
 	
 	return ospath[toggle];
@@ -480,6 +488,7 @@ Creates any directories needed to store the given filename
 */
 qboolean FS_CreatePath (char *OSPath) {
 	char	*ofs;
+	char	path[MAX_OSPATH];
 	
 	// make absolutely sure that it can't back up the path
 	// FIXME: is c: allowed???
@@ -488,17 +497,25 @@ qboolean FS_CreatePath (char *OSPath) {
 		return qtrue;
 	}
 
-	for (ofs = OSPath+1 ; *ofs ; ofs++) {
-		if (*ofs == PATH_SEP) {	
+	Q_strncpyz( path, OSPath, sizeof( path ) );
+	FS_ReplaceSeparators( path );
+
+	// Skip creation of the root directory as it will always be there
+	ofs = strchr( path, PATH_SEP );
+	ofs++;
+
+	for (; ofs != NULL && *ofs ; ofs++) {
+		if (*ofs == PATH_SEP) {
 			// create the directory
 			*ofs = 0;
-			if (!Sys_Mkdir (OSPath)) {
+			if (!Sys_Mkdir (path)) {
 				Com_Error( ERR_FATAL, "FS_CreatePath: failed to create path \"%s\"\n",
-					OSPath );
+					path );
 			}
 			*ofs = PATH_SEP;
 		}
 	}
+
 	return qfalse;
 }
 
@@ -2970,7 +2987,7 @@ static void FS_CheckPak0( void )
 			"the correct place and that every file "
 			"in the \"%s\" directory is present and readable", BASEGAME));
 
-		Com_Error(ERR_FATAL, errorText);
+		Com_Error(ERR_FATAL, "%s", errorText);
 	}
 	
 	if(foundPak & 1)
