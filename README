@@ -388,7 +388,6 @@ Using HTTP/FTP Download Support (Server)
   sv_allowDownload's value is now a bitmask made up of the following
   flags:
     1 - ENABLE
-    2 - do not use HTTP/FTP downloads
     4 - do not use UDP downloads
     8 - do not ask the client to disconnect when using HTTP/FTP
 
