@@ -68,10 +68,15 @@ static void _crap(const char* func, const char* fmt, ...)
 
 static void emit1(unsigned char v)
 {
+	int writecnt;
+	
 	if(assembler_pass)
 	{
 		out[compiledOfs++] = v;
-		if(fout) fwrite(&v, 1, 1, fout);
+
+		if(fout)
+			writecnt = fwrite(&v, 1, 1, fout);
+			
 		debug("%02hhx ", v);
 	}
 	else
