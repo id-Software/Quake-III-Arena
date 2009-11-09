@@ -200,6 +200,7 @@ New commands
   stopvideo               - stop video capture
 
   print                   - print out the contents of a cvar
+  unset                   - unset a user created cvar
 
   banaddr <range>         - ban an ip address range from joining a game on this
                             server, valid <range> is either playernum or CIDR
@@ -212,6 +213,7 @@ New commands
   flushbans               - delete all bans
 
   net_restart             - restart network subsystem to change latched settings
+  game_restart <fs_game>  - Switch to another mod
 
 ------------------------------------------------------------ Miscellaneous -----
 

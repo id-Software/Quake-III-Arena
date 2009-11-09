@@ -1032,6 +1032,18 @@ void CL_NextDemo( void ) {
 
 /*
 =====================
+CL_ShutdownVMs
+=====================
+*/
+
+void CL_ShutdownVMs(void)
+{
+	CL_ShutdownCGame();
+	CL_ShutdownUI();
+}
+
+/*
+=====================
 CL_ShutdownAll
 =====================
 */
@@ -1250,6 +1262,9 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		CL_WritePacket();
 		CL_WritePacket();
 	}
+	
+	// Remove pure paks
+	FS_PureServerSetLoadedPaks("", "");
 	
 	CL_ClearState ();
 
@@ -1735,6 +1750,19 @@ void CL_Vid_Restart_f( void ) {
 
 /*
 =================
+CL_Snd_Restart
+
+Restart the sound subsystem
+=================
+*/
+void CL_Snd_Restart(void)
+{
+	S_Shutdown();
+	S_Init();
+}
+
+/*
+=================
 CL_Snd_Restart_f
 
 Restart the sound subsystem
@@ -1742,10 +1770,9 @@ The cgame and game must also be forced to restart because
 handles will be invalid
 =================
 */
-void CL_Snd_Restart_f( void ) {
-	S_Shutdown();
-	S_Init();
-
+void CL_Snd_Restart_f(void)
+{
+	CL_Snd_Restart();
 	CL_Vid_Restart_f();
 }
 

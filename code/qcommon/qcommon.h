@@ -545,6 +545,7 @@ char	*Cvar_InfoString_Big( int bit );
 void	Cvar_InfoStringBuffer( int bit, char *buff, int buffsize );
 void Cvar_CheckRange( cvar_t *cv, float minVal, float maxVal, qboolean shouldBeIntegral );
 
+void	Cvar_Restart(qboolean unsetVM);
 void	Cvar_Restart_f( void );
 
 void Cvar_CompleteCvarName( char *args, int argNum );
@@ -797,6 +798,7 @@ void 		QDECL Com_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 
 void 		QDECL Com_DPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void 		QDECL Com_Error( int code, const char *fmt, ... ) __attribute__ ((format (printf, 2, 3)));
 void 		Com_Quit_f( void );
+void		Com_GameRestart(int checksumFeed, qboolean clientRestart);
 
 int			Com_Milliseconds( void );	// will be journaled properly
 unsigned	Com_BlockChecksum( const void *buffer, int length );
@@ -973,6 +975,9 @@ void CL_FlushMemory( void );
 
 void CL_StartHunkUsers( qboolean rendererOnly );
 // start all the client stuff using the hunk
+
+void CL_Snd_Restart(void);
+// Restart sound subsystem
 
 void Key_KeynameCompletion( void(*callback)(const char *s) );
 // for keyname autocompletion

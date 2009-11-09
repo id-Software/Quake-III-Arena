@@ -93,8 +93,9 @@ int			com_frameTime;
 int			com_frameMsec;
 int			com_frameNumber;
 
-qboolean	com_errorEntered;
-qboolean	com_fullyInitialized;
+qboolean	com_errorEntered = qfalse;
+qboolean	com_fullyInitialized = qfalse;
+qboolean	com_gameRestarting = qfalse;
 
 char	com_errorMessage[MAXPRINTMSG];
 
@@ -243,9 +244,20 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	va_list		argptr;
 	static int	lastErrorTime;
 	static int	errorCount;
+	static qboolean	calledSysError = qfalse;
 	int			currentTime;
 
-	Cvar_Set( "com_errorCode", va( "%i", code ) );
+	if(com_errorEntered)
+	{
+		if(!calledSysError)
+			Sys_Error("recursive error after: %s", com_errorMessage);
+		
+		return;
+	}
+
+	com_errorEntered = qtrue;
+
+	Cvar_Set("com_errorCode", va("%i", code));
 
 	// when we are running automated scripts, make sure we
 	// know if anything failed
@@ -263,11 +275,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		errorCount = 0;
 	}
 	lastErrorTime = currentTime;
-
-	if ( com_errorEntered ) {
-		Sys_Error( "recursive error after: %s", com_errorMessage );
-	}
-	com_errorEntered = qtrue;
 
 	va_start (argptr,fmt);
 	Q_vsnprintf (com_errorMessage, sizeof(com_errorMessage),fmt,argptr);
@@ -303,12 +310,13 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 			VM_Forced_Unload_Start();
 			CL_FlushMemory( );
 			VM_Forced_Unload_Done();
-			com_errorEntered = qfalse;
 			CL_CDDialog();
 		} else {
 			Com_Printf("Server didn't have CD\n" );
 		}
 		FS_PureServerSetLoadedPaks("", "");
+
+		com_errorEntered = qfalse;
 		longjmp (abortframe, -1);
 	} else {
 		CL_Shutdown ();
@@ -317,6 +325,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 
 	Com_Shutdown ();
 
+	calledSysError = qtrue;
 	Sys_Error ("%s", com_errorMessage);
 }
 
@@ -2375,6 +2384,85 @@ void Com_Setenv_f(void)
         }
 }
 
+/*
+==================
+Com_ExecuteCfg
+
+For controlling environment variables
+==================
+*/
+
+void Com_ExecuteCfg(void)
+{
+	Cbuf_ExecuteText(EXEC_NOW, "exec default.cfg\n");
+	Cbuf_Execute(); // Always execute after exec to prevent text buffer overflowing
+
+	if(!Com_SafeMode())
+	{
+		// skip the q3config.cfg and autoexec.cfg if "safe" is on the command line
+		Cbuf_ExecuteText(EXEC_NOW, "exec " Q3CONFIG_CFG "\n");
+		Cbuf_Execute();
+		Cbuf_ExecuteText(EXEC_NOW, "exec autoexec.cfg\n");
+		Cbuf_Execute();
+	}
+}
+
+/*
+==================
+Com_GameRestart
+
+Change to a new mod properly with cleaning up cvars before switching.
+==================
+*/
+
+void Com_GameRestart(int checksumFeed, qboolean clientRestart)
+{
+	// make sure no recursion can be triggered
+	if(!com_gameRestarting && com_fullyInitialized)
+	{
+		com_gameRestarting = qtrue;
+		
+		if(clientRestart)
+		{
+			CL_Disconnect(qfalse);
+			CL_ShutdownAll();
+		}
+
+		// Kill server if we have one
+		if(com_sv_running->integer)
+			SV_Shutdown("Game directory changed");
+
+		FS_Restart(checksumFeed);
+	
+		// Clean out any user and VM created cvars
+		Cvar_Restart(qtrue);
+		Com_ExecuteCfg();
+		
+		// Restart sound subsystem so old handles are flushed
+		CL_Snd_Restart();
+
+		if(clientRestart)
+			CL_StartHunkUsers(qfalse);
+		
+		com_gameRestarting = qfalse;
+	}
+}
+
+/*
+==================
+Com_GameRestart_f
+
+Expose possibility to change current running mod to the user
+==================
+*/
+
+void Com_GameRestart_f(void)
+{
+	Cvar_Set("fs_game", Cmd_Argv(1));
+
+	Com_GameRestart(0, qtrue);
+}
+
 #ifndef STANDALONE
 
 // TTimo: centralizing the cl_cdkey stuff after I discovered a buffer overflow problem with the dedicated server version
@@ -2593,17 +2681,9 @@ void Com_Init( char *commandLine ) {
 	Cmd_AddCommand ("changeVectors", MSG_ReportChangeVectors_f );
 	Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
 	Cmd_SetCommandCompletionFunc( "writeconfig", Cmd_CompleteCfgName );
+	Cmd_AddCommand("game_restart", Com_GameRestart_f);
 
-	// Make it execute the configuration files
-	Cbuf_AddText ("exec default.cfg\n");
-
-	// skip the q3config.cfg if "safe" is on the command line
-	if (!Com_SafeMode())
-		Cbuf_AddText("exec " Q3CONFIG_CFG "\n");
-
-	Cbuf_AddText ("exec autoexec.cfg\n");
-
-	Cbuf_Execute ();
+	Com_ExecuteCfg();
 
 	// override anything from the config files with command line args
 	Com_StartupVariable( NULL );
