@@ -137,6 +137,7 @@ New cvars
   s_backend                         - read only, indicates the current sound
                                       backend
   s_muteWhenMinimized               - mute sound when minimized
+  s_muteWhenUnfocused               - mute sound when window is unfocused
 
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
