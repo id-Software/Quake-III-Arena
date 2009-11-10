@@ -1032,18 +1032,6 @@ void CL_NextDemo( void ) {
 
 /*
 =====================
-CL_ShutdownVMs
-=====================
-*/
-
-void CL_ShutdownVMs(void)
-{
-	CL_ShutdownCGame();
-	CL_ShutdownUI();
-}
-
-/*
-=====================
 CL_ShutdownAll
 =====================
 */
