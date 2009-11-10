@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "snd_public.h"
 
 cvar_t *s_volume;
+cvar_t *s_muted;
 cvar_t *s_musicVolume;
 cvar_t *s_doppler;
 cvar_t *s_backend;
@@ -229,12 +230,25 @@ S_Update
 */
 void S_Update( void )
 {
-	if( ( s_muteWhenMinimized->integer && com_minimized->integer ) || 
-		( s_muteWhenUnfocused->integer && com_unfocused->integer ) ) {
-		S_StopAllSounds( );
-		return;
+	if(s_muted->integer)
+	{
+		if(!(s_muteWhenMinimized->integer && com_minimized->integer) &&
+		   !(s_muteWhenUnfocused->integer && com_unfocused->integer))
+		{
+			s_muted->integer = qfalse;
+			s_muted->modified = qtrue;
+		}
 	}
-
+	else
+	{
+		if((s_muteWhenMinimized->integer && com_minimized->integer) ||
+		   (s_muteWhenUnfocused->integer && com_unfocused->integer))
+		{
+			s_muted->integer = qtrue;
+			s_muted->modified = qtrue;
+		}
+	}
+	
 	if( si.Update ) {
 		si.Update( );
 	}
@@ -450,6 +464,7 @@ void S_Init( void )
 
 	s_volume = Cvar_Get( "s_volume", "0.8", CVAR_ARCHIVE );
 	s_musicVolume = Cvar_Get( "s_musicvolume", "0.25", CVAR_ARCHIVE );
+	s_muted = Cvar_Get("s_muted", "0", CVAR_TEMP);
 	s_doppler = Cvar_Get( "s_doppler", "1", CVAR_ARCHIVE );
 	s_backend = Cvar_Get( "s_backend", "", CVAR_ROM );
 	s_muteWhenMinimized = Cvar_Get( "s_muteWhenMinimized", "0", CVAR_ARCHIVE );

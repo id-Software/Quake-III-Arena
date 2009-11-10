@@ -937,7 +937,10 @@ void S_Base_RawSamples( int stream, int samples, int rate, int width, int s_chan
 	}
 	rawsamples = s_rawsamples[stream];
 
-	intVolume = 256 * volume * s_volume->value;
+	if(s_muted->integer)
+		intVolume = 0;
+	else
+		intVolume = 256 * volume * s_volume->value;
 
 	if ( s_rawend[stream] < s_soundtime ) {
 		Com_DPrintf( "S_Base_RawSamples: resetting minimum: %i < %i\n", s_rawend[stream], s_soundtime );
