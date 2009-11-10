@@ -33,10 +33,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "snd_codec.h"
 #include "client.h"
 
-void S_Play_f(void);
-void S_SoundList_f(void);
-void S_Music_f(void);
-
 void S_Update_( void );
 void S_Base_StopAllSounds(void);
 void S_Base_StopBackgroundTrack( void );
@@ -1315,7 +1311,9 @@ void S_Base_StartBackgroundTrack( const char *intro, const char *loop ){
 	}
 	Com_DPrintf( "S_StartBackgroundTrack( %s, %s )\n", intro, loop );
 
-	if ( !intro[0] ) {
+	if(!*intro)
+	{
+		S_Base_StopBackgroundTrack();
 		return;
 	}
 
