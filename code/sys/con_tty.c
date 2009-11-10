@@ -326,7 +326,7 @@ CON_Input
 char *CON_Input( void )
 {
 	// we use this when sending back commands
-	static char text[256];
+	static char text[MAX_EDIT_LINE];
 	int avail;
 	char key;
 	field_t *history;
@@ -357,7 +357,7 @@ char *CON_Input( void )
 				{
 					// push it in history
 					Hist_Add(&TTY_con);
-					strcpy(text, TTY_con.buffer);
+					Q_strncpyz(text, TTY_con.buffer, sizeof(text));
 					Field_Clear(&TTY_con);
 					key = '\n';
 					size = write(1, &key, 1);
@@ -419,6 +419,8 @@ char *CON_Input( void )
 				CON_FlushIn();
 				return NULL;
 			}
+			if (TTY_con.cursor >= sizeof(text) - 1)
+				return NULL;
 			// push regular character
 			TTY_con.buffer[TTY_con.cursor] = key;
 			TTY_con.cursor++;
