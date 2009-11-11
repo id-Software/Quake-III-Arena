@@ -929,7 +929,7 @@ void CL_PlayDemo_f( void ) {
 	char		retry[MAX_OSPATH];
 
 	if (Cmd_Argc() != 2) {
-		Com_Printf ("playdemo <demoname>\n");
+		Com_Printf ("demo <demoname>\n");
 		return;
 	}
 
@@ -937,14 +937,17 @@ void CL_PlayDemo_f( void ) {
 	// 2 means don't force disconnect of local client
 	Cvar_Set( "sv_killserver", "2" );
 
-	CL_Disconnect( qtrue );
-
 	// open the demo file
 	arg = Cmd_Argv(1);
 	
+	CL_Disconnect( qtrue );
+
 	// check for an extension .dm_?? (?? is protocol)
 	ext_test = arg + strlen(arg) - 6;
-	if ((strlen(arg) > 6) && (ext_test[0] == '.') && ((ext_test[1] == 'd') || (ext_test[1] == 'D')) && ((ext_test[2] == 'm') || (ext_test[2] == 'M')) && (ext_test[3] == '_'))
+	if ((strlen(arg) > 6) && (ext_test[0] == '.') &&
+		((ext_test[1] == 'd') || (ext_test[1] == 'D')) &&
+		((ext_test[2] == 'm') || (ext_test[2] == 'M')) &&
+		(ext_test[3] == '_'))
 	{
 		protocol = atoi(ext_test+4);
 		i=0;
