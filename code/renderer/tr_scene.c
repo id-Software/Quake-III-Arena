@@ -212,10 +212,10 @@ void RE_AddRefEntityToScene( const refEntity_t *ent ) {
 		return;
 	}
 	if ( Q_isnan(ent->origin[0]) || Q_isnan(ent->origin[1]) || Q_isnan(ent->origin[2]) ) {
-		static qboolean first_time = qtrue;
-		if (first_time) {
-			first_time = qfalse;
-			Com_Printf(S_COLOR_YELLOW "WARNING: You might have built ioquake3 with a buggy compiler!\n");
+		static qboolean firstTime = qtrue;
+		if (firstTime) {
+			firstTime = qfalse;
+			Com_DPrintf(S_COLOR_YELLOW "WARNING: RE_AddRefEntityToScene passed a refEntity which has an origin with a NaN component\n");
 		}
 		return;
 	}
