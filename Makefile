@@ -567,7 +567,7 @@ ifeq ($(PLATFORM),freebsd)
     CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
-  OPTIMIZEVM = -DNDEBUG -O3 -funroll-loops -fomit-frame-pointer
+  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
 
   ifeq ($(ARCH),axp)
     BASE_CFLAGS += -DNO_VM_COMPILED
@@ -756,7 +756,7 @@ ifeq ($(PLATFORM),sunos)
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
 
-  OPTIMIZEVM = -O3 -funroll-loops -DNDEBUG
+  OPTIMIZEVM = -O3 -funroll-loops
 
   ifeq ($(ARCH),sparc)
     OPTIMIZEVM += -O3 \
@@ -798,7 +798,7 @@ else # ifeq sunos
 # SETUP AND BUILD -- GENERIC
 #############################################################################
   BASE_CFLAGS=-DNO_VM_COMPILED
-  OPTIMIZE = -DNDEBUG -O3
+  OPTIMIZE = -O3
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -1016,7 +1016,7 @@ debug:
 
 release:
 	@$(MAKE) targets B=$(BR) CFLAGS="$(CFLAGS) $(BASE_CFLAGS) $(DEPEND_CFLAGS)" \
-	  OPTIMIZE="$(OPTIMIZE)" OPTIMIZEVM="$(OPTIMIZEVM)" \
+	  OPTIMIZE="-DNDEBUG $(OPTIMIZE)" OPTIMIZEVM="-DNDEBUG $(OPTIMIZEVM)" \
 	  CLIENT_CFLAGS="$(CLIENT_CFLAGS)" SERVER_CFLAGS="$(SERVER_CFLAGS)" V=$(V)
 
 # Create the build directories, check libraries and print out
