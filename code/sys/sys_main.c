@@ -557,6 +557,7 @@ int main( int argc, char **argv )
 	signal( SIGFPE, Sys_SigHandler );
 	signal( SIGSEGV, Sys_SigHandler );
 	signal( SIGTERM, Sys_SigHandler );
+	signal( SIGINT, Sys_SigHandler );
 
 	while( 1 )
 	{
