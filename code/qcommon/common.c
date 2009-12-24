@@ -3065,6 +3065,12 @@ void Com_Frame( void ) {
 	if ( com_speeds->integer ) {
 		timeAfter = Sys_Milliseconds ();
 	}
+#else
+	if ( com_speeds->integer ) {
+		timeAfter = Sys_Milliseconds ();
+		timeBeforeEvents = timeAfter;
+		timeBeforeClient = timeAfter;
+	}
 #endif
 
 	//
