@@ -381,8 +381,8 @@ SVC_HashForAddress
 ================
 */
 static long SVC_HashForAddress( netadr_t address ) {
-	byte 		*ip;
-	size_t	size;
+	byte 		*ip = NULL;
+	size_t	size = 0;
 	int			i;
 	long		hash = 0;
 
