@@ -1164,6 +1164,13 @@ void Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultVal
 {
 	cvar_t	*cv;
 
+	// There is code in Cvar_Get to prevent CVAR_ROM cvars being changed by the
+	// user. In other words CVAR_ARCHIVE and CVAR_ROM are mutually exclusive
+	// flags. Unfortunately some historical game code (including single player
+	// baseq3) sets both flags. We unset CVAR_ROM for such cvars.
+	if ((flags & (CVAR_ARCHIVE | CVAR_ROM)) == (CVAR_ARCHIVE | CVAR_ROM))
+		flags &= ~CVAR_ROM;
+
 	cv = Cvar_Get(varName, defaultValue, flags | CVAR_VM_CREATED);
 
 	if (!vmCvar)
