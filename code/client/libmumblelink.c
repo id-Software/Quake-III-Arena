@@ -39,14 +39,26 @@
 
 #include "libmumblelink.h"
 
+#ifndef MIN
+#define MIN(a, b) ((a)<(b)?(a):(b))
+#endif
+
 typedef struct
 {
 	uint32_t uiVersion;
 	uint32_t uiTick;
-	float   fPosition[3];
-	float   fFront[3];
-	float   fTop[3];
+	float   fAvatarPosition[3];
+	float   fAvatarFront[3];
+	float   fAvatarTop[3];
 	wchar_t name[256];
+	/* new in mumble 1.2 */
+	float   fCameraPosition[3];
+	float   fCameraFront[3];
+	float   fCameraTop[3];
+	wchar_t identity[256];
+	uint32_t context_len;
+	unsigned char context[256];
+	wchar_t description[2048];
 } LinkedMem;
 
 static LinkedMem *lm = NULL;
@@ -104,14 +116,49 @@ int mumble_link(const char* name)
 
 void mumble_update_coordinates(float fPosition[3], float fFront[3], float fTop[3])
 {
+	mumble_update_coordinates2(fPosition, fFront, fTop, fPosition, fFront, fTop);
+}
+
+void mumble_update_coordinates2(float fAvatarPosition[3], float fAvatarFront[3], float fAvatarTop[3],
+		float fCameraPosition[3], float fCameraFront[3], float fCameraTop[3])
+{
 	if (!lm)
 		return;
 
-	memcpy(lm->fPosition, fPosition, sizeof(fPosition));
-	memcpy(lm->fFront, fFront, sizeof(fFront));
-	memcpy(lm->fTop, fTop, sizeof(fTop));
-	lm->uiVersion = 1;
+	memcpy(lm->fAvatarPosition, fAvatarPosition, sizeof(fAvatarPosition));
+	memcpy(lm->fAvatarFront, fAvatarFront, sizeof(fAvatarFront));
+	memcpy(lm->fAvatarTop, fAvatarTop, sizeof(fAvatarTop));
+	memcpy(lm->fCameraPosition, fCameraPosition, sizeof(fCameraPosition));
+	memcpy(lm->fCameraFront, fCameraFront, sizeof(fCameraFront));
+	memcpy(lm->fCameraTop, fCameraTop, sizeof(fCameraTop));
+	lm->uiVersion = 2;
 	lm->uiTick = GetTickCount();
+}
+
+void mumble_set_identity(const char* identity)
+{
+	size_t len;
+	if (!lm)
+		return;
+	len = MIN(sizeof(lm->identity), strlen(identity)+1);
+	mbstowcs(lm->identity, identity, len);
+}
+
+void mumble_set_context(const unsigned char* context, size_t len)
+{
+	if (!lm)
+		return;
+	len = MIN(sizeof(lm->context), len);
+	memcpy(lm->context, context, len);
+}
+
+void mumble_set_description(const char* description)
+{
+	size_t len;
+	if (!lm)
+		return;
+	len = MIN(sizeof(lm->description), strlen(description)+1);
+	mbstowcs(lm->description, description, len);
 }
 
 void mumble_unlink()
