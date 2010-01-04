@@ -106,6 +106,8 @@ int mumble_link(const char* name)
 	lm = (LinkedMem *) (mmap(NULL, sizeof(LinkedMem), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd,0));
 	if (lm == (void *) (-1)) {
 		lm = NULL;
+		close(shmfd);
+		return -1;
 	}
 	close(shmfd);
 #endif
