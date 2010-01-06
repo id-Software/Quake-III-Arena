@@ -364,8 +364,6 @@ void SCR_DrawVoipMeter( void ) {
 		return;  // not connected to a server.
 	else if (!cl_connectedToVoipServer)
 		return;  // server doesn't support VoIP.
-	else if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive"))
-		return;  // single player game.
 	else if (clc.demoplaying)
 		return;  // playing back a demo.
 	else if (!cl_voip->integer)
@@ -577,8 +575,10 @@ void SCR_UpdateScreen( void ) {
 	// that case.
 	if( uivm || com_dedicated->integer )
 	{
+		// XXX
+		extern cvar_t* r_anaglyphMode;
 		// if running in stereo, we need to draw the frame twice
-		if ( cls.glconfig.stereoEnabled || Cvar_VariableIntegerValue("r_anaglyphMode")) {
+		if ( cls.glconfig.stereoEnabled || r_anaglyphMode->integer) {
 			SCR_DrawScreenField( STEREO_LEFT );
 			SCR_DrawScreenField( STEREO_RIGHT );
 		} else {

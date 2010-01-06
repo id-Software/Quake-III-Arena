@@ -917,6 +917,14 @@ static void IN_ProcessEvents( void )
 				vidRestartTime = Sys_Milliseconds() + 1000;
 			}
 			break;
+			case SDL_ACTIVEEVENT:
+				if (e.active.state & SDL_APPINPUTFOCUS) {
+					Cvar_SetValue( "com_unfocused",	!e.active.gain);
+				}
+				if (e.active.state & SDL_APPACTIVE) {
+					Cvar_SetValue( "com_minimized", !e.active.gain);
+				}
+				break;
 
 			default:
 				break;
@@ -972,6 +980,8 @@ IN_Init
 */
 void IN_Init( void )
 {
+	int appState;
+
 	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
 	{
 		Com_Error( ERR_FATAL, "IN_Init called before SDL_Init( SDL_INIT_VIDEO )\n" );
@@ -1008,6 +1018,10 @@ void IN_Init( void )
 		IN_DeactivateMouse( );
 		mouseAvailable = qfalse;
 	}
+
+	appState = SDL_GetAppState( );
+	Cvar_SetValue( "com_unfocused",	!( appState & SDL_APPINPUTFOCUS ) );
+	Cvar_SetValue( "com_minimized", !( appState & SDL_APPACTIVE ) );
 
 	IN_InitJoystick( );
 	Com_DPrintf( "------------------------------------\n" );
