@@ -545,45 +545,16 @@ else # ifeq mingw32
 
 ifeq ($(PLATFORM),freebsd)
 
-  ifneq (,$(findstring alpha,$(shell uname -m)))
-    ARCH=axp
-  else #default to i386
-    ARCH=i386
-  endif #alpha test
-
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -DUSE_ICON
+  # flags
+  BASE_CFLAGS = $(shell env MACHINE_ARCH=$(ARCH) make -f /dev/null -VCFLAGS) \
+    -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -DUSE_ICON -DMAP_ANONYMOUS=MAP_ANON
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS = 
+  HAVE_VM_COMPILED = true
 
-  ifeq ($(USE_OPENAL),1)
-    CLIENT_CFLAGS += -DUSE_OPENAL
-    ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
-    endif
-  endif
-
-  ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
-
-  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
-
-  ifeq ($(ARCH),axp)
-    BASE_CFLAGS += -DNO_VM_COMPILED
-    OPTIMIZEVM += -fexpensive-optimizations
-  else
-  ifeq ($(ARCH),i386)
-    OPTIMIZEVM += -mtune=pentiumpro \
-      -march=pentium -pipe -falign-loops=2 -falign-jumps=2 \
-      -falign-functions=2 -funroll-loops -fstrength-reduce
-    HAVE_VM_COMPILED=true
-  else
-    BASE_CFLAGS += -DNO_VM_COMPILED
-  endif
-  endif
-
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -597,14 +568,45 @@ ifeq ($(PLATFORM),freebsd)
 
   CLIENT_LIBS += $(SDL_LIBS) -lGL
 
+  # optional features/libraries
   ifeq ($(USE_OPENAL),1)
-    ifneq ($(USE_OPENAL_DLOPEN),1)
+    CLIENT_CFLAGS += -DUSE_OPENAL
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
       CLIENT_LIBS += $(THREAD_LIBS) -lopenal
     endif
   endif
 
+  ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += -DUSE_CURL
+    ifeq ($(USE_CURL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
+      CLIENT_LIBS += -lcurl
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+  endif
+
   ifeq ($(USE_CODEC_VORBIS),1)
     CLIENT_LIBS += -lvorbisfile -lvorbis -logg
+  endif
+
+  ifeq ($(USE_MUMBLE),1)
+    CLIENT_LIBS += -lrt
+  endif
+
+  # cross-compiling tweaks
+  ifeq ($(ARCH),i386)
+    ifeq ($(CROSS_COMPILING),1)
+      BASE_CFLAGS += -m32
+    endif
+  endif
+  ifeq ($(ARCH),amd64)
+    ifeq ($(CROSS_COMPILING),1)
+      BASE_CFLAGS += -m64
+    endif
   endif
 
 else # ifeq freebsd
@@ -1530,6 +1532,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
   ifeq ($(ARCH),x86_64)
     Q3OBJ += $(B)/client/vm_x86_64.o $(B)/client/vm_x86_64_assembler.o
   endif
+  ifeq ($(ARCH),amd64)
+    Q3OBJ += $(B)/client/vm_x86_64.o $(B)/client/vm_x86_64_assembler.o
+  endif
   ifeq ($(ARCH),ppc)
     Q3OBJ += $(B)/client/vm_powerpc.o $(B)/client/vm_powerpc_asm.o
   endif
@@ -1693,6 +1698,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
     Q3DOBJ += $(B)/ded/vm_x86.o
   endif
   ifeq ($(ARCH),x86_64)
+    Q3DOBJ += $(B)/ded/vm_x86_64.o $(B)/ded/vm_x86_64_assembler.o
+  endif
+  ifeq ($(ARCH),amd64)
     Q3DOBJ += $(B)/ded/vm_x86_64.o $(B)/ded/vm_x86_64_assembler.o
   endif
   ifeq ($(ARCH),ppc)
