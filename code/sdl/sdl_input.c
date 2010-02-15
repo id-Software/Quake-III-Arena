@@ -900,7 +900,7 @@ static void IN_ProcessEvents( void )
 				break;
 
 			case SDL_QUIT:
-				Sys_Quit( );
+				Cbuf_ExecuteText(EXEC_NOW, "quit Closed window\n");
 				break;
 
 			case SDL_VIDEORESIZE:

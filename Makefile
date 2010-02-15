@@ -366,6 +366,7 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),darwin)
   HAVE_VM_COMPILED=true
+  LIBS = -framework Cocoa
   CLIENT_LIBS=
   OPTIMIZEVM=
   
@@ -422,7 +423,7 @@ ifeq ($(PLATFORM),darwin)
   #  the file has been modified by each build.
   LIBSDLMAIN=$(B)/libSDLmain.a
   LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
-  CLIENT_LIBS += -framework Cocoa -framework IOKit -framework OpenGL \
+  CLIENT_LIBS += -framework IOKit -framework OpenGL \
     $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
 
   OPTIMIZEVM += -falign-loops=16
@@ -1557,7 +1558,7 @@ endif
 
 ifeq ($(PLATFORM),darwin)
   Q3OBJ += \
-    $(B)/client/sys_cocoa.o
+    $(B)/client/sys_osx.o
 endif
 
 ifeq ($(USE_MUMBLE),1)
@@ -1725,11 +1726,10 @@ else
     $(B)/ded/con_tty.o
 endif
 
-# Not currently referenced in the dedicated server.
-#ifeq ($(PLATFORM),darwin)
-#  Q3DOBJ += \
-#    $(B)/ded/sys_cocoa.o
-#endif
+ifeq ($(PLATFORM),darwin)
+  Q3DOBJ += \
+    $(B)/ded/sys_osx.o
+endif
 
 $(B)/ioq3ded$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"

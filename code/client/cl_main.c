@@ -3276,14 +3276,14 @@ CL_Shutdown
 
 ===============
 */
-void CL_Shutdown( void ) {
+void CL_Shutdown( char *finalmsg ) {
 	static qboolean recursive = qfalse;
 	
 	// check whether the client is running at all.
 	if(!(com_cl_running && com_cl_running->integer))
 		return;
 	
-	Com_Printf( "----- CL_Shutdown -----\n" );
+	Com_Printf( "----- Client Shutdown (%s) -----\n", finalmsg );
 
 	if ( recursive ) {
 		Com_Printf( "WARNING: Recursive shutdown\n" );

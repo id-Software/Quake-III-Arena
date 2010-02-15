@@ -673,6 +673,14 @@ void GLimp_Init( void )
 	r_allowResize = ri.Cvar_Get( "r_allowResize", "0", CVAR_ARCHIVE );
 	r_centerWindow = ri.Cvar_Get( "r_centerWindow", "0", CVAR_ARCHIVE );
 
+	if( Cvar_VariableIntegerValue( "com_abnormalExit" ) )
+	{
+		ri.Cvar_Set( "r_mode", va( "%d", R_MODE_FALLBACK ) );
+		ri.Cvar_Set( "r_fullscreen", "0" );
+		ri.Cvar_Set( "r_centerWindow", "0" );
+		ri.Cvar_Set( "com_abnormalExit", "0" );
+	}
+
 	Sys_SetEnv( "SDL_VIDEO_CENTERED", r_centerWindow->integer ? "1" : "" );
 
 	Sys_GLimpInit( );
@@ -693,7 +701,7 @@ void GLimp_Init( void )
 		ri.Printf( PRINT_ALL, "Setting r_mode %d failed, falling back on r_mode %d\n",
 				r_mode->integer, R_MODE_FALLBACK );
 
-		if(GLimp_StartDriverAndSetMode(R_MODE_FALLBACK, r_fullscreen->integer, qfalse))
+		if(GLimp_StartDriverAndSetMode(R_MODE_FALLBACK, qfalse, qfalse))
 			goto success;
 	}
 

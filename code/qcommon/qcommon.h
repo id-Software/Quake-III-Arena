@@ -181,7 +181,7 @@ qboolean	NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask);
 qboolean	NET_CompareBaseAdr (netadr_t a, netadr_t b);
 qboolean	NET_IsLocalAddress (netadr_t adr);
 const char	*NET_AdrToString (netadr_t a);
-const char      *NET_AdrToStringwPort (netadr_t a);
+const char	*NET_AdrToStringwPort (netadr_t a);
 int		NET_StringToAdr ( const char *s, netadr_t *a, netadrtype_t family);
 qboolean	NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, msg_t *net_message);
 void		NET_JoinMulticast6(void);
@@ -937,7 +937,7 @@ void CL_InitKeyCommands( void );
 
 void CL_Init( void );
 void CL_Disconnect( qboolean showMainMenu );
-void CL_Shutdown( void );
+void CL_Shutdown( char *finalmsg );
 void CL_Frame( int msec );
 qboolean CL_GameCommand( void );
 void CL_KeyEvent (int key, qboolean down, unsigned time);
@@ -1087,6 +1087,7 @@ char    *Sys_DefaultAppPath(void);
 
 void  Sys_SetDefaultHomePath(const char *path);
 char	*Sys_DefaultHomePath(void);
+const char	*Sys_TempPath(void);
 const char *Sys_Dirname( char *path );
 const char *Sys_Basename( char *path );
 char *Sys_ConsoleInput(void);
@@ -1098,6 +1099,27 @@ void	Sys_Sleep(int msec);
 qboolean Sys_LowPhysicalMemory( void );
 
 void Sys_SetEnv(const char *name, const char *value);
+
+typedef enum
+{
+	DR_YES = 0,
+	DR_NO = 1,
+	DR_OK = 0,
+	DR_CANCEL = 1
+} dialogResult_t;
+
+typedef enum
+{
+	DT_INFO,
+	DT_WARNING,
+	DT_ERROR,
+	DT_YES_NO,
+	DT_OK_CANCEL
+} dialogType_t;
+
+dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title );
+
+qboolean Sys_WritePIDFile( void );
 
 /* This is based on the Adaptive Huffman algorithm described in Sayood's Data
  * Compression book.  The ranks are not actually stored, but implicitly defined
