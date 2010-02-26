@@ -41,19 +41,19 @@ Sys_TempPath
 */
 const char *Sys_TempPath( void )
 {
-        static UInt8 posixPath[ MAX_OSPATH ];
-        FSRef ref;
-        if( FSFindFolder( kOnAppropriateDisk,
-                kTemporaryFolderType, kCreateFolder, &ref ) == noErr )
-        {
-                if( FSRefMakePath( &ref, posixPath,
-                        sizeof( posixPath ) - 1 ) == noErr )
-                {
-                        return (const char *)posixPath;
-                }
-        }
+	static UInt8 posixPath[ MAX_OSPATH ];
+	FSRef ref;
+	if( FSFindFolder( kOnAppropriateDisk,
+				kTemporaryFolderType, kCreateFolder, &ref ) == noErr )
+	{
+		if( FSRefMakePath( &ref, posixPath,
+					sizeof( posixPath ) - 1 ) == noErr )
+		{
+			return (const char *)posixPath;
+		}
+	}
 
-        return "/tmp";
+	return "/tmp";
 }
 
 /*
@@ -65,43 +65,51 @@ Display an OS X dialog box
 */
 dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title )
 {
-	NSAlert* alert = [NSAlert new];
-	
+	dialogResult_t result = DR_OK;
+	NSAlert *alert = [NSAlert new];
+
 	[alert setMessageText: [NSString stringWithUTF8String: title]];
 	[alert setInformativeText: [NSString stringWithUTF8String: message]];
-	
+
 	if( type == DT_ERROR )
 		[alert setAlertStyle: NSCriticalAlertStyle];
 	else
 		[alert setAlertStyle: NSWarningAlertStyle];
-	
+
 	switch( type )
 	{
 		default:
 			[alert runModal];
-			return DR_OK;
-			
+			result = DR_OK;
+			break;
+
 		case DT_YES_NO:
 			[alert addButtonWithTitle: @"Yes"];
 			[alert addButtonWithTitle: @"No"];
 			switch( [alert runModal] )
 			{
 				default:
-				case NSAlertFirstButtonReturn: return DR_YES;
-				case NSAlertSecondButtonReturn: return DR_NO;
+				case NSAlertFirstButtonReturn: result = DR_YES; break;
+				case NSAlertSecondButtonReturn: result = DR_NO; break;
 			}
-			
+			break;
+
 		case DT_OK_CANCEL:
 			[alert addButtonWithTitle: @"OK"];
 			[alert addButtonWithTitle: @"Cancel"];
-			
+
 			switch( [alert runModal] )
 			{
 				default:
-				case NSAlertFirstButtonReturn: return DR_OK;
-				case NSAlertSecondButtonReturn: return DR_CANCEL;
+				case NSAlertFirstButtonReturn: result = DR_OK; break;
+				case NSAlertSecondButtonReturn: result = DR_CANCEL; break;
 			}
+			break;
 	}
+
+	[alert release];
+
+	return result;
 }
 
 /*
