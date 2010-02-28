@@ -25,10 +25,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string.h>
 #include <stdarg.h>
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long u64;
+#include <inttypes.h>
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
 static char* out;
 static unsigned compiledOfs;
@@ -77,7 +79,7 @@ static void emit1(unsigned char v)
 		if(fout)
 			writecnt = fwrite(&v, 1, 1, fout);
 			
-		debug("%02hhx ", v);
+		debug("%02hx ", v);
 	}
 	else
 	{
@@ -282,7 +284,7 @@ static void labelhash_free(void)
 		min = MIN(min, n);
 		max = MAX(max, n);
 	}
-	printf("total %u, hsize %lu, zero %u, min %u, max %u\n", t, sizeof(labelhash)/sizeof(labelhash[0]), z, min, max);
+	printf("total %u, hsize %"PRIu64", zero %u, min %u, max %u\n", t, sizeof(labelhash)/sizeof(labelhash[0]), z, min, max);
 	memset(labelhash, 0, sizeof(labelhash));
 }
 
@@ -308,7 +310,7 @@ static const char* argtype2str(argtype_t t)
 
 static inline int iss8(u64 v)
 {
-	return (labs(v) <= 0x80);
+	return (llabs(v) <= 0x80); //llabs instead of labs required for __WIN64
 }
 
 static inline int isu8(u64 v)
@@ -318,7 +320,7 @@ static inline int isu8(u64 v)
 
 static inline int iss16(u64 v)
 {
-	return (labs(v) <= 0x8000);
+	return (llabs(v) <= 0x8000);
 }
 
 static inline int isu16(u64 v)
@@ -328,7 +330,7 @@ static inline int isu16(u64 v)
 
 static inline int iss32(u64 v)
 {
-	return (labs(v) <= 0x80000000);
+	return (llabs(v) <= 0x80000000);
 }
 
 static inline int isu32(u64 v)
@@ -338,7 +340,7 @@ static inline int isu32(u64 v)
 
 static void emit_opsingle(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
 {
-	u8 op = (u8)((unsigned long) data);
+	u8 op = (u8)((uint64_t) data);
 
 	if(arg1.type != T_NONE || arg2.type != T_NONE)
 		CRAP_INVALID_ARGS;
@@ -501,7 +503,7 @@ static void maybe_emit_displacement(arg_t* arg)
 /* one byte operator with register added to operator */
 static void emit_opreg(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
 {
-	u8 op = (u8)((unsigned long) data);
+	u8 op = (u8)((uint64_t) data);
 
 	if(arg1.type != T_REGISTER || arg2.type != T_NONE)
 		CRAP_INVALID_ARGS;
@@ -754,7 +756,7 @@ static void emit_condjump(const char* mnemonic, arg_t arg1, arg_t arg2, void* da
 {
 	unsigned off;
 	int disp;
-	unsigned char opcode = (unsigned char)(((unsigned long)data)&0xFF);
+	unsigned char opcode = (unsigned char)(((uint64_t)data)&0xFF);
 
 	if(arg1.type != T_LABEL || arg2.type != T_NONE)
 		crap("%s: argument must be label", mnemonic);
@@ -1151,7 +1153,7 @@ static unsigned char nexttok(const char** str, char* label, u64* val)
 	else if(*s >= '0' && *s <= '9')
 	{
 		char* endptr = NULL;
-		u64 v = strtol(s, &endptr, 0);
+		u64 v = strtoull(s, &endptr, 0);
 		if(endptr && (endptr-s == 0))
 			crap("invalid integer %s", s);
 		if(val) *val = v;
@@ -1272,7 +1274,7 @@ tok_memory:
 			}
 			break;
 		default:
-			crap("invalid token %hhu in %s", *(unsigned char*)s, *str);
+			crap("invalid token %hu in %s", *(unsigned char*)s, *str);
 			break;
 	}
 

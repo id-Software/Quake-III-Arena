@@ -460,8 +460,6 @@ ifeq ($(PLATFORM),mingw32)
     WINDRES=windres
   endif
 
-  ARCH=x86
-
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON
   CLIENT_CFLAGS =
@@ -486,12 +484,20 @@ ifeq ($(PLATFORM),mingw32)
     CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
-  OPTIMIZEVM = -O3 -march=i586 -fno-omit-frame-pointer \
-    -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
-    -fstrength-reduce
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
-
-  HAVE_VM_COMPILED = true
+  ifeq ($(ARCH),x86_64)
+    OPTIMIZEVM = -O3 -fno-omit-frame-pointer \
+      -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
+      -fstrength-reduce
+    OPTIMIZE = $(OPTIMIZEVM) --fast-math
+    HAVE_VM_COMPILED = true
+  endif
+  ifeq ($(ARCH),x86)
+    OPTIMIZEVM = -O3 -march=i586 -fno-omit-frame-pointer \
+      -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
+      -fstrength-reduce
+    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    HAVE_VM_COMPILED = true
+  endif
 
   SHLIBEXT=dll
   SHLIBCFLAGS=
@@ -509,7 +515,11 @@ ifeq ($(PLATFORM),mingw32)
     ifneq ($(USE_CURL_DLOPEN),1)
       ifeq ($(USE_LOCAL_HEADERS),1)
         CLIENT_CFLAGS += -DCURL_STATICLIB
-        CLIENT_LIBS += $(LIBSDIR)/win32/libcurl.a
+        ifeq ($(ARCH),x86_64)
+	  CLIENT_LIBS += $(LIBSDIR)/win64/libcurl.a
+	else
+          CLIENT_LIBS += $(LIBSDIR)/win32/libcurl.a
+        endif
       else
         CLIENT_LIBS += $(CURL_LIBS)
       endif
@@ -523,14 +533,22 @@ ifeq ($(PLATFORM),mingw32)
   ifeq ($(ARCH),x86)
     # build 32bit
     BASE_CFLAGS += -m32
+  else
+    BASE_CFLAGS += -m64
   endif
 
   # libmingw32 must be linked before libSDLmain
   CLIENT_LIBS += -lmingw32
   ifeq ($(USE_LOCAL_HEADERS),1)
     CLIENT_CFLAGS += -I$(SDLHDIR)/include
+    ifeq ($(ARCH), x86)
     CLIENT_LIBS += $(LIBSDIR)/win32/libSDLmain.a \
                       $(LIBSDIR)/win32/libSDL.dll.a
+    else
+    CLIENT_LIBS += $(LIBSDIR)/win64/libSDLmain.a \
+                      $(LIBSDIR)/win64/libSDL.dll.a \
+                      $(LIBSDIR)/win64/libSDL.a
+    endif
   else
     CLIENT_CFLAGS += $(SDL_CFLAGS)
     CLIENT_LIBS += $(SDL_LIBS)

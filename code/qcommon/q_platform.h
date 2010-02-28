@@ -72,9 +72,33 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // for windows fastcall option
 #define QDECL
 
-//================================================================= WIN32 ===
+//================================================================= WIN64/32 ===
 
-#ifdef _WIN32
+#ifdef __WIN64__
+
+#undef QDECL
+#define QDECL __cdecl
+
+#if defined( _MSC_VER )
+#define OS_STRING "win_msvc64"
+#elif defined __MINGW64__
+#define OS_STRING "win_mingw64"
+#endif
+
+#define ID_INLINE inline
+#define PATH_SEP '\\'
+
+#if defined( __WIN64__ ) 
+#define ARCH_STRING "x86_64"
+#elif defined _M_ALPHA
+#define ARCH_STRING "AXP"
+#endif
+
+#define Q3_LITTLE_ENDIAN
+
+#define DLL_EXT ".dll"
+
+#elif __WIN32__
 
 #undef QDECL
 #define QDECL __cdecl

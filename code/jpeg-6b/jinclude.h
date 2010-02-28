@@ -14,6 +14,9 @@
  * JPEG library.  Most applications need only include jpeglib.h.
  */
 
+#ifdef __WIN64__
+#include "basetsd.h"
+#endif
 
 #ifdef _MSC_VER
 

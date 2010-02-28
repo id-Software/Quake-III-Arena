@@ -23,17 +23,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // vm_x86_64.c -- load time compiler and execution environment for x86-64
 
 #include "vm_local.h"
-
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/time.h>
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdarg.h>
+
+#include <inttypes.h>
+
+#ifdef __WIN64__
+	#include <windows.h>
+	#define CROSSCALL __attribute__ ((sysv_abi))//fool the vm we're SYSV ABI
+	//#define __USE_MINGW_ANSI_STDIO 1 //very slow - avoid if possible
+#else
+	#include <sys/mman.h>
+	#include <sys/wait.h>
+	#define VM_X86_64_MMAP
+	#define CROSSCALL
+#endif
 
 //#define DEBUG_VM
 
@@ -43,8 +53,6 @@ static FILE* qdasmout;
 #else
 #define Dfprintf(args...)
 #endif
-
-#define VM_X86_64_MMAP
 
 void assembler_set_output(char* buf);
 size_t assembler_get_code_size(void);
@@ -71,11 +79,11 @@ static void VM_Destroy_Compiled(vm_t* self);
 */
 
 
-static long callAsmCall(long callProgramStack, long callSyscallNum)
+static int64_t CROSSCALL callAsmCall(int64_t callProgramStack, int64_t callSyscallNum)
 {
 	vm_t *savedVM;
-	long ret = 0x77;
-	long args[11];
+	int64_t ret = 0x77;
+	int64_t args[11];
 //	int iargs[11];
 	int i;
 
@@ -231,13 +239,13 @@ void emit(const char* fmt, ...)
 #define CHECK_INSTR_REG(reg) \
 	emit("cmpl $%u, %%"#reg, header->instructionCount); \
 	emit("jb jmp_ok_i_%08x", instruction); \
-	emit("movq $%lu, %%rax", (unsigned long)jmpviolation); \
+	emit("movq $%"PRIu64", %%rax", (uint64_t)jmpviolation); \
 	emit("callq *%%rax"); \
 	emit("jmp_ok_i_%08x:", instruction);
 
 #define PREPARE_JMP(reg) \
 	CHECK_INSTR_REG(reg) \
-	emit("movq $%lu, %%rbx", (unsigned long)vm->instructionPointers); \
+	emit("movq $%"PRIu64", %%rbx", (uint64_t)vm->instructionPointers); \
 	emit("movl (%%rbx, %%rax, 4), %%eax"); \
 	emit("addq %%r10, %%rax");
 
@@ -249,7 +257,7 @@ void emit(const char* fmt, ...)
 
 #define JMPIARG \
 	CHECK_INSTR(iarg); \
-	emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
+	emit("movq $%"PRIu64", %%rax", vm->codeBase+vm->instructionPointers[iarg]); \
 	emit("jmpq *%%rax");
  
 #define CONST_OPTIMIZE
@@ -339,7 +347,7 @@ void emit(const char* fmt, ...)
 	emit("andl $0x%x, %%ecx", vm->dataMask &~(bytes-1)); \
 	emit("cmpl %%" #reg ", %%ecx"); \
 	emit("jz rc_ok_i_%08x", instruction); \
-	emit("movq $%lu, %%rax", (unsigned long)memviolation); \
+	emit("movq $%"PRIu64", %%rax", (uint64_t)memviolation); \
 	emit("callq *%%rax"); \
 	emit("rc_ok_i_%08x:", instruction);
 #elif 1
@@ -363,7 +371,7 @@ static void* getentrypoint(vm_t* vm)
        return vm->codeBase;
 }
 
-static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
+static void CROSSCALL block_copy_vm(unsigned dest, unsigned src, unsigned count)
 {
 	unsigned dataMask = currentVM->dataMask;
 
@@ -378,20 +386,20 @@ static void block_copy_vm(unsigned dest, unsigned src, unsigned count)
 	memcpy(currentVM->dataBase+dest, currentVM->dataBase+src, count);
 }
 
-static void eop(void)
+static void CROSSCALL eop(void)
 {
 	Com_Error(ERR_DROP, "end of program reached without return!\n");
 	exit(1);
 }
 
-static void jmpviolation(void)
+static void CROSSCALL jmpviolation(void)
 {
 	Com_Error(ERR_DROP, "program tried to execute code outside VM\n");
 	exit(1);
 }
 
 #ifdef DEBUG_VM
-static void memviolation(void)
+static void CROSSCALL memviolation(void)
 {
 	Com_Error(ERR_DROP, "program tried to access memory outside VM\n");
 	exit(1);
@@ -430,9 +438,19 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	{
 		compiledOfs = assembler_get_code_size();
 		vm->codeLength = compiledOfs;
-		vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-		if(vm->codeBase == (void*)-1)
-			Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+
+		#ifdef VM_X86_64_MMAP
+			vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+			if(vm->codeBase == (void*)-1)
+				Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+		#elif __WIN64__
+			// allocate memory with write permissions under windows.
+			vm->codeBase = VirtualAlloc(NULL, compiledOfs, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+			if(!vm->codeBase)
+				Com_Error(ERR_DROP, "VM_CompileX86: VirtualAlloc failed");
+		#else
+			vm->codeBase = malloc(compiledOfs);
+		#endif
 
 		assembler_set_output((char*)vm->codeBase);
 	}
@@ -473,7 +491,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		else if(op_argsize[op] == 1)
 		{
 			barg = code[pc++];
-			Dfprintf(qdasmout, "%s %8hhu\n", opnames[op], barg);
+			Dfprintf(qdasmout, "%s %8hu\n", opnames[op], barg);
 		}
 		else
 		{
@@ -517,7 +535,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 						goto emit_do_syscall;
 
 					CHECK_INSTR(const_value);
-					emit("movq $%lu, %%rax", vm->codeBase+vm->instructionPointers[const_value]);
+					emit("movq $%"PRIu64", %%rax", vm->codeBase+vm->instructionPointers[const_value]);
 					emit("callq *%%rax");
 					got_const = 0;
 					break;
@@ -558,7 +576,7 @@ emit_do_syscall:
 					// first argument already in rdi
 					emit("movq %%rax, %%rsi"); // second argument in rsi
 				}
-				emit("movq $%lu, %%rax", (unsigned long)callAsmCall);
+				emit("movq $%"PRIu64", %%rax", (uint64_t)callAsmCall);
 				emit("callq *%%rax");
 				emit("pop %%rbx");
 				emit("addq %%rbx, %%rsp");
@@ -725,7 +743,7 @@ emit_do_syscall:
 				MAYBE_EMIT_CONST();
 				emit("subq $4, %%rsi");
 				emit("movl 4(%%rsi), %%eax"); // get value from stack
-				emit("movl $0x%hhx, %%ebx", barg);
+				emit("movl $0x%hx, %%ebx", barg);
 				emit("addl %%edi, %%ebx");
 				RANGECHECK(ebx, 4);
 				emit("movl %%eax, 0(%%r8,%%rbx, 1)"); // store in args space
@@ -742,7 +760,7 @@ emit_do_syscall:
 				emit("movl 4(%%rsi), %%edi");  // 1st argument dest
 				emit("movl 8(%%rsi), %%esi");  // 2nd argument src
 				emit("movl $%d, %%edx", iarg); // 3rd argument count
-				emit("movq $%lu, %%rax", (unsigned long)block_copy_vm);
+				emit("movq $%"PRIu64", %%rax", (uint64_t)block_copy_vm);
 				emit("callq *%%rax");
 				emit("pop %%r10");
 				emit("pop %%r9");
@@ -909,15 +927,25 @@ emit_do_syscall:
 		Com_Error(ERR_DROP, "leftover const\n");
 	}
 
-	emit("movq $%lu, %%rax", (unsigned long)eop);
+	emit("movq $%"PRIu64", %%rax", (uint64_t)eop);
 	emit("callq *%%rax");
 
 	} // pass loop
 
 	assembler_init(0);
 
-	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
-		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+	#ifdef VM_X86_64_MMAP
+		if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
+			Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+	#elif __WIN64__
+		{
+			DWORD oldProtect = 0;
+			
+			// remove write permissions; give exec permision
+			if(!VirtualProtect(vm->codeBase, compiledOfs, PAGE_EXECUTE_READ, &oldProtect))
+				Com_Error(ERR_DROP, "VM_CompileX86: VirtualProtect failed");
+		}
+	#endif
 
 	vm->destroy = VM_Destroy_Compiled;
 
@@ -934,17 +962,19 @@ emit_do_syscall:
 	fclose(qdasmout);
 #endif
 #endif
-	
-	if(vm->compiled)
-	{
-		struct timeval tvdone =  {0, 0};
-		struct timeval dur =  {0, 0};
-		Com_Printf( "VM file %s compiled to %i bytes of code (%p - %p)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
 
-		gettimeofday(&tvdone, NULL);
-		timersub(&tvdone, &tvstart, &dur);
-		Com_Printf( "compilation took %lu.%06lu seconds\n", dur.tv_sec, dur.tv_usec );
-	}
+	#ifndef __WIN64__ //timersub and gettimeofday
+		if(vm->compiled)
+		{
+			struct timeval tvdone =  {0, 0};
+			struct timeval dur =  {0, 0};
+			Com_Printf( "VM file %s compiled to %i bytes of code (%p - %p)\n", vm->name, vm->codeLength, vm->codeBase, vm->codeBase+vm->codeLength );
+
+			gettimeofday(&tvdone, NULL);
+			timersub(&tvdone, &tvstart, &dur);
+			Com_Printf( "compilation took %"PRIu64".%06"PRIu64" seconds\n", dur.tv_sec, dur.tv_usec );
+		}
+	#endif
 }
 
 
@@ -1034,7 +1064,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	);
 
 	if ( opStack != &stack[1] ) {
-		Com_Error( ERR_DROP, "opStack corrupted in compiled code (offset %ld)\n", (long int) ((void *) &stack[1] - opStack));
+		Com_Error( ERR_DROP, "opStack corrupted in compiled code (offset %"PRId64")\n", (int64_t) ((void *) &stack[1] - opStack));
 	}
 	if ( programStack != stackOnEntry - 48 ) {
 		Com_Error( ERR_DROP, "programStack corrupted in compiled code\n" );

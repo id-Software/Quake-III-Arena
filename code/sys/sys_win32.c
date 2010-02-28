@@ -41,6 +41,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
 
+#ifdef __WIN64__
+void Sys_SnapVector( float *v )
+{
+        v[0] = rint(v[0]);
+        v[1] = rint(v[1]);
+        v[2] = rint(v[2]);
+}
+#endif
+
 /*
 ================
 Sys_DefaultHomePath
