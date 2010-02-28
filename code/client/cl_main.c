@@ -4162,13 +4162,15 @@ void CL_ShowIP_f(void) {
 	Sys_ShowIP();
 }
 
-#ifndef STANDALONE
 /*
 =================
 bool CL_CDKeyValidate
 =================
 */
 qboolean CL_CDKeyValidate( const char *key, const char *checksum ) {
+#ifdef STANDALONE
+	return qtrue;
+#else
 	char	ch;
 	byte	sum;
 	char	chs[3];
@@ -4225,5 +4227,5 @@ qboolean CL_CDKeyValidate( const char *key, const char *checksum ) {
 	}
 
 	return qfalse;
-}
 #endif
+}
