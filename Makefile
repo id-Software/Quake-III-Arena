@@ -612,10 +612,6 @@ ifeq ($(PLATFORM),freebsd)
     CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
-  ifeq ($(USE_MUMBLE),1)
-    CLIENT_LIBS += -lrt
-  endif
-
   # cross-compiling tweaks
   ifeq ($(ARCH),i386)
     ifeq ($(CROSS_COMPILING),1)
