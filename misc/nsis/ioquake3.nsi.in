@@ -77,6 +77,8 @@ Section "ioquake3 (required)"
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
 
+  File "zlib1.dll"
+
   ; Put file there
   File "../../build/release-mingw32-x86/ioq3ded.x86.exe"
   File "../../build/release-mingw32-x86/ioquake3.x86.exe"
