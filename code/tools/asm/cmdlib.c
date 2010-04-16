@@ -63,7 +63,7 @@ char	*ex_argv[MAX_EX_ARGC];
 void ExpandWildcards( int *argc, char ***argv )
 {
 	struct _finddata_t fileinfo;
-	int		handle;
+	intptr_t	handle;
 	int		i;
 	char	filename[1024];
 	char	filebase[1024];

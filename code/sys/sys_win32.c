@@ -343,7 +343,7 @@ void Sys_ListFilteredFiles( const char *basedir, char *subdirs, char *filter, ch
 {
 	char		search[MAX_OSPATH], newsubdirs[MAX_OSPATH];
 	char		filename[MAX_OSPATH];
-	int			findhandle;
+	intptr_t	findhandle;
 	struct _finddata_t findinfo;
 
 	if ( *numfiles >= MAX_FOUND_FILES - 1 ) {
@@ -426,7 +426,7 @@ char **Sys_ListFiles( const char *directory, const char *extension, char *filter
 	char		**listCopy;
 	char		*list[MAX_FOUND_FILES];
 	struct _finddata_t findinfo;
-	int			findhandle;
+	intptr_t		findhandle;
 	int			flag;
 	int			i;
 
