@@ -757,13 +757,18 @@ emit_do_syscall:
 				emit("push %%r8");
 				emit("push %%r9");
 				emit("push %%r10");
-				emit("push %%r10");
+				emit("movq %%rsp, %%rbx"); // we need to align the stack pointer
+				emit("subq $8, %%rbx");    //   |
+				emit("andq $127, %%rbx");  //   |
+				emit("subq %%rbx, %%rsp"); // <-+
+				emit("push %%rbx");
 				emit("movl 4(%%rsi), %%edi");  // 1st argument dest
 				emit("movl 8(%%rsi), %%esi");  // 2nd argument src
 				emit("movl $%d, %%edx", iarg); // 3rd argument count
 				emit("movq $%"PRIu64", %%rax", (uint64_t)block_copy_vm);
 				emit("callq *%%rax");
-				emit("pop %%r10");
+				emit("pop %%rbx");
+				emit("addq %%rbx, %%rsp");
 				emit("pop %%r10");
 				emit("pop %%r9");
 				emit("pop %%r8");
