@@ -19,7 +19,7 @@ this readme. Since the code on how to handle those MDR files was released
 under a GPL licence a long time ago, I was able to implement this format for
 Quake3 and do some efficiency improvements.
 To enable the support for this model format, go to qcommon/qfiles.h,
-remove the comment slashes for #define RAVENMDR and then compile the engine.
+remove the comment slashes for #define RAVENMD4 and then compile the engine.
 
 Including finished MDR models in your projects is easy: just load the model
 files in your cgame code as you would normally load an MD3 model. The engine
