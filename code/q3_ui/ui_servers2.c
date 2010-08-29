@@ -147,8 +147,8 @@ static char* gamenames[] = {
 };
 
 static char* netnames[] = {
-	"???",
-	"UDP",
+	"??? ",
+	"UDP ",
 	"UDP6",
 	NULL
 };
@@ -534,7 +534,7 @@ static void ArenaServers_UpdateMenu( void ) {
 			pingColor = S_COLOR_RED;
 		}
 
-		Com_sprintf( buff, MAX_LISTBOXWIDTH, "%-20.20s %-12.12s %2d/%2d %-8.8s %3s %s%3d " S_COLOR_YELLOW "%s", 
+		Com_sprintf( buff, MAX_LISTBOXWIDTH, "%-20.20s %-12.12s %2d/%2d %-8.8s %4s%s%3d " S_COLOR_YELLOW "%s", 
 			servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numclients,
  			servernodeptr->maxclients, servernodeptr->gamename,
 			netnames[servernodeptr->nettype], pingColor, servernodeptr->pingtime, servernodeptr->bPB ? "Yes" : "No" );
@@ -672,6 +672,9 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 	}
 	*/
 	servernodeptr->nettype = atoi(Info_ValueForKey(info, "nettype"));
+	if (servernodeptr->nettype < 0 || servernodeptr->nettype >= ARRAY_LEN(netnames)) {
+		servernodeptr->nettype = 0;
+	}
 
 	s = Info_ValueForKey( info, "game");
 	i = atoi( Info_ValueForKey( info, "gametype") );

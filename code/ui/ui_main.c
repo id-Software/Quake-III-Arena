@@ -116,7 +116,7 @@ static const int numSortKeys = sizeof(sortKeys) / sizeof(const char*);
 static char* netnames[] = {
 	"???",
 	"UDP",
-	NULL
+	"UDP6"
 };
 
 #ifndef MISSIONPACK
@@ -941,7 +941,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 
 	handle = trap_PC_LoadSource( menuFile );
 	if (!handle) {
-		trap_Error( va( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile ) );
+		Com_Printf( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile );
 		handle = trap_PC_LoadSource( "ui/menus.txt" );
 		if (!handle) {
 			trap_Error( va( S_COLOR_RED "default menu file not found: ui/menus.txt, unable to continue!\n") );
@@ -2265,7 +2265,7 @@ static qboolean UI_Handicap_HandleKey(int flags, float *special, int key) {
 		}
     if (h > 100) {
       h = 5;
-    } else if (h < 0) {
+    } else if (h < 5) {
 			h = 100;
 		}
   	trap_Cvar_Set( "handicap", va( "%i", h) );
@@ -4307,9 +4307,15 @@ static const char *UI_FeederItemText(float feederID, int index, int column, qhan
 						return Info_ValueForKey(info, "addr");
 					} else {
 						if ( ui_netSource.integer == AS_LOCAL ) {
+							int nettype = atoi(Info_ValueForKey(info, "nettype"));
+
+							if (nettype < 0 || nettype >= ARRAY_LEN(netnames)) {
+								nettype = 0;
+							}
+
 							Com_sprintf( hostname, sizeof(hostname), "%s [%s]",
 											Info_ValueForKey(info, "hostname"),
-											netnames[atoi(Info_ValueForKey(info, "nettype"))] );
+											netnames[nettype] );
 							return hostname;
 						}
 						else {
