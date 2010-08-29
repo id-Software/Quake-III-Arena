@@ -562,8 +562,8 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 				((float *)frame->bones)[j] = LittleFloat( ((float *)curframe->bones)[j] );
 			}
 			
-			curframe++;
-			frame++;
+			curframe = (mdrFrame_t *) &cframe->bones[j];
+			frame = (mdrFrame_t *) &frame->bones[j];
 		}
 	}
 	
