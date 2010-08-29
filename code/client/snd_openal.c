@@ -127,6 +127,7 @@ typedef struct alSfx_s
 	snd_info_t	info;					// information for this sound like rate, sample count..
 
 	qboolean	isDefault;				// Couldn't be loaded - use default FX
+	qboolean	isDefaultChecked;		// Sound has been check if it isDefault
 	qboolean	inMemory;				// Sound is stored in memory
 	qboolean	isLocked;				// Sound is locked (can not be unloaded)
 	int				lastUsedTime;		// Time last used
@@ -291,7 +292,7 @@ static qboolean S_AL_BufferEvict( void )
 S_AL_BufferLoad
 =================
 */
-static void S_AL_BufferLoad(sfxHandle_t sfx)
+static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 {
 	ALenum error;
 	ALuint format;
@@ -309,7 +310,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 		return;
 
 	// Already done?
-	if((curSfx->inMemory) || (curSfx->isDefault))
+	if((curSfx->inMemory) || (curSfx->isDefault) || (!cache && curSfx->isDefaultChecked))
 		return;
 
 	// Try to load
@@ -317,6 +318,15 @@ static void S_AL_BufferLoad(sfxHandle_t sfx)
 	if(!data)
 	{
 		S_AL_BufferUseDefault(sfx);
+		return;
+	}
+
+	curSfx->isDefaultChecked = qtrue;
+
+	if (!cache)
+	{
+		// Don't create AL cache
+		Z_Free(data);
 		return;
 	}
 
@@ -394,7 +404,7 @@ void S_AL_BufferUse(sfxHandle_t sfx)
 		return;
 
 	if((!knownSfx[sfx].inMemory) && (!knownSfx[sfx].isDefault))
-		S_AL_BufferLoad(sfx);
+		S_AL_BufferLoad(sfx, qtrue);
 	knownSfx[sfx].lastUsedTime = Sys_Milliseconds();
 }
 
@@ -460,9 +470,13 @@ sfxHandle_t S_AL_RegisterSound( const char *sample, qboolean compressed )
 {
 	sfxHandle_t sfx = S_AL_BufferFind(sample);
 
-	if( s_alPrecache->integer && (!knownSfx[sfx].inMemory) && (!knownSfx[sfx].isDefault))
-		S_AL_BufferLoad(sfx);
+	if((!knownSfx[sfx].inMemory) && (!knownSfx[sfx].isDefault))
+		S_AL_BufferLoad(sfx, s_alPrecache->integer);
 	knownSfx[sfx].lastUsedTime = Com_Milliseconds();
+
+	if (knownSfx[sfx].isDefault) {
+		return 0;
+	}
 
 	return sfx;
 }
