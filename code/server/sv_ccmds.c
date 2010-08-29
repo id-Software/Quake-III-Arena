@@ -180,11 +180,15 @@ static void SV_Map_f( void ) {
 		// may not set sv_maxclients directly, always set latched
 		Cvar_SetLatched( "sv_maxclients", "8" );
 		cmd += 2;
-		cheat = qfalse;
+		if (!Q_stricmp( cmd, "devmap" ) ) {
+			cheat = qtrue;
+		} else {
+			cheat = qfalse;
+		}
 		killBots = qtrue;
 	}
 	else {
-		if ( !Q_stricmp( cmd, "devmap" ) || !Q_stricmp( cmd, "spdevmap" ) ) {
+		if ( !Q_stricmp( cmd, "devmap" ) ) {
 			cheat = qtrue;
 			killBots = qtrue;
 		} else {
