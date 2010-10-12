@@ -44,7 +44,8 @@ OutFile "ioquake3-XXXVERSIONXXX-XXXRELEASEXXX.x86.exe"
 ;Pages
 
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
-#!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
+;!insertmacro MUI_PAGE_LICENSE "../../COPYING.txt"
+!define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -83,7 +84,7 @@ Section "ioquake3 (required)"
   File "../../build/release-mingw32-x86/ioq3ded.x86.exe"
   File "../../build/release-mingw32-x86/ioquake3.x86.exe"
   File "../../COPYING.txt"
-  File "../../README.txt"
+  File "/oname=README.txt" "../../README"
   File "../../id-readme.txt"
   File "../../voip-readme.txt"
 
@@ -166,6 +167,8 @@ Section "Uninstall"
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\id-readme.txt
   Delete $INSTDIR\voip-readme.txt
+
+  Delete $INSTDIR\zlib1.dll
 
   Delete $INSTDIR\SDL.dll
 
