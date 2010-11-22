@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /* need this on NX enabled systems (i386 with PAE kernel or
  * noexec32=on x86_64) */
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
 #define VM_X86_MMAP
 #endif
 
