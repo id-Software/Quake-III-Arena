@@ -74,7 +74,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //================================================================= WIN64/32 ===
 
-#ifdef __WIN64__
+#if defined(_WIN64) || defined(__WIN64__)
 
 #undef QDECL
 #define QDECL __cdecl
@@ -98,7 +98,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define DLL_EXT ".dll"
 
-#elif __WIN32__
+#elif defined(_WIN32) || defined(__WIN32__)
 
 #undef QDECL
 #define QDECL __cdecl
