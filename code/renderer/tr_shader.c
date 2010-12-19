@@ -2866,7 +2866,6 @@ void	R_ShaderList_f (void) {
 	ri.Printf (PRINT_ALL, "------------------\n");
 }
 
-
 /*
 ====================
 ScanAndLoadShaderFiles
@@ -2883,7 +2882,7 @@ static void ScanAndLoadShaderFiles( void )
 	char *p;
 	int numShaderFiles;
 	int i;
-	char *oldp, *token, *hashMem;
+	char *oldp, *token, *hashMem, *textEnd;
 	int shaderTextHashTableSizes[MAX_SHADERTEXT_HASH], hash, size;
 
 	long sum = 0, summand;
@@ -2944,19 +2943,21 @@ static void ScanAndLoadShaderFiles( void )
 	// build single large buffer
 	s_shaderText = ri.Hunk_Alloc( sum + numShaderFiles*2, h_low );
 	s_shaderText[ 0 ] = '\0';
-
+	textEnd = s_shaderText;
+ 
 	// free in reverse order, so the temp files are all dumped
 	for ( i = numShaderFiles - 1; i >= 0 ; i-- )
 	{
-		if(buffers[i])
-		{
-			p = &s_shaderText[strlen(s_shaderText)];
-			strcat( s_shaderText, buffers[i] );
-			ri.FS_FreeFile( buffers[i] );
-			COM_Compress(p);
-			strcat( s_shaderText, "\n" );
-		}
+		if ( !buffers[i] )
+			continue;
+
+		strcat( textEnd, buffers[i] );
+		strcat( textEnd, "\n" );
+		textEnd += strlen( textEnd );
+		ri.FS_FreeFile( buffers[i] );
 	}
+
+	COM_Compress( s_shaderText );
 
 	// free up memory
 	ri.FS_FreeFileList( shaderFiles );
