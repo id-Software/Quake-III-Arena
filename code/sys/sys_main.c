@@ -162,11 +162,16 @@ qboolean Sys_WritePIDFile( void )
 		char  pidBuffer[ 64 ] = { 0 };
 		int   pid;
 
-		fread( pidBuffer, sizeof( char ), sizeof( pidBuffer ) - 1, f );
+		pid = fread( pidBuffer, sizeof( char ), sizeof( pidBuffer ) - 1, f );
 		fclose( f );
 
-		pid = atoi( pidBuffer );
-		if( !Sys_PIDIsRunning( pid ) )
+		if(pid > 0)
+		{
+			pid = atoi( pidBuffer );
+			if( !Sys_PIDIsRunning( pid ) )
+				stale = qtrue;
+		}
+		else
 			stale = qtrue;
 	}
 
