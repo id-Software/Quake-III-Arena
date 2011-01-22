@@ -2327,6 +2327,9 @@ static char *FindShaderInShaderText( const char *shadername ) {
 
 	hash = generateHashValue(shadername, MAX_SHADERTEXT_HASH);
 
+	if(!shaderTextHashTable[hash])
+		return NULL;
+
 	for (i = 0; shaderTextHashTable[hash][i]; i++) {
 		p = shaderTextHashTable[hash][i];
 		token = COM_ParseExt(&p, qtrue);
