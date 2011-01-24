@@ -232,7 +232,6 @@ but not on every player enter or exit.
 ================
 */
 #define	HEARTBEAT_MSEC	300*1000
-#define	HEARTBEAT_GAME	"QuakeArena-1"
 void SV_MasterHeartbeat( void ) {
 	static netadr_t	adr[MAX_MASTER_SERVERS][2]; // [2] for v4 and v6 address for the same address string.
 	int			i;
@@ -316,9 +315,9 @@ void SV_MasterHeartbeat( void ) {
 		// ever incompatably changes
 
 		if(adr[i][0].type != NA_BAD)
-			NET_OutOfBandPrint( NS_SERVER, adr[i][0], "heartbeat %s\n", HEARTBEAT_GAME );
+			NET_OutOfBandPrint(NS_SERVER, adr[i][0], "heartbeat %s\n", GAMENAME_FOR_MASTER);
 		if(adr[i][1].type != NA_BAD)
-			NET_OutOfBandPrint( NS_SERVER, adr[i][1], "heartbeat %s\n", HEARTBEAT_GAME );
+			NET_OutOfBandPrint(NS_SERVER, adr[i][1], "heartbeat %s\n", GAMENAME_FOR_MASTER);
 	}
 }
 
