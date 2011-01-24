@@ -309,11 +309,11 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 
 		if(search)
 		{
-			if(res->ai_addrlen > sadr_len)
-				res->ai_addrlen = sadr_len;
+			if(search->ai_addrlen > sadr_len)
+				search->ai_addrlen = sadr_len;
 				
-			memcpy(sadr, res->ai_addr, res->ai_addrlen);
-			freeaddrinfo(res);
+			memcpy(sadr, search->ai_addr, search->ai_addrlen);
+			freeaddrinfo(search);
 			
 			return qtrue;
 		}
