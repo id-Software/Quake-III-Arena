@@ -1097,20 +1097,31 @@ static void SV_Status_f( void ) {
 		}
 
 		Com_Printf ("%s", cl->name);
-    // TTimo adding a ^7 to reset the color
-    // NOTE: colored names in status breaks the padding (WONTFIX)
-    Com_Printf ("^7");
-		l = 16 - strlen(cl->name);
-		for (j=0 ; j<l ; j++)
+		
+		// TTimo adding a ^7 to reset the color
+		// NOTE: colored names in status breaks the padding (WONTFIX)
+		Com_Printf ("^7");
+		l = 14 - strlen(cl->name);
+		j = 0;
+		
+		do
+		{
 			Com_Printf (" ");
+			j++;
+		} while(j < l);
 
 		Com_Printf ("%7i ", svs.time - cl->lastPacketTime );
 
 		s = NET_AdrToString( cl->netchan.remoteAddress );
 		Com_Printf ("%s", s);
 		l = 22 - strlen(s);
-		for (j=0 ; j<l ; j++)
-			Com_Printf (" ");
+		j = 0;
+		
+		do
+		{
+			Com_Printf(" ");
+			j++;
+		} while(j < l);
 		
 		Com_Printf ("%5i", cl->netchan.qport);
 
