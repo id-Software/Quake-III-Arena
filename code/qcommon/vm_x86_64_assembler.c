@@ -248,7 +248,7 @@ static void hash_add_label(const char* label, unsigned address)
 	
 	labellen = strlen(label) + 1;
 	h->label = malloc(labellen);
-	Com_sprintf(h->label, labellen, "%s", label);
+	memcpy(h->label, label, labellen);
 	
 	h->address = address;
 	h->next = labelhash[i];
