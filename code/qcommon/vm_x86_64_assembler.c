@@ -246,7 +246,7 @@ static void hash_add_label(const char* label, unsigned address)
 	i %= sizeof(labelhash)/sizeof(labelhash[0]);
 	h = malloc(sizeof(struct hashentry));
 	
-	labellen = strlen(label);
+	labellen = strlen(label) + 1;
 	h->label = malloc(labellen);
 	Com_sprintf(h->label, labellen, "%s", label);
 	
