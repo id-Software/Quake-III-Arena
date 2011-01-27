@@ -572,8 +572,8 @@ ifeq ($(PLATFORM),freebsd)
   SERVER_CFLAGS = 
   HAVE_VM_COMPILED = true
 
-  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer -ffast-math
-  OPTIMIZE = $(OPTIMIZEVM)
+  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
+  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
