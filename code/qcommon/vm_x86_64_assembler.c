@@ -20,6 +20,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+#define _ISOC99_SOURCE
+
+#include "vm_local.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,9 +241,15 @@ static void hash_add_label(const char* label, unsigned address)
 {
 	struct hashentry* h;
 	unsigned i = hashkey(label, -1U);
+	int labellen;
+	
 	i %= sizeof(labelhash)/sizeof(labelhash[0]);
 	h = malloc(sizeof(struct hashentry));
-	h->label = strdup(label);
+	
+	labellen = strlen(label);
+	h->label = malloc(labellen);
+	Com_sprintf(h->label, labellen, "%s", label);
+	
 	h->address = address;
 	h->next = labelhash[i];
 	labelhash[i] = h;
