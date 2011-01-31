@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
 
+static UINT timerResolution = 0;
+
 #ifdef __WIN64__
 void Sys_SnapVector( float *v )
 {
@@ -696,6 +698,9 @@ Windows specific initialisation
 */
 void Sys_PlatformInit( void )
 {
+	TIMECAPS ptc;
+	UINT res;
+	
 #ifndef DEDICATED
 	const char *SDL_VIDEODRIVER = getenv( "SDL_VIDEODRIVER" );
 
@@ -708,6 +713,34 @@ void Sys_PlatformInit( void )
 	else
 		SDL_VIDEODRIVER_externallySet = qfalse;
 #endif
+
+	if(timeGetDevCaps(&ptc, sizeof(ptc)) == MMSYSERR_NOERROR)
+	{
+		timerResolution = ptc.wPeriodMin;
+
+		if(timerResolution > 1)
+		{
+			Com_Printf("Warning: Minimum supported timer resolution is %ums "
+				"on this system, recommended resolution 1ms\n", timerResolution);
+		}
+		
+		timeBeginPeriod(timerResolution);				
+	}
+	else
+		timerResolution = 0;
+}
+
+/*
+==============
+Sys_PlatformExit
+
+Windows specific initialisation
+==============
+*/
+void Sys_PlatformExit( void )
+{
+	if(timerResolution)
+		timeEndPeriod(timerResolution);
 }
 
 /*

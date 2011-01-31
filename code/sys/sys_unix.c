@@ -741,6 +741,17 @@ void Sys_PlatformInit( void )
 
 /*
 ==============
+Sys_PlatformExit
+
+Unix specific deinitialisation
+==============
+*/
+void Sys_PlatformExit( void )
+{
+}
+
+/*
+==============
 Sys_SetEnv
 
 set/unset environment variables (empty value removes it)
