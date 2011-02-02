@@ -144,7 +144,8 @@ New cvars
   com_standalone                    - Run in standalone mode
   com_maxfpsUnfocused               - Maximum frames per second when unfocused
   com_maxfpsMinimized               - Maximum frames per second when minimized
-
+  com_busyWait                      - Will use a busy loop to wait for rendering
+                                      next frame when set to non-zero value.
   in_joystickNo                     - select which joystick to use
   in_keyboardDebug                  - print keyboard debug info
 
@@ -234,6 +235,16 @@ Using Demo Data Files
   Please bear in mind that you will not be able to play online using the demo
   data, nor is it something that we like to spend much time maintaining or
   supporting.
+
+Help! Ioquake3 won't give me an fps of X anymore when setting com_maxfps!
+  Ioquake3 now uses the select() system call to wait for the rendering of the
+  next frame when com_maxfps was hit. This will improve your CPU load
+  considerably in these cases. However, not all systems may support a
+  granularity for its timing functions that is required to perform this waiting
+  correctly. For instance, ioquake3 tells select() to wait 2 milliseconds, but
+  really it can only wait for a multiple of 5ms, i.e. 5, 10, 15, 20... ms.
+  In this case you can always revert back to the old behaviour by setting the
+  cvar com_busyWait to 1.
 
 QuakeLive mouse acceleration (patch and this text written by TTimo from id)
   I've been using an experimental mouse acceleration code for a while, and

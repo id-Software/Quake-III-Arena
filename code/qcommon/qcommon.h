@@ -768,13 +768,12 @@ typedef enum
 
 typedef enum {
 	// SE_NONE must be zero
-	SE_NONE = 0,	// evTime is still valid
-	SE_KEY,		// evValue is a key code, evValue2 is the down flag
-	SE_CHAR,	// evValue is an ascii char
-	SE_MOUSE,	// evValue and evValue2 are reletive signed x / y moves
+	SE_NONE = 0,		// evTime is still valid
+	SE_KEY,			// evValue is a key code, evValue2 is the down flag
+	SE_CHAR,		// evValue is an ascii char
+	SE_MOUSE,		// evValue and evValue2 are reletive signed x / y moves
 	SE_JOYSTICK_AXIS,	// evValue is an axis number and evValue2 is the current state (-127 to 127)
-	SE_CONSOLE,	// evPtr is a char*
-	SE_PACKET	// evPtr is a netadr_t followed by data bytes to evPtrLength
+	SE_CONSOLE		// evPtr is a char*
 } sysEventType_t;
 
 typedef struct {
@@ -807,6 +806,7 @@ int			Com_Filter(char *filter, char *name, int casesensitive);
 int			Com_FilterPath(char *filter, char *name, int casesensitive);
 int			Com_RealTime(qtime_t *qtime);
 qboolean	Com_SafeMode( void );
+void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf);
 
 void		Com_StartupVariable( const char *match );
 // checks for and removes command line "+set var arg" constructs
@@ -845,7 +845,6 @@ extern	int		time_frontend;
 extern	int		time_backend;		// renderer backend time
 
 extern	int		com_frameTime;
-extern	int		com_frameMsec;
 
 extern	qboolean	com_errorEntered;
 
@@ -997,6 +996,7 @@ void SV_Init( void );
 void SV_Shutdown( char *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( netadr_t from, msg_t *msg );
+int SV_FrameMsec(void);
 qboolean SV_GameCommand( void );
 
 
@@ -1068,7 +1068,6 @@ cpuFeatures_t Sys_GetProcessorFeatures( void );
 void	Sys_SetErrorText( const char *text );
 
 void	Sys_SendPacket( int length, const void *data, netadr_t to );
-qboolean Sys_GetPacket( netadr_t *net_from, msg_t *net_message );
 
 qboolean	Sys_StringToAdr( const char *s, netadr_t *a, netadrtype_t family );
 //Does NOT parse port numbers, only base addresses.

@@ -30,17 +30,17 @@ serverStatic_t	svs;				// persistant server info
 server_t		sv;					// local server
 vm_t			*gvm = NULL;				// game virtual machine
 
-cvar_t	*sv_fps;				// time rate for running non-clients
+cvar_t	*sv_fps = NULL;			// time rate for running non-clients
 cvar_t	*sv_timeout;			// seconds without any message
 cvar_t	*sv_zombietime;			// seconds to sink messages after disconnect
 cvar_t	*sv_rconPassword;		// password for remote server commands
-cvar_t	*sv_privatePassword;	// password for the privateClient slots
+cvar_t	*sv_privatePassword;		// password for the privateClient slots
 cvar_t	*sv_allowDownload;
 cvar_t	*sv_maxclients;
 
 cvar_t	*sv_privateClients;		// number of clients reserved for password
 cvar_t	*sv_hostname;
-cvar_t	*sv_master[MAX_MASTER_SERVERS];		// master server ip address
+cvar_t	*sv_master[MAX_MASTER_SERVERS];	// master server ip address
 cvar_t	*sv_reconnectlimit;		// minimum seconds between connect messages
 cvar_t	*sv_showloss;			// report when usercmds are lost
 cvar_t	*sv_padPackets;			// add nop bytes to messages
@@ -1002,6 +1002,29 @@ static qboolean SV_CheckPaused( void ) {
 
 /*
 ==================
+SV_FrameMsec
+Return time in millseconds until processing of the next server frame.
+==================
+*/
+int SV_FrameMsec()
+{
+	if(sv_fps)
+	{
+		int frameMsec;
+		
+		frameMsec = 1000.0f / sv_fps->value;
+		
+		if(frameMsec < sv.timeResidual)
+			return 0;
+		else
+			return frameMsec - sv.timeResidual;
+	}
+	else
+		return 1;
+}
+
+/*
+==================
 SV_Frame
 
 Player movement occurs as a result of packet events, which
@@ -1051,13 +1074,6 @@ void SV_Frame( int msec ) {
 	sv.timeResidual += msec;
 
 	if (!com_dedicated->integer) SV_BotFrame (sv.time + sv.timeResidual);
-
-	if ( com_dedicated->integer && sv.timeResidual < frameMsec ) {
-		// NET_Sleep will give the OS time slices until either get a packet
-		// or time enough for a server frame has gone by
-		NET_Sleep(frameMsec - sv.timeResidual);
-		return;
-	}
 
 	// if time is about to hit the 32nd bit, kick all clients
 	// and clear sv.time, rather
