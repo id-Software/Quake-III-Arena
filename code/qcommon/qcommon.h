@@ -573,8 +573,9 @@ issues.
 #define FS_UI_REF		0x02
 #define FS_CGAME_REF	0x04
 #define FS_QAGAME_REF	0x08
-// number of id paks that will never be autodownloaded from baseq3
+// number of id paks that will never be autodownloaded from baseq3/missionpack
 #define NUM_ID_PAKS		9
+#define NUM_TA_PAKS		4
 
 #define	MAX_FILE_HANDLES	64
 
@@ -702,7 +703,7 @@ void FS_PureServerSetLoadedPaks( const char *pakSums, const char *pakNames );
 // sole exception of .cfg files.
 
 qboolean FS_CheckDirTraversal(const char *checkdir);
-qboolean FS_idPak( char *pak, char *base );
+qboolean FS_idPak(char *pak, char *base, int numPaks);
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring );
 
 void FS_Rename( const char *from, const char *to );
@@ -831,6 +832,9 @@ extern	cvar_t	*com_maxfpsUnfocused;
 extern	cvar_t	*com_minimized;
 extern	cvar_t	*com_maxfpsMinimized;
 extern	cvar_t	*com_altivec;
+extern	cvar_t	*com_standalone;
+extern	cvar_t	*com_basegame;
+extern	cvar_t	*com_homepath;
 
 // both client and server must agree to pause
 extern	cvar_t	*cl_paused;

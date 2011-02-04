@@ -88,8 +88,14 @@ char *Sys_DefaultHomePath( void )
 			FreeLibrary(shfolder);
 			return NULL;
 		}
-		Q_strncpyz( homePath, szPath, sizeof( homePath ) );
-		Q_strcat( homePath, sizeof( homePath ), "\\Quake3" );
+		
+		Com_Sprintf(homePath, sizeof(homePath), "%s%c", szPath, PATH_SEP);
+
+		if(com_homepath->string[0])
+			Q_strcat(homePath, sizeof(homePath), com_homepath->string);
+		else
+			Q_strcat(homePath, sizeof(homePath), "Quake3");
+
 		FreeLibrary(shfolder);
 	}
 

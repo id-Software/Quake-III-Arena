@@ -121,7 +121,7 @@ void Main_MenuEvent (void* ptr, int event) {
 		break;
 
 	case ID_TEAMARENA:
-		trap_Cvar_Set( "fs_game", "missionpack");
+		trap_Cvar_Set( "fs_game", BASETA);
 		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart;" );
 		break;
 
@@ -248,7 +248,7 @@ static qboolean UI_TeamArenaExists( void ) {
 	for( i = 0; i < numdirs; i++ ) {
 		dirlen = strlen( dirptr ) + 1;
     descptr = dirptr + dirlen;
-		if (Q_stricmp(dirptr, "missionpack") == 0) {
+		if (Q_stricmp(dirptr, BASETA) == 0) {
 			return qtrue;
 		}
     dirptr += dirlen + strlen(descptr) + 1;

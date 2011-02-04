@@ -83,6 +83,8 @@ cvar_t	*com_minimized;
 cvar_t	*com_maxfpsMinimized;
 cvar_t	*com_abnormalExit;
 cvar_t	*com_standalone;
+cvar_t	*com_basegame;
+cvar_t  *com_homepath;
 cvar_t	*com_busyWait;
 
 // com_speeds times
@@ -2616,12 +2618,19 @@ void Com_Init( char *commandLine ) {
 	Cmd_Init ();
 
 	// get the developer cvar set as early as possible
-	Com_StartupVariable( "developer" );
 	com_developer = Cvar_Get("developer", "0", CVAR_TEMP);
 
 	// done early so bind command exists
 	CL_InitKeyCommands();
 
+	com_standalone = Cvar_Get("com_standalone", "0", CVAR_ROM);
+	com_basegame = Cvar_Get("com_basegame", BASEGAME, CVAR_INIT);
+	com_homepath = Cvar_Get("com_homepath", "", CVAR_INIT);
+	
+	if(!com_basegame->string[0])
+		Cvar_ForceReset("com_basegame");
+
+	// Com_StartupVariable(
 	FS_InitFilesystem ();
 
 	Com_InitJournaling();
@@ -2690,7 +2699,6 @@ void Com_Init( char *commandLine ) {
 	com_minimized = Cvar_Get( "com_minimized", "0", CVAR_ROM );
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
-	com_standalone = Cvar_Get( "com_standalone", "0", CVAR_INIT );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
 
 	com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
@@ -2806,7 +2814,7 @@ void Com_WriteConfiguration( void ) {
 #ifndef DEDICATED
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
 #ifndef STANDALONE
-	if(!Cvar_VariableIntegerValue("com_standalone"))
+	if(!com_standalone->integer)
 	{
 		if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
 			Com_WriteCDKey( fs->string, &cl_cdkey[16] );

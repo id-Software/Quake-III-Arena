@@ -141,7 +141,14 @@ New cvars
 
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
-  com_standalone                    - Run in standalone mode
+  com_standalone (read only)        - If set to 1, quake3 is running in
+                                      standalone mode.
+  com_basegame                      - Use a different base than baseq3. If no
+                                      original Quake3 or TeamArena pak files
+                                      are found, this will enable running in
+                                      standalone mode.
+  com_homepath                      - Specify name that is to be appended to the
+                                      home path
   com_maxfpsUnfocused               - Maximum frames per second when unfocused
   com_maxfpsMinimized               - Maximum frames per second when minimized
   com_busyWait                      - Will use a busy loop to wait for rendering
@@ -334,11 +341,22 @@ Creating standalone games
   your own binaries. Instead, you can just use the pre-built binaries on the
   website. Just make sure the game is called with:
 
-    +set com_standalone 1 +set fs_game <yourgamedir>
-
-  in any links/scripts you install for your users to start the game. Note that
-  the com_standalone setting is rendered ineffective, if the binary detects pk3
-  files in the directory "baseq3", so you cannot use that one as game dir.
+    +set com_basegame <yournewbase>
+    
+  in any links/scripts you install for your users to start the game. The
+  binary must not detect any original quake3 game pak files. If this
+  condition is met, the game will set com_standalone to 1 and is then running
+  in stand alone mode.
+  
+  If you want the engine to use a different directory in your homepath than
+  e.g. "Quake3" on Windows or ".q3a" on Linux, then set a new name at startup
+  by adding
+  
+    +set com_homepath <homedirname>
+  
+  to the command line. Example line:
+  
+    +set com_basegame basefoo +set com_homepath .foo
 
   If you really changed parts that would make vanilla ioquake3 incompatible with
   your mod, we have included another way to conveniently build a stand-alone

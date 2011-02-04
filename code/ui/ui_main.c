@@ -65,7 +65,7 @@ static const int numNetSources = sizeof(netSources) / sizeof(const char*);
 static const serverFilter_t serverFilters[] = {
 	{"All", "" },
 	{"Quake 3 Arena", "" },
-	{"Team Arena", "missionpack" },
+	{"Team Arena", BASETA },
 	{"Rocket Arena", "arena" },
 	{"Alliance", "alliance20" },
 	{"Weapons Factory Arena", "wfa" },

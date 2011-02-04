@@ -97,7 +97,7 @@ void SV_GetChallenge(netadr_t from)
 #ifndef STANDALONE
 	// Drop the authorize stuff if this client is coming in via v6 as the auth server does not support ipv6.
 	// Drop also for addresses coming in on local LAN and for stand-alone games independent from id's assets.
-	if(challenge->adr.type == NA_IP && !Cvar_VariableIntegerValue("com_standalone") && !Sys_IsLANAddress(from))
+	if(challenge->adr.type == NA_IP && !com_standalone->integer && !Sys_IsLANAddress(from))
 	{
 		// look up the authorize server's IP
 		if (svs.authorizeAddress.type == NA_BAD)
@@ -882,8 +882,8 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 
 						// now that we know the file is referenced,
 						// check whether it's legal to download it.
-						missionPack = FS_idPak(pakbuf, "missionpack");
-						idPack = missionPack || FS_idPak(pakbuf, BASEGAME);
+						missionPack = FS_idPak(pakbuf, BASETA, NUM_TA_PAKS);
+						idPack = missionPack || FS_idPak(pakbuf, BASEGAME, NUM_ID_PAKS);
 
 						break;
 					}
