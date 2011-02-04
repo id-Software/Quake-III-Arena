@@ -4,7 +4,7 @@
 # GNU Make required
 #
 
-COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
+COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'|sed -e 's/\//_/g')
 
 COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 
@@ -239,7 +239,7 @@ LIB=lib
 INSTALL=install
 MKDIR=mkdir
 
-ifeq ($(PLATFORM),linux)
+ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
 
   ifeq ($(ARCH),alpha)
     ARCH=axp
