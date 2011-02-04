@@ -917,12 +917,10 @@ double strtod( const char *nptr, const char **endptr )
 	if( Q_stricmpn( nptr, "nan", 3 ) == 0 )
 	{
 		floatint_t nan;
-		if( endptr == NULL )
-		{
-			nan.ui = 0x7fffffff;
-			return nan.f;
-		}
-		*endptr = &nptr[3];
+
+		if( endptr )
+			*endptr = &nptr[3];
+
 		// nan can be followed by a bracketed number (in hex, octal,
 		// or decimal) which is then put in the mantissa
 		// this can be used to generate signalling or quiet NaNs, for
