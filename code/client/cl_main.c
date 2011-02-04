@@ -3127,6 +3127,7 @@ void CL_Init( void ) {
 	// offset for the power function (for style 1, ignored otherwise)
 	// this should be set to the max rate value
 	cl_mouseAccelOffset = Cvar_Get( "cl_mouseAccelOffset", "5", CVAR_ARCHIVE );
+	Cvar_CheckRange(cl_mouseAccelOffset, 0.001, 50000.0, qfalse);
 
 	cl_showMouseRate = Cvar_Get ("cl_showmouserate", "0", 0);
 
