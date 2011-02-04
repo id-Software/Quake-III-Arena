@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define MAX_USERMOVE				400
 #define MAX_COMMANDARGUMENTS		10
-#define ACTION_JUMPEDLASTFRAME		128
 
 bot_input_t *botinputs;
 
@@ -416,24 +415,6 @@ void EA_View(int client, vec3_t viewangles)
 //===========================================================================
 void EA_EndRegular(int client, float thinktime)
 {
-/*
-	bot_input_t *bi;
-	int jumped = qfalse;
-
-	bi = &botinputs[client];
-
-	bi->actionflags &= ~ACTION_JUMPEDLASTFRAME;
-
-	bi->thinktime = thinktime;
-	botimport.BotInput(client, bi);
-
-	bi->thinktime = 0;
-	VectorClear(bi->dir);
-	bi->speed = 0;
-	jumped = bi->actionflags & ACTION_JUMP;
-	bi->actionflags = 0;
-	if (jumped) bi->actionflags |= ACTION_JUMPEDLASTFRAME;
-*/
 } //end of the function EA_EndRegular
 //===========================================================================
 //
@@ -444,23 +425,10 @@ void EA_EndRegular(int client, float thinktime)
 void EA_GetInput(int client, float thinktime, bot_input_t *input)
 {
 	bot_input_t *bi;
-//	int jumped = qfalse;
 
 	bi = &botinputs[client];
-
-//	bi->actionflags &= ~ACTION_JUMPEDLASTFRAME;
-
 	bi->thinktime = thinktime;
 	Com_Memcpy(input, bi, sizeof(bot_input_t));
-
-	/*
-	bi->thinktime = 0;
-	VectorClear(bi->dir);
-	bi->speed = 0;
-	jumped = bi->actionflags & ACTION_JUMP;
-	bi->actionflags = 0;
-	if (jumped) bi->actionflags |= ACTION_JUMPEDLASTFRAME;
-	*/
 } //end of the function EA_GetInput
 //===========================================================================
 //
@@ -474,7 +442,6 @@ void EA_ResetInput(int client)
 	int jumped = qfalse;
 
 	bi = &botinputs[client];
-	bi->actionflags &= ~ACTION_JUMPEDLASTFRAME;
 
 	bi->thinktime = 0;
 	VectorClear(bi->dir);
