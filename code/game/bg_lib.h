@@ -95,10 +95,10 @@ int toupper( int c );
 
 double atof( const char *string );
 double _atof( const char **stringPtr );
-double strtod( const char *nptr, const char **endptr );
+double strtod( const char *nptr, char **endptr );
 int atoi( const char *string );
 int _atoi( const char **stringPtr );
-long strtol( const char *nptr, const char **endptr, int base );
+long strtol( const char *nptr, char **endptr, int base );
 
 int Q_vsnprintf( char *buffer, size_t length, const char *fmt, va_list argptr );
 int Q_snprintf( char *buffer, size_t length, const char *fmt, ... ) __attribute__ ((format (printf, 3, 4)));

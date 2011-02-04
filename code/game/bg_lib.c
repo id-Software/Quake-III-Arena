@@ -904,7 +904,7 @@ The variable pointed to by endptr will hold the location of the first character
 in the nptr string that was not used in the conversion
 ==============
 */
-double strtod( const char *nptr, const char **endptr )
+double strtod( const char *nptr, char **endptr )
 {
 	double res;
 	qboolean neg = qfalse;
@@ -919,7 +919,7 @@ double strtod( const char *nptr, const char **endptr )
 		floatint_t nan;
 
 		if( endptr )
-			*endptr = &nptr[3];
+			*endptr = (char *)&nptr[3];
 
 		// nan can be followed by a bracketed number (in hex, octal,
 		// or decimal) which is then put in the mantissa
@@ -928,7 +928,7 @@ double strtod( const char *nptr, const char **endptr )
 		// note that nan(0) is infinity!
 		if( nptr[3] == '(' )
 		{
-			const char *end;
+			char *end;
 			int mantissa = strtol( &nptr[4], &end, 0 );
 			if( *end == ')' )
 			{
@@ -948,9 +948,9 @@ double strtod( const char *nptr, const char **endptr )
 		if( endptr == NULL )
 			return inf.f;
 		if( Q_stricmpn( &nptr[3], "inity", 5 ) == 0 )
-			*endptr = &nptr[8];
+			*endptr = (char *)&nptr[8];
 		else
-			*endptr = &nptr[3];
+			*endptr = (char *)&nptr[3];
 		return inf.f;
 	}
 
@@ -1016,12 +1016,12 @@ double strtod( const char *nptr, const char **endptr )
 			float res2;
 			// apparently (confusingly) the exponent should be
 			// decimal
-			exp = strtol( &nptr[1], &end, 10 );
+			exp = strtol( &nptr[1], (char **)&end, 10 );
 			if( &nptr[1] == end )
 			{
 				// no exponent
 				if( endptr )
-					*endptr = nptr;
+					*endptr = (char *)nptr;
 				return res;
 			}
 			if( exp > 0 )
@@ -1048,7 +1048,7 @@ double strtod( const char *nptr, const char **endptr )
 			}
 		}
 		if( endptr )
-			*endptr = end;
+			*endptr = (char *)end;
 		return res;
 	}
 	// decimal
@@ -1080,12 +1080,12 @@ double strtod( const char *nptr, const char **endptr )
 		{
 			int exp;
 			float res10;
-			exp = strtol( &nptr[1], &end, 10 );
+			exp = strtol( &nptr[1], (char **)&end, 10 );
 			if( &nptr[1] == end )
 			{
 				// no exponent
 				if( endptr )
-					*endptr = nptr;
+					*endptr = (char *)nptr;
 				return res;
 			}
 			if( exp > 0 )
@@ -1114,7 +1114,7 @@ double strtod( const char *nptr, const char **endptr )
 			}
 		}
 		if( endptr )
-			*endptr = end;
+			*endptr = (char *)end;
 		return res;
 	}
 }
@@ -1224,13 +1224,13 @@ Will not overflow - returns LONG_MIN or LONG_MAX as appropriate
 *endptr is set to the location of the first character not used
 ==============
 */
-long strtol( const char *nptr, const char **endptr, int base )
+long strtol( const char *nptr, char **endptr, int base )
 {
 	long res;
 	qboolean pos = qtrue;
 
 	if( endptr )
-		*endptr = nptr;
+		*endptr = (char *)nptr;
 	// bases other than 0, 2, 8, 16 are very rarely used, but they're
 	// not much extra effort to support
 	if( base < 0 || base == 1 || base > 36 )
@@ -1252,14 +1252,14 @@ long strtol( const char *nptr, const char **endptr, int base )
 		nptr++;
 		// 0 is always a valid digit
 		if( endptr )
-			*endptr = nptr;
+			*endptr = (char *)nptr;
 		if( *nptr == 'x' || *nptr == 'X' )
 		{
 			if( base != 0 && base != 16 )
 			{
 				// can't be hex, reject x (accept 0)
 				if( endptr )
-					*endptr = nptr;
+					*endptr = (char *)nptr;
 				return 0;
 			}
 			nptr++;
@@ -1292,7 +1292,7 @@ long strtol( const char *nptr, const char **endptr, int base )
 			res = res * base - val;
 		nptr++;
 		if( endptr )
-			*endptr = nptr;
+			*endptr = (char *)nptr;
 	}
 	if( pos )
 	{
