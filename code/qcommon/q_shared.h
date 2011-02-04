@@ -181,9 +181,9 @@ typedef int		clipHandle_t;
 #define PAD(x,y) (((x)+(y)-1) & ~((y)-1))
 
 #ifdef __GNUC__
-#define ALIGN(x) __attribute__((aligned(x)))
+#define QALIGN(x) __attribute__((aligned(x)))
 #else
-#define ALIGN(x)
+#define QALIGN(x)
 #endif
 
 #ifndef NULL
