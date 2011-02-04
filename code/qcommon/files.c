@@ -1220,6 +1220,32 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 }
 
 
+char *FS_FindDll( const char *filename ) {
+	searchpath_t	*search;
+	directory_t		*dir;
+
+	if ( !fs_searchpaths ) {
+		Com_Error( ERR_FATAL, "Filesystem call made without initialization\n" );
+	}
+
+	for ( search = fs_searchpaths ; search ; search = search->next ) {
+		if ( search->dir ) {
+			FILE *f;
+			char *netpath;
+
+			dir = search->dir;
+			netpath = FS_BuildOSPath( dir->path, dir->gamedir, filename );
+			f = fopen( netpath, "rb" );
+			if (f) {
+				fclose( f );
+				return netpath;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 /*
 =================
 FS_Read

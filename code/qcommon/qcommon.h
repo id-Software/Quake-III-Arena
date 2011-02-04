@@ -606,6 +606,9 @@ void	FS_FreeFileList( char **list );
 qboolean FS_FileExists( const char *file );
 
 qboolean FS_CreatePath (char *OSPath);
+
+char *FS_FindDll( const char *filename );
+
 char   *FS_BuildOSPath( const char *base, const char *game, const char *qpath );
 qboolean FS_CompareZipChecksum(const char *zipfile);
 
