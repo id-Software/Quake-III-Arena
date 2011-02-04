@@ -110,7 +110,8 @@ New cvars
   cl_mouseAccelStyle                - Set to 1 for QuakeLive mouse acceleration
                                       behaviour, 0 for standard q3
   cl_mouseAccelOffset               - Tuning the acceleration curve, see below
-
+  cl_gamename                       - Gamename sent to master server in
+                                      getserversExt query
   s_useOpenAL                       - use the OpenAL sound backend if available
   s_alPrecache                      - cache OpenAL sounds before use
   s_alGain                          - the value of AL_GAIN for each source
@@ -142,24 +143,27 @@ New cvars
   com_ansiColor                     - enable use of ANSI escape codes in the tty
   com_altivec                       - enable use of altivec on PowerPC systems
   com_standalone (read only)        - If set to 1, quake3 is running in
-                                      standalone mode.
+                                      standalone mode
   com_basegame                      - Use a different base than baseq3. If no
                                       original Quake3 or TeamArena pak files
                                       are found, this will enable running in
-                                      standalone mode.
+                                      standalone mode
   com_homepath                      - Specify name that is to be appended to the
                                       home path
   com_maxfpsUnfocused               - Maximum frames per second when unfocused
   com_maxfpsMinimized               - Maximum frames per second when minimized
   com_busyWait                      - Will use a busy loop to wait for rendering
-                                      next frame when set to non-zero value.
+                                      next frame when set to non-zero value
   in_joystickNo                     - select which joystick to use
   in_keyboardDebug                  - print keyboard debug info
 
   sv_dlURL                          - the base of the HTTP or FTP site that
                                       holds custom pk3 files for your server
   sv_banFile                        - Name of the file that is used for storing
-                                      the server bans.
+                                      the server bans
+  sv_heartbeat                      - Heartbeat string sent to master server
+  sv_flatline                       - Heartbeat string sent to master server
+                                      when server is killed
 
   net_ip6                           - IPv6 address to bind to
   net_port6                         - port to bind to using the ipv6 address
@@ -354,9 +358,26 @@ Creating standalone games
   
     +set com_homepath <homedirname>
   
-  to the command line. Example line:
+  to the command line. Then you can control which kind of messages to send to
+  the master server:
+  
+    +set sv_heartbeat <heartbeat> +set sv_flatline <flatline>
+    +set cl_gamename <gamename>
+  
+  The <heartbeat> and <flatline> message can be specific to your game. The
+  flatline message is sent to signal the master server that the game server is
+  quitting. Vanilla quake3 uses "QuakeArena-1" both for the heartbeat and
+  flatline messages.
+  The cl_gamename message is for dpmaster to specify which game the client
+  wants a server list for. It is only used in the new ipv6 based getServersExt
+  query.
+  
+  Example line:
   
     +set com_basegame basefoo +set com_homepath .foo
+    +set sv_heartbeat fooalive +set sv_flatline foodead
+    +set cl_gamename foo
+
 
   If you really changed parts that would make vanilla ioquake3 incompatible with
   your mod, we have included another way to conveniently build a stand-alone

@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define CLIENT_WINDOW_MIN_TITLE 	"changeme2"
   #define GAMENAME_FOR_MASTER		"iofoo3"		// must NOT contain whitespaces
   #define HEARTBEAT_FOR_MASTER		GAMENAME_FOR_MASTER
+  #define FLATLINE_FOR_MASTER		GAMENAME_FOR_MASTER "dead"
 #else
   #define PRODUCT_NAME			"ioq3"
   #define BASEGAME			"baseq3"
@@ -41,6 +42,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define CLIENT_WINDOW_MIN_TITLE 	"ioq3"
   #define GAMENAME_FOR_MASTER		"Quake3Arena"
   #define HEARTBEAT_FOR_MASTER		"QuakeArena-1"
+  #define FLATLINE_FOR_MASTER		HEARTBEAT_FOR_MASTER
 #endif
 
 #ifdef _MSC_VER
