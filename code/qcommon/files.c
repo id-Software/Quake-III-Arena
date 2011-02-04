@@ -3025,10 +3025,7 @@ static void FS_CheckPak0( void )
 		}
 	}
 
-	if(com_basegame->string[0]				&&
-	   Q_stricmp(com_basegame->string, BASEGAME)		&&
-	   !foundPak && !foundTA
-	  )
+	if(!foundPak && !foundTA && Q_stricmp(com_basegame->string, BASEGAME))
 	{
 		Cvar_Set("com_standalone", "1");
 	}
@@ -3659,4 +3656,12 @@ void	FS_FilenameCompletion( const char *dir, const char *ext,
 		callback( filename );
 	}
 	FS_FreeFileList( filenames );
+}
+
+const char *FS_GetCurrentGameDir(void)
+{
+	if(fs_gamedirvar->string[0])
+	        return fs_gamedirvar->string;
+
+        return com_basegame->string;
 }
