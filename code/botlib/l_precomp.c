@@ -1362,7 +1362,7 @@ define_t *PC_DefineFromString(char *string)
 #endif //DEFINEHASHING
 	//
 	FreeScript(script);
-	//if the define was created succesfully
+	//if the define was created successfully
 	if (res > 0) return def;
 	//free the define is created
 	if (src.defines) PC_FreeDefine(def);
