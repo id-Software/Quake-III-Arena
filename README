@@ -181,7 +181,8 @@ New cvars
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
   r_zProj                           - distance of observer camera to projection
                                       plane in quake3 standard units
-  r_greyscale                       - render black and white images
+  r_greyscale                       - desaturate textures, useful for anaglyph,
+                                      supports values in the range of 0 to 1
   r_stereoEnabled                   - enable stereo rendering for techniques
                                       like shutter glasses (untested)
   r_anaglyphMode                    - Enable rendering of anaglyph images

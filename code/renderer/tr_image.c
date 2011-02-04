@@ -560,6 +560,27 @@ static void Upload32( unsigned *data,
 	scan = ((byte *)data);
 	samples = 3;
 
+	if( r_greyscale->integer )
+	{
+		for ( i = 0; i < c; i++ )
+		{
+			byte luma = LUMA(scan[i*4], scan[i*4 + 1], scan[i*4 + 2]);
+			scan[i*4] = luma;
+			scan[i*4 + 1] = luma;
+			scan[i*4 + 2] = luma;
+		}
+	}
+	else if( r_greyscale->value )
+	{
+		for ( i = 0; i < c; i++ )
+		{
+			float luma = LUMA(scan[i*4], scan[i*4 + 1], scan[i*4 + 2]);
+			scan[i*4] = LERP(scan[i*4], luma, r_greyscale->value);
+			scan[i*4 + 1] = LERP(scan[i*4 + 1], luma, r_greyscale->value);
+			scan[i*4 + 2] = LERP(scan[i*4 + 2], luma, r_greyscale->value);
+		}
+	}
+
 	if(lightMap)
 	{
 		if(r_greyscale->integer)
