@@ -103,10 +103,10 @@ typedef enum {
 
 	GT_TEAM,			// team deathmatch
 	GT_CTF,				// capture the flag
-	GT_MAX_GAME_TYPE,		// other gametypes haven't been implemented.
 	GT_1FCTF,
 	GT_OBELISK,
-	GT_HARVESTER
+	GT_HARVESTER,
+	GT_MAX_GAME_TYPE
 } gametype_t;
 
 typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
