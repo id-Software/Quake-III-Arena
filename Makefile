@@ -241,8 +241,8 @@ MKDIR=mkdir
 
 ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
 
-  ifeq ($(ARCH),alpha)
-    ARCH=axp
+  ifeq ($(ARCH),axp)
+    ARCH=alpha
   else
   ifeq ($(ARCH),x86_64)
     LIB=lib64
@@ -309,6 +309,11 @@ ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
     OPTIMIZE += -mtune=ultrasparc3 -mv8plus
     OPTIMIZEVM += -mtune=ultrasparc3 -mv8plus
     HAVE_VM_COMPILED=true
+  endif
+  ifeq ($(ARCH),alpha)
+    # According to http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=410555
+    # -ffast-math will cause the client to die with SIGFPE on Alpha
+    OPTIMIZE = $(OPTIMIZEVM)
   endif
   endif
   endif
