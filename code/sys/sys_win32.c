@@ -89,7 +89,7 @@ char *Sys_DefaultHomePath( void )
 			return NULL;
 		}
 		
-		Com_Sprintf(homePath, sizeof(homePath), "%s%c", szPath, PATH_SEP);
+		Com_sprintf(homePath, sizeof(homePath), "%s%c", szPath, PATH_SEP);
 
 		if(com_homepath->string[0])
 			Q_strcat(homePath, sizeof(homePath), com_homepath->string);
