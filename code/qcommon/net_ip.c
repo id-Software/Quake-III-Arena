@@ -50,6 +50,7 @@ typedef unsigned short sa_family_t;
 #	define EADDRNOTAVAIL	WSAEADDRNOTAVAIL
 #	define EAFNOSUPPORT		WSAEAFNOSUPPORT
 #	define ECONNRESET			WSAECONNRESET
+typedef u_long	ioctlarg_t;
 #	define socketError		WSAGetLastError( )
 
 static WSADATA	winsockdata;
@@ -85,6 +86,7 @@ typedef int SOCKET;
 #	define SOCKET_ERROR			-1
 #	define closesocket			close
 #	define ioctlsocket			ioctl
+typedef int	ioctlarg_t;
 #	define socketError			errno
 
 #endif
@@ -831,7 +833,7 @@ NET_IPSocket
 int NET_IPSocket( char *net_interface, int port, int *err ) {
 	SOCKET				newsocket;
 	struct sockaddr_in	address;
-	u_long				_true = 1;
+	ioctlarg_t			_true = 1;
 	int					i = 1;
 
 	*err = 0;
@@ -899,7 +901,7 @@ NET_IP6Socket
 int NET_IP6Socket( char *net_interface, int port, struct sockaddr_in6 *bindto, int *err ) {
 	SOCKET				newsocket;
 	struct sockaddr_in6	address;
-	u_long				_true = 1;
+	ioctlarg_t			_true = 1;
 
 	*err = 0;
 

@@ -241,15 +241,12 @@ static void hash_add_label(const char* label, unsigned address)
 {
 	struct hashentry* h;
 	unsigned i = hashkey(label, -1U);
-	int labellen;
 	
 	i %= sizeof(labelhash)/sizeof(labelhash[0]);
 	h = malloc(sizeof(struct hashentry));
 	
-	labellen = strlen(label) + 1;
-	h->label = malloc(labellen);
-	memcpy(h->label, label, labellen);
-	
+	h->label = strdup(label);
+
 	h->address = address;
 	h->next = labelhash[i];
 	labelhash[i] = h;
