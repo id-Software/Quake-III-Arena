@@ -463,15 +463,15 @@ void CG_DrawOldTourneyScoreboard( void ) {
 		trap_SendClientCommand( "score" );
 	}
 
-	color[0] = 1;
-	color[1] = 1;
-	color[2] = 1;
-	color[3] = 1;
-
 	// draw the dialog background
 	color[0] = color[1] = color[2] = 0;
 	color[3] = 1;
 	CG_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color );
+
+	color[0] = 1;
+	color[1] = 1;
+	color[2] = 1;
+	color[3] = 1;
 
 	// print the mesage of the day
 	s = CG_ConfigString( CS_MOTD );
