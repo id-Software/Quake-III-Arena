@@ -239,7 +239,9 @@ LIB=lib
 INSTALL=install
 MKDIR=mkdir
 
-ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
+#ifneq (,$(findstring i86pc,$(shell uname -m)))
+#ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
+ifneq (,$(findstring $(PLATFORM), linux gnu_kfreebsd kfreebsd-gnu))
 
   ifeq ($(ARCH),axp)
     ARCH=alpha
