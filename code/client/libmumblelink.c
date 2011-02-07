@@ -25,6 +25,9 @@
 #define uint32_t UINT32
 #else
 #include <unistd.h>
+#ifdef __sun
+#define _POSIX_C_SOURCE 199309L
+#endif
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
