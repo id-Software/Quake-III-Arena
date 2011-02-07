@@ -93,6 +93,7 @@ Makefile.local:
   USE_CODEC_VORBIS  - enable Ogg Vorbis support
   USE_LOCAL_HEADERS - use headers local to ioq3 instead of system ones
   COPYDIR           - the target installation directory
+  TEMPDIR           - specify user defined directory for temp files
 
 The defaults for these variables differ depending on the target platform.
 

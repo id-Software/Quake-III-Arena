@@ -103,6 +103,10 @@ ifndef BUILD_DIR
 BUILD_DIR=build
 endif
 
+ifndef TEMPDIR
+TEMPDIR=/tmp
+endif
+
 ifndef GENERATE_DEPENDENCIES
 GENERATE_DEPENDENCIES=1
 endif
@@ -184,7 +188,6 @@ LOKISETUPDIR=misc/setup
 NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
-TEMPDIR=/tmp
 
 bin_path=$(shell which $(1) 2> /dev/null)
 
@@ -239,8 +242,6 @@ LIB=lib
 INSTALL=install
 MKDIR=mkdir
 
-#ifneq (,$(findstring i86pc,$(shell uname -m)))
-#ifneq (,findstring($(PLATFORM),linux gnu_kfreebsd kfreebsd-gnu))
 ifneq (,$(findstring $(PLATFORM), linux gnu_kfreebsd kfreebsd-gnu))
 
   ifeq ($(ARCH),axp)
