@@ -2656,8 +2656,12 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		havepak = qfalse;
 
 		// never autodownload any of the id paks
-		if ( FS_idPak(fs_serverReferencedPakNames[i], BASEGAME, NUM_ID_PAKS)
-		|| FS_idPak(fs_serverReferencedPakNames[i], BASETA, NUM_TA_PAKS) ) {
+		if(FS_idPak(fs_serverReferencedPakNames[i], BASEGAME, NUM_ID_PAKS)
+#ifndef STANDALONE
+	           || FS_idPak(fs_serverReferencedPakNames[i], BASETA, NUM_TA_PAKS)
+#endif
+		  )
+		{
 			continue;
 		}
 
