@@ -550,8 +550,10 @@ typedef struct {
 	int				spectatorOffset;										// current offset from start
 	int				spectatorPaintLen; 									// current offset from start
 
+#ifdef MISSIONPACK
 	// skull trails
 	skulltrail_t	skulltrails[MAX_CLIENTS];
+#endif
 
 	// centerprinting
 	int			centerPrintTime;
@@ -562,9 +564,6 @@ typedef struct {
 
 	// low ammo warning state
 	int			lowAmmoWarning;		// 1 = low, 2 = empty
-
-	// kill timers for carnage reward
-	int			lastKillTime;
 
 	// crosshair client ID
 	int			crosshairClientNum;
@@ -656,10 +655,12 @@ typedef struct {
 	qhandle_t	charsetPropB;
 	qhandle_t	whiteShader;
 
+#ifdef MISSIONPACK
 	qhandle_t	redCubeModel;
 	qhandle_t	blueCubeModel;
 	qhandle_t	redCubeIcon;
 	qhandle_t	blueCubeIcon;
+#endif
 	qhandle_t	redFlagModel;
 	qhandle_t	blueFlagModel;
 	qhandle_t	neutralFlagModel;
