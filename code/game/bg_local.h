@@ -60,7 +60,6 @@ extern	pml_t		pml;
 extern	float	pm_stopspeed;
 extern	float	pm_duckScale;
 extern	float	pm_swimScale;
-extern	float	pm_wadeScale;
 
 extern	float	pm_accelerate;
 extern	float	pm_airaccelerate;

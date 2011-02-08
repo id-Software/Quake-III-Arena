@@ -414,7 +414,7 @@ Used to load a development dll instead of a virtual machine
 #2 look in fs_basepath
 =================
 */
-void *Sys_LoadDll( const char *name, char *fqpath ,
+void *Sys_LoadDll( const char *name,
 	intptr_t (**entryPoint)(int, ...),
 	intptr_t (*systemcalls)(intptr_t, ...) )
 {
