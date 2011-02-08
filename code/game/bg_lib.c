@@ -272,18 +272,29 @@ int toupper( int c ) {
 	return c;
 }
 
-void *memmove( void *dest, const void *src, size_t count ) {
-	int		i;
+void *memmove(void *dest, const void *src, size_t count)
+{
+	size_t		i;
 
-	if ( dest > src ) {
-		for ( i = count-1 ; i >= 0 ; i-- ) {
-			((char *)dest)[i] = ((char *)src)[i];
+	if(count)
+	{
+		if(dest > src)
+		{
+			i = count - 1;
+			
+			do
+			{
+				((char *) dest)[i] = ((char *) src)[i];
+				i--;
+			} while(i > 0);
 		}
-	} else {
-		for ( i = 0 ; i < count ; i++ ) {
-			((char *)dest)[i] = ((char *)src)[i];
+		else
+		{
+			for(i = 0; i < count; i++)
+				((char *) dest)[i] = ((char *) src)[i];
 		}
 	}
+	
 	return dest;
 }
 
