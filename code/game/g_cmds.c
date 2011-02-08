@@ -385,38 +385,34 @@ and sends over a command to the client to resize the view,
 hide the scoreboard, and take a special screenshot
 ==================
 */
-void Cmd_LevelShot_f( gentity_t *ent ) {
-	if ( !CheatsOk( ent ) ) {
-		return;
-	}
-
-	// doesn't work in single player
-	if ( g_gametype.integer != 0 ) {
-		trap_SendServerCommand( ent-g_entities,
-			"print \"Must be in g_gametype 0 for levelshot\n\"" );
-		return;
-	}
-
+void Cmd_LevelShot_f(gentity_t *ent)
+{
 	if(!ent->client->pers.localClient)
 	{
 		trap_SendServerCommand(ent-g_entities,
-		"print \"The levelshot command must be executed by a local client\n\"");
+			"print \"The levelshot command must be executed by a local client\n\"");
 		return;
 	}
-	
+
+	if(!CheatsOk(ent))
+		return;
+
+	// doesn't work in single player
+	if(g_gametype.integer == GT_SINGLE_PLAYER)
+	{
+		trap_SendServerCommand(ent-g_entities,
+			"print \"Must not be in singleplayer mode for levelshot\n\"" );
+		return;
+	}
+
 	BeginIntermission();
-	trap_SendServerCommand( ent-g_entities, "clientLevelShot" );
+	trap_SendServerCommand(ent-g_entities, "clientLevelShot");
 }
 
 
 /*
 ==================
-Cmd_LevelShot_f
-
-This is just to help generate the level pictures
-for the menus.  It goes to the intermission immediately
-and sends over a command to the client to resize the view,
-hide the scoreboard, and take a special screenshot
+Cmd_TeamTask_f
 ==================
 */
 void Cmd_TeamTask_f( gentity_t *ent ) {
@@ -436,7 +432,6 @@ void Cmd_TeamTask_f( gentity_t *ent ) {
 	trap_SetUserinfo(client, userinfo);
 	ClientUserinfoChanged(client);
 }
-
 
 
 /*
