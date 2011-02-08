@@ -280,12 +280,12 @@ void *memmove(void *dest, const void *src, size_t count)
 	{
 		if(dest > src)
 		{
-			i = count - 1;
+			i = count;
 			
 			do
 			{
-				((char *) dest)[i] = ((char *) src)[i];
 				i--;
+				((char *) dest)[i] = ((char *) src)[i];
 			} while(i > 0);
 		}
 		else
