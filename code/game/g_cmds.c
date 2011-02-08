@@ -392,11 +392,18 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 
 	// doesn't work in single player
 	if ( g_gametype.integer != 0 ) {
-		trap_SendServerCommand( ent-g_entities, 
+		trap_SendServerCommand( ent-g_entities,
 			"print \"Must be in g_gametype 0 for levelshot\n\"" );
 		return;
 	}
 
+	if(!ent->client->pers.localClient)
+	{
+		trap_SendServerCommand(ent-g_entities,
+		"print \"The levelshot command must be executed by a local client\n\"");
+		return;
+	}
+	
 	BeginIntermission();
 	trap_SendServerCommand( ent-g_entities, "clientLevelShot" );
 }
