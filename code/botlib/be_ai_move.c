@@ -2366,7 +2366,7 @@ bot_moveresult_t BotTravel_FuncBobbing(bot_movestate_t *ms, aas_reachability_t *
 		VectorSubtract(reach->start, ms->origin, dir1);
 		if (!(ms->moveflags & MFL_SWIMMING)) dir1[2] = 0;
 		dist1 = VectorNormalize(dir1);
-		//if func_bobbing is Not it's start position
+		//if func_bobbing is Not its start position
 		VectorSubtract(bob_origin, bob_start, dir);
 		if (VectorLength(dir) > 16)
 		{
@@ -3027,7 +3027,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 	ms = BotMoveStateFromHandle(movestate);
 	if (!ms) return;
 	//reset the grapple before testing if the bot has a valid goal
-	//because the bot could loose all it's goals when stuck to a wall
+	//because the bot could lose all its goals when stuck to a wall
 	BotResetGrapple(ms);
 	//
 	if (!goal)

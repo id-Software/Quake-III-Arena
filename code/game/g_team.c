@@ -717,7 +717,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 
 	if ( ent->flags & FL_DROPPED_ITEM ) {
-		// hey, its not home.  return it by teleporting it back
+		// hey, it's not home.  return it by teleporting it back
 		PrintMsg( NULL, "%s" S_COLOR_WHITE " returned the %s flag!\n", 
 			cl->pers.netname, TeamName(team));
 		AddScore(other, ent->r.currentOrigin, CTF_RECOVERY_BONUS);

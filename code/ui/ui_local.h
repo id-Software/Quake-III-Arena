@@ -576,7 +576,7 @@ qboolean UI_RegisterClientModelname( playerInfo_t *pi, const char *modelSkinName
 //
 // ui_atoms.c
 //
-// this is only used in the old ui, the new ui has it's own version
+// this is only used in the old ui, the new ui has its own version
 typedef struct {
 	int					frametime;
 	int					realtime;

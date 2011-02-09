@@ -306,7 +306,7 @@ Dlls will call this directly
 
  rcg010206 The horror; the horror.
 
-  The syscall mechanism relies on stack manipulation to get it's args.
+  The syscall mechanism relies on stack manipulation to get its args.
    This is likely due to C's inability to pass "..." parameters to
    a function in one clean chunk. On PowerPC Linux, these parameters
    are not necessarily passed on the stack, so while (&arg[0] == arg)

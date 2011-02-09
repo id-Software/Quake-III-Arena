@@ -379,7 +379,7 @@ void CG_UpdateCvars( void ) {
 
 	// check for modications here
 
-	// If team overlay is on, ask for updates from the server.  If its off,
+	// If team overlay is on, ask for updates from the server.  If it's off,
 	// let the server know so we don't receive it
 	if ( drawTeamOverlayModificationCount != cg_drawTeamOverlay.modificationCount ) {
 		drawTeamOverlayModificationCount = cg_drawTeamOverlay.modificationCount;

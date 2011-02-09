@@ -228,7 +228,7 @@ typedef struct bot_state_s
 	int decisionmaker;								//player who decided to go for this goal
 	int ordered;									//true if ordered to do something
 	float order_time;								//time ordered to do something
-	int owndecision_time;							//time the bot made it's own decision
+	int owndecision_time;							//time the bot made its own decision
 	bot_goal_t teamgoal;							//the team goal
 	bot_goal_t altroutegoal;						//alternative route goal
 	float reachedaltroutegoal_time;					//time the bot reached the alt route goal

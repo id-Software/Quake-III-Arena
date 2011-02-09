@@ -685,7 +685,7 @@ void BotCTFSeekGoals(bot_state_t *bs) {
 	if ( bs->lastgoal_ltgtype ) {
 		bs->teamgoal_time += 60;
 	}
-	// if the bot decided to do something on it's own and has a last ordered goal
+	// if the bot decided to do something on its own and has a last ordered goal
 	if ( !bs->ordered && bs->lastgoal_ltgtype ) {
 		bs->ltgtype = 0;
 	}
@@ -931,7 +931,7 @@ void Bot1FCTFSeekGoals(bot_state_t *bs) {
 	if ( bs->lastgoal_ltgtype ) {
 		bs->teamgoal_time += 60;
 	}
-	// if the bot decided to do something on it's own and has a last ordered goal
+	// if the bot decided to do something on its own and has a last ordered goal
 	if ( !bs->ordered && bs->lastgoal_ltgtype ) {
 		bs->ltgtype = 0;
 	}
@@ -4531,7 +4531,7 @@ BotAIPredictObstacles
 
 Predict the route towards the goal and check if the bot
 will be blocked by certain obstacles. When the bot has obstacles
-on it's path the bot should figure out if they can be removed
+on its path the bot should figure out if they can be removed
 by activating certain entities.
 ==================
 */

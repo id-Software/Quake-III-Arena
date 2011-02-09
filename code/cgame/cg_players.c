@@ -781,7 +781,7 @@ static qboolean CG_ScanForExistingClientInfo( clientInfo_t *ci ) {
 			&& !Q_stricmp( ci->blueTeam, match->blueTeam ) 
 			&& !Q_stricmp( ci->redTeam, match->redTeam )
 			&& (cgs.gametype < GT_TEAM || ci->team == match->team) ) {
-			// this clientinfo is identical, so use it's handles
+			// this clientinfo is identical, so use its handles
 
 			ci->deferred = qfalse;
 

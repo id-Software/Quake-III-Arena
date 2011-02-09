@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void BotSetupDeathmatchAI(void);
 //shutdown the deathmatch AI
 void BotShutdownDeathmatchAI(void);
-//let the bot live within it's deathmatch AI net
+//let the bot live within its deathmatch AI net
 void BotDeathmatchAI(bot_state_t *bs, float thinktime);
 //free waypoints
 void BotFreeWaypoints(bot_waypoint_t *wp);

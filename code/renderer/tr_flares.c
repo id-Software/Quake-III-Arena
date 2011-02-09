@@ -34,7 +34,7 @@ constant, irrespective of distance, but the intensity should be proportional to 
 projected area of the light source.
 
 A surface that has been flagged as having a light flare will calculate the depth
-buffer value that it's midpoint should have when the surface is added.
+buffer value that its midpoint should have when the surface is added.
 
 After all opaque surfaces have been rendered, the depth buffer is read back for
 each flare in view.  If the point has not been obscured by a closer surface, the

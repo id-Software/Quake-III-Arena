@@ -480,7 +480,7 @@
 2002-7-31 Timothee Besset <ttimo@idsoftware.com>
 	+ https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=513
 		https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=506
-		porting fix from RTCW codebase. client re-orders it's pk3s to scan in the same order than the server
+		porting fix from RTCW codebase. client re-orders its pk3s to scan in the same order than the server
 		this eliminates several 'Invalid .PK3 file referenced' situations (caused by client not referencing the same thing as server)
 	+ fixed border remnants in ta ui
 	+ https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=517
@@ -505,7 +505,7 @@
 	+ fix broken link in Linux FAQ	
 
 2002-7-27 Timothee Besset <ttimo@idsoftware.com>
-	+ ta ui: PB display in the browser, in it's additional tab, with sorting
+	+ ta ui: PB display in the browser, in its additional tab, with sorting
 
 2002-7-26 Timothee Besset <ttimo@idsoftware.com>
 	+ PB UI: for baseq3/ AND missionpack/
@@ -2775,7 +2775,7 @@
 	Can't find menu/art/unknownmap.tga
 
 	* Q3TA: after nearly 6 months, a code update from id. SOS access 
-	even. Got it to compile, link and start, but its currently broken
+	even. Got it to compile, link and start, but it's currently broken
 	(menu doesn't render in full, can't get into game etc.). Need
 	a baseline 1.17 to diff against. Last code dump was May 16, with 
 	bspc code updated May 19. Checking working directory of bk000520
