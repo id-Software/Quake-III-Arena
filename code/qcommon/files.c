@@ -545,57 +545,6 @@ static void FS_CheckFilenameIsNotExecutable( const char *filename,
 	}
 }
 
-
-/*
-=================
-FS_CopyFile
-
-Copy a fully specified file from one place to another
-=================
-*/
-static void FS_CopyFile( char *fromOSPath, char *toOSPath ) {
-	FILE	*f;
-	int		len;
-	byte	*buf;
-
-	Com_Printf( "copy %s to %s\n", fromOSPath, toOSPath );
-
-	FS_CheckFilenameIsNotExecutable( toOSPath, __func__ );
-
-	if (strstr(fromOSPath, "journal.dat") || strstr(fromOSPath, "journaldata.dat")) {
-		Com_Printf( "Ignoring journal files\n");
-		return;
-	}
-
-	f = fopen( fromOSPath, "rb" );
-	if ( !f ) {
-		return;
-	}
-	fseek (f, 0, SEEK_END);
-	len = ftell (f);
-	fseek (f, 0, SEEK_SET);
-
-	// we are using direct malloc instead of Z_Malloc here, so it
-	// probably won't work on a mac... Its only for developers anyway...
-	buf = malloc( len );
-	if (fread( buf, 1, len, f ) != len)
-		Com_Error( ERR_FATAL, "Short read in FS_Copyfiles()\n" );
-	fclose( f );
-
-	if( FS_CreatePath( toOSPath ) ) {
-		return;
-	}
-
-	f = fopen( toOSPath, "wb" );
-	if ( !f ) {
-		return;
-	}
-	if (fwrite( buf, 1, len, f ) != len)
-		Com_Error( ERR_FATAL, "Short write in FS_Copyfiles()\n" );
-	fclose( f );
-	free( buf );
-}
-
 /*
 ===========
 FS_Remove
@@ -807,11 +756,7 @@ void FS_SV_Rename( const char *from, const char *to ) {
 
 	FS_CheckFilenameIsNotExecutable( to_ospath, __func__ );
 
-	if (rename( from_ospath, to_ospath )) {
-		// Failed, try copying it and deleting the original
-		FS_CopyFile ( from_ospath, to_ospath );
-		FS_Remove ( from_ospath );
-	}
+	rename(from_ospath, to_ospath);
 }
 
 
@@ -841,11 +786,7 @@ void FS_Rename( const char *from, const char *to ) {
 
 	FS_CheckFilenameIsNotExecutable( to_ospath, __func__ );
 
-	if (rename( from_ospath, to_ospath )) {
-		// Failed, try copying it and deleting the original
-		FS_CopyFile ( from_ospath, to_ospath );
-		FS_Remove ( from_ospath );
-	}
+	rename(from_ospath, to_ospath);
 }
 
 /*
