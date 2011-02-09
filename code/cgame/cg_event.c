@@ -188,7 +188,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			if( gender == GENDER_FEMALE ) {
 				message = "found her prox mine";
 			} else if ( gender == GENDER_NEUTER ) {
-				message = "found it's prox mine";
+				message = "found its prox mine";
 			} else {
 				message = "found his prox mine";
 			}
