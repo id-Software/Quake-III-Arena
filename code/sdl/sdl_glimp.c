@@ -101,6 +101,19 @@ void GLimp_Shutdown( void )
 
 /*
 ===============
+GLimp_Minimize
+
+Minimize the game so that user is back at the desktop
+===============
+*/
+void GLimp_Minimize(void)
+{
+	SDL_WM_IconifyWindow();
+}
+
+
+/*
+===============
 GLimp_LogComment
 ===============
 */
