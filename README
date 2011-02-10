@@ -214,6 +214,7 @@ New commands
   video [filename]        - start video capture (use with demo command)
   stopvideo               - stop video capture
   stopmusic               - stop background music
+  minimize                - Minimize the game and show desktop
 
   print                   - print out the contents of a cvar
   unset                   - unset a user created cvar
