@@ -236,6 +236,8 @@ New commands
   net_restart             - restart network subsystem to change latched settings
   game_restart <fs_game>  - Switch to another mod
 
+  which <filename/path>   - print out the path on disk to a loaded item
+
 ------------------------------------------------------------ Miscellaneous -----
 
 Using shared libraries instead of qvm

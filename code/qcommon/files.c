@@ -2440,6 +2440,74 @@ void FS_TouchFile_f( void ) {
 	}
 }
 
+/*
+============
+FS_Which_f
+============
+*/
+void FS_Which_f( void ) {
+	searchpath_t	*search;
+	char			*netpath;
+	pack_t			*pak;
+	fileInPack_t	*pakFile;
+	directory_t		*dir;
+	long			hash;
+	FILE			*temp;
+	char			*filename;
+	char			buf[ MAX_OSPATH ];
+
+	hash = 0;
+	filename = Cmd_Argv(1);
+
+	if ( !filename[0] ) {
+		Com_Printf( "Usage: which <file>\n" );
+		return;
+	}
+
+	// qpaths are not supposed to have a leading slash
+	if ( filename[0] == '/' || filename[0] == '\\' ) {
+		filename++;
+	}
+
+	// just wants to see if file is there
+	for ( search = fs_searchpaths ; search ; search = search->next ) {
+		if ( search->pack ) {
+			hash = FS_HashFileName(filename, search->pack->hashSize);
+		}
+		// is the element a pak file?
+		if ( search->pack && search->pack->hashTable[hash] ) {
+			// look through all the pak file elements
+			pak = search->pack;
+			pakFile = pak->hashTable[hash];
+			do {
+				// case and separator insensitive comparisons
+				if ( !FS_FilenameCompare( pakFile->name, filename ) ) {
+					// found it!
+					Com_Printf( "File \"%s\" found in \"%s\"\n", filename, pak->pakFilename );
+					return;
+				}
+				pakFile = pakFile->next;
+			} while(pakFile != NULL);
+		} else if ( search->dir ) {
+			dir = search->dir;
+
+			netpath = FS_BuildOSPath( dir->path, dir->gamedir, filename );
+			temp = fopen (netpath, "rb");
+			if ( !temp ) {
+				continue;
+			}
+			fclose(temp);
+			Com_sprintf( buf, sizeof( buf ), "%s/%s", dir->path, dir->gamedir );
+			FS_ReplaceSeparators( buf );
+			Com_Printf( "File \"%s\" found at \"%s\"\n", filename, buf );
+			return;
+		}
+	}
+	Com_Printf( "File not found: \"%s\"\n", filename );
+	return;
+}
+
+
 //===========================================================================
 
 
@@ -2719,6 +2787,7 @@ void FS_Shutdown( qboolean closemfp ) {
 	Cmd_RemoveCommand( "dir" );
 	Cmd_RemoveCommand( "fdir" );
 	Cmd_RemoveCommand( "touchFile" );
+	Cmd_RemoveCommand( "which" );
 
 #ifdef FS_MISSING
 	if (closemfp) {
@@ -2852,6 +2921,7 @@ static void FS_Startup( const char *gameName )
 	Cmd_AddCommand ("dir", FS_Dir_f );
 	Cmd_AddCommand ("fdir", FS_NewDir_f );
 	Cmd_AddCommand ("touchFile", FS_TouchFile_f );
+	Cmd_AddCommand ("which", FS_Which_f );
 
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=506
 	// reorder the pure pk3 files according to server order
