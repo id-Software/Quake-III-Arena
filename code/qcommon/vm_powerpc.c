@@ -1837,7 +1837,7 @@ PPC_ComputeCode( vm_t *vm )
 	unsigned char *dataAndCode = mmap( NULL, codeLength,
 		PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0 );
 
-	if ( ! dataAndCode )
+	if (dataAndCode == MAP_FAILED)
 		DIE( "Not enough memory" );
 
 	ppc_instruction_t *codeNow, *codeBegin;

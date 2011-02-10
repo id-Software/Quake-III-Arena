@@ -53,6 +53,7 @@ static void VM_Destroy_Compiled(vm_t* self);
 
 */
 
+#define VMFREE_BUFFERS() {Z_Free(buf); Z_Free(jused);}
 static	byte	*buf = NULL;
 static	byte	*jused = NULL;
 static	int		compiledOfs = 0;
@@ -289,6 +290,7 @@ static int Hex( int c ) {
 		return c - '0';
 	}
 
+	VMFREE_BUFFERS();
 	Com_Error( ERR_DROP, "Hex: bad char '%c'", c );
 
 	return 0;
@@ -408,6 +410,7 @@ qboolean EmitMovEBXEDI(vm_t *vm, int andit) {
 #define JUSED(x) \
 	do { \
 		if (x < 0 || x >= jusedSize) { \
+		        VMFREE_BUFFERS(); \
 			Com_Error( ERR_DROP, \
 					"VM_CompileX86: jump target out of range at offset %d", pc ); \
 		} \
@@ -429,7 +432,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	// allocate a very large temp buffer, we will shrink it later
 	maxLength = header->codeLength * 8;
-	buf = Z_Malloc( maxLength );
+	buf = Z_Malloc(maxLength);
 	jused = Z_Malloc(jusedSize);
 	
 	Com_Memset(jused, 0, jusedSize);
@@ -454,16 +457,21 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	LastCommand = LAST_COMMAND_NONE;
 
-	while ( instruction < header->instructionCount ) {
-		if ( compiledOfs > maxLength - 16 ) {
-			Com_Error( ERR_FATAL, "VM_CompileX86: maxLength exceeded" );
+	while(instruction < header->instructionCount)
+	{
+		if(compiledOfs > maxLength - 16)
+		{
+	        	VMFREE_BUFFERS();
+			Com_Error(ERR_DROP, "VM_CompileX86: maxLength exceeded");
 		}
 
 		vm->instructionPointers[ instruction ] = compiledOfs;
 		instruction++;
 
-		if ( pc > header->codeLength ) {
-			Com_Error( ERR_FATAL, "VM_CompileX86: pc > header->codeLength" );
+		if(pc > header->codeLength)
+		{
+		        VMFREE_BUFFERS();
+			Com_Error(ERR_DROP, "VM_CompileX86: pc > header->codeLength");
 		}
 
 		op = code[ pc ];
@@ -1075,7 +1083,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			Emit4( (int)vm->instructionPointers );
 			break;
 		default:
-			Com_Error( ERR_DROP, "VM_CompileX86: bad opcode %i at offset %i", op, pc );
+		        VMFREE_BUFFERS();
+			Com_Error(ERR_DROP, "VM_CompileX86: bad opcode %i at offset %i", op, pc);
 		}
 		pop0 = pop1;
 		pop1 = op;
@@ -1086,13 +1095,13 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	vm->codeLength = compiledOfs;
 #ifdef VM_X86_MMAP
 	vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-	if(vm->codeBase == (void*)-1)
-		Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+	if(vm->codeBase == MAP_FAILED)
+		Com_Error(ERR_FATAL, "VM_CompileX86: can't mmap memory");
 #elif _WIN32
 	// allocate memory with EXECUTE permissions under windows.
 	vm->codeBase = VirtualAlloc(NULL, compiledOfs, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 	if(!vm->codeBase)
-		Com_Error(ERR_DROP, "VM_CompileX86: VirtualAlloc failed");
+		Com_Error(ERR_FATAL, "VM_CompileX86: VirtualAlloc failed");
 #else
 	vm->codeBase = malloc(compiledOfs);
 #endif
@@ -1101,14 +1110,14 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 #ifdef VM_X86_MMAP
 	if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
-		Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+		Com_Error(ERR_FATAL, "VM_CompileX86: mprotect failed");
 #elif _WIN32
 	{
 		DWORD oldProtect = 0;
 		
 		// remove write permissions.
 		if(!VirtualProtect(vm->codeBase, compiledOfs, PAGE_EXECUTE_READ, &oldProtect))
-			Com_Error(ERR_DROP, "VM_CompileX86: VirtualProtect failed");
+			Com_Error(ERR_FATAL, "VM_CompileX86: VirtualProtect failed");
 	}
 #endif
 

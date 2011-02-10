@@ -54,6 +54,8 @@ static FILE* qdasmout;
 #define Dfprintf(args...)
 #endif
 
+#define VM_FREEBUFFERS(vm) {assembler_init(0); VM_Destroy_Compiled(vm);}
+
 void assembler_set_output(char* buf);
 size_t assembler_get_code_size(void);
 void assembler_init(int pass);
@@ -251,6 +253,7 @@ void emit(const char* fmt, ...)
 
 #define CHECK_INSTR(nr) \
 	do { if(nr < 0 || nr >= header->instructionCount) { \
+		VM_FREEBUFFERS(vm); \
 		Com_Error( ERR_DROP, \
 			"%s: jump target 0x%x out of range at offset %d", __func__, nr, pc ); \
 	} } while(0)
@@ -429,6 +432,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 	// const optimization
 	unsigned got_const = 0, const_value = 0;
+	
+	vm->codeBase = NULL;
 
 	gettimeofday(&tvstart, NULL);
 
@@ -441,15 +446,17 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 
 		#ifdef VM_X86_64_MMAP
 			vm->codeBase = mmap(NULL, compiledOfs, PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-			if(vm->codeBase == (void*)-1)
-				Com_Error(ERR_DROP, "VM_CompileX86: can't mmap memory");
+			if(vm->codeBase == MAP_FAILED)
+				Com_Error(ERR_FATAL, "VM_CompileX86_64: can't mmap memory");
 		#elif __WIN64__
 			// allocate memory with write permissions under windows.
 			vm->codeBase = VirtualAlloc(NULL, compiledOfs, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
 			if(!vm->codeBase)
-				Com_Error(ERR_DROP, "VM_CompileX86: VirtualAlloc failed");
+				Com_Error(ERR_FATAL, "VM_CompileX86_64: VirtualAlloc failed");
 		#else
 			vm->codeBase = malloc(compiledOfs);
+			if(!vm_codeBase)
+				Com_Error(ERR_FATAL, "VM_CompileX86_64: Failed to allocate memory");
 		#endif
 
 		assembler_set_output((char*)vm->codeBase);
@@ -930,7 +937,9 @@ emit_do_syscall:
 
 	}
 
-	if(got_const) {
+	if(got_const)
+	{
+		VM_FREEBUFFERS(vm);
 		Com_Error(ERR_DROP, "leftover const\n");
 	}
 
@@ -943,14 +952,14 @@ emit_do_syscall:
 
 	#ifdef VM_X86_64_MMAP
 		if(mprotect(vm->codeBase, compiledOfs, PROT_READ|PROT_EXEC))
-			Com_Error(ERR_DROP, "VM_CompileX86: mprotect failed");
+			Com_Error(ERR_FATAL, "VM_CompileX86_64: mprotect failed");
 	#elif __WIN64__
 		{
 			DWORD oldProtect = 0;
 			
 			// remove write permissions; give exec permision
 			if(!VirtualProtect(vm->codeBase, compiledOfs, PAGE_EXECUTE_READ, &oldProtect))
-				Com_Error(ERR_DROP, "VM_CompileX86: VirtualProtect failed");
+				Com_Error(ERR_FATAL, "VM_CompileX86_64: VirtualProtect failed");
 		}
 	#endif
 
@@ -987,11 +996,16 @@ emit_do_syscall:
 
 void VM_Destroy_Compiled(vm_t* self)
 {
-#ifdef _WIN32
-	VirtualFree(self->codeBase, 0, MEM_RELEASE);
+	if(self && self->codeBase)
+	{
+#ifdef VM_X86_64_MMAP
+		munmap(self->codeBase, self->codeLength);
+#elif __WIN64__
+		VirtualFree(self->codeBase, 0, MEM_RELEASE);
 #else
-	munmap(self->codeBase, self->codeLength);
+		free(self->codeBase);
 #endif
+	}
 }
 
 /*

@@ -1427,7 +1427,7 @@ static void sparc_compute_code(vm_t *vm, struct func_info * const fp)
 
 	data_and_code = mmap(NULL, code_length, PROT_READ | PROT_WRITE,
 			     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-	if (!data_and_code)
+	if (data_and_code == MAP_FAILED)
 		DIE("Not enough memory");
 
 	code_now = code_begin = (unsigned int *)
