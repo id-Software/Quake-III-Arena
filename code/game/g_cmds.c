@@ -76,7 +76,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 			perfect,
 			cl->ps.persistant[PERS_CAPTURES]);
 		j = strlen(entry);
-		if (stringlength + j > 1024)
+		if (stringlength + j >= sizeof(string))
 			break;
 		strcpy (string + stringlength, entry);
 		stringlength += j;

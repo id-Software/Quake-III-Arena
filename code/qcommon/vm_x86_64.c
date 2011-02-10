@@ -54,7 +54,7 @@ static FILE* qdasmout;
 #define Dfprintf(args...)
 #endif
 
-#define VM_FREEBUFFERS(vm) {assembler_init(0); VM_Destroy_Compiled(vm);}
+#define VM_FREEBUFFERS(vm) do {assembler_init(0); VM_Destroy_Compiled(vm);} while(0)
 
 void assembler_set_output(char* buf);
 size_t assembler_get_code_size(void);

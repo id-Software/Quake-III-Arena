@@ -53,7 +53,7 @@ static void VM_Destroy_Compiled(vm_t* self);
 
 */
 
-#define VMFREE_BUFFERS() {Z_Free(buf); Z_Free(jused);}
+#define VMFREE_BUFFERS() do {Z_Free(buf); Z_Free(jused);} while(0)
 static	byte	*buf = NULL;
 static	byte	*jused = NULL;
 static	int		compiledOfs = 0;
