@@ -784,7 +784,7 @@ Cmd_CompleteCfgName
 */
 void Cmd_CompleteCfgName( char *args, int argNum ) {
 	if( argNum == 2 ) {
-		Field_CompleteFilename( "", "cfg", qfalse );
+		Field_CompleteFilename( "", "cfg", qfalse, qtrue );
 	}
 }
 
