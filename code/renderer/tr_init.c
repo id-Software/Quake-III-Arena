@@ -156,6 +156,9 @@ cvar_t	*r_saveFontData;
 
 cvar_t	*r_marksOnTriangleMeshes;
 
+cvar_t	*r_aviMotionJpegQuality;
+cvar_t	*r_screenshotJpegQuality;
+
 cvar_t	*r_maxpolys;
 int		max_polys;
 cvar_t	*r_maxpolyverts;
@@ -405,7 +408,7 @@ void RB_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName 
 	}
 
 	ri.FS_WriteFile( fileName, buffer, 1 );		// create path
-	SaveJPG( fileName, 90, glConfig.vidWidth, glConfig.vidHeight, buffer);
+	SaveJPG( fileName, r_screenshotJpegQuality->integer, glConfig.vidWidth, glConfig.vidHeight, buffer);
 
 	ri.Hunk_FreeTempMemory( buffer );
 }
@@ -709,7 +712,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 
 	if( cmd->motionJpeg )
 	{
-		frameSize = SaveJPGToBuffer( cmd->encodeBuffer, 90,
+		frameSize = SaveJPGToBuffer( cmd->encodeBuffer, r_aviMotionJpegQuality->integer,
 				cmd->width, cmd->height, cmd->captureBuffer );
 		ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize );
 	}
@@ -1011,6 +1014,9 @@ void R_Register( void )
 	r_shadows = ri.Cvar_Get( "cg_shadows", "1", 0 );
 
 	r_marksOnTriangleMeshes = ri.Cvar_Get("r_marksOnTriangleMeshes", "0", CVAR_ARCHIVE);
+
+	r_aviMotionJpegQuality = ri.Cvar_Get("r_aviMotionJpegQuality", "90", CVAR_ARCHIVE);
+	r_screenshotJpegQuality = ri.Cvar_Get("r_screenshotJpegQuality", "90", CVAR_ARCHIVE);
 
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);

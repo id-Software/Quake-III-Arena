@@ -209,6 +209,10 @@ New cvars
                                       backend being used
   r_noborder                        - Remove window decoration from window
                                       managers, like borders and titlebar.
+  r_screenshotJpegQuality           - Controls quality of jpeg screenshots
+                                      captured using screenshotJPEG
+  r_aviMotionJpegQuality            - Controls quality of video capture when
+                                      cl_aviMotionJpeg is enabled
 
 New commands
   video [filename]        - start video capture (use with demo command)
