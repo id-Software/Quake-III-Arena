@@ -1510,6 +1510,66 @@ void CIN_SetLooping(int handle, qboolean loop) {
 
 /*
 ==================
+CIN_ResampleCinematic
+
+Resample cinematic to 256x256 and store in buf2
+==================
+*/
+void CIN_ResampleCinematic(int handle, int *buf2) {
+	int ix, iy, *buf3, xm, ym, ll;
+	byte	*buf;
+
+	buf = cinTable[handle].buf;
+
+	xm = cinTable[handle].CIN_WIDTH/256;
+	ym = cinTable[handle].CIN_HEIGHT/256;
+	ll = 8;
+	if (cinTable[handle].CIN_WIDTH==512) {
+		ll = 9;
+	}
+
+	buf3 = (int*)buf;
+	if (xm==2 && ym==2) {
+		byte *bc2, *bc3;
+		int	ic, iiy;
+
+		bc2 = (byte *)buf2;
+		bc3 = (byte *)buf3;
+		for (iy = 0; iy<256; iy++) {
+			iiy = iy<<12;
+			for (ix = 0; ix<2048; ix+=8) {
+				for(ic = ix;ic<(ix+4);ic++) {
+					*bc2=(bc3[iiy+ic]+bc3[iiy+4+ic]+bc3[iiy+2048+ic]+bc3[iiy+2048+4+ic])>>2;
+					bc2++;
+				}
+			}
+		}
+	} else if (xm==2 && ym==1) {
+		byte *bc2, *bc3;
+		int	ic, iiy;
+
+		bc2 = (byte *)buf2;
+		bc3 = (byte *)buf3;
+		for (iy = 0; iy<256; iy++) {
+			iiy = iy<<11;
+			for (ix = 0; ix<2048; ix+=8) {
+				for(ic = ix;ic<(ix+4);ic++) {
+					*bc2=(bc3[iiy+ic]+bc3[iiy+4+ic])>>1;
+					bc2++;
+				}
+			}
+		}
+	} else {
+		for (iy = 0; iy<256; iy++) {
+			for (ix = 0; ix<256; ix++) {
+					buf2[(iy<<8)+ix] = buf3[((iy*ym)<<ll) + (ix*xm)];
+			}
+		}
+	}
+}
+
+/*
+==================
 SCR_DrawCinematic
 
 ==================
@@ -1532,54 +1592,12 @@ void CIN_DrawCinematic (int handle) {
 	SCR_AdjustFrom640( &x, &y, &w, &h );
 
 	if (cinTable[handle].dirty && (cinTable[handle].CIN_WIDTH != cinTable[handle].drawX || cinTable[handle].CIN_HEIGHT != cinTable[handle].drawY)) {
-		int ix, iy, *buf2, *buf3, xm, ym, ll;
-                
-		xm = cinTable[handle].CIN_WIDTH/256;
-		ym = cinTable[handle].CIN_HEIGHT/256;
-                ll = 8;
-                if (cinTable[handle].CIN_WIDTH==512) {
-                    ll = 9;
-                }
-                
-		buf3 = (int*)buf;
+		int *buf2;
+
 		buf2 = Hunk_AllocateTempMemory( 256*256*4 );
-                if (xm==2 && ym==2) {
-                    byte *bc2, *bc3;
-                    int	ic, iiy;
-                    
-                    bc2 = (byte *)buf2;
-                    bc3 = (byte *)buf3;
-                    for (iy = 0; iy<256; iy++) {
-                            iiy = iy<<12;
-                            for (ix = 0; ix<2048; ix+=8) {
-                                for(ic = ix;ic<(ix+4);ic++) {
-                                    *bc2=(bc3[iiy+ic]+bc3[iiy+4+ic]+bc3[iiy+2048+ic]+bc3[iiy+2048+4+ic])>>2;
-                                    bc2++;
-                                }
-                            }
-                    }
-                } else if (xm==2 && ym==1) {
-                    byte *bc2, *bc3;
-                    int	ic, iiy;
-                    
-                    bc2 = (byte *)buf2;
-                    bc3 = (byte *)buf3;
-                    for (iy = 0; iy<256; iy++) {
-                            iiy = iy<<11;
-                            for (ix = 0; ix<2048; ix+=8) {
-                                for(ic = ix;ic<(ix+4);ic++) {
-                                    *bc2=(bc3[iiy+ic]+bc3[iiy+4+ic])>>1;
-                                    bc2++;
-                                }
-                            }
-                    }
-                } else {
-                    for (iy = 0; iy<256; iy++) {
-                            for (ix = 0; ix<256; ix++) {
-                                    buf2[(iy<<8)+ix] = buf3[((iy*ym)<<ll) + (ix*xm)];
-                            }
-                    }
-                }
+
+		CIN_ResampleCinematic(handle, buf2);
+
 		re.DrawStretchRaw( x, y, w, h, 256, 256, (byte *)buf2, handle, qtrue);
 		cinTable[handle].dirty = qfalse;
 		Hunk_FreeTempMemory(buf2);
@@ -1659,7 +1677,25 @@ void CIN_UploadCinematic(int handle) {
 				}
 			}
 		}
-		re.UploadCinematic( 256, 256, 256, 256, cinTable[handle].buf, handle, cinTable[handle].dirty);
+
+		// Resample the video if needed
+		if (cinTable[handle].dirty && (cinTable[handle].CIN_WIDTH != cinTable[handle].drawX || cinTable[handle].CIN_HEIGHT != cinTable[handle].drawY))  {
+			int *buf2;
+
+			buf2 = Hunk_AllocateTempMemory( 256*256*4 );
+
+			CIN_ResampleCinematic(handle, buf2);
+
+			re.UploadCinematic( cinTable[handle].CIN_WIDTH, cinTable[handle].CIN_HEIGHT, 256, 256, (byte *)buf2, handle, qtrue);
+			cinTable[handle].dirty = qfalse;
+			Hunk_FreeTempMemory(buf2);
+		} else {
+			// Upload video at normal resolution
+			re.UploadCinematic( cinTable[handle].CIN_WIDTH, cinTable[handle].CIN_HEIGHT, cinTable[handle].drawX, cinTable[handle].drawY,
+					cinTable[handle].buf, handle, cinTable[handle].dirty);
+			cinTable[handle].dirty = qfalse;
+		}
+
 		if (cl_inGameVideo->integer == 0 && cinTable[handle].playonwalls == 1) {
 			cinTable[handle].playonwalls--;
 		}
