@@ -425,7 +425,7 @@ void *Sys_LoadDll( const char *name,
 
 	assert( name );
 
-	Q_snprintf (fname, sizeof(fname), "%s" ARCH_STRING DLL_EXT, name);
+	Com_sprintf(fname, sizeof(fname), "%s" ARCH_STRING DLL_EXT, name);
 
 	netpath = FS_FindDll(fname);
 
