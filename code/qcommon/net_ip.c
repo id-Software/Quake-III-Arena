@@ -1707,18 +1707,9 @@ void NET_Sleep(int msec)
 	if(highestfd < 0)
 	{
 		// windows ain't happy when select is called without valid FDs
-	
-		if(msec > 0)
-			msec--;
-		
 		SleepEx(msec, 0);
 		return;
 	}
-
-	#define TVW32_BIAS 999
-	// windows adds a whole millisecond of latency, otherwise granularity seems to be fine.
-	if(timeout.tv_usec > TVW32_BIAS)
-		timeout.tv_usec -= TVW32_BIAS;
 #endif
 
 	retval = select(highestfd + 1, &fdr, NULL, NULL, &timeout);
