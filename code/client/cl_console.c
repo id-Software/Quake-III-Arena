@@ -445,10 +445,8 @@ void CL_ConsolePrint( char *txt ) {
 			y = con.current % con.totallines;
 			con.text[y*con.linewidth+con.x] = (color << 8) | c;
 			con.x++;
-			if (con.x >= con.linewidth) {
+			if(con.x >= con.linewidth)
 				Con_Linefeed(skipnotify);
-				con.x = 0;
-			}
 			break;
 		}
 	}
