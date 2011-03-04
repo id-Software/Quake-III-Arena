@@ -3113,7 +3113,6 @@ void Item_Multi_Paint(itemDef_t *item) {
 
 typedef struct {
 	char	*command;
-	int		id;
 	int		defaultbind1;
 	int		defaultbind2;
 	int		bind1;
