@@ -982,6 +982,7 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin ) {
 	refEntity_t  beam;
 	vec3_t   forward;
 	vec3_t   muzzlePoint, endPoint;
+	int      anim;
 
 	if (cent->currentState.weapon != WP_LIGHTNING) {
 		return;
@@ -1021,8 +1022,12 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin ) {
 		VectorCopy(cent->lerpOrigin, muzzlePoint );
 	}
 
-	// FIXME: crouch
-	muzzlePoint[2] += DEFAULT_VIEWHEIGHT;
+	anim = cent->currentState.legsAnim & ~ANIM_TOGGLEBIT;
+	if ( anim == LEGS_WALKCR || anim == LEGS_IDLECR ) {
+		muzzlePoint[2] += CROUCH_VIEWHEIGHT;
+	} else {
+		muzzlePoint[2] += DEFAULT_VIEWHEIGHT;
+	}
 
 	VectorMA( muzzlePoint, 14, forward, muzzlePoint );
 
