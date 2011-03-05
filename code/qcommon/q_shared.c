@@ -1310,6 +1310,7 @@ void Info_SetValueForKey( char *s, const char *key, const char *value ) {
 Info_SetValueForKey_Big
 
 Changes or adds a key/value pair
+Includes and retains zero-length values
 ==================
 */
 void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
@@ -1330,7 +1331,7 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	}
 
 	Info_RemoveKey_Big (s, key);
-	if (!value || !strlen(value))
+	if (!value)
 		return;
 
 	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
