@@ -895,7 +895,7 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 	float		fullFloat;
 	int			*fromF, *toF;
 
-	numFields = sizeof(entityStateFields)/sizeof(entityStateFields[0]);
+	numFields = ARRAY_LEN( entityStateFields );
 
 	// all fields should be 32 bits to avoid any compiler packing issues
 	// the "number" field is not part of the field list
@@ -1040,7 +1040,7 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 		return;
 	}
 
-	numFields = sizeof(entityStateFields)/sizeof(entityStateFields[0]);
+	numFields = ARRAY_LEN( entityStateFields );
 	lc = MSG_ReadByte(msg);
 
 	if ( lc > numFields || lc < 0 ) {
@@ -1210,7 +1210,7 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	c = msg->cursize;
 
-	numFields = sizeof( playerStateFields ) / sizeof( playerStateFields[0] );
+	numFields = ARRAY_LEN( playerStateFields );
 
 	lc = 0;
 	for ( i = 0, field = playerStateFields ; i < numFields ; i++, field++ ) {
@@ -1377,7 +1377,7 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		print = 0;
 	}
 
-	numFields = sizeof( playerStateFields ) / sizeof( playerStateFields[0] );
+	numFields = ARRAY_LEN( playerStateFields );
 	lc = MSG_ReadByte(msg);
 
 	if ( lc > numFields || lc < 0 ) {

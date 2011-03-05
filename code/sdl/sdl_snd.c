@@ -99,8 +99,7 @@ static struct
 	{ AUDIO_S16MSB, "AUDIO_S16MSB" }
 };
 
-static int formatToStringTableSize =
-  sizeof( formatToStringTable ) / sizeof( formatToStringTable[ 0 ] );
+static int formatToStringTableSize = ARRAY_LEN( formatToStringTable );
 
 /*
 ===============

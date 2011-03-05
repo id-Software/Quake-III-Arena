@@ -259,7 +259,7 @@ static const struct sparc_opcode sparc_opcodes[] = {
 	{ "fbg",	BFCC(0,6), { ARG_DISP22 }, },
 	{ "fble",	BFCC(0,13), { ARG_DISP22 }, },
 };
-#define SPARC_NUM_OPCODES (sizeof(sparc_opcodes) / sizeof(sparc_opcodes[0]))
+#define SPARC_NUM_OPCODES (ARRAY_LEN(sparc_opcodes))
 
 #define RS1(X)			(((X) & 0x1f) << 14)
 #define RS2(X)			(((X) & 0x1f) << 0)
@@ -320,7 +320,7 @@ static unsigned int sparc_assemble(enum sparc_iname iname, const int argc, const
 
 #define IN(inst, args...) \
 ({	const int argv[] = { args }; \
-	const int argc = sizeof(argv) / sizeof(argv[0]); \
+	const int argc = ARRAY_LEN(argv); \
 	sparc_assemble(inst, argc, argv); \
 })
 

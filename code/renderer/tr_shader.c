@@ -30,7 +30,6 @@ static char *s_shaderText;
 static	shaderStage_t	stages[MAX_SHADER_STAGES];		
 static	shader_t		shader;
 static	texModInfo_t	texMods[MAX_SHADER_STAGES][TR_MAX_TEXMODS];
-static	qboolean		deferLoad;
 
 #define FILE_HASH_SIZE		1024
 static	shader_t*		hashTable[FILE_HASH_SIZE];
@@ -1371,7 +1370,7 @@ surfaceparm <name>
 */
 static void ParseSurfaceParm( char **text ) {
 	char	*token;
-	int		numInfoParms = sizeof(infoParms) / sizeof(infoParms[0]);
+	int		numInfoParms = ARRAY_LEN( infoParms );
 	int		i;
 
 	token = COM_ParseExt( text, qfalse );
@@ -3069,8 +3068,6 @@ void R_InitShaders( void ) {
 	ri.Printf( PRINT_ALL, "Initializing Shaders\n" );
 
 	Com_Memset(hashTable, 0, sizeof(hashTable));
-
-	deferLoad = qfalse;
 
 	CreateInternalShaders();
 

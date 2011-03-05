@@ -346,7 +346,7 @@ intptr_t QDECL VM_DllSyscall( intptr_t arg, ... ) {
   args[0] = arg;
   
   va_start(ap, arg);
-  for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
+  for (i = 1; i < ARRAY_LEN (args); i++)
     args[i] = va_arg(ap, intptr_t);
   va_end(ap);
   
@@ -756,7 +756,7 @@ intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 		int args[10];
 		va_list ap;
 		va_start(ap, callnum);
-		for (i = 0; i < sizeof (args) / sizeof (args[i]); i++) {
+		for (i = 0; i < ARRAY_LEN(args); i++) {
 			args[i] = va_arg(ap, int);
 		}
 		va_end(ap);
@@ -781,7 +781,7 @@ intptr_t	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 
 		a.callnum = callnum;
 		va_start(ap, callnum);
-		for (i = 0; i < sizeof (a.args) / sizeof (a.args[0]); i++) {
+		for (i = 0; i < ARRAY_LEN(a.args); i++) {
 			a.args[i] = va_arg(ap, int);
 		}
 		va_end(ap);

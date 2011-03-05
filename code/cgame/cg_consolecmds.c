@@ -518,7 +518,7 @@ qboolean CG_ConsoleCommand( void ) {
 
 	cmd = CG_Argv(0);
 
-	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) {
+	for ( i = 0 ; i < ARRAY_LEN( commands ) ; i++ ) {
 		if ( !Q_stricmp( cmd, commands[i].cmd ) ) {
 			commands[i].function();
 			return qtrue;
@@ -540,7 +540,7 @@ so it can perform tab completion
 void CG_InitConsoleCommands( void ) {
 	int		i;
 
-	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) {
+	for ( i = 0 ; i < ARRAY_LEN( commands ) ; i++ ) {
 		trap_AddCommand( commands[i].cmd );
 	}
 

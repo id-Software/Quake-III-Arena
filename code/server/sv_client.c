@@ -1782,7 +1782,7 @@ void SV_UserVoip( client_t *cl, msg_t *msg ) {
 
 		// Transmit this packet to the client.
 		// !!! FIXME: I don't like this queueing system.
-		if (client->queuedVoipPackets >= (sizeof (client->voipPacket) / sizeof (client->voipPacket[0]))) {
+		if (client->queuedVoipPackets >= ARRAY_LEN(client->voipPacket)) {
 			Com_Printf("Too many VoIP packets queued for client #%d\n", i);
 			continue;  // no room for another packet right now.
 		}
