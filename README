@@ -113,6 +113,7 @@ New cvars
   cl_mouseAccelOffset               - Tuning the acceleration curve, see below
   cl_gamename                       - Gamename sent to master server in
                                       getserversExt query
+
   s_useOpenAL                       - use the OpenAL sound backend if available
   s_alPrecache                      - cache OpenAL sounds before use
   s_alGain                          - the value of AL_GAIN for each source
@@ -155,6 +156,7 @@ New cvars
   com_maxfpsMinimized               - Maximum frames per second when minimized
   com_busyWait                      - Will use a busy loop to wait for rendering
                                       next frame when set to non-zero value
+
   in_joystickNo                     - select which joystick to use
   in_keyboardDebug                  - print keyboard debug info
 
@@ -177,6 +179,9 @@ New cvars
   net_mcast6addr                    - multicast address to use for scanning for
                                       ipv6 servers on the local network
   net_mcastiface                    - outgoing interface to use for scan
+
+  protocol                          - Allow changing protocol version
+                                      (startup only)
 
   r_allowResize                     - make window resizable (SDL only)
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
