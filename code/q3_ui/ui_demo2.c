@@ -223,7 +223,7 @@ static void Demos_MenuInit( void ) {
 	s_demos.list.generic.y			= 130;
 	s_demos.list.width				= 16;
 	s_demos.list.height				= 14;
-	Com_sprintf(extension, sizeof(extension), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
+	Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, (int) trap_Cvar_VariableValue("protocol"));
 	s_demos.list.numitems			= trap_FS_GetFileList( "demos", extension, s_demos.names, NAMEBUFSIZE );
 	s_demos.list.itemnames			= (const char **)s_demos.demolist;
 	s_demos.list.columns			= 3;
