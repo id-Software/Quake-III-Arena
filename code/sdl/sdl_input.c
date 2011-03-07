@@ -574,17 +574,13 @@ static void IN_InitJoystick( void )
 {
 	int i = 0;
 	int total = 0;
+	char buf[MAX_STRING_CHARS] = "";
 
 	if (stick != NULL)
 		SDL_JoystickClose(stick);
 
 	stick = NULL;
 	memset(&stick_state, '\0', sizeof (stick_state));
-
-	if( !in_joystick->integer ) {
-		Com_DPrintf( "Joystick is not active.\n" );
-		return;
-	}
 
 	if (!SDL_WasInit(SDL_INIT_JOYSTICK))
 	{
@@ -599,8 +595,21 @@ static void IN_InitJoystick( void )
 
 	total = SDL_NumJoysticks();
 	Com_DPrintf("%d possible joysticks\n", total);
+
+	// Print list and build cvar to allow ui to select joystick.
 	for (i = 0; i < total; i++)
-		Com_DPrintf("[%d] %s\n", i, SDL_JoystickName(i));
+	{
+		Q_strcat(buf, sizeof(buf), SDL_JoystickName(i));
+		Q_strcat(buf, sizeof(buf), "\n");
+	}
+
+	Cvar_Get( "in_availableJoysticks", buf, CVAR_ROM );
+
+	if( !in_joystick->integer ) {
+		Com_DPrintf( "Joystick is not active.\n" );
+		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+		return;
+	}
 
 	in_joystickNo = Cvar_Get( "in_joystickNo", "0", CVAR_ARCHIVE );
 	if( in_joystickNo->integer < 0 || in_joystickNo->integer >= total )

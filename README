@@ -158,6 +158,7 @@ New cvars
                                       next frame when set to non-zero value
 
   in_joystickNo                     - select which joystick to use
+  in_availableJoysticks             - list of available Joysticks
   in_keyboardDebug                  - print keyboard debug info
 
   sv_dlURL                          - the base of the HTTP or FTP site that
