@@ -123,6 +123,7 @@ typedef void ALCvoid;
  */
 #define ALC_DEFAULT_DEVICE_SPECIFIER             0x1004
 #define ALC_DEVICE_SPECIFIER                     0x1005
+#define ALC_ALL_DEVICES_SPECIFIER                0x1013
 #define ALC_EXTENSIONS                           0x1006
 
 #define ALC_MAJOR_VERSION                        0x1000
