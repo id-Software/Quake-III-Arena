@@ -45,7 +45,7 @@ cvar_t *s_alInputDevice;
 cvar_t *s_alAvailableDevices;
 cvar_t *s_alAvailableInputDevices;
 
-static enumeration_ext = qfalse;
+static qboolean enumeration_ext = qfalse;
 
 /*
 =================
@@ -2275,18 +2275,18 @@ static
 void S_AL_SoundInfo( void )
 {
 	Com_Printf( "OpenAL info:\n" );
-	Com_Printf( "  Vendor:     %s\n", qalGetString( AL_VENDOR ) );
-	Com_Printf( "  Version:    %s\n", qalGetString( AL_VERSION ) );
-	Com_Printf( "  Renderer:   %s\n", qalGetString( AL_RENDERER ) );
-	Com_Printf( "  AL Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
+	Com_Printf( "  Vendor:         %s\n", qalGetString( AL_VENDOR ) );
+	Com_Printf( "  Version:        %s\n", qalGetString( AL_VERSION ) );
+	Com_Printf( "  Renderer:       %s\n", qalGetString( AL_RENDERER ) );
+	Com_Printf( "  AL Extensions:  %s\n", qalGetString( AL_EXTENSIONS ) );
 	Com_Printf( "  ALC Extensions: %s\n", qalcGetString( alDevice, ALC_EXTENSIONS ) );
 	if(enumeration_ext)
 	{
-		Com_Printf("  Device:      %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
-		Com_Printf("Available Devices:\n%s", s_alAvailableDevices->string);
+		Com_Printf("  Device:         %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
+		Com_Printf("  Available Devices:\n%s", s_alAvailableDevices->string);
 #ifdef USE_VOIP
-		Com_Printf("Input Device:  %s\n", qalcGetString(alCaptureDevice, ALC_DEVICE_SPECIFIER));
-		Com_Printf("Available Input Devices:\n%s", s_alAvailableInputDevices->string);
+		Com_Printf("  Input Device:   %s\n", qalcGetString(alCaptureDevice, ALC_DEVICE_SPECIFIER));
+		Com_Printf("  Available Input Devices:\n%s", s_alAvailableInputDevices->string);
 #endif
 	}
 }
@@ -2366,8 +2366,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 	s_alGraceDistance = Cvar_Get("s_alGraceDistance", "512", CVAR_CHEAT);
 
 	s_alDriver = Cvar_Get( "s_alDriver", ALDRIVER_DEFAULT, CVAR_ARCHIVE | CVAR_LATCH );
-	s_alInputDevice = Cvar_Get( "s_alInputDevice", ALDRIVER_DEFAULT, CVAR_ARCHIVE | CVAR_LATCH );
 
+	s_alInputDevice = Cvar_Get( "s_alInputDevice", "", CVAR_ARCHIVE | CVAR_LATCH );
 	s_alDevice = Cvar_Get("s_alDevice", "", CVAR_ARCHIVE | CVAR_LATCH);
 
 	// Load QAL
@@ -2386,8 +2386,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 		inputdevice = NULL;
 
 	// Device enumeration support
-	if(qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") ||
-	   (enumeration_ext = qalcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
+	if((enumeration_ext = qalcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) ||
+	   qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")
 	  )
 	{
 		char devicenames[1024] = "";
