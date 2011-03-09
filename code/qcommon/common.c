@@ -451,7 +451,6 @@ be after execing the config and default.
 void Com_StartupVariable( const char *match ) {
 	int		i;
 	char	*s;
-	cvar_t	*cv;
 
 	for (i=0 ; i < com_numConsoleLines ; i++) {
 		Cmd_TokenizeString( com_consoleLines[i] );
@@ -460,11 +459,13 @@ void Com_StartupVariable( const char *match ) {
 		}
 
 		s = Cmd_Argv(1);
-		if ( !match || !strcmp( s, match ) ) {
-			Cvar_Set( s, Cmd_Argv(2) );
-			cv = Cvar_Get( s, "", 0 );
-			cv->flags |= CVAR_USER_CREATED;
-//			com_consoleLines[i] = 0;
+		
+		if(!match || !strcmp(s, match))
+		{
+			if(Cvar_Flags(s) == CVAR_NONEXISTENT)
+				Cvar_Get(s, Cmd_Argv(2), CVAR_USER_CREATED);
+			else
+				Cvar_Set(s, Cmd_Argv(2));
 		}
 	}
 }
