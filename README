@@ -132,6 +132,8 @@ New cvars
   s_alDriver                        - which OpenAL library to use
   s_alDevice                        - which OpenAL device to use
   s_alAvailableDevices              - list of available OpenAL devices
+  s_alInputDevice                   - which OpenAL input device to use
+  s_alAvailableInputDevices         - list of available OpenAL input devices
   s_sdlBits                         - SDL bit resolution
   s_sdlSpeed                        - SDL sample rate
   s_sdlChannels                     - SDL number of channels
