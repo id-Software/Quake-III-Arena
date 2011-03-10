@@ -321,6 +321,17 @@ qboolean Sys_Mkdir( const char *path )
 }
 
 /*
+==================
+Sys_Mkfifo
+Noop on windows because named pipes do not function the same way
+==================
+*/
+FILE *Sys_Mkfifo( const char *ospath )
+{
+	return NULL;
+}
+
+/*
 ==============
 Sys_Cwd
 ==============

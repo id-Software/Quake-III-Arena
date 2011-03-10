@@ -249,6 +249,31 @@ qboolean Sys_Mkdir( const char *path )
 
 /*
 ==================
+Sys_Mkfifo
+==================
+*/
+FILE *Sys_Mkfifo( const char *ospath )
+{
+	FILE	*fifo; 
+	int		result;
+	int		fn;
+
+	result = mkfifo( ospath, 0600 );
+	if( result != 0 )
+		return NULL;
+
+	fifo = fopen( ospath, "w+" );
+	if( fifo )
+	{
+		fn = fileno( fifo );
+		fcntl( fn, F_SETFL, O_NONBLOCK );
+	}
+
+	return fifo;
+}
+
+/*
+==================
 Sys_Cwd
 ==================
 */
