@@ -705,10 +705,6 @@ char* Q_strrchr( const char* string, int c )
 
 qboolean Q_isanumber( const char *s )
 {
-#ifdef Q3_VM
-	//FIXME: implement
-	return qfalse;
-#else
 	char *p;
 	double d;
 
@@ -718,7 +714,6 @@ qboolean Q_isanumber( const char *s )
 	d = strtod( s, &p );
 
 	return *p == '\0';
-#endif
 }
 
 qboolean Q_isintegral( float f )
