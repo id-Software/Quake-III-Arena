@@ -574,7 +574,7 @@ static void IN_InitJoystick( void )
 {
 	int i = 0;
 	int total = 0;
-	char buf[MAX_STRING_CHARS] = "";
+	char buf[16384] = "";
 
 	if (stick != NULL)
 		SDL_JoystickClose(stick);

@@ -2390,7 +2390,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	   qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")
 	  )
 	{
-		char devicenames[1024] = "";
+		char devicenames[16384] = "";
 		const char *devicelist;
 		const char *defaultdevice;
 		int curlen;
@@ -2494,7 +2494,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 		}
 		else
 		{
-			char inputdevicenames[1024] = "";
+			char inputdevicenames[16384] = "";
 			const char *inputdevicelist;
 			const char *defaultinputdevice;
 			int curlen;
