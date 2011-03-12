@@ -30,10 +30,43 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * You may also wish to include "jerror.h".
  */
 
-#define JPEG_INTERNALS
-#include "../jpeg-6b/jpeglib.h"
+#ifdef USE_INTERNAL_JPEG
+#  define JPEG_INTERNALS
+#endif
 
-void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *height ) {
+#include <jpeglib.h>
+
+#ifndef USE_INTERNAL_JPEG
+#  if JPEG_LIB_VERSION < 80
+#    error Need system libjpeg >= 80
+#  endif
+#endif
+
+static void R_JPGErrorExit(j_common_ptr cinfo)
+{
+  char buffer[JMSG_LENGTH_MAX];
+  
+  (*cinfo->err->format_message) (cinfo, buffer);
+  
+  /* Let the memory manager delete any temp files before we die */
+  jpeg_destroy(cinfo);
+  
+  ri.Error(ERR_FATAL, "%s\n", buffer);
+}
+
+static void R_JPGOutputMessage(j_common_ptr cinfo)
+{
+  char buffer[JMSG_LENGTH_MAX];
+  
+  /* Create the message */
+  (*cinfo->err->format_message) (cinfo, buffer);
+  
+  /* Send it to stderr, adding a newline */
+  ri.Printf(PRINT_ALL, "%s\n", buffer);
+}
+
+void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *height)
+{
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
    */
@@ -55,6 +88,7 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
   JSAMPARRAY buffer;		/* Output row buffer */
   unsigned row_stride;		/* physical row width in output buffer */
   unsigned pixelcount, memcount;
+  int sindex, dindex;
   unsigned char *out;
   int len;
 	union {
@@ -82,6 +116,8 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
    * address which we place into the link field in cinfo.
    */
   cinfo.err = jpeg_std_error(&jerr);
+  cinfo.err->error_exit = R_JPGErrorExit;
+  cinfo.err->output_message = R_JPGOutputMessage;
 
   /* Now we can initialize the JPEG decompression object. */
   jpeg_create_decompress(&cinfo);
@@ -101,9 +137,7 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
 
   /* Step 4: set parameters for decompression */
 
-  /* In this example, we don't need to change any of the defaults set by
-   * jpeg_read_header(), so we do nothing here.
-   */
+  cinfo.out_color_space = JCS_RGB;
 
   /* Step 5: Start decompressor */
 
@@ -124,9 +158,10 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
 
   if(!cinfo.output_width || !cinfo.output_height
       || ((pixelcount * 4) / cinfo.output_width) / 4 != cinfo.output_height
-      || pixelcount > 0x1FFFFFFF || cinfo.output_components > 4) // 4*1FFFFFFF == 0x7FFFFFFC < 0x7FFFFFFF
+      || pixelcount > 0x1FFFFFFF || cinfo.output_components != 3
+    )
   {
-    ri.Error (ERR_DROP, "LoadJPG: %s has an invalid image size: %dx%d*4=%d, components: %d\n", filename,
+    ri.Error (ERR_DROP, "LoadJPG: %s has an invalid image format: %dx%d*4=%d, components: %d\n", filename,
 		    cinfo.output_width, cinfo.output_height, pixelcount * 4, cinfo.output_components);
   }
 
@@ -158,34 +193,19 @@ void R_LoadJPG( const char *filename, unsigned char **pic, int *width, int *heig
 
   // If we are processing an 8-bit JPEG (greyscale), we'll have to convert
   // the greyscale values to RGBA.
-  if(cinfo.output_components == 1)
-  {
-  	int sindex = pixelcount, dindex = memcount;
-	unsigned char greyshade;
+  sindex = pixelcount * cinfo.output_components;
+  dindex = memcount;
 
-	// Only pixelcount number of bytes have been written.
-	// Expand the color values over the rest of the buffer, starting
-	// from the end.
-	do
-	{
-		greyshade = buf[--sindex];
-
-		buf[--dindex] = 255;
-		buf[--dindex] = greyshade;
-		buf[--dindex] = greyshade;
-		buf[--dindex] = greyshade;
-	} while(sindex);
-  }
-  else
-  {
-	// clear all the alphas to 255
-	int	i;
-
-	for ( i = 3 ; i < memcount ; i+=4 )
-	{
-		buf[i] = 255;
-	}
-  }
+  // Only pixelcount number of bytes have been written.
+  // Expand the color values over the rest of the buffer, starting
+  // from the end.
+  do
+  {	
+    buf[--dindex] = 255;
+    buf[--dindex] = buf[--sindex];
+    buf[--dindex] = buf[--sindex];
+    buf[--dindex] = buf[--sindex];
+  } while(sindex);
 
   *pic = out;
 
