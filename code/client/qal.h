@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
   #include <AL/al.h>
   #include <AL/alc.h>
+  #include <AL/alext.h>
 #endif
 #endif
 
