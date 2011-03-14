@@ -46,6 +46,8 @@ cvar_t *s_alAvailableDevices;
 cvar_t *s_alAvailableInputDevices;
 
 static qboolean enumeration_ext = qfalse;
+static qboolean enumeration_all_ext = qfalse;
+static qboolean capture_ext = qfalse;
 
 /*
 =================
@@ -2271,8 +2273,7 @@ void S_AL_MasterGain( float gain )
 S_AL_SoundInfo
 =================
 */
-static
-void S_AL_SoundInfo( void )
+static void S_AL_SoundInfo(void)
 {
 	Com_Printf( "OpenAL info:\n" );
 	Com_Printf( "  Vendor:         %s\n", qalGetString( AL_VENDOR ) );
@@ -2280,15 +2281,22 @@ void S_AL_SoundInfo( void )
 	Com_Printf( "  Renderer:       %s\n", qalGetString( AL_RENDERER ) );
 	Com_Printf( "  AL Extensions:  %s\n", qalGetString( AL_EXTENSIONS ) );
 	Com_Printf( "  ALC Extensions: %s\n", qalcGetString( alDevice, ALC_EXTENSIONS ) );
-	if(enumeration_ext)
-	{
+
+	if(enumeration_all_ext)
+		Com_Printf("  Device:         %s\n", qalcGetString(alDevice, ALC_ALL_DEVICES_SPECIFIER));
+	else if(enumeration_ext)
 		Com_Printf("  Device:         %s\n", qalcGetString(alDevice, ALC_DEVICE_SPECIFIER));
+
+	if(enumeration_all_ext || enumeration_ext)
 		Com_Printf("  Available Devices:\n%s", s_alAvailableDevices->string);
+
 #ifdef USE_VOIP
-		Com_Printf("  Input Device:   %s\n", qalcGetString(alCaptureDevice, ALC_DEVICE_SPECIFIER));
+	if(capture_ext)
+	{
+		Com_Printf("  Input Device:   %s\n", qalcGetString(alCaptureDevice, ALC_CAPTURE_DEVICE_SPECIFIER));
 		Com_Printf("  Available Input Devices:\n%s", s_alAvailableInputDevices->string);
-#endif
 	}
+#endif
 }
 
 
@@ -2385,16 +2393,18 @@ qboolean S_AL_Init( soundInterface_t *si )
 	if(inputdevice && !*inputdevice)
 		inputdevice = NULL;
 
+
 	// Device enumeration support
-	if((enumeration_ext = qalcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) ||
-	   qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")
-	  )
+	enumeration_all_ext = qalcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT");
+	enumeration_ext = qalcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT");
+
+	if(enumeration_ext || enumeration_all_ext)
 	{
 		char devicenames[16384] = "";
 		const char *devicelist;
 		const char *defaultdevice;
 		int curlen;
-		
+
 		// get all available devices + the default device name.
 		if(enumeration_ext)
 		{
@@ -2501,6 +2511,8 @@ qboolean S_AL_Init( soundInterface_t *si )
 			const char *defaultinputdevice;
 			int curlen;
 
+			capture_ext = qtrue;
+
 			// get all available input devices + the default input device name.
 			inputdevicelist = qalcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
 			defaultinputdevice = qalcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
@@ -2527,7 +2539,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 				alCaptureDevice = qalcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 4096);
 			}
 			Com_Printf( "OpenAL capture device %s.\n",
-			            (alCaptureDevice == NULL) ? "failed to open" : "opened");
+				    (alCaptureDevice == NULL) ? "failed to open" : "opened");
 		}
 	}
 #endif
