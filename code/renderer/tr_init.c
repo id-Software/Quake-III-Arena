@@ -397,18 +397,20 @@ RB_TakeScreenshotJPEG
 */  
 void RB_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName ) {
 	byte		*buffer;
+	size_t memcount;
 
-	buffer = ri.Hunk_AllocateTempMemory(glConfig.vidWidth*glConfig.vidHeight*4);
+	memcount = glConfig.vidWidth * glConfig.vidHeight * 3;
 
-	qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer ); 
+	buffer = ri.Hunk_AllocateTempMemory(memcount);
+
+	qglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
 	// gamma correct
-	if ( glConfig.deviceSupportsGamma ) {
-		R_GammaCorrect( buffer, glConfig.vidWidth * glConfig.vidHeight * 4 );
-	}
+	if(glConfig.deviceSupportsGamma)
+		R_GammaCorrect(buffer, memcount);
 
 	ri.FS_WriteFile( fileName, buffer, 1 );		// create path
-	SaveJPG( fileName, r_screenshotJpegQuality->integer, glConfig.vidWidth, glConfig.vidHeight, buffer);
+	RE_SaveJPG(fileName, r_screenshotJpegQuality->integer, glConfig.vidWidth, glConfig.vidHeight, buffer);
 
 	ri.Hunk_FreeTempMemory( buffer );
 }
@@ -698,36 +700,37 @@ RB_TakeVideoFrameCmd
 const void *RB_TakeVideoFrameCmd( const void *data )
 {
 	const videoFrameCommand_t	*cmd;
-	int												frameSize;
-	int												i;
+	size_t				memcount;
+	int				i;
 	
 	cmd = (const videoFrameCommand_t *)data;
 	
-	qglReadPixels( 0, 0, cmd->width, cmd->height, GL_RGBA,
-			GL_UNSIGNED_BYTE, cmd->captureBuffer );
+	qglReadPixels(0, 0, cmd->width, cmd->height, GL_RGB,
+		GL_UNSIGNED_BYTE, cmd->captureBuffer);
+
+	memcount = cmd->width * cmd->height * 3;
 
 	// gamma correct
 	if( glConfig.deviceSupportsGamma )
-		R_GammaCorrect( cmd->captureBuffer, cmd->width * cmd->height * 4 );
+		R_GammaCorrect(cmd->captureBuffer, memcount);
 
 	if( cmd->motionJpeg )
 	{
-		frameSize = SaveJPGToBuffer( cmd->encodeBuffer, r_aviMotionJpegQuality->integer,
-				cmd->width, cmd->height, cmd->captureBuffer );
-		ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize );
+		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, memcount,
+			r_aviMotionJpegQuality->integer,
+			cmd->width, cmd->height, cmd->captureBuffer);
+		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
 	}
 	else
 	{
-		frameSize = cmd->width * cmd->height;
-
-		for( i = 0; i < frameSize; i++)    // Pack to 24bpp and swap R and B
+		for(i = 0; i < memcount; i += 3)    // swap R and B
 		{
-			cmd->encodeBuffer[ i*3 ]     = cmd->captureBuffer[ i*4 + 2 ];
-			cmd->encodeBuffer[ i*3 + 1 ] = cmd->captureBuffer[ i*4 + 1 ];
-			cmd->encodeBuffer[ i*3 + 2 ] = cmd->captureBuffer[ i*4 ];
+			cmd->encodeBuffer[i]     = cmd->captureBuffer[i + 2];
+			cmd->encodeBuffer[i + 1] = cmd->captureBuffer[i + 1];
+			cmd->encodeBuffer[i + 2] = cmd->captureBuffer[i];
 		}
 
-		ri.CL_WriteAVIVideoFrame( cmd->encodeBuffer, frameSize * 3 );
+		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
 	}
 
 	return (const void *)(cmd + 1);	

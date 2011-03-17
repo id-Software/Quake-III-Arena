@@ -368,8 +368,9 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   else
     afd.motionJpeg = qfalse;
 
-  afd.cBuffer = Z_Malloc( afd.width * afd.height * 4 );
-  afd.eBuffer = Z_Malloc( afd.width * afd.height * 4 );
+  // Buffers only need to store RGB pixels
+  afd.cBuffer = Z_Malloc(afd.width * afd.height * 3);
+  afd.eBuffer = Z_Malloc(afd.width * afd.height * 3);
 
   afd.a.rate = dma.speed;
   afd.a.format = WAV_FORMAT_PCM;
