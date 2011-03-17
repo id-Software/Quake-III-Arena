@@ -916,7 +916,7 @@ ifeq ($(USE_INTERNAL_JPEG),1)
   BASE_CFLAGS += -DUSE_INTERNAL_JPEG
   BASE_CFLAGS += -I$(JPDIR)
 else
-  LIBS += -ljpeg
+  CLIENT_LIBS += -ljpeg
 endif
 
 ifdef DEFAULT_BASEDIR
