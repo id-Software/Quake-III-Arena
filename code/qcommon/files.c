@@ -943,6 +943,8 @@ fileHandle_t FS_FCreateOpenPipeFile( const char *filename ) {
 	}
 	else
 	{
+		Com_Printf( S_COLOR_YELLOW "WARNING: Could not create new com_pipefile at %s. "
+			"com_pipefile will not be used.\n", ospath );
 		f = 0;
 	}
 
