@@ -583,10 +583,10 @@ void SetTeam( gentity_t *ent, char *s ) {
 		player_die (ent, ent, ent, 100000, MOD_SUICIDE);
 
 	}
+
 	// they go to the end of the line for tournements
-	if ( team == TEAM_SPECTATOR ) {
-		client->sess.spectatorTime = level.time;
-	}
+	if(team == TEAM_SPECTATOR && oldTeam != team)
+		AddTournamentQueue(client);
 
 	client->sess.sessionTeam = team;
 	client->sess.spectatorState = specState;
