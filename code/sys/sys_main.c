@@ -207,6 +207,8 @@ static void Sys_Exit( int exitCode )
 		remove( Sys_PIDFileName( ) );
 	}
 
+	Sys_PlatformExit( );
+
 	exit( exitCode );
 }
 
