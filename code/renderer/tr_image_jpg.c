@@ -137,6 +137,10 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
 
   /* Step 4: set parameters for decompression */
 
+  /*
+   * Make sure it always converts images to RGB color space. This will
+   * automatically convert 8-bit greyscale images to RGB as well.
+   */
   cinfo.out_color_space = JCS_RGB;
 
   /* Step 5: Start decompressor */
@@ -195,14 +199,10 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
   
   buf = out;
 
-  // If we are processing an 8-bit JPEG (greyscale), we'll have to convert
-  // the greyscale values to RGBA.
+  // Expand from RGB to RGBA
   sindex = pixelcount * cinfo.output_components;
   dindex = memcount;
 
-  // Only pixelcount number of bytes have been written.
-  // Expand the color values over the rest of the buffer, starting
-  // from the end.
   do
   {	
     buf[--dindex] = 255;
