@@ -358,7 +358,7 @@ Expects RGB input data
 =================
 */
 size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
-    int image_width, int image_height, byte *image_buffer)
+    int image_width, int image_height, byte *image_buffer, int padding)
 {
   struct jpeg_compress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -398,7 +398,7 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 
   /* Step 5: while (scan lines remain to be written) */
   /*           jpeg_write_scanlines(...); */
-  row_stride = image_width * cinfo.input_components; /* JSAMPLEs per row in image_buffer */
+  row_stride = image_width * cinfo.input_components + padding; /* JSAMPLEs per row in image_buffer */
   
   while (cinfo.next_scanline < cinfo.image_height) {
     /* jpeg_write_scanlines expects an array of pointers to scanlines.
@@ -422,7 +422,7 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
   return outcount;
 }
 
-void RE_SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer)
+void RE_SaveJPG(char * filename, int quality, int image_width, int image_height, byte *image_buffer, int padding)
 {
   byte *out;
   size_t bufSize;
@@ -430,7 +430,7 @@ void RE_SaveJPG(char * filename, int quality, int image_width, int image_height,
   bufSize = image_width * image_height * 3;
   out = ri.Hunk_AllocateTempMemory(bufSize);
 
-  bufSize = RE_SaveJPGToBuffer(out, bufSize, quality, image_width, image_height, image_buffer);
+  bufSize = RE_SaveJPGToBuffer(out, bufSize, quality, image_width, image_height, image_buffer, padding);
   ri.FS_WriteFile(filename, out, bufSize);
 
   ri.Hunk_FreeTempMemory(out);

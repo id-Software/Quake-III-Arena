@@ -177,7 +177,8 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
-#define PAD(x,y) (((x)+(y)-1) & ~((y)-1))
+#define PAD(x,y)	(((x)+(y)-1) & ~((y)-1))
+#define PADLEN(x,y)	(PAD((x), (y)) - (x))
 
 #ifdef __GNUC__
 #define QALIGN(x) __attribute__((aligned(x)))
