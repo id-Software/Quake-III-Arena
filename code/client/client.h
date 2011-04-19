@@ -391,6 +391,15 @@ extern	cvar_t	*m_forward;
 extern	cvar_t	*m_side;
 extern	cvar_t	*m_filter;
 
+extern	cvar_t	*j_pitch;
+extern	cvar_t	*j_yaw;
+extern	cvar_t	*j_forward;
+extern	cvar_t	*j_side;
+extern	cvar_t	*j_pitch_axis;
+extern	cvar_t	*j_yaw_axis;
+extern	cvar_t	*j_forward_axis;
+extern	cvar_t	*j_side_axis;
+
 extern	cvar_t	*cl_timedemo;
 extern	cvar_t	*cl_aviFrameRate;
 extern	cvar_t	*cl_aviMotionJpeg;

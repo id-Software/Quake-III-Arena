@@ -121,6 +121,26 @@ New cvars
   cl_gamename                       - Gamename sent to master server in
                                       getserversExt query
 
+  in_joystickUseAnalog              - Do not translate joystick axis events
+                                      to keyboard commands
+
+  j_forward                         - Joystick analogue to m_forward,
+                                      for forward movement speed/direction.
+  j_side                            - Joystick analogue to m_side,
+                                      for side movement speed/direction.
+  j_pitch                           - Joystick analogue to m_pitch,
+                                      for pitch rotation speed/direction.
+  j_yaw                             - Joystick analogue to m_yaw,
+                                      for yaw rotation speed/direction.
+  j_forward_axis                    - Selects which joystick axis
+                                      controls forward/back.
+  j_side_axis                       - Selects which joystick axis
+                                      controls left/right.
+  j_pitch_axis                      - Selects which joystick axis
+                                      controls pitch.
+  j_yaw_axis                        - Selects which joystick axis
+                                      controls yaw.
+
   s_useOpenAL                       - use the OpenAL sound backend if available
   s_alPrecache                      - cache OpenAL sounds before use
   s_alGain                          - the value of AL_GAIN for each source

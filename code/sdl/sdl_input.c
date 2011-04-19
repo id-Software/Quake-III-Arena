@@ -67,6 +67,7 @@ static cvar_t *in_joystick          = NULL;
 static cvar_t *in_joystickDebug     = NULL;
 static cvar_t *in_joystickThreshold = NULL;
 static cvar_t *in_joystickNo        = NULL;
+static cvar_t *in_joystickUseAnalog = NULL;
 
 static int vidRestartTime = 0;
 
@@ -561,6 +562,7 @@ struct
 {
 	qboolean buttons[16];  // !!! FIXME: these might be too many.
 	unsigned int oldaxes;
+	int oldaaxes[16];
 	unsigned int oldhats;
 } stick_state;
 
@@ -615,6 +617,8 @@ static void IN_InitJoystick( void )
 	if( in_joystickNo->integer < 0 || in_joystickNo->integer >= total )
 		Cvar_Set( "in_joystickNo", "0" );
 
+	in_joystickUseAnalog = Cvar_Get( "in_joystickUseAnalog", "0", CVAR_ARCHIVE );
+
 	stick = SDL_JoystickOpen( in_joystickNo->integer );
 
 	if (stick == NULL) {
@@ -623,11 +627,12 @@ static void IN_InitJoystick( void )
 	}
 
 	Com_DPrintf( "Joystick %d opened\n", in_joystickNo->integer );
-	Com_DPrintf( "Name:    %s\n", SDL_JoystickName(in_joystickNo->integer) );
-	Com_DPrintf( "Axes:    %d\n", SDL_JoystickNumAxes(stick) );
-	Com_DPrintf( "Hats:    %d\n", SDL_JoystickNumHats(stick) );
-	Com_DPrintf( "Buttons: %d\n", SDL_JoystickNumButtons(stick) );
-	Com_DPrintf( "Balls: %d\n", SDL_JoystickNumBalls(stick) );
+	Com_DPrintf( "Name:       %s\n", SDL_JoystickName(in_joystickNo->integer) );
+	Com_DPrintf( "Axes:       %d\n", SDL_JoystickNumAxes(stick) );
+	Com_DPrintf( "Hats:       %d\n", SDL_JoystickNumHats(stick) );
+	Com_DPrintf( "Buttons:    %d\n", SDL_JoystickNumButtons(stick) );
+	Com_DPrintf( "Balls:      %d\n", SDL_JoystickNumBalls(stick) );
+	Com_DPrintf( "Use Analog: %s\n", in_joystickUseAnalog->integer ? "Yes" : "No" );
 
 	SDL_JoystickEventState(SDL_QUERY);
 }
@@ -808,11 +813,27 @@ static void IN_JoyMove( void )
 		for (i = 0; i < total; i++)
 		{
 			Sint16 axis = SDL_JoystickGetAxis(stick, i);
-			float f = ( (float) axis ) / 32767.0f;
-			if( f < -in_joystickThreshold->value ) {
-				axes |= ( 1 << ( i * 2 ) );
-			} else if( f > in_joystickThreshold->value ) {
-				axes |= ( 1 << ( ( i * 2 ) + 1 ) );
+
+			if (in_joystickUseAnalog->integer)
+			{
+				float f = ( (float) abs(axis) ) / 32767.0f;
+				
+				if( f < in_joystickThreshold->value ) axis = 0;
+
+				if ( axis != stick_state.oldaaxes[i] )
+				{
+					Com_QueueEvent( 0, SE_JOYSTICK_AXIS, i, axis, 0, NULL );
+					stick_state.oldaaxes[i] = axis;
+				}
+			}
+			else
+			{
+				float f = ( (float) axis ) / 32767.0f;
+				if( f < -in_joystickThreshold->value ) {
+					axes |= ( 1 << ( i * 2 ) );
+				} else if( f > in_joystickThreshold->value ) {
+					axes |= ( 1 << ( ( i * 2 ) + 1 ) );
+				}
 			}
 		}
 	}
