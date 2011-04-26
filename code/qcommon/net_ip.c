@@ -389,7 +389,6 @@ Compare without port, and up to the bit number given in netmask.
 */
 qboolean NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask)
 {
-	qboolean differed;
 	byte cmpmask, *addra, *addrb;
 	int curbyte;
 	
@@ -421,24 +420,12 @@ qboolean NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask)
 		return qfalse;
 	}
 
-	differed = qfalse;
-	curbyte = 0;
+	curbyte = netmask >> 3;
 
-	while(netmask > 7)
-	{
-		if(addra[curbyte] != addrb[curbyte])
-		{
-			differed = qtrue;
-			break;
-		}
+	if(curbyte && memcmp(addra, addrb, curbyte))
+			return qfalse;
 
-		curbyte++;
-		netmask -= 8;
-	}
-
-	if(differed)
-		return qfalse;
-
+	netmask &= ~0x07;
 	if(netmask)
 	{
 		cmpmask = (1 << netmask) - 1;
