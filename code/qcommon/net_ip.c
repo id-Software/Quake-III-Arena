@@ -425,7 +425,7 @@ qboolean NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask)
 	if(curbyte && memcmp(addra, addrb, curbyte))
 			return qfalse;
 
-	netmask &= ~0x07;
+	netmask &= 0x07;
 	if(netmask)
 	{
 		cmpmask = (1 << netmask) - 1;
