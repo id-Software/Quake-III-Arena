@@ -128,7 +128,7 @@ typedef struct bot_state_s
 	playerState_t cur_ps;							//current player state
 	int last_eFlags;								//last ps flags
 	usercmd_t lastucmd;								//usercmd from last frame
-	int entityeventTime[1024];						//last entity event time
+	int entityeventTime[MAX_GENTITIES];				//last entity event time
 	//
 	bot_settings_t settings;						//several bot settings
 	int (*ainode)(struct bot_state_s *bs);			//current AI node
