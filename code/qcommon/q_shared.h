@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define GAMENAME_FOR_MASTER		"iofoo3"		// must NOT contain whitespaces
   #define HEARTBEAT_FOR_MASTER		GAMENAME_FOR_MASTER
   #define FLATLINE_FOR_MASTER		GAMENAME_FOR_MASTER "dead"
-//  #define PROTOCOL_SUPPORT_OLD	// You probably don't need this for your standalone game
 #else
   #define PRODUCT_NAME			"ioq3"
   #define BASEGAME			"baseq3"
@@ -43,7 +42,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define GAMENAME_FOR_MASTER		"Quake3Arena"
   #define HEARTBEAT_FOR_MASTER		"QuakeArena-1"
   #define FLATLINE_FOR_MASTER		HEARTBEAT_FOR_MASTER
-  #define PROTOCOL_SUPPORT_OLD
 #endif
 
 #define BASETA				"missionpack"
@@ -684,7 +682,7 @@ void Parse2DMatrix (char **buf_p, int y, int x, float *m);
 void Parse3DMatrix (char **buf_p, int z, int y, int x, float *m);
 int Com_HexStrToInt( const char *str );
 
-int QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
+void	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
 
 char *Com_SkipTokens( char *s, int numTokens, char *sep );
 char *Com_SkipCharset( char *s, char *sep );

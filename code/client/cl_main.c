@@ -533,6 +533,7 @@ void CL_WriteDemoMessage ( msg_t *msg, int headerBytes ) {
 	len = clc.serverMessageSequence;
 	swlen = LittleLong( len );
 	FS_Write (&swlen, 4, clc.demofile);
+
 	// skip the packet sequencing information
 	len = msg->cursize - headerBytes;
 	swlen = LittleLong(len);
@@ -635,24 +636,14 @@ void CL_Record_f( void ) {
 	if ( Cmd_Argc() == 2 ) {
 		s = Cmd_Argv(1);
 		Q_strncpyz( demoName, s, sizeof( demoName ) );
-#ifdef PROTOCOL_SUPPORT_OLD
-		if(clc.compat)
-			Com_sprintf(name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_oldprotocol->integer);
-		else
-#endif
-			Com_sprintf(name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_protocol->integer);
+		Com_sprintf (name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_protocol->integer );
 	} else {
 		int		number;
 
 		// scan for a free demo name
 		for ( number = 0 ; number <= 9999 ; number++ ) {
 			CL_DemoFilename( number, demoName );
-#ifdef PROTOCOL_SUPPORT_OLD
-			if(clc.compat)
-				Com_sprintf(name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_oldprotocol->integer);
-			else
-#endif
-				Com_sprintf(name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_protocol->integer);
+			Com_sprintf (name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_protocol->integer );
 
 			if (!FS_FileExists(name))
 				break;	// file doesn't exist
@@ -673,6 +664,7 @@ void CL_Record_f( void ) {
 	} else {
 	  clc.spDemoRecording = qfalse;
 	}
+
 
 	Q_strncpyz( clc.demoName, demoName, sizeof( clc.demoName ) );
 
@@ -897,62 +889,36 @@ void CL_ReadDemoMessage( void ) {
 CL_WalkDemoExt
 ====================
 */
-static int CL_WalkDemoExt(char *arg, char *name, int *demofile)
+static void CL_WalkDemoExt(char *arg, char *name, int *demofile)
 {
 	int i = 0;
 	*demofile = 0;
 
-#ifdef PROTOCOL_SUPPORT_OLD
-	if(com_oldprotocol->integer > 0)
-	{
-		Com_sprintf(name, MAX_OSPATH, "demos/%s.%s%d", arg, DEMOEXT, com_oldprotocol->integer);
-		FS_FOpenFileRead(name, demofile, qtrue);
-		
-		if (*demofile)
-		{
-			Com_Printf("Demo file: %s\n", name);
-			return com_oldprotocol->integer;
-		}
-	}
-	
-	if(com_protocol->integer != com_oldprotocol->integer)
-#endif
-	{
-		Com_sprintf(name, MAX_OSPATH, "demos/%s.%s%d", arg, DEMOEXT, com_protocol->integer);
-		FS_FOpenFileRead(name, demofile, qtrue);
+	Com_sprintf (name, MAX_OSPATH, "demos/%s.%s%d", arg, DEMOEXT, com_protocol->integer);
 
-		if (*demofile)
-		{
-			Com_Printf("Demo file: %s\n", name);
-			return com_protocol->integer;
-		}
+	FS_FOpenFileRead( name, demofile, qtrue );
+
+	if (*demofile)
+	{
+		Com_Printf("Demo file: %s\n", name);
+		return;
 	}
 
 	Com_Printf("Not found: %s\n", name);
 
 	while(demo_protocols[i])
 	{
-#ifdef PROTOCOL_SUPPORT_OLD
-		if(demo_protocols[i] == com_oldprotocol->integer)
-			continue;
-#endif
-		if(demo_protocols[i] == com_protocol->integer)
-			continue;
-	
 		Com_sprintf (name, MAX_OSPATH, "demos/%s.%s%d", arg, DEMOEXT, demo_protocols[i]);
 		FS_FOpenFileRead( name, demofile, qtrue );
 		if (*demofile)
 		{
 			Com_Printf("Demo file: %s\n", name);
-
-			return demo_protocols[i];
+			break;
 		}
 		else
 			Com_Printf("Not found: %s\n", name);
 		i++;
 	}
-	
-	return -1;
 }
 
 /*
@@ -1012,11 +978,7 @@ void CL_PlayDemo_f( void ) {
 				break;
 		}
 
-		if(demo_protocols[i] || protocol == com_protocol->integer
-#ifdef PROTOCOL_SUPPORT_OLD
-		   || protocol == com_oldprotocol->integer
-#endif
-		  )
+		if(demo_protocols[i] || protocol == com_protocol->integer)
 		{
 			Com_sprintf(name, sizeof(name), "demos/%s", arg);
 			FS_FOpenFileRead(name, &clc.demofile, qtrue);
@@ -1033,11 +995,11 @@ void CL_PlayDemo_f( void ) {
 
 			Q_strncpyz(retry, arg, len + 1);
 			retry[len] = '\0';
-			protocol = CL_WalkDemoExt(retry, name, &clc.demofile);
+			CL_WalkDemoExt(retry, name, &clc.demofile);
 		}
 	}
 	else
-		protocol = CL_WalkDemoExt(arg, name, &clc.demofile);
+		CL_WalkDemoExt(arg, name, &clc.demofile);
 	
 	if (!clc.demofile) {
 		Com_Error( ERR_DROP, "couldn't open %s", name);
@@ -1050,13 +1012,6 @@ void CL_PlayDemo_f( void ) {
 	cls.state = CA_CONNECTED;
 	clc.demoplaying = qtrue;
 	Q_strncpyz( cls.servername, Cmd_Argv(1), sizeof( cls.servername ) );
-
-#ifdef PROTOCOL_SUPPORT_OLD
-	if(protocol <= com_oldprotocol->integer)
-		clc.compat = qtrue;
-	else
-		clc.compat = qfalse;
-#endif
 
 	// read demo messages until connected
 	while ( cls.state >= CA_CONNECTED && cls.state < CA_PRIMED ) {
@@ -2198,16 +2153,7 @@ void CL_CheckForResend( void ) {
 		port = Cvar_VariableValue ("net_qport");
 
 		Q_strncpyz( info, Cvar_InfoString( CVAR_USERINFO ), sizeof( info ) );
-		
-#ifdef PROTOCOL_SUPPORT_OLD
-		if(com_oldprotocol->integer == com_protocol->integer)
-			clc.compat = qtrue;
-
-		if(clc.compat)
-			Info_SetValueForKey(info, "protocol", va("%i", com_oldprotocol->integer));
-		else
-#endif
-			Info_SetValueForKey(info, "protocol", va("%i", com_protocol->integer));
+		Info_SetValueForKey( info, "protocol", va("%i", com_protocol->integer ) );
 		Info_SetValueForKey( info, "qport", va("%i", port ) );
 		Info_SetValueForKey( info, "challenge", va("%i", clc.challenge ) );
 		
@@ -2448,7 +2394,6 @@ Responses to broadcasts, etc
 void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	char	*s;
 	char	*c;
-	int challenge;
 
 	MSG_BeginReadingOOB( msg );
 	MSG_ReadLong( msg );	// skip the -1
@@ -2470,33 +2415,18 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 			return;
 		}
 		
-		c = Cmd_Argv(2);
-		if(*c)
-			challenge = atoi(c);
-		
-#ifdef PROTOCOL_SUPPORT_OLD
-		if(!clc.compat)
+		if(!NET_CompareAdr(from, clc.serverAddress))
 		{
-			if(!*c || challenge != clc.challenge)
-			{
-				Com_Printf("Bad challenge for challengeResponse. Ignored.\n");
-				return;
-			}
-		}
-		else
-#endif
-		{
-			if(!NET_CompareAdr(from, clc.serverAddress))
-			{
-				// This challenge response is not coming from the expected address.
-				// Check whether we have a matching client challenge to prevent
-				// connection hi-jacking.
+			// This challenge response is not coming from the expected address.
+			// Check whether we have a matching client challenge to prevent
+			// connection hi-jacking.
 			
-				if(!*c || challenge != clc.challenge)
-				{
-					Com_DPrintf("Challenge response received from unexpected source. Ignored.\n");
-					return;
-				}
+			c = Cmd_Argv(2);
+			
+			if(!*c || atoi(c) != clc.challenge)
+			{
+				Com_DPrintf("Challenge response received from unexpected source. Ignored.\n");
+				return;
 			}
 		}
 
@@ -2527,34 +2457,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 			Com_Printf( "connectResponse from wrong address. Ignored.\n" );
 			return;
 		}
-
-#ifdef PROTOCOL_SUPPORT_OLD
-		if(!clc.compat)
-		{
-			c = Cmd_Argv(1);
-
-			if(*c)
-				challenge = atoi(c);
-			else
-			{
-				Com_Printf("Bad connectResponse received. Ignored.\n");
-				return;
-			}
-			
-			if(challenge != clc.challenge)
-			{
-				Com_Printf("ConnectResponse with bad challenge received. Ignored.\n");
-				return;
-			}
-		}
-
-		Netchan_Setup(NS_CLIENT, &clc.netchan, from, Cvar_VariableValue("net_qport"),
-			      clc.challenge, clc.compat);
-#else
-		Netchan_Setup(NS_CLIENT, &clc.netchan, from, Cvar_VariableValue("net_qport"),
-			      clc.challenge);
-#endif
-
+		Netchan_Setup (NS_CLIENT, &clc.netchan, from, Cvar_VariableValue( "net_qport" ) );
 		cls.state = CA_CONNECTED;
 		clc.lastPacketSentTime = -9999;		// send first packet immediately
 		return;
@@ -2569,6 +2472,13 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	// server responding to a get playerlist
 	if ( !Q_stricmp(c, "statusResponse") ) {
 		CL_ServerStatusResponse( from, msg );
+		return;
+	}
+
+	// a disconnect message from the server, which will happen if the server
+	// dropped the connection but it is still getting packets from us
+	if (!Q_stricmp(c, "disconnect")) {
+		CL_DisconnectPacket( from );
 		return;
 	}
 
@@ -2591,33 +2501,10 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	}
 
 	// echo request from server
-	if(!Q_stricmp(c, "print")){
+	if ( !Q_stricmp(c, "print") ) {
 		s = MSG_ReadString( msg );
-		
-		#ifdef PROTOCOL_SUPPORT_OLD
-		// Hack to detect legacy server protocol
-		if(cls.state == CA_CHALLENGING && com_oldprotocol->integer > 0)
-		{
-			char buf[128];
-			int len;
-			
-			len = Com_sprintf(buf, sizeof(buf), "Server uses protocol version %d",
-					     com_oldprotocol->integer);
-
-			if(len < sizeof(buf) && !Q_strncmp(s, buf, len) && !isdigit(s[len]))
-			{
-				// This is an old, but compatible protocol version.
-				// Go back to connecting state.
-				clc.compat = qtrue;
-				cls.state = CA_CONNECTING;
-				return;
-			}
-		}
-		#endif
-
 		Q_strncpyz( clc.serverMessage, s, sizeof( clc.serverMessage ) );
 		Com_Printf( "%s", s );
-
 		return;
 	}
 
@@ -3558,13 +3445,7 @@ void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 
 	// if this isn't the correct protocol version, ignore it
 	prot = atoi( Info_ValueForKey( infoString, "protocol" ) );
-
-	if(prot != com_protocol->integer
-#ifdef PROTOCOL_SUPPORT_OLD
-	   && prot != com_oldprotocol->integer
-#endif
-	  )
-	{
+	if ( prot != com_protocol->integer ) {
 		Com_DPrintf( "Different protocol info packet: %s\n", infoString );
 		return;
 	}
