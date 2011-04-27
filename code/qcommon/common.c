@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 int demo_protocols[] =
-{ 66, 67, 68, 0 };
+{ 67, 66, 0 };
 
 #define MAX_NUM_ARGVS	50
 
@@ -86,6 +86,9 @@ cvar_t	*com_maxfpsMinimized;
 cvar_t	*com_abnormalExit;
 cvar_t	*com_standalone;
 cvar_t	*com_protocol;
+#ifdef PROTOCOL_SUPPORT_OLD
+cvar_t	*com_oldprotocol;
+#endif
 cvar_t	*com_basegame;
 cvar_t  *com_homepath;
 cvar_t	*com_busyWait;
@@ -2710,6 +2713,9 @@ void Com_Init( char *commandLine ) {
 	s = va("%s %s %s", Q3_VERSION, PLATFORM_STRING, __DATE__ );
 	com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
 	com_protocol = Cvar_Get ("protocol", va("%i", PROTOCOL_VERSION), CVAR_SERVERINFO | CVAR_INIT);
+#ifdef PROTOCOL_SUPPORT_OLD
+	com_oldprotocol = Cvar_Get ("oldprotocol", va("%i", PROTOCOL_OLD_VERSION), CVAR_INIT);
+#endif
 
 	Sys_Init();
 

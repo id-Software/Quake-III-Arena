@@ -194,7 +194,8 @@ void		NET_Sleep(int msec);
 
 #define MAX_DOWNLOAD_WINDOW			8		// max of eight download frames
 #define MAX_DOWNLOAD_BLKSIZE		2048	// 2048 byte block chunks
- 
+
+#define NETCHAN_GENCHECKSUM(challenge, sequence) ((challenge) ^ ((sequence) * (challenge)))
 
 /*
 Netchan handles packet fragmentation and out of order / duplicate suppression
@@ -223,10 +224,20 @@ typedef struct {
 	int			unsentFragmentStart;
 	int			unsentLength;
 	byte		unsentBuffer[MAX_MSGLEN];
+
+	int			challenge;
+
+#ifdef PROTOCOL_SUPPORT_OLD
+	qboolean	compat;
+#endif
 } netchan_t;
 
 void Netchan_Init( int qport );
-void Netchan_Setup( netsrc_t sock, netchan_t *chan, netadr_t adr, int qport );
+void Netchan_Setup(netsrc_t sock, netchan_t *chan, netadr_t adr, int qport, int challenge
+#ifdef PROTOCOL_SUPPORT_OLD
+		   , qboolean compat
+#endif
+);
 
 void Netchan_Transmit( netchan_t *chan, int length, const byte *data );
 void Netchan_TransmitNextFragment( netchan_t *chan );
@@ -242,7 +253,8 @@ PROTOCOL
 ==============================================================
 */
 
-#define	PROTOCOL_VERSION	68
+#define	PROTOCOL_VERSION	69
+#define PROTOCOL_OLD_VERSION	68
 // 1.31 - 67
 
 // maintain a list of compatible protocols for demo playing
@@ -857,6 +869,9 @@ extern	cvar_t	*cl_packetdelay;
 extern	cvar_t	*sv_packetdelay;
 
 extern	cvar_t	*com_protocol;
+#ifdef PROTOCOL_SUPPORT_OLD
+extern	cvar_t	*com_oldprotocol;
+#endif
 
 // com_speeds times
 extern	int		time_game;

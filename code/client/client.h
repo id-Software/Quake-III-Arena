@@ -260,6 +260,10 @@ typedef struct {
 	float voipPower;
 #endif
 
+#ifdef PROTOCOL_SUPPORT_OLD
+	qboolean compat;
+#endif
+
 	// big stuff at end of structure so most offsets are 15 bits or less
 	netchan_t	netchan;
 } clientConnection_t;

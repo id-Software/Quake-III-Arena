@@ -147,9 +147,6 @@ void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ) {
 	Netchan_Transmit( chan, msg->cursize, msg->data );
 }
 
-extern 	int oldsize;
-int newsize = 0;
-
 /*
 =================
 CL_Netchan_Process
@@ -161,7 +158,8 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg ) {
 	ret = Netchan_Process( chan, msg );
 	if (!ret)
 		return qfalse;
+
 	CL_Netchan_Decode( msg );
-	newsize += msg->cursize;
+
 	return qtrue;
 }
