@@ -2634,7 +2634,7 @@ CL_CheckUserinfo
 */
 void CL_CheckUserinfo( void ) {
 	// don't add reliable commands when not yet connected
-	if(cls.state < CA_CHALLENGING)
+	if(cls.state < CA_CONNECTED)
 		return;
 
 	// don't overflow the reliable command buffer when paused
