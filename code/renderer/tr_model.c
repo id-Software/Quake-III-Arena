@@ -81,7 +81,7 @@ qhandle_t R_RegisterMD3(const char *name, model_t *mod)
 			if (ident == MD3_IDENT)
 				loaded = R_LoadMD3(mod, lod, buf.u, name);
 			else
-				ri.Printf(PRINT_WARNING,"RE_RegisterMD3: unknown fileid for %s\n", name);
+				ri.Printf(PRINT_WARNING,"R_RegisterMD3: unknown fileid for %s\n", name);
 		}
 		
 		ri.FS_FreeFile(buf.v);
@@ -109,7 +109,7 @@ qhandle_t R_RegisterMD3(const char *name, model_t *mod)
 	}
 
 #ifdef _DEBUG
-	ri.Printf(PRINT_WARNING,"RE_RegisterMD3: couldn't load %s\n", name);
+	ri.Printf(PRINT_WARNING,"R_RegisterMD3: couldn't load %s\n", name);
 #endif
 
 	mod->type = MOD_BAD;
@@ -147,7 +147,7 @@ qhandle_t R_RegisterMDR(const char *name, model_t *mod)
 	
 	if(!loaded)
 	{
-		ri.Printf(PRINT_WARNING,"RE_RegisterMDR: couldn't load mdr file %s\n", name);
+		ri.Printf(PRINT_WARNING,"R_RegisterMDR: couldn't load mdr file %s\n", name);
 		mod->type = MOD_BAD;
 		return 0;
 	}
@@ -183,7 +183,7 @@ qhandle_t R_RegisterIQM(const char *name, model_t *mod)
 	
 	if(!loaded)
 	{
-		ri.Printf(PRINT_WARNING,"RE_RegisterIQM: couldn't load mdr file %s\n", name);
+		ri.Printf(PRINT_WARNING,"R_RegisterIQM: couldn't load iqm file %s\n", name);
 		mod->type = MOD_BAD;
 		return 0;
 	}
@@ -202,12 +202,12 @@ typedef struct
 // when there are multiple models of different formats available
 static modelExtToLoaderMap_t modelLoaders[ ] =
 {
+	{ "iqm", R_RegisterIQM },
 #ifdef RAVENMD4
 	{ "mdr", R_RegisterMDR },
 #endif
 	{ "md4", R_RegisterMD3 },
-	{ "md3", R_RegisterMD3 },
-	{ "iqm", R_RegisterIQM }
+	{ "md3", R_RegisterMD3 }
 };
 
 static int numModelLoaders = ARRAY_LEN(modelLoaders);
@@ -546,7 +546,7 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 {
 	int					i, j, k, l;
 	mdrHeader_t			*pinmodel, *mdr;
-        mdrFrame_t			*frame;
+	mdrFrame_t			*frame;
 	mdrLOD_t			*lod, *curlod;
 	mdrSurface_t			*surf, *cursurf;
 	mdrTriangle_t			*tri, *curtri;
@@ -598,7 +598,7 @@ static qboolean R_LoadMDR( model_t *mod, void *buffer, int filesize, const char 
 	}
 
 	mod->dataSize += size;
-	mod->md4 = mdr = ri.Hunk_Alloc( size, h_low );
+	mod->modelData = mdr = ri.Hunk_Alloc( size, h_low );
 
 	// Copy all the values over from the file and fix endian issues in the process, if necessary.
 	
@@ -1207,10 +1207,10 @@ int R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFram
 		}
 		else
 #endif
-                if( model->type == MOD_IQM ) {
-                        return R_IQMLerpTag( tag, model->modelData,
-                                             startFrame, endFrame,
-                                             frac, tagName );
+		if( model->type == MOD_IQM ) {
+			return R_IQMLerpTag( tag, model->modelData,
+					startFrame, endFrame,
+					frac, tagName );
 		} else {
 
 			AxisClear( tag->axis );

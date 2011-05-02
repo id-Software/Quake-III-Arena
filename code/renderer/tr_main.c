@@ -1260,8 +1260,8 @@ void R_AddEntitySurfaces (void) {
 					break;
 #endif
 				case MOD_IQM:
-                                        R_AddIQMSurfaces( ent );
-                                        break;
+					R_AddIQMSurfaces( ent );
+					break;
 				case MOD_BRUSH:
 					R_AddBrushModelSurfaces( ent );
 					break;
