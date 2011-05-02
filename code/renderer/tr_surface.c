@@ -1242,6 +1242,7 @@ void (*rb_surfaceTable[SF_NUM_SURFACE_TYPES])( void *) = {
 #ifdef RAVENMD4
 	(void(*)(void*))RB_MDRSurfaceAnim,		// SF_MDR,
 #endif
+	(void(*)(void*))RB_IQMSurfaceAnim,		// SF_IQM,
 	(void(*)(void*))RB_SurfaceFlare,		// SF_FLARE,
 	(void(*)(void*))RB_SurfaceEntity,		// SF_ENTITY
 	(void(*)(void*))RB_SurfaceDisplayList		// SF_DISPLAY_LIST

@@ -1423,6 +1423,7 @@ Q3OBJ = \
   $(B)/client/tr_image_tga.o \
   $(B)/client/tr_image_pcx.o \
   $(B)/client/tr_init.o \
+  $(B)/client/tr_model_iqm.o \
   $(B)/client/tr_light.o \
   $(B)/client/tr_main.o \
   $(B)/client/tr_marks.o \
