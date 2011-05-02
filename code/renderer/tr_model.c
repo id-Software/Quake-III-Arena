@@ -270,7 +270,7 @@ qhandle_t RE_RegisterModel( const char *name ) {
 	int			i;
 	char		localName[ MAX_QPATH ];
 	const char	*ext;
-	char		*altName;
+	char		altName[ MAX_QPATH ];
 
 	if ( !name || !name[0] ) {
 		ri.Printf( PRINT_ALL, "RE_RegisterModel: NULL name\n" );
@@ -358,7 +358,7 @@ qhandle_t RE_RegisterModel( const char *name ) {
 		if (i == orgLoader)
 			continue;
 
-		altName = va( "%s.%s", localName, modelLoaders[ i ].ext );
+		Com_sprintf( altName, sizeof (altName), "%s.%s", localName, modelLoaders[ i ].ext );
 
 		// Load
 		hModel = modelLoaders[ i ].ModelLoader( altName, mod );
