@@ -27,14 +27,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 botlib_export_t	*botlib_export;
 
-void SV_GameError( const char *string ) {
-	Com_Error( ERR_DROP, "%s", string );
-}
-
-void SV_GamePrint( const char *string ) {
-	Com_Printf( "%s", string );
-}
-
 // these functions must be used instead of pointer arithmetic, because
 // the game allocates gentities with private information after the server shared part
 int	SV_NumForGentity( sharedEntity_t *ent ) {
@@ -300,10 +292,10 @@ The module is making a system call
 intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case G_PRINT:
-		SV_GamePrintf((const char*) VMA(1));
+		Com_Printf( "%s", (const char*)VMA(1) );
 		return 0;
 	case G_ERROR:
-		SV_GameError((const char*) VMA(1));
+		Com_Error( ERR_DROP, "%s", (const char*)VMA(1) );
 		return 0;
 	case G_MILLISECONDS:
 		return Sys_Milliseconds();

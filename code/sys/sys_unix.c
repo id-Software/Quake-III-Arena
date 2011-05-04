@@ -63,12 +63,12 @@ char *Sys_DefaultHomePath(void)
 			if(com_homepath->string[0])
 				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
 			else
-				Q_strcat(homePath, sizeof(homePath), "Quake3");
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_MACOSX);
 #else
 			if(com_homepath->string[0])
 				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
 			else
-				Q_strcat(homePath, sizeof(homePath), ".q3a");
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
 #endif
 		}
 	}
