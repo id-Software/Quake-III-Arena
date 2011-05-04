@@ -300,10 +300,10 @@ The module is making a system call
 intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case G_PRINT:
-		Com_Printf( "%s", (const char*)VMA(1) );
+		SV_GamePrintf((const char*) VMA(1));
 		return 0;
 	case G_ERROR:
-		Com_Error( ERR_DROP, "%s", (const char*)VMA(1) );
+		SV_GameError((const char*) VMA(1));
 		return 0;
 	case G_MILLISECONDS:
 		return Sys_Milliseconds();
