@@ -67,6 +67,62 @@ static void InterpolateMatrix( float *a, float *b, float lerp, float *mat ) {
 	mat[10] = a[10] * unLerp + b[10] * lerp;
 	mat[11] = a[11] * unLerp + b[11] * lerp;
 }
+static void JointToMatrix( vec3_t rot, vec3_t scale, vec3_t trans,
+			   float *mat ) {
+	float rotLen = DotProduct(rot, rot);
+	float rotW = -SQRTFAST(1.0f - rotLen);
+
+	float xx = 2.0f * rot[0] * rot[0];
+	float yy = 2.0f * rot[1] * rot[1];
+	float zz = 2.0f * rot[2] * rot[2];
+	float xy = 2.0f * rot[0] * rot[1];
+	float xz = 2.0f * rot[0] * rot[2];
+	float yz = 2.0f * rot[1] * rot[2];
+	float wx = 2.0f * rotW * rot[0];
+	float wy = 2.0f * rotW * rot[1];
+	float wz = 2.0f * rotW * rot[2];
+
+	mat[ 0] = scale[0] * (1.0f - (yy + zz));
+	mat[ 1] = scale[0] * (xy - wz);
+	mat[ 2] = scale[0] * (xz + wy);
+	mat[ 3] = trans[0];
+	mat[ 4] = scale[1] * (xy + wz);
+	mat[ 5] = scale[1] * (1.0f - (xx + zz));
+	mat[ 6] = scale[1] * (yz - wx);
+	mat[ 7] = trans[1];
+	mat[ 8] = scale[2] * (xz - wy);
+	mat[ 9] = scale[2] * (yz + wx);
+	mat[10] = scale[2] * (1.0f - (xx + yy));
+	mat[11] = trans[2];
+}
+static void JointToMatrixInverse( vec3_t rot, vec3_t scale, vec3_t trans,
+				  float *mat ) {
+	float rotLen = DotProduct(rot, rot);
+	float rotW = -SQRTFAST(1.0f - rotLen);
+
+	float xx = 2.0f * rot[0] * rot[0];
+	float yy = 2.0f * rot[1] * rot[1];
+	float zz = 2.0f * rot[2] * rot[2];
+	float xy = 2.0f * rot[0] * rot[1];
+	float xz = 2.0f * rot[0] * rot[2];
+	float yz = 2.0f * rot[1] * rot[2];
+	float wx = 2.0f * rotW * rot[0];
+	float wy = 2.0f * rotW * rot[1];
+	float wz = 2.0f * rotW * rot[2];
+
+	mat[ 0] = scale[0] * (1.0f - (yy + zz));
+	mat[ 1] = scale[0] * (xy + wz);
+	mat[ 2] = scale[2] * (xz - wy);
+	mat[ 3] = -DotProduct((mat + 0), trans);
+	mat[ 4] = scale[0] * (xy - wz);
+	mat[ 5] = scale[1] * (1.0f - (xx + zz));
+	mat[ 6] = scale[2] * (yz + wx);
+	mat[ 7] = -DotProduct((mat + 4), trans);
+	mat[ 8] = scale[0] * (xz + wy);
+	mat[ 9] = scale[1] * (yz - wx);
+	mat[10] = scale[2] * (1.0f - (xx + yy));
+	mat[11] = -DotProduct((mat + 8), trans);
+}
 
 /*
 =================
@@ -86,7 +142,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	unsigned short		*framedata;
 	char			*str;
 	int			i, j;
-	float			*jointMats, *mat;
+	float			jointMats[IQM_MAX_JOINTS * 2 * 12];
+	float			*mat;
 	size_t			size, joint_names;
 	iqmData_t		*iqmData;
 	srfIQModel_t		*surface;
@@ -262,7 +319,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	}
 
 	// check and swap joints
-	if( IQM_CheckRange( header, header->ofs_joints,
+	if( header->num_joints > IQM_MAX_JOINTS ||
+	    IQM_CheckRange( header, header->ofs_joints,
 			    header->num_joints, sizeof(iqmJoint_t) ) ) {
 		return qfalse;
 	}
@@ -390,37 +448,13 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 	// calculate joint matrices and their inverses
 	// they are needed only until the pose matrices are calculated
-	jointMats = (float *)ri.Hunk_AllocateTempMemory( header->num_joints * 2 * 3 * 4 * sizeof(float) );
 	mat = jointMats;
 	joint = (iqmJoint_t *)((byte *)header + header->ofs_joints);
 	for( i = 0; i < header->num_joints; i++, joint++ ) {
 		float tmpMat[12];
 
-		float rotW = DotProduct(joint->rotate, joint->rotate);
-		rotW = -SQRTFAST(1.0f - rotW);
-
-		float xx = 2.0f * joint->rotate[0] * joint->rotate[0];
-		float yy = 2.0f * joint->rotate[1] * joint->rotate[1];
-		float zz = 2.0f * joint->rotate[2] * joint->rotate[2];
-		float xy = 2.0f * joint->rotate[0] * joint->rotate[1];
-		float xz = 2.0f * joint->rotate[0] * joint->rotate[2];
-		float yz = 2.0f * joint->rotate[1] * joint->rotate[2];
-		float wx = 2.0f * rotW * joint->rotate[0];
-		float wy = 2.0f * rotW * joint->rotate[1];
-		float wz = 2.0f * rotW * joint->rotate[2];
-
-		tmpMat[ 0] = joint->scale[0] * (1.0f - (yy + zz));
-		tmpMat[ 1] = joint->scale[0] * (xy - wz);
-		tmpMat[ 2] = joint->scale[0] * (xz + wy);
-		tmpMat[ 3] = joint->translate[0];
-		tmpMat[ 4] = joint->scale[1] * (xy + wz);
-		tmpMat[ 5] = joint->scale[1] * (1.0f - (xx + zz));
-		tmpMat[ 6] = joint->scale[1] * (yz - wx);
-		tmpMat[ 7] = joint->translate[1];
-		tmpMat[ 8] = joint->scale[2] * (xz - wy);
-		tmpMat[ 9] = joint->scale[2] * (yz + wx);
-		tmpMat[10] = joint->scale[2] * (1.0f - (xx + yy));
-		tmpMat[11] = joint->translate[2];
+		JointToMatrix( joint->rotate, joint->scale, joint->translate,
+			       tmpMat );
 
 		if( joint->parent >= 0 ) {
 			// premultiply with parent-matrix
@@ -434,18 +468,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 		// compute the inverse matrix by combining the
 		// inverse scale, rotation and translation
-		tmpMat[ 0] = joint->scale[0] * (1.0f - (yy + zz));
-		tmpMat[ 1] = joint->scale[1] * (xy + wz);
-		tmpMat[ 2] = joint->scale[2] * (xz - wy);
-		tmpMat[ 3] = -DotProduct((tmpMat + 0), joint->translate);
-		tmpMat[ 4] = joint->scale[0] * (xy - wz);
-		tmpMat[ 5] = joint->scale[1] * (1.0f - (xx + zz));
-		tmpMat[ 6] = joint->scale[2] * (yz + wx);
-		tmpMat[ 7] = -DotProduct((tmpMat + 4), joint->translate);
-		tmpMat[ 8] = joint->scale[0] * (xz + wy);
-		tmpMat[ 9] = joint->scale[1] * (yz - wx);
-		tmpMat[10] = joint->scale[2] * (1.0f - (xx + yy));
-		tmpMat[11] = -DotProduct((tmpMat + 8), joint->translate);
+		JointToMatrixInverse( joint->rotate, joint->scale,
+				      joint->translate, tmpMat );
 
 		if( joint->parent >= 0 ) {
 			// premultiply with inverse parent-matrix
@@ -497,31 +521,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 				scale[2] += *framedata++ * pose->channelscale[8];
 
 			// construct transformation matrix
-			float rotW = DotProduct(rotate, rotate);
-			rotW = -SQRTFAST(1.0f - rotW);
-
-			float xx = 2.0f * rotate[0] * rotate[0];
-			float yy = 2.0f * rotate[1] * rotate[1];
-			float zz = 2.0f * rotate[2] * rotate[2];
-			float xy = 2.0f * rotate[0] * rotate[1];
-			float xz = 2.0f * rotate[0] * rotate[2];
-			float yz = 2.0f * rotate[1] * rotate[2];
-			float wx = 2.0f * rotW * rotate[0];
-			float wy = 2.0f * rotW * rotate[1];
-			float wz = 2.0f * rotW * rotate[2];
-
-			mat1[ 0] = scale[0] * (1.0f - (yy + zz));
-			mat1[ 1] = scale[0] * (xy - wz);
-			mat1[ 2] = scale[0] * (xz + wy);
-			mat1[ 3] = translate[0];
-			mat1[ 4] = scale[1] * (xy + wz);
-			mat1[ 5] = scale[1] * (1.0f - (xx + zz));
-			mat1[ 6] = scale[1] * (yz - wx);
-			mat1[ 7] = translate[1];
-			mat1[ 8] = scale[2] * (xz - wy);
-			mat1[ 9] = scale[2] * (yz + wx);
-			mat1[10] = scale[2] * (1.0f - (xx + yy));
-			mat1[11] = translate[2];
+			JointToMatrix( rotate, scale, translate, mat1 );
 			
 			if( pose->parent >= 0 ) {
 				Matrix34Multiply( jointMats + 12 * 2 * pose->parent,
@@ -534,7 +534,6 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			mat += 12;
 		}
 	}
-	ri.Hunk_FreeTempMemory( jointMats );
 
 	// register shaders
 	// overwrite the material offset with the shader index
@@ -648,6 +647,84 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 }
 
 /*
+=============
+R_CullIQM
+=============
+*/
+static int R_CullIQM( iqmData_t *data, trRefEntity_t *ent ) {
+	vec3_t		bounds[2];
+	vec_t		*oldBounds, *newBounds;
+	int		i;
+
+	// compute bounds pointers
+	oldBounds = data->bounds + 6*ent->e.oldframe;
+	newBounds = data->bounds + 6*ent->e.frame;
+
+	// calculate a bounding box in the current coordinate system
+	for (i = 0 ; i < 3 ; i++) {
+		bounds[0][i] = oldBounds[i] < newBounds[i] ? oldBounds[i] : newBounds[i];
+		bounds[1][i] = oldBounds[i+3] > newBounds[i+3] ? oldBounds[i+3] : newBounds[i+3];
+	}
+
+	switch ( R_CullLocalBox( bounds ) )
+	{
+	case CULL_IN:
+		tr.pc.c_box_cull_md3_in++;
+		return CULL_IN;
+	case CULL_CLIP:
+		tr.pc.c_box_cull_md3_clip++;
+		return CULL_CLIP;
+	case CULL_OUT:
+	default:
+		tr.pc.c_box_cull_md3_out++;
+		return CULL_OUT;
+	}
+}
+
+/*
+=================
+R_ComputeIQMFogNum
+
+=================
+*/
+int R_ComputeIQMFogNum( iqmData_t *data, trRefEntity_t *ent ) {
+	int			i, j;
+	fog_t			*fog;
+	vec_t			*bounds;
+	vec3_t			diag, center;
+	vec3_t			localOrigin;
+	vec_t			radius;
+
+	if ( tr.refdef.rdflags & RDF_NOWORLDMODEL ) {
+		return 0;
+	}
+
+	// FIXME: non-normalized axis issues
+	bounds = data->bounds + 6*ent->e.frame;
+	VectorSubtract( bounds+3, bounds, diag );
+	VectorMA( bounds, 0.5f, diag, center );
+	VectorAdd( ent->e.origin, center, localOrigin );
+	radius = 0.5f * VectorLength( diag );
+
+	for ( i = 1 ; i < tr.world->numfogs ; i++ ) {
+		fog = &tr.world->fogs[i];
+		for ( j = 0 ; j < 3 ; j++ ) {
+			if ( localOrigin[j] - radius >= fog->bounds[1][j] ) {
+				break;
+			}
+			if ( localOrigin[j] + radius <= fog->bounds[0][j] ) {
+				break;
+			}
+		}
+		if ( j == 3 ) {
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+/*
 =================
 R_AddIQMSurfaces
 
@@ -658,15 +735,91 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 	iqmData_t		*data;
 	srfIQModel_t		*surface;
 	int			i;
+	qboolean		personalModel;
+	int			cull;
+	int			fogNum;
+	shader_t		*shader;
 
 	data = tr.currentModel->modelData;
 	surface = data->surfaces;
 
-	R_SetupEntityLighting( &tr.refdef, ent );
+	// don't add third_person objects if not in a portal
+	personalModel = (ent->e.renderfx & RF_THIRD_PERSON) && !tr.viewParms.isPortal;
+
+	if ( ent->e.renderfx & RF_WRAP_FRAMES ) {
+		ent->e.frame %= data->num_frames;
+		ent->e.oldframe %= data->num_frames;
+	}
+
+	//
+	// Validate the frames so there is no chance of a crash.
+	// This will write directly into the entity structure, so
+	// when the surfaces are rendered, they don't need to be
+	// range checked again.
+	//
+	if ( (ent->e.frame >= data->num_frames) 
+	     || (ent->e.frame < 0)
+	     || (ent->e.oldframe >= data->num_frames)
+	     || (ent->e.oldframe < 0) ) {
+		ri.Printf( PRINT_DEVELOPER, "R_AddIQMSurfaces: no such frame %d to %d for '%s'\n",
+			   ent->e.oldframe, ent->e.frame,
+			   tr.currentModel->name );
+		ent->e.frame = 0;
+		ent->e.oldframe = 0;
+	}
+
+	//
+	// cull the entire model if merged bounding box of both frames
+	// is outside the view frustum.
+	//
+	cull = R_CullIQM ( data, ent );
+	if ( cull == CULL_OUT ) {
+		return;
+	}
+
+	//
+	// set up lighting now that we know we aren't culled
+	//
+	if ( !personalModel || r_shadows->integer > 1 ) {
+		R_SetupEntityLighting( &tr.refdef, ent );
+	}
+
+	//
+	// see if we are in a fog volume
+	//
+	fogNum = R_ComputeIQMFogNum( data, ent );
 
 	for ( i = 0 ; i < data->num_surfaces ; i++ ) {
-		R_AddDrawSurf( &surface->surfaceType,
-			       surface->shader, 0 /*fogNum*/, 0 );
+		if( ent->e.customShader ) {
+			shader = R_GetShaderByHandle( ent->e.customShader );
+		} else {
+			shader = surface->shader;
+		}
+
+		// we will add shadows even if the main object isn't visible in the view
+
+		// stencil shadows can't do personal models unless I polyhedron clip
+		if ( !personalModel
+			&& r_shadows->integer == 2 
+			&& fogNum == 0
+			&& !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) ) 
+			&& shader->sort == SS_OPAQUE ) {
+			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, 0 );
+		}
+
+		// projection shadows work fine with personal models
+		if ( r_shadows->integer == 3
+			&& fogNum == 0
+			&& (ent->e.renderfx & RF_SHADOW_PLANE )
+			&& shader->sort == SS_OPAQUE ) {
+			R_AddDrawSurf( (void *)surface, tr.projectionShadowShader, 0, 0 );
+		}
+
+		if( !personalModel ) {
+			R_AddDrawSurf( &surface->surfaceType,
+				       shader, fogNum, 0 );
+		}
+
 		surface++;
 	}
 }
@@ -719,6 +872,7 @@ Compute vertices for this model surface
 void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	srfIQModel_t	*surf = (srfIQModel_t *)surface;
 	iqmData_t	*data = surf->data;
+	float		jointMats[IQM_MAX_JOINTS * 12];
 	int		i;
 
 	vec4_t		*outXYZ = &tess.xyz[tess.numVertexes];
@@ -726,15 +880,18 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	vec2_t		(*outTexCoord)[2] = &tess.texCoords[tess.numVertexes];
 	color4ub_t	*outColor = &tess.vertexColors[tess.numVertexes];
 
-	float	mat[data->num_joints * 12];
 	int	frame = backEnd.currentEntity->e.frame % data->num_frames;
 	int	oldframe = backEnd.currentEntity->e.oldframe % data->num_frames;
 	float	backlerp = backEnd.currentEntity->e.backlerp;
 
+	int		*tri;
+	glIndex_t	*ptr;
+	glIndex_t	base;
+
 	RB_CHECKOVERFLOW( surf->num_vertexes, surf->num_triangles * 3 );
 
 	// compute interpolated joint matrices
-	ComputeJointMats( data, frame, oldframe, backlerp, mat );
+	ComputeJointMats( data, frame, oldframe, backlerp, jointMats );
 
 	// transform vertexes and fill other data
 	for( i = 0; i < surf->num_vertexes;
@@ -748,13 +905,13 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 		// four blend weights
 		for( k = 0; k < 12; k++ )
 			vtxMat[k] = data->blendWeights[4*vtx]
-				* mat[12*data->blendIndexes[4*vtx] + k];
+				* jointMats[12*data->blendIndexes[4*vtx] + k];
 		for( j = 1; j < 4; j++ ) {
 			if( data->blendWeights[4*vtx + j] <= 0 )
 				break;
 			for( k = 0; k < 12; k++ )
 				vtxMat[k] += data->blendWeights[4*vtx + j]
-					* mat[12*data->blendIndexes[4*vtx + j] + k];
+					* jointMats[12*data->blendIndexes[4*vtx + j] + k];
 		}
 		for( k = 0; k < 12; k++ )
 			vtxMat[k] *= 1.0f / 255.0f;
@@ -813,11 +970,9 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 		(*outColor)[3] = data->colors[4*vtx+3];
 	}
 
-	int	*tri = data->triangles;
-	tri += 3 * surf->first_triangle;
-
-	glIndex_t	*ptr = &tess.indexes[tess.numIndexes];
-	glIndex_t	base = tess.numVertexes;
+	tri = data->triangles + 3 * surf->first_triangle;
+	ptr = &tess.indexes[tess.numIndexes];
+	base = tess.numVertexes;
 
 	for( i = 0; i < surf->num_triangles; i++ ) {
 		*ptr++ = base + (*tri++ - surf->first_vertex);
@@ -832,9 +987,9 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 int R_IQMLerpTag( orientation_t *tag, iqmData_t *data,
 		  int startFrame, int endFrame, 
 		  float frac, const char *tagName ) {
+	float	jointMats[IQM_MAX_JOINTS * 12];
 	int	joint;
 	char	*names = data->names;
-	float	mat[data->num_joints * 12];
 
 	// get joint number by reading the joint names
 	for( joint = 0; joint < data->num_joints; joint++ ) {
@@ -845,19 +1000,20 @@ int R_IQMLerpTag( orientation_t *tag, iqmData_t *data,
 	if( joint >= data->num_joints )
 		return qfalse;
 
-	ComputeJointMats( data, startFrame, endFrame, frac, mat );
-	tag->axis[0][0] = mat[12 * joint + 0];
-	tag->axis[1][0] = mat[12 * joint + 1];
-	tag->axis[2][0] = mat[12 * joint + 2];
-	tag->origin[0] = mat[12 * joint + 3];
-	tag->axis[0][1] = mat[12 * joint + 4];
-	tag->axis[1][1] = mat[12 * joint + 5];
-	tag->axis[2][1] = mat[12 * joint + 6];
-	tag->origin[1] = mat[12 * joint + 7];
-	tag->axis[0][2] = mat[12 * joint + 8];
-	tag->axis[1][2] = mat[12 * joint + 9];
-	tag->axis[2][2] = mat[12 * joint + 10];
-	tag->origin[0] = mat[12 * joint + 11];
+	ComputeJointMats( data, startFrame, endFrame, frac, jointMats );
+
+	tag->axis[0][0] = jointMats[12 * joint + 0];
+	tag->axis[1][0] = jointMats[12 * joint + 1];
+	tag->axis[2][0] = jointMats[12 * joint + 2];
+	tag->origin[0] = jointMats[12 * joint + 3];
+	tag->axis[0][1] = jointMats[12 * joint + 4];
+	tag->axis[1][1] = jointMats[12 * joint + 5];
+	tag->axis[2][1] = jointMats[12 * joint + 6];
+	tag->origin[1] = jointMats[12 * joint + 7];
+	tag->axis[0][2] = jointMats[12 * joint + 8];
+	tag->axis[1][2] = jointMats[12 * joint + 9];
+	tag->axis[2][2] = jointMats[12 * joint + 10];
+	tag->origin[0] = jointMats[12 * joint + 11];
 
 	return qfalse;
 }
