@@ -193,6 +193,13 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	LL( header->num_extensions );
 	LL( header->ofs_extensions );
 
+	// check ioq3 joint limit
+	if ( header->num_joints > IQM_MAX_JOINTS ) {
+		ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %d joints (%d).\n",
+				mod_name, IQM_MAX_JOINTS, header->num_joints);
+		return qfalse;
+	}
+
 	// check and swap vertex arrays
 	if( IQM_CheckRange( header, header->ofs_vertexarrays,
 			    header->num_vertexarrays,
@@ -305,7 +312,21 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( mesh->num_vertexes );
 		LL( mesh->first_triangle );
 		LL( mesh->num_triangles );
-		
+
+		// check ioq3 limits
+		if ( mesh->num_vertexes > SHADER_MAX_VERTEXES ) 
+		{
+			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i verts on a surface (%i).\n",
+				  mod_name, SHADER_MAX_VERTEXES, mesh->num_vertexes );
+			return qfalse;
+		}
+		if ( mesh->num_triangles*3 > SHADER_MAX_INDEXES ) 
+		{
+			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i triangles on a surface (%i).\n",
+				  mod_name, SHADER_MAX_INDEXES / 3, mesh->num_triangles );
+			return qfalse;
+		}
+
 		if( mesh->first_vertex >= header->num_vertexes ||
 		    mesh->first_vertex + mesh->num_vertexes > header->num_vertexes ||
 		    mesh->first_triangle >= header->num_triangles ||
@@ -319,8 +340,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	}
 
 	// check and swap joints
-	if( header->num_joints > IQM_MAX_JOINTS ||
-	    IQM_CheckRange( header, header->ofs_joints,
+	if( IQM_CheckRange( header, header->ofs_joints,
 			    header->num_joints, sizeof(iqmJoint_t) ) ) {
 		return qfalse;
 	}
@@ -542,6 +562,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	str = (char *)header + header->ofs_text;
 	for( i = 0; i < header->num_meshes; i++, mesh++, surface++ ) {
 		surface->surfaceType = SF_IQM;
+		Q_strncpyz(surface->name, str + mesh->name, sizeof (surface->name));
 		surface->shader = R_FindShader( str + mesh->material, LIGHTMAP_NONE, qtrue );
 		if( surface->shader->defaultShader )
 			surface->shader = tr.defaultShader;
@@ -550,7 +571,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		surface->num_vertexes = mesh->num_vertexes;
 		surface->first_triangle = mesh->first_triangle;
 		surface->num_triangles = mesh->num_triangles;
-        }
+	}
 
 	// copy vertexarrays and indexes
 	vertexarray = (iqmVertexArray_t *)((byte *)header + header->ofs_vertexarrays);
@@ -734,11 +755,12 @@ Add all surfaces of this model
 void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 	iqmData_t		*data;
 	srfIQModel_t		*surface;
-	int			i;
+	int			i, j;
 	qboolean		personalModel;
 	int			cull;
 	int			fogNum;
 	shader_t		*shader;
+	skin_t			*skin;
 
 	data = tr.currentModel->modelData;
 	surface = data->surfaces;
@@ -790,8 +812,21 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 	fogNum = R_ComputeIQMFogNum( data, ent );
 
 	for ( i = 0 ; i < data->num_surfaces ; i++ ) {
-		if( ent->e.customShader ) {
+		if(ent->e.customShader)
 			shader = R_GetShaderByHandle( ent->e.customShader );
+		else if(ent->e.customSkin > 0 && ent->e.customSkin < tr.numSkins)
+		{
+			skin = R_GetSkinByHandle(ent->e.customSkin);
+			shader = tr.defaultShader;
+
+			for(j = 0; j < skin->numSurfaces; j++)
+			{
+				if (!strcmp(skin->surfaces[j]->name, surface->name))
+				{
+					shader = skin->surfaces[j]->shader;
+					break;
+				}
+			}
 		} else {
 			shader = surface->shader;
 		}
@@ -816,8 +851,7 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 		}
 
 		if( !personalModel ) {
-			R_AddDrawSurf( &surface->surfaceType,
-				       shader, fogNum, 0 );
+			R_AddDrawSurf( (void *)surface, shader, fogNum, 0 );
 		}
 
 		surface++;

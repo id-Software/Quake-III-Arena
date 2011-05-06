@@ -668,6 +668,7 @@ typedef struct {
 // inter-quake-model surface
 typedef struct srfIQModel_s {
 	surfaceType_t	surfaceType;
+	char		name[MAX_QPATH];
 	shader_t	*shader;
 	iqmData_t	*data;
 	int		first_vertex, num_vertexes;
