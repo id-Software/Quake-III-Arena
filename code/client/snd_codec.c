@@ -53,45 +53,89 @@ static char *S_FileExtension(const char *fni)
 
 /*
 =================
-S_FindCodecForFile
+S_CodecGetSound
 
-Select an appropriate codec for a file based on its extension
+Opens/loads a sound, tries codec based on the sound's file extension
+then tries all supported codecs.
 =================
 */
-static snd_codec_t *S_FindCodecForFile(const char *filename)
+static void *S_CodecGetSound(const char *filename, snd_info_t *info)
 {
-	char *ext = S_FileExtension(filename);
-	snd_codec_t *codec = codecs;
+	snd_codec_t *codec;
+	snd_codec_t *orgCodec = NULL;
+	qboolean	orgNameFailed = qfalse;
+	char		localName[ MAX_QPATH ];
+	const char	*ext;
+	char		altName[ MAX_QPATH ];
+	void		*rtn = NULL;
 
-	if(!ext)
+	Q_strncpyz(localName, filename, MAX_QPATH);
+
+	ext = S_FileExtension(localName);
+
+	if( *ext )
 	{
-		// No extension - auto-detect
-		while(codec)
+		// Look for the correct loader and use it
+		for( codec = codecs; codec; codec = codec->next )
 		{
-			char fn[MAX_QPATH];
-			
-			// there is no extension so we do not need to subtract 4 chars
-			Q_strncpyz(fn, filename, MAX_QPATH);
-			COM_DefaultExtension(fn, MAX_QPATH, codec->ext);
-
-			// Check it exists
-			if(FS_ReadFile(fn, NULL) != -1)
-				return codec;
-
-			// Nope. Next!
-			codec = codec->next;
+			if( !Q_stricmp( ext, codec->ext ) )
+			{
+				// Load
+				if( info )
+					rtn = codec->load(localName, info);
+				else
+					rtn = codec->open(localName);
+				break;
+			}
 		}
 
-		// Nothin'
-		return NULL;
+		// A loader was found
+		if( codec )
+		{
+			if( !rtn )
+			{
+				// Loader failed, most likely because the file isn't there;
+				// try again without the extension
+				orgNameFailed = qtrue;
+				orgCodec = codec;
+				COM_StripExtension( filename, localName, MAX_QPATH );
+			}
+			else
+			{
+				// Something loaded
+				return rtn;
+			}
+		}
 	}
 
-	while(codec)
+	// Try and find a suitable match using all
+	// the sound codecs supported
+	for( codec = codecs; codec; codec = codec->next )
 	{
-		if(!Q_stricmp(ext, codec->ext))
-			return codec;
-		codec = codec->next;
+		if( codec == orgCodec )
+			continue;
+
+		Com_sprintf( altName, sizeof (altName), "%s%s", localName, codec->ext );
+
+		// Load
+		if( info )
+			rtn = codec->load(altName, info);
+		else
+			rtn = codec->open(altName);
+
+		if( rtn )
+		{
+			if( orgNameFailed )
+			{
+				Com_DPrintf(S_COLOR_YELLOW "WARNING: %s not present, using %s instead\n",
+						filename, altName );
+			}
+
+			return rtn;
+		}
 	}
+
+	Com_Printf(S_COLOR_YELLOW "WARNING: Failed to %s sound %s!\n", info ? "load" : "open", filename);
 
 	return NULL;
 }
@@ -104,10 +148,13 @@ S_CodecInit
 void S_CodecInit()
 {
 	codecs = NULL;
-	S_CodecRegister(&wav_codec);
+
 #ifdef USE_CODEC_VORBIS
 	S_CodecRegister(&ogg_codec);
 #endif
+
+// Register wav codec last so that it is always tried first when a file extension was not found
+	S_CodecRegister(&wav_codec);
 }
 
 /*
@@ -138,20 +185,7 @@ S_CodecLoad
 */
 void *S_CodecLoad(const char *filename, snd_info_t *info)
 {
-	snd_codec_t *codec;
-	char fn[MAX_QPATH];
-
-	codec = S_FindCodecForFile(filename);
-	if(!codec)
-	{
-		Com_Printf("Unknown extension for %s\n", filename);
-		return NULL;
-	}
-
-	strncpy(fn, filename, sizeof(fn));
-	COM_DefaultExtension(fn, sizeof(fn), codec->ext);
-
-	return codec->load(fn, info);
+	return S_CodecGetSound(filename, info);
 }
 
 /*
@@ -161,20 +195,7 @@ S_CodecOpenStream
 */
 snd_stream_t *S_CodecOpenStream(const char *filename)
 {
-	snd_codec_t *codec;
-	char fn[MAX_QPATH];
-
-	codec = S_FindCodecForFile(filename);
-	if(!codec)
-	{
-		Com_Printf("Unknown extension for %s\n", filename);
-		return NULL;
-	}
-
-	strncpy(fn, filename, sizeof(fn));
-	COM_DefaultExtension(fn, sizeof(fn), codec->ext);
-
-	return codec->open(fn);
+	return S_CodecGetSound(filename, NULL);
 }
 
 void S_CodecCloseStream(snd_stream_t *stream)
