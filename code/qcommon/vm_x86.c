@@ -1104,6 +1104,8 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		Com_Error(ERR_FATAL, "VM_CompileX86: VirtualAlloc failed");
 #else
 	vm->codeBase = malloc(compiledOfs);
+	if(!vm->codeBase)
+	        Com_Error(ERR_FATAL, "VM_CompileX86: malloc failed");
 #endif
 
 	Com_Memcpy( vm->codeBase, buf, compiledOfs );
