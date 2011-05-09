@@ -382,7 +382,7 @@ byte *RB_ReadPixels(int x, int y, int width, int height, size_t *offset, int *pa
 	// Allocate a few more bytes so that we can choose an alignment we like
 	buffer = ri.Hunk_AllocateTempMemory(padwidth * height + *offset + packAlign - 1);
 	
-	bufstart = (byte *) PAD((intptr_t) buffer + *offset, packAlign);
+	bufstart = PADP((intptr_t) buffer + *offset, packAlign);
 	qglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, bufstart);
 	
 	*offset = bufstart - buffer;
@@ -780,7 +780,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	avipadwidth = PAD(linelen, AVI_LINE_PADDING);
 	avipadlen = avipadwidth - linelen;
 
-	cBuf = (byte *) PAD((intptr_t) cmd->captureBuffer, packAlign);
+	cBuf = PADP(cmd->captureBuffer, packAlign);
 		
 	qglReadPixels(0, 0, cmd->width, cmd->height, GL_RGB,
 		GL_UNSIGNED_BYTE, cBuf);

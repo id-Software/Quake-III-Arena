@@ -195,6 +195,7 @@ void *R_GetCommandBuffer( int bytes ) {
 	renderCommandList_t	*cmdList;
 
 	cmdList = &backEndData[tr.smpFrame]->commands;
+	bytes = PAD(bytes, sizeof(void *));
 
 	// always leave room for the end of list command
 	if ( cmdList->used + bytes + 4 > MAX_RENDER_COMMANDS ) {
