@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "q_shared.h"
 #include "qcommon.h"
 
-#define	OPSTACK_SIZE	256
+#define	OPSTACK_SIZE	1024
 #define	OPSTACK_MASK	(OPSTACK_SIZE-1)
 
 // don't change
