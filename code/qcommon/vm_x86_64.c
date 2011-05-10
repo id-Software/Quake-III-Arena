@@ -387,7 +387,7 @@ void emit(const char* fmt, ...)
 	do { Com_Error(ERR_DROP, "instruction not implemented: %s", opnames[x]); } while(0)
 #else
 #define NOTIMPL(x) \
-	do { Com_Printf(S_COLOR_RED "instruction not implemented: %x", x); vm->compiled = qfalse; return; } while(0)
+	do { Com_Printf(S_COLOR_RED "instruction not implemented: %x\n", x); vm->compiled = qfalse; return; } while(0)
 #endif
 
 static void* getentrypoint(vm_t* vm)
