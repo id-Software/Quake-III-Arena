@@ -74,10 +74,10 @@ static void VM_Destroy_Compiled(vm_t* self);
   ebx	scratch
   ecx	scratch (required for shifts)
   edx	scratch (required for divisions)
-  rsi	stack pointer (opStack)
+  rsi	opStack offset
   rdi	program frame pointer (programStack)
   r8    pointer data (vm->dataBase)
-  r9    opStack data
+  r9    opStack data base (opStack)
   r10   start of generated code
 */
 
@@ -384,10 +384,10 @@ void emit(const char* fmt, ...)
 
 #ifdef DEBUG_VM
 #define NOTIMPL(x) \
-	do { Com_Error(ERR_DROP, "instruction not implemented: %s\n", opnames[x]); } while(0)
+	do { Com_Error(ERR_DROP, "instruction not implemented: %s", opnames[x]); } while(0)
 #else
 #define NOTIMPL(x) \
-	do { Com_Printf(S_COLOR_RED "instruction not implemented: %x\n", x); vm->compiled = qfalse; return; } while(0)
+	do { Com_Printf(S_COLOR_RED "instruction not implemented: %x", x); vm->compiled = qfalse; return; } while(0)
 #endif
 
 static void* getentrypoint(vm_t* vm)
@@ -404,7 +404,7 @@ static void CROSSCALL block_copy_vm(unsigned dest, unsigned src, unsigned count)
 	|| ((dest+count) & dataMask) != dest + count
 	|| ((src+count) & dataMask) != src + count)
 	{
-		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!\n");
+		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!");
 	}
 
 	memcpy(currentVM->dataBase+dest, currentVM->dataBase+src, count);
@@ -412,26 +412,26 @@ static void CROSSCALL block_copy_vm(unsigned dest, unsigned src, unsigned count)
 
 static void CROSSCALL eop(void)
 {
-	Com_Error(ERR_DROP, "End of program reached without return!\n");
+	Com_Error(ERR_DROP, "End of program reached without return!");
 	exit(1);
 }
 
 static void CROSSCALL jmpviolation(void)
 {
-	Com_Error(ERR_DROP, "Program tried to execute code outside VM\n");
+	Com_Error(ERR_DROP, "Program tried to execute code outside VM");
 	exit(1);
 }
 
 #ifdef DEBUG_VM
 static void CROSSCALL memviolation(void)
 {
-	Com_Error(ERR_DROP, "Program tried to access memory outside VM, or unaligned memory access\n");
+	Com_Error(ERR_DROP, "Program tried to access memory outside VM, or unaligned memory access");
 	exit(1);
 }
 
 static void CROSSCALL opstackviolation(void)
 {
-	Com_Error(ERR_DROP, "Program corrupted the VM opStack\n");
+	Com_Error(ERR_DROP, "Program corrupted the VM opStack");
 	exit(1);
 }
 #endif
@@ -968,7 +968,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	if(got_const)
 	{
 		VM_FREEBUFFERS(vm);
-		Com_Error(ERR_DROP, "leftover const\n");
+		Com_Error(ERR_DROP, "leftover const");
 	}
 
 	emit("movq $%"PRIu64", %%rax", (uint64_t)eop);
@@ -1115,10 +1115,10 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	);
 
 	if(opStackRet != 4)
-		Com_Error(ERR_DROP, "opStack corrupted in compiled code (offset %d)\n", opStackRet);
+		Com_Error(ERR_DROP, "opStack corrupted in compiled code (offset %d)", opStackRet);
 
 	if ( programStack != stackOnEntry - 48 ) {
-		Com_Error( ERR_DROP, "programStack corrupted in compiled code\n" );
+		Com_Error( ERR_DROP, "programStack corrupted in compiled code" );
 	}
 
 //	Com_Printf("exiting %s level %d\n", vm->name, vm->callLevel);
