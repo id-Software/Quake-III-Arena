@@ -65,7 +65,6 @@ struct powerpc_opcode
 };
 
 static const struct powerpc_opcode powerpc_opcodes[];
-static const int powerpc_num_opcodes;
 
 #define PPC_OPCODE_PPC			 1
 #define PPC_OPCODE_POWER		 2
@@ -112,7 +111,6 @@ struct powerpc_operand
 };
 
 static const struct powerpc_operand powerpc_operands[];
-static const unsigned int num_powerpc_operands;
 
 #define PPC_OPERAND_SIGNED (0x1)
 #define PPC_OPERAND_SIGNOPT (0x2)
@@ -390,7 +388,6 @@ static const struct powerpc_operand powerpc_operands[] =
 
 };
 
-static const unsigned int num_powerpc_operands = ARRAY_LEN (powerpc_operands);
 
 /* The functions used to insert and extract complicated operands.  */
 
