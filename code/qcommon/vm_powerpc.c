@@ -1,4 +1,4 @@
-/*
+50/*
 ===========================================================================
 Copyright (C) 2008 Przemyslaw Iskra <sparky@pld-linux.org>
 
@@ -47,7 +47,7 @@ static clock_t time_total_vm = 0;
 /* exit() won't be called but use it because it is marked with noreturn */
 #define DIE( reason ) \
 	do { \
-		Com_Error(ERR_DROP, "vm_powerpc compiler error: " reason "\n"); \
+		Com_Error(ERR_DROP, "vm_powerpc compiler error: " reason); \
 		exit(1); \
 	} while(0)
 

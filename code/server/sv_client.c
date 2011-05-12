@@ -459,7 +459,7 @@ void SV_DirectConnect( netadr_t from ) {
 				newcl = &svs.clients[sv_maxclients->integer - 1];
 			}
 			else {
-				Com_Error( ERR_FATAL, "server is full on local connect\n" );
+				Com_Error( ERR_FATAL, "server is full on local connect" );
 				return;
 			}
 		}

@@ -1054,12 +1054,12 @@ void Z_CheckHeap( void ) {
 			break;			// all blocks have been hit
 		}
 		if ( (byte *)block + block->size != (byte *)block->next)
-			Com_Error( ERR_FATAL, "Z_CheckHeap: block size does not touch the next block\n" );
+			Com_Error( ERR_FATAL, "Z_CheckHeap: block size does not touch the next block" );
 		if ( block->next->prev != block) {
-			Com_Error( ERR_FATAL, "Z_CheckHeap: next block doesn't have proper back link\n" );
+			Com_Error( ERR_FATAL, "Z_CheckHeap: next block doesn't have proper back link" );
 		}
 		if ( !block->tag && !block->next->tag ) {
-			Com_Error( ERR_FATAL, "Z_CheckHeap: two consecutive free blocks\n" );
+			Com_Error( ERR_FATAL, "Z_CheckHeap: two consecutive free blocks" );
 		}
 	}
 }
@@ -1870,7 +1870,7 @@ void Hunk_Trash( void ) {
 		return;
 
 #ifdef _DEBUG
-	Com_Error(ERR_DROP, "hunk trashed\n");
+	Com_Error(ERR_DROP, "hunk trashed");
 	return;
 #endif
 

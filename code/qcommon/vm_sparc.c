@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /* exit() won't be called but use it because it is marked with noreturn */
 #define DIE( reason ) \
 	do { \
-		Com_Error(ERR_DROP, "vm_sparc compiler error: " reason "\n"); \
+		Com_Error(ERR_DROP, "vm_sparc compiler error: " reason); \
 		exit(1); \
 	} while(0)
 

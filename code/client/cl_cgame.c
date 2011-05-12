@@ -300,7 +300,7 @@ rescan:
 		if ( argc >= 2 )
 			Com_Error( ERR_SERVERDISCONNECT, "Server disconnected - %s", Cmd_Argv( 1 ) );
 		else
-			Com_Error( ERR_SERVERDISCONNECT, "Server disconnected\n" );
+			Com_Error( ERR_SERVERDISCONNECT, "Server disconnected" );
 	}
 
 	if ( !strcmp( cmd, "bcs0" ) ) {
