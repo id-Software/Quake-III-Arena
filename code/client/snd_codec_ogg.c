@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Q3 OGG codec
 snd_codec_t ogg_codec =
 {
-	".ogg",
+	"ogg",
 	S_OGG_CodecLoad,
 	S_OGG_CodecOpenStream,
 	S_OGG_CodecReadStream,

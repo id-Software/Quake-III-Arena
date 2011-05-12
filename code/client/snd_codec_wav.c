@@ -183,7 +183,7 @@ static qboolean S_ReadRIFFHeader(fileHandle_t file, snd_info_t *info)
 // WAV codec
 snd_codec_t wav_codec =
 {
-	".wav",
+	"wav",
 	S_WAV_CodecLoad,
 	S_WAV_CodecOpenStream,
 	S_WAV_CodecReadStream,

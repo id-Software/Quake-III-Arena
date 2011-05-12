@@ -90,7 +90,7 @@ static void *S_CodecGetSound(const char *filename, snd_info_t *info)
 		if( codec == orgCodec )
 			continue;
 
-		Com_sprintf( altName, sizeof (altName), "%s%s", localName, codec->ext );
+		Com_sprintf( altName, sizeof (altName), "%s.%s", localName, codec->ext );
 
 		// Load
 		if( info )
