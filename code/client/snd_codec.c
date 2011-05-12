@@ -28,31 +28,6 @@ static snd_codec_t *codecs;
 
 /*
 =================
-S_FileExtension
-=================
-*/
-static char *S_FileExtension(const char *fni)
-{
-	// we should search from the ending to the last '/'
-
-	char *fn = (char *) fni + strlen(fni) - 1;
-	char *eptr = NULL;
-
-	while(*fn != '/' && fn != fni)
-	{
-		if(*fn == '.')
-		{
-			eptr = fn;
-			break;
-		}
-		fn--;
-	}
-
-	return eptr;
-}
-
-/*
-=================
 S_CodecGetSound
 
 Opens/loads a sound, tries codec based on the sound's file extension
@@ -71,7 +46,7 @@ static void *S_CodecGetSound(const char *filename, snd_info_t *info)
 
 	Q_strncpyz(localName, filename, MAX_QPATH);
 
-	ext = S_FileExtension(localName);
+	ext = COM_GetExtension(localName);
 
 	if( *ext )
 	{
