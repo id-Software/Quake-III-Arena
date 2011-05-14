@@ -189,7 +189,7 @@ void GL_TexEnv( int env )
 		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
 		break;
 	default:
-		ri.Error( ERR_DROP, "GL_TexEnv: invalid env '%d' passed\n", env );
+		ri.Error( ERR_DROP, "GL_TexEnv: invalid env '%d' passed", env );
 		break;
 	}
 }
@@ -264,7 +264,7 @@ void GL_State( unsigned long stateBits )
 				break;
 			default:
 				srcFactor = GL_ONE;		// to get warning to shut up
-				ri.Error( ERR_DROP, "GL_State: invalid src blend state bits\n" );
+				ri.Error( ERR_DROP, "GL_State: invalid src blend state bits" );
 				break;
 			}
 
@@ -296,7 +296,7 @@ void GL_State( unsigned long stateBits )
 				break;
 			default:
 				dstFactor = GL_ONE;		// to get warning to shut up
-				ri.Error( ERR_DROP, "GL_State: invalid dst blend state bits\n" );
+				ri.Error( ERR_DROP, "GL_State: invalid dst blend state bits" );
 				break;
 			}
 

@@ -719,7 +719,7 @@ void GLimp_Init( void )
 	}
 
 	// Nothing worked, give up
-	ri.Error( ERR_FATAL, "GLimp_Init() - could not load OpenGL subsystem\n" );
+	ri.Error( ERR_FATAL, "GLimp_Init() - could not load OpenGL subsystem" );
 
 success:
 	// This values force the UI to disable driver selection
