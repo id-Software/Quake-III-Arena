@@ -241,7 +241,7 @@ char *strchr( const char *string, int c ) {
 	if(c)
 		return NULL;
 	else
-		return string;
+		return (char *) string;
 }
 
 char *strstr( const char *string, const char *strCharSet ) {
