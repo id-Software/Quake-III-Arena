@@ -82,11 +82,11 @@ static void VM_Destroy_Compiled(vm_t* self);
 */
 
 
-static int64_t CROSSCALL callAsmCall(int64_t callProgramStack, int64_t callSyscallNum)
+static intptr_t CROSSCALL callAsmCall(intptr_t callProgramStack, int64_t callSyscallNum)
 {
 	vm_t *savedVM;
-	int64_t ret = 0x77;
-	int64_t args[11];
+	intptr_t ret = 0x77;
+	intptr_t args[11];
 //	int iargs[11];
 	int i;
 
@@ -245,7 +245,7 @@ void emit(const char* fmt, ...)
 	emit("andl $0x%x, %%ecx", vm->dataMask &~(bytes-1)); \
 	emit("cmpl %%" #reg ", %%ecx"); \
 	emit("jz rc_ok_i_%08x", instruction); \
-	emit("movq $%"PRIu64", %%rax", (uint64_t) memviolation); \
+	emit("movq $%"PRIu64", %%rax", (intptr_t) memviolation); \
 	emit("callq *%%rax"); \
 	emit("rc_ok_i_%08x:", instruction)
 
@@ -254,7 +254,7 @@ void emit(const char* fmt, ...)
 	emit("andl $0x%x, %%ecx", OPSTACK_MASK & ~0x03); \
 	emit("cmpl %%esi, %%ecx"); \
 	emit("jz oc_ok_i_%08x", instruction); \
-	emit("movq $%"PRIu64", %%rax", (uint64_t) opstackviolation); \
+	emit("movq $%"PRIu64", %%rax", (intptr_t) opstackviolation); \
 	emit("callq *%%rax"); \
 	emit("oc_ok_i_%08x:", instruction)
 #elif 1
@@ -279,13 +279,13 @@ void emit(const char* fmt, ...)
 #define CHECK_INSTR_REG(reg) \
 	emit("cmpl $%u, %%"#reg, header->instructionCount); \
 	emit("jb jmp_ok_i_%08x", instruction); \
-	emit("movq $%"PRIu64", %%rax", (uint64_t)jmpviolation); \
+	emit("movq $%"PRIu64", %%rax", (intptr_t)jmpviolation); \
 	emit("callq *%%rax"); \
 	emit("jmp_ok_i_%08x:", instruction)
 
 #define PREPARE_JMP(reg) \
 	CHECK_INSTR_REG(reg); \
-	emit("movq $%"PRIu64", %%rbx", (uint64_t)vm->instructionPointers); \
+	emit("movq $%"PRIu64", %%rbx", (intptr_t)vm->instructionPointers); \
 	emit("movl (%%rbx, %%rax, 4), %%eax"); \
 	emit("addq %%r10, %%rax")
 
@@ -606,12 +606,11 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 					got_const = 0;
 					emit("movq $%u, %%rsi", -1-const_value); // second argument in rsi
 				} else {
-					emit("negl %%eax");        // convert to actual number
-					emit("decl %%eax");
+					emit("notl %%eax");        // convert to actual number
 					// first argument already in rdi
 					emit("movq %%rax, %%rsi"); // second argument in rsi
 				}
-				emit("movq $%"PRIu64", %%rax", (uint64_t)callAsmCall);
+				emit("movq $%"PRIu64", %%rax", (intptr_t) callAsmCall);
 				emit("callq *%%rax");
 				emit("pop %%rbx");
 				emit("addq %%rbx, %%rsp");
@@ -800,7 +799,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl 4(%%r9, %%rsi, 1), %%edi");  // 1st argument dest
 				emit("movl 8(%%r9, %%rsi, 1), %%esi");  // 2nd argument src
 				emit("movl $%d, %%edx", iarg); // 3rd argument count
-				emit("movq $%"PRIu64", %%rax", (uint64_t)block_copy_vm);
+				emit("movq $%"PRIu64", %%rax", (intptr_t) block_copy_vm);
 				emit("callq *%%rax");
 				emit("pop %%rbx");
 				emit("addq %%rbx, %%rsp");
@@ -971,7 +970,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 		Com_Error(ERR_DROP, "leftover const");
 	}
 
-	emit("movq $%"PRIu64", %%rax", (uint64_t)eop);
+	emit("movq $%"PRIu64", %%rax", (intptr_t) eop);
 	emit("callq *%%rax");
 
 	} // pass loop
@@ -1106,7 +1105,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		"	movq %2,%%r10		\r\n" \
 		"       subq $24, %%rsp # fix alignment as call pushes one value \r\n" \
 		"	callq *%%r10		\r\n" \
-		"       addq $24, %%rsp          \r\n" \
+		"       addq $24, %%rsp         \r\n" \
 		"	movl %%edi, %0		\r\n" \
 		"	movl %%esi, %1		\r\n" \
 		: "=m" (programStack), "=m" (opStackRet)
