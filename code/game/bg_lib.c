@@ -242,7 +242,7 @@ char *strchr( const char *string, int c ) {
 
 char *strrchr(const char *string, int c)
 {
-	const char *found = 0;
+	const char *found = NULL;
 	
 	while(*string)
 	{
