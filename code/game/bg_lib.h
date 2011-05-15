@@ -88,6 +88,7 @@ char *strcat( char *strDestination, const char *strSource );
 char *strcpy( char *strDestination, const char *strSource );
 int strcmp( const char *string1, const char *string2 );
 char *strchr( const char *string, int c );
+char *strrchr(const char *string, int c);
 char *strstr( const char *string, const char *strCharSet );
 char *strncpy( char *strDest, const char *strSource, size_t count );
 int tolower( int c );

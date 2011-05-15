@@ -864,7 +864,7 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg )
 	
  		// Chop off filename extension.
 		Com_sprintf(pakbuf, sizeof(pakbuf), "%s", cl->downloadName);
-		pakptr = Q_strrchr(pakbuf, '.');
+		pakptr = strrchr(pakbuf, '.');
 		
 		if(pakptr)
 		{

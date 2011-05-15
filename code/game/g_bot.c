@@ -213,7 +213,7 @@ static void PlayerIntroSound( const char *modelAndSkin ) {
 	char	*skin;
 
 	Q_strncpyz( model, modelAndSkin, sizeof(model) );
-	skin = Q_strrchr( model, '/' );
+	skin = strrchr( model, '/' );
 	if ( skin ) {
 		*skin++ = '\0';
 	}

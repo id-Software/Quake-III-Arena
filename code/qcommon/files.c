@@ -1022,7 +1022,7 @@ qboolean FS_IsDemoExt(const char *filename, int namelen)
 	char *ext_test;
 	int index, protocol;
 
-	ext_test = Q_strrchr(filename, '.');
+	ext_test = strrchr(filename, '.');
 	if(ext_test && !Q_stricmpn(ext_test + 1, DEMOEXT, ARRAY_LEN(DEMOEXT) - 1))
 	{
 		protocol = atoi(ext_test + ARRAY_LEN(DEMOEXT));

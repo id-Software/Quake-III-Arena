@@ -966,7 +966,7 @@ void CL_PlayDemo_f( void ) {
 	CL_Disconnect( qtrue );
 
 	// check for an extension .DEMOEXT_?? (?? is protocol)
-	ext_test = Q_strrchr(arg, '.');
+	ext_test = strrchr(arg, '.');
 	
 	if(ext_test && !Q_stricmpn(ext_test + 1, DEMOEXT, ARRAY_LEN(DEMOEXT) - 1))
 	{

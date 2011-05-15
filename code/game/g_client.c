@@ -626,7 +626,7 @@ Forces a client's skin (for teamplay)
 static void ForceClientSkin( gclient_t *client, char *model, const char *skin ) {
 	char *p;
 
-	if ((p = Q_strrchr(model, '/')) != 0) {
+	if ((p = strrchr(model, '/')) != 0) {
 		*p = 0;
 	}
 
