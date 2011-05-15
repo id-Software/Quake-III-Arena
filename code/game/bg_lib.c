@@ -48,10 +48,6 @@ static const char rcsid[] =
 static char* med3(char *, char *, char *, cmp_t *);
 static void	 swapfunc(char *, char *, int, int);
 
-#ifndef min
-#define min(a, b)	((a) < (b) ? (a) : (b))
-#endif
-
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
@@ -167,9 +163,9 @@ loop:	SWAPINIT(a, es);
 	}
 
 	pn = (char *)a + n * es;
-	r = min(pa - (char *)a, pb - pa);
+	r = MIN(pa - (char *)a, pb - pa);
 	vecswap(a, pb - r, r);
-	r = min(pd - pc, pn - pd - es);
+	r = MIN(pd - pc, pn - pd - es);
 	vecswap(pb, pn - r, r);
 	if ((r = pb - pa) > es)
 		qsort(a, r / es, es, cmp);
@@ -1460,8 +1456,6 @@ static int dopr_outch (char *buffer, size_t *currlen, size_t maxlen, char c );
 #define DP_C_LDOUBLE 4
 
 #define char_to_int(p) (p - '0')
-#define MAX(p,q) ((p >= q) ? p : q)
-#define MIN(p,q) ((p <= q) ? p : q)
 
 static int dopr (char *buffer, size_t maxlen, const char *format, va_list args)
 {

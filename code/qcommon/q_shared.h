@@ -640,6 +640,14 @@ void PerpendicularVector( vec3_t dst, const vec3_t src );
 int Q_isnan( float x );
 
 
+#ifndef MAX
+#define MAX(x,y) ((x)>(y)?(x):(y))
+#endif
+
+#ifndef MIN
+#define MIN(x,y) ((x)<(y)?(x):(y))
+#endif
+
 //=============================================
 
 float Com_Clamp( float min, float max, float value );

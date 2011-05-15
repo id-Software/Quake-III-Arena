@@ -43,9 +43,6 @@ static const char* cur_line;
 
 static FILE* fout;
 
-#define MIN(a,b)  ((a) < (b) ? (a) : (b))
-#define MAX(a,b)  ((a) > (b) ? (a) : (b))
-
 #define crap(fmt, args...) do { \
 	_crap(__FUNCTION__, fmt, ##args); \
 } while(0)
