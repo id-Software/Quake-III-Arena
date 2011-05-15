@@ -1,4 +1,4 @@
-VERSION=1.34
+VERSION=1.36
 RELEASE=svn
 
 all:
@@ -10,6 +10,6 @@ sign:
 	done
 
 clean:
-	rm -rf *.run image
+	rm -rf *.run image defines.m4
 
 .PHONY: all sign clean
