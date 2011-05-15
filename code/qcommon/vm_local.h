@@ -151,6 +151,7 @@ struct vm_s {
 
 	qboolean	compiled;
 	byte		*codeBase;
+	int			entryOfs;
 	int			codeLength;
 
 	int			*instructionPointers;
