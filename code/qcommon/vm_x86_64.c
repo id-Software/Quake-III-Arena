@@ -70,15 +70,15 @@ static void VM_Destroy_Compiled(vm_t* self);
   |
   +- r8
 
-  eax	scratch
-  bl	opStack offset
-  ecx	scratch (required for shifts)
-  edx	scratch (required for divisions)
-  rsi	scratch
-  rdi	program frame pointer (programStack)
-  r8    pointer data (vm->dataBase)
-  r9    opStack data base (vm->opStack + OPSTACK_SIZE / 2)
-  r10   start of generated code
+  eax		scratch
+  rbx/bl	opStack offset
+  ecx		scratch (required for shifts)
+  edx		scratch (required for divisions)
+  rsi		scratch
+  rdi		program frame pointer (programStack)
+  r8		pointer data (vm->dataBase)
+  r9		opStack data base (opStack)
+  r10		start of generated code
 */
 
 
@@ -1080,7 +1080,7 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	opStack = PADP(stack, 4);
 
 	__asm__ __volatile__ (
-		"	movq $-0x80,%%rbx	\r\n" \
+		"	movq $0x0,%%rbx		\r\n" \
 		"	movl %5,%%edi		\r\n" \
 		"	movq %4,%%r8		\r\n" \
 		"	movq %3,%%r9		\r\n" \
@@ -1091,10 +1091,10 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		"	movl %%edi, %0		\r\n" \
 		"	movq %%rbx, %1		\r\n" \
 		: "=g" (programStack), "=g" (opStackRet)
-		: "g" (entryPoint), "g" (((intptr_t ) opStack) + OPSTACK_SIZE / 2), "g" (vm->dataBase), "g" (programStack)
+		: "g" (entryPoint), "g" (opStack), "g" (vm->dataBase), "g" (programStack)
 		: "%rsi", "%rdi", "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r15", "%xmm0"
 	);
-	if(opStackRet != -(OPSTACK_SIZE / 2) + 4 || *opStack != 0xDEADBEEF)
+	if(opStackRet != 4 || *opStack != 0xDEADBEEF)
 		Com_Error(ERR_DROP, "opStack corrupted in compiled code (offset %ld)", opStackRet);
 
 	if ( programStack != stackOnEntry - 48 ) {
