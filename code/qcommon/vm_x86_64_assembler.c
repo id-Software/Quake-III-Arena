@@ -158,6 +158,7 @@ typedef enum {
 	R_R15 =  0x0F  | R_64,
 	R_AL  =  R_EAX | R_8,
 	R_AX  =  R_EAX | R_16,
+	R_BL  =  R_EBX | R_8,
 	R_CL  =  R_ECX | R_8,
 	R_XMM0 = 0x00  | R_XMM,
 	R_MGP =  0x0F, // mask for general purpose registers
@@ -212,6 +213,32 @@ typedef struct {
 	u8 rcode8;  // opcode for reg8/mem8
 	u8 rcode;  // opcode for reg/mem
 } opparam_t;
+
+static opparam_t params_add = { subcode: 0, rmcode: 0x01, };
+static opparam_t params_or = { subcode: 1, rmcode: 0x09, };
+static opparam_t params_and = { subcode: 4, rmcode: 0x21, };
+static opparam_t params_sub = { subcode: 5, rmcode: 0x29, };
+static opparam_t params_xor = { subcode: 6, rmcode: 0x31, };
+static opparam_t params_cmp = { subcode: 7, rmcode: 0x39, mrcode: 0x3b, };
+static opparam_t params_dec = { subcode: 1, rcode: 0xff, rcode8: 0xfe, };
+static opparam_t params_sar = { subcode: 7, rcode: 0xd3, rcode8: 0xd2, };
+static opparam_t params_shl = { subcode: 4, rcode: 0xd3, rcode8: 0xd2, };
+static opparam_t params_shr = { subcode: 5, rcode: 0xd3, rcode8: 0xd2, };
+static opparam_t params_idiv = { subcode: 7, rcode: 0xf7, rcode8: 0xf6, };
+static opparam_t params_div = { subcode: 6, rcode: 0xf7, rcode8: 0xf6, };
+static opparam_t params_imul = { subcode: 5, rcode: 0xf7, rcode8: 0xf6, };
+static opparam_t params_mul = { subcode: 4, rcode: 0xf7, rcode8: 0xf6, };
+static opparam_t params_neg = { subcode: 3, rcode: 0xf7, rcode8: 0xf6, };
+static opparam_t params_not = { subcode: 2, rcode: 0xf7, rcode8: 0xf6, };
+
+static opparam_t params_cvtsi2ss = { xmmprefix: 0xf3, rmcode: 0x2a };
+static opparam_t params_cvttss2si = { xmmprefix: 0xf3, rmcode: 0x2c };
+static opparam_t params_addss = { xmmprefix: 0xf3, mrcode: 0x58 };
+static opparam_t params_divss = { xmmprefix: 0xf3, mrcode: 0x5e };
+static opparam_t params_movss = { xmmprefix: 0xf3, mrcode: 0x10, rmcode: 0x11 };
+static opparam_t params_mulss = { xmmprefix: 0xf3, mrcode: 0x59 };
+static opparam_t params_subss = { xmmprefix: 0xf3, mrcode: 0x5c };
+static opparam_t params_ucomiss = { mrcode: 0x2e };
 
 /* ************************* */
 
@@ -314,9 +341,9 @@ static const char* argtype2str(argtype_t t)
 
 /* ************************* */
 
-static inline int iss8(u64 v)
+static inline int iss8(int64_t v)
 {
-	return (llabs(v) <= 0x80); //llabs instead of labs required for __WIN64
+	return (v >= -0x80 && v <= 0x7f);
 }
 
 static inline int isu8(u64 v)
@@ -324,9 +351,9 @@ static inline int isu8(u64 v)
 	return (v <= 0xff);
 }
 
-static inline int iss16(u64 v)
+static inline int iss16(int64_t v)
 {
-	return (llabs(v) <= 0x8000);
+	return (v >= -0x8000 && v <= 0x7fff);
 }
 
 static inline int isu16(u64 v)
@@ -334,9 +361,9 @@ static inline int isu16(u64 v)
 	return (v <= 0xffff);
 }
 
-static inline int iss32(u64 v)
+static inline int iss32(int64_t v)
 {
-	return (llabs(v) <= 0x80000000);
+	return (v >= -0x80000000L && v <= 0x7fffffff);
 }
 
 static inline int isu32(u64 v)
@@ -595,7 +622,7 @@ static void emit_mov(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
 		
 		if(arg2.v.reg & R_8)
 		{
-			if(!isu8(arg1.v.imm))
+			if(!iss8(arg1.v.imm))
 				crap("value too large for 8bit register");
 
 			op = 0xb0;
@@ -711,19 +738,23 @@ static void emit_subaddand(const char* mnemonic, arg_t arg1, arg_t arg2, void* d
 		}
 
 		compute_rexmodrmsib(&rex, &modrm, &sib, &arg1, &arg2);
-
 		modrm |= params->subcode << 3;
 
 		if(rex) emit1(rex);
-#if 0
-		if(isu8(arg1.v.imm))
+
+		if(arg2.v.reg & R_8)
+		{
+			emit1(0x80); // sub reg8/mem8, imm8
+			emit1(modrm);
+			emit1(arg1.v.imm & 0xFF);
+		}
+		else if(iss8(arg1.v.imm))
 		{
 			emit1(0x83); // sub reg/mem, imm8
 			emit1(modrm);
-			emit1(arg1.v.imm&0xFF);
+			emit1(arg1.v.imm & 0xFF);
 		}
 		else
-#endif
 		{
 			emit1(0x81); // sub reg/mem, imm32
 			emit1(modrm);
@@ -893,42 +924,19 @@ static void emit_twobyte(const char* mnemonic, arg_t arg1, arg_t arg2, void* dat
 		CRAP_INVALID_ARGS;
 }
 
-static opparam_t params_add = { subcode: 0, rmcode: 0x01, };
-static opparam_t params_or = { subcode: 1, rmcode: 0x09, };
-static opparam_t params_and = { subcode: 4, rmcode: 0x21, };
-static opparam_t params_sub = { subcode: 5, rmcode: 0x29, };
-static opparam_t params_xor = { subcode: 6, rmcode: 0x31, };
-static opparam_t params_cmp = { subcode: 7, rmcode: 0x39, mrcode: 0x3b, };
-static opparam_t params_dec = { subcode: 1, rcode: 0xff, rcode8: 0xfe, };
-static opparam_t params_sar = { subcode: 7, rcode: 0xd3, rcode8: 0xd2, };
-static opparam_t params_shl = { subcode: 4, rcode: 0xd3, rcode8: 0xd2, };
-static opparam_t params_shr = { subcode: 5, rcode: 0xd3, rcode8: 0xd2, };
-static opparam_t params_idiv = { subcode: 7, rcode: 0xf7, rcode8: 0xf6, };
-static opparam_t params_div = { subcode: 6, rcode: 0xf7, rcode8: 0xf6, };
-static opparam_t params_imul = { subcode: 5, rcode: 0xf7, rcode8: 0xf6, };
-static opparam_t params_mul = { subcode: 4, rcode: 0xf7, rcode8: 0xf6, };
-static opparam_t params_neg = { subcode: 3, rcode: 0xf7, rcode8: 0xf6, };
-static opparam_t params_not = { subcode: 2, rcode: 0xf7, rcode8: 0xf6, };
-
-static opparam_t params_cvtsi2ss = { xmmprefix: 0xf3, rmcode: 0x2a };
-static opparam_t params_cvttss2si = { xmmprefix: 0xf3, rmcode: 0x2c };
-static opparam_t params_addss = { xmmprefix: 0xf3, mrcode: 0x58 };
-static opparam_t params_divss = { xmmprefix: 0xf3, mrcode: 0x5e };
-static opparam_t params_movss = { xmmprefix: 0xf3, mrcode: 0x10, rmcode: 0x11 };
-static opparam_t params_mulss = { xmmprefix: 0xf3, mrcode: 0x59 };
-static opparam_t params_subss = { xmmprefix: 0xf3, mrcode: 0x5c };
-static opparam_t params_ucomiss = { mrcode: 0x2e };
-
 static int ops_sorted = 0;
 static op_t ops[] = {
+	{ "addb", emit_subaddand, &params_add },
 	{ "addl", emit_subaddand, &params_add },
 	{ "addq", emit_subaddand, &params_add },
 	{ "addss", emit_twobyte, &params_addss },
+	{ "andb", emit_subaddand, &params_and },
 	{ "andl", emit_subaddand, &params_and },
 	{ "andq", emit_subaddand, &params_and },
 	{ "callq", emit_call, NULL },
 	{ "cbw", emit_opsingle16, (void*)0x98 },
 	{ "cdq", emit_opsingle, (void*)0x99 },
+	{ "cmpb", emit_subaddand, &params_cmp },
 	{ "cmpl", emit_subaddand, &params_cmp },
 	{ "cmpq", emit_subaddand, &params_cmp },
 	{ "cvtsi2ss", emit_twobyte, &params_cvtsi2ss },
@@ -974,18 +982,21 @@ static op_t ops[] = {
 	{ "nop", emit_opsingle, (void*)0x90 },
 	{ "notl", emit_op_rm, &params_not },
 	{ "notq", emit_op_rm, &params_not },
-	{ "or",   emit_subaddand, &params_or },
+	{ "orb",   emit_subaddand, &params_or },
 	{ "orl",  emit_subaddand, &params_or },
+	{ "orq",  emit_subaddand, &params_or },
 	{ "pop", emit_opreg, (void*)0x58 },
 	{ "push", emit_opreg, (void*)0x50 },
 	{ "ret", emit_opsingle, (void*)0xc3 },
 	{ "sarl", emit_op_rm_cl, &params_sar },
 	{ "shl", emit_op_rm_cl, &params_shl },
 	{ "shrl", emit_op_rm_cl, &params_shr },
+	{ "subb", emit_subaddand, &params_sub },
 	{ "subl", emit_subaddand, &params_sub },
 	{ "subq", emit_subaddand, &params_sub },
 	{ "subss", emit_twobyte, &params_subss },
 	{ "ucomiss", emit_twobyte, &params_ucomiss },
+	{ "xorb",  emit_subaddand, &params_xor },
 	{ "xorl",  emit_subaddand, &params_xor },
 	{ "xorq",  emit_subaddand, &params_xor },
 	{ NULL, NULL, NULL }
@@ -1010,27 +1021,24 @@ static op_t* getop(const char* n)
 	}
 
 #else
-	unsigned m, t, b;
+	unsigned int m, t, b;
 	int r;
 	t = ARRAY_LEN(ops)-1;
-	b = 0;
 
-	while(b <= t)
+	r = m = -1;
+
+	do
 	{
-		m = ((t-b)>>1) + b;
-		if((r = strcmp(ops[m].mnemonic, n)) == 0)
-		{
-			return &ops[m];
-		}
-		else if(r < 0)
-		{
+		if(r < 0)
 			b = m + 1;
-		}
 		else
-		{
 			t = m - 1;
-		}
-	}
+
+		m = ((t - b) >> 1) + b;
+
+		if((r = strcmp(ops[m].mnemonic, n)) == 0)
+			return &ops[m];
+	} while(b <= t && t);
 #endif
 
 	return NULL;
@@ -1046,6 +1054,10 @@ static reg_t parsereg(const char* str)
 	else if(*s == 'a' && s[1] == 'x' && !s[2])
 	{
 		return R_AX;
+	}
+	if(*s == 'b' && s[1] == 'l' && !s[2])
+	{
+		return R_BL;
 	}
 	if(*s == 'c' && s[1] == 'l' && !s[2])
 	{
