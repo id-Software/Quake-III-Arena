@@ -329,7 +329,7 @@ qboolean EmitMovEBXEDI(vm_t *vm, int andit) {
 /*
 =================
 DoSyscall
-Uses asm to get arguments from stack to work around different calling conventions
+Uses asm to retrieve arguments from registers to work around different calling conventions
 =================
 */
 
@@ -342,7 +342,6 @@ static void DoSyscall(void)
 	int programStack;
 	int *opStack;
 	
-	// Get arguments directly from registers to work around different calling conventions
 #ifdef _MSC_VER
 	__asm
 	{
@@ -417,8 +416,8 @@ int EmitCallProcedure(vm_t *vm)
 	retval = compiledOfs;
 
 	EmitString("F7 D0");		// not eax
-	// use ecx register to store DoSyscall address
-	EmitString("B9");		// mov ecx, DoSyscall
+	// use edx register to store DoSyscall address
+	EmitString("BA");		// mov edx, DoSyscall
 	Emit4((intptr_t) DoSyscall);
 
 	// align the stack pointer to a 16-byte-boundary
@@ -427,7 +426,7 @@ int EmitCallProcedure(vm_t *vm)
 	EmitString("83 E4 F0");		// and esp, 0xFFFFFFF0
 			
 	// call the syscall wrapper function
-	EmitString("FF D1");		// call ecx
+	EmitString("FF D2");		// call edx
 
 	// reset the stack pointer to its previous value
 	EmitString("89 EC");		// mov esp, ebp
@@ -442,26 +441,24 @@ int EmitCallProcedure(vm_t *vm)
 
 void EmitCall(vm_t *vm, int sysCallOfs)
 {
-       	EmitString("51");	// push ecx
-       	EmitString("8B 0D");	// mov ecx, dword ptr [&vm->codeBase]
+       	EmitString("8B 15");	// mov edx, [dword ptr vm->codeBase]
        	Emit4((intptr_t) &vm->codeBase);
 
        	if(sysCallOfs)
        	{
 	       	if(sysCallOfs < 0x80 || sysCallOfs > 0x7f)
 	       	{
-		       	EmitString("83 C1");	// add ecx, sysCallOfs
+		       	EmitString("83 C2");	// add edx, sysCallOfs
 		       	Emit1(sysCallOfs);
 		}
 		else
 		{
-			EmitString("81 C1");	// add ecx, sysCallOfs
+			EmitString("81 C2");	// add edx, sysCallOfs
 			Emit4(sysCallOfs);
 		}
 	}
 
-	EmitString("FF D1");	// call ecx
-	EmitString("59");	// pop ecx
+	EmitString("FF D2");	// call edx
 }
 
 /*
@@ -1258,7 +1255,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			break;
 		case OP_DIVI:
 			EmitString( "8B 47 FC" );	// mov eax,dword ptr [edi-4]
-			EmitString( "99" );			// cdq
+			EmitString( "99" );		// cdq
 			EmitString( "F7 3F" );		// idiv dword ptr [edi]
 			EmitString( "89 47 FC" );	// mov dword ptr [edi-4],eax
 			EmitCommand(LAST_COMMAND_SUB_DI_4);		// sub edi, 4
@@ -1272,7 +1269,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 			break;
 		case OP_MODI:
 			EmitString( "8B 47 FC" );	// mov eax,dword ptr [edi-4]
-			EmitString( "99" );			// cdq
+			EmitString( "99" );		// cdq
 			EmitString( "F7 3F" );		// idiv dword ptr [edi]
 			EmitString( "89 57 FC" );	// mov dword ptr [edi-4],edx
 			EmitCommand(LAST_COMMAND_SUB_DI_4);		// sub edi, 4
@@ -1546,18 +1543,16 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 			popad
 		}
 #else
-		/* These registers are used as scratch registers and are destroyed after the
-		 * call.  Do not use clobber, so they can be used as input for the asm. */
-		unsigned eax;
-		unsigned ebx;
-		unsigned ecx;
-		unsigned edx;
-
 		__asm__ volatile(
-			"call *%6"
-			: "+S" (programStack), "+D" (opStack),
-			  "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-			: "mr" (vm->codeBase + vm->entryOfs)
+		        "pushal\r\n"
+		        "movl %0, %%esi\r\n"
+		        "movl %1, %%edi\r\n"
+			"call *%2\r\n"
+			"movl %%edi, %1\r\n"
+			"movl %%esi, %0\r\n"
+			"popal\r\n"
+			: "+g" (programStack), "+g" (opStack)
+			: "g" (vm->codeBase + vm->entryOfs)
 			: "cc", "memory"
 		);
 #endif
