@@ -1491,6 +1491,7 @@ This function is called directly by the generated code
 */
 int	VM_CallCompiled( vm_t *vm, int *args ) {
 	int		stack[1024];
+	void	*entryPoint;
 	int		programCounter;
 	int		programStack;
 	int		stackOnEntry;
@@ -1527,36 +1528,28 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
 	// off we go into generated code...
+	entryPoint = vm->codeBase + vm->entryOfs;
 	opStack = &stack;
 
-	{
 #ifdef _MSC_VER
-		void *entryPoint = vm->codeBase + vm->entryOfs;
-
-		__asm {
-			pushad
-			mov    esi, programStack
-			mov    edi, opStack
-			call   entryPoint
-			mov    programStack, esi
-			mov    opStack, edi
-			popad
-		}
-#else
-		__asm__ volatile(
-		        "pushal\r\n"
-		        "movl %0, %%esi\r\n"
-		        "movl %1, %%edi\r\n"
-			"call *%2\r\n"
-			"movl %%edi, %1\r\n"
-			"movl %%esi, %0\r\n"
-			"popal\r\n"
-			: "+g" (programStack), "+g" (opStack)
-			: "g" (vm->codeBase + vm->entryOfs)
-			: "cc", "memory"
-		);
-#endif
+	__asm
+	{
+		pushad
+		mov    esi, programStack
+		mov    edi, opStack
+		call   entryPoint
+		mov    programStack, esi
+		mov    opStack, edi
+		popad
 	}
+#else
+	__asm__ volatile(
+		"call *%2\r\n"
+		: "+S" (programStack), "+D" (opStack)
+		: "r" (vm->codeBase + vm->entryOfs)
+		: "cc", "memory", "%eax", "%ebx", "%ecx", "%edx"
+	);
+#endif
 
 	if ( opStack != &stack[1] ) {
 		Com_Error( ERR_DROP, "opStack corrupted in compiled code" );
