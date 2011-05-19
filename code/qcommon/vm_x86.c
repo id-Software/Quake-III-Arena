@@ -1544,10 +1544,12 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	}
 #else
 	__asm__ volatile(
+		"push %%eax\r\n"
 		"call *%2\r\n"
+		"pop %%eax\r\n"
 		: "+S" (programStack), "+D" (opStack)
-		: "r" (vm->codeBase + vm->entryOfs)
-		: "cc", "memory", "%eax", "%ebx", "%ecx", "%edx"
+		: "a" (vm->codeBase + vm->entryOfs)
+		: "cc", "memory", "%ebx", "%ecx", "%edx"
 	);
 #endif
 
