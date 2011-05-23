@@ -1029,7 +1029,9 @@ This function is called directly by the generated code
 static char* memData;
 #endif
 
-int	VM_CallCompiled( vm_t *vm, int *args ) {
+int VM_CallCompiled(vm_t *vm, int *args)
+{
+	int stack[OPSTACK_SIZE + 3];
 	int		programCounter;
 	int		programStack;
 	int		stackOnEntry;
@@ -1037,7 +1039,6 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	byte	*image;
 	void	*entryPoint;
 	int	*opStack;
-	int stack[OPSTACK_SIZE + 3] = { 0xDEADBEEF };
 
 	currentVM = vm;
 	
@@ -1079,6 +1080,8 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 	entryPoint = getentrypoint(vm);
 	opStack = PADP(stack, 4);
 
+	*opStack = 0xDEADBEEF;
+
 	__asm__ __volatile__ (
 		"	movq $0x0,%%rbx		\r\n" \
 		"	movl %5,%%edi		\r\n" \
@@ -1092,8 +1095,9 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		"	movq %%rbx, %1		\r\n" \
 		: "=g" (programStack), "=g" (opStackRet)
 		: "g" (entryPoint), "g" (opStack), "g" (vm->dataBase), "g" (programStack)
-		: "%rsi", "%rdi", "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r15", "%xmm0"
+		: "%rsi", "%rdi", "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "%xmm0"
 	);
+
 	if(opStackRet != 1 || *opStack != 0xDEADBEEF)
 		Com_Error(ERR_DROP, "opStack corrupted in compiled code (offset %ld)", opStackRet);
 
