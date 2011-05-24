@@ -511,6 +511,7 @@ typedef struct VM_Data {
 	int (*AsmCall)(int, int);
 	void (*BlockCopy)(unsigned int, unsigned int, unsigned int);
 	unsigned int *iPointers;
+	void (*ErrJump)(void);
 	unsigned int data[0];
 } vm_data_t;
 
@@ -698,10 +699,19 @@ static void dst_insn_append(struct func_info * const fp)
 	fp->insn_index = 0;
 }
 
-static void jump_insn_append(struct func_info * const fp, enum sparc_iname iname, int dest)
+static void ErrJump(void)
+{ 
+	Com_Error(ERR_DROP, "program tried to execute code outside VM\n");
+	exit(1);
+}
+
+static void jump_insn_append(vm_t *vm, struct func_info * const fp, enum sparc_iname iname, int dest)
 {
 	struct jump_insn *jp = Z_Malloc(sizeof(*jp));
 	struct dst_insn *dp;
+
+	if (dest < 0 || dest >= vm->instructionCount)
+		ErrJump();
 
 	dp = dst_new(fp, 2, jp, 0);
 
@@ -734,10 +744,10 @@ static void end_emit(struct func_info * const fp)
 		dst_insn_append(fp);
 }
 
-static void emit_jump(struct func_info * const fp, enum sparc_iname iname, int dest)
+static void emit_jump(vm_t *vm, struct func_info * const fp, enum sparc_iname iname, int dest)
 {
 	end_emit(fp);
-	jump_insn_append(fp, iname, dest);
+	jump_insn_append(vm, fp, iname, dest);
 }
 
 static void analyze_function(struct func_info * const fp)
@@ -860,7 +870,7 @@ do {	int saved_i_count = (fp)->saved_icount;			\
 	(fp)->saved_icount = saved_i_count;			\
 } while (0)
 
-static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
+static void compile_one_insn(vm_t *vm, struct func_info * const fp, struct src_insn *sp)
 {
 	start_emit(fp, sp->i_count);
 
@@ -928,11 +938,17 @@ static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
 	case OP_JUMP:
 		if (fp->cached_const) {
 			EMIT_FALSE_CONST(fp);
-			emit_jump(fp, BA, fp->cached_const->arg.i);
+			emit_jump(vm, fp, BA, fp->cached_const->arg.i);
 		} else {
 			MAYBE_EMIT_CONST(fp);
-			in(LDLI, rVMDATA, VM_Data_Offset(iPointers), rTMP);
+			in(SETHI, vm->instructionCount >> 10, rTMP);
+			in(ORI, rTMP, vm->instructionCount & 0x3ff, rTMP);
+			in(SUBCC, rTMP, rFIRST(fp), G0);
+			in(BLEU, +4*5);
+			in(LDLI, rVMDATA, VM_Data_Offset(ErrJump), rTMP);
+
 			in(SLLI, rFIRST(fp), 2, rFIRST(fp));
+			in(LDLI, rVMDATA, VM_Data_Offset(iPointers), rTMP);
 			in(LDL, rTMP, rFIRST(fp), rTMP);
 			in(JMPL, rTMP, G0, G0);
 			in(NOP);
@@ -943,7 +959,7 @@ static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
 		if (fp->cached_const) {
 			EMIT_FALSE_CONST(fp);
 			if (fp->cached_const->arg.si >= 0) {
-				emit_jump(fp, CALL, fp->cached_const->arg.i);
+				emit_jump(vm, fp, CALL, fp->cached_const->arg.i);
 			} else {
 				in(LDLI, rVMDATA, VM_Data_Offset(CallThunk), rTMP);
 				in(LDLI, rVMDATA, VM_Data_Offset(AsmCall), O3);
@@ -959,6 +975,11 @@ static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
 			in(NOP);
 
 			/* normal call */
+			in(SETHI, vm->instructionCount >> 10, rTMP);
+			in(ORI, rTMP, vm->instructionCount & 0x3ff, rTMP);
+			in(SUBCC, rTMP, rFIRST(fp), G0);
+			in(BLEU, +4*9);
+			in(LDLI, rVMDATA, VM_Data_Offset(ErrJump), rTMP);
 			in(LDLI, rVMDATA, VM_Data_Offset(iPointers), O5);
 			in(SLLI, rFIRST(fp), 2, rFIRST(fp));
 			in(LDL, O5, rFIRST(fp), rTMP);
@@ -1124,7 +1145,7 @@ static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
 		case OP_GTU: iname = BGU; break;
 		case OP_LEU: iname = BLEU; break;
 		}
-		emit_jump(fp, iname, sp->arg.i);
+		emit_jump(vm, fp, iname, sp->arg.i);
 		POP_GPR(fp);
 		POP_GPR(fp);
 		break;
@@ -1297,7 +1318,7 @@ static void compile_one_insn(struct func_info * const fp, struct src_insn *sp)
 		case OP_GTF: iname = FBG; break;
 		case OP_LEF: iname = FBLE; break;
 		}
-		emit_jump(fp, iname, sp->arg.i);
+		emit_jump(vm, fp, iname, sp->arg.i);
 		POP_FPR(fp);
 		POP_FPR(fp);
 		break;
@@ -1344,7 +1365,7 @@ static void free_source_insns(struct func_info * const fp)
 	}
 }
 
-static void compile_function(struct func_info * const fp)
+static void compile_function(vm_t *vm, struct func_info * const fp)
 {
 	struct src_insn *sp;
 
@@ -1359,7 +1380,7 @@ static void compile_function(struct func_info * const fp)
 
 	sp = fp->first;
 	while ((sp = sp->next) != NULL)
-		compile_one_insn(fp, sp);
+		compile_one_insn(vm, fp, sp);
 
 	free_source_insns(fp);
 }
@@ -1478,6 +1499,7 @@ static void sparc_compute_code(vm_t *vm, struct func_info * const fp)
 	data->iPointers = (unsigned int *) vm->instructionPointers;
 	data->dataLength = VM_Data_Offset(data[fp->data_num]);
 	data->codeLength = (code_now - code_begin) * sizeof(unsigned int);
+	data->ErrJump = ErrJump;
 
 #if 0
 	{
@@ -1564,7 +1586,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 
 		if (op == OP_ENTER) {
 			if (fi.first->next)
-				compile_function(&fi);
+				compile_function(vm, &fi);
 			fi.first->next = NULL;
 			fi.last = fi.first;
 			fi.has_call = fi.need_float_tmp = 0;
@@ -1592,7 +1614,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 		fi.last->next = sp;
 		fi.last = sp;
 	}
-	compile_function(&fi);
+	compile_function(vm, &fi);
 
 	Z_Free(fi.first);
 
