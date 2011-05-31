@@ -1081,21 +1081,26 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	opStack = PADP(stack, 4);
 
 	*opStack = 0xDEADBEEF;
+	opStackRet = 0;
 
 	__asm__ __volatile__ (
-		"	movq $0x0,%%rbx		\r\n" \
-		"	movl %5,%%edi		\r\n" \
 		"	movq %4,%%r8		\r\n" \
 		"	movq %3,%%r9		\r\n" \
 		"	movq %2,%%r10		\r\n" \
+		"	push %%r15		\r\n" \
+		"	push %%r14		\r\n" \
+		"	push %%r13		\r\n" \
+		"	push %%r12		\r\n" \
 		"       subq $24, %%rsp # fix alignment as call pushes one value \r\n" \
 		"	callq *%%r10		\r\n" \
 		"       addq $24, %%rsp         \r\n" \
-		"	movl %%edi, %0		\r\n" \
-		"	movq %%rbx, %1		\r\n" \
-		: "=g" (programStack), "=g" (opStackRet)
+		"	pop %%r12		\r\n" \
+		"	pop %%r13		\r\n" \
+		"	pop %%r14		\r\n" \
+		"	pop %%r15		\r\n"
+		: "+D" (programStack), "+b" (opStackRet)
 		: "g" (entryPoint), "g" (opStack), "g" (vm->dataBase), "g" (programStack)
-		: "%rsi", "%rdi", "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "%xmm0"
+		: "%rsi", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%xmm0"
 	);
 
 	if(opStackRet != 1 || *opStack != 0xDEADBEEF)
