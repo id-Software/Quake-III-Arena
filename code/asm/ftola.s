@@ -29,8 +29,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qasm.h"
 
-#if id386
-
 .data
 
 temp:   .single   0.0
@@ -157,4 +155,3 @@ C(Q_ftol0F7F):
         fldcw  fpucw
         movl temp,%eax
         ret
-#endif

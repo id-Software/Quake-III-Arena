@@ -272,7 +272,7 @@ void emit(const char* fmt, ...)
 #define PREPARE_JMP(reg) \
 	CHECK_INSTR_REG(reg); \
 	emit("movq $%"PRIu64", %%rsi", (intptr_t)vm->instructionPointers); \
-	emit("movl (%%rsi, %%rax, 4), %%eax"); \
+	emit("movl (%%rsi, %%rax, 8), %%eax"); \
 	emit("addq %%r10, %%rax")
 
 #define CHECK_INSTR(nr) \

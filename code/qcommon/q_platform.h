@@ -76,6 +76,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #if defined(_WIN64) || defined(__WIN64__)
 
+#define idx64
+
 #undef QDECL
 #define QDECL __cdecl
 
@@ -144,6 +146,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "i386"
 #define Q3_LITTLE_ENDIAN
 #elif defined __x86_64__
+#define idx64
 #define ARCH_STRING "x86_64"
 #define Q3_LITTLE_ENDIAN
 #endif
@@ -170,6 +173,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined __i386__
 #define ARCH_STRING "i386"
 #elif defined __x86_64__
+#define idx64
 #define ARCH_STRING "x86_64"
 #elif defined __powerpc64__
 #define ARCH_STRING "ppc64"
@@ -232,6 +236,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef __i386__
 #define ARCH_STRING "i386"
 #elif defined __amd64__
+#define idx64
 #define ARCH_STRING "amd64"
 #elif defined __axp__
 #define ARCH_STRING "alpha"
