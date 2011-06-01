@@ -343,32 +343,32 @@ static const char* argtype2str(argtype_t t)
 
 static inline int iss8(int64_t v)
 {
-	return (v >= -0x80 && v <= 0x7f);
+	return (SCHAR_MIN <= v && v <= SCHAR_MAX);
 }
 
 static inline int isu8(u64 v)
 {
-	return (v <= 0xff);
+	return (v <= UCHAR_MAX);
 }
 
 static inline int iss16(int64_t v)
 {
-	return (v >= -0x8000 && v <= 0x7fff);
+	return (SHRT_MIN <= v && v <= SHRT_MAX);
 }
 
 static inline int isu16(u64 v)
 {
-	return (v <= 0xffff);
+	return (v <= USHRT_MAX);
 }
 
 static inline int iss32(int64_t v)
 {
-	return (v >= -0x80000000L && v <= 0x7fffffff);
+	return (INT_MIN <= v && v <= INT_MAX);
 }
 
 static inline int isu32(u64 v)
 {
-	return (v <= 0xffffffff);
+	return (v <= UINT_MAX);
 }
 
 static void emit_opsingle(const char* mnemonic, arg_t arg1, arg_t arg2, void* data)
