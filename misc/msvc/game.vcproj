@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9,00"
 	Name="game"
 	ProjectGUID="{F9EE10DA-2404-4154-B904-F93C936C040A}"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -82,6 +83,8 @@
 				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"
 			/>
@@ -102,9 +105,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -179,6 +179,8 @@
 				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"
 			/>
@@ -199,9 +201,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -276,6 +275,8 @@
 				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"
 			/>
@@ -296,9 +297,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -373,6 +371,8 @@
 				MapFileName="$(IntDir)\qagamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\qagamex86.lib"
 				TargetMachine="1"
 			/>
@@ -393,9 +393,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

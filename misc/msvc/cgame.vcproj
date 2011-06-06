@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9,00"
 	Name="cgame"
 	ProjectGUID="{C878E295-CB82-4B40-8ECF-5CE5525466FA}"
 	RootNamespace="cgame"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -83,6 +84,8 @@
 				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"
 			/>
@@ -103,9 +106,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -180,6 +180,8 @@
 				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"
 			/>
@@ -200,9 +202,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -277,6 +276,8 @@
 				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"
 			/>
@@ -297,9 +298,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -374,6 +372,8 @@
 				MapFileName="$(IntDir)\cgamex86.map"
 				SubSystem="2"
 				BaseAddress="0x30000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(IntDir)\cgamex86.lib"
 				TargetMachine="1"
 			/>
@@ -394,9 +394,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
