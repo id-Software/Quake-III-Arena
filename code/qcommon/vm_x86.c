@@ -105,7 +105,8 @@ typedef enum
 
 typedef enum
 {
-	VM_BLOCK_COPY = 0,
+	VM_JMP_VIOLATION = 0,
+	VM_BLOCK_COPY = 1
 } ESysCallType;
 
 static	ELastCommand	LastCommand;
@@ -392,16 +393,19 @@ void EmitMovEDXStack(vm_t *vm, int andit)
 
 #define SET_JMPOFS(x) do { buf[(x)] = compiledOfs - ((x) + 1); } while(0)
 
+
+/*
+=================
+ErrJump
+Error handler for jump/call to invalid instruction number
+=================
+*/
+
 static void ErrJump(void)
 { 
 	Com_Error(ERR_DROP, "program tried to execute code outside VM");
 	exit(1);
 }
-
-#define ERRJUMP() \
-	EmitRexString(0x48, "B8"); \
-	EmitPtr(ErrJump); \
-	EmitRexString(0x48, "FF D0")
 
 /*
 =================
@@ -445,11 +449,16 @@ static void DoSyscall(void)
 #ifdef _MSC_VER
 	__asm
 	{
-		mov		dword ptr syscallNum, eax
-		mov		dword ptr programStack, esi
-		mov		dword ptr opStackBase, edi
-		mov		dword ptr opStackOfs, ebx
-		mov		dword ptr arg, ecx
+		mov	dword ptr syscallNum, eax
+		mov	dword ptr programStack, esi
+		mov	dword ptr opStackOfs, ebx
+#ifdef idx64
+		mov	qword ptr opStackBase, rdi
+		mov	qword ptr arg, rcx
+#else
+		mov	dword ptr opStackBase, edi
+		mov	dword ptr arg, ecx
+#endif
 	}
 #else
 	__asm__ volatile(
@@ -491,6 +500,9 @@ static void DoSyscall(void)
 	{
 		switch(syscallNum)
 		{
+		case VM_JMP_VIOLATION:
+			ErrJump();
+		break;
 		case VM_BLOCK_COPY: 
 			if(opStackOfs < 1)
 				Com_Error(ERR_DROP, "VM_BLOCK_COPY failed due to corrupted opStack");
@@ -502,6 +514,19 @@ static void DoSyscall(void)
 		break;
 		}
 	}
+}
+
+/*
+=================
+EmitCallRel
+Relative call to vm->codeBase + callOfs
+=================
+*/
+
+void EmitCallRel(vm_t *vm, int callOfs)
+{
+	EmitString("E8");			// call 0x12345678
+	Emit4(callOfs - compiledOfs - 4);
 }
 
 /*
@@ -532,7 +557,7 @@ int EmitCallDoSyscall(vm_t *vm)
 	EmitRexString(0x48, "89 E5");		// mov ebp, esp
 	EmitRexString(0x48, "83 E4 F0");	// and esp, 0xFFFFFFF0
 			
-	// call the syscall wrapper function
+	// call the syscall wrapper function DoSyscall()
 
 	EmitString("FF D2");			// call edx
 
@@ -555,15 +580,17 @@ int EmitCallDoSyscall(vm_t *vm)
 
 /*
 =================
-EmitCallRel
-Relative call to vm->codeBase + callOfs
+EmitCallErrJump
+Emit the code that triggers execution of the jump violation handler
 =================
 */
 
-void EmitCallRel(vm_t *vm, int callOfs)
+static void EmitCallErrJump(vm_t *vm, int sysCallOfs)
 {
-	EmitString("E8");			// call 0x12345678
-	Emit4(callOfs - compiledOfs - 4);
+	EmitString("B8");			// mov eax, 0x12345678
+	Emit4(VM_JMP_VIOLATION);
+
+	EmitCallRel(vm, sysCallOfs);
 }
 
 /*
@@ -582,7 +609,7 @@ int EmitCallProcedure(vm_t *vm, int sysCallOfs)
 	STACK_POP(1);			// sub bl, 1
 	EmitString("85 C0");		// test eax, eax
 
-	// Jump to syscall code
+	// Jump to syscall code, 1 byte offset should suffice
 	EmitString("7C");		// jl systemCall
 	jmpSystemCall = compiledOfs++;
 		
@@ -606,7 +633,7 @@ int EmitCallProcedure(vm_t *vm, int sysCallOfs)
 		
 	// badAddr:
 	SET_JMPOFS(jmpBadAddr);
-	ERRJUMP();
+	EmitCallErrJump(vm, sysCallOfs);
 
 	/************ System Call ************/
 	
@@ -657,7 +684,7 @@ void EmitCallIns(vm_t *vm, int cdest)
 	EmitString("E8");	// call 0x12345678
 
 	// we only know all the jump addresses in the third pass
-	if(pass)
+	if(pass == 2)
 		Emit4(vm->instructionPointers[cdest] - compiledOfs - 4);
 	else
 		compiledOfs += 4;
@@ -1081,7 +1108,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 	int		maxLength;
 	int		v;
 	int		i;
-        int		callProcOfsSyscall, callProcOfs;
+        int		callProcOfsSyscall, callProcOfs, callDoSyscallOfs;
 
 	jusedSize = header->instructionCount + 2;
 
@@ -1108,8 +1135,10 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 
 	// Start buffer with x86-VM specific procedures
 	compiledOfs = 0;
+
+	callDoSyscallOfs = compiledOfs;
 	callProcOfs = EmitCallDoSyscall(vm);
-	callProcOfsSyscall = EmitCallProcedure(vm, 0);
+	callProcOfsSyscall = EmitCallProcedure(vm, callDoSyscallOfs);
 	vm->entryOfs = compiledOfs;
 
 	for(pass=0; pass < 3; pass++) {
@@ -1622,7 +1651,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 			EmitString("B9");				// mov ecx, 0x12345678
 			Emit4(Constant4());
 
-			EmitCallRel(vm, 0);
+			EmitCallRel(vm, callDoSyscallOfs);
 
 			EmitCommand(LAST_COMMAND_SUB_BL_2);		// sub bl, 2
 			break;
@@ -1640,7 +1669,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 			EmitString("FF 24 85");			// jmp dword ptr [instructionPointers + eax * 4]
 			Emit4((intptr_t) vm->instructionPointers);
 #endif
-			ERRJUMP();
+			EmitCallErrJump(vm, callDoSyscallOfs);
 			break;
 		default:
 		        VMFREE_BUFFERS();
@@ -1720,7 +1749,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	int		stack[OPSTACK_SIZE + 7];
 	void	*entryPoint;
 	int		programCounter;
-	intptr_t	programStack, stackOnEntry;
+	int		programStack, stackOnEntry;
 	byte	*image;
 	int	*opStack, *opStackOnEntry;
 	int		opStackOfs;
@@ -1762,24 +1791,42 @@ int VM_CallCompiled(vm_t *vm, int *args)
 #ifdef _MSC_VER
 	__asm
 	{
-#ifndef idx64
-		pushad
-#endif
-		mov    esi, programStack
-		mov    edi, opStack
-		mov    ebx, opStackOfs
 #ifdef idx64
-#warning look up calling conventions and push/pop if necessary
-		mov    r8, vm->instructionPointers
-		mov    r9, vm->dataBase
-#endif
-		call   entryPoint
-		mov    opStackOfs, ebx
-		mov    opStack, edi
-		mov    programStack, esi
-#ifndef idx64
+		// non-volatile registers according to x64 calling convention
+		push	rsi
+		push	rdi
+		push	rbx
+		
+		mov	esi, dword ptr programStack
+		mov	rdi, qword ptr opStack
+		mov	ebx, dword ptr opStackOfs
+		mov	r8, qword ptr vm->instructionPointers
+		mov	r9, qword ptr vm->dataBase
+
+		call	entryPoint
+
+		mov	dword ptr opStackOfs, ebx
+		mov	qword ptr opStack, rdi
+		mov	dword ptr programStack, esi
+		
+		pop	rbx
+		pop	rdi
+		pop	rsi
+#else
+		pushad
+
+		mov	esi, dword ptr programStack
+		mov	edi, dword ptr opStack
+		mov	ebx, dword ptr opStackOfs
+
+		call	entryPoint
+
+		mov	dword ptr opStackOfs, ebx
+		mov	dword ptr opStack, edi
+		mov	dword ptr programStack, esi
+		
 		popad
-#endif
+#endif		
 	}
 #elif defined(idx64)
 	__asm__ volatile(
@@ -1797,7 +1844,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 		"pop %%r15\r\n"
 		: "+S" (programStack), "+D" (opStack), "+b" (opStackOfs)
 		: "g" (vm->instructionPointers), "g" (vm->dataBase), "g" (entryPoint)
-		: "cc", "memory", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%xmm0"
+		: "cc", "memory", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11"
 	);
 #else
 	__asm__ volatile(
