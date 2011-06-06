@@ -739,7 +739,7 @@ else # ifeq netbsd
 
 ifeq ($(PLATFORM),irix64)
 
-  ARCH=mips  #default to MIPS
+  ARCH=mips
 
   CC = c99
   MKDIR = mkdir -p
