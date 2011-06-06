@@ -686,7 +686,7 @@ void Cmd_RemoveCommandSafe( const char *cmd_name )
 	if( cmd->function )
 	{
 		Com_Error( ERR_DROP, "Restricted source tried to remove "
-			"system command \"%s\"\n", cmd_name );
+			"system command \"%s\"", cmd_name );
 		return;
 	}
 

@@ -635,10 +635,10 @@ void Cvar_SetSafe( const char *var_name, const char *value )
 	{
 		if( value )
 			Com_Error( ERR_DROP, "Restricted source tried to set "
-				"\"%s\" to \"%s\"\n", var_name, value );
+				"\"%s\" to \"%s\"", var_name, value );
 		else
 			Com_Error( ERR_DROP, "Restricted source tried to "
-				"modify \"%s\"\n", var_name );
+				"modify \"%s\"", var_name );
 		return;
 	}
 	Cvar_Set( var_name, value );

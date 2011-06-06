@@ -541,7 +541,7 @@ static void FS_CheckFilenameIsNotExecutable( const char *filename,
 	if( !Q_stricmp( COM_GetExtension( filename ), DLL_EXT ) )
 	{
 		Com_Error( ERR_FATAL, "%s: Not allowed to manipulate '%s' due "
-			"to %s extension\n", function, filename, DLL_EXT );
+			"to %s extension", function, filename, DLL_EXT );
 	}
 }
 
@@ -1454,7 +1454,7 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 
 		if( offset < 0 || origin == FS_SEEK_END ) {
 			Com_Error( ERR_FATAL, "Negative offsets and FS_SEEK_END not implemented "
-					"for FS_Seek on pk3 file contents\n" );
+					"for FS_Seek on pk3 file contents" );
 			return -1;
 		}
 
