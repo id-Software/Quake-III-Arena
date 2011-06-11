@@ -67,20 +67,17 @@ static void InterpolateMatrix( float *a, float *b, float lerp, float *mat ) {
 	mat[10] = a[10] * unLerp + b[10] * lerp;
 	mat[11] = a[11] * unLerp + b[11] * lerp;
 }
-static void JointToMatrix( vec3_t rot, vec3_t scale, vec3_t trans,
+static void JointToMatrix( vec4_t rot, vec3_t scale, vec3_t trans,
 			   float *mat ) {
-	float rotLen = DotProduct(rot, rot);
-	float rotW = -SQRTFAST(1.0f - rotLen);
-
 	float xx = 2.0f * rot[0] * rot[0];
 	float yy = 2.0f * rot[1] * rot[1];
 	float zz = 2.0f * rot[2] * rot[2];
 	float xy = 2.0f * rot[0] * rot[1];
 	float xz = 2.0f * rot[0] * rot[2];
 	float yz = 2.0f * rot[1] * rot[2];
-	float wx = 2.0f * rotW * rot[0];
-	float wy = 2.0f * rotW * rot[1];
-	float wz = 2.0f * rotW * rot[2];
+	float wx = 2.0f * rot[3] * rot[0];
+	float wy = 2.0f * rot[3] * rot[1];
+	float wz = 2.0f * rot[3] * rot[2];
 
 	mat[ 0] = scale[0] * (1.0f - (yy + zz));
 	mat[ 1] = scale[0] * (xy - wz);
@@ -95,20 +92,17 @@ static void JointToMatrix( vec3_t rot, vec3_t scale, vec3_t trans,
 	mat[10] = scale[2] * (1.0f - (xx + yy));
 	mat[11] = trans[2];
 }
-static void JointToMatrixInverse( vec3_t rot, vec3_t scale, vec3_t trans,
+static void JointToMatrixInverse( vec4_t rot, vec3_t scale, vec3_t trans,
 				  float *mat ) {
-	float rotLen = DotProduct(rot, rot);
-	float rotW = -SQRTFAST(1.0f - rotLen);
-
 	float xx = 2.0f * rot[0] * rot[0];
 	float yy = 2.0f * rot[1] * rot[1];
 	float zz = 2.0f * rot[2] * rot[2];
 	float xy = 2.0f * rot[0] * rot[1];
 	float xz = 2.0f * rot[0] * rot[2];
 	float yz = 2.0f * rot[1] * rot[2];
-	float wx = 2.0f * rotW * rot[0];
-	float wy = 2.0f * rotW * rot[1];
-	float wz = 2.0f * rotW * rot[2];
+	float wx = 2.0f * rot[3] * rot[0];
+	float wy = 2.0f * rot[3] * rot[1];
+	float wz = 2.0f * rot[3] * rot[2];
 
 	mat[ 0] = scale[0] * (1.0f - (yy + zz));
 	mat[ 1] = scale[0] * (xy + wz);
@@ -159,6 +153,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 	LL( header->version );
 	if( header->version != IQM_VERSION ) {
+		ri.Printf(PRINT_WARNING, "R_LoadIQM: %s is a unsupported IQM version (%d), only version %d is supported.\n",
+				mod_name, header->version, IQM_VERSION);
 		return qfalse;
 	}
 
@@ -355,6 +351,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( joint->rotate[0] );
 		LL( joint->rotate[1] );
 		LL( joint->rotate[2] );
+		LL( joint->rotate[3] );
 		LL( joint->scale[0] );
 		LL( joint->scale[1] );
 		LL( joint->scale[2] );
@@ -390,6 +387,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( pose->channeloffset[6] );
 		LL( pose->channeloffset[7] );
 		LL( pose->channeloffset[8] );
+		LL( pose->channeloffset[9] );
 		LL( pose->channelscale[0] );
 		LL( pose->channelscale[1] );
 		LL( pose->channelscale[2] );
@@ -399,25 +397,29 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( pose->channelscale[6] );
 		LL( pose->channelscale[7] );
 		LL( pose->channelscale[8] );
+		LL( pose->channelscale[9] );
 	}
 
-	// check and swap model bounds
-	if(IQM_CheckRange(header, header->ofs_bounds,
-			  header->num_frames, sizeof(*bounds)))
+	if (header->ofs_bounds)
 	{
-		return qfalse;
-	}
-	bounds = (iqmBounds_t *) ((byte *) header + header->ofs_bounds);
-	for(i = 0; i < header->num_poses; i++)
-	{
-		LL(bounds->bbmin[0]);
-		LL(bounds->bbmin[1]);
-		LL(bounds->bbmin[2]);
-		LL(bounds->bbmax[0]);
-		LL(bounds->bbmax[1]);
-		LL(bounds->bbmax[2]);
+		// check and swap model bounds
+		if(IQM_CheckRange(header, header->ofs_bounds,
+				  header->num_frames, sizeof(*bounds)))
+		{
+			return qfalse;
+		}
+		bounds = (iqmBounds_t *) ((byte *) header + header->ofs_bounds);
+		for(i = 0; i < header->num_frames; i++)
+		{
+			LL(bounds->bbmin[0]);
+			LL(bounds->bbmin[1]);
+			LL(bounds->bbmin[2]);
+			LL(bounds->bbmax[0]);
+			LL(bounds->bbmax[1]);
+			LL(bounds->bbmax[2]);
 
-		bounds++;
+			bounds++;
+		}
 	}
 
 	// allocate the model and copy the data
@@ -509,7 +511,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	for( i = 0; i < header->num_frames; i++ ) {
 		pose = (iqmPose_t *)((byte *)header + header->ofs_poses);
 		for( j = 0; j < header->num_poses; j++, pose++ ) {
-			vec3_t	translate, rotate, scale;
+			vec3_t	translate;
+			vec4_t	rotate;
+			vec3_t	scale;
 			float	mat1[12], mat2[12];
 
 			translate[0] = pose->channeloffset[0];
@@ -521,6 +525,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			translate[2] = pose->channeloffset[2];
 			if( pose->mask & 0x004)
 				translate[2] += *framedata++ * pose->channelscale[2];
+
 			rotate[0] = pose->channeloffset[3];
 			if( pose->mask & 0x008)
 				rotate[0] += *framedata++ * pose->channelscale[3];
@@ -530,15 +535,19 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			rotate[2] = pose->channeloffset[5];
 			if( pose->mask & 0x020)
 				rotate[2] += *framedata++ * pose->channelscale[5];
-			scale[0] = pose->channeloffset[6];
+			rotate[3] = pose->channeloffset[6];
 			if( pose->mask & 0x040)
-				scale[0] += *framedata++ * pose->channelscale[6];
-			scale[1] = pose->channeloffset[7];
+				rotate[3] += *framedata++ * pose->channelscale[6];
+
+			scale[0] = pose->channeloffset[7];
 			if( pose->mask & 0x080)
-				scale[1] += *framedata++ * pose->channelscale[7];
-			scale[2] = pose->channeloffset[8];
+				scale[0] += *framedata++ * pose->channelscale[7];
+			scale[1] = pose->channeloffset[8];
 			if( pose->mask & 0x100)
-				scale[2] += *framedata++ * pose->channelscale[8];
+				scale[1] += *framedata++ * pose->channelscale[8];
+			scale[2] = pose->channeloffset[9];
+			if( pose->mask & 0x200)
+				scale[2] += *framedata++ * pose->channelscale[9];
 
 			// construct transformation matrix
 			JointToMatrix( rotate, scale, translate, mat1 );
@@ -563,6 +572,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	for( i = 0; i < header->num_meshes; i++, mesh++, surface++ ) {
 		surface->surfaceType = SF_IQM;
 		Q_strncpyz(surface->name, str + mesh->name, sizeof (surface->name));
+		Q_strlwr(surface->name); // lowercase the surface name so skin compares are faster
 		surface->shader = R_FindShader( str + mesh->material, LIGHTMAP_NONE, qtrue );
 		if( surface->shader->defaultShader )
 			surface->shader = tr.defaultShader;
@@ -677,6 +687,11 @@ static int R_CullIQM( iqmData_t *data, trRefEntity_t *ent ) {
 	vec_t		*oldBounds, *newBounds;
 	int		i;
 
+	if (!data->bounds) {
+		tr.pc.c_box_cull_md3_clip++;
+		return CULL_CLIP;
+	}
+
 	// compute bounds pointers
 	oldBounds = data->bounds + 6*ent->e.oldframe;
 	newBounds = data->bounds + 6*ent->e.frame;
@@ -712,6 +727,7 @@ int R_ComputeIQMFogNum( iqmData_t *data, trRefEntity_t *ent ) {
 	int			i, j;
 	fog_t			*fog;
 	vec_t			*bounds;
+	const vec_t		defaultBounds[6] = { -8, -8, -8, 8, 8, 8 };
 	vec3_t			diag, center;
 	vec3_t			localOrigin;
 	vec_t			radius;
@@ -721,7 +737,11 @@ int R_ComputeIQMFogNum( iqmData_t *data, trRefEntity_t *ent ) {
 	}
 
 	// FIXME: non-normalized axis issues
-	bounds = data->bounds + 6*ent->e.frame;
+	if (data->bounds) {
+		bounds = data->bounds + 6*ent->e.frame;
+	} else {
+		bounds = defaultBounds;
+	}
 	VectorSubtract( bounds+3, bounds, diag );
 	VectorMA( bounds, 0.5f, diag, center );
 	VectorAdd( ent->e.origin, center, localOrigin );
@@ -879,7 +899,7 @@ static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
 		mat1 = data->poseMats + 12 * data->num_joints * frame;
 		mat2 = data->poseMats + 12 * data->num_joints * oldframe;
 		
-		for( i = 0; i < 12 * data->num_joints; i++, joint++ ) {
+		for( i = 0; i < data->num_joints; i++, joint++ ) {
 			if( *joint >= 0 ) {
 				float tmpMat[12];
 				InterpolateMatrix( mat1 + 12*i, mat2 + 12*i,
@@ -1031,8 +1051,11 @@ int R_IQMLerpTag( orientation_t *tag, iqmData_t *data,
 			break;
 		names += strlen( names ) + 1;
 	}
-	if( joint >= data->num_joints )
+	if( joint >= data->num_joints ) {
+		AxisClear( tag->axis );
+		VectorClear( tag->origin );
 		return qfalse;
+	}
 
 	ComputeJointMats( data, startFrame, endFrame, frac, jointMats );
 
@@ -1047,7 +1070,7 @@ int R_IQMLerpTag( orientation_t *tag, iqmData_t *data,
 	tag->axis[0][2] = jointMats[12 * joint + 8];
 	tag->axis[1][2] = jointMats[12 * joint + 9];
 	tag->axis[2][2] = jointMats[12 * joint + 10];
-	tag->origin[0] = jointMats[12 * joint + 11];
+	tag->origin[2] = jointMats[12 * joint + 11];
 
-	return qfalse;
+	return qtrue;
 }
