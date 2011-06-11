@@ -726,7 +726,7 @@ R_ComputeIQMFogNum
 int R_ComputeIQMFogNum( iqmData_t *data, trRefEntity_t *ent ) {
 	int			i, j;
 	fog_t			*fog;
-	vec_t			*bounds;
+	const vec_t		*bounds;
 	const vec_t		defaultBounds[6] = { -8, -8, -8, 8, 8, 8 };
 	vec3_t			diag, center;
 	vec3_t			localOrigin;

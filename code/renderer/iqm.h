@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define __IQM_H__
 
 #define IQM_MAGIC "INTERQUAKEMODEL"
-#define IQM_VERSION 1
+#define IQM_VERSION 2
 
 #define	IQM_MAX_JOINTS		128
 
@@ -86,15 +86,15 @@ typedef struct iqmjoint
 {
     unsigned int name;
     int parent;
-    float translate[3], rotate[3], scale[3];
+    float translate[3], rotate[4], scale[3];
 } iqmJoint_t;
 
 typedef struct iqmpose
 {
     int parent;
     unsigned int mask;
-    float channeloffset[9];
-    float channelscale[9];
+    float channeloffset[10];
+    float channelscale[10];
 } iqmPose_t;
 
 typedef struct iqmanim
