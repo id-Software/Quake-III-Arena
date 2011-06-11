@@ -469,6 +469,11 @@ static void PlayerModel_SetMenuItems( void )
 	// model
 	trap_Cvar_VariableStringBuffer( "model", s_playermodel.modelskin, 64 );
 	
+	// use default skin if none is set
+	if (!strchr(s_playermodel.modelskin, '/')) {
+		Q_strcat(s_playermodel.modelskin, 64, "/default");
+	}
+	
 	// find model in our list
 	for (i=0; i<s_playermodel.nummodels; i++)
 	{
