@@ -70,13 +70,13 @@ void qsnapvectorx87(vec3_t vec)
         	"sub $2, " ESP "\n"
         	"fnstcw (" ESP ")\n"
         	"fldcw %0\n"
-        	QROUNDX87("(" EAX ")")
-        	QROUNDX87("4(" EAX ")")
-        	QROUNDX87("8(" EAX ")")
+        	QROUNDX87("(%1)")
+        	QROUNDX87("4(%1)")
+        	QROUNDX87("8(%1)")
         	"fldcw (" ESP ")\n"
         	"add $2, " ESP "\n"
         	:
-        	: "m" (fpucw), "a" (vec)
+        	: "m" (fpucw), "r" (vec)
         	: "memory"
 	);
 }

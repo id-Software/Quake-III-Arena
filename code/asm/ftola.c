@@ -33,7 +33,7 @@ long qftolsse(float f)
   __asm__ volatile
   (
     "cvttss2si %1, %0\n"
-    : "=a" (retval)
+    : "=r" (retval)
     : "x" (f)
   );
   
@@ -61,7 +61,7 @@ long qftolx87(float f)
     "flds %1\n"
     "fistpl %1\n"
     "mov %1, %0\n"
-    : "=a" (retval)
+    : "=r" (retval)
     : "m" (f)
   );
   
