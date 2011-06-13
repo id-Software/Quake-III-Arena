@@ -67,29 +67,6 @@ static	int		pc = 0;
 
 #define FTOL_PTR
 
-#ifdef _MSC_VER
-
-#if defined( FTOL_PTR )
-int _ftol( float );
-static	void	*ftolPtr = _ftol;
-#endif
-
-#else // _MSC_VER
-
-#if defined( FTOL_PTR )
-
-int qftol( void );
-int qftol027F( void );
-int qftol037F( void );
-int qftol0E7F( void );
-int qftol0F7F( void );
-
-
-static	void	*ftolPtr = qftol0F7F;
-#endif // FTOL_PTR
-
-#endif
-
 static	int	instruction, pass;
 static	int	lastConst = 0;
 static	int	oc0, oc1, pop0, pop1;
@@ -111,15 +88,17 @@ typedef enum
 
 static	ELastCommand	LastCommand;
 
-static inline int iss8(int32_t v)
+static int iss8(int32_t v)
 {
 	return (SCHAR_MIN <= v && v <= SCHAR_MAX);
 }
 
-static inline int isu8(uint32_t v)
+#if 0
+static int isu8(uint32_t v)
 {
 	return (v <= UCHAR_MAX);
 }
+#endif
 
 static int NextConstant4(void)
 {
@@ -436,30 +415,37 @@ Uses asm to retrieve arguments from registers to work around different calling c
 =================
 */
 
+#if defined(_MSC_VER) && defined(idx64)
+
+extern void qsyscall64(void);
+extern uint8_t qvmcall64(int *programStack, int *opStack, intptr_t *instructionPointers, byte *dataBase);
+
+// Microsoft does not support inline assembler on x64 platforms. Meh.
+void DoSyscall(int syscallNum, int programStack, int *opStackBase, uint8_t opStackOfs, intptr_t arg)
+{
+#else
 static void DoSyscall(void)
 {
-	vm_t *savedVM;
-
 	int syscallNum;
 	int programStack;
 	int *opStackBase;
-	int opStackOfs;
+	uint8_t opStackOfs;
 	intptr_t arg;
+#endif
+
+	vm_t *savedVM;
 
 #ifdef _MSC_VER
+  #ifndef idx64
 	__asm
 	{
 		mov	dword ptr syscallNum, eax
 		mov	dword ptr programStack, esi
-		mov	dword ptr opStackOfs, ebx
-#ifdef idx64
-		mov	qword ptr opStackBase, rdi
-		mov	qword ptr arg, rcx
-#else
+		mov	byte ptr opStackOfs, bl
 		mov	dword ptr opStackBase, edi
 		mov	dword ptr arg, ecx
-#endif
 	}
+  #endif
 #else
 	__asm__ volatile(
 		""
@@ -539,8 +525,13 @@ Call to DoSyscall()
 int EmitCallDoSyscall(vm_t *vm)
 {
 	// use edx register to store DoSyscall address
+#if defined(_MSC_VER) && defined(idx64)
+	EmitRexString(0x48, "BA");		// mov edx, qsyscall64
+	EmitPtr(qsyscall64);
+#else
 	EmitRexString(0x48, "BA");		// mov edx, DoSyscall
 	EmitPtr(DoSyscall);
+#endif
 
 	// Push important registers to stack as we can't really make
 	// any assumptions about calling conventions.
@@ -1629,9 +1620,8 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 			EmitString("DB 1C 9F");				// fistp dword ptr [edi + ebx * 4]
 #else // FTOL_PTR
 			// call the library conversion function
-			EmitString("D9 04 9F");				// fld dword ptr [edi + ebx * 4]
-			EmitRexString(0x48, "BA");			// mov edx, ftolPtr
-			EmitPtr(ftolPtr);
+			EmitRexString(0x48, "BA");			// mov edx, Q_VMftol
+			EmitPtr(Q_VMftol);
 			EmitRexString(0x48, "FF D2");			// call edx
 			EmitCommand(LAST_COMMAND_MOV_STACK_EAX);	// mov dword ptr [edi + ebx * 4], eax
 #endif
@@ -1746,12 +1736,12 @@ This function is called directly by the generated code
 
 int VM_CallCompiled(vm_t *vm, int *args)
 {
-	int		stack[OPSTACK_SIZE + 7];
+	byte	stack[OPSTACK_SIZE * 4 + 15];
 	void	*entryPoint;
 	int		programCounter;
 	int		programStack, stackOnEntry;
 	byte	*image;
-	int	*opStack, *opStackOnEntry;
+	int	*opStack;
 	int		opStackOfs;
 
 	currentVM = vm;
@@ -1784,35 +1774,16 @@ int VM_CallCompiled(vm_t *vm, int *args)
 
 	// off we go into generated code...
 	entryPoint = vm->codeBase + vm->entryOfs;
-	opStack = opStackOnEntry = PADP(stack, 8);
+	opStack = PADP(stack, 16);
 	*opStack = 0xDEADBEEF;
 	opStackOfs = 0;
 
 #ifdef _MSC_VER
+  #ifdef idx64
+	opStackOfs = qvmcall64(&programStack, opStack, vm->instructionPointers, vm->dataBase);
+  #else
 	__asm
 	{
-#ifdef idx64
-		// non-volatile registers according to x64 calling convention
-		push	rsi
-		push	rdi
-		push	rbx
-		
-		mov	esi, dword ptr programStack
-		mov	rdi, qword ptr opStack
-		mov	ebx, dword ptr opStackOfs
-		mov	r8, qword ptr vm->instructionPointers
-		mov	r9, qword ptr vm->dataBase
-
-		call	entryPoint
-
-		mov	dword ptr opStackOfs, ebx
-		mov	qword ptr opStack, rdi
-		mov	dword ptr programStack, esi
-		
-		pop	rbx
-		pop	rdi
-		pop	rsi
-#else
 		pushad
 
 		mov	esi, dword ptr programStack
@@ -1826,8 +1797,8 @@ int VM_CallCompiled(vm_t *vm, int *args)
 		mov	dword ptr programStack, esi
 		
 		popad
-#endif		
 	}
+  #endif		
 #elif defined(idx64)
 	__asm__ volatile(
 		"movq %5, %%rax\r\n"
@@ -1855,7 +1826,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	);
 #endif
 
-	if(opStack != opStackOnEntry || opStackOfs != 1 || *opStack != 0xDEADBEEF)
+	if(opStackOfs != 1 || *opStack != 0xDEADBEEF)
 	{
 		Com_Error(ERR_DROP, "opStack corrupted in compiled code");
 	}

@@ -419,6 +419,58 @@ extern	vec3_t	axisDefault[3];
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
+int Q_isnan(float x);
+
+#ifdef idx64
+  extern long qftolsse(float f);
+  extern void qvmftolsse(void);
+  extern void qsnapvectorsse(vec3_t vec);
+
+  #define Q_ftol qftolsse
+  #define Q_SnapVector qsnapvectorsse
+
+  extern void (*Q_VMftol)(void);
+#elif defined(id386)
+  extern long QDECL qftolx87(float f);
+  extern long QDECL qftolsse(float f);
+  extern void QDECL qvmftolx87(void);
+  extern void QDECL qvmftolsse(void);
+  extern void QDECL qsnapvectorx87(vec3_t vec);
+  extern void QDECL qsnapvectorsse(vec3_t vec);
+
+  extern long (QDECL *Q_ftol)(float f);
+  extern void (QDECL *Q_VMftol)(void);
+  extern void (QDECL *Q_SnapVector)(vec3_t vec);
+#else
+  #define Q_ftol(f) lrintf((f))
+  #define Q_SnapVector(vec)\
+	do\
+	{\
+		vec3_t *temp = (vec);\
+		\
+		(*temp)[0] = round((*temp)[0]);\
+		(*temp)[1] = round((*temp)[1]);\
+		(*temp)[2] = round((*temp)[2]);\
+	} while(0)
+#endif
+/*
+// if your system does not have lrintf() and round() you can try this block. Please also open a bug report at bugzilla.icculus.org
+// or write a mail to the ioq3 mailing list.
+#else
+  #define Q_ftol(f) ((long) (f))
+  #define Q_round(f) do { if((f) < 0) (f) -= 0.5f; else (f) += 0.5f; (f) = Q_ftol((f)); } while(0)
+  #define Q_SnapVector(vec) \
+	do\
+	{\
+		vec3_t *temp = (vec);\
+		\
+		Q_round((*temp)[0]);\
+		Q_round((*temp)[1]);\
+		Q_round((*temp)[2]);\
+	} while(0)
+#endif
+*/
+
 #if idppc
 
 static ID_INLINE float Q_rsqrt( float number ) {
@@ -637,8 +689,6 @@ void MakeNormalVectors( const vec3_t forward, vec3_t right, vec3_t up );
 void MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3]);
 void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void PerpendicularVector( vec3_t dst, const vec3_t src );
-int Q_isnan( float x );
-
 
 #ifndef MAX
 #define MAX(x,y) ((x)>(y)?(x):(y))

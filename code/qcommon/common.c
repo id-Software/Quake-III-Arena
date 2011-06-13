@@ -90,6 +90,14 @@ cvar_t	*com_basegame;
 cvar_t  *com_homepath;
 cvar_t	*com_busyWait;
 
+#if defined(idx64) 
+  void (*Q_VMftol)(void);
+#elif defined(id386)
+	long (QDECL *Q_ftol)(float f);
+	void (QDECL *Q_VMftol)(void);
+	void (QDECL *Q_SnapVector)(vec3_t vec);
+#endif
+
 // com_speeds times
 int		time_game;
 int		time_frontend;		// renderer frontend time
@@ -2567,6 +2575,53 @@ static void Com_DetectAltivec(void)
 
 /*
 =================
+Com_DetectSSE
+Find out whether we have SSE support for Q_ftol function
+=================
+*/
+
+#if defined(id386) || defined(idx64)
+
+static void Com_DetectSSE(void)
+{
+#ifndef idx64
+	cpuFeatures_t feat;
+	
+	feat = Sys_GetProcessorFeatures();
+
+	if(feat & CF_SSE)
+	{
+		if(feat & CF_SSE2)
+			Q_SnapVector = qsnapvectorsse;
+		else
+			Q_SnapVector = qsnapvectorx87;
+
+		Q_ftol = qftolsse;
+#endif
+		Q_VMftol = qvmftolsse;
+
+		Com_Printf("Have SSE support\n");
+#ifndef idx64
+	}
+	else
+	{
+		Q_ftol = qftolx87;
+		Q_VMftol = qvmftolx87;
+		Q_SnapVector = qsnapvectorx87;
+
+		Com_Printf("No SSE support on this machine\n");
+	}
+#endif
+}
+
+#else
+
+#define Com_DetectSSE()
+
+#endif
+
+/*
+=================
 Com_InitRand
 Seed the random number generator, if possible with an OS supplied random seed.
 =================
@@ -2614,6 +2669,8 @@ void Com_Init( char *commandLine ) {
 
 //	Swap_Init ();
 	Cbuf_Init ();
+
+	Com_DetectSSE();
 
 	// override anything from the config files with command line args
 	Com_StartupVariable( NULL );
