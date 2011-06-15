@@ -1,0 +1,904 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7c0887fc-620c-4e83-80b0-d44c41221398}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{cfee8f2d-0c9e-4599-b76f-03ef269e3693}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;fi;fd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{2118ef55-d2c1-45e3-96d8-7df8f9a88b7d}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="jpeg">
+      <UniqueIdentifier>{27b20f9b-7e4b-4391-9f9e-c0ac2bf06d06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="jpeg\Source Files">
+      <UniqueIdentifier>{93eeec3e-d741-45cf-996a-1fdb2f8a9bdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="jpeg\Header Files">
+      <UniqueIdentifier>{73a57952-9988-46dd-8eb4-b8888787d4b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="botlib">
+      <UniqueIdentifier>{a885ab26-dd2e-4f73-9ff7-7aab5426ad08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="botlib\Source Files">
+      <UniqueIdentifier>{e0c6c739-e416-48e9-bf88-34e7fd0cf024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="botlib\Header Files">
+      <UniqueIdentifier>{e35bc6f6-1102-4c5c-a650-b7139842f45e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{c82e323c-9a35-41ea-9f28-ee0c1e15c7ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer\Source Files">
+      <UniqueIdentifier>{0ee0a9cb-f315-480b-b7c7-9b1f0d15db54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="speex">
+      <UniqueIdentifier>{78e83da0-aef9-489d-a068-e484f9f114da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{89531515-ab90-4808-b464-28319ea749c5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\client\cl_avi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_cgame.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_cin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_console.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_curl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_keys.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_net_chan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_parse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_scrn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\cl_ui.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cm_load.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cm_patch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cm_polylib.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cm_test.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cm_trace.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cmd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sys\con_log.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sys\con_passive.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\cvar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\files.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\huffman.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\ioapi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\md4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\md5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\msg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\net_chan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\net_ip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\puff.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\q_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\qal.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sdl\sdl_gamma.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sdl\sdl_glimp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sdl\sdl_input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sdl\sdl_snd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_adpcm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_codec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_codec_ogg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_codec_wav.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_dma.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_mem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_mix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_openal.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\client\snd_wavelet.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_bot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_ccmds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_game.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_init.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_net_chan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_snapshot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\server\sv_world.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sys\sys_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\sys\sys_win32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\unzip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\vm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\vm_interpreted.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\qcommon\vm_x86.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jaricom.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcapimin.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcapistd.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcarith.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jccoefct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jccolor.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcdctmgr.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jchuff.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcinit.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmainct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmarker.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmaster.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcomapi.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcparam.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcprepct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcsample.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jctrans.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdapimin.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdapistd.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdarith.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdatadst.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdatasrc.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdcoefct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdcolor.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jddctmgr.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdhuff.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdinput.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmainct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmarker.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmaster.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmerge.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdpostct.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdsample.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdtrans.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jerror.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctflt.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctfst.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctint.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctflt.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctfst.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctint.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jmemmgr.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jmemnobs.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jquant1.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jquant2.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jutils.c">
+      <Filter>jpeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_bspq3.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_cluster.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_debug.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_entity.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_file.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_main.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_move.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_optimize.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_reach.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_route.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_routealt.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_aas_sample.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_char.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_chat.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_gen.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_goal.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_move.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_weap.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ai_weight.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_ea.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\be_interface.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_crc.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_libvar.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_log.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_memory.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_precomp.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_script.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\botlib\l_struct.c">
+      <Filter>botlib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_animation.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_backend.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_bsp.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_cmds.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_curve.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_flares.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_font.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image_bmp.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image_jpg.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image_pcx.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image_png.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_image_tga.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_init.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_light.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_main.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_marks.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_mesh.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_model.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_model_iqm.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_noise.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_scene.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_shade.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_shade_calc.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_shader.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_shadows.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_sky.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_surface.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderer\tr_world.c">
+      <Filter>renderer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\bits.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\buffer.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\cb_search.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_10_16_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_10_32_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_20_32_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_5_256_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_5_64_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\exc_8_128_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\fftwrap.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\filterbank.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\filters.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\gain_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\gain_table_lbr.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\hexc_10_32_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\hexc_table.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\high_lsp_tables.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\jitter.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\kiss_fft.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\kiss_fftr.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\lpc.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\lsp.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\lsp_tables_nb.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\ltp.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\mdf.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\modes.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\modes_wb.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\nb_celp.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\preprocess.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\quant_lsp.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\resample.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\sb_celp.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\smallft.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\speex.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\speex_callbacks.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\speex_header.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\stereo.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\vbr.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\vq.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\libspeex\window.c">
+      <Filter>speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\game\bg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\cgame\cg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\cl_curl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\cm_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\cm_patch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\cm_polylib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\cm_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\game\g_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\keycodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\keys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\puff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\q_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\qal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\qcommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\qfiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\renderer\qgl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\win32\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\server\server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\snd_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\snd_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\surfaceflags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\renderer\tr_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\renderer\tr_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\cgame\tr_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\ui_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\qcommon\vm_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\win32\win_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\sys\win_resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jchuff.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jconfig.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jdct.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jdhuff.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jerror.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jinclude.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jmemsys.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jmorecfg.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jpegint.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jpeglib.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jversion.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\aasfile.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_bsp.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_cluster.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_debug.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_def.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_entity.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_file.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_funcs.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_main.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_move.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_optimize.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_reach.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_route.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_routealt.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_aas_sample.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_ai_weight.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\be_interface.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_crc.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_libvar.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_log.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_memory.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_precomp.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_script.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_struct.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\botlib\l_utils.h">
+      <Filter>botlib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\libspeex\config.h">
+      <Filter>speex</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\code\sys\win_resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\code\asm\ftola.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\code\asm\snapvector.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\code\asm\vm_x86_64.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
