@@ -622,7 +622,8 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 		interpret = VMI_BYTECODE;
 	}
 #else
-	if ( interpret >= VMI_COMPILED ) {
+	if(interpret != VMI_BYTECODE)
+	{
 		vm->compiled = qtrue;
 		VM_Compile( vm, header );
 	}

@@ -1403,7 +1403,7 @@ vmInterpret_t FS_FindVM(void **startSearch, char *found, int foundlen, const cha
         
 	while(search)
 	{
-		if(search->dir)
+		if(search->dir && !fs_numServerPaks)
 		{
 			dir = search->dir;
 
