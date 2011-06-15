@@ -377,15 +377,20 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	// load the image
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
 	Com_Printf( "Loading vm file %s...\n", filename );
-	length = FS_ReadFile( filename, &header.v );
+
+	length = FS_ReadFileDir(filename, vm->searchPath, &header.v);
+
 	if ( !header.h ) {
 		Com_Printf( "Failed.\n" );
 		VM_Free( vm );
+
+		Com_Printf(S_COLOR_YELLOW "Warning: Couldn't open VM file %s\n", filename);
+
 		return NULL;
 	}
 
 	// show where the qvm was loaded from
-	Cmd_ExecuteString( va( "which %s\n", filename ) );
+	FS_Which(filename, vm->searchPath);
 
 	if( LittleLong( header.h->vmMagic ) == VM_MAGIC_VER2 ) {
 		Com_Printf( "...which has vmMagic VM_MAGIC_VER2\n" );
@@ -400,9 +405,13 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 			|| header.h->bssLength < 0
 			|| header.h->dataLength < 0
 			|| header.h->litLength < 0
-			|| header.h->codeLength <= 0 ) {
-			VM_Free( vm );
-			Com_Error( ERR_FATAL, "%s has bad header", filename );
+			|| header.h->codeLength <= 0 )
+		{
+			VM_Free(vm);
+			FS_FreeFile(header.v);
+			
+			Com_Printf(S_COLOR_YELLOW "Warning: %s has bad header\n", filename);
+			return NULL;
 		}
 	} else if( LittleLong( header.h->vmMagic ) == VM_MAGIC ) {
 		// byte swap the header
@@ -415,14 +424,21 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 		if ( header.h->bssLength < 0
 			|| header.h->dataLength < 0
 			|| header.h->litLength < 0
-			|| header.h->codeLength <= 0 ) {
-			VM_Free( vm );
-			Com_Error( ERR_FATAL, "%s has bad header", filename );
+			|| header.h->codeLength <= 0 )
+		{
+			VM_Free(vm);
+			FS_FreeFile(header.v);
+
+			Com_Printf(S_COLOR_YELLOW "Warning: %s has bad header\n", filename);
+			return NULL;
 		}
 	} else {
 		VM_Free( vm );
-		Com_Error( ERR_FATAL, "%s does not have a recognisable "
-				"magic number in its header", filename );
+		FS_FreeFile(header.v);
+
+		Com_Printf(S_COLOR_YELLOW "Warning: %s does not have a recognisable "
+				"magic number in its header\n", filename);
+		return NULL;
 	}
 
 	// round up to next power of 2 so all data operations can
@@ -524,7 +540,9 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 				vmInterpret_t interpret ) {
 	vm_t		*vm;
 	vmHeader_t	*header;
-	int			i, remaining;
+	int			i, remaining, retval;
+	char filename[MAX_OSPATH];
+	void *startSearch = NULL;
 
 	if ( !module || !module[0] || !systemCalls ) {
 		Com_Error( ERR_FATAL, "VM_Create: bad parms" );
@@ -553,25 +571,41 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 
 	vm = &vmTable[i];
 
-	Q_strncpyz( vm->name, module, sizeof( vm->name ) );
-	vm->systemCall = systemCalls;
+	Q_strncpyz(vm->name, module, sizeof(vm->name));
 
-	if ( interpret == VMI_NATIVE ) {
-		// try to load as a system dll
-		Com_Printf( "Loading dll file %s.\n", vm->name );
-		vm->dllHandle = Sys_LoadDll( module, &vm->entryPoint, VM_DllSyscall );
-		if ( vm->dllHandle ) {
-			return vm;
+	do
+	{
+		retval = FS_FindVM(&startSearch, filename, sizeof(filename), module, (interpret == VMI_NATIVE));
+		
+		if(retval == VMI_NATIVE)
+		{
+			Com_Printf("Try loading dll file %s\n", filename);
+
+			vm->dllHandle = Sys_LoadDll(filename, &vm->entryPoint, VM_DllSyscall);
+			
+			if(vm->dllHandle)
+			{
+				vm->systemCall = systemCalls;
+				return vm;
+			}
+			
+			Com_Printf("Failed loading dll, trying next\n");
 		}
+		else if(retval == VMI_COMPILED)
+		{
+			vm->searchPath = startSearch;
+			if((header = VM_LoadQVM(vm, qtrue)))
+				break;
 
-		Com_Printf( "Failed to load dll, looking for qvm.\n" );
-		interpret = VMI_COMPILED;
-	}
-
-	// load the image
-	if( !( header = VM_LoadQVM( vm, qtrue ) ) ) {
+			// VM_Free overwrites the name on failed load
+			Q_strncpyz(vm->name, module, sizeof(vm->name));
+		}
+	} while(retval >= 0);
+	
+	if(retval < 0)
 		return NULL;
-	}
+
+	vm->systemCall = systemCalls;
 
 	// allocate space for the jump targets, which will be filled in by the compile/prep functions
 	vm->instructionCount = header->instructionCount;
