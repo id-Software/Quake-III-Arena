@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../qcommon/q_platform.h"
 
-#ifdef idx64
+#if idx64
   #define EAX "%%rax"
   #define EBX "%%rbx"
   #define ESP "%%rsp"
