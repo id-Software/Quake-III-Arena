@@ -2083,18 +2083,6 @@ int Q_vsnprintf(char *str, size_t length, const char *fmt, va_list args)
 	return dopr(str, length, fmt, args);
 }
 
-int Q_snprintf(char *str, size_t length, const char *fmt, ...)
-{
-	va_list ap;
-	int retval;
-
-	va_start(ap, fmt);
-	retval = Q_vsnprintf(str, length, fmt, ap);
-	va_end(ap);
-	
-	return retval;
-}
-
 /* this is really crappy */
 int sscanf( const char *buffer, const char *fmt, ... ) {
 	int		cmd;
