@@ -388,28 +388,6 @@ static void ErrJump(void)
 
 /*
 =================
-DoBlockCopy
-Executes OP_BLOCK_COPY
-=================
-*/
-
-void DoBlockCopy(unsigned int dest, unsigned int src, size_t n)
-{
-	unsigned int dataMask = currentVM->dataMask;
-
-	if ((dest & dataMask) != dest
-	|| (src & dataMask) != src
-	|| ((dest + n) & dataMask) != dest + n
-	|| ((src + n) & dataMask) != src + n)
-	{
-		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!");
-	}
-
-	memcpy(currentVM->dataBase + dest, currentVM->dataBase + src, n);
-}
-
-/*
-=================
 DoSyscall
 Uses asm to retrieve arguments from registers to work around different calling conventions
 =================
@@ -493,7 +471,7 @@ static void DoSyscall(void)
 			if(opStackOfs < 1)
 				Com_Error(ERR_DROP, "VM_BLOCK_COPY failed due to corrupted opStack");
 			
-			DoBlockCopy(opStackBase[opStackOfs - 1], opStackBase[opStackOfs], arg);
+			VM_BlockCopy(opStackBase[(opStackOfs - 1)], opStackBase[opStackOfs], arg);
 		break;
 		default:
 			Com_Error(ERR_DROP, "Unknown VM operation %d", syscallNum);

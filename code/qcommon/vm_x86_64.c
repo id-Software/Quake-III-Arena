@@ -381,21 +381,6 @@ static void* getentrypoint(vm_t* vm)
        return vm->codeBase;
 }
 
-static void CROSSCALL block_copy_vm(unsigned dest, unsigned src, unsigned count)
-{
-	unsigned dataMask = currentVM->dataMask;
-
-	if ((dest & dataMask) != dest
-	|| (src & dataMask) != src
-	|| ((dest+count) & dataMask) != dest + count
-	|| ((src+count) & dataMask) != src + count)
-	{
-		Com_Error(ERR_DROP, "OP_BLOCK_COPY out of range!");
-	}
-
-	memcpy(currentVM->dataBase+dest, currentVM->dataBase+src, count);
-}
-
 static void CROSSCALL eop(void)
 {
 	Com_Error(ERR_DROP, "End of program reached without return!");
@@ -782,7 +767,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 				emit("movl 4(%%r9, %%rbx, 4), %%edi");  // 1st argument dest
 				emit("movl 8(%%r9, %%rbx, 4), %%rsi");  // 2nd argument src
 				emit("movl $%d, %%edx", iarg); // 3rd argument count
-				emit("movq $%"PRIu64", %%rax", (intptr_t) block_copy_vm);
+				emit("movq $%"PRIu64", %%rax", (intptr_t) VM_BlockCopy);
 				emit("callq *%%rax");
 				emit("pop %%rsi");
 				emit("addq %%rsi, %%rsp");
