@@ -1885,6 +1885,7 @@ Q3CGOBJ_ = \
   $(B)/baseq3/cgame/cg_info.o \
   $(B)/baseq3/cgame/cg_localents.o \
   $(B)/baseq3/cgame/cg_marks.o \
+  $(B)/baseq3/cgame/cg_particles.o \ 
   $(B)/baseq3/cgame/cg_players.o \
   $(B)/baseq3/cgame/cg_playerstate.o \
   $(B)/baseq3/cgame/cg_predict.o \
@@ -1928,6 +1929,7 @@ MPCGOBJ_ = \
   $(B)/missionpack/cgame/cg_info.o \
   $(B)/missionpack/cgame/cg_localents.o \
   $(B)/missionpack/cgame/cg_marks.o \
+  $(B)/missionpack/cgame/cg_particles.o \
   $(B)/missionpack/cgame/cg_players.o \
   $(B)/missionpack/cgame/cg_playerstate.o \
   $(B)/missionpack/cgame/cg_predict.o \

@@ -59,6 +59,9 @@
     <ClCompile Include="..\..\code\cgame\cg_newDraw.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\cgame\cg_particles.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\cgame\cg_players.c">
       <Filter>Source Files</Filter>
     </ClCompile>
