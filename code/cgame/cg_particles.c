@@ -1293,7 +1293,7 @@ void CG_ParticleExplosion (char *animStr, vec3_t origin, vec3_t vel, int duratio
 	p->time = cg.time;
 #ifdef WOLF_PARTICLES
 	p->alpha = 1.0;
-#lese
+#else
 	p->alpha = 0.5;
 #endif
 	p->alphavel = 0;
