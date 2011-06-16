@@ -1,10 +1,16 @@
 #!/bin/sh
 
-export CC=i586-mingw32msvc-gcc
-export WINDRES=i586-mingw32msvc-windres
-export PLATFORM=mingw32
-if [ !$ARCH ]
+if [ !$CC ]
 then
-export ARCH=x86
+  export CC=i586-mingw32msvc-gcc
 fi
+
+if [ !$WINDRES ]
+then
+  export WINDRES=i586-mingw32msvc-windres
+fi
+
+export PLATFORM=mingw32
+export ARCH=x86
+
 exec make $*

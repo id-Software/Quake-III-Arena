@@ -141,7 +141,8 @@ static float	shaderAnimSTRatio[MAX_SHADER_ANIMS] = {
 #ifdef WOLF_PARTICLES
 #define		MAX_PARTICLES	1024 * 8
 #else
-#define		WOLF_PARTICLES 1024
+#define		MAX_PARTICLES 1024
+#endif
 
 cparticle_t	*active_particles, *free_particles;
 cparticle_t	particles[MAX_PARTICLES];

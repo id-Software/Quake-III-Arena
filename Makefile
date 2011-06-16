@@ -1885,7 +1885,7 @@ Q3CGOBJ_ = \
   $(B)/baseq3/cgame/cg_info.o \
   $(B)/baseq3/cgame/cg_localents.o \
   $(B)/baseq3/cgame/cg_marks.o \
-  $(B)/baseq3/cgame/cg_particles.o \ 
+  $(B)/baseq3/cgame/cg_particles.o \
   $(B)/baseq3/cgame/cg_players.o \
   $(B)/baseq3/cgame/cg_playerstate.o \
   $(B)/baseq3/cgame/cg_predict.o \
