@@ -11,6 +11,6 @@ then
 fi
 
 export PLATFORM=mingw32
-export ARCH=x86_64
+export ARCH=x64
 
 exec make $*
