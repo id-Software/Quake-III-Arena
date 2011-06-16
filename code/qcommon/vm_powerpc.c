@@ -389,23 +389,6 @@ VM_AsmCall( int callSyscallInvNum, int callProgramStack )
 	return ret;
 }
 
-static void
-VM_BlockCopy( unsigned int dest, unsigned int src, unsigned int count )
-{
-	unsigned dataMask = currentVM->dataMask;
-
-	if ( (dest & dataMask) != dest
-		|| (src & dataMask) != src
-		|| ((dest+count) & dataMask) != dest + count
-		|| ((src+count) & dataMask) != src + count)
-	{
-		DIE( "OP_BLOCK_COPY out of range!");
-	}
-
-	memcpy( currentVM->dataBase+dest, currentVM->dataBase+src, count );
-}
-
-
 /*
  * code-block descriptors
  */
