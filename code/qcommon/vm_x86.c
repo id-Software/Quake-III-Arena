@@ -413,8 +413,7 @@ static void DoSyscall(void)
 
 	vm_t *savedVM;
 
-#ifdef _MSC_VER
-  #ifndef idx64
+#if defined(_MSC_VER) && !idx64
 	__asm
 	{
 		mov	dword ptr syscallNum, eax
@@ -423,7 +422,6 @@ static void DoSyscall(void)
 		mov	dword ptr opStackBase, edi
 		mov	dword ptr arg, ecx
 	}
-  #endif
 #else
 	__asm__ volatile(
 		""
