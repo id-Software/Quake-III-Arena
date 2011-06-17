@@ -2408,10 +2408,10 @@ void Com_GameRestart(int checksumFeed, qboolean clientRestart)
 		// Clean out any user and VM created cvars
 		Cvar_Restart(qtrue);
 		Com_ExecuteCfg();
-		
-		// Restart sound subsystem so old handles are flushed
-		CL_Snd_Restart();
 
+		// shut down sound system before restart
+		CL_Snd_Shutdown();
+		
 		if(clientRestart)
 			CL_StartHunkUsers(qfalse);
 		

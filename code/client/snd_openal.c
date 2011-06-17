@@ -148,7 +148,7 @@ static qboolean alBuffersInitialised = qfalse;
 // Sound effect storage, data structures
 #define MAX_SFX 4096
 static alSfx_t knownSfx[MAX_SFX];
-static int numSfx = 0;
+static sfxHandle_t numSfx = 0;
 
 static sfxHandle_t default_sfx;
 
@@ -332,7 +332,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 	if (!cache)
 	{
 		// Don't create AL cache
-		Z_Free(data);
+		Hunk_FreeTempMemory(data);
 		return;
 	}
 
@@ -344,7 +344,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 	if((error = qalGetError()) != AL_NO_ERROR)
 	{
 		S_AL_BufferUseDefault(sfx);
-		Z_Free(data);
+		Hunk_FreeTempMemory(data);
 		Com_Printf( S_COLOR_RED "ERROR: Can't create a sound buffer for %s - %s\n",
 				curSfx->filename, S_AL_ErrorMsg(error));
 		return;
@@ -369,7 +369,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 		if( !S_AL_BufferEvict( ) )
 		{
 			S_AL_BufferUseDefault(sfx);
-			Z_Free(data);
+			Hunk_FreeTempMemory(data);
 			Com_Printf( S_COLOR_RED "ERROR: Out of memory loading %s\n", curSfx->filename);
 			return;
 		}
@@ -383,7 +383,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 	if(error != AL_NO_ERROR)
 	{
 		S_AL_BufferUseDefault(sfx);
-		Z_Free(data);
+		Hunk_FreeTempMemory(data);
 		Com_Printf( S_COLOR_RED "ERROR: Can't fill sound buffer for %s - %s\n",
 				curSfx->filename, S_AL_ErrorMsg(error));
 		return;
@@ -392,7 +392,7 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 	curSfx->info = info;
 	
 	// Free the memory
-	Z_Free(data);
+	Hunk_FreeTempMemory(data);
 
 	// Woo!
 	curSfx->inMemory = qtrue;
@@ -460,7 +460,7 @@ void S_AL_BufferShutdown( void )
 		S_AL_BufferUnload(i);
 
 	// Clear the tables
-	memset(knownSfx, 0, sizeof(knownSfx));
+	numSfx = 0;
 
 	// All undone
 	alBuffersInitialised = qfalse;
@@ -2205,6 +2205,8 @@ S_AL_BeginRegistration
 static
 void S_AL_BeginRegistration( void )
 {
+	if(!numSfx)
+		S_AL_BufferInit();
 }
 
 /*
