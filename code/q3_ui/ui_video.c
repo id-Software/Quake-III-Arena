@@ -428,6 +428,10 @@ static void GraphicsOptions_GetAspectRatios( void )
 		
 		// calculate resolution's aspect ratio
 		x = strchr( resolutions[r], 'x' ) + 1;
+		
+		if(!x)
+                	continue;
+		
 		Q_strncpyz( str, resolutions[r], x-resolutions[r] );
 		w = atoi( str );
 		h = atoi( x );
