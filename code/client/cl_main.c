@@ -231,7 +231,7 @@ void CL_Voip_f( void )
 	const char *cmd = Cmd_Argv(1);
 	const char *reason = NULL;
 
-	if (cls.state != CA_ACTIVE)
+	if (clc.state != CA_ACTIVE)
 		reason = "Not connected to a server";
 	else if (!clc.speexInitialized)
 		reason = "Speex not initialized";
@@ -329,7 +329,7 @@ void CL_CaptureVoip(void)
 
 	if (cl_voipSend->modified) {
 		qboolean dontCapture = qfalse;
-		if (cls.state != CA_ACTIVE)
+		if (clc.state != CA_ACTIVE)
 			dontCapture = qtrue;  // not connected to a server.
 		else if (!cl_connectedToVoipServer)
 			dontCapture = qtrue;  // server doesn't support VoIP.
@@ -623,7 +623,7 @@ void CL_Record_f( void ) {
 		return;
 	}
 
-	if ( cls.state != CA_ACTIVE ) {
+	if ( clc.state != CA_ACTIVE ) {
 		Com_Printf ("You must be in a level to record.\n");
 		return;
 	}
@@ -1009,12 +1009,12 @@ void CL_PlayDemo_f( void ) {
 
 	Con_Close();
 
-	cls.state = CA_CONNECTED;
+	clc.state = CA_CONNECTED;
 	clc.demoplaying = qtrue;
-	Q_strncpyz( cls.servername, Cmd_Argv(1), sizeof( cls.servername ) );
+	Q_strncpyz( clc.servername, Cmd_Argv(1), sizeof( clc.servername ) );
 
 	// read demo messages until connected
-	while ( cls.state >= CA_CONNECTED && cls.state < CA_PRIMED ) {
+	while ( clc.state >= CA_CONNECTED && clc.state < CA_PRIMED ) {
 		CL_ReadDemoMessage();
 	}
 	// don't get the first snapshot this frame, to prevent the long
@@ -1068,7 +1068,13 @@ void CL_NextDemo( void ) {
 CL_ShutdownAll
 =====================
 */
-void CL_ShutdownAll(void) {
+void CL_ShutdownAll(qboolean shutdownRef)
+{
+	if(CL_VideoRecording())
+		CL_CloseAVI();
+
+	if(clc.demorecording)
+		CL_StopRecord_f();
 
 #ifdef USE_CURL
 	CL_cURL_Shutdown();
@@ -1081,9 +1087,10 @@ void CL_ShutdownAll(void) {
 	CL_ShutdownUI();
 
 	// shutdown the renderer
-	if ( re.Shutdown ) {
-		re.Shutdown( qfalse );		// don't destroy window or context
-	}
+	if(shutdownRef)
+		CL_ShutdownRef();
+	else if(re.Shutdown)
+		re.Shutdown(qfalse);		// don't destroy window or context
 
 	cls.uiStarted = qfalse;
 	cls.cgameStarted = qfalse;
@@ -1093,17 +1100,15 @@ void CL_ShutdownAll(void) {
 
 /*
 =================
-CL_FlushMemory
+CL_ClearMemory
 
-Called by CL_MapLoading, CL_Connect_f, CL_PlayDemo_f, and CL_ParseGamestate the only
-ways a client gets into a game
-Also called by Com_Error
+Called by Com_GameRestart
 =================
 */
-void CL_FlushMemory( void ) {
-
+void CL_ClearMemory(qboolean shutdownRef)
+{
 	// shutdown all the client stuff
-	CL_ShutdownAll();
+	CL_ShutdownAll(shutdownRef);
 
 	// if not running a server clear the whole hunk
 	if ( !com_sv_running->integer ) {
@@ -1116,8 +1121,21 @@ void CL_FlushMemory( void ) {
 		// clear all the client data on the hunk
 		Hunk_ClearToMark();
 	}
+}
 
-	CL_StartHunkUsers( qfalse );
+/*
+=================
+CL_FlushMemory
+
+Called by CL_MapLoading, CL_Connect_f, CL_PlayDemo_f, and CL_ParseGamestate the only
+ways a client gets into a game
+Also called by Com_Error
+=================
+*/
+void CL_FlushMemory(void)
+{
+	CL_ClearMemory(qfalse);
+	CL_StartHunkUsers(qfalse);
 }
 
 /*
@@ -1131,7 +1149,7 @@ memory on the hunk from cgame, ui, and renderer
 */
 void CL_MapLoading( void ) {
 	if ( com_dedicated->integer ) {
-		cls.state = CA_DISCONNECTED;
+		clc.state = CA_DISCONNECTED;
 		Key_SetCatcher( KEYCATCH_CONSOLE );
 		return;
 	}
@@ -1144,8 +1162,8 @@ void CL_MapLoading( void ) {
 	Key_SetCatcher( 0 );
 
 	// if we are already connected to the local host, stay connected
-	if ( cls.state >= CA_CONNECTED && !Q_stricmp( cls.servername, "localhost" ) ) {
-		cls.state = CA_CONNECTED;		// so the connect screen is drawn
+	if ( clc.state >= CA_CONNECTED && !Q_stricmp( clc.servername, "localhost" ) ) {
+		clc.state = CA_CONNECTED;		// so the connect screen is drawn
 		Com_Memset( cls.updateInfoString, 0, sizeof( cls.updateInfoString ) );
 		Com_Memset( clc.serverMessage, 0, sizeof( clc.serverMessage ) );
 		Com_Memset( &cl.gameState, 0, sizeof( cl.gameState ) );
@@ -1155,12 +1173,12 @@ void CL_MapLoading( void ) {
 		// clear nextmap so the cinematic shutdown doesn't execute it
 		Cvar_Set( "nextmap", "" );
 		CL_Disconnect( qtrue );
-		Q_strncpyz( cls.servername, "localhost", sizeof(cls.servername) );
-		cls.state = CA_CHALLENGING;		// so the connect screen is drawn
+		Q_strncpyz( clc.servername, "localhost", sizeof(clc.servername) );
+		clc.state = CA_CHALLENGING;		// so the connect screen is drawn
 		Key_SetCatcher( 0 );
 		SCR_UpdateScreen();
 		clc.connectTime = -RETRANSMIT_TIMEOUT;
-		NET_StringToAdr( cls.servername, &clc.serverAddress, NA_UNSPEC);
+		NET_StringToAdr( clc.servername, &clc.serverAddress, NA_UNSPEC);
 		// we don't need a challenge on the localhost
 
 		CL_CheckForResend();
@@ -1203,6 +1221,17 @@ static void CL_UpdateGUID( const char *prefix, int prefix_len )
 			prefix, prefix_len ) );
 }
 
+static void CL_OldGame(void)
+{
+	char *curGame = Cvar_VariableString("fs_game");
+	
+	if(cls.oldGame[0] || *curGame)
+	{
+		// change back to previous fs_game
+		Cvar_Set("fs_game", cls.oldGame);
+		Com_GameRestart(0, qtrue);
+	}
+}
 
 /*
 =====================
@@ -1277,7 +1306,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	// send a disconnect message to the server
 	// send it a few times in case one is dropped
-	if ( cls.state >= CA_CONNECTED ) {
+	if ( clc.state >= CA_CONNECTED ) {
 		CL_AddReliableCommand("disconnect", qtrue);
 		CL_WritePacket();
 		CL_WritePacket();
@@ -1292,7 +1321,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// wipe the client connection
 	Com_Memset( &clc, 0, sizeof( clc ) );
 
-	cls.state = CA_DISCONNECTED;
+	clc.state = CA_DISCONNECTED;
 
 	// allow cheats locally
 	Cvar_Set( "sv_cheats", "1" );
@@ -1311,7 +1340,9 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		SCR_UpdateScreen( );
 		CL_CloseAVI( );
 	}
+
 	CL_UpdateGUID( NULL, 0 );
+	CL_OldGame();
 }
 
 
@@ -1334,7 +1365,7 @@ void CL_ForwardCommandToServer( const char *string ) {
 		return;
 	}
 
-	if ( clc.demoplaying || cls.state < CA_CONNECTED || cmd[0] == '+' ) {
+	if ( clc.demoplaying || clc.state < CA_CONNECTED || cmd[0] == '+' ) {
 		Com_Printf ("Unknown command \"%s" S_COLOR_WHITE "\"\n", cmd);
 		return;
 	}
@@ -1477,7 +1508,7 @@ CL_ForwardToServer_f
 ==================
 */
 void CL_ForwardToServer_f( void ) {
-	if ( cls.state != CA_ACTIVE || clc.demoplaying ) {
+	if ( clc.state != CA_ACTIVE || clc.demoplaying ) {
 		Com_Printf ("Not connected to a server.\n");
 		return;
 	}
@@ -1496,7 +1527,7 @@ CL_Disconnect_f
 void CL_Disconnect_f( void ) {
 	SCR_StopCinematic();
 	Cvar_Set("ui_singlePlayerActive", "0");
-	if ( cls.state != CA_DISCONNECTED && cls.state != CA_CINEMATIC ) {
+	if ( clc.state != CA_DISCONNECTED && clc.state != CA_CINEMATIC ) {
 		Com_Error (ERR_DISCONNECT, "Disconnected from server");
 	}
 }
@@ -1509,12 +1540,12 @@ CL_Reconnect_f
 ================
 */
 void CL_Reconnect_f( void ) {
-	if ( !strlen( cls.servername ) || !strcmp( cls.servername, "localhost" ) ) {
+	if ( !strlen( clc.servername ) || !strcmp( clc.servername, "localhost" ) ) {
 		Com_Printf( "Can't reconnect to localhost.\n" );
 		return;
 	}
 	Cvar_Set("ui_singlePlayerActive", "0");
-	Cbuf_AddText( va("connect %s\n", cls.servername ) );
+	Cbuf_AddText( va("connect %s\n", clc.servername ) );
 }
 
 /*
@@ -1568,11 +1599,11 @@ void CL_Connect_f( void ) {
 	CL_Disconnect( qtrue );
 	Con_Close();
 
-	Q_strncpyz( cls.servername, server, sizeof(cls.servername) );
+	Q_strncpyz( clc.servername, server, sizeof(clc.servername) );
 
-	if (!NET_StringToAdr(cls.servername, &clc.serverAddress, family) ) {
+	if (!NET_StringToAdr(clc.servername, &clc.serverAddress, family) ) {
 		Com_Printf ("Bad server address\n");
-		cls.state = CA_DISCONNECTED;
+		clc.state = CA_DISCONNECTED;
 		return;
 	}
 	if (clc.serverAddress.port == 0) {
@@ -1581,7 +1612,7 @@ void CL_Connect_f( void ) {
 
 	serverString = NET_AdrToStringwPort(clc.serverAddress);
 
-	Com_Printf( "%s resolved to %s\n", cls.servername, serverString);
+	Com_Printf( "%s resolved to %s\n", clc.servername, serverString);
 
 	if( cl_guidServerUniq->integer )
 		CL_UpdateGUID( serverString, strlen( serverString ) );
@@ -1591,10 +1622,10 @@ void CL_Connect_f( void ) {
 	// if we aren't playing on a lan, we need to authenticate
 	// with the cd key
 	if(NET_IsLocalAddress(clc.serverAddress))
-		cls.state = CA_CHALLENGING;
+		clc.state = CA_CHALLENGING;
 	else
 	{
-		cls.state = CA_CONNECTING;
+		clc.state = CA_CONNECTING;
 		
 		// Set a client challenge number that ideally is mirrored back by the server.
 		clc.challenge = ((rand() << 16) ^ rand()) ^ Com_Milliseconds();
@@ -1659,7 +1690,7 @@ void CL_Rcon_f( void ) {
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=543
 	Q_strcat (message, MAX_RCON_MESSAGE, Cmd_Cmd()+5);
 
-	if ( cls.state >= CA_CONNECTED ) {
+	if ( clc.state >= CA_CONNECTED ) {
 		to = clc.netchan.remoteAddress;
 	} else {
 		if (!strlen(rconAddress->string)) {
@@ -1723,49 +1754,55 @@ void CL_Vid_Restart_f( void ) {
 
 	// don't let them loop during the restart
 	S_StopAllSounds();
-	// shutdown the UI
-	CL_ShutdownUI();
-	// shutdown the CGame
-	CL_ShutdownCGame();
-	// shutdown the renderer and clear the renderer interface
-	CL_ShutdownRef();
-	// client is no longer pure untill new checksums are sent
-	CL_ResetPureClientAtServer();
-	// clear pak references
-	FS_ClearPakReferences( FS_UI_REF | FS_CGAME_REF );
-	// reinitialize the filesystem if the game directory or checksum has changed
-	FS_ConditionalRestart( clc.checksumFeed );
 
-	cls.rendererStarted = qfalse;
-	cls.uiStarted = qfalse;
-	cls.cgameStarted = qfalse;
-	cls.soundRegistered = qfalse;
+	if(!FS_ConditionalRestart(clc.checksumFeed, qtrue))
+	{
+		// if not running a server clear the whole hunk
+		if(com_sv_running->integer)
+		{
+			// clear all the client data on the hunk
+			Hunk_ClearToMark();
+		}
+		else
+		{
+			// clear the whole hunk
+			Hunk_Clear();
+		}
+	
+		// shutdown the UI
+		CL_ShutdownUI();
+		// shutdown the CGame
+		CL_ShutdownCGame();
+		// shutdown the renderer and clear the renderer interface
+		CL_ShutdownRef();
+		// client is no longer pure untill new checksums are sent
+		CL_ResetPureClientAtServer();
+		// clear pak references
+		FS_ClearPakReferences( FS_UI_REF | FS_CGAME_REF );
+		// reinitialize the filesystem if the game directory or checksum has changed
 
-	// unpause so the cgame definately gets a snapshot and renders a frame
-	Cvar_Set( "cl_paused", "0" );
+		cls.rendererStarted = qfalse;
+		cls.uiStarted = qfalse;
+		cls.cgameStarted = qfalse;
+		cls.soundRegistered = qfalse;
 
-	// if not running a server clear the whole hunk
-	if ( !com_sv_running->integer ) {
-		// clear the whole hunk
-		Hunk_Clear();
-	}
-	else {
-		// clear all the client data on the hunk
-		Hunk_ClearToMark();
-	}
+		// unpause so the cgame definately gets a snapshot and renders a frame
+		Cvar_Set("cl_paused", "0");
 
-	// initialize the renderer interface
-	CL_InitRef();
+		// initialize the renderer interface
+		CL_InitRef();
 
-	// startup all the client stuff
-	CL_StartHunkUsers( qfalse );
+		// startup all the client stuff
+		CL_StartHunkUsers(qfalse);
 
-	// start the cgame if connected
-	if ( cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
-		cls.cgameStarted = qtrue;
-		CL_InitCGame();
-		// send pure checksums
-		CL_SendPureChecksums();
+		// start the cgame if connected
+		if(clc.state > CA_CONNECTED && clc.state != CA_CINEMATIC)
+		{
+			cls.cgameStarted = qtrue;
+			CL_InitCGame();
+			// send pure checksums
+			CL_SendPureChecksums();
+		}
 	}
 }
 
@@ -1826,7 +1863,7 @@ void CL_Configstrings_f( void ) {
 	int		i;
 	int		ofs;
 
-	if ( cls.state != CA_ACTIVE ) {
+	if ( clc.state != CA_ACTIVE ) {
 		Com_Printf( "Not connected to a server.\n");
 		return;
 	}
@@ -1847,8 +1884,8 @@ CL_Clientinfo_f
 */
 void CL_Clientinfo_f( void ) {
 	Com_Printf( "--------- Client Information ---------\n" );
-	Com_Printf( "state: %i\n", cls.state );
-	Com_Printf( "Server: %s\n", cls.servername );
+	Com_Printf( "state: %i\n", clc.state );
+	Com_Printf( "Server: %s\n", clc.servername );
 	Com_Printf ("User info settings:\n");
 	Info_Print( Cvar_InfoString( CVAR_USERINFO ) );
 	Com_Printf( "--------------------------------------\n" );
@@ -1898,14 +1935,14 @@ void CL_DownloadsComplete( void ) {
 	}
 
 	// let the client game init and load data
-	cls.state = CA_LOADING;
+	clc.state = CA_LOADING;
 
 	// Pump the loop, this may change gamestate!
 	Com_EventLoop();
 
 	// if the gamestate was changed by calling Com_EventLoop
 	// then we loaded everything already and we don't want to do it again.
-	if ( cls.state != CA_LOADING ) {
+	if ( clc.state != CA_LOADING ) {
 		return;
 	}
 
@@ -2091,7 +2128,7 @@ void CL_InitDownloads(void) {
 
 		if ( *clc.downloadList ) {
 			// if autodownloading is not enabled on the server
-			cls.state = CA_CONNECTED;
+			clc.state = CA_CONNECTED;
 
 			*clc.downloadTempName = *clc.downloadName = 0;
 			Cvar_Set( "cl_downloadName", "" );
@@ -2123,7 +2160,7 @@ void CL_CheckForResend( void ) {
 	}
 
 	// resend if we haven't gotten a reply yet
-	if ( cls.state != CA_CONNECTING && cls.state != CA_CHALLENGING ) {
+	if ( clc.state != CA_CONNECTING && clc.state != CA_CHALLENGING ) {
 		return;
 	}
 
@@ -2135,7 +2172,7 @@ void CL_CheckForResend( void ) {
 	clc.connectPacketCount++;
 
 
-	switch ( cls.state ) {
+	switch ( clc.state ) {
 	case CA_CONNECTING:
 		// requesting a challenge .. IPv6 users always get in as authorize server supports no ipv6.
 #ifndef STANDALONE
@@ -2177,7 +2214,7 @@ void CL_CheckForResend( void ) {
 		break;
 
 	default:
-		Com_Error( ERR_FATAL, "CL_CheckForResend: bad cls.state" );
+		Com_Error( ERR_FATAL, "CL_CheckForResend: bad clc.state" );
 	}
 }
 
@@ -2192,7 +2229,7 @@ to the client so it doesn't have to wait for the full timeout period.
 ===================
 */
 void CL_DisconnectPacket( netadr_t from ) {
-	if ( cls.state < CA_AUTHORIZING ) {
+	if ( clc.state < CA_AUTHORIZING ) {
 		return;
 	}
 
@@ -2410,7 +2447,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	// challenge from the server we are connecting to
 	if (!Q_stricmp(c, "challengeResponse"))
 	{
-		if (cls.state != CA_CONNECTING)
+		if (clc.state != CA_CONNECTING)
 		{
 			Com_DPrintf("Unwanted challenge response received.  Ignored.\n");
 			return;
@@ -2433,7 +2470,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 		// start sending challenge response instead of challenge request packets
 		clc.challenge = atoi(Cmd_Argv(1));
-		cls.state = CA_CHALLENGING;
+		clc.state = CA_CHALLENGING;
 		clc.connectPacketCount = 0;
 		clc.connectTime = -99999;
 
@@ -2446,11 +2483,11 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 	// server connection
 	if ( !Q_stricmp(c, "connectResponse") ) {
-		if ( cls.state >= CA_CONNECTED ) {
+		if ( clc.state >= CA_CONNECTED ) {
 			Com_Printf ("Dup connect received.  Ignored.\n");
 			return;
 		}
-		if ( cls.state != CA_CHALLENGING ) {
+		if ( clc.state != CA_CHALLENGING ) {
 			Com_Printf ("connectResponse packet while not connecting. Ignored.\n");
 			return;
 		}
@@ -2459,7 +2496,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 			return;
 		}
 		Netchan_Setup (NS_CLIENT, &clc.netchan, from, Cvar_VariableValue( "net_qport" ) );
-		cls.state = CA_CONNECTED;
+		clc.state = CA_CONNECTED;
 		clc.lastPacketSentTime = -9999;		// send first packet immediately
 		return;
 	}
@@ -2542,7 +2579,7 @@ void CL_PacketEvent( netadr_t from, msg_t *msg ) {
 		return;
 	}
 
-	if ( cls.state < CA_CONNECTED ) {
+	if ( clc.state < CA_CONNECTED ) {
 		return;		// can't be a valid sequenced packet
 	}
 
@@ -2596,7 +2633,7 @@ void CL_CheckTimeout( void ) {
 	// check timeout
 	//
 	if ( ( !CL_CheckPaused() || !sv_paused->integer ) 
-		&& cls.state >= CA_CONNECTED && cls.state != CA_CINEMATIC
+		&& clc.state >= CA_CONNECTED && clc.state != CA_CINEMATIC
 	    && cls.realtime - clc.lastPacketTime > cl_timeout->value*1000) {
 		if (++cl.timeoutcount > 5) {	// timeoutcount saves debugger
 			Com_Printf ("\nServer connection timed out.\n");
@@ -2635,7 +2672,7 @@ CL_CheckUserinfo
 */
 void CL_CheckUserinfo( void ) {
 	// don't add reliable commands when not yet connected
-	if(cls.state < CA_CONNECTED)
+	if(clc.state < CA_CONNECTED)
 		return;
 
 	// don't overflow the reliable command buffer when paused
@@ -2666,7 +2703,7 @@ void CL_Frame ( int msec ) {
 	if(clc.downloadCURLM) {
 		CL_cURL_PerformDownload();
 		// we can't process frames normally when in disconnected
-		// download mode since the ui vm expects cls.state to be
+		// download mode since the ui vm expects clc.state to be
 		// CA_CONNECTED
 		if(clc.cURLDisconnected) {
 			cls.realFrametime = msec;
@@ -2685,7 +2722,7 @@ void CL_Frame ( int msec ) {
 		// bring up the cd error dialog if needed
 		cls.cddialog = qfalse;
 		VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_NEED_CD );
-	} else	if ( cls.state == CA_DISCONNECTED && !( Key_GetCatcher( ) & KEYCATCH_UI )
+	} else	if ( clc.state == CA_DISCONNECTED && !( Key_GetCatcher( ) & KEYCATCH_UI )
 		&& !com_sv_running->integer && uivm ) {
 		// if disconnected, bring up the menu
 		S_StopAllSounds();
@@ -2695,7 +2732,7 @@ void CL_Frame ( int msec ) {
 	// if recording an avi, lock to a fixed fps
 	if ( CL_VideoRecording( ) && cl_aviFrameRate->integer && msec) {
 		// save the current screen
-		if ( cls.state == CA_ACTIVE || cl_forceavidemo->integer) {
+		if ( clc.state == CA_ACTIVE || cl_forceavidemo->integer) {
 			CL_TakeVideoFrame( );
 
 			// fixed time for next frame'
@@ -2707,7 +2744,7 @@ void CL_Frame ( int msec ) {
 	}
 	
 	if( cl_autoRecordDemo->integer ) {
-		if( cls.state == CA_ACTIVE && !clc.demorecording && !clc.demoplaying ) {
+		if( clc.state == CA_ACTIVE && !clc.demorecording && !clc.demoplaying ) {
 			// If not recording a demo, and we should be, start one
 			qtime_t	now;
 			char		*nowString;
@@ -2724,7 +2761,7 @@ void CL_Frame ( int msec ) {
 					now.tm_min,
 					now.tm_sec );
 
-			Q_strncpyz( serverName, cls.servername, MAX_OSPATH );
+			Q_strncpyz( serverName, clc.servername, MAX_OSPATH );
 			// Replace the ":" in the address as it is not a valid
 			// file name character
 			p = strstr( serverName, ":" );
@@ -2738,7 +2775,7 @@ void CL_Frame ( int msec ) {
 			Cbuf_ExecuteText( EXEC_NOW,
 					va( "record %s-%s-%s", nowString, serverName, mapName ) );
 		}
-		else if( cls.state != CA_ACTIVE && clc.demorecording ) {
+		else if( clc.state != CA_ACTIVE && clc.demorecording ) {
 			// Recording, but not CA_ACTIVE, so stop recording
 			CL_StopRecord_f( );
 		}
@@ -3119,9 +3156,11 @@ void CL_Init( void ) {
 
 	Con_Init ();
 
-	CL_ClearState ();
-
-	cls.state = CA_DISCONNECTED;	// no longer CA_UNINITIALIZED
+	if(!com_fullyInitialized)
+	{
+		CL_ClearState();
+		clc.state = CA_DISCONNECTED;	// no longer CA_UNINITIALIZED
+	}
 
 	cls.realtime = 0;
 
@@ -3334,7 +3373,8 @@ CL_Shutdown
 
 ===============
 */
-void CL_Shutdown( char *finalmsg ) {
+void CL_Shutdown(char *finalmsg, qboolean disconnect)
+{
 	static qboolean recursive = qfalse;
 	
 	// check whether the client is running at all.
@@ -3349,16 +3389,15 @@ void CL_Shutdown( char *finalmsg ) {
 	}
 	recursive = qtrue;
 
-	CL_Disconnect( qtrue );
-
-	CL_Snd_Shutdown();
-	CL_ShutdownRef();
+	if(disconnect)
+		CL_Disconnect(qtrue);
 	
-	CL_ShutdownUI();
+	CL_Snd_Shutdown();
+	CL_ClearMemory(qtrue);
 
 	Cmd_RemoveCommand ("cmd");
 	Cmd_RemoveCommand ("configstrings");
-	Cmd_RemoveCommand ("userinfo");
+	Cmd_RemoveCommand ("clientinfo");
 	Cmd_RemoveCommand ("snd_restart");
 	Cmd_RemoveCommand ("vid_restart");
 	Cmd_RemoveCommand ("disconnect");
@@ -3367,15 +3406,22 @@ void CL_Shutdown( char *finalmsg ) {
 	Cmd_RemoveCommand ("cinematic");
 	Cmd_RemoveCommand ("stoprecord");
 	Cmd_RemoveCommand ("connect");
+	Cmd_RemoveCommand ("reconnect");
 	Cmd_RemoveCommand ("localservers");
 	Cmd_RemoveCommand ("globalservers");
 	Cmd_RemoveCommand ("rcon");
 	Cmd_RemoveCommand ("ping");
 	Cmd_RemoveCommand ("serverstatus");
 	Cmd_RemoveCommand ("showip");
+	Cmd_RemoveCommand ("fs_openedList");
+	Cmd_RemoveCommand ("fs_referencedList");
 	Cmd_RemoveCommand ("model");
 	Cmd_RemoveCommand ("video");
 	Cmd_RemoveCommand ("stopvideo");
+	Cmd_RemoveCommand ("minimize");
+
+	CL_ShutdownInput();
+	Con_Shutdown();
 
 	Cvar_Set( "cl_running", "0" );
 
@@ -4168,7 +4214,7 @@ void CL_ServerStatus_f(void) {
 
 	if ( argc != 2 && argc != 3 )
 	{
-		if (cls.state != CA_ACTIVE || clc.demoplaying)
+		if (clc.state != CA_ACTIVE || clc.demoplaying)
 		{
 			Com_Printf ("Not connected to a server.\n");
 			Com_Printf( "usage: serverstatus [-4|-6] server\n");

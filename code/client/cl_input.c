@@ -640,7 +640,7 @@ void CL_CreateNewCommands( void ) {
 	int			cmdNum;
 
 	// no need to create usercmds until we have a gamestate
-	if ( cls.state < CA_PRIMED ) {
+	if ( clc.state < CA_PRIMED ) {
 		return;
 	}
 
@@ -677,7 +677,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	int		delta;
 
 	// don't send anything if playing back a demo
-	if ( clc.demoplaying || cls.state == CA_CINEMATIC ) {
+	if ( clc.demoplaying || clc.state == CA_CINEMATIC ) {
 		return qfalse;
 	}
 
@@ -689,8 +689,8 @@ qboolean CL_ReadyToSendPacket( void ) {
 
 	// if we don't have a valid gamestate yet, only send
 	// one packet a second
-	if ( cls.state != CA_ACTIVE && 
-		cls.state != CA_PRIMED && 
+	if ( clc.state != CA_ACTIVE && 
+		clc.state != CA_PRIMED && 
 		!*clc.downloadTempName &&
 		cls.realtime - clc.lastPacketSentTime < 1000 ) {
 		return qfalse;
@@ -754,7 +754,7 @@ void CL_WritePacket( void ) {
 	int			count, key;
 
 	// don't send anything if playing back a demo
-	if ( clc.demoplaying || cls.state == CA_CINEMATIC ) {
+	if ( clc.demoplaying || clc.state == CA_CINEMATIC ) {
 		return;
 	}
 
@@ -949,7 +949,7 @@ Called every frame to builds and sends a command packet to the server.
 */
 void CL_SendCmd( void ) {
 	// don't send any message if not connected
-	if ( cls.state < CA_CONNECTED ) {
+	if ( clc.state < CA_CONNECTED ) {
 		return;
 	}
 
@@ -1046,4 +1046,78 @@ void CL_InitInput( void ) {
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", 0);
 	cl_debugMove = Cvar_Get ("cl_debugMove", "0", 0);
+}
+
+/*
+============
+CL_ShutdownInput
+============
+*/
+void CL_ShutdownInput(void)
+{
+	Cmd_RemoveCommand("centerview");
+
+	Cmd_RemoveCommand("+moveup");
+	Cmd_RemoveCommand("-moveup");
+	Cmd_RemoveCommand("+movedown");
+	Cmd_RemoveCommand("-movedown");
+	Cmd_RemoveCommand("+left");
+	Cmd_RemoveCommand("-left");
+	Cmd_RemoveCommand("+right");
+	Cmd_RemoveCommand("-right");
+	Cmd_RemoveCommand("+forward");
+	Cmd_RemoveCommand("-forward");
+	Cmd_RemoveCommand("+back");
+	Cmd_RemoveCommand("-back");
+	Cmd_RemoveCommand("+lookup");
+	Cmd_RemoveCommand("-lookup");
+	Cmd_RemoveCommand("+lookdown");
+	Cmd_RemoveCommand("-lookdown");
+	Cmd_RemoveCommand("+strafe");
+	Cmd_RemoveCommand("-strafe");
+	Cmd_RemoveCommand("+moveleft");
+	Cmd_RemoveCommand("-moveleft");
+	Cmd_RemoveCommand("+moveright");
+	Cmd_RemoveCommand("-moveright");
+	Cmd_RemoveCommand("+speed");
+	Cmd_RemoveCommand("-speed");
+	Cmd_RemoveCommand("+attack");
+	Cmd_RemoveCommand("-attack");
+	Cmd_RemoveCommand("+button0");
+	Cmd_RemoveCommand("-button0");
+	Cmd_RemoveCommand("+button1");
+	Cmd_RemoveCommand("-button1");
+	Cmd_RemoveCommand("+button2");
+	Cmd_RemoveCommand("-button2");
+	Cmd_RemoveCommand("+button3");
+	Cmd_RemoveCommand("-button3");
+	Cmd_RemoveCommand("+button4");
+	Cmd_RemoveCommand("-button4");
+	Cmd_RemoveCommand("+button5");
+	Cmd_RemoveCommand("-button5");
+	Cmd_RemoveCommand("+button6");
+	Cmd_RemoveCommand("-button6");
+	Cmd_RemoveCommand("+button7");
+	Cmd_RemoveCommand("-button7");
+	Cmd_RemoveCommand("+button8");
+	Cmd_RemoveCommand("-button8");
+	Cmd_RemoveCommand("+button9");
+	Cmd_RemoveCommand("-button9");
+	Cmd_RemoveCommand("+button10");
+	Cmd_RemoveCommand("-button10");
+	Cmd_RemoveCommand("+button11");
+	Cmd_RemoveCommand("-button11");
+	Cmd_RemoveCommand("+button12");
+	Cmd_RemoveCommand("-button12");
+	Cmd_RemoveCommand("+button13");
+	Cmd_RemoveCommand("-button13");
+	Cmd_RemoveCommand("+button14");
+	Cmd_RemoveCommand("-button14");
+	Cmd_RemoveCommand("+mlook");
+	Cmd_RemoveCommand("-mlook");
+
+#ifdef USE_VOIP
+	Cmd_RemoveCommand("+voiprecord");
+	Cmd_RemoveCommand("-voiprecord");
+#endif
 }

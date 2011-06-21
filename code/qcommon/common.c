@@ -338,7 +338,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		longjmp (abortframe, -1);
 	} else {
 		VM_Forced_Unload_Start();
-		CL_Shutdown (va("Client fatal crashed: %s", com_errorMessage));
+		CL_Shutdown (va("Client fatal crashed: %s", com_errorMessage), qtrue);
 		SV_Shutdown (va("Server fatal crashed: %s", com_errorMessage));
 		VM_Forced_Unload_Done();
 	}
@@ -363,7 +363,7 @@ void Com_Quit_f( void ) {
 	char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
 		SV_Shutdown (p[0] ? p : "Server quit");
-		CL_Shutdown (p[0] ? p : "Client quit");
+		CL_Shutdown (p[0] ? p : "Client quit", qtrue);
 		Com_Shutdown ();
 		FS_Shutdown(qtrue);
 	}
@@ -2386,22 +2386,26 @@ Change to a new mod properly with cleaning up cvars before switching.
 ==================
 */
 
-void Com_GameRestart(int checksumFeed, qboolean clientRestart)
+void Com_GameRestart(int checksumFeed, qboolean disconnect)
 {
 	// make sure no recursion can be triggered
 	if(!com_gameRestarting && com_fullyInitialized)
 	{
+		int clWasRunning = com_cl_running->integer;
+		
 		com_gameRestarting = qtrue;
 		
-		if(clientRestart)
-		{
-			CL_Disconnect(qfalse);
-			CL_ShutdownAll();
-		}
-
 		// Kill server if we have one
 		if(com_sv_running->integer)
 			SV_Shutdown("Game directory changed");
+
+		if(clWasRunning)
+		{
+			if(disconnect)
+				CL_Disconnect(qfalse);
+				
+			CL_Shutdown("Game directory changed", disconnect);
+		}
 
 		FS_Restart(checksumFeed);
 	
@@ -2409,11 +2413,19 @@ void Com_GameRestart(int checksumFeed, qboolean clientRestart)
 		Cvar_Restart(qtrue);
 		Com_ExecuteCfg();
 
-		// shut down sound system before restart
-		CL_Snd_Shutdown();
-		
-		if(clientRestart)
+		if(disconnect)
+		{
+			// We don't want to change any network settings if gamedir
+			// change was triggered by a connect to server because the
+			// new network settings might make the connection fail.
+			NET_Restart_f();
+		}
+
+		if(clWasRunning)
+		{
+			CL_Init();
 			CL_StartHunkUsers(qfalse);
+		}
 		
 		com_gameRestarting = qfalse;
 	}
@@ -2761,6 +2773,7 @@ void Com_Init( char *commandLine ) {
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
+	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
 
 	com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
 

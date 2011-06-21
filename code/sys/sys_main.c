@@ -351,7 +351,7 @@ void Sys_Error( const char *error, ... )
 	Q_vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 
-	CL_Shutdown( string );
+	CL_Shutdown(string, qtrue);
 	Sys_ErrorDialog( string );
 
 	Sys_Exit( 3 );
@@ -498,9 +498,9 @@ void Sys_SigHandler( int signal )
 	{
 		signalcaught = qtrue;
 #ifndef DEDICATED
-		CL_Shutdown( va( "Received signal %d", signal ) );
+		CL_Shutdown(va("Received signal %d", signal), qtrue);
 #endif
-		SV_Shutdown( va( "Received signal %d", signal ) );
+		SV_Shutdown(va("Received signal %d", signal) );
 	}
 
 	if( signal == SIGTERM || signal == SIGINT )
