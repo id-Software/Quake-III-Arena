@@ -995,6 +995,9 @@ UI_ConsoleCommand
 qboolean UI_ConsoleCommand( int realTime ) {
 	char	*cmd;
 
+	uis.frametime = realTime - uis.realtime;
+	uis.realtime = realTime;
+
 	cmd = UI_Argv( 0 );
 
 	// ensure minimum menu data is available
