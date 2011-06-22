@@ -44,7 +44,7 @@ IFDEF idx64
 ; qsnapvector using SSE
 
   qsnapvectorsse PROC
-    sub rsp, 4
+    sub rsp, 8
 	stmxcsr [rsp]				; save SSE control word
 	ldmxcsr ssecw				; set to round nearest
 
@@ -58,19 +58,19 @@ IFDEF idx64
 	pop rdi
 
 	ldmxcsr [rsp]				; restore sse control word to old value
-	add rsp, 4
+	add rsp, 8
 	ret
   qsnapvectorsse ENDP
 
 ELSE
 
   qsnapvectorsse PROC
-	sub esp, 4
+	sub esp, 8
 	stmxcsr [esp]				; save SSE control word
 	ldmxcsr ssecw				; set to round nearest
 
     push edi
-	mov edi, dword ptr 12[esp]	; maskmovdqu uses edi as implicit memory operand
+	mov edi, dword ptr 16[esp]	; maskmovdqu uses edi as implicit memory operand
 	movaps xmm1, ssemask		; initialize the mask register for maskmovdqu
     movups xmm0, [edi]			; here is stored our vector. Read 4 values in one go
 	cvtps2dq xmm0, xmm0			; convert 4 single fp to int
@@ -79,7 +79,7 @@ ELSE
 	pop edi
 
 	ldmxcsr [esp]				; restore sse control word to old value
-	add esp, 4
+	add esp, 8
 	ret
   qsnapvectorsse ENDP
 

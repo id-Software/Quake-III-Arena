@@ -91,10 +91,10 @@ cvar_t  *com_homepath;
 cvar_t	*com_busyWait;
 
 #if idx64
-  void (*Q_VMftol)(void);
+	int (*Q_VMftol)(void);
 #elif id386
 	long (QDECL *Q_ftol)(float f);
-	void (QDECL *Q_VMftol)(void);
+	int (QDECL *Q_VMftol)(void);
 	void (QDECL *Q_SnapVector)(vec3_t vec);
 #endif
 

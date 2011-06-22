@@ -423,23 +423,23 @@ int Q_isnan(float x);
 
 #if idx64
   extern long qftolsse(float f);
-  extern void qvmftolsse(void);
+  extern int qvmftolsse(void);
   extern void qsnapvectorsse(vec3_t vec);
 
   #define Q_ftol qftolsse
   #define Q_SnapVector qsnapvectorsse
 
-  extern void (*Q_VMftol)(void);
+  extern int (*Q_VMftol)(void);
 #elif id386
   extern long QDECL qftolx87(float f);
   extern long QDECL qftolsse(float f);
-  extern void QDECL qvmftolx87(void);
-  extern void QDECL qvmftolsse(void);
+  extern int QDECL qvmftolx87(void);
+  extern int QDECL qvmftolsse(void);
   extern void QDECL qsnapvectorx87(vec3_t vec);
   extern void QDECL qsnapvectorsse(vec3_t vec);
 
   extern long (QDECL *Q_ftol)(float f);
-  extern void (QDECL *Q_VMftol)(void);
+  extern int (QDECL *Q_VMftol)(void);
   extern void (QDECL *Q_SnapVector)(vec3_t vec);
 #else
   #define Q_ftol(f) lrintf((f))

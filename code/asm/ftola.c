@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 long qftolsse(float f)
 {
-  register long retval;
+  long retval;
   
   __asm__ volatile
   (
@@ -40,21 +40,25 @@ long qftolsse(float f)
   return retval;
 }
 
-void qvmftolsse(void)
+int qvmftolsse(void)
 {
+  int retval;
+  
   __asm__ volatile
   (
     "movss (" EDI ", " EBX ", 4), %%xmm0\n"
-    "cvttss2si %%xmm0, " EAX "\n"
-    :
+    "cvttss2si %%xmm0, %0\n"
+    : "=r" (retval)
     :
     : "%xmm0"
   );
+  
+  return retval;
 }
 
 long qftolx87(float f)
 {
-  register long retval;
+  long retval;
 
   __asm__ volatile
   (
@@ -68,13 +72,17 @@ long qftolx87(float f)
   return retval;
 }
 
-void qvmftolx87(void)
+int qvmftolx87(void)
 {
+  int retval;
+
   __asm__ volatile
   (
     "flds (" EDI ", " EBX ", 4)\n"
     "fistpl (" EDI ", " EBX ", 4)\n"
-    "mov (" EDI ", " EBX ", 4), " EAX "\n"
-    :
+    "mov (" EDI ", " EBX ", 4), %0\n"
+    : "=r" (retval)
   );
+  
+  return retval;
 }
