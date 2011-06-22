@@ -504,6 +504,9 @@ void	Cvar_Update( vmCvar_t *vmCvar );
 void 	Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
+cvar_t	*Cvar_Set2(const char *var_name, const char *value, qboolean force);
+// same as Cvar_Set, but allows more control over setting of cvar
+
 void	Cvar_SetSafe( const char *var_name, const char *value );
 // sometimes we set variables from an untrusted source: fail if flags & CVAR_PROTECTED
 

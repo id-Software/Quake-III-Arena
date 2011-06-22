@@ -475,7 +475,7 @@ void Com_StartupVariable( const char *match ) {
 			if(Cvar_Flags(s) == CVAR_NONEXISTENT)
 				Cvar_Get(s, Cmd_Argv(2), CVAR_USER_CREATED);
 			else
-				Cvar_Set(s, Cmd_Argv(2));
+				Cvar_Set2(s, Cmd_Argv(2), qfalse);
 		}
 	}
 }
@@ -2391,9 +2391,10 @@ void Com_GameRestart(int checksumFeed, qboolean disconnect)
 	// make sure no recursion can be triggered
 	if(!com_gameRestarting && com_fullyInitialized)
 	{
-		int clWasRunning = com_cl_running->integer;
+		int clWasRunning;
 		
 		com_gameRestarting = qtrue;
+		clWasRunning = com_cl_running->integer;
 		
 		// Kill server if we have one
 		if(com_sv_running->integer)
@@ -2441,7 +2442,16 @@ Expose possibility to change current running mod to the user
 
 void Com_GameRestart_f(void)
 {
-	Cvar_Set("fs_game", Cmd_Argv(1));
+	if(!FS_FilenameCompare(Cmd_Argv(1), com_basegame->string))
+	{
+		// This is the standard base game. Servers and clients should
+		// use "" and not the standard basegame name because this messes
+		// up pak file negotiation and lots of other stuff
+		
+		Cvar_Set("fs_game", "");
+	}
+	else
+		Cvar_Set("fs_game", Cmd_Argv(1));
 
 	Com_GameRestart(0, qtrue);
 }
@@ -2703,7 +2713,6 @@ void Com_Init( char *commandLine ) {
 	if(!com_basegame->string[0])
 		Cvar_ForceReset("com_basegame");
 
-	// Com_StartupVariable(
 	FS_InitFilesystem ();
 
 	Com_InitJournaling();

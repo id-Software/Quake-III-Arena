@@ -3392,8 +3392,8 @@ void CL_Shutdown(char *finalmsg, qboolean disconnect)
 	if(disconnect)
 		CL_Disconnect(qtrue);
 	
-	CL_Snd_Shutdown();
 	CL_ClearMemory(qtrue);
+	CL_Snd_Shutdown();
 
 	Cmd_RemoveCommand ("cmd");
 	Cmd_RemoveCommand ("configstrings");
