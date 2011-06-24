@@ -418,27 +418,29 @@ GraphicsOptions_GetAspectRatios
 static void GraphicsOptions_GetAspectRatios( void )
 {
 	int i, r;
-	
+
 	// build ratio list from resolutions
 	for( r = 0; resolutions[r]; r++ )
 	{
 		int w, h;
 		char *x;
 		char str[ sizeof(ratioBuf[0]) ];
-		
-		// calculate resolution's aspect ratio
-		x = strchr( resolutions[r], 'x' );
-		
-		if(!x)
-                	continue;
 
-		x++;
-		
+		// calculate resolution's aspect ratio
+		x = strchr( resolutions[r], 'x' ) + 1;
 		Q_strncpyz( str, resolutions[r], x-resolutions[r] );
 		w = atoi( str );
 		h = atoi( x );
 		Com_sprintf( str, sizeof(str), "%.2f:1", (float)w / (float)h );
-		
+
+		// rename common ratios ("1.33:1" -> "4:3")
+		for( i = 0; knownRatios[i][0]; i++ ) {
+			if( !Q_stricmp( str, knownRatios[i][0] ) ) {
+				Q_strncpyz( str, knownRatios[i][1], sizeof( str ) );
+				break;
+			}
+		}
+
 		// add ratio to list if it is new
 		// establish res/ratio relationship
 		for( i = 0; ratioBuf[i][0]; i++ )
@@ -451,23 +453,11 @@ static void GraphicsOptions_GetAspectRatios( void )
 			Q_strncpyz( ratioBuf[i], str, sizeof(ratioBuf[i]) );
 			ratioToRes[i] = r;
 		}
-		resToRatio[r] = i;
+
+		ratios[r] = ratioBuf[r]; 
+		resToRatio[r] = i; 
 	}
-	
-	// prepare itemlist pointer array
-	// rename common ratios ("1.33:1" -> "4:3")
-	for( r = 0; ratioBuf[r][0]; r++ )
-	{
-		for( i = 0; knownRatios[i][0]; i++ )
-		{
-			if( !Q_stricmp( ratioBuf[r], knownRatios[i][0] ) )
-			{
-				Q_strncpyz( ratioBuf[r], knownRatios[i][1], sizeof(ratioBuf[r]) );
-				break;
-			}
-		}
-		ratios[r] = ratioBuf[r];
-	}
+
 	ratios[r] = NULL;
 }
 
