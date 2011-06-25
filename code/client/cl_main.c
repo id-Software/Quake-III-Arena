@@ -3864,17 +3864,14 @@ void CL_GlobalServers_f( void ) {
 		
 		if(v4enabled)
 		{
-			Com_sprintf(command, sizeof(command), "getserversExt %s %s ipv6",
+			Com_sprintf(command, sizeof(command), "getserversExt %s %s",
 				cl_gamename->string, Cmd_Argv(2));
 		}
 		else
 		{
-			Com_sprintf(command, sizeof(command), "getserversExt %s %s",
+			Com_sprintf(command, sizeof(command), "getserversExt %s %s ipv6",
 				cl_gamename->string, Cmd_Argv(2));
 		}
-
-		// TODO: test if we only have an IPv6 connection. If it's the case,
-		//       request IPv6 servers only by appending " ipv6" to the command
 	}
 	else
 		Com_sprintf(command, sizeof(command), "getservers %s", Cmd_Argv(2));
