@@ -362,8 +362,14 @@ void Com_Quit_f( void ) {
 	// don't try to shutdown if we are in a recursive error
 	char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
+		// Some VMs might execute "quit" command directly,
+		// which would trigger an unload of active VM error.
+		// Sys_Quit will kill this process anyways, so
+		// a corrupt call stack makes no difference
+		VM_Forced_Unload_Start();
 		SV_Shutdown (p[0] ? p : "Server quit");
 		CL_Shutdown (p[0] ? p : "Client quit", qtrue);
+		VM_Forced_Unload_Done();
 		Com_Shutdown ();
 		FS_Shutdown(qtrue);
 	}
