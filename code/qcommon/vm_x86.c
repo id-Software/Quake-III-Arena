@@ -1714,7 +1714,7 @@ This function is called directly by the generated code
 
 int VM_CallCompiled(vm_t *vm, int *args)
 {
-	byte	stack[OPSTACK_SIZE * 4 + 15];
+	byte	stack[OPSTACK_SIZE + 15];
 	void	*entryPoint;
 	int		programCounter;
 	int		programStack, stackOnEntry;
