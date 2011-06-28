@@ -1253,20 +1253,17 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	gun.renderfx = parent->renderfx;
 
 	// set custom shading for railgun refire rate
-	if ( ps || cent->currentState.clientNum == cg.predictedPlayerState.clientNum ) {
-		if ( cg.predictedPlayerState.weapon == WP_RAILGUN 
-			&& cg.predictedPlayerState.weaponstate == WEAPON_FIRING ) {
-			float	f;
-
-			f = (float)cg.predictedPlayerState.weaponTime / 1500;
-			gun.shaderRGBA[1] = 0;
-			gun.shaderRGBA[0] = 
-			gun.shaderRGBA[2] = 255 * ( 1.0 - f );
-		} else {
-			gun.shaderRGBA[0] = 255;
-			gun.shaderRGBA[1] = 255;
-			gun.shaderRGBA[2] = 255;
+	if( weaponNum == WP_RAILGUN ) {
+		clientInfo_t *ci = &cgs.clientinfo[cent->currentState.clientNum];
+		if( cent->pe.railFireTime + 1500 > cg.time ) {
+			int scale = 255 * ( cg.time - cent->pe.railFireTime ) / 1500;
+			gun.shaderRGBA[0] = ( ci->c1RGBA[0] * scale ) >> 8;
+			gun.shaderRGBA[1] = ( ci->c1RGBA[1] * scale ) >> 8;
+			gun.shaderRGBA[2] = ( ci->c1RGBA[2] * scale ) >> 8;
 			gun.shaderRGBA[3] = 255;
+		}
+		else {
+			Byte4Copy( ci->c1RGBA, gun.shaderRGBA );
 		}
 	}
 
@@ -1743,6 +1740,10 @@ void CG_FireWeapon( centity_t *cent ) {
 		}
 	}
 
+	if( ent->weapon == WP_RAILGUN ) {
+		cent->pe.railFireTime = cg.time;
+	}
+
 	// play quad sound if needed
 	if ( cent->currentState.powerups & ( 1 << PW_QUAD ) ) {
 		trap_S_StartSound (NULL, cent->currentState.number, CHAN_ITEM, cgs.media.quadSound );
@@ -1978,7 +1979,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 		float	*color;
 
 		// colorize with client color
-		color = cgs.clientinfo[clientNum].color2;
+		color = cgs.clientinfo[clientNum].color1;
 		CG_ImpactMark( mark, origin, dir, random()*360, color[0],color[1], color[2],1, alphaFade, radius, qfalse );
 	} else {
 		CG_ImpactMark( mark, origin, dir, random()*360, 1,1,1,1, alphaFade, radius, qfalse );

@@ -900,8 +900,18 @@ void CG_NewClientInfo( int clientNum ) {
 	v = Info_ValueForKey( configstring, "c1" );
 	CG_ColorFromString( v, newInfo.color1 );
 
+	newInfo.c1RGBA[0] = 255 * newInfo.color1[0];
+	newInfo.c1RGBA[1] = 255 * newInfo.color1[1];
+	newInfo.c1RGBA[2] = 255 * newInfo.color1[2];
+	newInfo.c1RGBA[3] = 255;
+
 	v = Info_ValueForKey( configstring, "c2" );
 	CG_ColorFromString( v, newInfo.color2 );
+
+	newInfo.c2RGBA[0] = 255 * newInfo.color2[0];
+	newInfo.c2RGBA[1] = 255 * newInfo.color2[1];
+	newInfo.c2RGBA[2] = 255 * newInfo.color2[2];
+	newInfo.c2RGBA[3] = 255;
 
 	// bot skill
 	v = Info_ValueForKey( configstring, "skill" );
