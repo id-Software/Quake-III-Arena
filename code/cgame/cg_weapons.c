@@ -1294,7 +1294,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	if(ps && cg_drawGun.integer == 2)
 		VectorMA(gun.origin, -lerped.origin[1], parent->axis[1], gun.origin);
 	else if(!ps || cg_drawGun.integer != 3)
-       	VectorMA(gun.origin, lerped.origin[1], parent->axis[1], gun.origin);
+	       	VectorMA(gun.origin, lerped.origin[1], parent->axis[1], gun.origin);
 
 	VectorMA(gun.origin, lerped.origin[2], parent->axis[2], gun.origin);
 
