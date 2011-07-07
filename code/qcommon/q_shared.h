@@ -206,7 +206,7 @@ typedef int		clipHandle_t;
 #define	MIN_QINT			(-MAX_QINT-1)
 
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
-
+#define STR_LEN(x)			(ARRAY_LEN(x) - 1)
 
 // angle indexes
 #define	PITCH				0		// up / down
@@ -750,7 +750,7 @@ void Parse2DMatrix (char **buf_p, int y, int x, float *m);
 void Parse3DMatrix (char **buf_p, int z, int y, int x, float *m);
 int Com_HexStrToInt( const char *str );
 
-void	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
+int QDECL Com_sprintf (char *dest, int size, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
 
 char *Com_SkipTokens( char *s, int numTokens, char *sep );
 char *Com_SkipCharset( char *s, char *sep );
