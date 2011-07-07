@@ -819,6 +819,12 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 	if ( pi->currentWeapon != WP_NONE ) {
 		memset( &gun, 0, sizeof(gun) );
 		gun.hModel = pi->weaponModel;
+		if( pi->currentWeapon == WP_RAILGUN ) {
+			Byte4Copy( pi->c1RGBA, gun.shaderRGBA );
+		}
+		else {
+			Byte4Copy( colorWhite, gun.shaderRGBA );
+		}
 		VectorCopy( origin, gun.lightingOrigin );
 		UI_PositionEntityOnTag( &gun, &torso, pi->torsoModel, "tag_weapon");
 		gun.renderfx = renderfx;
@@ -857,6 +863,12 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 		if ( pi->flashModel ) {
 			memset( &flash, 0, sizeof(flash) );
 			flash.hModel = pi->flashModel;
+			if( pi->currentWeapon == WP_RAILGUN ) {
+				Byte4Copy( pi->c1RGBA, flash.shaderRGBA );
+			}
+			else {
+				Byte4Copy( colorWhite, flash.shaderRGBA );
+			}
 			VectorCopy( origin, flash.lightingOrigin );
 			UI_PositionEntityOnTag( &flash, &gun, pi->weaponModel, "tag_flash");
 			flash.renderfx = renderfx;
@@ -1140,8 +1152,35 @@ UI_PlayerInfo_SetInfo
 void UI_PlayerInfo_SetInfo( playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t viewAngles, vec3_t moveAngles, weapon_t weaponNumber, qboolean chat ) {
 	int			currentAnim;
 	weapon_t	weaponNum;
+	int			c;
 
 	pi->chat = chat;
+
+	c = (int)trap_Cvar_VariableValue( "color1" );
+ 
+	VectorClear( pi->color1 );
+
+	if( c < 1 || c > 7 ) {
+		VectorSet( pi->color1, 1, 1, 1 );
+	}
+	else {
+		if( c & 1 ) {
+			pi->color1[2] = 1.0f;
+		}
+
+		if( c & 2 ) {
+			pi->color1[1] = 1.0f;
+		}
+
+		if( c & 4 ) {
+			pi->color1[0] = 1.0f;
+		}
+	}
+
+	pi->c1RGBA[0] = 255 * pi->color1[0];
+	pi->c1RGBA[1] = 255 * pi->color1[1];
+	pi->c1RGBA[2] = 255 * pi->color1[2];
+	pi->c1RGBA[3] = 255;
 
 	// view angles
 	VectorCopy( viewAngles, pi->viewAngles );

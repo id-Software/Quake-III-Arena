@@ -798,6 +798,8 @@ static sfxHandle_t SpinControl_Key( menulist_s *s, int key )
 	sound = 0;
 	switch (key)
 	{
+		case K_KP_RIGHTARROW:
+		case K_RIGHTARROW:
 		case K_MOUSE1:
 			s->curvalue++;
 			if (s->curvalue >= s->numitems)
@@ -807,24 +809,10 @@ static sfxHandle_t SpinControl_Key( menulist_s *s, int key )
 		
 		case K_KP_LEFTARROW:
 		case K_LEFTARROW:
-			if (s->curvalue > 0)
-			{
-				s->curvalue--;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
-			break;
-
-		case K_KP_RIGHTARROW:
-		case K_RIGHTARROW:
-			if (s->curvalue < s->numitems-1)
-			{
-				s->curvalue++;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
+			s->curvalue--;
+			if (s->curvalue < 0)
+				s->curvalue = s->numitems-1;
+			sound = menu_move_sound;
 			break;
 	}
 
