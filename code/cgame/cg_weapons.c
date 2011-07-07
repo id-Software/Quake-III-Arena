@@ -2000,6 +2000,8 @@ void CG_MissileHitPlayer( int weapon, vec3_t origin, vec3_t dir, int entityNum )
 	switch ( weapon ) {
 	case WP_GRENADE_LAUNCHER:
 	case WP_ROCKET_LAUNCHER:
+	case WP_PLASMAGUN:
+	case WP_BFG:
 #ifdef MISSIONPACK
 	case WP_NAILGUN:
 	case WP_CHAINGUN:
