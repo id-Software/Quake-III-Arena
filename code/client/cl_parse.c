@@ -560,7 +560,7 @@ A download message has been received from the server
 void CL_ParseDownload ( msg_t *msg ) {
 	int		size;
 	unsigned char data[MAX_MSGLEN];
-	int block;
+	uint16_t block;
 
 	if (!*clc.downloadTempName) {
 		Com_Printf("Server sending download, but no download was requested\n");
@@ -571,7 +571,7 @@ void CL_ParseDownload ( msg_t *msg ) {
 	// read the data
 	block = MSG_ReadShort ( msg );
 
-	if ( !block )
+	if(!block && !clc.downloadBlock)
 	{
 		// block zero is special, contains file size
 		clc.downloadSize = MSG_ReadLong ( msg );
@@ -594,8 +594,9 @@ void CL_ParseDownload ( msg_t *msg ) {
 	
 	MSG_ReadData(msg, data, size);
 
-	if (clc.downloadBlock != block) {
-		Com_DPrintf( "CL_ParseDownload: Expected block %d, got %d\n", clc.downloadBlock, block);
+	if((clc.downloadBlock & 0xFFFF) != block)
+	{
+		Com_DPrintf( "CL_ParseDownload: Expected block %d, got %d\n", (clc.downloadBlock & 0xFFFF), block);
 		return;
 	}
 
