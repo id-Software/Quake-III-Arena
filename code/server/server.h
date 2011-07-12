@@ -345,7 +345,7 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink (client_t *cl, usercmd_t *cmd);
 
-void SV_WriteDownloadToClient( client_t *cl , msg_t *msg );
+int SV_WriteDownloadToClient(client_t *cl , msg_t *msg);
 
 #ifdef USE_VOIP
 void SV_WriteVoipToClient( client_t *cl, msg_t *msg );
