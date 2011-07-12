@@ -643,7 +643,13 @@ void SVC_Info( netadr_t from ) {
 	// to prevent timed spoofed reply packets that add ghost servers
 	Info_SetValueForKey( infostring, "challenge", Cmd_Argv(1) );
 
-	Info_SetValueForKey( infostring, "protocol", va("%i", com_protocol->integer) );
+#ifdef LEGACY_PROTOCOL
+	if(com_legacyprotocol->integer > 0)
+		Info_SetValueForKey(infostring, "protocol", va("%i", com_legacyprotocol->integer));
+	else
+#endif
+		Info_SetValueForKey(infostring, "protocol", va("%i", com_protocol->integer));
+
 	Info_SetValueForKey( infostring, "hostname", sv_hostname->string );
 	Info_SetValueForKey( infostring, "mapname", sv_mapname->string );
 	Info_SetValueForKey( infostring, "clients", va("%i", count) );
@@ -868,10 +874,6 @@ void SV_PacketEvent( netadr_t from, msg_t *msg ) {
 		}
 		return;
 	}
-	
-	// if we received a sequenced packet from an address we don't recognize,
-	// send an out of band disconnect packet to it
-	NET_OutOfBandPrint( NS_SERVER, from, "disconnect" );
 }
 
 

@@ -59,10 +59,23 @@ void SV_GetChallenge(netadr_t from)
 	int		clientChallenge;
 	challenge_t	*challenge;
 	qboolean wasfound = qfalse;
+	char *gameName;
 
 	// ignore if we are in single player
 	if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive")) {
 		return;
+	}
+
+	gameName = Cmd_Argv(2);
+	if(gameName && *gameName)
+	{
+		// reject client if the heartbeat string sent by the client doesn't match ours
+		if(strcmp(gameName, sv_heartbeat->string))
+		{
+ 			NET_OutOfBandPrint(NS_SERVER, from, "print\nGame mismatch: This is a %s server\n",
+ 				sv_heartbeat->string);
+			return;
+		}
 	}
 
 	oldest = 0;
@@ -302,6 +315,9 @@ void SV_DirectConnect( netadr_t from ) {
 	intptr_t		denied;
 	int			count;
 	char		*ip;
+#ifdef LEGACY_PROTOCOL
+	qboolean	compat = qfalse;
+#endif
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
 	
@@ -314,11 +330,21 @@ void SV_DirectConnect( netadr_t from ) {
 
 	Q_strncpyz( userinfo, Cmd_Argv(1), sizeof(userinfo) );
 
-	version = atoi( Info_ValueForKey( userinfo, "protocol" ) );
-	if ( version != com_protocol->integer ) {
-		NET_OutOfBandPrint( NS_SERVER, from, "print\nServer uses protocol version %i (yours is %i).\n", com_protocol->integer, version );
-		Com_DPrintf ("    rejected connect from version %i\n", version);
-		return;
+	version = atoi(Info_ValueForKey(userinfo, "protocol"));
+	
+#ifdef LEGACY_PROTOCOL
+	if(version > 0 && com_legacyprotocol->integer == version)
+		compat = qtrue;
+	else
+#endif
+	{
+		if(version != com_protocol->integer)
+		{
+			NET_OutOfBandPrint(NS_SERVER, from, "print\nServer uses protocol version %i "
+					   "(yours is %i).\n", com_protocol->integer, version);
+			Com_DPrintf("    rejected connect from version %i\n", version);
+			return;
+		}
 	}
 
 	challenge = atoi( Info_ValueForKey( userinfo, "challenge" ) );
@@ -500,7 +526,12 @@ gotnewcl:
 	newcl->challenge = challenge;
 
 	// save the address
-	Netchan_Setup (NS_SERVER, &newcl->netchan , from, qport);
+#ifdef LEGACY_PROTOCOL
+	newcl->compat = compat;
+	Netchan_Setup(NS_SERVER, &newcl->netchan, from, qport, challenge, compat);
+#else
+	Netchan_Setup(NS_SERVER, &newcl->netchan, from, qport, challenge, qfalse);
+#endif
 	// init the netchan queue
 	newcl->netchan_end_queue = &newcl->netchan_start_queue;
 
@@ -521,7 +552,7 @@ gotnewcl:
 	SV_UserinfoChanged( newcl );
 
 	// send the connect packet to the client
-	NET_OutOfBandPrint( NS_SERVER, from, "connectResponse" );
+	NET_OutOfBandPrint(NS_SERVER, from, "connectResponse %d", challenge);
 
 	Com_DPrintf( "Going from CS_FREE to CS_CONNECTED for %s\n", newcl->name );
 

@@ -185,6 +185,10 @@ New cvars
                                       standalone mode
   com_homepath                      - Specify name that is to be appended to the
                                       home path
+  com_legacyprotocol                - Specify protocol version number for
+                                      legacy Quake3 1.32c protocol, see
+                                      "Network protocols" section below
+                                      (startup only)
   com_maxfpsUnfocused               - Maximum frames per second when unfocused
   com_maxfpsMinimized               - Maximum frames per second when minimized
   com_busyWait                      - Will use a busy loop to wait for rendering
@@ -193,6 +197,10 @@ New cvars
                                       through which other processes can control
                                       the server while it is running. 
                                       Nonfunctional on Windows.
+  com_protocol                      - Specify protocol version number for
+                                      current ioquake3 protocol, see
+                                      "Network protocols" section below
+                                      (startup only)
 
   in_joystickNo                     - select which joystick to use
   in_availableJoysticks             - list of available Joysticks
@@ -217,9 +225,6 @@ New cvars
   net_mcast6addr                    - multicast address to use for scanning for
                                       ipv6 servers on the local network
   net_mcastiface                    - outgoing interface to use for scan
-
-  protocol                          - Allow changing protocol version
-                                      (startup only)
 
   r_allowResize                     - make window resizable (SDL only)
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
@@ -281,7 +286,8 @@ New commands
 
   which <filename/path>   - print out the path on disk to a loaded item
 
------------------------------------------------------------- Miscellaneous -----
+
+--------------------------------------------------------- README for Users -----
 
 Using shared libraries instead of qvm
   To force Q3 to use shared libraries instead of qvms run it with the following
@@ -308,175 +314,6 @@ Help! Ioquake3 won't give me an fps of X anymore when setting com_maxfps!
   really it can only wait for a multiple of 5ms, i.e. 5, 10, 15, 20... ms.
   In this case you can always revert back to the old behaviour by setting the
   cvar com_busyWait to 1.
-
-QuakeLive mouse acceleration (patch and this text written by TTimo from id)
-  I've been using an experimental mouse acceleration code for a while, and
-  decided to make it available to everyone. Don't be too worried if you don't
-  understand the explanations below, this is mostly intended for advanced
-  players:
-  To enable it, set cl_mouseAccelStyle 1 (0 is the default/legacy behavior)
-
-  New style is controlled with 3 cvars:
-
-  sensitivity
-  cl_mouseAccel
-  cl_mouseAccelOffset
-
-  The old code (cl_mouseAccelStyle 0) can be difficult to calibrate because if
-  you have a base sensitivity setup, as soon as you set a non zero acceleration
-  your base sensitivity at low speeds will change as well. The other problem
-  with style 0 is that you are stuck on a square (power of two) acceleration
-  curve.
-
-  The new code tries to solve both problems:
-
-  Once you setup your sensitivity to feel comfortable and accurate enough for
-  low mouse deltas with no acceleration (cl_mouseAccel 0), you can start
-  increasing cl_mouseAccel and tweaking cl_mouseAccelOffset to get the
-  amplification you want for high deltas with little effect on low mouse deltas.
-
-  cl_mouseAccel is a power value. Should be >= 1, 2 will be the same power curve
-  as style 0. The higher the value, the faster the amplification grows with the
-  mouse delta.
-
-  cl_mouseAccelOffset sets how much base mouse delta will be doubled by
-  acceleration. The closer to zero you bring it, the more acceleration will
-  happen at low speeds. This is also very useful if you are changing to a new
-  mouse with higher dpi, if you go from 500 to 1000 dpi, you can divide your
-  cl_mouseAccelOffset by two to keep the same overall 'feel' (you will likely
-  gain in precision when you do that, but that is not related to mouse
-  acceleration).
-
-  Mouse acceleration is tricky to configure, and when you do you'll have to
-  re-learn your aiming. But you will find that it's very much forth it in the
-  long run.
-
-  If you try the new acceleration code and start using it, I'd be very
-  interested by your feedback.
-
-64bit mods
-  If you wish to compile external mods as shared libraries on a 64bit platform,
-  and the mod source is derived from the id Q3 SDK, you will need to modify the
-  interface code a little. Open the files ending in _syscalls.c and change
-  every instance of int to intptr_t in the declaration of the syscall function
-  pointer and the dllEntry function. Also find the vmMain function for each
-  module (usually in cg_main.c g_main.c etc.) and similarly replace the return
-  value in the prototype with intptr_t (arg0, arg1, ...stay int).
-
-  Add the following code snippet to q_shared.h:
-
-    #ifdef Q3_VM
-    typedef int intptr_t;
-    #else
-    #include <stdint.h>
-    #endif
-
-  Note if you simply wish to run mods on a 64bit platform you do not need to
-  recompile anything since by default Q3 uses a virtual machine system.
-
-Creating mods compatible with Q3 1.32b
-  If you're using this package to create mods for the last official release of
-  Q3, it is necessary to pass the commandline option '-vq3' to your invocation
-  of q3asm. This is because by default q3asm outputs an updated qvm format that
-  is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
-  compiler.
-
-Creating standalone games
-  Have you finished the daunting task of removing all dependencies on the Q3
-  game data? You probably now want to give your users the opportunity to play
-  the game without owning a copy of Q3, which consequently means removing cd-key
-  and authentication server checks. In addition to being a straightforward Q3
-  client, ioquake3 also purports to be a reliable and stable code base on which
-  to base your game project.
-
-  However, before you start compiling your own version of ioquake3, you have to
-  ask yourself: Have we changed or will we need to change anything of importance
-  in the engine?
-
-  If your answer to this question is "no", it probably makes no sense to build
-  your own binaries. Instead, you can just use the pre-built binaries on the
-  website. Just make sure the game is called with:
-
-    +set com_basegame <yournewbase>
-    
-  in any links/scripts you install for your users to start the game. The
-  binary must not detect any original quake3 game pak files. If this
-  condition is met, the game will set com_standalone to 1 and is then running
-  in stand alone mode.
-  
-  If you want the engine to use a different directory in your homepath than
-  e.g. "Quake3" on Windows or ".q3a" on Linux, then set a new name at startup
-  by adding
-  
-    +set com_homepath <homedirname>
-  
-  to the command line. Then you can control which kind of messages to send to
-  the master server:
-  
-    +set sv_heartbeat <heartbeat> +set sv_flatline <flatline>
-    +set cl_gamename <gamename>
-  
-  The <heartbeat> and <flatline> message can be specific to your game. The
-  flatline message is sent to signal the master server that the game server is
-  quitting. Vanilla quake3 uses "QuakeArena-1" both for the heartbeat and
-  flatline messages.
-  The cl_gamename message is for dpmaster to specify which game the client
-  wants a server list for. It is only used in the new ipv6 based getServersExt
-  query.
-  
-  Example line:
-  
-    +set com_basegame basefoo +set com_homepath .foo
-    +set sv_heartbeat fooalive +set sv_flatline foodead
-    +set cl_gamename foo
-
-
-  If you really changed parts that would make vanilla ioquake3 incompatible with
-  your mod, we have included another way to conveniently build a stand-alone
-  binary. Just run make with the option BUILD_STANDALONE=1. Don't forget to edit
-  the PRODUCT_NAME and subsequent #defines in qcommon/q_shared.h with
-  information appropriate for your project.
-
-  While a lot of work has been put into ioquake3 that you can benefit from free
-  of charge, it does not mean that you have no obligations to fulfil. Please be
-  aware that as soon as you start distributing your game with an engine based on
-  our sources we expect you to fully comply with the requirements as stated in
-  the GPL. That includes making sources and modifications you made to the
-  ioquake3 engine as well as the game-code used to compile the .qvm files for
-  the game logic freely available to everyone. Furthermore, note that the "QIIIA
-  Game Source License" prohibits distribution of mods that are intended to
-  operate on a version of Q3 not sanctioned by id software:
-
-    "with this Agreement, ID grants to you the non-exclusive and limited right
-    to distribute copies of the Software ... for operation only with the full
-    version of the software game QUAKE III ARENA"
-
-  This means that if you're creating a standalone game, you cannot use said
-  license on any portion of the product. As the only other license this code has
-  been released under is the GPL, this is the only option.
-
-  This does NOT mean that you cannot market this game commercially. The GPL does
-  not prohibit commercial exploitation and all assets (e.g. textures, sounds,
-  maps) created by yourself are your property and can be sold like every other
-  game you find in stores.
-
-cl_guid Support
-  cl_guid is a cvar which is part of the client's USERINFO string.  Its value
-  is a 32 character string made up of [a-f] and [0-9] characters.  This
-  value is pseudo-unique for every player.  Id's Quake 3 Arena client also
-  sets cl_guid, but only if Punkbuster is enabled on the client.
-
-  If cl_guidServerUniq is non-zero (the default), then this value is also
-  pseudo-unique for each server a client connects to (based on IP:PORT of
-  the server).
-
-  The purpose of cl_guid is to add an identifier for each player on
-  a server.  This value can be reset by the client at any time so it's not
-  useful for blocking access.  However, it can have at least two uses in
-  your mod's game code:
-    1) improve logging to allow statistical tools to index players by more
-       than just name
-    2) granting some weak admin rights to players without requiring passwords
 
 Using HTTP/FTP Download Support (Server)
   You can enable redirected downloads on your server even if it's not
@@ -585,6 +422,207 @@ SDL Keyboard Differences
   then be used for binding, nor will they generate characters when entering
   text. Also, in addition to the nominated console keys, Shift-ESC is hard
   coded to always toggle the console.
+
+QuakeLive mouse acceleration (patch and this text written by TTimo from id)
+  I've been using an experimental mouse acceleration code for a while, and
+  decided to make it available to everyone. Don't be too worried if you don't
+  understand the explanations below, this is mostly intended for advanced
+  players:
+  To enable it, set cl_mouseAccelStyle 1 (0 is the default/legacy behavior)
+
+  New style is controlled with 3 cvars:
+
+  sensitivity
+  cl_mouseAccel
+  cl_mouseAccelOffset
+
+  The old code (cl_mouseAccelStyle 0) can be difficult to calibrate because if
+  you have a base sensitivity setup, as soon as you set a non zero acceleration
+  your base sensitivity at low speeds will change as well. The other problem
+  with style 0 is that you are stuck on a square (power of two) acceleration
+  curve.
+
+  The new code tries to solve both problems:
+
+  Once you setup your sensitivity to feel comfortable and accurate enough for
+  low mouse deltas with no acceleration (cl_mouseAccel 0), you can start
+  increasing cl_mouseAccel and tweaking cl_mouseAccelOffset to get the
+  amplification you want for high deltas with little effect on low mouse deltas.
+
+  cl_mouseAccel is a power value. Should be >= 1, 2 will be the same power curve
+  as style 0. The higher the value, the faster the amplification grows with the
+  mouse delta.
+
+  cl_mouseAccelOffset sets how much base mouse delta will be doubled by
+  acceleration. The closer to zero you bring it, the more acceleration will
+  happen at low speeds. This is also very useful if you are changing to a new
+  mouse with higher dpi, if you go from 500 to 1000 dpi, you can divide your
+  cl_mouseAccelOffset by two to keep the same overall 'feel' (you will likely
+  gain in precision when you do that, but that is not related to mouse
+  acceleration).
+
+  Mouse acceleration is tricky to configure, and when you do you'll have to
+  re-learn your aiming. But you will find that it's very much forth it in the
+  long run.
+
+  If you try the new acceleration code and start using it, I'd be very
+  interested by your feedback.
+
+
+---------------------------------------------------- README for Developers -----
+
+64bit mods
+  If you wish to compile external mods as shared libraries on a 64bit platform,
+  and the mod source is derived from the id Q3 SDK, you will need to modify the
+  interface code a little. Open the files ending in _syscalls.c and change
+  every instance of int to intptr_t in the declaration of the syscall function
+  pointer and the dllEntry function. Also find the vmMain function for each
+  module (usually in cg_main.c g_main.c etc.) and similarly replace the return
+  value in the prototype with intptr_t (arg0, arg1, ...stay int).
+
+  Add the following code snippet to q_shared.h:
+
+    #ifdef Q3_VM
+    typedef int intptr_t;
+    #else
+    #include <stdint.h>
+    #endif
+
+  Note if you simply wish to run mods on a 64bit platform you do not need to
+  recompile anything since by default Q3 uses a virtual machine system.
+
+Creating mods compatible with Q3 1.32b
+  If you're using this package to create mods for the last official release of
+  Q3, it is necessary to pass the commandline option '-vq3' to your invocation
+  of q3asm. This is because by default q3asm outputs an updated qvm format that
+  is necessary to fix a bug involving the optimizing pass of the x86 vm JIT
+  compiler.
+
+Creating standalone games
+  Have you finished the daunting task of removing all dependencies on the Q3
+  game data? You probably now want to give your users the opportunity to play
+  the game without owning a copy of Q3, which consequently means removing cd-key
+  and authentication server checks. In addition to being a straightforward Q3
+  client, ioquake3 also purports to be a reliable and stable code base on which
+  to base your game project.
+
+  However, before you start compiling your own version of ioquake3, you have to
+  ask yourself: Have we changed or will we need to change anything of importance
+  in the engine?
+
+  If your answer to this question is "no", it probably makes no sense to build
+  your own binaries. Instead, you can just use the pre-built binaries on the
+  website. Just make sure the game is called with:
+
+    +set com_basegame <yournewbase>
+    
+  in any links/scripts you install for your users to start the game. The
+  binary must not detect any original quake3 game pak files. If this
+  condition is met, the game will set com_standalone to 1 and is then running
+  in stand alone mode.
+  
+  If you want the engine to use a different directory in your homepath than
+  e.g. "Quake3" on Windows or ".q3a" on Linux, then set a new name at startup
+  by adding
+  
+    +set com_homepath <homedirname>
+  
+  to the command line. You can also control which kind of messages to send to
+  the master server:
+  
+    +set sv_heartbeat <heartbeat> +set sv_flatline <flatline>
+    +set cl_gamename <gamename>
+  
+  The <heartbeat> and <flatline> message can be specific to your game. The
+  flatline message is sent to signal the master server that the game server is
+  quitting. Vanilla quake3 uses "QuakeArena-1" both for the heartbeat and
+  flatline messages.
+  The cl_gamename message is for dpmaster to specify which game the client
+  wants a server list for. It is only used in the new ipv6 based getServersExt
+  query.
+  
+  Example line:
+  
+    +set com_basegame basefoo +set com_homepath .foo
+    +set sv_heartbeat fooalive +set sv_flatline foodead
+    +set cl_gamename foo
+
+
+  If you really changed parts that would make vanilla ioquake3 incompatible with
+  your mod, we have included another way to conveniently build a stand-alone
+  binary. Just run make with the option BUILD_STANDALONE=1. Don't forget to edit
+  the PRODUCT_NAME and subsequent #defines in qcommon/q_shared.h with
+  information appropriate for your project.
+
+  While a lot of work has been put into ioquake3 that you can benefit from free
+  of charge, it does not mean that you have no obligations to fulfil. Please be
+  aware that as soon as you start distributing your game with an engine based on
+  our sources we expect you to fully comply with the requirements as stated in
+  the GPL. That includes making sources and modifications you made to the
+  ioquake3 engine as well as the game-code used to compile the .qvm files for
+  the game logic freely available to everyone. Furthermore, note that the "QIIIA
+  Game Source License" prohibits distribution of mods that are intended to
+  operate on a version of Q3 not sanctioned by id software:
+
+    "with this Agreement, ID grants to you the non-exclusive and limited right
+    to distribute copies of the Software ... for operation only with the full
+    version of the software game QUAKE III ARENA"
+
+  This means that if you're creating a standalone game, you cannot use said
+  license on any portion of the product. As the only other license this code has
+  been released under is the GPL, this is the only option.
+
+  This does NOT mean that you cannot market this game commercially. The GPL does
+  not prohibit commercial exploitation and all assets (e.g. textures, sounds,
+  maps) created by yourself are your property and can be sold like every other
+  game you find in stores.
+
+Network protocols
+  There are now two cvars that give you some degree of freedom over the reported
+  protocol versions between clients and servers: "com_protocol" and
+  "com_legacyprotocol".
+  The reason for this is that some standalone games increased the protocol
+  number even though nothing really changed in their protocol and the ioquake3
+  engine is still fully compatible.
+
+  In order to harden the network protocol against UDP spoofing attacks a new
+  network protocol was introduced that defends against such attacks.
+  Unfortunately, this protocol will be incompatible to the original quake3 1.32c
+  which is the latest official release from id.
+  Luckily, ioquake3 has backwards compatibility, on the client as well as on the
+  server. This means ioquake3 players can play on old servers just as ioquake3
+  servers are able to service old clients.
+
+  The cvar "com_protocol" denotes the protocol version for the new hardened
+  protocol, whereas the "com_legacyprotocol" cvar denotes the protocol version
+  for the legacy protocol.
+  If the value for "com_protocol" and "com_legacyprotocol" is identical, then
+  the legacy protocol is always used. If "com_legacyprotocol" is set to 0, then
+  support for the legacy protocol is disabled.
+  
+  Mods that use a standalone engine obviously do not require dual protocol
+  support, and it is turned off if the engine is compiled with STANDALONE per
+  default. If you desire backwards compatibility to older versions of your
+  game you can still enable it in q_shared.h by defining
+  LEGACY_PROTOCOL.
+
+cl_guid Support
+  cl_guid is a cvar which is part of the client's USERINFO string.  Its value
+  is a 32 character string made up of [a-f] and [0-9] characters.  This
+  value is pseudo-unique for every player.  Id's Quake 3 Arena client also
+  sets cl_guid, but only if Punkbuster is enabled on the client.
+
+  If cl_guidServerUniq is non-zero (the default), then this value is also
+  pseudo-unique for each server a client connects to (based on IP:PORT of
+  the server).
+
+  The purpose of cl_guid is to add an identifier for each player on
+  a server.  This value can be reset by the client at any time so it's not
+  useful for blocking access.  However, it can have at least two uses in
+  your mod's game code:
+    1) improve logging to allow statistical tools to index players by more
+       than just name
+    2) granting some weak admin rights to players without requiring passwords
 
 PNG support
   ioquake3 supports the use of PNG (Portable Network Graphic) images as

@@ -195,7 +195,8 @@ void		NET_Sleep(int msec);
 #define MAX_DOWNLOAD_WINDOW		48	// ACK window of 48 download chunks. Cannot set this higher, or clients
 						// will overflow the reliable commands buffer
 #define MAX_DOWNLOAD_BLKSIZE		1024	// 896 byte block chunks
- 
+
+#define NETCHAN_GENCHECKSUM(challenge, sequence) ((challenge) ^ ((sequence) * (challenge)))
 
 /*
 Netchan handles packet fragmentation and out of order / duplicate suppression
@@ -224,10 +225,16 @@ typedef struct {
 	int			unsentFragmentStart;
 	int			unsentLength;
 	byte		unsentBuffer[MAX_MSGLEN];
+
+	int			challenge;
+
+#ifdef LEGACY_PROTOCOL
+	qboolean	compat;
+#endif
 } netchan_t;
 
 void Netchan_Init( int qport );
-void Netchan_Setup( netsrc_t sock, netchan_t *chan, netadr_t adr, int qport );
+void Netchan_Setup(netsrc_t sock, netchan_t *chan, netadr_t adr, int qport, int challenge, qboolean compat);
 
 void Netchan_Transmit( netchan_t *chan, int length, const byte *data );
 void Netchan_TransmitNextFragment( netchan_t *chan );
@@ -243,7 +250,8 @@ PROTOCOL
 ==============================================================
 */
 
-#define	PROTOCOL_VERSION	68
+#define	PROTOCOL_VERSION	69
+#define PROTOCOL_LEGACY_VERSION	68
 // 1.31 - 67
 
 // maintain a list of compatible protocols for demo playing
@@ -863,6 +871,9 @@ extern	cvar_t	*cl_packetdelay;
 extern	cvar_t	*sv_packetdelay;
 
 extern	cvar_t	*com_protocol;
+#ifdef LEGACY_PROTOCOL
+extern	cvar_t	*com_legacyprotocol;
+#endif
 
 // com_speeds times
 extern	int		time_game;

@@ -42,8 +42,8 @@ DEMOS MENU
 #define ART_ARROWLEFT		"menu/art/arrows_horz_left"
 #define ART_ARROWRIGHT		"menu/art/arrows_horz_right"
 
-#define MAX_DEMOS			128
-#define NAMEBUFSIZE			( MAX_DEMOS * 16 )
+#define MAX_DEMOS			1024
+#define NAMEBUFSIZE			(MAX_DEMOS * 32)
 
 #define ID_BACK				10
 #define ID_GO				11
@@ -72,6 +72,9 @@ typedef struct {
 
 	int				numDemos;
 	char			names[NAMEBUFSIZE];
+	int				numLegacyDemos;
+	char			namesLegacy[NAMEBUFSIZE];
+	
 	char			*demolist[MAX_DEMOS];
 } demos_t;
 
@@ -133,6 +136,7 @@ static void Demos_MenuInit( void ) {
 	int		i;
 	int		len;
 	char	*demoname, extension[32];
+	int	protocol, protocolLegacy;
 
 	memset( &s_demos, 0 ,sizeof(demos_t) );
 	s_demos.menu.key = UI_DemosMenu_Key;
@@ -223,10 +227,33 @@ static void Demos_MenuInit( void ) {
 	s_demos.list.generic.y			= 130;
 	s_demos.list.width				= 16;
 	s_demos.list.height				= 14;
-	Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, (int) trap_Cvar_VariableValue("protocol"));
-	s_demos.list.numitems			= trap_FS_GetFileList( "demos", extension, s_demos.names, NAMEBUFSIZE );
 	s_demos.list.itemnames			= (const char **)s_demos.demolist;
 	s_demos.list.columns			= 3;
+
+	protocolLegacy = trap_Cvar_VariableValue("com_legacyprotocol");
+	protocol = trap_Cvar_VariableValue("com_protocol");
+
+	if(!protocol)
+		protocol = trap_Cvar_VariableValue("protocol");
+	if(protocolLegacy == protocol)
+		protocolLegacy = 0;
+
+	Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, protocol);
+	s_demos.numDemos = trap_FS_GetFileList("demos", extension, s_demos.names, NAMEBUFSIZE);
+
+	if(s_demos.numDemos > MAX_DEMOS)
+		s_demos.numDemos = MAX_DEMOS;
+	
+	if(protocolLegacy > 0)
+	{
+		Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, protocolLegacy);
+		s_demos.numLegacyDemos = trap_FS_GetFileList("demos", extension, s_demos.namesLegacy, NAMEBUFSIZE);
+	}
+	else
+		s_demos.numLegacyDemos = 0;
+
+	s_demos.list.numitems = s_demos.numDemos + s_demos.numLegacyDemos;
+
 
 	if (!s_demos.list.numitems) {
 		strcpy( s_demos.names, "No Demos Found." );
@@ -239,15 +266,21 @@ static void Demos_MenuInit( void ) {
 		s_demos.list.numitems = MAX_DEMOS;
 
 	demoname = s_demos.names;
-	for ( i = 0; i < s_demos.list.numitems; i++ ) {
+	for(i = 0; i < s_demos.numDemos; i++)
+	{
 		s_demos.list.itemnames[i] = demoname;
 		
-		// strip extension
-		len = strlen( demoname );
-		if (!Q_stricmp(demoname +  len - 4,".dm3"))
-			demoname[len-4] = '\0';
+		len = strlen(demoname);
 
-//		Q_strupr(demoname);
+		demoname += len + 1;
+	}
+
+	demoname = s_demos.namesLegacy;
+	for(; i < s_demos.list.numitems; i++)
+	{
+		s_demos.list.itemnames[i] = demoname;
+		
+		len = strlen(demoname);
 
 		demoname += len + 1;
 	}

@@ -1056,6 +1056,11 @@ qboolean FS_IsDemoExt(const char *filename, int namelen)
 		if(protocol == com_protocol->integer)
 			return qtrue;
 
+#ifdef LEGACY_PROTOCOL
+                if(protocol == com_legacyprotocol->integer)
+                        return qtrue;
+#endif
+
 		for(index = 0; demo_protocols[index]; index++)
 		{
 			if(demo_protocols[index] == protocol)
