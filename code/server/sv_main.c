@@ -1156,5 +1156,52 @@ void SV_Frame( int msec ) {
 	SV_MasterHeartbeat(sv_heartbeat->string);
 }
 
-//============================================================================
+/*
+====================
+SV_RateMsec
 
+Return the number of msec until another message can be sent to
+a client based on its rate settings
+====================
+*/
+
+#define UDPIP_HEADER_SIZE 28
+#define UDPIP6_HEADER_SIZE 48
+
+int SV_RateMsec(client_t *client)
+{
+	int rate, rateMsec;
+	int messageSize;
+	
+	messageSize = client->netchan.lastSentSize;
+	rate = client->rate;
+
+	if(sv_maxRate->integer)
+	{
+		if(sv_maxRate->integer < 1000)
+			Cvar_Set( "sv_MaxRate", "1000" );
+		if(sv_maxRate->integer < rate)
+			rate = sv_maxRate->integer;
+	}
+
+	if(sv_minRate->integer)
+	{
+		if(sv_minRate->integer < 1000)
+			Cvar_Set("sv_minRate", "1000");
+		if(sv_minRate->integer > rate)
+			rate = sv_minRate->integer;
+	}
+
+	if(client->netchan.remoteAddress.type == NA_IP6)
+		messageSize += UDPIP6_HEADER_SIZE;
+	else
+		messageSize += UDPIP_HEADER_SIZE;
+		
+	rateMsec = messageSize * 1000 / ((int) (rate * com_timescale->value));
+	rate = Sys_Milliseconds() - client->netchan.lastSentTime;
+	
+	if(rate > rateMsec)
+		return 0;
+	else
+		return rateMsec - rate;
+}

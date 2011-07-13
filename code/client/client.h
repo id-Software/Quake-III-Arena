@@ -234,6 +234,7 @@ typedef struct {
 	unsigned char	timeDemoDurations[ MAX_TIMEDEMO_DURATIONS ];	// log of frame durations
 
 #ifdef USE_VOIP
+	qboolean voipEnabled;
 	qboolean speexInitialized;
 	int speexFrameSize;
 	int speexSampleRate;
@@ -517,7 +518,6 @@ extern int cl_connectedToPureServer;
 extern int cl_connectedToCheatServer;
 
 #ifdef USE_VOIP
-extern int cl_connectedToVoipServer;
 void CL_Voip_f( void );
 #endif
 
@@ -622,7 +622,6 @@ void LAN_SaveServersToCache( void );
 // cl_net_chan.c
 //
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg);	//int length, const byte *data );
-void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 
 //

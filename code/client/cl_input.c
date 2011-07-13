@@ -840,8 +840,6 @@ void CL_WritePacket( void ) {
 			cl_voipSendTarget->modified = qfalse;
 		}
 
-		MSG_WriteByte (&buf, clc_EOF);  // placate legacy servers.
-		MSG_WriteByte (&buf, clc_extension);
 		MSG_WriteByte (&buf, clc_voip);
 		MSG_WriteByte (&buf, clc.voipOutgoingGeneration);
 		MSG_WriteLong (&buf, clc.voipOutgoingSequence);
@@ -863,8 +861,6 @@ void CL_WritePacket( void ) {
 			MSG_Init (&fakemsg, fakedata, sizeof (fakedata));
 			MSG_Bitstream (&fakemsg);
 			MSG_WriteLong (&fakemsg, clc.reliableAcknowledge);
-			MSG_WriteByte (&fakemsg, svc_EOF);
-			MSG_WriteByte (&fakemsg, svc_extension);
 			MSG_WriteByte (&fakemsg, svc_voip);
 			MSG_WriteShort (&fakemsg, clc.clientNum);
 			MSG_WriteByte (&fakemsg, clc.voipOutgoingGeneration);
@@ -928,16 +924,6 @@ void CL_WritePacket( void ) {
 	}
 
 	CL_Netchan_Transmit (&clc.netchan, &buf);	
-
-	// clients never really should have messages large enough
-	// to fragment, but in case they do, fire them all off
-	// at once
-	// TTimo: this causes a packet burst, which is bad karma for winsock
-	// added a WARNING message, we'll see if there are legit situations where this happens
-	while ( clc.netchan.unsentFragments ) {
-		Com_DPrintf( "WARNING: #462 unsent fragments (not supposed to happen!)\n" );
-		CL_Netchan_TransmitNextFragment( &clc.netchan );
-	}
 }
 
 /*

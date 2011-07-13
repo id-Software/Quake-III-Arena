@@ -521,45 +521,6 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 	}
 }
 
-
-/*
-====================
-SV_RateMsec
-
-Return the number of msec a given size message is supposed
-to take to clear, based on the current rate
-====================
-*/
-#define	HEADER_RATE_BYTES	48		// include our header, IP header, and some overhead
-static int SV_RateMsec( client_t *client, int messageSize ) {
-	int		rate;
-	int		rateMsec;
-
-	// individual messages will never be larger than fragment size
-	if ( messageSize > 1500 ) {
-		messageSize = 1500;
-	}
-	rate = client->rate;
-	if ( sv_maxRate->integer ) {
-		if ( sv_maxRate->integer < 1000 ) {
-			Cvar_Set( "sv_MaxRate", "1000" );
-		}
-		if ( sv_maxRate->integer < rate ) {
-			rate = sv_maxRate->integer;
-		}
-	}
-	if ( sv_minRate->integer ) {
-		if ( sv_minRate->integer < 1000 )
-			Cvar_Set( "sv_minRate", "1000" );
-		if ( sv_minRate->integer > rate )
-			rate = sv_minRate->integer;
-	}
-
-	rateMsec = ( messageSize + HEADER_RATE_BYTES ) * 1000 / ((int) (rate * com_timescale->value));
-
-	return rateMsec;
-}
-
 /*
 =======================
 SV_SendMessageToClient
@@ -567,48 +528,15 @@ SV_SendMessageToClient
 Called by SV_SendClientSnapshot and SV_SendClientGameState
 =======================
 */
-void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
-	int			rateMsec;
-
+void SV_SendMessageToClient(msg_t *msg, client_t *client)
+{
 	// record information about the message
 	client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageSize = msg->cursize;
 	client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageSent = svs.time;
 	client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageAcked = -1;
 
 	// send the datagram
-	SV_Netchan_Transmit( client, msg );	//msg->cursize, msg->data );
-
-	// set nextSnapshotTime based on rate and requested number of updates
-
-	// local clients get snapshots every server frame
-	// TTimo - https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=491
-	// added sv_lanForceRate check
-	if ( client->netchan.remoteAddress.type == NA_LOOPBACK || (sv_lanForceRate->integer && Sys_IsLANAddress (client->netchan.remoteAddress)) ) {
-		client->nextSnapshotTime = svs.time + ((int) (1000.0 / sv_fps->integer * com_timescale->value));
-		return;
-	}
-	
-	// normal rate / snapshotMsec calculation
-	rateMsec = SV_RateMsec(client, msg->cursize);
-
-	if ( rateMsec < client->snapshotMsec * com_timescale->value) {
-		// never send more packets than this, no matter what the rate is at
-		rateMsec = client->snapshotMsec * com_timescale->value;
-		client->rateDelayed = qfalse;
-	} else {
-		client->rateDelayed = qtrue;
-	}
-
-	client->nextSnapshotTime = svs.time + ((int) (rateMsec * com_timescale->value));
-
-	// don't pile up empty snapshots while connecting
-	if ( client->state != CS_ACTIVE ) {
-		// a gigantic connection message may have already put the nextSnapshotTime
-		// more than a second away, so don't shorten it
-		// do shorten if client is downloading
-		if (!*client->downloadName && client->nextSnapshotTime < svs.time + ((int) (1000.0 * com_timescale->value)))
-			client->nextSnapshotTime = svs.time + ((int) (1000 * com_timescale->value));
-	}
+	SV_Netchan_Transmit(client, msg);
 }
 
 
@@ -666,33 +594,47 @@ void SV_SendClientSnapshot( client_t *client ) {
 SV_SendClientMessages
 =======================
 */
-void SV_SendClientMessages( void ) {
-	int			i;
+void SV_SendClientMessages(void)
+{
+	int		i;
 	client_t	*c;
 
 	// send a message to each connected client
-	for (i=0, c = svs.clients ; i < sv_maxclients->integer ; i++, c++) {
-		if (!c->state) {
+	for(i=0; i < sv_maxclients->integer; i++)
+	{
+		c = &svs.clients[i];
+		
+		if(!c->state)
 			continue;		// not connected
-		}
-
-		if ( svs.time < c->nextSnapshotTime ) {
-			continue;		// not time yet
-		}
 
 		if(*c->downloadName)
 			continue;		// Client is downloading, don't send snapshots
 
-		// send additional message fragments if the last message
-		// was too large to send at once
-		if ( c->netchan.unsentFragments ) {
-			c->nextSnapshotTime = svs.time + 
-				SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
-			SV_Netchan_TransmitNextFragment( c );
-			continue;
+		if(!(c->netchan.remoteAddress.type == NA_LOOPBACK ||
+		     (sv_lanForceRate->integer && Sys_IsLANAddress(c->netchan.remoteAddress))))
+		{
+			// rate control for clients not on LAN 
+			
+			if(svs.time - c->lastSnapshotTime < c->snapshotMsec * com_timescale->value)
+				continue;		// It's not time yet
+		
+			if(c->netchan.unsentFragments || c->netchan_start_queue)
+			{
+				c->rateDelayed = qtrue;
+				continue;		// Drop this snapshot if the packet queue is still full
+			}
+
+			if(SV_RateMsec(c) > 0)
+			{
+				// Not enough time since last packet passed through the line
+				c->rateDelayed = qtrue;
+				continue;
+			}
 		}
 
 		// generate and send a new message
-		SV_SendClientSnapshot( c );
+		SV_SendClientSnapshot(c);
+		c->lastSnapshotTime = svs.time;
+		c->rateDelayed = qfalse;
 	}
 }

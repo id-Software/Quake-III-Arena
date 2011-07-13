@@ -557,7 +557,7 @@ gotnewcl:
 	Com_DPrintf( "Going from CS_FREE to CS_CONNECTED for %s\n", newcl->name );
 
 	newcl->state = CS_CONNECTED;
-	newcl->nextSnapshotTime = svs.time;
+	newcl->lastSnapshotTime = 0;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
 	
@@ -758,7 +758,7 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 	client->gentity = ent;
 
 	client->deltaMessage = -1;
-	client->nextSnapshotTime = svs.time;	// generate a snapshot immediately
+	client->lastSnapshotTime = 0;	// generate a snapshot immediately
 
 	if(cmd)
 		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
@@ -797,7 +797,7 @@ static void SV_CloseDownload( client_t *cl ) {
 	// Free the temporary buffer space
 	for (i = 0; i < MAX_DOWNLOAD_WINDOW; i++) {
 		if (cl->downloadBlocks[i]) {
-			Z_Free( cl->downloadBlocks[i] );
+			Hunk_FreeTempMemory(cl->downloadBlocks[i]);
 			cl->downloadBlocks[i] = NULL;
 		}
 	}
@@ -1017,7 +1017,7 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 		curindex = (cl->downloadCurrentBlock % MAX_DOWNLOAD_WINDOW);
 
 		if (!cl->downloadBlocks[curindex])
-			cl->downloadBlocks[curindex] = Z_Malloc( MAX_DOWNLOAD_BLKSIZE );
+			cl->downloadBlocks[curindex] = Hunk_AllocateTempMemory(MAX_DOWNLOAD_BLKSIZE);
 
 		cl->downloadBlockSize[curindex] = FS_Read( cl->downloadBlocks[curindex], MAX_DOWNLOAD_BLKSIZE, cl->download );
 
@@ -1086,9 +1086,40 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 
 /*
 ==================
+SV_SendQueuedMessages
+
+Send one round of fragments, or queued messages to all clients that have data pending.
+Return the shortest time interval for sending next packet to client
+==================
+*/
+
+int SV_SendQueuedMessages(void)
+{
+	int i, retval = -1, nextFragT;
+	client_t *cl;
+	
+	for(i=0; i < sv_maxclients->integer; i++)
+	{
+		cl = &svs.clients[i];
+		
+		if(cl->state)
+		{
+			nextFragT = SV_Netchan_TransmitNextFragment(cl);
+
+			if(nextFragT >= 0 && (retval == -1 || retval > nextFragT))
+				retval = nextFragT;
+		}
+	}
+
+	return retval;
+}
+
+
+/*
+==================
 SV_SendDownloadMessages
 
-Send download messages to all clients
+Send one round of download messages to all clients
 ==================
 */
 
@@ -1099,25 +1130,22 @@ int SV_SendDownloadMessages(void)
 	msg_t msg;
 	byte msgBuffer[MAX_MSGLEN];
 	
-	for(i=0, cl = svs.clients ; i < sv_maxclients->integer ; i++, cl++)
+	for(i=0; i < sv_maxclients->integer; i++)
 	{
+		cl = &svs.clients[i];
+		
 		if(cl->state && *cl->downloadName)
 		{
-			if(cl->netchan.unsentFragments)
-				SV_Netchan_TransmitNextFragment(cl);
-			else
-			{
-				MSG_Init(&msg, msgBuffer, sizeof(msgBuffer));
-				MSG_WriteLong(&msg, cl->lastClientCommand);
+			MSG_Init(&msg, msgBuffer, sizeof(msgBuffer));
+			MSG_WriteLong(&msg, cl->lastClientCommand);
 			
-				retval = SV_WriteDownloadToClient(cl, &msg);
+			retval = SV_WriteDownloadToClient(cl, &msg);
 				
-				if(retval)
-				{
-					MSG_WriteByte(&msg, svc_EOF);
-					SV_Netchan_Transmit(cl, &msg);
-					numDLs += retval;
-				}
+			if(retval)
+			{
+				MSG_WriteByte(&msg, svc_EOF);
+				SV_Netchan_Transmit(cl, &msg);
+				numDLs += retval;
 			}
 		}
 	}
@@ -1135,43 +1163,41 @@ Check to see if there is any VoIP queued for a client, and send if there is.
 */
 void SV_WriteVoipToClient( client_t *cl, msg_t *msg )
 {
-	voipServerPacket_t *packet = &cl->voipPacket[0];
-	int totalbytes = 0;
-	int i;
-
-	if (*cl->downloadName) {
+	if(*cl->downloadName)
+	{
 		cl->queuedVoipPackets = 0;
 		return;  // no VoIP allowed if download is going, to save bandwidth.
 	}
 
-	// Write as many VoIP packets as we reasonably can...
-	for (i = 0; i < cl->queuedVoipPackets; i++, packet++) {
-		totalbytes += packet->len;
-		if (totalbytes > MAX_DOWNLOAD_BLKSIZE)
-			break;
+	if(cl->queuedVoipPackets)
+	{
+		int totalbytes = 0;
+		int i;
+		voipServerPacket_t *packet;
 
-		// You have to start with a svc_EOF, so legacy clients drop the
-		//  rest of this packet. Otherwise, those without VoIP support will
-		//  see the svc_voip command, then panic and disconnect.
-		// Generally we don't send VoIP packets to legacy clients, but this
-		//  serves as both a safety measure and a means to keep demo files
-		//  compatible.
-		MSG_WriteByte( msg, svc_EOF );
-		MSG_WriteByte( msg, svc_extension );
-		MSG_WriteByte( msg, svc_voip );
-		MSG_WriteShort( msg, packet->sender );
-		MSG_WriteByte( msg, (byte) packet->generation );
-		MSG_WriteLong( msg, packet->sequence );
-		MSG_WriteByte( msg, packet->frames );
-		MSG_WriteShort( msg, packet->len );
-		MSG_WriteData( msg, packet->data, packet->len );
-	}
+		// Write as many VoIP packets as we reasonably can...
+		for(i = cl->queuedVoipIndex; i < cl->queuedVoipPackets; i++)
+		{
+			packet = cl->voipPacket[i % ARRAY_LEN(cl->voipPacket)];
+			
+			totalbytes += packet->len;
+			if (totalbytes > (msg->maxsize - msg->cursize) / 2)
+				break;
 
-	// !!! FIXME: I hate this queue system.
-	cl->queuedVoipPackets -= i;
-	if (cl->queuedVoipPackets > 0) {
-		memmove( &cl->voipPacket[0], &cl->voipPacket[i],
-		         sizeof (voipServerPacket_t) * i);
+			MSG_WriteByte(msg, svc_voip);
+			MSG_WriteShort(msg, packet->sender);
+			MSG_WriteByte(msg, (byte) packet->generation);
+			MSG_WriteLong(msg, packet->sequence);
+			MSG_WriteByte(msg, packet->frames);
+			MSG_WriteShort(msg, packet->len);
+			MSG_WriteData(msg, packet->data, packet->len);
+			
+			Hunk_FreeTempMemory(packet);
+		}
+
+		cl->queuedVoipPackets -= i;
+		cl->queuedVoipIndex += i;
+		cl->queuedVoipIndex %= ARRAY_LEN(cl->voipPacket);
 	}
 }
 #endif
@@ -1343,7 +1369,7 @@ static void SV_VerifyPaks_f( client_t *cl ) {
 		} 
 		else {
 			cl->pureAuthentic = 0;
-			cl->nextSnapshotTime = -1;
+			cl->lastSnapshotTime = 0;
 			cl->state = CS_ACTIVE;
 			SV_SendClientSnapshot( cl );
 			SV_DropClient( cl, "Unpure client detected. Invalid .PK3 files referenced!" );
@@ -1408,23 +1434,38 @@ void SV_UserinfoChanged( client_t *cl ) {
 
 	// snaps command
 	val = Info_ValueForKey (cl->userinfo, "snaps");
-	if (strlen(val)) {
+	
+	if(strlen(val))
+	{
 		i = atoi(val);
-		if ( i < 1 ) {
+		
+		if(i < 1)
 			i = 1;
-		} else if ( i > sv_fps->integer ) {
+		else if(i > sv_fps->integer)
 			i = sv_fps->integer;
-		}
-		cl->snapshotMsec = 1000/i;
-	} else {
-		cl->snapshotMsec = 50;
+
+		i = 1000 / i;
+	}
+	else
+		i = 50;
+
+	if(i != cl->snapshotMsec)
+	{
+		// Reset last sent snapshot so we avoid desync between server frame time and snapshot send time
+		cl->lastSnapshotTime = 0;
+		cl->snapshotMsec = i;		
 	}
 	
 #ifdef USE_VOIP
-	// in the future, (val) will be a protocol version string, so only
-	//  accept explicitly 1, not generally non-zero.
-	val = Info_ValueForKey (cl->userinfo, "cl_voip");
-	cl->hasVoip = (atoi(val) == 1) ? qtrue : qfalse;
+#ifdef LEGACY_PROTOCOL
+	if(cl->compat)
+		cl->hasVoip = qfalse;
+	else
+#endif
+	{
+		val = Info_ValueForKey(cl->userinfo, "cl_voip");
+		cl->hasVoip = atoi(val);
+	}
 #endif
 
 	// TTimo
@@ -1759,7 +1800,7 @@ void SV_UserVoip( client_t *cl, msg_t *msg ) {
 	const int recip2 = MSG_ReadLong(msg);
 	const int recip3 = MSG_ReadLong(msg);
 	const int packetsize = MSG_ReadShort(msg);
-	byte encoded[sizeof (cl->voipPacket[0].data)];
+	byte encoded[sizeof(cl->voipPacket[0]->data)];
 	client_t *client = NULL;
 	voipServerPacket_t *packet = NULL;
 	int i;
@@ -1833,13 +1874,15 @@ void SV_UserVoip( client_t *cl, msg_t *msg ) {
 			continue;  // no room for another packet right now.
 		}
 
-		packet = &client->voipPacket[client->queuedVoipPackets];
+		packet = Hunk_AllocateTempMemory(sizeof(*packet));
 		packet->sender = sender;
 		packet->frames = frames;
 		packet->len = packetsize;
 		packet->generation = generation;
 		packet->sequence = sequence;
 		memcpy(packet->data, encoded, packetsize);
+
+		client->voipPacket[(client->queuedVoipIndex + client->queuedVoipPackets) % ARRAY_LEN(client->voipPacket)] = packet;
 		client->queuedVoipPackets++;
 	}
 }
@@ -1931,18 +1974,6 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	// read optional clientCommand strings
 	do {
 		c = MSG_ReadByte( msg );
-
-		// See if this is an extension command after the EOF, which means we
-		//  got data that a legacy server should ignore.
-		if ((c == clc_EOF) && (MSG_LookaheadByte( msg ) == clc_extension)) {
-			MSG_ReadByte( msg );  // throw the clc_extension byte away.
-			c = MSG_ReadByte( msg );  // something legacy servers can't do!
-			// sometimes you get a clc_extension at end of stream...dangling
-			//  bits in the huffman decoder giving a bogus value?
-			if (c == -1) {
-				c = clc_EOF;
-			}
-		}
 
 		if ( c == clc_EOF ) {
 			break;

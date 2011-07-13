@@ -3111,7 +3111,11 @@ void Com_Frame( void ) {
 		{
 			if(com_sv_running->integer)
 			{
-				// Send out download messages now that we're idle
+				// Send out fragmented packets now that we're idle
+				delayT = SV_SendQueuedMessages();
+				if(delayT >= 0 && delayT < timeVal)
+					timeVal = delayT;
+					
 				if(sv_dlRate->integer)
 				{
 					// Rate limiting. This is very imprecise for high
@@ -3145,20 +3149,31 @@ void Com_Frame( void ) {
 								// all of the bandwidth. This will result in an
 								// effective maximum rate of 1MB/s per user, but the
 								// low download window size limits this anyways.
-								timeVal = 2;
+								if(timeVal > 2)
+									timeVal = 2;
+									
 								dlNextRound = dlStart + deltaT + 1;
 							}
 							else
 							{
 								dlNextRound = dlStart + delayT;
-								timeVal = delayT - deltaT;
+								delayT -= deltaT;
+								
+								if(delayT < timeVal)
+									timeVal = delayT;
 							}
 						}
 					}
 				}
 				else
+				{
 					SV_SendDownloadMessages();
+					timeVal = 1;
+				}
 			}
+
+			if(timeVal == 0)
+				timeVal = 1;
 
 			if(com_busyWait->integer)
 				NET_Sleep(0);

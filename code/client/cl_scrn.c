@@ -362,7 +362,7 @@ void SCR_DrawVoipMeter( void ) {
 		return;  // not recording at the moment.
 	else if (clc.state != CA_ACTIVE)
 		return;  // not connected to a server.
-	else if (!cl_connectedToVoipServer)
+	else if (!clc.voipEnabled)
 		return;  // server doesn't support VoIP.
 	else if (clc.demoplaying)
 		return;  // playing back a demo.

@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qcommon.h"
 #include "client.h"
 
+#ifdef LEGACY_PROTOCOL
 /*
 ==============
 CL_Netchan_Encode
@@ -125,14 +126,22 @@ static void CL_Netchan_Decode( msg_t *msg ) {
 		*(msg->data + i) = *(msg->data + i) ^ key;
 	}
 }
+#endif
 
 /*
 =================
 CL_Netchan_TransmitNextFragment
 =================
 */
-void CL_Netchan_TransmitNextFragment( netchan_t *chan ) {
-	Netchan_TransmitNextFragment( chan );
+qboolean CL_Netchan_TransmitNextFragment(netchan_t *chan)
+{
+	if(chan->unsentFragments)
+	{
+		Netchan_TransmitNextFragment(chan);
+		return qtrue;
+	}
+	
+	return qfalse;
 }
 
 /*
@@ -143,8 +152,18 @@ CL_Netchan_Transmit
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ) {
 	MSG_WriteByte( msg, clc_EOF );
 
-	CL_Netchan_Encode( msg );
-	Netchan_Transmit( chan, msg->cursize, msg->data );
+#ifdef LEGACY_PROTOCOL
+	if(chan->compat)
+		CL_Netchan_Encode(msg);
+#endif
+
+	Netchan_Transmit(chan, msg->cursize, msg->data);
+	
+	// Transmit all fragments without delay
+	while(CL_Netchan_TransmitNextFragment(chan))
+	{
+		Com_DPrintf("WARNING: #462 unsent fragments (not supposed to happen!)\n");
+	}
 }
 
 /*
@@ -159,7 +178,10 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg ) {
 	if (!ret)
 		return qfalse;
 
-	CL_Netchan_Decode( msg );
+#ifdef LEGACY_PROTOCOL
+	if(chan->compat)
+		CL_Netchan_Decode(msg);
+#endif
 
 	return qtrue;
 }
