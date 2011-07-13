@@ -72,8 +72,6 @@ typedef struct {
 
 	int				numDemos;
 	char			names[NAMEBUFSIZE];
-	int				numLegacyDemos;
-	char			namesLegacy[NAMEBUFSIZE];
 	
 	char			*demolist[MAX_DEMOS];
 } demos_t;
@@ -133,7 +131,7 @@ Demos_MenuInit
 ===============
 */
 static void Demos_MenuInit( void ) {
-	int		i;
+	int		i, j;
 	int		len;
 	char	*demoname, extension[32];
 	int	protocol, protocolLegacy;
@@ -239,50 +237,47 @@ static void Demos_MenuInit( void ) {
 		protocolLegacy = 0;
 
 	Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, protocol);
-	s_demos.numDemos = trap_FS_GetFileList("demos", extension, s_demos.names, NAMEBUFSIZE);
+	s_demos.numDemos = trap_FS_GetFileList("demos", extension, s_demos.names, ARRAY_LEN(s_demos.names));
 
-	if(s_demos.numDemos > MAX_DEMOS)
-		s_demos.numDemos = MAX_DEMOS;
-	
-	if(protocolLegacy > 0)
+	demoname = s_demos.names;
+	i = 0;
+
+	for(j = 0; j < 2; j++)
 	{
-		Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, protocolLegacy);
-		s_demos.numLegacyDemos = trap_FS_GetFileList("demos", extension, s_demos.namesLegacy, NAMEBUFSIZE);
+		if(s_demos.numDemos > MAX_DEMOS)
+			s_demos.numDemos = MAX_DEMOS;
+
+		for(; i < s_demos.numDemos; i++)
+		{
+			s_demos.list.itemnames[i] = demoname;
+		
+			len = strlen(demoname);
+
+			demoname += len + 1;
+		}
+
+		if(!j)
+		{
+			if(protocolLegacy > 0 && s_demos.numDemos < MAX_DEMOS)
+			{
+				Com_sprintf(extension, sizeof(extension), ".%s%d", DEMOEXT, protocolLegacy);
+				s_demos.numDemos += trap_FS_GetFileList("demos", extension, demoname,
+									ARRAY_LEN(s_demos.names) - (demoname - s_demos.names));
+			}
+			else
+				break;
+		}
 	}
-	else
-		s_demos.numLegacyDemos = 0;
 
-	s_demos.list.numitems = s_demos.numDemos + s_demos.numLegacyDemos;
+	s_demos.list.numitems = s_demos.numDemos;
 
-
-	if (!s_demos.list.numitems) {
-		strcpy( s_demos.names, "No Demos Found." );
+	if(!s_demos.numDemos)
+	{
+		s_demos.list.itemnames[0] = "No Demos Found.";
 		s_demos.list.numitems = 1;
 
 		//degenerate case, not selectable
 		s_demos.go.generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
-	}
-	else if (s_demos.list.numitems > MAX_DEMOS)
-		s_demos.list.numitems = MAX_DEMOS;
-
-	demoname = s_demos.names;
-	for(i = 0; i < s_demos.numDemos; i++)
-	{
-		s_demos.list.itemnames[i] = demoname;
-		
-		len = strlen(demoname);
-
-		demoname += len + 1;
-	}
-
-	demoname = s_demos.namesLegacy;
-	for(; i < s_demos.list.numitems; i++)
-	{
-		s_demos.list.itemnames[i] = demoname;
-		
-		len = strlen(demoname);
-
-		demoname += len + 1;
 	}
 
 	Menu_AddItem( &s_demos.menu, &s_demos.banner );

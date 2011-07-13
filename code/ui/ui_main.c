@@ -2863,7 +2863,7 @@ static void UI_LoadMovies( void ) {
 
 }
 
-
+#define NAMEBUFSIZE (MAX_DEMOS * 32)
 
 /*
 ===============
@@ -2871,30 +2871,48 @@ UI_LoadDemos
 ===============
 */
 static void UI_LoadDemos( void ) {
-	char	demolist[4096];
-	char demoExt[32];
+	char	demolist[NAMEBUFSIZE];
+	char	demoExt[32];
 	char	*demoname;
-	int		i, len;
+	int	i, j, len;
+	int	protocol, protocolLegacy;
 
-	Com_sprintf(demoExt, sizeof(demoExt), "%s%d", DEMOEXT, (int)trap_Cvar_VariableValue("protocol"));
+	protocolLegacy = trap_Cvar_VariableValue("com_legacyprotocol");
+	protocol = trap_Cvar_VariableValue("com_protocol");
 
-	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, 4096 );
+	if(!protocol)
+		protocol = trap_Cvar_VariableValue("protocol");
+	if(protocolLegacy == protocol)
+		protocolLegacy = 0;
 
-	Com_sprintf(demoExt, sizeof(demoExt), ".%s%d", DEMOEXT, (int)trap_Cvar_VariableValue("protocol"));
+	Com_sprintf(demoExt, sizeof(demoExt), ".%s%d", DEMOEXT, protocol);
+	uiInfo.demoCount = trap_FS_GetFileList("demos", demoExt, demolist, ARRAY_LEN(demolist));
+	
+	demoname = demolist;
+	i = 0;
 
-	if (uiInfo.demoCount) {
-		if (uiInfo.demoCount > MAX_DEMOS) {
+	for(j = 0; j < 2; j++)
+	{
+		if(uiInfo.demoCount > MAX_DEMOS)
 			uiInfo.demoCount = MAX_DEMOS;
-		}
-		demoname = demolist;
-		for ( i = 0; i < uiInfo.demoCount; i++ ) {
-			len = strlen( demoname );
-			if (!Q_stricmp(demoname +  len - strlen(demoExt), demoExt)) {
-				demoname[len-strlen(demoExt)] = '\0';
-			}
-			Q_strupr(demoname);
+
+		for(; i < uiInfo.demoCount; i++)
+		{
+			len = strlen(demoname);
 			uiInfo.demoList[i] = String_Alloc(demoname);
 			demoname += len + 1;
+		}
+		
+		if(!j)
+		{
+		        if(protocolLegacy > 0 && uiInfo.demoCount < MAX_DEMOS)
+		        {
+                        	Com_sprintf(demoExt, sizeof(demoExt), ".%s%d", DEMOEXT, protocolLegacy);
+                        	uiInfo.demoCount += trap_FS_GetFileList("demos", demoExt, demolist, ARRAY_LEN(demolist));
+                        	demoname = demolist;
+                        }
+                        else
+                                break;
 		}
 	}
 
