@@ -3100,8 +3100,13 @@ void Com_Frame( void ) {
 	else
 		minMsec = 1;
 
-	timeVal = 0;
-	
+	msec = Sys_Milliseconds() - com_frameTime;
+
+	if(msec >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - msec;
+
 	do
 	{
 		if(com_sv_running->integer)
