@@ -1104,7 +1104,10 @@ int SV_SendQueuedMessages(void)
 		
 		if(cl->state)
 		{
-			nextFragT = SV_Netchan_TransmitNextFragment(cl);
+			nextFragT = SV_RateMsec(cl);
+
+			if(!nextFragT)
+				nextFragT = SV_Netchan_TransmitNextFragment(cl);
 
 			if(nextFragT >= 0 && (retval == -1 || retval > nextFragT))
 				retval = nextFragT;
