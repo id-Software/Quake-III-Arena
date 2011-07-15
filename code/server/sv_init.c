@@ -760,8 +760,14 @@ void SV_Shutdown( char *finalmsg ) {
 	SV_ClearServer();
 
 	// free server static data
-	if ( svs.clients ) {
-		Z_Free( svs.clients );
+	if(svs.clients)
+	{
+		int index;
+		
+		for(index = 0; index < sv_maxclients->integer; index++)
+			SV_FreeClient(&svs.clients[index]);
+		
+		Z_Free(svs.clients);
 	}
 	Com_Memset( &svs, 0, sizeof( svs ) );
 

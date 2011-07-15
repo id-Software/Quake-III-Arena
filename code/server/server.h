@@ -348,6 +348,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg );
 void SV_UserinfoChanged( client_t *cl );
 
 void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd );
+void SV_FreeClient(client_t *client);
 void SV_DropClient( client_t *drop, const char *reason );
 
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
@@ -466,4 +467,4 @@ void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, con
 void SV_Netchan_Transmit( client_t *client, msg_t *msg);
 int SV_Netchan_TransmitNextFragment(client_t *client);
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
-
+void SV_Netchan_FreeQueue(client_t *client);

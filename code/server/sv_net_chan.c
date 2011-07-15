@@ -130,6 +130,27 @@ static void SV_Netchan_Decode( client_t *client, msg_t *msg ) {
 }
 #endif
 
+
+
+/*
+=================
+SV_Netchan_FreeQueue
+=================
+*/
+void SV_Netchan_FreeQueue(client_t *client)
+{
+	netchan_buffer_t *netbuf, *next;
+	
+	for(netbuf = client->netchan_start_queue; netbuf; netbuf = next)
+	{
+		next = netbuf->next;
+		Z_Free(netbuf);
+	}
+	
+	client->netchan_start_queue = NULL;
+	client->netchan_end_queue = &client->netchan_start_queue;
+}
+
 /*
 =================
 SV_Netchan_TransmitNextInQueue
@@ -159,7 +180,7 @@ void SV_Netchan_TransmitNextInQueue(client_t *client)
 	else
 		Com_DPrintf("#462 Netchan_TransmitNextFragment: remaining queued message\n");
 
-	Hunk_FreeTempMemory(netbuf);
+	Z_Free(netbuf);
 }
 
 /*
@@ -207,7 +228,7 @@ void SV_Netchan_Transmit( client_t *client, msg_t *msg)
 	{
 		netchan_buffer_t *netbuf;
 		Com_DPrintf("#462 SV_Netchan_Transmit: unsent fragments, stacked\n");
-		netbuf = (netchan_buffer_t *) Hunk_AllocateTempMemory(sizeof(netchan_buffer_t));
+		netbuf = (netchan_buffer_t *) Z_Malloc(sizeof(netchan_buffer_t));
 		// store the msg, we can't store it encoded, as the encoding depends on stuff we still have to finish sending
 		MSG_Copy(&netbuf->msg, netbuf->msgBuffer, sizeof( netbuf->msgBuffer ), msg);
 		netbuf->next = NULL;
