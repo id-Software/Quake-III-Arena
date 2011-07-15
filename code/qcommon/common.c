@@ -77,7 +77,6 @@ cvar_t	*cl_paused;
 cvar_t	*sv_paused;
 cvar_t  *cl_packetdelay;
 cvar_t  *sv_packetdelay;
-cvar_t  *sv_dlRate;
 cvar_t	*com_cameraMode;
 cvar_t	*com_ansiColor;
 cvar_t	*com_unfocused;
@@ -2781,7 +2780,6 @@ void Com_Init( char *commandLine ) {
 	sv_paused = Cvar_Get ("sv_paused", "0", CVAR_ROM);
 	cl_packetdelay = Cvar_Get ("cl_packetdelay", "0", CVAR_CHEAT);
 	sv_packetdelay = Cvar_Get ("sv_packetdelay", "0", CVAR_CHEAT);
-	sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 	com_sv_running = Cvar_Get ("sv_running", "0", CVAR_ROM);
 	com_cl_running = Cvar_Get ("cl_running", "0", CVAR_ROM);
 	com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
@@ -3031,16 +3029,33 @@ int Com_ModifyMsec( int msec ) {
 
 /*
 =================
+Com_TimeVal
+=================
+*/
+
+int Com_TimeVal(int minMsec)
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if(timeVal >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
+
+/*
+=================
 Com_Frame
 =================
 */
 void Com_Frame( void ) {
 
 	int		msec, minMsec;
-	int		timeVal;
-	int		numBlocks = 1;
-	int		dlStart, deltaT, delayT;
-	static int	dlNextRound = 0;
+	int		timeVal, timeValSV;
 	static int	lastTime = 0, bias = 0;
  
 	int		timeBeforeFirstEvents;
@@ -3100,94 +3115,26 @@ void Com_Frame( void ) {
 	else
 		minMsec = 1;
 
-	msec = Sys_Milliseconds() - com_frameTime;
-
-	if(msec >= minMsec)
-		timeVal = 0;
-	else
-		timeVal = minMsec - msec;
-
+	timeVal = 0;
 	do
 	{
 		if(com_sv_running->integer)
 		{
-			// Send out fragmented packets now that we're idle
-			delayT = SV_SendQueuedMessages();
-			if(delayT >= 0 && delayT < timeVal)
-				timeVal = delayT;
+			timeValSV = SV_SendQueuedPackets();
+			
+			timeVal = Com_TimeVal(minMsec);
 
-			if(sv_dlRate->integer)
-			{
-				// Rate limiting. This is very imprecise for high
-				// download rates due to millisecond timedelta resolution
-				dlStart = Sys_Milliseconds();
-				deltaT = dlNextRound - dlStart;
-
-				if(deltaT > 0)
-				{
-					if(deltaT < timeVal)
-						timeVal = deltaT + 1;
-				}
-				else
-				{
-					numBlocks = SV_SendDownloadMessages();
-
-					if(numBlocks)
-					{
-						// There are active downloads
-						deltaT = Sys_Milliseconds() - dlStart;
-
-						delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
-						delayT /= sv_dlRate->integer * 1024;
-
-						if(delayT <= deltaT + 1)
-						{
-							// Sending the last round of download messages
-							// took too long for given rate, don't wait for
-							// next round, but always enforce a 1ms delay
-							// between DL message rounds so we don't hog
-							// all of the bandwidth. This will result in an
-							// effective maximum rate of 1MB/s per user, but the
-							// low download window size limits this anyways.
-							if(timeVal > 2)
-								timeVal = 2;
-
-							dlNextRound = dlStart + deltaT + 1;
-						}
-						else
-						{
-							dlNextRound = dlStart + delayT;
-							delayT -= deltaT;
-
-							if(delayT < timeVal)
-								timeVal = delayT;
-						}
-					}
-				}
-			}
-			else
-			{
-				if(SV_SendDownloadMessages())
-					timeVal = 1;
-			}
+			if(timeValSV < timeVal)
+				timeVal = timeValSV;
 		}
-
-		if(timeVal == 0)
-			timeVal = 1;
-
-		if(com_busyWait->integer)
+		else
+			timeVal = Com_TimeVal(minMsec);
+		
+		if(com_busyWait->integer || timeVal < 1)
 			NET_Sleep(0);
 		else
 			NET_Sleep(timeVal - 1);
-
-		msec = Sys_Milliseconds() - com_frameTime;
-		
-		if(msec >= minMsec)
-			timeVal = 0;
-		else
-			timeVal = minMsec - msec;
-
-	} while(timeVal > 0);
+	} while(Com_TimeVal(minMsec));
 	
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();

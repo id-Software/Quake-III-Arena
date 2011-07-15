@@ -1675,6 +1675,9 @@ void NET_Sleep(int msec)
 	fd_set fdr;
 	int highestfd = -1, retval;
 
+	if(msec < 0)
+		msec = 0;
+
 	FD_ZERO(&fdr);
 
 	if(ip_socket != INVALID_SOCKET)
