@@ -588,10 +588,8 @@ Destructor for data allocated in a client structure
 */
 void SV_FreeClient(client_t *client)
 {
+#ifdef USE_VOIP
 	int index;
-	
-	SV_Netchan_FreeQueue(client);
-	SV_CloseDownload(client);
 	
 	for(index = client->queuedVoipIndex; index < client->queuedVoipPackets; index++)
 	{
@@ -601,6 +599,10 @@ void SV_FreeClient(client_t *client)
 	}
 	
 	client->queuedVoipPackets = 0;
+#endif
+
+	SV_Netchan_FreeQueue(client);
+	SV_CloseDownload(client);
 }
 
 /*
