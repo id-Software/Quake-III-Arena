@@ -34,7 +34,8 @@ SV_Netchan_Encode
 
 ==============
 */
-static void SV_Netchan_Encode( client_t *client, msg_t *msg ) {
+static void SV_Netchan_Encode(client_t *client, msg_t *msg, const char *clientCommandString)
+{
 	long i, index;
 	byte key, *string;
 	int	srdc, sbit;
@@ -58,7 +59,7 @@ static void SV_Netchan_Encode( client_t *client, msg_t *msg ) {
 	msg->bit = sbit;
 	msg->readcount = srdc;
 
-	string = (byte *)client->lastClientCommandString;
+	string = (byte *) clientCommandString;
 	index = 0;
 	// xor the client challenge with the netchan sequence number
 	key = client->challenge ^ client->netchan.outgoingSequence;
@@ -165,7 +166,7 @@ void SV_Netchan_TransmitNextInQueue(client_t *client)
 
 #ifdef LEGACY_PROTOCOL
 	if(client->compat)
-		SV_Netchan_Encode(client, &netbuf->msg);
+		SV_Netchan_Encode(client, &netbuf->msg, netbuf->clientCommandString);
 #endif
 
 	Netchan_Transmit(&client->netchan, netbuf->msg.cursize, netbuf->msg.data);
@@ -231,6 +232,13 @@ void SV_Netchan_Transmit( client_t *client, msg_t *msg)
 		netbuf = (netchan_buffer_t *) Z_Malloc(sizeof(netchan_buffer_t));
 		// store the msg, we can't store it encoded, as the encoding depends on stuff we still have to finish sending
 		MSG_Copy(&netbuf->msg, netbuf->msgBuffer, sizeof( netbuf->msgBuffer ), msg);
+#ifdef LEGACY_PROTOCOL
+		if(client->compat)
+		{
+			Q_strncpyz(netbuf->clientCommandString, client->lastClientCommandString,
+				   sizeof(netbuf->clientCommandString));
+		}
+#endif
 		netbuf->next = NULL;
 		// insert it in the queue, the message will be encoded and sent later
 		*client->netchan_end_queue = netbuf;
@@ -240,7 +248,7 @@ void SV_Netchan_Transmit( client_t *client, msg_t *msg)
 	{
 #ifdef LEGACY_PROTOCOL
 		if(client->compat)
-			SV_Netchan_Encode(client, msg);
+			SV_Netchan_Encode(client, msg, client->lastClientCommandString);
 #endif
 		Netchan_Transmit( &client->netchan, msg->cursize, msg->data );
 	}
