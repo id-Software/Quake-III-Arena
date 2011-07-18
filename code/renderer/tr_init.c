@@ -1149,9 +1149,7 @@ void R_Init( void ) {
 	Com_Memset( &tess, 0, sizeof( tess ) );
 
 	if(sizeof(glconfig_t) != 11332)
-	{
-		ri.Error( ERR_FATAL, "Mod ABI incompatible: sizeof(glconfig_t) == %zd != 11332", sizeof(glconfig_t));
-	}
+		ri.Error( ERR_FATAL, "Mod ABI incompatible: sizeof(glconfig_t) == %u != 11332", (unsigned int) sizeof(glconfig_t));
 
 //	Swap_Init();
 
