@@ -260,19 +260,10 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	va_list		argptr;
 	static int	lastErrorTime;
 	static int	errorCount;
-	static qboolean	calledSysError = qfalse;
 	int			currentTime;
 
 	if(com_errorEntered)
-	{
-		if(!calledSysError)
-		{
-			calledSysError = qtrue;
-			Sys_Error("recursive error after: %s", com_errorMessage);
-		}
-		
-		return;
-	}
+		Sys_Error("recursive error after: %s", com_errorMessage);
 
 	com_errorEntered = qtrue;
 
@@ -348,7 +339,6 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 
 	Com_Shutdown ();
 
-	calledSysError = qtrue;
 	Sys_Error ("%s", com_errorMessage);
 }
 

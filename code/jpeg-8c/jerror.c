@@ -68,7 +68,7 @@ const char * const jpeg_std_message_table[] = {
  * or jpeg_destroy) at some point.
  */
 
-METHODDEF(void)
+__attribute__ ((noreturn)) METHODDEF(void)
 error_exit (j_common_ptr cinfo)
 {
   /* Always display the message */

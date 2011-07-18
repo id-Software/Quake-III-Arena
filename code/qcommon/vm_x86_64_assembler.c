@@ -30,6 +30,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <inttypes.h>
 
+// Ignore __attribute__ on non-gcc platforms
+#ifndef __GNUC__
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+#endif
+
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -55,7 +62,7 @@ static FILE* fout;
 #define debug(fmt, args...)
 #endif
 
-static void _crap(const char* func, const char* fmt, ...)
+static __attribute__ ((noreturn)) __attribute__ ((format (printf, 2, 3))) void _crap(const char* func, const char* fmt, ...)
 {
 	va_list ap;
 	fprintf(stderr, "%s() - ", func);

@@ -193,7 +193,7 @@ Sys_Exit
 Single exit point (regular exit or in case of error)
 =================
 */
-static void Sys_Exit( int exitCode )
+static __attribute__ ((noreturn)) void Sys_Exit( int exitCode )
 {
 	CON_Shutdown( );
 
@@ -351,18 +351,18 @@ void Sys_Error( const char *error, ... )
 	Q_vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 
-	CL_Shutdown(string, qtrue);
 	Sys_ErrorDialog( string );
 
 	Sys_Exit( 3 );
 }
 
+#if 0
 /*
 =================
 Sys_Warn
 =================
 */
-void Sys_Warn( char *warning, ... )
+static __attribute__ ((format (printf, 1, 2))) void Sys_Warn( char *warning, ... )
 {
 	va_list argptr;
 	char    string[1024];
@@ -373,6 +373,7 @@ void Sys_Warn( char *warning, ... )
 
 	CON_Print( va( "Warning: %s", string ) );
 }
+#endif
 
 /*
 ============

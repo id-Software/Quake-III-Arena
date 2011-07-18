@@ -68,7 +68,7 @@ static void		SV_RankEncodeGameID( uint64_t game_id, char* result,
 static uint64_t	SV_RankDecodePlayerID( const char* string );
 static void		SV_RankDecodePlayerKey( const char* string, GR_PLAYER_TOKEN key );
 static char*	SV_RankStatusString( GR_STATUS status );
-static void		SV_RankError( const char* fmt, ... );
+static void		SV_RankError( const char* fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 static char     SV_RankGameKey[64];
 
 /*

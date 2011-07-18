@@ -229,7 +229,7 @@ static unsigned char op_argsize[256] =
 	[OP_BLOCK_COPY] = 4,
 };
 
-void emit(const char* fmt, ...)
+static __attribute__ ((format (printf, 1, 2))) void emit(const char* fmt, ...)
 {
 	va_list ap;
 	char line[4096];
@@ -381,26 +381,26 @@ static void* getentrypoint(vm_t* vm)
        return vm->codeBase;
 }
 
-static void CROSSCALL eop(void)
+static __attribute__ ((noreturn)) void CROSSCALL eop(void)
 {
 	Com_Error(ERR_DROP, "End of program reached without return!");
 	exit(1);
 }
 
-static void CROSSCALL jmpviolation(void)
+static __attribute__ ((noreturn)) void CROSSCALL jmpviolation(void)
 {
 	Com_Error(ERR_DROP, "Program tried to execute code outside VM");
 	exit(1);
 }
 
 #ifdef DEBUG_VM
-static void CROSSCALL memviolation(void)
+static __attribute__ ((noreturn)) void CROSSCALL memviolation(void)
 {
 	Com_Error(ERR_DROP, "Program tried to access memory outside VM, or unaligned memory access");
 	exit(1);
 }
 
-static void CROSSCALL opstackviolation(void)
+static __attribute__ ((noreturn)) void CROSSCALL opstackviolation(void)
 {
 	Com_Error(ERR_DROP, "Program corrupted the VM opStack");
 	exit(1);

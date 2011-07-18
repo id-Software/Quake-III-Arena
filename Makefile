@@ -943,6 +943,10 @@ else
 endif
 
 BASE_CFLAGS += -DPRODUCT_VERSION=\\\"$(VERSION)\\\"
+BASE_CFLAGS += -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral
+BASE_CFLAGS += -Wstrict-aliasing=2 -Wmissing-format-attribute
+BASE_CFLAGS += -Wdisabled-optimization
+BASE_CFLAGS += -Werror-implicit-function-declaration
 
 ifeq ($(V),1)
 echo_cmd=@:
