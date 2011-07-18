@@ -610,6 +610,12 @@ void SV_SendClientMessages(void)
 		if(*c->downloadName)
 			continue;		// Client is downloading, don't send snapshots
 
+        	if(c->netchan.unsentFragments || c->netchan_start_queue)
+        	{
+        	        c->rateDelayed = qtrue;
+			continue;		// Drop this snapshot if the packet queue is still full or delta compression will break
+                }
+
 		if(!(c->netchan.remoteAddress.type == NA_LOOPBACK ||
 		     (sv_lanForceRate->integer && Sys_IsLANAddress(c->netchan.remoteAddress))))
 		{
@@ -617,12 +623,6 @@ void SV_SendClientMessages(void)
 			
 			if(svs.time - c->lastSnapshotTime < c->snapshotMsec * com_timescale->value)
 				continue;		// It's not time yet
-		
-			if(c->netchan.unsentFragments || c->netchan_start_queue)
-			{
-				c->rateDelayed = qtrue;
-				continue;		// Drop this snapshot if the packet queue is still full
-			}
 
 			if(SV_RateMsec(c) > 0)
 			{
