@@ -614,7 +614,7 @@ static int Sys_XmessageCommand( dialogType_t type, const char *message, const ch
 
 	switch( type )
 	{
-		default:           options = "-buttons OK"; break;
+		default:           options = "-buttons OK:0"; break;
 		case DT_YES_NO:    options = "-buttons Yes:0,No:1"; break;
 		case DT_OK_CANCEL: options = "-buttons OK:0,Cancel:1"; break;
 	}
