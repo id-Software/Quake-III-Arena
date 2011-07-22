@@ -2410,7 +2410,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 		int curlen;
 
 		// get all available devices + the default device name.
-		if(enumeration_ext)
+		if(enumeration_all_ext)
 		{
 			devicelist = qalcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
 			defaultdevice = qalcGetString(NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
@@ -2428,18 +2428,24 @@ qboolean S_AL_Init( soundInterface_t *si )
 		// Generic Software as that one works more reliably with various sound systems.
 		// If it's not, use OpenAL's default selection as we don't want to ignore
 		// native hardware acceleration.
-		if(!device && !strcmp(defaultdevice, "Generic Hardware"))
+		if(!device && defaultdevice && !strcmp(defaultdevice, "Generic Hardware"))
 			device = "Generic Software";
 #endif
 
 		// dump a list of available devices to a cvar for the user to see.
-		while((curlen = strlen(devicelist)))
-		{
-			Q_strcat(devicenames, sizeof(devicenames), devicelist);
-			Q_strcat(devicenames, sizeof(devicenames), "\n");
 
-			devicelist += curlen + 1;
+		if(devicelist)
+		{
+			while((curlen = strlen(devicelist)))
+			{
+				Q_strcat(devicenames, sizeof(devicenames), devicelist);
+				Q_strcat(devicenames, sizeof(devicenames), "\n");
+
+				devicelist += curlen + 1;
+			}
 		}
+		else
+			devicelist = "";
 
 		s_alAvailableDevices = Cvar_Get("s_alAvailableDevices", devicenames, CVAR_ROM | CVAR_NORESTART);
 	}
