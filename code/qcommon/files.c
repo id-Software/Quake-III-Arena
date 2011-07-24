@@ -557,7 +557,7 @@ static void FS_CheckFilenameIsNotExecutable( const char *filename,
 		const char *function )
 {
 	// Check if the filename ends with the library extension
-	if( !Q_stricmp( COM_GetExtension( filename ), DLL_EXT ) )
+	if(COM_CompareExtension(filename, DLL_EXT))
 	{
 		Com_Error( ERR_FATAL, "%s: Not allowed to manipulate '%s' due "
 			"to %s extension", function, filename, DLL_EXT );
