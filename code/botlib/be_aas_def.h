@@ -29,13 +29,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
+#include "../qcommon/q_shared.h"
+
 //debugging on
 #define AAS_DEBUG
-
-#define MAX_CLIENTS			64
-#define	MAX_MODELS			256		// these are sent over the net as 8 bits
-#define	MAX_SOUNDS			256		// so they cannot be blindly increased
-#define	MAX_CONFIGSTRINGS	1024
 
 #define	CS_SCORES			32
 #define	CS_MODELS			(CS_SCORES+MAX_CLIENTS)
