@@ -43,6 +43,7 @@ typedef struct voipServerPacket_s
 	int frames;
 	int len;
 	int sender;
+	int flags;
 	byte data[1024];
 } voipServerPacket_t;
 #endif
@@ -361,10 +362,6 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd);
 int SV_WriteDownloadToClient(client_t *cl , msg_t *msg);
 int SV_SendDownloadMessages(void);
 int SV_SendQueuedMessages(void);
-
-#ifdef USE_VOIP
-void SV_WriteVoipToClient( client_t *cl, msg_t *msg );
-#endif
 
 
 //

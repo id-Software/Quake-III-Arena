@@ -799,83 +799,53 @@ void CL_WritePacket( void ) {
 	}
 
 #ifdef USE_VOIP
-	if (clc.voipOutgoingDataSize > 0) {  // only send if data.
-		// Move cl_voipSendTarget from a string to the bitmasks if needed.
-		if (cl_voipSendTarget->modified) {
-			char buffer[32];
-			const char *target = cl_voipSendTarget->string;
+	if (clc.voipOutgoingDataSize > 0)
+	{
+		if((clc.voipFlags & VOIP_SPATIAL) || Com_IsVoipTarget(clc.voipTargets, sizeof(clc.voipTargets), -1))
+		{
+			MSG_WriteByte (&buf, clc_voip);
+			MSG_WriteByte (&buf, clc.voipOutgoingGeneration);
+			MSG_WriteLong (&buf, clc.voipOutgoingSequence);
+			MSG_WriteByte (&buf, clc.voipOutgoingDataFrames);
+			MSG_WriteData (&buf, clc.voipTargets, sizeof(clc.voipTargets));
+			MSG_WriteByte(&buf, clc.voipFlags);
+			MSG_WriteShort (&buf, clc.voipOutgoingDataSize);
+			MSG_WriteData (&buf, clc.voipOutgoingData, clc.voipOutgoingDataSize);
 
-			if (Q_stricmp(target, "attacker") == 0) {
-				int player = VM_Call( cgvm, CG_LAST_ATTACKER );
-				Com_sprintf(buffer, sizeof (buffer), "%d", player);
-				target = buffer;
-			} else if (Q_stricmp(target, "crosshair") == 0) {
-				int player = VM_Call( cgvm, CG_CROSSHAIR_PLAYER );
-				Com_sprintf(buffer, sizeof (buffer), "%d", player);
-				target = buffer;
+			// If we're recording a demo, we have to fake a server packet with
+			//  this VoIP data so it gets to disk; the server doesn't send it
+			//  back to us, and we might as well eliminate concerns about dropped
+			//  and misordered packets here.
+			if(clc.demorecording && !clc.demowaiting)
+			{
+				const int voipSize = clc.voipOutgoingDataSize;
+				msg_t fakemsg;
+				byte fakedata[MAX_MSGLEN];
+				MSG_Init (&fakemsg, fakedata, sizeof (fakedata));
+				MSG_Bitstream (&fakemsg);
+				MSG_WriteLong (&fakemsg, clc.reliableAcknowledge);
+				MSG_WriteByte (&fakemsg, svc_voip);
+				MSG_WriteShort (&fakemsg, clc.clientNum);
+				MSG_WriteByte (&fakemsg, clc.voipOutgoingGeneration);
+				MSG_WriteLong (&fakemsg, clc.voipOutgoingSequence);
+				MSG_WriteByte (&fakemsg, clc.voipOutgoingDataFrames);
+				MSG_WriteShort (&fakemsg, clc.voipOutgoingDataSize );
+				MSG_WriteData (&fakemsg, clc.voipOutgoingData, voipSize);
+				MSG_WriteByte (&fakemsg, svc_EOF);
+				CL_WriteDemoMessage (&fakemsg, 0);
 			}
 
-			if ((*target == '\0') || (Q_stricmp(target, "all") == 0)) {
-				const int all = 0x7FFFFFFF;
-				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = all;
-			} else if (Q_stricmp(target, "none") == 0) {
-				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
-			} else {
-				const char *ptr = target;
-				clc.voipTarget1 = clc.voipTarget2 = clc.voipTarget3 = 0;
-				do {
-					if ((*ptr == ',') || (*ptr == '\0')) {
-						const int val = atoi(target);
-						target = ptr + 1;
-						if ((val >= 0) && (val < 31)) {
-							clc.voipTarget1 |= (1 << (val-0));
-						} else if ((val >= 31) && (val < 62)) {
-							clc.voipTarget2 |= (1 << (val-31));
-						} else if ((val >= 62) && (val < 93)) {
-							clc.voipTarget3 |= (1 << (val-62));
-						}
-					}
-				} while (*(ptr++));
-			}
-			cl_voipSendTarget->modified = qfalse;
+			clc.voipOutgoingSequence += clc.voipOutgoingDataFrames;
+			clc.voipOutgoingDataSize = 0;
+			clc.voipOutgoingDataFrames = 0;
 		}
-
-		MSG_WriteByte (&buf, clc_voip);
-		MSG_WriteByte (&buf, clc.voipOutgoingGeneration);
-		MSG_WriteLong (&buf, clc.voipOutgoingSequence);
-		MSG_WriteByte (&buf, clc.voipOutgoingDataFrames);
-		MSG_WriteLong (&buf, clc.voipTarget1);
-		MSG_WriteLong (&buf, clc.voipTarget2);
-		MSG_WriteLong (&buf, clc.voipTarget3);
-		MSG_WriteShort (&buf, clc.voipOutgoingDataSize);
-		MSG_WriteData (&buf, clc.voipOutgoingData, clc.voipOutgoingDataSize);
-
-		// If we're recording a demo, we have to fake a server packet with
-		//  this VoIP data so it gets to disk; the server doesn't send it
-		//  back to us, and we might as well eliminate concerns about dropped
-		//  and misordered packets here.
-		if ( clc.demorecording && !clc.demowaiting ) {
-			const int voipSize = clc.voipOutgoingDataSize;
-			msg_t fakemsg;
-			byte fakedata[MAX_MSGLEN];
-			MSG_Init (&fakemsg, fakedata, sizeof (fakedata));
-			MSG_Bitstream (&fakemsg);
-			MSG_WriteLong (&fakemsg, clc.reliableAcknowledge);
-			MSG_WriteByte (&fakemsg, svc_voip);
-			MSG_WriteShort (&fakemsg, clc.clientNum);
-			MSG_WriteByte (&fakemsg, clc.voipOutgoingGeneration);
-			MSG_WriteLong (&fakemsg, clc.voipOutgoingSequence);
-			MSG_WriteByte (&fakemsg, clc.voipOutgoingDataFrames);
-			MSG_WriteShort (&fakemsg, clc.voipOutgoingDataSize );
-			MSG_WriteData (&fakemsg, clc.voipOutgoingData, voipSize);
-			MSG_WriteByte (&fakemsg, svc_EOF);
-			CL_WriteDemoMessage (&fakemsg, 0);
+		else
+		{
+			// We have data, but no targets. Silently discard all data
+			clc.voipOutgoingDataSize = 0;
+			clc.voipOutgoingDataFrames = 0;
 		}
-
-		clc.voipOutgoingSequence += clc.voipOutgoingDataFrames;
-		clc.voipOutgoingDataSize = 0;
-		clc.voipOutgoingDataFrames = 0;
-	} else
+	}
 #endif
 
 	if ( count >= 1 ) {

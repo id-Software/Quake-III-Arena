@@ -250,9 +250,10 @@ typedef struct {
 	qboolean voipMuteAll;
 
 	// outgoing data...
-	int voipTarget1;  // these three ints make up a bit mask of 92 bits.
-	int voipTarget2;  //  the bits say who a VoIP pack is addressed to:
-	int voipTarget3;  //  (1 << clientnum). See cl_voipSendTarget cvar.
+	// if voipTargets[i / 8] & (1 << (i % 8)),
+	// then we are sending to clientnum i.
+	uint8_t voipTargets[(MAX_CLIENTS + 7) / 8];
+	uint8_t voipFlags;
 	SpeexPreprocessState *speexPreprocessor;
 	SpeexBits speexEncoderBits;
 	void *speexEncoder;

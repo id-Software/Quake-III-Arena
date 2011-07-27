@@ -49,9 +49,12 @@ s_alCapture: set to "1" (the default) to have the audio layer open an OpenAL
 cl_voipSendTarget: a string: "all" to broadcast to everyone, "none" to send
                    to no one, "attacker" to send to the last person that hit
                    you, "crosshair" to send to the people currently in your
-                   crosshair, or a comma-separated list of client numbers, like
-                   "0,7,2,23" ... an empty string is treated like "all". This
-                   is reset to "all" when connecting to a new server.
+                   crosshair, "spatial" to talk to all people in hearing
+                   range or a comma-separated list of client numbers, like
+                   "0,7,2,23" ... an empty string is treated like "spatial".
+                   You can also use a mixed string like
+                   "0, spatial, 2, crosshair".
+                   This is reset to "spatial" when connecting to a new server.
                    Presumably mods will manage this cvar, not people, but
                    keybind could be useful for the general cases. To send to
                    just your team, or the opposing team, or a buddy list, you

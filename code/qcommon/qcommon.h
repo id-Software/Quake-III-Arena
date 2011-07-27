@@ -252,7 +252,7 @@ PROTOCOL
 ==============================================================
 */
 
-#define	PROTOCOL_VERSION	70
+#define	PROTOCOL_VERSION	71
 #define PROTOCOL_LEGACY_VERSION	68
 // 1.31 - 67
 
@@ -833,6 +833,8 @@ int			Com_FilterPath(char *filter, char *name, int casesensitive);
 int			Com_RealTime(qtime_t *qtime);
 qboolean	Com_SafeMode( void );
 void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf);
+
+qboolean	Com_IsVoipTarget(uint8_t *voipTargets, int voipTargetsSize, int clientNum);
 
 void		Com_StartupVariable( const char *match );
 // checks for and removes command line "+set var arg" constructs

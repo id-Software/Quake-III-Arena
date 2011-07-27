@@ -293,6 +293,88 @@ void CL_VoipNewGeneration(void)
 
 /*
 ===============
+CL_VoipParseTargets
+
+sets clc.voipTargets according to cl_voipSendTarget
+Generally we don't want who's listening to change during a transmission,
+so this is only called when the key is first pressed
+===============
+*/
+void CL_VoipParseTargets(void)
+{
+	const char *target = cl_voipSendTarget->string;
+	char *end;
+	int val;
+
+	Com_Memset(clc.voipTargets, 0, sizeof(clc.voipTargets));
+	clc.voipFlags &= ~VOIP_SPATIAL;
+
+	while(target)
+	{
+		while(*target == ',' || *target == ' ')
+			target++;
+
+		if(!*target)
+			break;
+		
+		if(isdigit(*target))
+		{
+			val = strtol(target, &end, 10);
+			target = end;
+		}
+		else
+		{
+			if(!Q_stricmpn(target, "all", 3))
+			{
+				Com_Memset(clc.voipTargets, ~0, sizeof(clc.voipTargets));
+				return;
+			}
+			if(!Q_stricmpn(target, "spatial", 7))
+			{
+				clc.voipFlags |= VOIP_SPATIAL;
+				target += 7;
+				continue;
+			}
+			else
+			{
+				if(!Q_stricmpn(target, "attacker", 8))
+				{
+					val = VM_Call(cgvm, CG_LAST_ATTACKER);
+					target += 8;
+				}
+				else if(!Q_stricmpn(target, "crosshair", 9))
+				{
+					val = VM_Call(cgvm, CG_CROSSHAIR_PLAYER);
+					target += 9;
+				}
+				else
+				{
+					while(*target && *target != ',' && *target != ' ')
+						target++;
+
+					continue;
+				}
+
+				if(val < 0)
+					continue;
+			}
+		}
+
+		if(val < 0 || val >= MAX_CLIENTS)
+		{
+			Com_Printf(S_COLOR_YELLOW "WARNING: VoIP "
+				   "target %d is not a valid client "
+				   "number\n", val);
+
+			continue;
+		}
+
+		clc.voipTargets[val / 8] |= 1 << (val % 8);
+	}
+}
+
+/*
+===============
 CL_CaptureVoip
 
 Record more audio from the hardware if required and encode it into Speex
@@ -342,8 +424,9 @@ void CL_CaptureVoip(void)
 
 		cl_voipSend->modified = qfalse;
 
-		if (dontCapture) {
-			cl_voipSend->integer = 0;
+		if(dontCapture)
+		{
+			Cvar_Set("cl_voipSend", "0");
 			return;
 		}
 
@@ -362,11 +445,12 @@ void CL_CaptureVoip(void)
 		S_MasterGain(cl_voipGainDuringCapture->value);
 		S_StartCapture();
 		CL_VoipNewGeneration();
+		CL_VoipParseTargets();
 	}
 
 	if ((cl_voipSend->integer) || (finalFrame)) { // user wants to capture audio?
 		int samples = S_AvailableCaptureSamples();
-		const int mult = (finalFrame) ? 1 : 12; // 12 == 240ms of audio.
+		const int mult = (finalFrame) ? 1 : 4; // 4 == 80ms of audio.
 
 		// enough data buffered in audio hardware to process yet?
 		if (samples >= (clc.speexFrameSize * mult)) {
@@ -378,8 +462,8 @@ void CL_CaptureVoip(void)
 			int wpos = 0;
 			int pos = 0;
 
-			if (samples > (clc.speexFrameSize * 12))
-				samples = (clc.speexFrameSize * 12);
+			if (samples > (clc.speexFrameSize * 4))
+				samples = (clc.speexFrameSize * 4);
 
 			// !!! FIXME: maybe separate recording from encoding, so voipPower
 			// !!! FIXME:  updates faster than 4Hz?
@@ -3420,7 +3504,7 @@ void CL_Init( void ) {
 
 #ifdef USE_VOIP
 	cl_voipSend = Cvar_Get ("cl_voipSend", "0", 0);
-	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "all", 0);
+	cl_voipSendTarget = Cvar_Get ("cl_voipSendTarget", "spatial", 0);
 	cl_voipGainDuringCapture = Cvar_Get ("cl_voipGainDuringCapture", "0.2", CVAR_ARCHIVE);
 	cl_voipCaptureMult = Cvar_Get ("cl_voipCaptureMult", "2.0", CVAR_ARCHIVE);
 	cl_voipUseVAD = Cvar_Get ("cl_voipUseVAD", "0", CVAR_ARCHIVE);

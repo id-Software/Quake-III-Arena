@@ -928,6 +928,23 @@ typedef struct {
 	char		string[MAX_CVAR_VALUE_STRING];
 } vmCvar_t;
 
+
+/*
+==============================================================
+
+VoIP
+
+==============================================================
+*/
+
+// if you change the count of flags be sure to also change VOIP_FLAGNUM
+#define VOIP_SPATIAL		0x01		// spatialized voip message
+#define VOIP_DIRECT		0x02		// non-spatialized voip message
+
+// number of flags voip knows. You will have to bump protocol version number if you
+// change this.
+#define VOIP_FLAGCNT		2
+
 /*
 ==============================================================
 
