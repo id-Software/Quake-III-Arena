@@ -912,7 +912,6 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 	for ( i = 0; i < tess.numIndexes; i += 3 )
 	{
 		vec3_t normal;
-		float dot;
 		float len;
 
 		VectorSubtract( tess.xyz[tess.indexes[i]], tr.viewParms.or.origin, normal );
@@ -923,7 +922,7 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 			shortest = len;
 		}
 
-		if ( ( dot = DotProduct( normal, tess.normal[tess.indexes[i]] ) ) >= 0 )
+		if ( DotProduct( normal, tess.normal[tess.indexes[i]] ) >= 0 )
 		{
 			numTriangles--;
 		}
@@ -1269,7 +1268,6 @@ void R_AddEntitySurfaces (void) {
 					if ( (ent->e.renderfx & RF_THIRD_PERSON) && !tr.viewParms.isPortal) {
 						break;
 					}
-					shader = R_GetShaderByHandle( ent->e.customShader );
 					R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0 );
 					break;
 				default:

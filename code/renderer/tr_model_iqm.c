@@ -885,8 +885,8 @@ static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
 	int	*joint = data->jointParents;
 	int	i;
 
-	if (  oldframe == frame ) {
-		mat1 = mat2 = data->poseMats + 12 * data->num_joints * frame;
+	if ( oldframe == frame ) {
+		mat1 = data->poseMats + 12 * data->num_joints * frame;
 		for( i = 0; i < data->num_joints; i++, joint++ ) {
 			if( *joint >= 0 ) {
 				Matrix34Multiply( mat + 12 * *joint,

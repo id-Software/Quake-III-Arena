@@ -192,7 +192,6 @@ typedef struct bot_state_s
 	float lastair_time;								//last time the bot had air
 	float teleport_time;							//last time the bot teleported
 	float camp_time;								//last time camped
-	float camp_range;								//camp range
 	float weaponchange_time;						//time the bot started changing weapons
 	float firethrottlewait_time;					//amount of time to wait
 	float firethrottleshoot_time;					//amount of time to shoot
@@ -264,11 +263,6 @@ typedef struct bot_state_s
 	int ctfstrategy;								//ctf strategy
 	char subteam[32];								//sub team name
 	float formation_dist;							//formation team mate intervening space
-	char formation_teammate[16];					//netname of the team mate the bot uses for relative positioning
-	float formation_angle;							//angle relative to the formation team mate
-	vec3_t formation_dir;							//the direction the formation is moving in
-	vec3_t formation_origin;						//origin the bot uses for relative positioning
-	bot_goal_t formation_goal;						//formation goal
 
 	bot_activategoal_t *activatestack;				//first activate goal on the stack
 	bot_activategoal_t activategoalheap[MAX_ACTIVATESTACK];	//activate goal heap

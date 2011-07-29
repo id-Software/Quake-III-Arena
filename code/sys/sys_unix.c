@@ -405,9 +405,9 @@ char **Sys_ListFiles( const char *directory, const char *extension, char *filter
 			continue;
 
 		if (*extension) {
-			if ( strlen( d->d_name ) < strlen( extension ) ||
+			if ( strlen( d->d_name ) < extLen ||
 				Q_stricmp(
-					d->d_name + strlen( d->d_name ) - strlen( extension ),
+					d->d_name + strlen( d->d_name ) - extLen,
 					extension ) ) {
 				continue; // didn't match
 			}

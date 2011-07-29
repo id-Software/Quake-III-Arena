@@ -931,7 +931,7 @@ static qboolean R_LoadMD4( model_t *mod, void *buffer, const char *mod_name ) {
     
 	// swap all the frames
 	frameSize = (size_t)( &((md4Frame_t *)0)->bones[ md4->numBones ] );
-    for ( i = 0 ; i < md4->numFrames ; i++, frame++) {
+    for ( i = 0 ; i < md4->numFrames ; i++) {
 	    frame = (md4Frame_t *) ( (byte *)md4 + md4->ofsFrames + i * frameSize );
     	frame->radius = LittleFloat( frame->radius );
         for ( j = 0 ; j < 3 ; j++ ) {

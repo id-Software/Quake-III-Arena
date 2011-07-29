@@ -4429,7 +4429,8 @@ open, which buttons to activate etc.
 */
 void BotAIBlocked(bot_state_t *bs, bot_moveresult_t *moveresult, int activate) {
 	int movetype, bspent;
-	vec3_t hordir, start, end, mins, maxs, sideward, angles, up = {0, 0, 1};
+	vec3_t hordir, sideward, angles, up = {0, 0, 1};
+	//vec3_t start, end, mins, maxs;
 	aas_entityinfo_t entinfo;
 	bot_activategoal_t activategoal;
 
@@ -4491,11 +4492,11 @@ void BotAIBlocked(bot_state_t *bs, bot_moveresult_t *moveresult, int activate) {
 	movetype = MOVE_WALK;
 	// if there's an obstacle at the bot's feet and head then
 	// the bot might be able to crouch through
-	VectorCopy(bs->origin, start);
-	start[2] += 18;
-	VectorMA(start, 5, hordir, end);
-	VectorSet(mins, -16, -16, -24);
-	VectorSet(maxs, 16, 16, 4);
+	//VectorCopy(bs->origin, start);
+	//start[2] += 18;
+	//VectorMA(start, 5, hordir, end);
+	//VectorSet(mins, -16, -16, -24);
+	//VectorSet(maxs, 16, 16, 4);
 	//
 	//bsptrace = AAS_Trace(start, mins, maxs, end, bs->entitynum, MASK_PLAYERSOLID);
 	//if (bsptrace.fraction >= 1) movetype = MOVE_CROUCH;

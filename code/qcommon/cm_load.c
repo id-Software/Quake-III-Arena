@@ -138,7 +138,7 @@ void CMod_LoadSubmodels( lump_t *l ) {
 		Com_Error( ERR_DROP, "MAX_SUBMODELS exceeded" );
 	}
 
-	for ( i=0 ; i<count ; i++, in++, out++)
+	for ( i=0 ; i<count ; i++, in++)
 	{
 		out = &cm.cmodels[i];
 

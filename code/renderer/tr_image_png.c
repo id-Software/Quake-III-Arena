@@ -791,8 +791,6 @@ static uint8_t PredictPaeth(uint8_t a, uint8_t b, uint8_t c)
 	int p;
 	int pa, pb, pc;
 
-	Pr = 0;
-
 	p  = ((int) a) + ((int) b) - ((int) c);
 	pa = abs(p - ((int) a));
 	pb = abs(p - ((int) b));

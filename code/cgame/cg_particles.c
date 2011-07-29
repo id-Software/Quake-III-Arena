@@ -858,9 +858,7 @@ void CG_AddParticles (void)
 	float			alpha;
 	float			time, time2;
 	vec3_t			org;
-	int				color;
 	cparticle_t		*active, *tail;
-	int				type;
 	vec3_t			rotate_ang;
 
 	if (!initparticles)
@@ -965,15 +963,11 @@ void CG_AddParticles (void)
 		if (alpha > 1.0)
 			alpha = 1;
 
-		color = p->color;
-
 		time2 = time*time;
 
 		org[0] = p->org[0] + p->vel[0]*time + p->accel[0]*time2;
 		org[1] = p->org[1] + p->vel[1]*time + p->accel[1]*time2;
 		org[2] = p->org[2] + p->vel[2]*time + p->accel[2]*time2;
-
-		type = p->type;
 
 		CG_AddParticleToScene (p, org, alpha);
 	}
@@ -1682,8 +1676,8 @@ qboolean ValidBloodPool (vec3_t start)
 	vec3_t	angles;
 	vec3_t	right, up;
 	vec3_t	this_pos, x_pos, center_pos, end_pos;
-	float	x, y;
-	float	fwidth, fheight;
+	int		x, y;
+	int		fwidth, fheight;
 	trace_t	trace;
 	vec3_t	normal;
 

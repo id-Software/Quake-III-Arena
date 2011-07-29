@@ -1758,8 +1758,6 @@ Advances the non-player objects in the world
 void G_RunFrame( int levelTime ) {
 	int			i;
 	gentity_t	*ent;
-	int			msec;
-int start, end;
 
 	// if we are waiting for the level to restart, do nothing
 	if ( level.restarted ) {
@@ -1769,7 +1767,6 @@ int start, end;
 	level.framenum++;
 	level.previousTime = level.time;
 	level.time = levelTime;
-	msec = level.time - level.previousTime;
 
 	// get any cvar changes
 	G_UpdateCvars();
@@ -1777,7 +1774,6 @@ int start, end;
 	//
 	// go through all allocated objects
 	//
-	start = trap_Milliseconds();
 	ent = &g_entities[0];
 	for (i=0 ; i<level.num_entities ; i++, ent++) {
 		if ( !ent->inuse ) {
@@ -1837,9 +1833,7 @@ int start, end;
 
 		G_RunThink( ent );
 	}
-end = trap_Milliseconds();
 
-start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
 	for (i=0 ; i < level.maxclients ; i++, ent++ ) {
@@ -1847,7 +1841,6 @@ start = trap_Milliseconds();
 			ClientEndFrame( ent );
 		}
 	}
-end = trap_Milliseconds();
 
 	// see if it is time to do a tournement restart
 	CheckTournament();

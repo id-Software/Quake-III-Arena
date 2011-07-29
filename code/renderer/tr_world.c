@@ -63,7 +63,6 @@ static qboolean	R_CullGrid( srfGridMesh_t *cv ) {
 	} else {
 		sphereCull = R_CullPointAndRadius( cv->localOrigin, cv->meshRadius );
 	}
-	boxCull = CULL_OUT;
 	
 	// check for trivial reject
 	if ( sphereCull == CULL_OUT )

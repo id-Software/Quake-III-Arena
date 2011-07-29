@@ -243,8 +243,6 @@ S_AL_BufferUnload
 */
 static void S_AL_BufferUnload(sfxHandle_t sfx)
 {
-	ALenum error;
-
 	if(knownSfx[sfx].filename[0] == '\0')
 		return;
 
@@ -254,7 +252,7 @@ static void S_AL_BufferUnload(sfxHandle_t sfx)
 	// Delete it 
 	S_AL_ClearError( qfalse );
 	qalDeleteBuffers(1, &knownSfx[sfx].buffer);
-	if((error = qalGetError()) != AL_NO_ERROR)
+	if(qalGetError() != AL_NO_ERROR)
 		Com_Printf( S_COLOR_RED "ERROR: Can't delete sound buffer for %s\n",
 				knownSfx[sfx].filename);
 
@@ -673,7 +671,6 @@ qboolean S_AL_SrcInit( void )
 {
 	int i;
 	int limit;
-	ALenum error;
 
 	// Clear the sources data structure
 	memset(srcList, 0, sizeof(srcList));
@@ -692,7 +689,7 @@ qboolean S_AL_SrcInit( void )
 	for(i = 0; i < limit; i++)
 	{
 		qalGenSources(1, &srcList[i].alSource);
-		if((error = qalGetError()) != AL_NO_ERROR)
+		if(qalGetError() != AL_NO_ERROR)
 			break;
 		srcCount++;
 	}
@@ -2440,20 +2437,26 @@ qboolean S_AL_Init( soundInterface_t *si )
 	{
 		char devicenames[16384] = "";
 		const char *devicelist;
+#ifdef _WIN32
 		const char *defaultdevice;
+#endif
 		int curlen;
 
 		// get all available devices + the default device name.
 		if(enumeration_all_ext)
 		{
 			devicelist = qalcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+#ifdef _WIN32
 			defaultdevice = qalcGetString(NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
+#endif
 		}
 		else
 		{
 			// We don't have ALC_ENUMERATE_ALL_EXT but normal enumeration.
 			devicelist = qalcGetString(NULL, ALC_DEVICE_SPECIFIER);
+#ifdef _WIN32
 			defaultdevice = qalcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+#endif
 			enumeration_ext = qtrue;
 		}
 

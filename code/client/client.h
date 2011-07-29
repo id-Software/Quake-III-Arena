@@ -564,7 +564,7 @@ void CL_SaveConsoleHistory( void );
 void	SCR_Init (void);
 void	SCR_UpdateScreen (void);
 
-void	SCR_DebugGraph (float value, int color);
+void	SCR_DebugGraph (float value);
 
 int		SCR_GetBigStringWidth( const char *str );	// returns in virtual 640x480 coordinates
 

@@ -237,7 +237,6 @@ void VM_PrepareInterpreter( vm_t *vm, vmHeader_t *header ) {
 	}
 	int_pc = 0;
 	instruction = 0;
-	code = (byte *)header + header->codeOffset;
 	
 	// Now that the code has been expanded to int-sized opcodes, we'll translate instruction index
 	//into an index into codeBase[], which contains opcodes and operands.

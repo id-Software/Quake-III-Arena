@@ -112,20 +112,6 @@ static void Demos_MenuEvent( void *ptr, int event ) {
 
 
 /*
-=================
-UI_DemosMenu_Key
-=================
-*/
-static sfxHandle_t UI_DemosMenu_Key( int key ) {
-	menucommon_s	*item;
-
-	item = Menu_ItemAtCursor( &s_demos.menu );
-
-	return Menu_DefaultKey( &s_demos.menu, key );
-}
-
-
-/*
 ===============
 Demos_MenuInit
 ===============
@@ -137,7 +123,6 @@ static void Demos_MenuInit( void ) {
 	int	protocol, protocolLegacy;
 
 	memset( &s_demos, 0 ,sizeof(demos_t) );
-	s_demos.menu.key = UI_DemosMenu_Key;
 
 	Demos_Cache();
 

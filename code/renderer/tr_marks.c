@@ -272,6 +272,10 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 	vec3_t			v1, v2;
 	int				*indexes;
 
+	if (numPoints <= 0) {
+		return 0;
+	}
+
 	//increment view count for double check prevention
 	tr.viewCount++;
 

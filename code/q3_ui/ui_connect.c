@@ -82,7 +82,7 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 	downloadCount = trap_Cvar_VariableValue( "cl_downloadCount" );
 	downloadTime = trap_Cvar_VariableValue( "cl_downloadTime" );
 
-	leftWidth = width = UI_ProportionalStringWidth( dlText ) * UI_ProportionalSizeScale( style );
+	leftWidth = UI_ProportionalStringWidth( dlText ) * UI_ProportionalSizeScale( style );
 	width = UI_ProportionalStringWidth( etaText ) * UI_ProportionalSizeScale( style );
 	if (width > leftWidth) leftWidth = width;
 	width = UI_ProportionalStringWidth( xferText ) * UI_ProportionalSizeScale( style );

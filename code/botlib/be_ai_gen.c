@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //===========================================================================
 int GeneticSelection(int numranks, float *rankings)
 {
-	float sum, select;
+	float sum;
 	int i, index;
 
 	sum = 0;
@@ -64,7 +64,7 @@ int GeneticSelection(int numranks, float *rankings)
 	{
 		//select a bot where the ones with the higest rankings have
 		//the highest chance of being selected
-		select = random() * sum;
+		//sum *= random();
 		for (i = 0; i < numranks; i++)
 		{
 			if (rankings[i] < 0) continue;

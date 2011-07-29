@@ -440,9 +440,7 @@ void CL_CaptureVoip(void)
 	// try to get more audio data from the sound card...
 
 	if (initialFrame) {
-		float gain = cl_voipGainDuringCapture->value;
-		if (gain < 0.0f) gain = 0.0f; else if (gain >= 1.0f) gain = 1.0f;
-		S_MasterGain(cl_voipGainDuringCapture->value);
+		S_MasterGain(Com_Clamp(0.0f, 1.0f, cl_voipGainDuringCapture->value));
 		S_StartCapture();
 		CL_VoipNewGeneration();
 		CL_VoipParseTargets();
@@ -582,9 +580,8 @@ CL_ChangeReliableCommand
 ======================
 */
 void CL_ChangeReliableCommand( void ) {
-	int r, index, l;
+	int index, l;
 
-	r = clc.reliableSequence - (random() * 5);
 	index = clc.reliableSequence & ( MAX_RELIABLE_COMMANDS - 1 );
 	l = strlen(clc.reliableCommands[ index ]);
 	if ( l >= MAX_STRING_CHARS - 1 ) {
@@ -3001,7 +2998,7 @@ void CL_Frame ( int msec ) {
 	cls.realtime += cls.frametime;
 
 	if ( cl_timegraph->integer ) {
-		SCR_DebugGraph ( cls.realFrametime * 0.25, 0 );
+		SCR_DebugGraph ( cls.realFrametime * 0.25 );
 	}
 
 	// see if we need to update any userinfo
@@ -3803,10 +3800,8 @@ CL_GetServerStatus
 ===================
 */
 serverStatus_t *CL_GetServerStatus( netadr_t from ) {
-	serverStatus_t *serverStatus;
 	int i, oldest, oldestTime;
 
-	serverStatus = NULL;
 	for (i = 0; i < MAX_SERVERSTATUSREQUESTS; i++) {
 		if ( NET_CompareAdr( from, cl_serverStatusList[i].address ) ) {
 			return &cl_serverStatusList[i];
@@ -4330,7 +4325,6 @@ qboolean CL_UpdateVisiblePings_f(int source) {
 	if (slots < MAX_PINGREQUESTS) {
 		serverInfo_t *server = NULL;
 
-		max = (source == AS_GLOBAL) ? MAX_GLOBAL_SERVERS : MAX_OTHER_SERVERS;
 		switch (source) {
 			case AS_LOCAL :
 				server = &cls.localServers[0];

@@ -395,25 +395,18 @@ DEBUG GRAPH
 ===============================================================================
 */
 
-typedef struct
-{
-	float	value;
-	int		color;
-} graphsamp_t;
-
 static	int			current;
-static	graphsamp_t	values[1024];
+static	float		values[1024];
 
 /*
 ==============
 SCR_DebugGraph
 ==============
 */
-void SCR_DebugGraph (float value, int color)
+void SCR_DebugGraph (float value)
 {
-	values[current&1023].value = value;
-	values[current&1023].color = color;
-	current++;
+	values[current] = value;
+	current = (current + 1) % ARRAY_LEN(values);
 }
 
 /*
@@ -425,7 +418,6 @@ void SCR_DrawDebugGraph (void)
 {
 	int		a, x, y, w, i, h;
 	float	v;
-	int		color;
 
 	//
 	// draw the graph
@@ -440,9 +432,8 @@ void SCR_DrawDebugGraph (void)
 
 	for (a=0 ; a<w ; a++)
 	{
-		i = (current-1-a+1024) & 1023;
-		v = values[i].value;
-		color = values[i].color;
+		i = (ARRAY_LEN(values)+current-1-(a % ARRAY_LEN(values))) % ARRAY_LEN(values);
+		v = values[i];
 		v = v * cl_graphscale->integer + cl_graphshift->integer;
 		
 		if (v < 0)

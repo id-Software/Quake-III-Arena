@@ -295,7 +295,10 @@ CG_CheckLocalSounds
 ==================
 */
 void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
-	int			highScore, health, armor, reward;
+	int			highScore, reward;
+#ifdef MISSIONPACK
+	int			health, armor;
+#endif
 	sfxHandle_t sfx;
 
 	// don't play the sounds if the player just changed teams
@@ -305,9 +308,9 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 
 	// hit changes
 	if ( ps->persistant[PERS_HITS] > ops->persistant[PERS_HITS] ) {
+#ifdef MISSIONPACK
 		armor  = ps->persistant[PERS_ATTACKEE_ARMOR] & 0xff;
 		health = ps->persistant[PERS_ATTACKEE_ARMOR] >> 8;
-#ifdef MISSIONPACK
 		if (armor > 50 ) {
 			trap_S_StartLocalSound( cgs.media.hitSoundHighArmor, CHAN_LOCAL_SOUND );
 		} else if (armor || health > 100) {

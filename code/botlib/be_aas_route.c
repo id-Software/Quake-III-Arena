@@ -506,9 +506,11 @@ void AAS_CalculateAreaTravelTimes(void)
 	aas_reversedlink_t *revlink;
 	aas_reachability_t *reach;
 	aas_areasettings_t *settings;
+#ifdef DEBUG
 	int starttime;
 
 	starttime = Sys_MilliSeconds();
+#endif
 	//if there are still area travel times, free the memory
 	if (aasworld.areatraveltimes) FreeMemory(aasworld.areatraveltimes);
 	//get the total size of all the area travel times
@@ -887,7 +889,8 @@ void AAS_InitRoutingUpdate(void)
 //===========================================================================
 void AAS_CreateAllRoutingCache(void)
 {
-	int i, j, t;
+	int i, j;
+	//int t;
 
 	aasworld.initialized = qtrue;
 	botimport.Print(PRT_MESSAGE, "AAS_CreateAllRoutingCache\n");
@@ -898,7 +901,8 @@ void AAS_CreateAllRoutingCache(void)
 		{
 			if (i == j) continue;
 			if (!AAS_AreaReachability(j)) continue;
-			t = AAS_AreaTravelTimeToGoalArea(i, aasworld.areas[i].center, j, TFL_DEFAULT);
+			AAS_AreaTravelTimeToGoalArea(i, aasworld.areas[i].center, j, TFL_DEFAULT);
+			//t = AAS_AreaTravelTimeToGoalArea(i, aasworld.areas[i].center, j, TFL_DEFAULT);
 			//Log_Write("traveltime from %d to %d is %d", i, j, t);
 		} //end for
 	} //end for
