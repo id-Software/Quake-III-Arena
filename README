@@ -120,8 +120,6 @@ New cvars
   cl_mouseAccelStyle                - Set to 1 for QuakeLive mouse acceleration
                                       behaviour, 0 for standard q3
   cl_mouseAccelOffset               - Tuning the acceleration curve, see below
-  cl_gamename                       - Gamename sent to master server in
-                                      getserversExt query
 
   in_joystickUseAnalog              - Do not translate joystick axis events
                                       to keyboard commands
@@ -197,6 +195,10 @@ New cvars
                                       through which other processes can control
                                       the server while it is running. 
                                       Nonfunctional on Windows.
+  com_gamename                      - Gamename sent to master server in
+                                      getservers[Ext] query and infoResponse
+                                      "gamename" infostring value. Also used
+                                      for filtering local network games.
   com_protocol                      - Specify protocol version number for
                                       current ioquake3 protocol, see
                                       "Network protocols" section below
@@ -210,9 +212,6 @@ New cvars
                                       holds custom pk3 files for your server
   sv_banFile                        - Name of the file that is used for storing
                                       the server bans
-  sv_heartbeat                      - Heartbeat string sent to master server
-  sv_flatline                       - Heartbeat string sent to master server
-                                      when server is killed
 
   net_ip6                           - IPv6 address to bind to
   net_port6                         - port to bind to using the ipv6 address
@@ -527,25 +526,18 @@ Creating standalone games
   
     +set com_homepath <homedirname>
   
-  to the command line. You can also control which kind of messages to send to
-  the master server:
+  to the command line. You can also control which game name to use when talking
+  to the master server:
   
-    +set sv_heartbeat <heartbeat> +set sv_flatline <flatline>
-    +set cl_gamename <gamename>
+    +set com_gamename <gamename>
   
-  The <heartbeat> and <flatline> message can be specific to your game. The
-  flatline message is sent to signal the master server that the game server is
-  quitting. Vanilla quake3 uses "QuakeArena-1" both for the heartbeat and
-  flatline messages.
-  The cl_gamename message is for dpmaster to specify which game the client
-  wants a server list for. It is only used in the new ipv6 based getServersExt
-  query.
+  So clients requesting a server list will only receive servers that have a
+  matching game name.
   
   Example line:
   
     +set com_basegame basefoo +set com_homepath .foo
-    +set sv_heartbeat fooalive +set sv_flatline foodead
-    +set cl_gamename foo
+    +set com_gamename foo
 
 
   If you really changed parts that would make vanilla ioquake3 incompatible with

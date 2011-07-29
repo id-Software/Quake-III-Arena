@@ -870,6 +870,7 @@ extern	cvar_t	*sv_paused;
 extern	cvar_t	*cl_packetdelay;
 extern	cvar_t	*sv_packetdelay;
 
+extern	cvar_t	*com_gamename;
 extern	cvar_t	*com_protocol;
 #ifdef LEGACY_PROTOCOL
 extern	cvar_t	*com_legacyprotocol;

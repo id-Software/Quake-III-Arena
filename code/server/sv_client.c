@@ -70,10 +70,10 @@ void SV_GetChallenge(netadr_t from)
 	if(gameName && *gameName)
 	{
 		// reject client if the heartbeat string sent by the client doesn't match ours
-		if(strcmp(gameName, sv_heartbeat->string))
+		if(strcmp(gameName, com_gamename->string))
 		{
  			NET_OutOfBandPrint(NS_SERVER, from, "print\nGame mismatch: This is a %s server\n",
- 				sv_heartbeat->string);
+ 				com_gamename->string);
 			return;
 		}
 	}

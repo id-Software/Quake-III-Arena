@@ -31,26 +31,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define BASEGAME			"foobar"
   #define CLIENT_WINDOW_TITLE     	"changeme"
   #define CLIENT_WINDOW_MIN_TITLE 	"changeme2"
-  #define GAMENAME_FOR_MASTER		"iofoo3"		// must NOT contain whitespaces
-  #define HEARTBEAT_FOR_MASTER		GAMENAME_FOR_MASTER
-  #define FLATLINE_FOR_MASTER		GAMENAME_FOR_MASTER "dead"
   #define HOMEPATH_NAME_UNIX		".foo"
   #define HOMEPATH_NAME_WIN		"FooBar"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
+  #define GAMENAME_FOR_MASTER		"foobar"	// must NOT contain whitespace
 //  #define LEGACY_PROTOCOL	// You probably don't need this for your standalone game
 #else
   #define PRODUCT_NAME			"ioq3"
   #define BASEGAME			"baseq3"
   #define CLIENT_WINDOW_TITLE     	"ioquake3"
   #define CLIENT_WINDOW_MIN_TITLE 	"ioq3"
-  #define GAMENAME_FOR_MASTER		"Quake3Arena"
-  #define HEARTBEAT_FOR_MASTER		"QuakeArena-1"
-  #define FLATLINE_FOR_MASTER		HEARTBEAT_FOR_MASTER
   #define HOMEPATH_NAME_UNIX		".q3a"
   #define HOMEPATH_NAME_WIN		"Quake3"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
+  #define GAMENAME_FOR_MASTER		"Quake3Arena"
   #define LEGACY_PROTOCOL
 #endif
+
+// Heartbeat for dpmaster protocol. You shouldn't change this unless you know what you're doing
+#define HEARTBEAT_FOR_MASTER		"DarkPlaces"
 
 #define BASETA				"missionpack"
 
