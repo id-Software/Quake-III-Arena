@@ -144,23 +144,8 @@ qboolean QAL_Init(const char *libname)
 	if(OpenALLib)
 		return qtrue;
 
-	Com_Printf( "Loading \"%s\"...\n", libname);
-	if( (OpenALLib = Sys_LoadLibrary(libname)) == 0 )
-	{
-#ifdef _WIN32
+	if(!(OpenALLib = Sys_LoadDll(libname)))
 		return qfalse;
-#else
-		char fn[1024];
-		Q_strncpyz( fn, Sys_Cwd( ), sizeof( fn ) );
-		strncat(fn, "/", sizeof(fn) - strlen(fn) - 1);
-		strncat(fn, libname, sizeof(fn) - strlen(fn) - 1);
-
-		if( (OpenALLib = Sys_LoadLibrary(fn)) == 0 )
-		{
-			return qfalse;
-		}
-#endif
-	}
 
 	alinit_fail = qfalse;
 

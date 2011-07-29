@@ -412,10 +412,59 @@ void Sys_UnloadDll( void *dllHandle )
 =================
 Sys_LoadDll
 
+First try to load library name from system library path,
+from executable path, then fs_basepath.
+=================
+*/
+
+void *Sys_LoadDll(const char *name)
+{
+	void *dllhandle;
+	
+	Com_Printf("Try loading \"%s\"...\n", name);
+	if(!(dllhandle = Sys_LoadLibrary(name)))
+	{
+		const char *topDir;
+		char libPath[MAX_OSPATH];
+
+		topDir = Sys_BinaryPath();
+
+		if(!*topDir)
+			topDir = ".";
+
+		Com_Printf("Try loading \"%s\" from \"%s\"...\n", name, topDir);
+		Com_sprintf(libPath, sizeof(libPath), "%s%c%s", topDir, PATH_SEP, name);
+
+		if(!(dllhandle = Sys_LoadLibrary(libPath)))
+		{
+			const char *basePath = Cvar_VariableString("fs_basepath");
+			
+			if(!basePath || !*basePath)
+				basePath = ".";
+			
+			if(FS_FilenameCompare(topDir, basePath))
+			{
+				Com_Printf("Try loading \"%s\" from \"%s\"...\n", name, basePath);
+				Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, name);
+				dllhandle = Sys_LoadLibrary(libPath);
+			}
+			
+			if(!dllhandle)
+				Com_Printf("Loading \"%s\" failed\n", name);
+		}
+	}
+	
+	return dllhandle;
+}
+
+/*
+=================
+Sys_LoadQVMDll
+
 Used to load a development dll instead of a virtual machine
 =================
 */
-void *Sys_LoadDll(const char *name,
+void *Sys_LoadQVMDll(const char *name,
 	intptr_t (QDECL **entryPoint)(int, ...),
 	intptr_t (*systemcalls)(intptr_t, ...))
 {
@@ -429,7 +478,7 @@ void *Sys_LoadDll(const char *name,
 
 	if(!libHandle)
 	{
-		Com_Printf("Sys_LoadDll(%s) failed:\n\"%s\"\n", name, Sys_LibraryError());
+		Com_Printf("Sys_LoadQVMDll(%s) failed:\n\"%s\"\n", name, Sys_LibraryError());
 		return NULL;
 	}
 
@@ -438,13 +487,13 @@ void *Sys_LoadDll(const char *name,
 
 	if ( !*entryPoint || !dllEntry )
 	{
-		Com_Printf ( "Sys_LoadDll(%s) failed to find vmMain function:\n\"%s\" !\n", name, Sys_LibraryError( ) );
+		Com_Printf ( "Sys_LoadQVMDll(%s) failed to find vmMain function:\n\"%s\" !\n", name, Sys_LibraryError( ) );
 		Sys_UnloadLibrary(libHandle);
 
 		return NULL;
 	}
 
-	Com_Printf ( "Sys_LoadDll(%s) found vmMain function at %p\n", name, *entryPoint );
+	Com_Printf ( "Sys_LoadQVMDll(%s) found vmMain function at %p\n", name, *entryPoint );
 	dllEntry( systemcalls );
 
 	return libHandle;

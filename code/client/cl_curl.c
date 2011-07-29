@@ -94,30 +94,19 @@ qboolean CL_cURL_Init()
 
 
 	Com_Printf("Loading \"%s\"...", cl_cURLLib->string);
-	if( (cURLLib = Sys_LoadLibrary(cl_cURLLib->string)) == 0 )
+	if(!(cURLLib = Sys_LoadDll(cl_cURLLib->string)))
 	{
 #ifdef _WIN32
 		return qfalse;
-#else
-		char fn[1024];
 
-		Q_strncpyz( fn, Sys_Cwd( ), sizeof( fn ) );
-		strncat(fn, "/", sizeof(fn)-strlen(fn)-1);
-		strncat(fn, cl_cURLLib->string, sizeof(fn)-strlen(fn)-1);
-
-		if((cURLLib = Sys_LoadLibrary(fn)) == 0)
-		{
-#ifdef ALTERNATE_CURL_LIB
-			// On some linux distributions there is no libcurl.so.3, but only libcurl.so.4. That one works too.
-			if( (cURLLib = Sys_LoadLibrary(ALTERNATE_CURL_LIB)) == 0 )
-			{
-				return qfalse;
-			}
+#elsif ALTERNATE_CURL_LIB
+		// On some linux distributions there is no libcurl.so.3, but only libcurl.so.4. That one works too.
+		if(!(cURLLib = Sys_LoadDll(ALTERNATE_CURL_LIB)))
+			return qfalse;
 #else
+
 			return qfalse;
 #endif
-		}
-#endif /* _WIN32 */
 	}
 
 	clc.cURLEnabled = qtrue;

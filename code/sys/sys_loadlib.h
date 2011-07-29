@@ -47,3 +47,5 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #	define Sys_LoadFunction(h,fn) SDL_LoadFunction(h,fn)
 #	define Sys_LibraryError() SDL_GetError()
 #endif
+
+void * QDECL Sys_LoadDll(const char *name);
