@@ -585,7 +585,6 @@ typedef struct {
 	qboolean		debug;
 	qhandle_t		whiteShader;
 	qhandle_t		menuBackShader;
-	qhandle_t		menuBackShader2;
 	qhandle_t		menuBackNoLogoShader;
 	qhandle_t		charset;
 	qhandle_t		charsetProp;
