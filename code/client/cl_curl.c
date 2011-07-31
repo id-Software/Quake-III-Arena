@@ -96,17 +96,11 @@ qboolean CL_cURL_Init()
 	Com_Printf("Loading \"%s\"...", cl_cURLLib->string);
 	if(!(cURLLib = Sys_LoadDll(cl_cURLLib->string)))
 	{
-#ifdef _WIN32
-		return qfalse;
-
-#elsif ALTERNATE_CURL_LIB
+#ifdef ALTERNATE_CURL_LIB
 		// On some linux distributions there is no libcurl.so.3, but only libcurl.so.4. That one works too.
 		if(!(cURLLib = Sys_LoadDll(ALTERNATE_CURL_LIB)))
-			return qfalse;
-#else
-
-			return qfalse;
 #endif
+			return qfalse;
 	}
 
 	clc.cURLEnabled = qtrue;
