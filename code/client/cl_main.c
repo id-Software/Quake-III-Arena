@@ -3182,7 +3182,7 @@ void CL_InitRef( void ) {
 
 	Com_sprintf(dllName, sizeof(dllName), "renderer_%s_" ARCH_STRING DLL_EXT, cl_renderer->string);
 
-	if(!(rendererLib = Sys_LoadDll(dllName)) && strcmp(cl_renderer->string, cl_renderer->resetString))
+	if(!(rendererLib = Sys_LoadDll(dllName, qfalse)) && strcmp(cl_renderer->string, cl_renderer->resetString))
 	{
 		Cvar_ForceReset("cl_renderer");
 

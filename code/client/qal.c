@@ -144,7 +144,7 @@ qboolean QAL_Init(const char *libname)
 	if(OpenALLib)
 		return qtrue;
 
-	if(!(OpenALLib = Sys_LoadDll(libname)))
+	if(!(OpenALLib = Sys_LoadDll(libname, qtrue)))
 		return qfalse;
 
 	alinit_fail = qfalse;
