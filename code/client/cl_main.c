@@ -144,6 +144,8 @@ int serverStatusCount;
 	void hA3Dg_ExportRenderGeom (refexport_t *incoming_re);
 #endif
 
+static int isQuitting = qfalse;
+
 extern void SV_BotFrame( int time );
 void CL_CheckForResend( void );
 void CL_ShowIP_f(void);
@@ -1472,7 +1474,9 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 
 	CL_UpdateGUID( NULL, 0 );
-	CL_OldGame();
+
+	if(!isQuitting)
+		CL_OldGame();
 }
 
 
@@ -3630,7 +3634,7 @@ CL_Shutdown
 
 ===============
 */
-void CL_Shutdown(char *finalmsg, qboolean disconnect)
+void CL_Shutdown(char *finalmsg, qboolean disconnect, qboolean quit)
 {
 	static qboolean recursive = qfalse;
 	
@@ -3645,6 +3649,8 @@ void CL_Shutdown(char *finalmsg, qboolean disconnect)
 		return;
 	}
 	recursive = qtrue;
+
+	isQuitting = quit;
 
 	if(disconnect)
 		CL_Disconnect(qtrue);
@@ -3675,7 +3681,6 @@ void CL_Shutdown(char *finalmsg, qboolean disconnect)
 	Cmd_RemoveCommand ("model");
 	Cmd_RemoveCommand ("video");
 	Cmd_RemoveCommand ("stopvideo");
-	Cmd_RemoveCommand ("minimize");
 
 	CL_ShutdownInput();
 	Con_Shutdown();

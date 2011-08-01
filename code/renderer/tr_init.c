@@ -1250,6 +1250,7 @@ void RE_Shutdown( qboolean destroyWindow ) {
 	ri.Cmd_RemoveCommand ("shaderlist");
 	ri.Cmd_RemoveCommand ("skinlist");
 	ri.Cmd_RemoveCommand ("gfxinfo");
+	ri.Cmd_RemoveCommand("minimize");
 	ri.Cmd_RemoveCommand( "modelist" );
 	ri.Cmd_RemoveCommand( "shaderstate" );
 

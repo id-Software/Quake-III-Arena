@@ -550,7 +550,7 @@ void Sys_SigHandler( int signal )
 	{
 		signalcaught = qtrue;
 #ifndef DEDICATED
-		CL_Shutdown(va("Received signal %d", signal), qtrue);
+		CL_Shutdown(va("Received signal %d", signal), qtrue, qtrue);
 #endif
 		SV_Shutdown(va("Received signal %d", signal) );
 	}
