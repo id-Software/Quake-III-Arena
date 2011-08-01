@@ -3111,11 +3111,11 @@ static void FS_ReorderPurePaks( void )
 	searchpath_t **p_insert_index, // for linked list reordering
 		**p_previous; // when doing the scan
 
+	fs_reordered = qfalse;
+
 	// only relevant when connected to pure server
 	if ( !fs_numServerPaks )
 		return;
-
-	fs_reordered = qfalse;
 
 	p_insert_index = &fs_searchpaths; // we insert in order at the beginning of the list
 	for ( i = 0 ; i < fs_numServerPaks ; i++ ) {
@@ -3889,9 +3889,10 @@ qboolean FS_ConditionalRestart(int checksumFeed, qboolean disconnect)
 		Com_GameRestart(checksumFeed, disconnect);
 		return qtrue;
 	}
-
 	else if(checksumFeed != fs_checksumFeed)
 		FS_Restart(checksumFeed);
+	else if(fs_numServerPaks && !fs_reordered)
+		FS_ReorderPurePaks();
 	
 	return qfalse;
 }
