@@ -1011,3 +1011,32 @@ int Q_isnan( float x )
 
 	return (int)( (unsigned int)fi.ui >> 31 );
 }
+//------------------------------------------------------------------------
+
+#ifndef Q3_VM
+/*
+=====================
+Q_acos
+
+the msvc acos doesn't always return a value between -PI and PI:
+
+int i;
+i = 1065353246;
+acos(*(float*) &i) == -1.#IND0
+
+=====================
+*/
+float Q_acos(float c) {
+	float angle;
+
+	angle = acos(c);
+
+	if (angle > M_PI) {
+		return (float)M_PI;
+	}
+	if (angle < -M_PI) {
+		return (float)M_PI;
+	}
+	return angle;
+}
+#endif

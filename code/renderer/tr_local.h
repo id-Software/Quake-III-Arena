@@ -1306,6 +1306,7 @@ void		GLimp_FrontEndSleep( void );
 void		GLimp_WakeRenderer( void *data );
 
 void		GLimp_LogComment( char *comment );
+void		GLimp_Minimize(void);
 
 // NOTE TTimo linux works with float gamma value, not the gamma table
 //   the params won't be used, getting the r_gamma cvar directly

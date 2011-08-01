@@ -90,7 +90,7 @@ GLimp_Shutdown
 */
 void GLimp_Shutdown( void )
 {
-	IN_Shutdown();
+	ri.IN_Shutdown();
 
 	SDL_QuitSubSystem( SDL_INIT_VIDEO );
 	screen = NULL;
@@ -464,10 +464,10 @@ static qboolean GLimp_StartDriverAndSetMode(int mode, qboolean fullscreen, qbool
 
 		SDL_VideoDriverName( driverName, sizeof( driverName ) - 1 );
 		ri.Printf( PRINT_ALL, "SDL using driver \"%s\"\n", driverName );
-		Cvar_Set( "r_sdlDriver", driverName );
+		ri.Cvar_Set( "r_sdlDriver", driverName );
 	}
 
-	if (fullscreen && Cvar_VariableIntegerValue( "in_nograb" ) )
+	if (fullscreen && ri.Cvar_VariableIntegerValue( "in_nograb" ) )
 	{
 		ri.Printf( PRINT_ALL, "Fullscreen not allowed with in_nograb 1\n");
 		ri.Cvar_Set( "r_fullscreen", "0" );
@@ -686,7 +686,7 @@ void GLimp_Init( void )
 	r_allowResize = ri.Cvar_Get( "r_allowResize", "0", CVAR_ARCHIVE );
 	r_centerWindow = ri.Cvar_Get( "r_centerWindow", "0", CVAR_ARCHIVE );
 
-	if( Cvar_VariableIntegerValue( "com_abnormalExit" ) )
+	if( ri.Cvar_VariableIntegerValue( "com_abnormalExit" ) )
 	{
 		ri.Cvar_Set( "r_mode", va( "%d", R_MODE_FALLBACK ) );
 		ri.Cvar_Set( "r_fullscreen", "0" );
@@ -694,16 +694,16 @@ void GLimp_Init( void )
 		ri.Cvar_Set( "com_abnormalExit", "0" );
 	}
 
-	Sys_SetEnv( "SDL_VIDEO_CENTERED", r_centerWindow->integer ? "1" : "" );
+	ri.Sys_SetEnv( "SDL_VIDEO_CENTERED", r_centerWindow->integer ? "1" : "" );
 
-	Sys_GLimpInit( );
+	ri.Sys_GLimpInit( );
 
 	// Create the window and set up the context
 	if(GLimp_StartDriverAndSetMode(r_mode->integer, r_fullscreen->integer, r_noborder->integer))
 		goto success;
 
 	// Try again, this time in a platform specific "safe mode"
-	Sys_GLimpSafeInit( );
+	ri.Sys_GLimpSafeInit( );
 
 	if(GLimp_StartDriverAndSetMode(r_mode->integer, r_fullscreen->integer, qfalse))
 		goto success;
@@ -747,7 +747,7 @@ success:
 	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
 
 	// This depends on SDL_INIT_VIDEO, hence having it here
-	IN_Init( );
+	ri.IN_Init( );
 }
 
 
@@ -778,7 +778,7 @@ void GLimp_EndFrame( void )
 			// Find out the current state
 			fullscreen = !!( s->flags & SDL_FULLSCREEN );
 				
-			if( r_fullscreen->integer && Cvar_VariableIntegerValue( "in_nograb" ) )
+			if( r_fullscreen->integer && ri.Cvar_VariableIntegerValue( "in_nograb" ) )
 			{
 				ri.Printf( PRINT_ALL, "Fullscreen not allowed with in_nograb 1\n");
 				ri.Cvar_Set( "r_fullscreen", "0" );
@@ -796,9 +796,9 @@ void GLimp_EndFrame( void )
 		{
 			// SDL_WM_ToggleFullScreen didn't work, so do it the slow way
 			if( !sdlToggled )
-				Cbuf_AddText( "vid_restart" );
+				ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart");
 
-			IN_Restart( );
+			ri.IN_Restart( );
 		}
 
 		r_fullscreen->modified = qfalse;

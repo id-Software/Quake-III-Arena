@@ -60,7 +60,7 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 		GetVersionEx( &vinfo );
 		if( vinfo.dwMajorVersion >= 5 && vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT )
 		{
-			Com_DPrintf( "performing gamma clamp.\n" );
+			ri.Printf( PRINT_DEVELOPER, "performing gamma clamp.\n" );
 			for( j = 0 ; j < 3 ; j++ )
 			{
 				for( i = 0 ; i < 128 ; i++ )

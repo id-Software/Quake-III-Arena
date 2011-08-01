@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "client.h"
 #include <limits.h>
 
+#include "../sys/sys_local.h"
+#include "../sys/sys_loadlib.h"
+
 #ifdef USE_MUMBLE
 #include "libmumblelink.h"
 #endif
@@ -43,6 +46,8 @@ cvar_t	*cl_voipCaptureMult;
 cvar_t	*cl_voipShowMeter;
 cvar_t	*cl_voip;
 #endif
+
+cvar_t	*cl_renderer;
 
 cvar_t	*cl_nodelta;
 cvar_t	*cl_debugMove;
@@ -116,6 +121,9 @@ vm_t				*cgvm;
 
 // Structure containing functions exported from refresh DLL
 refexport_t	re;
+#ifdef USE_RENDERER_DLOPEN
+static void	*rendererLib = NULL;
+#endif
 
 ping_t	cl_pinglist[MAX_PINGREQUESTS];
 
@@ -136,7 +144,6 @@ int serverStatusCount;
 	void hA3Dg_ExportRenderGeom (refexport_t *incoming_re);
 #endif
 
-extern void GLimp_Minimize(void);
 extern void SV_BotFrame( int time );
 void CL_CheckForResend( void );
 void CL_ShowIP_f(void);
@@ -3163,8 +3170,38 @@ CL_InitRef
 void CL_InitRef( void ) {
 	refimport_t	ri;
 	refexport_t	*ret;
+#ifdef USE_RENDERER_DLOPEN
+	GetRefAPI_t		GetRefAPI;
+	char			dllName[MAX_OSPATH];
+#endif
 
 	Com_Printf( "----- Initializing Renderer ----\n" );
+
+#ifdef USE_RENDERER_DLOPEN
+	cl_renderer = Cvar_Get("cl_renderer", "opengl1", CVAR_ARCHIVE | CVAR_LATCH);
+
+	Com_sprintf(dllName, sizeof(dllName), "renderer_%s_" ARCH_STRING DLL_EXT, cl_renderer->string);
+
+	if(!(rendererLib = Sys_LoadDll(dllName)) && strcmp(cl_renderer->string, cl_renderer->resetString))
+	{
+		Cvar_ForceReset("cl_renderer");
+
+		Com_sprintf(dllName, sizeof(dllName), "renderer_opengl1_" ARCH_STRING DLL_EXT);
+		rendererLib = Sys_LoadLibrary(dllName);
+	}
+
+	if(!rendererLib)
+	{
+		Com_Printf("failed:\n\"%s\"\n", Sys_LibraryError());
+		Com_Error(ERR_FATAL, "Failed to load renderer");
+	}
+
+	GetRefAPI = Sys_LoadFunction(rendererLib, "GetRefAPI");
+	if(!GetRefAPI)
+	{
+		Com_Error(ERR_FATAL, "Can't load symbol GetRefAPI: '%s'",  Sys_LibraryError());
+	}
+#endif
 
 	ri.Cmd_AddCommand = Cmd_AddCommand;
 	ri.Cmd_RemoveCommand = Cmd_RemoveCommand;
@@ -3183,7 +3220,10 @@ void CL_InitRef( void ) {
 #endif
 	ri.Hunk_AllocateTempMemory = Hunk_AllocateTempMemory;
 	ri.Hunk_FreeTempMemory = Hunk_FreeTempMemory;
+
+	ri.CM_ClusterPVS = CM_ClusterPVS;
 	ri.CM_DrawDebugSurface = CM_DrawDebugSurface;
+
 	ri.FS_ReadFile = FS_ReadFile;
 	ri.FS_FreeFile = FS_FreeFile;
 	ri.FS_WriteFile = FS_WriteFile;
@@ -3193,7 +3233,9 @@ void CL_InitRef( void ) {
 	ri.FS_FileExists = FS_FileExists;
 	ri.Cvar_Get = Cvar_Get;
 	ri.Cvar_Set = Cvar_Set;
+	ri.Cvar_SetValue = Cvar_SetValue;
 	ri.Cvar_CheckRange = Cvar_CheckRange;
+	ri.Cvar_VariableIntegerValue = Cvar_VariableIntegerValue;
 
 	// cinematic stuff
 
@@ -3202,6 +3244,17 @@ void CL_InitRef( void ) {
 	ri.CIN_RunCinematic = CIN_RunCinematic;
   
 	ri.CL_WriteAVIVideoFrame = CL_WriteAVIVideoFrame;
+
+	ri.IN_Init = IN_Init;
+	ri.IN_Shutdown = IN_Shutdown;
+	ri.IN_Restart = IN_Restart;
+
+	ri.ftol = Q_ftol;
+
+	ri.Sys_SetEnv = Sys_SetEnv;
+	ri.Sys_GLimpSafeInit = Sys_GLimpSafeInit;
+	ri.Sys_GLimpInit = Sys_GLimpInit;
+	ri.Sys_LowPhysicalMemory = Sys_LowPhysicalMemory;
 
 	ret = GetRefAPI( REF_API_VERSION, &ri );
 
@@ -3555,7 +3608,6 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("model", CL_SetModel_f );
 	Cmd_AddCommand ("video", CL_Video_f );
 	Cmd_AddCommand ("stopvideo", CL_StopVideo_f );
-	Cmd_AddCommand("minimize", GLimp_Minimize);
 	CL_InitRef();
 
 	SCR_Init ();

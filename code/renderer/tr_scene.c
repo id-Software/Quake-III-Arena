@@ -215,7 +215,7 @@ void RE_AddRefEntityToScene( const refEntity_t *ent ) {
 		static qboolean firstTime = qtrue;
 		if (firstTime) {
 			firstTime = qfalse;
-			Com_DPrintf(S_COLOR_YELLOW "WARNING: RE_AddRefEntityToScene passed a refEntity which has an origin with a NaN component\n");
+			ri.Printf( PRINT_WARNING, "RE_AddRefEntityToScene passed a refEntity which has an origin with a NaN component\n");
 		}
 		return;
 	}
