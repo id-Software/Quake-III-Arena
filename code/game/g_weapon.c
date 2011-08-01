@@ -85,8 +85,15 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
 		return qfalse;
 	}
 
+	if ( ent->client->noclip ) {
+		return qfalse;
+	}
+
 	traceEnt = &g_entities[ tr.entityNum ];
 
+	if ( traceEnt->client->noclip ) {
+		return qfalse;
+	}
 	// send blood impact
 	if ( traceEnt->takedamage && traceEnt->client ) {
 		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
@@ -142,9 +149,9 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
 
 	for ( i = 0 ; i < 3 ; i++ ) {
 		if ( to[i] <= v[i] ) {
-			v[i] = (int)v[i];
+			v[i] = floor(v[i]);
 		} else {
-			v[i] = (int)v[i] + 1;
+			v[i] = ceil(v[i]);
 		}
 	}
 }

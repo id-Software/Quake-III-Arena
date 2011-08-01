@@ -829,26 +829,26 @@ Touch_DoorTriggerSpectator
 ================
 */
 static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_t *trace ) {
-	int i, axis;
-	vec3_t origin, dir, angles;
+	int axis;
+	float doorMin, doorMax;
+	vec3_t origin;
 
 	axis = ent->count;
-	VectorClear(dir);
-	if (fabs(other->s.origin[axis] - ent->r.absmax[axis]) <
-		fabs(other->s.origin[axis] - ent->r.absmin[axis])) {
-		origin[axis] = ent->r.absmin[axis] - 10;
-		dir[axis] = -1;
+	// the constants below relate to constants in Think_SpawnNewDoorTrigger()
+	doorMin = ent->r.absmin[axis] + 100;
+	doorMax = ent->r.absmax[axis] - 100;
+
+	VectorCopy(other->client->ps.origin, origin);
+
+	if (origin[axis] < doorMin || origin[axis] > doorMax) return;
+
+	if (fabs(origin[axis] - doorMax) < fabs(origin[axis] - doorMin)) {
+		origin[axis] = doorMin - 10;
+	} else {
+		origin[axis] = doorMax + 10;
 	}
-	else {
-		origin[axis] = ent->r.absmax[axis] + 10;
-		dir[axis] = 1;
-	}
-	for (i = 0; i < 3; i++) {
-		if (i == axis) continue;
-		origin[i] = (ent->r.absmin[i] + ent->r.absmax[i]) * 0.5;
-	}
-	vectoangles(dir, angles);
-	TeleportPlayer(other, origin, angles );
+
+	TeleportPlayer(other, origin, tv(10000000.0, 0, 0));
 }
 
 /*

@@ -1132,7 +1132,7 @@ static qboolean UI_ParseAnimationFile( const char *filename, animation_t *animat
 	}
 
 	if ( i != MAX_ANIMATIONS ) {
-		Com_Printf( "Error parsing animation file: %s", filename );
+		Com_Printf( "Error parsing animation file: %s\n", filename );
 		return qfalse;
 	}
 

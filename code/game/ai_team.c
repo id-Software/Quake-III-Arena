@@ -458,11 +458,11 @@ void BotCTFOrders_FlagNotAtBase(bot_state_t *bs) {
 			case 1: break;
 			case 2:
 			{
-				//both will go for the enemy flag
+				// keep one near the base for when the flag is returned
 				ClientName(teammates[0], name, sizeof(name));
 				BotAI_BotInitialChat(bs, "cmd_defendbase", name, NULL);
 				BotSayTeamOrder(bs, teammates[0]);
-				BotSayVoiceTeamOrder(bs, teammates[0], VOICECHAT_GETFLAG);
+				BotSayVoiceTeamOrder(bs, teammates[0], VOICECHAT_DEFEND);
 				//
 				ClientName(teammates[1], name, sizeof(name));
 				BotAI_BotInitialChat(bs, "cmd_getflag", name, NULL);
@@ -494,7 +494,7 @@ void BotCTFOrders_FlagNotAtBase(bot_state_t *bs) {
 				//keep some people near the base for when the flag is returned
 				defenders = (int) (float) numteammates * 0.3 + 0.5;
 				if (defenders > 3) defenders = 3;
-				attackers = (int) (float) numteammates * 0.7 + 0.5;
+				attackers = (int) (float) numteammates * 0.6 + 0.5;
 				if (attackers > 6) attackers = 6;
 				for (i = 0; i < defenders; i++) {
 					//
@@ -537,7 +537,7 @@ void BotCTFOrders_FlagNotAtBase(bot_state_t *bs) {
 			{
 				//everyone go for the flag
 				ClientName(teammates[0], name, sizeof(name));
-				BotAI_BotInitialChat(bs, "cmd_defendbase", name, NULL);
+				BotAI_BotInitialChat(bs, "cmd_getflag", name, NULL);
 				BotSayTeamOrder(bs, teammates[0]);
 				BotSayVoiceTeamOrder(bs, teammates[0], VOICECHAT_GETFLAG);
 				//
@@ -1349,7 +1349,7 @@ void Bot1FCTFOrders_EnemyHasFlag(bot_state_t *bs) {
 				if (defenders > 8) defenders = 8;
 				//10% will try to return the flag
 				attackers = (int) (float) numteammates * 0.1 + 0.5;
-				if (attackers > 2) attackers = 2;
+				if (attackers > 1) attackers = 1;
 				for (i = 0; i < defenders; i++) {
 					//
 					ClientName(teammates[i], name, sizeof(name));
@@ -1410,7 +1410,7 @@ void Bot1FCTFOrders_EnemyHasFlag(bot_state_t *bs) {
 			{
 				//70% defend the base
 				defenders = (int) (float) numteammates * 0.7 + 0.5;
-				if (defenders > 8) defenders = 8;
+				if (defenders > 7) defenders = 7;
 				//20% try to return the flag
 				attackers = (int) (float) numteammates * 0.2 + 0.5;
 				if (attackers > 2) attackers = 2;
@@ -1573,7 +1573,7 @@ void Bot1FCTFOrders_EnemyDroppedFlag(bot_state_t *bs) {
 					ClientName(teammates[numteammates - i - 1], name, sizeof(name));
 					BotAI_BotInitialChat(bs, "cmd_getflag", name, NULL);
 					BotSayTeamOrder(bs, teammates[numteammates - i - 1]);
-					BotSayVoiceTeamOrder(bs, teammates[numteammates - i - 1], VOICECHAT_DEFEND);
+					BotSayVoiceTeamOrder(bs, teammates[numteammates - i - 1], VOICECHAT_GETFLAG);
 				}
 				//
 				break;

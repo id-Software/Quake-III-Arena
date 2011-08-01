@@ -2598,7 +2598,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	
 		if (clc.state != CA_CONNECTING)
 		{
-			Com_DPrintf("Unwanted challenge response received.  Ignored.\n");
+			Com_DPrintf("Unwanted challenge response received. Ignored.\n");
 			return;
 		}
 		
@@ -2677,7 +2677,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	// server connection
 	if ( !Q_stricmp(c, "connectResponse") ) {
 		if ( clc.state >= CA_CONNECTED ) {
-			Com_Printf ("Dup connect received.  Ignored.\n");
+			Com_Printf ("Dup connect received. Ignored.\n");
 			return;
 		}
 		if ( clc.state != CA_CHALLENGING ) {

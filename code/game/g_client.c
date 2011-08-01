@@ -419,8 +419,6 @@ void CopyToBodyQue( gentity_t *ent ) {
 	body = level.bodyQue[ level.bodyQueIndex ];
 	level.bodyQueIndex = (level.bodyQueIndex + 1) % BODY_QUEUE_SIZE;
 
-	trap_UnlinkEntity (body);
-
 	body->s = ent->s;
 	body->s.eFlags = EF_DEAD;		// clear EF_TALK, etc
 #ifdef MISSIONPACK
@@ -526,18 +524,13 @@ void SetClientViewAngle( gentity_t *ent, vec3_t angle ) {
 
 /*
 ================
-respawn
+ClientRespawn
 ================
 */
-void respawn( gentity_t *ent ) {
-	gentity_t	*tent;
+void ClientRespawn( gentity_t *ent ) {
 
 	CopyToBodyQue (ent);
 	ClientSpawn(ent);
-
-	// add a teleportation effect
-	tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-	tent->s.clientNum = ent->s.clientNum;
 }
 
 /*
@@ -1007,7 +1000,6 @@ and on transition between teams, but doesn't happen on respawns
 void ClientBegin( int clientNum ) {
 	gentity_t	*ent;
 	gclient_t	*client;
-	gentity_t	*tent;
 	int			flags;
 
 	ent = g_entities + clientNum;
@@ -1039,10 +1031,6 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent );
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
-		// send event
-		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-		tent->s.clientNum = ent->s.clientNum;
-
 		if ( g_gametype.integer != GT_TOURNAMENT  ) {
 			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
 		}
@@ -1071,6 +1059,7 @@ void ClientSpawn(gentity_t *ent) {
 	clientSession_t		savedSess;
 	int		persistant[MAX_PERSISTANT];
 	gentity_t	*spawnPoint;
+	gentity_t *tent;
 	int		flags;
 	int		savedPing;
 //	char	*savedAreaBits;
@@ -1206,19 +1195,6 @@ void ClientSpawn(gentity_t *ent) {
 
 	trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
 	SetClientViewAngle( ent, spawn_angles );
-
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
-
-	} else {
-		G_KillBox( ent );
-		trap_LinkEntity (ent);
-
-		// force the base weapon up
-		client->ps.weapon = WP_MACHINEGUN;
-		client->ps.weaponstate = WEAPON_READY;
-
-	}
-
 	// don't allow full run speed for a bit
 	client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	client->ps.pm_time = 100;
@@ -1231,36 +1207,40 @@ void ClientSpawn(gentity_t *ent) {
 	client->ps.torsoAnim = TORSO_STAND;
 	client->ps.legsAnim = LEGS_IDLE;
 
-	if ( level.intermissiontime ) {
-		MoveClientToIntermission( ent );
-	} else {
-		// fire the targets of the spawn point
-		G_UseTargets( spawnPoint, ent );
+	if (!level.intermissiontime) {
+		if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+			G_KillBox(ent);
+			// force the base weapon up
+			client->ps.weapon = WP_MACHINEGUN;
+			client->ps.weaponstate = WEAPON_READY;
+			// fire the targets of the spawn point
+			G_UseTargets(spawnPoint, ent);
+			// select the highest weapon number available, after any spawn given items have fired
+			client->ps.weapon = 1;
 
-		// select the highest weapon number available, after any
-		// spawn given items have fired
-		client->ps.weapon = 1;
-		for ( i = WP_NUM_WEAPONS - 1 ; i > 0 ; i-- ) {
-			if ( client->ps.stats[STAT_WEAPONS] & ( 1 << i ) ) {
-				client->ps.weapon = i;
-				break;
+			for (i = WP_NUM_WEAPONS - 1 ; i > 0 ; i--) {
+				if (client->ps.stats[STAT_WEAPONS] & (1 << i)) {
+					client->ps.weapon = i;
+					break;
+				}
 			}
-		}
-	}
+			// positively link the client, even if the command times are weird
+			VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
 
+			tent = G_TempEntity(ent->client->ps.origin, EV_PLAYER_TELEPORT_IN);
+			tent->s.clientNum = ent->s.clientNum;
+
+			trap_LinkEntity (ent);
+		}
+	} else {
+		// move players to intermission
+		MoveClientToIntermission(ent);
+	}
 	// run a client frame to drop exactly to the floor,
 	// initialize animations and other things
 	client->ps.commandTime = level.time - 100;
 	ent->client->pers.cmd.serverTime = level.time;
 	ClientThink( ent-g_entities );
-
-	// positively link the client, even if the command times are weird
-	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
-		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
-		trap_LinkEntity( ent );
-	}
-
 	// run the presend to set anything else
 	ClientEndFrame( ent );
 
