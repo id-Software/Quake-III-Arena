@@ -531,8 +531,9 @@ ifeq ($(PLATFORM),mingw32)
 
   LIBS= -lws2_32 -lwinmm -lpsapi
   CLIENT_LDFLAGS += -mwindows
-  CLIENT_LIBS = -lgdi32 -lole32 -lopengl32
-
+  CLIENT_LIBS = -lgdi32 -lole32
+  RENDERER_LIBS = -lgdi32 -lole32 -lopengl32
+  
   ifeq ($(USE_CURL),1)
     CLIENT_CFLAGS += -DUSE_CURL
     CLIENT_CFLAGS += $(CURL_CFLAGS)
@@ -563,18 +564,25 @@ ifeq ($(PLATFORM),mingw32)
 
   # libmingw32 must be linked before libSDLmain
   CLIENT_LIBS += -lmingw32
+  RENDERER_LIBS += -lmingw32
+  
   ifeq ($(USE_LOCAL_HEADERS),1)
     CLIENT_CFLAGS += -I$(SDLHDIR)/include
     ifeq ($(ARCH), x86)
     CLIENT_LIBS += $(LIBSDIR)/win32/libSDLmain.a \
                       $(LIBSDIR)/win32/libSDL.dll.a
+    RENDERER_LIBS += $(LIBSDIR)/win32/libSDLmain.a \
+                      $(LIBSDIR)/win32/libSDL.dll.a
     else
     CLIENT_LIBS += $(LIBSDIR)/win64/libSDLmain.a \
+                      $(LIBSDIR)/win64/libSDL64.dll.a
+    RENDERER_LIBS += $(LIBSDIR)/win64/libSDLmain.a \
                       $(LIBSDIR)/win64/libSDL64.dll.a
     endif
   else
     CLIENT_CFLAGS += $(SDL_CFLAGS)
     CLIENT_LIBS += $(SDL_LIBS)
+    RENDERER_LIBS += $(SDL_LIBS)
   endif
 
   BUILD_CLIENT_SMP = 0
