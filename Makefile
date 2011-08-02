@@ -21,6 +21,9 @@ ifeq ($(COMPILE_PLATFORM),mingw32)
   ifeq ($(COMPILE_ARCH),i386)
     COMPILE_ARCH=x86
   endif
+  ifeq ($(COMPILE_ARCH),x86_64)
+    COMPILE_ARCH=x64
+  endif
 endif
 
 ifndef BUILD_STANDALONE
