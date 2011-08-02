@@ -279,28 +279,6 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
     -pipe -DUSE_ICON
   CLIENT_CFLAGS += $(SDL_CFLAGS)
 
-  ifeq ($(USE_OPENAL),1)
-    CLIENT_CFLAGS += -DUSE_OPENAL
-    ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
-    endif
-  endif
-
-  ifeq ($(USE_CURL),1)
-    CLIENT_CFLAGS += -DUSE_CURL
-    ifeq ($(USE_CURL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
-    endif
-  endif
-
-  ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
-  
-  ifeq ($(USE_RENDERER_DLOPEN),1)
-    CLIENT_CFLAGS += -DUSE_RENDERER_DLOPEN
-  endif
-
   OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
@@ -337,10 +315,6 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
     OPTIMIZE = $(OPTIMIZEVM)
   endif
   endif
-  endif
-
-  ifneq ($(HAVE_VM_COMPILED),true)
-    BASE_CFLAGS += -DNO_VM_COMPILED
   endif
 
   SHLIBEXT=so
@@ -416,25 +390,18 @@ ifeq ($(PLATFORM),darwin)
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
   ifeq ($(USE_OPENAL),1)
-    BASE_CFLAGS += -DUSE_OPENAL
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += -framework OpenAL
-    else
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CURL),1)
-    CLIENT_CFLAGS += -DUSE_CURL
     ifneq ($(USE_CURL_DLOPEN),1)
       CLIENT_LIBS += -lcurl
-    else
-      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
     CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
@@ -453,10 +420,6 @@ ifeq ($(PLATFORM),darwin)
 
   OPTIMIZEVM += -falign-loops=16
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
-
-  ifneq ($(HAVE_VM_COMPILED),true)
-    BASE_CFLAGS += -DNO_VM_COMPILED
-  endif
 
   SHLIBEXT=dylib
   SHLIBCFLAGS=-fPIC -fno-common
@@ -494,23 +457,12 @@ ifeq ($(PLATFORM),mingw32)
   endif
 
   ifeq ($(USE_OPENAL),1)
-    CLIENT_CFLAGS += -DUSE_OPENAL
     CLIENT_CFLAGS += $(OPENAL_CFLAGS)
-    ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
-    else
+    ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LDFLAGS += $(OPENAL_LDFLAGS)
     endif
   endif
-
-  ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
   
-  ifeq ($(USE_RENDERER_DLOPEN),1)
-    CLIENT_CFLAGS += -DUSE_RENDERER_DLOPEN
-  endif
-
   ifeq ($(ARCH),x64)
     OPTIMIZEVM = -O3 -fno-omit-frame-pointer \
       -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
@@ -538,14 +490,13 @@ ifeq ($(PLATFORM),mingw32)
   RENDERER_LIBS = -lgdi32 -lole32 -lopengl32
   
   ifeq ($(USE_CURL),1)
-    CLIENT_CFLAGS += -DUSE_CURL
     CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
       ifeq ($(USE_LOCAL_HEADERS),1)
         CLIENT_CFLAGS += -DCURL_STATICLIB
         ifeq ($(ARCH),x64)
-	  CLIENT_LIBS += $(LIBSDIR)/win64/libcurl.a
-	else
+          CLIENT_LIBS += $(LIBSDIR)/win64/libcurl.a
+        else
           CLIENT_LIBS += $(LIBSDIR)/win32/libcurl.a
         endif
       else
@@ -623,23 +574,18 @@ ifeq ($(PLATFORM),freebsd)
 
   # optional features/libraries
   ifeq ($(USE_OPENAL),1)
-    CLIENT_CFLAGS += -DUSE_OPENAL
     ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
       CLIENT_LIBS += $(THREAD_LIBS) -lopenal
     endif
   endif
 
   ifeq ($(USE_CURL),1)
-    CLIENT_CFLAGS += -DUSE_CURL
     ifeq ($(USE_CURL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
       CLIENT_LIBS += -lcurl
     endif
   endif
 
   ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
     CLIENT_LIBS += -lvorbisfile -lvorbis -logg
   endif
 
@@ -669,24 +615,10 @@ ifeq ($(PLATFORM),openbsd)
     -DUSE_ICON -DMAP_ANONYMOUS=MAP_ANON
   CLIENT_CFLAGS += $(SDL_CFLAGS)
 
-  ifeq ($(USE_OPENAL),1)
-    CLIENT_CFLAGS += -DUSE_OPENAL
-    ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
-    endif
-  endif
-
-  ifeq ($(USE_CODEC_VORBIS),1)
-    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
-  endif
-
   ifeq ($(USE_CURL),1)
-    CLIENT_CFLAGS += -DUSE_CURL $(CURL_CFLAGS)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     USE_CURL_DLOPEN=0
   endif
-
-  BASE_CFLAGS += -DNO_VM_COMPILED
-  HAVE_VM_COMPILED=false
 
   SHLIBEXT=so
   SHLIBNAME=.$(SHLIBEXT)
@@ -737,12 +669,11 @@ ifeq ($(PLATFORM),netbsd)
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes
 
-  ifneq ($(ARCH),i386)
-    BASE_CFLAGS += -DNO_VM_COMPILED
+  ifeq ($(ARCH),i386)
+    HAVE_VM_COMPILED=true
   endif
 
   BUILD_CLIENT = 0
-  BUILD_GAME_QVM = 0
 
 else # ifeq netbsd
 
@@ -758,7 +689,7 @@ ifeq ($(PLATFORM),irix64)
   MKDIR = mkdir -p
 
   BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 \
-    -I. -I$(ROOT)/usr/include -DNO_VM_COMPILED
+    -I. -I$(ROOT)/usr/include
   CLIENT_CFLAGS += $(SDL_CFLAGS)
   OPTIMIZE = -O3
   
@@ -822,10 +753,6 @@ ifeq ($(PLATFORM),sunos)
   
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
-  ifneq ($(HAVE_VM_COMPILED),true)
-    BASE_CFLAGS += -DNO_VM_COMPILED
-  endif
-
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared $(LDFLAGS)
@@ -843,7 +770,7 @@ else # ifeq sunos
 #############################################################################
 # SETUP AND BUILD -- GENERIC
 #############################################################################
-  BASE_CFLAGS=-DNO_VM_COMPILED
+  BASE_CFLAGS=
   OPTIMIZE = -O3
 
   SHLIBEXT=so
@@ -858,6 +785,11 @@ endif #OpenBSD
 endif #NetBSD
 endif #IRIX
 endif #SunOS
+
+ifneq ($(HAVE_VM_COMPILED),true)
+  BASE_CFLAGS += -DNO_VM_COMPILED
+  BUILD_GAME_QVM=0
+endif
 
 TARGETS =
 
@@ -913,6 +845,28 @@ ifneq ($(BUILD_GAME_QVM),0)
       $(B)/missionpack/vm/ui.qvm
     endif
   endif
+endif
+
+ifeq ($(USE_OPENAL),1)
+  CLIENT_CFLAGS += -DUSE_OPENAL
+  ifeq ($(USE_OPENAL_DLOPEN),1)
+    CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
+  endif
+endif
+
+ifeq ($(USE_CURL),1)
+  CLIENT_CFLAGS += -DUSE_CURL
+  ifeq ($(USE_CURL_DLOPEN),1)
+    CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
+  endif
+endif
+
+ifeq ($(USE_CODEC_VORBIS),1)
+  CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+endif
+
+ifeq ($(USE_RENDERER_DLOPEN),1)
+  CLIENT_CFLAGS += -DUSE_RENDERER_DLOPEN
 endif
 
 ifeq ($(USE_MUMBLE),1)
