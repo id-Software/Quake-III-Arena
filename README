@@ -401,7 +401,7 @@ SDL Keyboard Differences
 
   On many international layouts the default console toggle keys are also dead
   keys, meaning that dropping the console potentially results in
-  unintentionally initiating the keying of a dead key. Futhermore SDL 1.2's
+  unintentionally initiating the keying of a dead key. Furthermore SDL 1.2's
   dead key support is broken by design and Q3 doesn't support non-ASCII text
   entry, so the chances are you won't get the correct character anyway.
 
@@ -547,7 +547,7 @@ Creating standalone games
   information appropriate for your project.
 
   While a lot of work has been put into ioquake3 that you can benefit from free
-  of charge, it does not mean that you have no obligations to fulfil. Please be
+  of charge, it does not mean that you have no obligations to fulfill. Please be
   aware that as soon as you start distributing your game with an engine based on
   our sources we expect you to fully comply with the requirements as stated in
   the GPL. That includes making sources and modifications you made to the
@@ -663,7 +663,7 @@ are off by default.
 --------------------------------------------- Building Official Installers -----
 
 We need help getting automated installers on all the platforms that ioquake3
-supports. We don't neccesarily care about all the installers being identical,
+supports. We don't necessarily care about all the installers being identical,
 but we have some general guidelines:
 
   * Please include the id patch pk3s in your installer, which are available
@@ -678,7 +678,7 @@ but we have some general guidelines:
     user in copying the file or tell them how.
 
   * It is fine to just install the binaries without requiring id EULA agreement,
-    providing pak0.pk3 and the patch pk3s are not refered to or included in the
+    providing pak0.pk3 and the patch pk3s are not referred to or included in the
     installer.
 
   * Please include at least an SDL so/dylib/dll on every platform.
