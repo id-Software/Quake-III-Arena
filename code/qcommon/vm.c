@@ -579,7 +579,7 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 		{
 			Com_Printf("Try loading dll file %s\n", filename);
 
-			vm->dllHandle = Sys_LoadQVMDll(filename, &vm->entryPoint, VM_DllSyscall);
+			vm->dllHandle = Sys_LoadGameDll(filename, &vm->entryPoint, VM_DllSyscall);
 			
 			if(vm->dllHandle)
 			{
