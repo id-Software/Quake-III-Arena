@@ -1050,16 +1050,8 @@ void IN_Init( void )
 	SDL_EnableKeyRepeat( SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL );
 	keyRepeatEnabled = qtrue;
 
-	if( in_mouse->value )
-	{
-		mouseAvailable = qtrue;
-		IN_ActivateMouse( );
-	}
-	else
-	{
-		IN_DeactivateMouse( );
-		mouseAvailable = qfalse;
-	}
+	mouseAvailable = ( in_mouse->value != 0 );
+	IN_DeactivateMouse( );
 
 	appState = SDL_GetAppState( );
 	Cvar_SetValue( "com_unfocused",	!( appState & SDL_APPINPUTFOCUS ) );
