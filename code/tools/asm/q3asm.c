@@ -950,12 +950,11 @@ STAT("PROC");
 
 ASM(ENDPROC)
 {
-	int		v, v2;
 	if ( !strcmp( token, "endproc" ) ) {
 STAT("ENDPROC");
 		Parse();				// skip the function name
-		v = ParseValue();		// locals
-		v2 = ParseValue();		// arg marshalling
+		ParseValue();		// locals
+		ParseValue();		// arg marshalling
 
 		// all functions must leave something on the opstack
 		instructionCount++;
