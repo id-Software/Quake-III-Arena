@@ -443,7 +443,9 @@ int Q_isnan(float x);
   extern int (QDECL *Q_VMftol)(void);
   extern void (QDECL *Q_SnapVector)(vec3_t vec);
 #else
-  #define Q_ftol(f) lrintf((f))
+  // Q_ftol must expand to a function name so the pluggable renderer can take
+  // its address
+  #define Q_ftol lrintf
   #define Q_SnapVector(vec)\
 	do\
 	{\
