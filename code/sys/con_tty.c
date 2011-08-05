@@ -356,8 +356,8 @@ char *CON_Input( void )
 					Q_strncpyz(text, TTY_con.buffer, sizeof(text));
 					Field_Clear(&TTY_con);
 					key = '\n';
-					write(1, &key, 1);
-					write( 1, "]", 1 );
+					write(STDOUT_FILENO, &key, 1);
+					write(STDOUT_FILENO, "]", 1);
 					return text;
 				}
 				if (key == '\t')
