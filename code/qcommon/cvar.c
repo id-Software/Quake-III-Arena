@@ -629,7 +629,7 @@ void Cvar_SetSafe( const char *var_name, const char *value )
 {
 	int flags = Cvar_Flags( var_name );
 
-	if( flags != CVAR_NONEXISTENT && flags & CVAR_PROTECTED )
+	if((flags != CVAR_NONEXISTENT) && (flags & CVAR_PROTECTED))
 	{
 		if( value )
 			Com_Error( ERR_DROP, "Restricted source tried to set "
