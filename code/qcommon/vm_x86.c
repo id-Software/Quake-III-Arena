@@ -455,7 +455,7 @@ static void DoSyscall(void)
 		opStackBase[opStackOfs + 1] = savedVM->systemCall(args);
 #else
 		data[0] = ~syscallNum;
-		opStackBase[opStackOfs + 1] = savedVM->systemCall(data);
+		opStackBase[opStackOfs + 1] = savedVM->systemCall((intptr_t *) data);
 #endif
 	}
 	else
