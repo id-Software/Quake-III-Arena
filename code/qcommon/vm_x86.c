@@ -1776,25 +1776,25 @@ int VM_CallCompiled(vm_t *vm, int *args)
   #endif		
 #elif idx64
 	__asm__ volatile(
-		"movq %5, %%rax\r\n"
-		"movq %3, %%r8\r\n"
-		"movq %4, %%r9\r\n"
-		"push %%r15\r\n"
-		"push %%r14\r\n"
-		"push %%r13\r\n"
-		"push %%r12\r\n"
-		"callq *%%rax\r\n"
-		"pop %%r12\r\n"
-		"pop %%r13\r\n"
-		"pop %%r14\r\n"
-		"pop %%r15\r\n"
+		"movq %5, %%rax\n"
+		"movq %3, %%r8\n"
+		"movq %4, %%r9\n"
+		"push %%r15\n"
+		"push %%r14\n"
+		"push %%r13\n"
+		"push %%r12\n"
+		"callq *%%rax\n"
+		"pop %%r12\n"
+		"pop %%r13\n"
+		"pop %%r14\n"
+		"pop %%r15\n"
 		: "+S" (programStack), "+D" (opStack), "+b" (opStackOfs)
 		: "g" (vm->instructionPointers), "g" (vm->dataBase), "g" (entryPoint)
 		: "cc", "memory", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11"
 	);
 #else
 	__asm__ volatile(
-		"calll *%3\r\n"
+		"calll *%3\n"
 		: "+S" (programStack), "+D" (opStack), "+b" (opStackOfs)
 		: "g" (entryPoint)
 		: "cc", "memory", "%eax", "%ecx", "%edx"

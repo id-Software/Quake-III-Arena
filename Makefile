@@ -386,6 +386,9 @@ ifeq ($(PLATFORM),darwin)
     # used no matter what and they corrupt the frame pointer in VM calls
     BASE_CFLAGS += -mstackrealign
   endif
+  ifeq ($(ARCH),x86_64)
+    OPTIMIZEVM += -mfpmath=sse
+  endif
 
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
