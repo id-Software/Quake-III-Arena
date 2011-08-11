@@ -292,17 +292,14 @@ qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode )
 	vidmode_t	*vm;
 	float			pixelAspect;
 
-	if ( mode < -2 ) {
+	if ( mode < -1 ) {
 		return qfalse;
 	}
 	if ( mode >= s_numVidModes ) {
 		return qfalse;
 	}
 
-	if ( mode == -2 ) {
-		// Must set width and height to display size before calling this function!
-		pixelAspect = 1.0f;
-	} else if ( mode == -1 ) {
+	if ( mode == -1 ) {
 		*width = r_customwidth->integer;
 		*height = r_customheight->integer;
 		pixelAspect = r_customPixelAspect->value;
