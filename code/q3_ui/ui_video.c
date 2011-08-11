@@ -297,7 +297,7 @@ static graphicsoptions_t		s_graphicsoptions;
 static InitialVideoOptions_s s_ivo_templates[] =
 {
 	{
-		6, qtrue, 3, 0, 2, 2, 1, 0, qtrue
+		6, qtrue, 3, 0, 2, 2, 1, 0, qtrue	// Note: If r_availableModes is found, mode is changed to -2.
 	},
 	{
 		4, qtrue, 2, 0, 2, 1, 1, 0, qtrue	// JDC: this was tq 3
@@ -372,6 +372,10 @@ static int GraphicsOptions_FindBuiltinResolution( int mode )
 	if( !resolutionsDetected )
 		return mode;
 
+	// Display resolution
+	if( mode == 0 )
+		return -2;
+
 	if( mode < 0 )
 		return -1;
 
@@ -395,6 +399,10 @@ static int GraphicsOptions_FindDetectedResolution( int mode )
 
 	if( !resolutionsDetected )
 		return mode;
+
+	// Display resolution
+	if( mode == -2 )
+		return 0;
 
 	if( mode < 0 )
 		return -1;
@@ -425,11 +433,16 @@ static void GraphicsOptions_GetAspectRatios( void )
 		char str[ sizeof(ratioBuf[0]) ];
 
 		// calculate resolution's aspect ratio
-		x = strchr( resolutions[r], 'x' ) + 1;
-		Q_strncpyz( str, resolutions[r], x-resolutions[r] );
-		w = atoi( str );
-		h = atoi( x );
-		Com_sprintf( str, sizeof(str), "%.2f:1", (float)w / (float)h );
+		x = strchr( resolutions[r], 'x' );
+		if (x) {
+			x++;
+			Q_strncpyz( str, resolutions[r], x-resolutions[r] );
+			w = atoi( str );
+			h = atoi( x );
+			Com_sprintf( str, sizeof(str), "%.2f:1", (float)w / (float)h );
+		} else {
+			Q_strncpyz(str, "Unknown", sizeof(str));
+		}
 
 		// rename common ratios ("1.33:1" -> "4:3")
 		for( i = 0; knownRatios[i][0]; i++ ) {
@@ -489,6 +502,13 @@ static void GraphicsOptions_GetResolutions( void )
 	{
 		char* s = resbuf;
 		unsigned int i = 0;
+
+		// Add display resolution video mode
+		detectedResolutions[i++] = "Display Resolution";
+
+		// Use display resolution in "Very High Quality" template
+		s_ivo_templates[0].mode = -2;
+
 		while( s && i < ARRAY_LEN(detectedResolutions)-1 )
 		{
 			detectedResolutions[i++] = s;
