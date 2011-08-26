@@ -5,7 +5,7 @@
 ; This file is used to automatically build the installers in the
 ; openSUSE build service, don't break this!
 ;
-; you have to copy SDL.dll and libcurl-4.dll here manually
+; you have to copy SDL.dll and OpenAL32.dll here manually
 
 !define MULTIUSER_MUI
 !define MULTIUSER_EXECUTIONLEVEL Highest
@@ -78,8 +78,6 @@ Section "ioquake3 (required)"
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
 
-  File "zlib1.dll"
-
   ; Put file there
   File "../../build/release-mingw32-x86/ioq3ded.x86.exe"
   File "../../build/release-mingw32-x86/ioquake3.x86.exe"
@@ -127,14 +125,6 @@ Section "SDL.dll"
 
 SectionEnd
 
-Section "libcurl"
-
-  SetOutPath $INSTDIR
-
-  File "libcurl-4.dll"
-
-SectionEnd
-
 Section "OpenAL-Soft library"
 
   SetOutPath $INSTDIR
@@ -168,11 +158,7 @@ Section "Uninstall"
   Delete $INSTDIR\id-readme.txt
   Delete $INSTDIR\voip-readme.txt
 
-  Delete $INSTDIR\zlib1.dll
-
   Delete $INSTDIR\SDL.dll
-
-  Delete $INSTDIR\libcurl-4.dll
 
   Delete $INSTDIR\OpenAL32.dll
 
