@@ -22,10 +22,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef USE_CURL
 #include "client.h"
-cvar_t *cl_cURLLib;
 
 #ifdef USE_CURL_DLOPEN
 #include "../sys/sys_loadlib.h"
+
+cvar_t *cl_cURLLib;
 
 char* (*qcurl_version)(void);
 
