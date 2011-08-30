@@ -60,7 +60,7 @@ endif
 all: ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe
 
 ioquake3.$(ARCH).nsi: ioquake3.nsi.in
-	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/x86/$(ARCH)/;s/SDL.dll/$(SDLDLL)/g' < $< > $@
+	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/x86/$(ARCH)/g;s/SDL.dll/$(SDLDLL)/' < $< > $@
 
 ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe: ioquake3.$(ARCH).nsi
 	makensis $(DEFINES) ioquake3.$(ARCH).nsi
