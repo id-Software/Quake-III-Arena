@@ -60,6 +60,7 @@ void SV_GetChallenge(netadr_t from)
 	challenge_t	*challenge;
 	qboolean wasfound = qfalse;
 	char *gameName;
+	qboolean gameMismatch;
 
 	// ignore if we are in single player
 	if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive")) {
@@ -67,15 +68,21 @@ void SV_GetChallenge(netadr_t from)
 	}
 
 	gameName = Cmd_Argv(2);
-	if(gameName && *gameName)
+
+#ifdef LEGACY_PROTOCOL
+	// gamename is optional for legacy protocol
+	if (com_legacyprotocol->integer && !*gameName)
+		gameMismatch = qfalse;
+	else
+#endif
+		gameMismatch = !*gameName || strcmp(gameName, com_gamename->string) != 0;
+
+	// reject client if the gamename string sent by the client doesn't match ours
+	if (gameMismatch)
 	{
-		// reject client if the heartbeat string sent by the client doesn't match ours
-		if(strcmp(gameName, com_gamename->string))
-		{
- 			NET_OutOfBandPrint(NS_SERVER, from, "print\nGame mismatch: This is a %s server\n",
- 				com_gamename->string);
-			return;
-		}
+		NET_OutOfBandPrint(NS_SERVER, from, "print\nGame mismatch: This is a %s server\n",
+			com_gamename->string);
+		return;
 	}
 
 	oldest = 0;

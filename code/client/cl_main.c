@@ -3763,13 +3763,22 @@ void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 	char	*infoString;
 	int		prot;
 	char	*gamename;
+	qboolean gameMismatch;
 
 	infoString = MSG_ReadString( msg );
 
 	// if this isn't the correct gamename, ignore it
 	gamename = Info_ValueForKey( infoString, "gamename" );
 
-	if (gamename && *gamename && strcmp(gamename, com_gamename->string))
+#ifdef LEGACY_PROTOCOL
+	// gamename is optional for legacy protocol
+	if (com_legacyprotocol->integer && !*gamename)
+		gameMismatch = qfalse;
+	else
+#endif
+		gameMismatch = !*gamename || strcmp(gamename, com_gamename->string) != 0;
+
+	if (gameMismatch)
 	{
 		Com_DPrintf( "Game mismatch in info packet: %s\n", infoString );
 		return;
