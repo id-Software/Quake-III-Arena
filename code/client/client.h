@@ -489,14 +489,6 @@ typedef struct {
 	qboolean	wasPressed;		// set when down, not cleared when up
 } kbutton_t;
 
-extern	kbutton_t	in_mlook, in_klook;
-extern 	kbutton_t 	in_strafe;
-extern 	kbutton_t 	in_speed;
-
-#ifdef USE_VOIP
-extern 	kbutton_t 	in_voiprecord;
-#endif
-
 void CL_InitInput(void);
 void CL_ShutdownInput(void);
 void CL_SendCmd (void);
