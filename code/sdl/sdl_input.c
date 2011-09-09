@@ -535,13 +535,12 @@ static void IN_DeactivateMouse( void )
 static int joy_keys[16] = {
 	K_LEFTARROW, K_RIGHTARROW,
 	K_UPARROW, K_DOWNARROW,
-	K_JOY16, K_JOY17,
-	K_JOY18, K_JOY19,
-	K_JOY20, K_JOY21,
-	K_JOY22, K_JOY23,
-
-	K_JOY24, K_JOY25,
-	K_JOY26, K_JOY27
+	K_JOY17, K_JOY18,
+	K_JOY19, K_JOY20,
+	K_JOY21, K_JOY22,
+	K_JOY23, K_JOY24,
+	K_JOY25, K_JOY26,
+	K_JOY27, K_JOY28
 };
 
 // translate hat events into keypresses
