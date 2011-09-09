@@ -442,7 +442,7 @@ static void DoSyscall(void)
 		int *data;
 #if idx64
 		int index;
-		intptr_t args[11];
+		intptr_t args[16];
 #endif
 		
 		data = (int *) (savedVM->dataBase + programStack + 4);
