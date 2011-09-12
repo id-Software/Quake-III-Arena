@@ -326,13 +326,14 @@ char *CON_Input( void )
 		}
 	}
 
-	CON_Show();
-
-	if( newlinepos < 0)
+	if( newlinepos < 0) {
+		CON_Show();
 		return NULL;
+	}
 
 	if( !qconsole_linelen )
 	{
+		CON_Show();
 		Com_Printf( "\n" );
 		return NULL;
 	}
@@ -341,6 +342,7 @@ char *CON_Input( void )
 	Com_Printf( "%s\n", qconsole_line );
 
 	qconsole_linelen = 0;
+	CON_Show();
 
 	return qconsole_line;
 }
