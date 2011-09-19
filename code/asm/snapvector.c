@@ -47,17 +47,18 @@ void qsnapvectorsse(vec3_t vec)
 
 		"movaps (%0), %%xmm1\n"
 		"movups (%2), %%xmm0\n"
+		"movaps %%xmm0, %%xmm2\n"
+		"andps %%xmm1, %%xmm0\n"
+		"andnps %%xmm2, %%xmm1\n"
 		"cvtps2dq %%xmm0, %%xmm0\n"
 		"cvtdq2ps %%xmm0, %%xmm0\n"
-		// vec MUST reside in register rdi as maskmovdqu uses
-		// it as an implicit operand. The "D" constraint makes
-		// sure of that.
-		"maskmovdqu %%xmm1, %%xmm0\n"
+		"orps %%xmm1, %%xmm0\n"
+		"movups %%xmm0, (%2)\n"
 		
 		"ldmxcsr %3\n"
 		:
-		: "r" (ssemask), "m" (ssecw), "D" (vec), "m" (oldcw)
-		: "memory", "%xmm0", "%xmm1"
+		: "r" (ssemask), "m" (ssecw), "r" (vec), "m" (oldcw)
+		: "memory", "%xmm0", "%xmm1", "%xmm2"
 	);
 	
 }
