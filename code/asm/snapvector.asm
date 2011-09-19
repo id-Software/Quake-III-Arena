@@ -100,6 +100,7 @@ ELSE
 	qroundx87 8[eax]
 	fldcw [esp]
 	add esp, 2
+	ret
   qsnapvectorx87 ENDP
 
 ENDIF
