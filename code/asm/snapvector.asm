@@ -70,7 +70,7 @@ ELSE
 	stmxcsr [esp]				; save SSE control word
 	ldmxcsr ssecw				; set to round nearest
 
-	mov eax, dword ptr 16[esp]		; store address of vector in eax
+	mov eax, dword ptr 12[esp]		; store address of vector in eax
 	movaps xmm1, ssemask			; initialize the mask register for maskmovdqu
 	movups xmm0, [eax]			; here is stored our vector. Read 4 values in one go
 	movaps xmm2, xmm0			; keep a copy of the original data
