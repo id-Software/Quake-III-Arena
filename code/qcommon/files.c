@@ -1398,7 +1398,7 @@ vmInterpret_t FS_FindVM(void **startSearch, char *found, int foundlen, const cha
 	if(enableDll)
 		Com_sprintf(dllName, sizeof(dllName), "%s" ARCH_STRING DLL_EXT, name);
 		
-	Com_sprintf(qvmName, sizeof(dllName), "vm/%s.qvm", name);
+	Com_sprintf(qvmName, sizeof(qvmName), "vm/%s.qvm", name);
 
 	lastSearch = *startSearch;
 	if(*startSearch == NULL)
