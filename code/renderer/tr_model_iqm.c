@@ -92,30 +92,26 @@ static void JointToMatrix( vec4_t rot, vec3_t scale, vec3_t trans,
 	mat[10] = scale[2] * (1.0f - (xx + yy));
 	mat[11] = trans[2];
 }
-static void JointToMatrixInverse( vec4_t rot, vec3_t scale, vec3_t trans,
-				  float *mat ) {
-	float xx = 2.0f * rot[0] * rot[0];
-	float yy = 2.0f * rot[1] * rot[1];
-	float zz = 2.0f * rot[2] * rot[2];
-	float xy = 2.0f * rot[0] * rot[1];
-	float xz = 2.0f * rot[0] * rot[2];
-	float yz = 2.0f * rot[1] * rot[2];
-	float wx = 2.0f * rot[3] * rot[0];
-	float wy = 2.0f * rot[3] * rot[1];
-	float wz = 2.0f * rot[3] * rot[2];
+static void Matrix34Invert( float *inMat, float *outMat )
+{
+	vec3_t trans;
+	float invSqrLen, *v;
 
-	mat[ 0] = scale[0] * (1.0f - (yy + zz));
-	mat[ 1] = scale[0] * (xy + wz);
-	mat[ 2] = scale[2] * (xz - wy);
-	mat[ 3] = -DotProduct((mat + 0), trans);
-	mat[ 4] = scale[0] * (xy - wz);
-	mat[ 5] = scale[1] * (1.0f - (xx + zz));
-	mat[ 6] = scale[2] * (yz + wx);
-	mat[ 7] = -DotProduct((mat + 4), trans);
-	mat[ 8] = scale[0] * (xz + wy);
-	mat[ 9] = scale[1] * (yz - wx);
-	mat[10] = scale[2] * (1.0f - (xx + yy));
-	mat[11] = -DotProduct((mat + 8), trans);
+	outMat[ 0] = inMat[ 0]; outMat[ 1] = inMat[ 4]; outMat[ 2] = inMat[ 8];
+	outMat[ 4] = inMat[ 1]; outMat[ 5] = inMat[ 5]; outMat[ 6] = inMat[ 9];
+	outMat[ 8] = inMat[ 2]; outMat[ 9] = inMat[ 6]; outMat[10] = inMat[10];
+
+	v = outMat + 0; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 4; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 8; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+
+	trans[0] = inMat[ 3];
+	trans[1] = inMat[ 7];
+	trans[2] = inMat[11];
+
+	outMat[ 3] = -DotProduct(outMat + 0, trans);
+	outMat[ 7] = -DotProduct(outMat + 4, trans);
+	outMat[11] = -DotProduct(outMat + 8, trans);
 }
 
 /*
@@ -473,36 +469,25 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	mat = jointMats;
 	joint = (iqmJoint_t *)((byte *)header + header->ofs_joints);
 	for( i = 0; i < header->num_joints; i++, joint++ ) {
-		float tmpMat[12];
+		float baseFrame[12], invBaseFrame[12];
 
-		JointToMatrix( joint->rotate, joint->scale, joint->translate,
-			       tmpMat );
+		JointToMatrix( joint->rotate, joint->scale, joint->translate, baseFrame );
+		Matrix34Invert( baseFrame, invBaseFrame );
 
-		if( joint->parent >= 0 ) {
-			// premultiply with parent-matrix
-			Matrix34Multiply( jointMats + 2 * 12 * joint->parent,
-					  tmpMat, mat);
-		} else {
-			Com_Memcpy( mat, tmpMat, sizeof(tmpMat) );
+		if ( joint->parent >= 0 )
+		{
+			Matrix34Multiply( jointMats + 2 * 12 * joint->parent, baseFrame, mat );
+			mat += 12;
+			Matrix34Multiply( invBaseFrame, jointMats + 2 * 12 * joint->parent + 12, mat );
+			mat += 12;
 		}
-
-		mat += 12;
-
-		// compute the inverse matrix by combining the
-		// inverse scale, rotation and translation
-		JointToMatrixInverse( joint->rotate, joint->scale,
-				      joint->translate, tmpMat );
-
-		if( joint->parent >= 0 ) {
-			// premultiply with inverse parent-matrix
-			Matrix34Multiply( tmpMat,
-					  jointMats + 2 * 12 * joint->parent + 12,
-					  mat);
-		} else {
-			Com_Memcpy( mat, tmpMat, sizeof(tmpMat) );
+		else
+		{
+			Com_Memcpy( mat, baseFrame,    sizeof(baseFrame)    );
+			mat += 12;
+			Com_Memcpy( mat, invBaseFrame, sizeof(invBaseFrame) );
+			mat += 12;
 		}
-
-		mat += 12;
 	}
 
 	// calculate pose matrices
