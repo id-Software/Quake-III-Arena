@@ -447,13 +447,26 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	}
 	dataLength = 1 << i;
 
-	if( alloc ) {
+	if(alloc)
+	{
 		// allocate zero filled space for initialized and uninitialized data
-		vm->dataBase = Hunk_Alloc( dataLength, h_high );
+		vm->dataBase = Hunk_Alloc(dataLength, h_high);
 		vm->dataMask = dataLength - 1;
-	} else {
-		// clear the data
-		Com_Memset( vm->dataBase, 0, dataLength );
+	}
+	else
+	{
+		// clear the data, but make sure we're not clearing more than allocated
+		if(vm->dataMask + 1 != dataLength)
+		{
+			VM_Free(vm);
+			FS_FreeFile(header.v);
+
+			Com_Printf(S_COLOR_YELLOW "Warning: Data region size of %s not matching after"
+					"VM_Restart()\n", filename);
+			return NULL;
+		}
+		
+		Com_Memset(vm->dataBase, 0, dataLength);
 	}
 
 	// copy the intialized data
@@ -465,18 +478,34 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 		*(int *)(vm->dataBase + i) = LittleLong( *(int *)(vm->dataBase + i ) );
 	}
 
-	if( header.h->vmMagic == VM_MAGIC_VER2 ) {
-		vm->numJumpTableTargets = header.h->jtrgLength >> 2;
-		Com_Printf( "Loading %d jump table targets\n", vm->numJumpTableTargets );
+	if(header.h->vmMagic == VM_MAGIC_VER2)
+	{
+		Com_Printf("Loading %d jump table targets\n", vm->numJumpTableTargets);
 
-		if( alloc ) {
-			vm->jumpTableTargets = Hunk_Alloc( header.h->jtrgLength, h_high );
-		} else {
-			Com_Memset( vm->jumpTableTargets, 0, header.h->jtrgLength );
+		header.h->jtrgLength &= ~0x03;
+
+		if(alloc)
+		{
+			vm->jumpTableTargets = Hunk_Alloc(header.h->jtrgLength, h_high);
+			vm->numJumpTableTargets = header.h->jtrgLength >> 2;
+		}
+		else
+		{
+			if((header.h->jtrgLength >> 2) != vm->numJumpTableTargets)
+			{
+				VM_Free(vm);
+				FS_FreeFile(header.v);
+
+				Com_Printf(S_COLOR_YELLOW "Warning: Jump table size of %s not matching after"
+						"VM_Restart()\n", filename);
+				return NULL;
+			}
+
+			Com_Memset(vm->jumpTableTargets, 0, header.h->jtrgLength);
 		}
 
-		Com_Memcpy( vm->jumpTableTargets, (byte *)header.h + header.h->dataOffset +
-				header.h->dataLength + header.h->litLength, header.h->jtrgLength );
+		Com_Memcpy(vm->jumpTableTargets, (byte *) header.h + header.h->dataOffset +
+				header.h->dataLength + header.h->litLength, header.h->jtrgLength);
 
 		// byte swap the longs
 		for ( i = 0 ; i < header.h->jtrgLength ; i += 4 ) {
