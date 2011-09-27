@@ -24,21 +24,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "vm_local.h"
 
 #ifdef _WIN32
-#include <windows.h>
-#endif
+  #include <windows.h>
+#else
+  #ifdef __FreeBSD__
+  #include <sys/types.h>
+  #endif
 
-#ifdef __FreeBSD__
-#include <sys/types.h>
-#endif
+  #include <sys/mman.h> // for PROT_ stuff
 
-#ifndef _WIN32
-#include <sys/mman.h> // for PROT_ stuff
-#endif
-
-/* need this on NX enabled systems (i386 with PAE kernel or
- * noexec32=on x86_64) */
-#if defined(__linux__) || defined(__FreeBSD__)
-#define VM_X86_MMAP
+  /* need this on NX enabled systems (i386 with PAE kernel or
+   * noexec32=on x86_64) */
+  #define VM_X86_MMAP
+  
+  // workaround for systems that use the old MAP_ANON macro
+  #ifndef MAP_ANONYMOUS
+    #define MAP_ANONYMOUS MAP_ANON
+  #endif
 #endif
 
 static void VM_Destroy_Compiled(vm_t* self);
