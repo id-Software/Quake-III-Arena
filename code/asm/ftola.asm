@@ -25,11 +25,11 @@ IFNDEF idx64
 .model flat, c
 ENDIF
 
-; .data
+.data
 
-; ifndef idx64
-;   fpucw WORD 0F7Fh
-; endif
+ifndef idx64
+  fpucw WORD 0F7Fh
+endif
 
 .code
 
@@ -51,22 +51,19 @@ ELSE
 ; qftol using FPU
 
   qftolx87m macro src
-;    not necessary, fpucw is set with _controlfp at startup
-;    sub esp, 2
-;    fnstcw word ptr [esp]
-;    fldcw fpucw
+    sub esp, 2
+    fnstcw word ptr [esp]
+    fldcw fpucw
     fld dword ptr src
 	fistp dword ptr src
-;	fldcw [esp]
+	fldcw [esp]
 	mov eax, src
-;	add esp, 2
+	add esp, 2
 	ret
   endm
   
   qftolx87 PROC
-; need this line when storing FPU control word on stack
-;    qftolx87m [esp + 6]
-    qftolx87m [esp + 4]
+    qftolx87m [esp + 6]
   qftolx87 ENDP
 
   qvmftolx87 PROC

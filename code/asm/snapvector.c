@@ -33,31 +33,21 @@ static unsigned char ssemask[16] __attribute__((aligned(16))) =
 	"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"
 };
 
-static const unsigned int ssecw __attribute__((aligned(16))) = 0x00001F80;
-static const unsigned short fpucw = 0x037F;
-
 void qsnapvectorsse(vec3_t vec)
 {
-	uint32_t oldcw __attribute__((aligned(16)));
-	
 	__asm__ volatile
 	(
-		"stmxcsr %3\n"
-		"ldmxcsr %1\n"
-
 		"movaps (%0), %%xmm1\n"
-		"movups (%2), %%xmm0\n"
+		"movups (%1), %%xmm0\n"
 		"movaps %%xmm0, %%xmm2\n"
 		"andps %%xmm1, %%xmm0\n"
 		"andnps %%xmm2, %%xmm1\n"
 		"cvtps2dq %%xmm0, %%xmm0\n"
 		"cvtdq2ps %%xmm0, %%xmm0\n"
 		"orps %%xmm1, %%xmm0\n"
-		"movups %%xmm0, (%2)\n"
-		
-		"ldmxcsr %3\n"
+		"movups %%xmm0, (%1)\n"
 		:
-		: "r" (ssemask), "m" (ssecw), "r" (vec), "m" (oldcw)
+		: "r" (ssemask), "r" (vec)
 		: "memory", "%xmm0", "%xmm1", "%xmm2"
 	);
 	
@@ -73,16 +63,11 @@ void qsnapvectorx87(vec3_t vec)
 {
 	__asm__ volatile
 	(
-		"sub $2, " ESP "\n"
-		"fnstcw (" ESP ")\n"
-		"fldcw %0\n"
-		QROUNDX87("(%1)")
-		QROUNDX87("4(%1)")
-		QROUNDX87("8(%1)")
-		"fldcw (" ESP ")\n"
-		"add $2, " ESP "\n"
+		QROUNDX87("(%0)")
+		QROUNDX87("4(%0)")
+		QROUNDX87("8(%0)")
 		:
-		: "m" (fpucw), "r" (vec)
+		: "r" (vec)
 		: "memory"
 	);
 }
