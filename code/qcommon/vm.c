@@ -363,7 +363,8 @@ VM_LoadQVM
 Load a .qvm file
 =================
 */
-vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
+vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc, qboolean unpure)
+{
 	int					dataLength;
 	int					i;
 	char				filename[MAX_QPATH];
@@ -376,7 +377,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc ) {
 	Com_sprintf( filename, sizeof(filename), "vm/%s.qvm", vm->name );
 	Com_Printf( "Loading vm file %s...\n", filename );
 
-	FS_ReadFileDir(filename, vm->searchPath, &header.v);
+	FS_ReadFileDir(filename, vm->searchPath, unpure, &header.v);
 
 	if ( !header.h ) {
 		Com_Printf( "Failed.\n" );
@@ -522,9 +523,13 @@ VM_Restart
 
 Reload the data, but leave everything else in place
 This allows a server to do a map_restart without changing memory allocation
+
+We need to make sure that servers can access unpure QVMs (not contained in any pak)
+even if the client is pure, so take "unpure" as argument.
 =================
 */
-vm_t *VM_Restart( vm_t *vm ) {
+vm_t *VM_Restart(vm_t *vm, qboolean unpure)
+{
 	vmHeader_t	*header;
 
 	// DLL's can't be restarted in place
@@ -542,15 +547,16 @@ vm_t *VM_Restart( vm_t *vm ) {
 	}
 
 	// load the image
-	Com_Printf( "VM_Restart()\n" );
+	Com_Printf("VM_Restart()\n");
 
-	if( !( header = VM_LoadQVM( vm, qfalse ) ) ) {
-		Com_Error( ERR_DROP, "VM_Restart failed" );
+	if(!(header = VM_LoadQVM(vm, qfalse, unpure)))
+	{
+		Com_Error(ERR_DROP, "VM_Restart failed");
 		return NULL;
 	}
 
 	// free the original file
-	FS_FreeFile( header );
+	FS_FreeFile(header);
 
 	return vm;
 }
@@ -621,7 +627,7 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 		else if(retval == VMI_COMPILED)
 		{
 			vm->searchPath = startSearch;
-			if((header = VM_LoadQVM(vm, qtrue)))
+			if((header = VM_LoadQVM(vm, qtrue, qfalse)))
 				break;
 
 			// VM_Free overwrites the name on failed load

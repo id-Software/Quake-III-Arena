@@ -901,7 +901,7 @@ void SV_RestartGameProgs( void ) {
 	VM_Call( gvm, GAME_SHUTDOWN, qtrue );
 
 	// do a restart instead of a free
-	gvm = VM_Restart( gvm );
+	gvm = VM_Restart(gvm, qtrue);
 	if ( !gvm ) {
 		Com_Error( ERR_FATAL, "VM_Restart on game failed" );
 	}
