@@ -462,7 +462,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc, qboolean unpure)
 			VM_Free(vm);
 			FS_FreeFile(header.v);
 
-			Com_Printf(S_COLOR_YELLOW "Warning: Data region size of %s not matching after"
+			Com_Printf(S_COLOR_YELLOW "Warning: Data region size of %s not matching after "
 					"VM_Restart()\n", filename);
 			return NULL;
 		}
@@ -497,7 +497,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc, qboolean unpure)
 				VM_Free(vm);
 				FS_FreeFile(header.v);
 
-				Com_Printf(S_COLOR_YELLOW "Warning: Jump table size of %s not matching after"
+				Com_Printf(S_COLOR_YELLOW "Warning: Jump table size of %s not matching after "
 						"VM_Restart()\n", filename);
 				return NULL;
 			}
