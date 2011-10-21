@@ -2329,7 +2329,10 @@ A way to force a bus error for development reasons
 =================
 */
 static void Com_Crash_f( void ) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnull-dereference"
 	* ( int * ) 0 = 0x12345678;
+#pragma clang diagnostic pop
 }
 
 /*

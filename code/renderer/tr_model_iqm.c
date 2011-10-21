@@ -284,9 +284,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( triangle->vertex[1] );
 		LL( triangle->vertex[2] );
 		
-		if( triangle->vertex[0] < 0 || triangle->vertex[0] > header->num_vertexes ||
-		    triangle->vertex[1] < 0 || triangle->vertex[1] > header->num_vertexes ||
-		    triangle->vertex[2] < 0 || triangle->vertex[2] > header->num_vertexes ) {
+		if( triangle->vertex[0] > header->num_vertexes ||
+		    triangle->vertex[1] > header->num_vertexes ||
+		    triangle->vertex[2] > header->num_vertexes ) {
 			return qfalse;
 		}
 	}
@@ -323,9 +323,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		    mesh->first_vertex + mesh->num_vertexes > header->num_vertexes ||
 		    mesh->first_triangle >= header->num_triangles ||
 		    mesh->first_triangle + mesh->num_triangles > header->num_triangles ||
-		    mesh->name < 0 ||
 		    mesh->name >= header->num_text ||
-		    mesh->material < 0 ||
 		    mesh->material >= header->num_text ) {
 			return qfalse;
 		}
@@ -354,7 +352,6 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 		if( joint->parent < -1 ||
 		    joint->parent >= (int)header->num_joints ||
-		    joint->name < 0 ||
 		    joint->name >= (int)header->num_text ) {
 			return qfalse;
 		}
