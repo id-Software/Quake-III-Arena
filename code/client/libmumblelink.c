@@ -115,7 +115,7 @@ int mumble_link(const char* name)
 	close(shmfd);
 #endif
 	memset(lm, 0, sizeof(LinkedMem));
-	mbstowcs(lm->name, name, sizeof(lm->name));
+	mbstowcs(lm->name, name, sizeof(lm->name) / sizeof(wchar_t));
 
 	return 0;
 }
