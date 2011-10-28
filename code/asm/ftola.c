@@ -89,7 +89,7 @@ int qvmftolx87(void)
     "fldcw %2\n"
     "flds (" EDI ", " EBX ", 4)\n"
     "fistpl (" EDI ", " EBX ", 4)\n"
-    "fldcw %2\n"
+    "fldcw %1\n"
     "mov (" EDI ", " EBX ", 4), %0\n"
     : "=r" (retval)
     : "m" (oldcw), "m" (fpucw)
