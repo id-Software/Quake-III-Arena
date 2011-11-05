@@ -1127,7 +1127,7 @@ void R_DecomposeSort( unsigned sort, int *entityNum, shader_t **shader,
 					 int *fogNum, int *dlightMap ) {
 	*fogNum = ( sort >> QSORT_FOGNUM_SHIFT ) & 31;
 	*shader = tr.sortedShaders[ ( sort >> QSORT_SHADERNUM_SHIFT ) & (MAX_SHADERS-1) ];
-	*entityNum = ( sort >> QSORT_ENTITYNUM_SHIFT ) & (MAX_GENTITIES-1);
+	*entityNum = ( sort >> QSORT_ENTITYNUM_SHIFT ) & MAX_ENTITIES;
 	*dlightMap = sort & 3;
 }
 

@@ -25,7 +25,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #define	MAX_DLIGHTS		32		// can't be increased, because bit flags are used on surfaces
-#define	MAX_ENTITIES		1023		// can't be increased without changing drawsurf bit packing
+
+#define	ENTITYNUM_BITS		10		// can't be increased without changing drawsurf bit packing
+#define	MAX_ENTITIES		((1<<ENTITYNUM_BITS) - 1)
 
 // renderfx flags
 #define	RF_MINLIGHT		0x0001		// allways have some light (viewmodel, some items)
