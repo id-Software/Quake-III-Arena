@@ -495,11 +495,11 @@ qboolean	ConsoleCommand( void ) {
 
 	if (g_dedicated.integer) {
 		if (Q_stricmp (cmd, "say") == 0) {
-			trap_SendServerCommand( -1, va("print \"server: %s\"", ConcatArgs(1) ) );
+			trap_SendServerCommand( -1, va("print \"server: %s\n\"", ConcatArgs(1) ) );
 			return qtrue;
 		}
 		// everything else will also be printed as a say command
-		trap_SendServerCommand( -1, va("print \"server: %s\"", ConcatArgs(0) ) );
+		trap_SendServerCommand( -1, va("print \"server: %s\n\"", ConcatArgs(0) ) );
 		return qtrue;
 	}
 
