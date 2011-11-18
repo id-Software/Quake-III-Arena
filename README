@@ -245,8 +245,9 @@ New cvars
                                       red-cyan glasses:    1
                                       red-blue:            2
                                       red-green:           3
+                                      green-magenta:       4
                                       To swap the colors for left and right eye
-                                      just add 3 to the value for the wanted
+                                      just add 4 to the value for the wanted
                                       color combination. For red-blue and
                                       red-green you probably want to enable
                                       r_greyscale
