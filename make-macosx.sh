@@ -1,34 +1,34 @@
 #!/bin/sh
 APPBUNDLE=ioquake3.app
-BINARY=ioquake3.x64
-DEDBIN=ioq3ded.x64
+BINARY=ioquake3.x86_64
+DEDBIN=ioq3ded.x86_64
 PKGINFO=APPLIOQ3
 ICNS=misc/quake3.icns
-DESTDIR=build/release-darwin-x64
+DESTDIR=build/release-darwin-x86_64
 BASEDIR=baseq3
 MPACKDIR=missionpack
-RENDERDIR=build/release-darwin-x64
+RENDERDIR=build/release-darwin-x86_64
 
 BIN_OBJ="
-	build/release-darwin-x64/ioquake3.x64
+	build/release-darwin-x86_64/ioquake3.x86_64
 "
 BIN_DEDOBJ="
-	build/release-darwin-x64/ioq3ded.x64
+	build/release-darwin-x86_64/ioq3ded.x86_64
 "
 BASE_OBJ="
-	build/release-darwin-x64/$BASEDIR/cgamex64.dylib
-	build/release-darwin-x64/$BASEDIR/uix64.dylib
-	build/release-darwin-x64/$BASEDIR/qagamex64.dylib
+	build/release-darwin-x86_64/$BASEDIR/cgamex86_64.dylib
+	build/release-darwin-x86_64/$BASEDIR/uix86_64.dylib
+	build/release-darwin-x86_64/$BASEDIR/qagamex86_64.dylib
 "
 MPACK_OBJ="
-	build/release-darwin-x64/$MPACKDIR/cgamex64.dylib
-	build/release-darwin-x64/$MPACKDIR/uix64.dylib
-	build/release-darwin-x64/$MPACKDIR/qagamex64.dylib
+	build/release-darwin-x86_64/$MPACKDIR/cgamex86_64.dylib
+	build/release-darwin-x86_64/$MPACKDIR/uix86_64.dylib
+	build/release-darwin-x86_64/$MPACKDIR/qagamex86_64.dylib
 "
 
 RENDER_OBJ="
-	build/release-darwin-x64/renderer_opengl1_smp_x64.dylib
-	build/release-darwin-x64/renderer_opengl1_x64.dylib
+	build/release-darwin-x86_64/renderer_opengl1_smp_x86_64.dylib
+	build/release-darwin-x86_64/renderer_opengl1_x86_64.dylib
 "
 
 cd `dirname $0`
@@ -49,7 +49,7 @@ unset X86_CFLAGS
 unset X86_LDFLAGS
 if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
 	X86_SDK=/Developer/SDKs/MacOSX10.5.sdk
-	X86_CFLAGS="-arch x64 -isysroot /Developer/SDKs/MacOSX10.5.sdk \
+	X86_CFLAGS="-arch x86_64 -isysroot /Developer/SDKs/MacOSX10.5.sdk \
 			-DMAC_OS_X_VERSION_MIN_REQUIRED=1050"
 	X86_LDFLAGS=" -mmacosx-version-min=10.5"
 fi
@@ -67,10 +67,10 @@ NCPU=`sysctl -n hw.ncpu`
 
 
 # intel client and server
-if [ -d build/release-darwin-x64 ]; then
-	rm -r build/release-darwin-x64
+if [ -d build/release-darwin-x86_64 ]; then
+	rm -r build/release-darwin-x86_64
 fi
-(ARCH=x64 CFLAGS=$X86_CFLAGS LDFLAGS=$X86_LDFLAGS make -j$NCPU) || exit 1;
+(ARCH=x86_64 CFLAGS=$X86_CFLAGS LDFLAGS=$X86_LDFLAGS make -j$NCPU) || exit 1;
 
 echo "Creating .app bundle $DESTDIR/$APPBUNDLE"
 if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR ]; then
