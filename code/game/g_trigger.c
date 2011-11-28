@@ -390,8 +390,6 @@ void SP_trigger_hurt( gentity_t *self ) {
 		self->damage = 5;
 	}
 
-	self->r.contents = CONTENTS_TRIGGER;
-
 	self->use = hurt_use;
 
 	// link in to the world if starting active
