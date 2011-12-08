@@ -306,7 +306,7 @@ typedef enum {
 #define UI_INVERSE		0x00002000
 #define UI_PULSE		0x00004000
 
-#if defined(_DEBUG) && !defined(BSPC)
+#if !defined(NDEBUG) && !defined(BSPC)
 	#define HUNK_DEBUG
 #endif
 
