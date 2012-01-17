@@ -3608,7 +3608,7 @@ static int UI_MapCountByGameType(qboolean singlePlayer) {
 }
 
 qboolean UI_hasSkinForBase(const char *base, const char *team) {
-	char	test[1024];
+	char	test[MAX_QPATH];
 	
 	Com_sprintf( test, sizeof( test ), "models/players/%s/%s/lower_default.skin", base, team );
 
