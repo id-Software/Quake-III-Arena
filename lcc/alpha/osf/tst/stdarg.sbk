@@ -1,0 +1,430 @@
+.sdata
+.globl x
+.align 2
+x:
+.long 0x1
+.long 0x2
+.long 0x3
+.long 0x4
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-128($sp)
+.mask 0x4000000,-72
+.frame $sp,128,$26,48
+stq $26,56($sp)
+.prologue 1
+lda $16,L.3
+jsr $26,print
+ldgp $gp,0($26)
+lda $16,L.4
+lda $17,L.5
+jsr $26,print
+ldgp $gp,0($26)
+lda $16,L.6
+lda $17,3
+lda $18,10
+jsr $26,print
+ldgp $gp,0($26)
+lda $16,L.7
+lda $17,L.8
+lda $18,L.9
+lda $19,4
+lda $20,10
+jsr $26,print
+ldgp $gp,0($26)
+lda $16,L.10
+lda $17,L.8
+lda $18,L.9
+ldt $f19,L.11
+lda $20,10
+jsr $26,print
+ldgp $gp,0($26)
+lda $16,L.12
+lda $27,x
+mov $27,$1
+uldq $17,0($1)
+uldq $18,8($1)
+mov $27,$1
+uldq $19,0($1)
+uldq $20,8($1)
+mov $27,$1
+uldq $21,0($1)
+ldl $4,8($1)
+ldl $2,12($1)
+stl $4,0($30)
+stl $2,4($30)
+mov $27,$1
+ldl $4,0($1)
+ldl $2,4($1)
+stl $4,8($30)
+stl $2,12($30)
+ldl $4,8($1)
+ldl $2,12($1)
+stl $4,16($30)
+stl $2,20($30)
+mov $27,$1
+ldl $4,0($1)
+ldl $2,4($1)
+stl $4,24($30)
+stl $2,28($30)
+ldl $4,8($1)
+ldl $2,12($1)
+stl $4,32($30)
+stl $2,36($30)
+mov $27,$1
+ldl $4,0($1)
+ldl $2,4($1)
+stl $4,40($30)
+stl $2,44($30)
+ldl $4,8($1)
+ldl $2,12($1)
+stl $4,48($30)
+stl $2,52($30)
+jsr $26,print
+ldgp $gp,0($26)
+mov $31,$0
+L.2:
+ldq $26,56($sp)
+lda $sp,128($sp)
+ret
+.end main
+.globl print
+.text
+.ent print
+print:
+ldgp $gp,0($27)
+lda $sp,-160($sp)
+.mask 0x4006000,-144
+.frame $sp,160,$26,96
+stq $13,0($sp)
+stq $14,8($sp)
+stq $26,16($sp)
+stq $16,112($sp)
+stq $17,120($sp)
+stt $f17,72($sp)
+stq $18,128($sp)
+stt $f18,80($sp)
+stq $19,136($sp)
+stt $f19,88($sp)
+stq $20,144($sp)
+stt $f20,96($sp)
+stq $21,152($sp)
+stt $f21,104($sp)
+.prologue 1
+lda $27,-48+160($sp)
+stq $27,-120+160($sp)
+lda $27,-40+160($sp)
+ldq $25,-120+160($sp)
+subq $27,$25,$27
+stl $27,-112+160($sp)
+br L.21
+L.18:
+ldq $27,-48+160($sp)
+ldb $27,($27)
+cmpeq $27,37,$23
+beq $23,L.22
+ldq $27,-48+160($sp)
+lda $27,1($27)
+stq $27,-48+160($sp)
+ldb $14,($27)
+lda $27,115
+cmpeq $14,$27,$23
+bne $23,L.74
+cmple $14,$27,$23
+beq $23,L.100
+L.99:
+lda $27,98
+cmplt $14,$27,$23
+bne $23,L.24
+lda $27,102
+cmple $14,$27,$23
+beq $23,L.24
+subl $14,98,$27
+sll $27,3,$27
+ldq $27,L.101($27)
+jmp ($27)
+.rdata
+.align 3
+L.101:
+.quad L.27
+.quad L.41
+.quad L.52
+.quad L.24
+.quad L.85
+.text
+L.100:
+lda $27,119
+cmpeq $14,$27,$23
+bne $23,L.63
+br L.24
+L.27:
+ldl $27,-112+160($sp)
+lda $27,16($27)
+stl $27,-112+160($sp)
+lda $27,-136+160($sp)
+ldl $25,-112+160($sp)
+ldq $22,-120+160($sp)
+addq $25,$22,$25
+lda $1,-16($25)
+ldl $4,0($1)
+ldl $2,4($1)
+stl $4,0($27)
+stl $2,4($27)
+ldl $4,8($1)
+ldl $2,12($1)
+stl $4,8($27)
+stl $2,12($27)
+lda $16,L.37
+ldl $17,-136+160($sp)
+ldl $18,-132+160($sp)
+ldl $19,-128+160($sp)
+ldl $20,-124+160($sp)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.41:
+lda $16,L.42
+ldl $27,-112+160($sp)
+lda $27,8($27)
+stl $27,-112+160($sp)
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+lda $27,-8($27)
+ldb $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.52:
+lda $16,L.53
+ldl $27,-112+160($sp)
+lda $27,8($27)
+stl $27,-112+160($sp)
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+ldl $17,-8($27)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.63:
+lda $16,L.64
+ldl $27,-112+160($sp)
+lda $27,8($27)
+stl $27,-112+160($sp)
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+lda $27,-8($27)
+ldw $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.74:
+lda $16,L.75
+ldl $27,-112+160($sp)
+lda $27,8($27)
+stl $27,-112+160($sp)
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+ldq $17,-8($27)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.85:
+lda $16,L.86
+ldl $27,-112+160($sp)
+lda $27,8($27)
+stl $27,-112+160($sp)
+ldl $27,-112+160($sp)
+cmple $27,48,$23
+beq $23,L.97
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+lda $13,-56($27)
+br L.98
+L.97:
+ldl $27,-112+160($sp)
+ldq $25,-120+160($sp)
+addq $27,$25,$27
+lda $13,-8($27)
+L.98:
+ldt $f17,($13)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.24:
+lda $16,L.42
+ldq $27,-48+160($sp)
+ldb $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+br L.23
+L.22:
+lda $16,L.42
+ldq $27,-48+160($sp)
+ldb $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+L.23:
+L.19:
+ldq $27,-48+160($sp)
+lda $27,1($27)
+stq $27,-48+160($sp)
+L.21:
+ldq $27,-48+160($sp)
+ldb $27,($27)
+cmpeq $27,$31,$23
+beq $23,L.18
+mov $31,$0
+L.13:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $26,16($sp)
+lda $sp,160($sp)
+ret
+.end print
+.rdata
+.align 0
+L.86:
+.byte 37
+.byte 102
+.byte 0
+.align 0
+L.75:
+.byte 37
+.byte 115
+.byte 0
+.align 0
+L.64:
+.byte 37
+.byte 120
+.byte 0
+.align 0
+L.53:
+.byte 37
+.byte 100
+.byte 0
+.align 0
+L.42:
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.37:
+.byte 123
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 125
+.byte 0
+.align 0
+L.12:
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 10
+.byte 0
+.align 3
+L.11:
+.long 0x0
+.long 0x40140000
+.align 0
+L.10:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 102
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.9:
+.byte 115
+.byte 116
+.byte 0
+.align 0
+L.8:
+.byte 116
+.byte 101
+.byte 0
+.align 0
+L.7:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 119
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.6:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 100
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.5:
+.byte 50
+.byte 0
+.align 0
+L.4:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.3:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 49
+.byte 10
+.byte 0

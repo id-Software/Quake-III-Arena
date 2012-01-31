@@ -1,0 +1,4 @@
+tst/cq.c:533: warning: missing return value
+tst/cq.c:1169: warning: missing return value
+tst/cq.c:5294: warning: unreachable code
+tst/cq.c:5303: warning: missing return value

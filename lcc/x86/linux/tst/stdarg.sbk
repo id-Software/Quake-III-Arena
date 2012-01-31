@@ -1,0 +1,395 @@
+.data
+.globl x
+.align 4
+.type x,@object
+.size x,16
+x:
+.long 1
+.long 2
+.long 3
+.long 4
+.globl main
+.text
+.align 16
+.type main,@function
+main:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $8,%esp
+pushl $.LC2
+call print
+addl $4,%esp
+pushl $.LC4
+pushl $.LC3
+call print
+addl $8,%esp
+pushl $10
+pushl $3
+pushl $.LC5
+call print
+addl $12,%esp
+pushl $10
+pushl $4
+pushl $.LC8
+pushl $.LC7
+pushl $.LC6
+call print
+addl $20,%esp
+pushl $10
+fldl .LC10
+subl $8,%esp
+fstpl (%esp)
+pushl $.LC8
+pushl $.LC7
+pushl $.LC9
+call print
+addl $24,%esp
+leal x,%edi
+movl %edi,-8(%ebp)
+movl %edi,%esi
+movl %esi,-4(%ebp)
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+movl -8(%ebp),%edi
+movl %edi,%esi
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+movl -8(%ebp),%edi
+movl %edi,%esi
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+movl -8(%ebp),%edi
+movl %edi,%esi
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+movl -8(%ebp),%edi
+movl %edi,%esi
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+movl -8(%ebp),%edi
+movl %edi,%esi
+subl $16,%esp
+movl %esp,%edi
+movl $16,%ecx
+rep
+movsb
+pushl $.LC11
+call print
+addl $100,%esp
+movl $0,%eax
+.LC1:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf12:
+.size main,.Lf12-main
+.globl print
+.align 16
+.type print,@function
+print:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $28,%esp
+leal 24(%ebp),%edi
+movl %edi,-4(%ebp)
+jmp .LC19
+.LC16:
+movl 20(%ebp),%edi
+movsbl (,%edi),%edi
+cmpl $37,%edi
+jne .LC20
+movl 20(%ebp),%edi
+leal 1(%edi),%edi
+movl %edi,20(%ebp)
+movsbl (,%edi),%edi
+movl %edi,-8(%ebp)
+movl -8(%ebp),%edi
+cmpl $115,%edi
+je .LC36
+cmpl $115,%edi
+jg .LC41
+.LC40:
+movl -8(%ebp),%edi
+cmpl $98,%edi
+jl .LC22
+cmpl $102,%edi
+jg .LC22
+jmp *.LC42-392(,%edi,4)
+.data
+.align 4
+.LC42:
+.long .LC25
+.long .LC30
+.long .LC32
+.long .LC22
+.long .LC38
+.text
+.LC41:
+cmpl $119,-8(%ebp)
+je .LC34
+jmp .LC22
+.LC25:
+movl -4(%ebp),%edi
+leal 16(%edi),%edi
+movl %edi,-28(%ebp)
+movl %edi,-4(%ebp)
+leal -24(%ebp),%edi
+movl -28(%ebp),%esi
+leal -16(%esi),%esi
+movl $16,%ecx
+rep
+movsb
+pushl -12(%ebp)
+pushl -16(%ebp)
+pushl -20(%ebp)
+pushl -24(%ebp)
+pushl $.LC26
+call printf
+addl $20,%esp
+jmp .LC21
+.LC30:
+movl -4(%ebp),%edi
+leal 4(%edi),%edi
+movl %edi,-4(%ebp)
+movsbl -4(%edi),%edi
+pushl %edi
+pushl $.LC31
+call printf
+addl $8,%esp
+jmp .LC21
+.LC32:
+movl -4(%ebp),%edi
+leal 4(%edi),%edi
+movl %edi,-4(%ebp)
+pushl -4(%edi)
+pushl $.LC33
+call printf
+addl $8,%esp
+jmp .LC21
+.LC34:
+movl -4(%ebp),%edi
+leal 4(%edi),%edi
+movl %edi,-4(%ebp)
+movswl -4(%edi),%edi
+pushl %edi
+pushl $.LC35
+call printf
+addl $8,%esp
+jmp .LC21
+.LC36:
+movl -4(%ebp),%edi
+leal 4(%edi),%edi
+movl %edi,-4(%ebp)
+pushl -4(%edi)
+pushl $.LC37
+call printf
+addl $8,%esp
+jmp .LC21
+.LC38:
+movl -4(%ebp),%edi
+leal 8(%edi),%edi
+movl %edi,-4(%ebp)
+fldl -8(%edi)
+subl $8,%esp
+fstpl (%esp)
+pushl $.LC39
+call printf
+addl $12,%esp
+jmp .LC21
+.LC22:
+movl 20(%ebp),%edi
+movsbl (,%edi),%edi
+pushl %edi
+pushl $.LC31
+call printf
+addl $8,%esp
+jmp .LC21
+.LC20:
+movl 20(%ebp),%edi
+movsbl (,%edi),%edi
+pushl %edi
+pushl $.LC31
+call printf
+addl $8,%esp
+.LC21:
+.LC17:
+incl 20(%ebp)
+.LC19:
+movl 20(%ebp),%edi
+movsbl (,%edi),%edi
+cmpl $0,%edi
+jne .LC16
+movl $0,%eax
+.LC13:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf44:
+.size print,.Lf44-print
+.data
+.align 1
+.LC39:
+.byte 37
+.byte 102
+.byte 0
+.align 1
+.LC37:
+.byte 37
+.byte 115
+.byte 0
+.align 1
+.LC35:
+.byte 37
+.byte 120
+.byte 0
+.align 1
+.LC33:
+.byte 37
+.byte 100
+.byte 0
+.align 1
+.LC31:
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.LC26:
+.byte 123
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 125
+.byte 0
+.align 1
+.LC11:
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 10
+.byte 0
+.align 4
+.LC10:
+.long 0
+.long 1075052544
+.align 1
+.LC9:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 102
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.LC8:
+.byte 115
+.byte 116
+.byte 0
+.align 1
+.LC7:
+.byte 116
+.byte 101
+.byte 0
+.align 1
+.LC6:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 119
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.LC5:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 100
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.LC4:
+.byte 50
+.byte 0
+.align 1
+.LC3:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.LC2:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 49
+.byte 10
+.byte 0
+.text
+.ident "LCC: 4.1"

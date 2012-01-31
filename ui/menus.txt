@@ -1,0 +1,39 @@
+// menu defs
+// 
+{	
+	loadMenu { "ui/main.menu" }
+ 	loadMenu { "ui/joinserver.menu" }
+ 	loadMenu { "ui/filter.menu" }
+	loadMenu { "ui/punkbuster.menu" }
+ 	loadMenu { "ui/player.menu" }
+ 	loadMenu { "ui/setup.menu" }
+ 	loadMenu { "ui/fight.menu" }
+ 	loadMenu { "ui/skirmish.menu" }
+ 	loadMenu { "ui/createserver.menu" }
+	loadMenu { "ui/controls.menu" }
+	loadMenu { "ui/cdkey.menu" }
+	loadMenu { "ui/system.menu" }
+	loadMenu { "ui/options.menu" }
+	loadMenu { "ui/help.menu" }
+	loadMenu { "ui/ordershelp.menu" }
+ 	loadMenu { "ui/mod.menu" }
+	loadMenu { "ui/demo.menu" }
+	loadMenu { "ui/cinematicmenu.menu" }
+	loadMenu { "ui/credit.menu" }
+	loadMenu { "ui/demo_quit.menu" }
+	loadMenu { "ui/connect.menu" }
+	loadMenu { "ui/powerup.menu" } 
+	loadMenu { "ui/password.menu" }
+	loadMenu { "ui/quake3.menu" }
+	loadMenu { "ui/quit.menu" }
+	loadMenu { "ui/vid_restart.menu" }
+	loadMenu { "ui/default.menu" }
+	loadMenu { "ui/addfilter.menu" }
+	loadMenu { "ui/error.menu" }
+	loadMenu { "ui/serverinfo.menu" }
+	loadMenu { "ui/findplayer.menu" }
+	loadMenu { "ui/endofgame.menu" }
+	loadMenu { "ui/quitcredit.menu" }
+	loadMenu { "ui/resetscore.menu" }
+	loadMenu { "ui/createfavorite.menu" }
+}

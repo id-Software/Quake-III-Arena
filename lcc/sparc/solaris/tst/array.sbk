@@ -1,0 +1,172 @@
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-144,%sp
+mov %g0,%i4
+.L2:
+mov %g0,%i5
+.L6:
+sll %i5,2,%i2
+sll %i4,4,%i1
+set x,%i0
+add %i1,%i0,%i1
+smul %i4,1000,%i0
+add %i0,%i5,%i0
+st %i0,[%i2+%i1]
+.L7:
+add %i5,1,%i5
+cmp %i5,4; bl .L6; nop
+sll %i4,2,%i2
+set y,%i1
+sll %i4,4,%i0
+set x,%l7
+add %i0,%l7,%i0
+st %i0,[%i2+%i1]
+.L3:
+add %i4,1,%i4
+cmp %i4,3; bl .L2; nop
+call f; nop
+mov %g0,%i4
+.L10:
+sll %i4,4,%i2
+add -48,%fp,%i1
+add %i2,%i1,%i2
+mov %i2,%i3
+sll %i4,2,%i1
+set y,%i0
+st %i2,[%i1+%i0]
+mov %g0,%i5
+.L14:
+sll %i5,2,%i2
+sll %i4,4,%i1
+set x,%i0
+add %i1,%i0,%i1
+ld [%i2+%i1],%i1
+st %i1,[%i2+%i3]
+.L15:
+add %i5,1,%i5
+cmp %i5,4; bl .L14; nop
+.L11:
+add %i4,1,%i4
+cmp %i4,3; bl .L10; nop
+add -48,%fp,%o0
+set y,%o1
+call g; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.global f
+.align 4
+f:
+save %sp,-96,%sp
+mov %g0,%i4
+.L19:
+mov %g0,%i5
+.L23:
+set .L27,%o0
+sll %i5,2,%i3
+sll %i4,4,%i2
+set x,%i1
+add %i2,%i1,%i2
+ld [%i3+%i2],%o1
+call printf; nop
+.L24:
+add %i5,1,%i5
+cmp %i5,4; bl .L23; nop
+.L20:
+add %i4,1,%i4
+cmp %i4,3; bl .L19; nop
+set .L28,%o0
+call printf; nop
+mov %g0,%i4
+.L29:
+mov %g0,%i5
+.L33:
+set .L27,%o0
+sll %i5,2,%i3
+sll %i4,2,%i2
+set y,%i1
+ld [%i2+%i1],%i2
+ld [%i3+%i2],%o1
+call printf; nop
+.L34:
+add %i5,1,%i5
+cmp %i5,4; bl .L33; nop
+.L30:
+add %i4,1,%i4
+cmp %i4,3; bl .L29; nop
+set .L28,%o0
+call printf; nop
+mov %g0,%i0
+.L18:
+ret; restore
+.type f,#function
+.size f,.-f
+.global g
+.align 4
+g:
+save %sp,-96,%sp
+mov %g0,%i4
+.L38:
+mov %g0,%i5
+.L42:
+set .L27,%o0
+sll %i5,2,%i3
+sll %i4,4,%i2
+add %i2,%i0,%i2
+ld [%i3+%i2],%o1
+call printf; nop
+.L43:
+add %i5,1,%i5
+cmp %i5,4; bl .L42; nop
+.L39:
+add %i4,1,%i4
+cmp %i4,3; bl .L38; nop
+set .L28,%o0
+call printf; nop
+mov %g0,%i4
+.L46:
+mov %g0,%i5
+.L50:
+set .L27,%o0
+sll %i5,2,%i3
+sll %i4,2,%i2
+ld [%i2+%i1],%i2
+ld [%i3+%i2],%o1
+call printf; nop
+.L51:
+add %i5,1,%i5
+cmp %i5,4; bl .L50; nop
+.L47:
+add %i4,1,%i4
+cmp %i4,3; bl .L46; nop
+set .L28,%o0
+call printf; nop
+mov %g0,%i0
+.L37:
+ret; restore
+.type g,#function
+.size g,.-g
+.section ".bss"
+.global y
+.type y,#object
+.size y,12
+.common y,12,4
+.global x
+.type x,#object
+.size x,48
+.common x,48,4
+.section ".rodata"
+.align 1
+.L28:
+.byte 10
+.byte 0
+.align 1
+.L27:
+.byte 32
+.byte 37
+.byte 100
+.byte 0

@@ -1,0 +1,21 @@
+This hierarchy is the distribution for lcc version 4.1.
+
+lcc version 3.x is described in the book "A Retargetable C Compiler:
+Design and Implementation" (Addison-Wesley, 1995, ISBN 0-8053-1670-1).
+There are significant differences between 3.x and 4.x, most notably in
+the intermediate code. doc/4.html summarizes the differences.
+
+VERSION 4.1 IS INCOMPATIBLE WITH EARLIER VERSIONS OF LCC. DO NOT
+UNLOAD THIS DISTRIBUTION ON TOP OF A 3.X DISTRIBUTION.
+
+LOG describes the changes since the last release.
+
+CPYRIGHT describes the conditions under you can use, copy, modify, and
+distribute lcc or works derived from lcc.
+
+doc/install.html is an HTML file that gives a complete description of
+the distribution and installation instructions.
+
+Chris Fraser / cwfraser@microsoft.com
+David Hanson / drh@microsoft.com
+$Revision: 145 $ $Date: 2001-10-17 16:53:10 -0500 (Wed, 17 Oct 2001) $

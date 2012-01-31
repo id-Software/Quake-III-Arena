@@ -1,0 +1,282 @@
+.globl main
+.text
+.align 16
+.type main,@function
+main:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+movl $0,%eax
+.LC1:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf2:
+.size main,.Lf2-main
+.globl f
+.align 16
+.type f,@function
+f:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+call f
+movl %eax,%edi
+call f
+leal (%eax,%edi),%edi
+movl %edi,20(%ebp)
+movl $0,%eax
+.LC3:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf4:
+.size f,.Lf4-f
+.globl f2
+.align 16
+.type f2,@function
+f2:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+call f
+movl %eax,%edi
+cmpl $0,20(%ebp)
+je .LC7
+call f
+movl %eax,%esi
+movl %esi,-4(%ebp)
+jmp .LC8
+.LC7:
+movl $1,-4(%ebp)
+.LC8:
+movl -4(%ebp),%esi
+leal (%esi,%edi),%edi
+movl %edi,20(%ebp)
+movl $0,%eax
+.LC5:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf9:
+.size f2,.Lf9-f2
+.globl f3
+.align 16
+.type f3,@function
+f3:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $44,%esp
+movl $0,-4(%ebp)
+movl $0,-8(%ebp)
+movl $0,-12(%ebp)
+movl $0,-16(%ebp)
+movl $0,-20(%ebp)
+movl $0,-24(%ebp)
+movl $0,-28(%ebp)
+movl $0,-32(%ebp)
+movl $0,-36(%ebp)
+movl $0,-40(%ebp)
+movl 24(%ebp),%edi
+leal 4(%edi),%esi
+movl %esi,24(%ebp)
+cmpl $0,20(%ebp)
+je .LC12
+call f
+movl %eax,%esi
+movl %esi,-44(%ebp)
+jmp .LC13
+.LC12:
+movl $0,-44(%ebp)
+.LC13:
+movl -44(%ebp),%esi
+movl %esi,(,%edi)
+movl $0,%eax
+.LC10:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf14:
+.size f3,.Lf14-f3
+.globl f4
+.align 16
+.type f4,@function
+f4:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $52,%esp
+movl $0,-4(%ebp)
+movl $0,-8(%ebp)
+movl $0,-12(%ebp)
+movl $0,-16(%ebp)
+movl $0,-20(%ebp)
+movl $0,-24(%ebp)
+movl i,%edi
+leal (,%edi,8),%esi
+fldl a(%esi)
+fstpl -36(%ebp)
+fldl b(%esi)
+fstpl -44(%ebp)
+fldl -36(%ebp)
+faddl -44(%ebp)
+fldl .LC19
+fcompp
+fstsw %ax
+sahf
+je .LC17
+cmpl $0,%edi
+je .LC17
+fldl -36(%ebp)
+fsubl -44(%ebp)
+fldl .LC19
+fcompp
+fstsw %ax
+sahf
+je .LC17
+movl $1,-28(%ebp)
+jmp .LC18
+.LC17:
+movl $0,-28(%ebp)
+.LC18:
+movl -28(%ebp),%edi
+movl %edi,i
+movl $0,%eax
+.LC15:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf20:
+.size f4,.Lf20-f4
+.globl f5
+.align 16
+.type f5,@function
+f5:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+movl k,%edi
+movl m,%esi
+movl A,%ebx
+movl %edi,%edx
+imull %esi,%edx
+leal (%ebx,%edx,8),%edx
+movl j,%ecx
+movl %ecx,%eax
+imull %esi,%eax
+leal (%ebx,%eax,8),%esi
+movl n,%ebx
+movl B,%eax
+imull %ebx,%edi
+leal (%eax,%edi,8),%edi
+imull %ebx,%ecx
+leal (%eax,%ecx,8),%ebx
+fldl (,%edx)
+fmull (,%esi)
+fldl (,%edi)
+fmull (,%ebx)
+faddp %st(1),%st
+fstpl x
+fldl (,%edx)
+fmull (,%ebx)
+fldl (,%edi)
+fmull (,%esi)
+fsubp %st(1),%st
+fstpl x
+movl $0,%eax
+.LC21:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf22:
+.size f5,.Lf22-f5
+.bss
+.globl x
+.align 4
+.type x,@object
+.size x,8
+.comm x,8
+.globl B
+.align 4
+.type B,@object
+.size B,4
+.comm B,4
+.globl A
+.align 4
+.type A,@object
+.size A,4
+.comm A,4
+.globl n
+.align 4
+.type n,@object
+.size n,4
+.comm n,4
+.globl m
+.align 4
+.type m,@object
+.size m,4
+.comm m,4
+.globl k
+.align 4
+.type k,@object
+.size k,4
+.comm k,4
+.globl j
+.align 4
+.type j,@object
+.size j,4
+.comm j,4
+.globl i
+.align 4
+.type i,@object
+.size i,4
+.comm i,4
+.globl b
+.align 4
+.type b,@object
+.size b,80
+.comm b,80
+.globl a
+.align 4
+.type a,@object
+.size a,80
+.comm a,80
+.data
+.align 4
+.LC19:
+.long 0
+.long 0
+.text
+.ident "LCC: 4.1"

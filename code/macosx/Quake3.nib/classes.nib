@@ -1,0 +1,18 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {showHelp = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {paste = id; requestTerminate = id; }; 
+            CLASS = Q3Controller; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {bannerPanel = id; }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

@@ -1,0 +1,899 @@
+.globl main
+.text
+.align 16
+.type main,@function
+main:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $8,%esp
+leal .LC6,%edi
+movl %edi,-4(%ebp)
+jmp .LC5
+.LC2:
+movl -4(%ebp),%edi
+movsbl (,%edi),%edi
+pushl %edi
+call backslash
+addl $4,%esp
+pushl %eax
+movl -4(%ebp),%edi
+movsbl (,%edi),%edi
+pushl %edi
+pushl $.LC7
+call printf
+addl $12,%esp
+.LC3:
+incl -4(%ebp)
+.LC5:
+movl -4(%ebp),%edi
+movsbl (,%edi),%edi
+cmpl $0,%edi
+jne .LC2
+call f
+call g
+call h
+movl $16777216,-8(%ebp)
+jmp .LC11
+.LC8:
+pushl -8(%ebp)
+call big
+addl $4,%esp
+.LC9:
+addl $16777216,-8(%ebp)
+.LC11:
+movl -8(%ebp),%edi
+andl $117440512,%edi
+cmpl $0,%edi
+jne .LC8
+call limit
+movl $0,%eax
+.LC1:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf12:
+.size main,.Lf12-main
+.globl backslash
+.align 16
+.type backslash,@function
+backslash:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+movl 20(%ebp),%edi
+cmpl $102,%edi
+je .LC17
+cmpl $102,%edi
+jg .LC23
+.LC22:
+cmpl $98,20(%ebp)
+je .LC16
+jmp .LC14
+.LC23:
+movl 20(%ebp),%edi
+cmpl $110,%edi
+je .LC18
+cmpl $110,%edi
+jl .LC14
+.LC24:
+movl 20(%ebp),%edi
+cmpl $114,%edi
+je .LC19
+cmpl $116,%edi
+je .LC20
+cmpl $118,%edi
+je .LC21
+jmp .LC14
+.LC16:
+movl $8,%eax
+jmp .LC13
+.LC17:
+movl $12,%eax
+jmp .LC13
+.LC18:
+movl $10,%eax
+jmp .LC13
+.LC19:
+movl $13,%eax
+jmp .LC13
+.LC20:
+movl $9,%eax
+jmp .LC13
+.LC21:
+movl $11,%eax
+jmp .LC13
+.LC14:
+movl 20(%ebp),%eax
+.LC13:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf25:
+.size backslash,.Lf25-backslash
+.globl f
+.align 16
+.type f,@function
+f:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $12,%esp
+movl $0,-8(%ebp)
+pushl $.LC27
+call printf
+addl $4,%esp
+movl $0,-4(%ebp)
+.LC28:
+movl -4(%ebp),%edi
+movl %edi,-12(%ebp)
+movl -4(%ebp),%edi
+cmpl $1,%edi
+jl .LC32
+cmpl $20,%edi
+jg .LC32
+jmp *.LC44-4(,%edi,4)
+.data
+.align 4
+.LC44:
+.long .LC34
+.long .LC35
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC36
+.long .LC37
+.long .LC38
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC32
+.long .LC39
+.long .LC40
+.long .LC41
+.long .LC42
+.long .LC43
+.text
+.LC34:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC35:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC36:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC37:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC38:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC39:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC40:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC41:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC42:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+jmp .LC33
+.LC43:
+movl -4(%ebp),%edi
+movl %edi,-8(%ebp)
+.LC32:
+.LC33:
+pushl -8(%ebp)
+pushl $.LC46
+call printf
+addl $8,%esp
+.LC29:
+incl -4(%ebp)
+cmpl $20,-4(%ebp)
+jle .LC28
+movl $0,%eax
+.LC26:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf47:
+.size f,.Lf47-f
+.globl g
+.align 16
+.type g,@function
+g:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+pushl $.LC49
+call printf
+addl $4,%esp
+movl $1,-4(%ebp)
+.LC50:
+movl -4(%ebp),%edi
+cmpl $1001,%edi
+jl .LC67
+cmpl $1004,%edi
+jg .LC68
+jmp *.LC69-4004(,%edi,4)
+.data
+.align 4
+.LC69:
+.long .LC63
+.long .LC63
+.long .LC63
+.long .LC63
+.text
+.LC67:
+movl -4(%ebp),%edi
+cmpl $1,%edi
+jl .LC54
+cmpl $8,%edi
+jg .LC54
+jmp *.LC71-4(,%edi,4)
+.data
+.align 4
+.LC71:
+.long .LC56
+.long .LC56
+.long .LC58
+.long .LC58
+.long .LC58
+.long .LC60
+.long .LC60
+.long .LC60
+.text
+.LC68:
+movl -4(%ebp),%edi
+cmpl $3001,%edi
+jl .LC54
+cmpl $3004,%edi
+jg .LC54
+jmp *.LC73-12004(,%edi,4)
+.data
+.align 4
+.LC73:
+.long .LC65
+.long .LC65
+.long .LC65
+.long .LC65
+.text
+.LC56:
+pushl -4(%ebp)
+pushl $.LC57
+call printf
+addl $8,%esp
+jmp .LC55
+.LC58:
+pushl -4(%ebp)
+pushl $.LC59
+call printf
+addl $8,%esp
+jmp .LC55
+.LC60:
+pushl -4(%ebp)
+pushl $.LC61
+call printf
+addl $8,%esp
+.LC54:
+pushl -4(%ebp)
+pushl $.LC62
+call printf
+addl $8,%esp
+jmp .LC55
+.LC63:
+pushl -4(%ebp)
+pushl $.LC64
+call printf
+addl $8,%esp
+jmp .LC55
+.LC65:
+pushl -4(%ebp)
+pushl $.LC66
+call printf
+addl $8,%esp
+.LC55:
+.LC51:
+incl -4(%ebp)
+cmpl $10,-4(%ebp)
+jle .LC50
+movl $0,%eax
+.LC48:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf75:
+.size g,.Lf75-g
+.globl h
+.align 16
+.type h,@function
+h:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $8,%esp
+movl $0,-8(%ebp)
+pushl $.LC77
+call printf
+addl $4,%esp
+movl $1,-4(%ebp)
+.LC78:
+movl -4(%ebp),%edi
+cmpl $264,%edi
+je .LC90
+cmpl $264,%edi
+jg .LC98
+.LC97:
+movl -4(%ebp),%edi
+cmpl $120,%edi
+je .LC88
+cmpl $120,%edi
+jg .LC100
+.LC99:
+movl -4(%ebp),%edi
+cmpl $8,%edi
+je .LC87
+cmpl $8,%edi
+jl .LC82
+.LC101:
+cmpl $16,-4(%ebp)
+je .LC86
+jmp .LC82
+.LC100:
+movl -4(%ebp),%edi
+cmpl $128,%edi
+je .LC84
+cmpl $128,%edi
+jl .LC82
+.LC102:
+cmpl $248,-4(%ebp)
+je .LC91
+jmp .LC82
+.LC98:
+movl -4(%ebp),%edi
+cmpl $288,%edi
+je .LC95
+cmpl $288,%edi
+jg .LC104
+.LC103:
+movl -4(%ebp),%edi
+cmpl $272,%edi
+je .LC92
+cmpl $272,%edi
+jl .LC82
+.LC105:
+cmpl $280,-4(%ebp)
+je .LC89
+jmp .LC82
+.LC104:
+movl -4(%ebp),%edi
+cmpl $304,%edi
+je .LC93
+cmpl $304,%edi
+jg .LC107
+.LC106:
+cmpl $296,-4(%ebp)
+je .LC94
+jmp .LC82
+.LC107:
+cmpl $312,-4(%ebp)
+je .LC96
+jmp .LC82
+.LC82:
+incl -8(%ebp)
+jmp .LC79
+.LC84:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC86:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC87:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC88:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC89:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC90:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC91:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC92:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC93:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC94:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC95:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+jmp .LC83
+.LC96:
+pushl -4(%ebp)
+pushl $.LC85
+call printf
+addl $8,%esp
+.LC83:
+.LC79:
+incl -4(%ebp)
+cmpl $500,-4(%ebp)
+jle .LC78
+pushl -8(%ebp)
+pushl $.LC108
+call printf
+addl $8,%esp
+movl $0,%eax
+.LC76:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf109:
+.size h,.Lf109-h
+.globl big
+.align 16
+.type big,@function
+big:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+movl 20(%ebp),%edi
+andl $0x6000000,%edi
+movl %edi,-4(%ebp)
+movl -4(%ebp),%edi
+cmpl $33554432,%edi
+je .LC116
+cmpl $33554432,%edi
+jg .LC120
+.LC119:
+movl -4(%ebp),%edi
+cmpl $-2,%edi
+je .LC114
+cmpl $-1,%edi
+je .LC114
+cmpl $0,%edi
+je .LC114
+jmp .LC111
+.LC120:
+movl -4(%ebp),%edi
+cmpl $67108864,%edi
+je .LC117
+jmp .LC111
+.LC114:
+pushl 20(%ebp)
+pushl $.LC115
+call printf
+addl $8,%esp
+jmp .LC112
+.LC116:
+pushl 20(%ebp)
+pushl $.LC115
+call printf
+addl $8,%esp
+jmp .LC112
+.LC117:
+pushl 20(%ebp)
+pushl $.LC115
+call printf
+addl $8,%esp
+jmp .LC112
+.LC111:
+pushl 20(%ebp)
+pushl $.LC118
+call printf
+addl $8,%esp
+.LC112:
+movl $0,%eax
+.LC110:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf121:
+.size big,.Lf121-big
+.globl limit
+.align 16
+.type limit,@function
+limit:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+movl $-2147483648,-4(%ebp)
+.LC123:
+movl -4(%ebp),%edi
+movl $-2147483648,%esi
+cmpl $-2147483648,%edi
+jl .LC127
+cmpl $-2147483644,%edi
+jg .LC127
+leal (,%edi,4),%edi
+leal (,%esi,4),%esi
+subl %esi,%edi
+jmp *.LC140(%edi)
+.data
+.align 4
+.LC140:
+.long .LC129
+.long .LC131
+.long .LC133
+.long .LC135
+.long .LC137
+.text
+.LC129:
+pushl $.LC130
+call printf
+addl $4,%esp
+jmp .LC128
+.LC131:
+pushl $.LC132
+call printf
+addl $4,%esp
+jmp .LC128
+.LC133:
+pushl $.LC134
+call printf
+addl $4,%esp
+jmp .LC128
+.LC135:
+pushl $.LC136
+call printf
+addl $4,%esp
+jmp .LC128
+.LC137:
+pushl $.LC138
+call printf
+addl $4,%esp
+jmp .LC128
+.LC127:
+pushl $.LC139
+call printf
+addl $4,%esp
+.LC128:
+.LC124:
+incl -4(%ebp)
+cmpl $-2147483643,-4(%ebp)
+jle .LC123
+movl $2147483647,-4(%ebp)
+.LC141:
+movl -4(%ebp),%edi
+movl $2147483643,%esi
+cmpl $2147483643,%edi
+jl .LC145
+cmpl $2147483647,%edi
+jg .LC145
+leal (,%edi,4),%edi
+leal (,%esi,4),%esi
+subl %esi,%edi
+jmp *.LC152(%edi)
+.data
+.align 4
+.LC152:
+.long .LC151
+.long .LC150
+.long .LC149
+.long .LC148
+.long .LC147
+.text
+.LC147:
+pushl $.LC130
+call printf
+addl $4,%esp
+jmp .LC146
+.LC148:
+pushl $.LC132
+call printf
+addl $4,%esp
+jmp .LC146
+.LC149:
+pushl $.LC134
+call printf
+addl $4,%esp
+jmp .LC146
+.LC150:
+pushl $.LC136
+call printf
+addl $4,%esp
+jmp .LC146
+.LC151:
+pushl $.LC138
+call printf
+addl $4,%esp
+jmp .LC146
+.LC145:
+pushl $.LC139
+call printf
+addl $4,%esp
+.LC146:
+.LC142:
+decl -4(%ebp)
+cmpl $2147483642,-4(%ebp)
+jge .LC141
+movl $0,%eax
+.LC122:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf153:
+.size limit,.Lf153-limit
+.data
+.align 1
+.LC139:
+.byte 53
+.byte 10
+.byte 0
+.align 1
+.LC138:
+.byte 52
+.byte 10
+.byte 0
+.align 1
+.LC136:
+.byte 51
+.byte 10
+.byte 0
+.align 1
+.LC134:
+.byte 50
+.byte 10
+.byte 0
+.align 1
+.LC132:
+.byte 49
+.byte 10
+.byte 0
+.align 1
+.LC130:
+.byte 48
+.byte 10
+.byte 0
+.align 1
+.LC118:
+.byte 120
+.byte 32
+.byte 61
+.byte 32
+.byte 48
+.byte 120
+.byte 37
+.byte 120
+.byte 32
+.byte 40
+.byte 100
+.byte 101
+.byte 102
+.byte 97
+.byte 117
+.byte 108
+.byte 116
+.byte 41
+.byte 10
+.byte 0
+.align 1
+.LC115:
+.byte 120
+.byte 32
+.byte 61
+.byte 32
+.byte 48
+.byte 120
+.byte 37
+.byte 120
+.byte 10
+.byte 0
+.align 1
+.LC108:
+.byte 37
+.byte 100
+.byte 32
+.byte 100
+.byte 101
+.byte 102
+.byte 97
+.byte 117
+.byte 108
+.byte 116
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.LC85:
+.byte 105
+.byte 32
+.byte 61
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC77:
+.byte 104
+.byte 58
+.byte 10
+.byte 0
+.align 1
+.LC66:
+.byte 54
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC64:
+.byte 53
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC62:
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC61:
+.byte 51
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC59:
+.byte 50
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC57:
+.byte 49
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC49:
+.byte 103
+.byte 58
+.byte 10
+.byte 0
+.align 1
+.LC46:
+.byte 120
+.byte 32
+.byte 61
+.byte 32
+.byte 37
+.byte 100
+.byte 10
+.byte 0
+.align 1
+.LC27:
+.byte 102
+.byte 58
+.byte 10
+.byte 0
+.align 1
+.LC7:
+.byte 37
+.byte 99
+.byte 32
+.byte 61
+.byte 32
+.byte 48
+.byte 120
+.byte 37
+.byte 120
+.byte 10
+.byte 0
+.align 1
+.LC6:
+.byte 98
+.byte 102
+.byte 110
+.byte 114
+.byte 116
+.byte 118
+.byte 120
+.byte 0
+.text
+.ident "LCC: 4.1"

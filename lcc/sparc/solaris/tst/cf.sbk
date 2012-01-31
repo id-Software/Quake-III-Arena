@@ -1,0 +1,143 @@
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-96,%sp
+cmp %i0,1; bg .L2; nop
+set .L4,%i2
+ld [%i2],%f31
+st %f31,[%fp+-4]
+ba .L3; nop
+.L2:
+ld [%i1+4],%o0
+call atof; nop
+fmovs %f0,%f31
+set .L5,%i2
+ld [%i2],%f30
+fdivs %f31,%f30,%f31
+st %f31,[%fp+-4]
+.L3:
+mov %g0,%i5
+.L6:
+mov %i5,%i2
+add %i2,1,%i5
+sll %i2,2,%i2
+set f,%l7
+set .L4,%l6
+ld [%l6],%f31
+st %f31,[%i2+%l7]
+.L7:
+cmp %i5,127; ble .L6; nop
+mov %g0,%i4
+ba .L11; nop
+.L10:
+sll %i3,2,%i2
+set f,%l7
+add %i2,%l7,%i2
+ld [%i2],%f31
+set .L13,%l7
+ld [%l7],%f30
+fadds %f31,%f30,%f31
+st %f31,[%i2]
+add %i4,1,%i4
+.L11:
+call getchar; nop
+mov %o0,%i3
+cmp %o0,-1; bne .L10; nop
+set .L14,%o0
+call printf; nop
+mov %g0,%i5
+.L15:
+sll %i5,2,%i2
+set f,%l7
+ld [%i2+%l7],%f31
+set .L4,%i2
+ld [%i2],%f30
+fcmpes %f31,%f30; nop; fbue .L19; nop
+st %i4,[%sp+64]; ld [%sp+64],%f30; fitos %f30,%f30
+fdivs %f31,%f30,%f31
+ld [%fp+-4],%f30
+fcmpes %f31,%f30; nop; fbul .L19; nop
+cmp %i5,32; bg .L21; nop
+set .L23,%o0
+mov %i5,%o1
+call printf; nop
+ba .L22; nop
+.L21:
+set .L24,%o0
+mov %i5,%o1
+call printf; nop
+.L22:
+set .L25,%o0
+set .L5,%i2
+ld [%i2],%f31
+sll %i5,2,%i2
+set f,%l7
+ld [%i2+%l7],%f30
+fmuls %f31,%f30,%f31
+st %i4,[%sp+64]; ld [%sp+64],%f30; fitos %f30,%f30
+fdivs %f31,%f30,%f31
+fstod %f31,%f30
+st %f30,[%sp+4*1+68]
+st %f31,[%sp+4*2+68]
+ld [%sp+4*1+68],%o1
+ld [%sp+4*2+68],%o2
+call printf; nop
+.L19:
+.L16:
+add %i5,1,%i5
+cmp %i5,127; ble .L15; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.section ".bss"
+.global f
+.type f,#object
+.size f,512
+.common f,512,4
+.section ".rodata"
+.align 1
+.L25:
+.byte 9
+.byte 37
+.byte 46
+.byte 49
+.byte 102
+.byte 10
+.byte 0
+.align 1
+.L24:
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.L23:
+.byte 37
+.byte 48
+.byte 51
+.byte 111
+.byte 0
+.align 1
+.L14:
+.byte 99
+.byte 104
+.byte 97
+.byte 114
+.byte 9
+.byte 102
+.byte 114
+.byte 101
+.byte 113
+.byte 10
+.byte 0
+.align 4
+.L13:
+.word 0x3f800000
+.align 4
+.L5:
+.word 0x42c80000
+.align 4
+.L4:
+.word 0x0

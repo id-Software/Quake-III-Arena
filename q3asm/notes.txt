@@ -1,0 +1,16 @@
+
+don't do any paramter conversion (double to float, etc)
+
+
+
+Why?
+
+Security.
+Portability.
+
+It may be more aproachable.
+
+can still use regular dlls for development purposes
+
+lcc
+q3asm

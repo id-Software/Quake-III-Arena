@@ -1,0 +1,170 @@
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-96($sp)
+.fmask 0x200,-96
+.mask 0x4007000,-64
+.frame $sp,96,$26,48
+stt $f9,0($sp)
+stq $12,8($sp)
+stq $13,16($sp)
+stq $14,24($sp)
+stq $26,32($sp)
+stq $16,48($sp)
+stq $17,56($sp)
+.prologue 1
+ldl $27,-48+96($sp)
+cmple $27,1,$23
+beq $23,L.2
+lds $f9,L.4
+br L.3
+L.2:
+ldq $27,-40+96($sp)
+ldq $16,8($27)
+jsr $26,atof
+ldgp $gp,0($26)
+lds $f29,L.5
+divs $f0,$f29,$f9
+L.3:
+mov $31,$14
+L.6:
+mov $14,$27
+lda $14,1($27)
+sll $27,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lds $f30,L.4
+sts $f30,f($27)
+L.7:
+lda $27,127
+cmple $14,$27,$23
+bne $23,L.6
+mov $31,$13
+br L.11
+L.10:
+sll $12,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lda $27,f($27)
+lds $f30,($27)
+lds $f29,L.13
+adds $f30,$f29,$f30
+sts $f30,($27)
+lda $13,1($13)
+L.11:
+jsr $26,getchar
+ldgp $gp,0($26)
+mov $0,$12
+lda $25,-1
+cmpeq $0,$25,$23
+beq $23,L.10
+lda $16,L.14
+jsr $26,printf
+ldgp $gp,0($26)
+mov $31,$14
+L.15:
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lds $f30,f($27)
+lds $f29,L.4
+cmpteq $f30,$f29,$f1
+fbne $f1,L.19
+stq $13,-56+96($sp)
+ldt $f29,-56+96($sp)
+cvtqs $f29,$f29
+divs $f30,$f29,$f30
+cmptlt $f30,$f9,$f1
+fbne $f1,L.19
+cmple $14,32,$23
+beq $23,L.21
+lda $16,L.23
+mov $14,$17
+jsr $26,printf
+ldgp $gp,0($26)
+br L.22
+L.21:
+lda $16,L.24
+mov $14,$17
+jsr $26,printf
+ldgp $gp,0($26)
+L.22:
+lda $16,L.25
+lds $f30,L.5
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lds $f29,f($27)
+muls $f30,$f29,$f30
+stq $13,-56+96($sp)
+ldt $f29,-56+96($sp)
+cvtqs $f29,$f29
+divs $f30,$f29,$f30
+cvtst $f30,$f17
+jsr $26,printf
+ldgp $gp,0($26)
+L.19:
+L.16:
+lda $14,1($14)
+lda $27,127
+cmple $14,$27,$23
+bne $23,L.15
+mov $31,$0
+L.1:
+ldt $f9,0($sp)
+ldq $12,8($sp)
+ldq $13,16($sp)
+ldq $14,24($sp)
+ldq $26,32($sp)
+lda $sp,96($sp)
+ret
+.end main
+.globl f
+.comm f,512
+.rdata
+.align 0
+L.25:
+.byte 9
+.byte 37
+.byte 46
+.byte 49
+.byte 102
+.byte 10
+.byte 0
+.align 0
+L.24:
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.23:
+.byte 37
+.byte 48
+.byte 51
+.byte 111
+.byte 0
+.align 0
+L.14:
+.byte 99
+.byte 104
+.byte 97
+.byte 114
+.byte 9
+.byte 102
+.byte 114
+.byte 101
+.byte 113
+.byte 10
+.byte 0
+.align 2
+L.13:
+.long 0x3f800000
+.align 2
+L.5:
+.long 0x42c80000
+.align 2
+L.4:
+.long 0x0

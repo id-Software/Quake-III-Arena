@@ -1,0 +1,5 @@
+tst/sort.c:23: warning: missing return value
+tst/sort.c:30: warning: missing return value
+tst/sort.c:37: warning: missing return value
+tst/sort.c:41: warning: missing return value
+tst/sort.c:65: warning: missing return value

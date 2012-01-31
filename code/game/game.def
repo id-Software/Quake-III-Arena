@@ -1,0 +1,3 @@
+EXPORTS
+	dllEntry
+	vmMain

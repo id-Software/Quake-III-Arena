@@ -1,0 +1,153 @@
+.set reorder
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,48,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-48
+.fmask 0xc0000000,-32
+.mask 0xc2c00000,-8
+s.d $f30,16($sp)
+sw $22,24($sp)
+sw $23,28($sp)
+.cprestore 32
+sw $30,36($sp)
+sw $31,40($sp)
+sw $4,48($sp)
+sw $5,52($sp)
+lw $24,0+48($sp)
+la $15,1
+bgt $24,$15,L.2
+l.s $f30,L.4
+b L.3
+L.2:
+lw $24,4+48($sp)
+lw $4,4($24)
+jal atof
+l.s $f16,L.5
+div.s $f30,$f0,$f16
+L.3:
+move $30,$0
+L.6:
+move $24,$30
+la $30,1($24)
+sll $24,$24,2
+l.s $f18,L.4
+s.s $f18,f($24)
+L.7:
+la $24,127
+ble $30,$24,L.6
+move $23,$0
+b L.11
+L.10:
+sll $24,$22,2
+la $24,f($24)
+l.s $f18,($24)
+l.s $f16,L.13
+add.s $f18,$f18,$f16
+s.s $f18,($24)
+la $23,1($23)
+L.11:
+jal getchar
+move $22,$2
+la $15,-1
+bne $2,$15,L.10
+la $4,L.14
+jal printf
+move $30,$0
+L.15:
+sll $24,$30,2
+l.s $f18,f($24)
+l.s $f16,L.4
+c.eq.s $f18,$f16; bc1t L.19
+mtc1 $23,$f16; cvt.s.w $f16,$f16
+div.s $f18,$f18,$f16
+c.lt.s $f18,$f30; bc1t L.19
+la $24,32
+bgt $30,$24,L.21
+la $4,L.23
+move $5,$30
+jal printf
+b L.22
+L.21:
+la $4,L.24
+move $5,$30
+jal printf
+L.22:
+la $4,L.25
+l.s $f18,L.5
+sll $24,$30,2
+l.s $f16,f($24)
+mul.s $f18,$f18,$f16
+mtc1 $23,$f16; cvt.s.w $f16,$f16
+div.s $f18,$f18,$f16
+cvt.d.s $f18,$f18
+mfc1.d $6,$f18
+jal printf
+L.19:
+L.16:
+la $30,1($30)
+la $24,127
+ble $30,$24,L.15
+move $2,$0
+L.1:
+l.d $f30,16($sp)
+lw $22,24($sp)
+lw $23,28($sp)
+lw $25,32($sp)
+lw $30,36($sp)
+lw $31,40($sp)
+addu $sp,$sp,48
+j $31
+.end main
+.globl f
+.comm f,512
+.rdata
+.align 0
+L.25:
+.byte 9
+.byte 37
+.byte 46
+.byte 49
+.byte 102
+.byte 10
+.byte 0
+.align 0
+L.24:
+.byte 37
+.byte 99
+.byte 0
+.align 0
+L.23:
+.byte 37
+.byte 48
+.byte 51
+.byte 111
+.byte 0
+.align 0
+L.14:
+.byte 99
+.byte 104
+.byte 97
+.byte 114
+.byte 9
+.byte 102
+.byte 114
+.byte 101
+.byte 113
+.byte 10
+.byte 0
+.align 2
+L.13:
+.word 0x3f800000
+.align 2
+L.5:
+.word 0x42c80000
+.align 2
+L.4:
+.word 0x0

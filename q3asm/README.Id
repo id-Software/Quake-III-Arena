@@ -1,0 +1,10 @@
+2002-10-25  Timothee Besset <ttimo@idsoftware.com>
+If you are looking for a faster version of the q3asm tool, try:
+http://www.icculus.org/~phaethon/q3/q3asm-turbo/q3asm-turbo.html
+
+2001-10-31  Timothee Besset <ttimo@idsoftware.com>
+updated from the $/source/q3asm code
+modified for portability and use with >= 1.31 mod source release
+
+the cmdlib.c cmdlib.h mathlib.h qfiles.h have been copied from
+$/source/common

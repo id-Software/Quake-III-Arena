@@ -1,0 +1,383 @@
+# $Id: makefile.nt 314 2002-10-05 17:07:57Z timo $
+HOSTFILE=etc/win32.c
+TARGET=x86\win32
+TEMPDIR=\\temp
+A=.lib
+O=.obj
+E=.exe
+CC=cl -nologo
+CFLAGS=-DWIN32 -Zi -MLd -Fd$(BUILDDIR)^\
+LD=cl -nologo
+LDFLAGS=-Zi -MLd -Fd$(BUILDDIR)^\
+B=$(BUILDDIR)^\
+T=$B$(TARGET)\tst^\
+C=$Blcc -Wo-lccdir=$(BUILDDIR) -Wf-target=$(TARGET) -I$B$(TARGET)/include
+# $Id: makefile.nt 314 2002-10-05 17:07:57Z timo $
+
+what:
+	-@echo make all q3rcc lburg q3cpp lcc bprint liblcc triple clean clobber
+
+all::	q3rcc lburg q3cpp lcc bprint liblcc
+
+q3rcc:	$Bq3rcc$E
+lburg:	$Blburg$E
+q3cpp:	$Bq3cpp$E
+lcc:	$Blcc$E
+bprint:	$Bbprint$E
+liblcc:	$Bliblcc$A
+
+RCCOBJS=$Balloc$O \
+	$Bbind$O \
+	$Bdag$O \
+	$Bdagcheck$O \
+	$Bdecl$O \
+	$Benode$O \
+	$Berror$O \
+	$Bexpr$O \
+	$Bevent$O \
+	$Binit$O \
+	$Binits$O \
+	$Binput$O \
+	$Blex$O \
+	$Blist$O \
+	$Bmain$O \
+	$Boutput$O \
+	$Bprof$O \
+	$Bprofio$O \
+	$Bsimp$O \
+	$Bstmt$O \
+	$Bstring$O \
+	$Bsym$O \
+	$Btrace$O \
+	$Btree$O \
+	$Btypes$O \
+	$Bnull$O \
+	$Bsymbolic$O \
+	$Bgen$O \
+	$Bbytecode$O \
+	$Balpha$O \
+	$Bmips$O \
+	$Bsparc$O \
+	$Bstab$O \
+	$Bx86$O \
+	$Bx86linux$O
+
+$Bq3rcc$E::	$Bmain$O $Blibrcc$A $(EXTRAOBJS)
+		$(LD) $(LDFLAGS) -Fe$@ $Bmain$O $(EXTRAOBJS) $Blibrcc$A $(EXTRALIBS)
+
+$Blibrcc$A:	$(RCCOBJS)
+		lib -out:$@ $(RCCOBJS)
+
+$(RCCOBJS):	src/c.h src/token.h src/config.h
+
+$Balloc$O:	src/alloc.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/alloc.c
+$Bbind$O:	src/bind.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/bind.c
+$Bdag$O:	src/dag.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/dag.c
+$Bdecl$O:	src/decl.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/decl.c
+$Benode$O:	src/enode.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/enode.c
+$Berror$O:	src/error.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/error.c
+$Bevent$O:	src/event.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/event.c
+$Bexpr$O:	src/expr.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/expr.c
+$Bgen$O:	src/gen.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/gen.c
+$Binit$O:	src/init.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/init.c
+$Binits$O:	src/inits.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/inits.c
+$Binput$O:	src/input.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/input.c
+$Blex$O:	src/lex.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/lex.c
+$Blist$O:	src/list.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/list.c
+$Bmain$O:	src/main.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/main.c
+$Bnull$O:	src/null.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/null.c
+$Boutput$O:	src/output.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/output.c
+$Bprof$O:	src/prof.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/prof.c
+$Bprofio$O:	src/profio.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/profio.c
+$Bsimp$O:	src/simp.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/simp.c
+$Bstmt$O:	src/stmt.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/stmt.c
+$Bstring$O:	src/string.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/string.c
+$Bsym$O:	src/sym.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/sym.c
+$Bsymbolic$O:	src/symbolic.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/symbolic.c
+$Bbytecode$O:	src/bytecode.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/bytecode.c
+$Btrace$O:	src/trace.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/trace.c
+$Btree$O:	src/tree.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/tree.c
+$Btypes$O:	src/types.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/types.c
+$Bstab$O:	src/stab.c src/stab.h;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ src/stab.c
+
+$Bdagcheck$O:	$Bdagcheck.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Bdagcheck.c
+$Balpha$O:	$Balpha.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Balpha.c
+$Bmips$O:	$Bmips.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Bmips.c
+$Bsparc$O:	$Bsparc.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Bsparc.c
+$Bx86$O:	$Bx86.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Bx86.c
+$Bx86linux$O:	$Bx86linux.c;	$(CC) $(CFLAGS) -c -Isrc -Fo$@ $Bx86linux.c
+
+$Bdagcheck.c:	$Blburg$E src/dagcheck.md; $Blburg src/dagcheck.md $@
+$Balpha.c:	$Blburg$E src/alpha.md;    $Blburg src/alpha.md    $@
+$Bmips.c:	$Blburg$E src/mips.md;     $Blburg src/mips.md     $@
+$Bsparc.c:	$Blburg$E src/sparc.md;    $Blburg src/sparc.md    $@
+$Bx86.c:	$Blburg$E src/x86.md;      $Blburg src/x86.md      $@
+$Bx86linux.c:	$Blburg$E src/x86linux.md; $Blburg src/x86linux.md $@
+
+$Brcc.h:	src/rcc.asdl;			$(ASDL_HOME)/bin/asdlGen --c -d $B src/rcc.asdl
+$Brcc$O:	$Brcc.h;			$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -Fo$@ $Brcc.c
+$Basdl$O:	src/asdl.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -Fo$@ src/asdl.c
+$Bpass2$O:	src/pass2.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -Fo$@ src/pass2.c
+$B2html$O:	src/2html.c $Brcc.h src/c.h;	$(CC) $(CFLAGS) -c -Isrc -I$B -I$(ASDL_HOME)/include/asdlGen -Fo$@ src/2html.c
+
+$Bpass2$E:	$Bpass2$O $(EXTRAOBJS) $Blibrcc$A;	$(LD) $(LDFLAGS) -Fe$@ $Bpass2$O $(EXTRAOBJS) $Blibrcc$A $(EXTRALIBS)
+$B2html$E:	$B2html$O $Brcc$O;			$(LD) $(LDFLAGS) -Fe$@ $B2html$O $Brcc$O $(EXTRALIBS)
+
+$Bbprint$E:	$Bbprint$O;		$(LD) $(LDFLAGS) -Fe$@ $Bbprint$O 
+
+$Bbprint$O:	etc/bprint.c;		$(CC) $(CFLAGS) -c -Isrc -Fo$@ etc/bprint.c
+
+$Blcc$E:	$Blcc$O $Bhost$O;	$(LD) $(LDFLAGS) -Fe$@ $Blcc$O $Bhost$O 
+
+$Blcc$O:	etc/lcc.c;	$(CC) $(CFLAGS) -c -DTEMPDIR=\"$(TEMPDIR)\" -Fo$@ etc/lcc.c
+$Bhost$O:	$(HOSTFILE);	$(CC) $(CFLAGS) -c -Fo$@ $(HOSTFILE)
+
+LIBOBJS=$Bassert$O $Bbbexit$O $Byynull$O
+
+$Bliblcc$A:	$(LIBOBJS);	lib -out:$@ $Bassert$O $Bbbexit$O $Byynull$O
+
+$Bassert$O:	lib/assert.c;	$(CC) -c -Fo$@ lib/assert.c
+$Byynull$O:	lib/yynull.c;	$(CC) -c -Fo$@ lib/yynull.c
+$Bbbexit$O:	lib/bbexit.c;	$(CC) -c -Fo$@ lib/bbexit.c
+
+$Blburg$E:	$Blburg$O $Bgram$O;	$(LD) $(LDFLAGS) -Fe$@ $Blburg$O $Bgram$O 
+
+$Blburg$O $Bgram$O:	lburg/lburg.h
+
+$Blburg$O:	lburg/lburg.c;	$(CC) $(CFLAGS) -c -Ilburg -Fo$@ lburg/lburg.c
+$Bgram$O:	lburg/gram.c;	$(CC) $(CFLAGS) -c -Ilburg -Fo$@ lburg/gram.c
+
+CPPOBJS=$Bcpp$O $Blexer$O $Bnlist$O $Btokens$O $Bmacro$O $Beval$O \
+	$Binclude$O $Bhideset$O $Bgetopt$O $Bunix$O
+
+$Bq3cpp$E:	$(CPPOBJS)
+		$(LD) $(LDFLAGS) -Fe$@ $(CPPOBJS) 
+
+$(CPPOBJS):	cpp/cpp.h
+
+$Bcpp$O:	cpp/cpp.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/cpp.c
+$Blexer$O:	cpp/lex.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/lex.c
+$Bnlist$O:	cpp/nlist.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/nlist.c
+$Btokens$O:	cpp/tokens.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/tokens.c
+$Bmacro$O:	cpp/macro.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/macro.c
+$Beval$O:	cpp/eval.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/eval.c
+$Binclude$O:	cpp/include.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/include.c
+$Bhideset$O:	cpp/hideset.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/hideset.c
+$Bgetopt$O:	cpp/getopt.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/getopt.c
+$Bunix$O:	cpp/unix.c;	$(CC) $(CFLAGS) -c -Icpp -Fo$@ cpp/unix.c
+
+test:	$T8q.s \
+	$Tarray.s \
+	$Tcf.s \
+	$Tcq.s \
+	$Tcvt.s \
+	$Tfields.s \
+	$Tfront.s \
+	$Tincr.s \
+	$Tinit.s \
+	$Tlimits.s \
+	$Tparanoia.s \
+	$Tsort.s \
+	$Tspill.s \
+	$Tstdarg.s \
+	$Tstruct.s \
+	$Tswitch.s \
+	$Twf1.s \
+	$Tyacc.s
+
+$T8q.s:	tst\8q.c tst\8q.0 all
+	-$C -S -Wf-errout=$T8q.2 -o $T8q.s tst/8q.c
+	fc $(TARGET)\tst\8q.sbk $T8q.s
+	fc $(TARGET)\tst\8q.2bk $T8q.2
+	$C -o $T8q$E $T8q.s
+	-$T8q$E <tst/8q.0 >$T8q.1
+	fc $(TARGET)\tst\8q.1bk $T8q.1
+$Tarray.s:	tst\array.c tst\array.0 all
+	-$C -S -Wf-errout=$Tarray.2 -o $Tarray.s tst/array.c
+	fc $(TARGET)\tst\array.sbk $Tarray.s
+	fc $(TARGET)\tst\array.2bk $Tarray.2
+	$C -o $Tarray$E $Tarray.s
+	-$Tarray$E <tst/array.0 >$Tarray.1
+	fc $(TARGET)\tst\array.1bk $Tarray.1
+$Tcf.s:	tst\cf.c tst\cf.0 all
+	-$C -S -Wf-errout=$Tcf.2 -o $Tcf.s tst/cf.c
+	fc $(TARGET)\tst\cf.sbk $Tcf.s
+	fc $(TARGET)\tst\cf.2bk $Tcf.2
+	$C -o $Tcf$E $Tcf.s
+	-$Tcf$E <tst/cf.0 >$Tcf.1
+	fc $(TARGET)\tst\cf.1bk $Tcf.1
+$Tcq.s:	tst\cq.c tst\cq.0 all
+	-$C -S -Wf-errout=$Tcq.2 -o $Tcq.s tst/cq.c
+	fc $(TARGET)\tst\cq.sbk $Tcq.s
+	fc $(TARGET)\tst\cq.2bk $Tcq.2
+	$C -o $Tcq$E $Tcq.s
+	-$Tcq$E <tst/cq.0 >$Tcq.1
+	fc $(TARGET)\tst\cq.1bk $Tcq.1
+$Tcvt.s:	tst\cvt.c tst\cvt.0 all
+	-$C -S -Wf-errout=$Tcvt.2 -o $Tcvt.s tst/cvt.c
+	fc $(TARGET)\tst\cvt.sbk $Tcvt.s
+	fc $(TARGET)\tst\cvt.2bk $Tcvt.2
+	$C -o $Tcvt$E $Tcvt.s
+	-$Tcvt$E <tst/cvt.0 >$Tcvt.1
+	fc $(TARGET)\tst\cvt.1bk $Tcvt.1
+$Tfields.s:	tst\fields.c tst\fields.0 all
+	-$C -S -Wf-errout=$Tfields.2 -o $Tfields.s tst/fields.c
+	fc $(TARGET)\tst\fields.sbk $Tfields.s
+	fc $(TARGET)\tst\fields.2bk $Tfields.2
+	$C -o $Tfields$E $Tfields.s
+	-$Tfields$E <tst/fields.0 >$Tfields.1
+	fc $(TARGET)\tst\fields.1bk $Tfields.1
+$Tfront.s:	tst\front.c tst\front.0 all
+	-$C -S -Wf-errout=$Tfront.2 -o $Tfront.s tst/front.c
+	fc $(TARGET)\tst\front.sbk $Tfront.s
+	fc $(TARGET)\tst\front.2bk $Tfront.2
+$Tincr.s:	tst\incr.c tst\incr.0 all
+	-$C -S -Wf-errout=$Tincr.2 -o $Tincr.s tst/incr.c
+	fc $(TARGET)\tst\incr.sbk $Tincr.s
+	fc $(TARGET)\tst\incr.2bk $Tincr.2
+	$C -o $Tincr$E $Tincr.s
+	-$Tincr$E <tst/incr.0 >$Tincr.1
+	fc $(TARGET)\tst\incr.1bk $Tincr.1
+$Tinit.s:	tst\init.c tst\init.0 all
+	-$C -S -Wf-errout=$Tinit.2 -o $Tinit.s tst/init.c
+	fc $(TARGET)\tst\init.sbk $Tinit.s
+	fc $(TARGET)\tst\init.2bk $Tinit.2
+	$C -o $Tinit$E $Tinit.s
+	-$Tinit$E <tst/init.0 >$Tinit.1
+	fc $(TARGET)\tst\init.1bk $Tinit.1
+$Tlimits.s:	tst\limits.c tst\limits.0 all
+	-$C -S -Wf-errout=$Tlimits.2 -o $Tlimits.s tst/limits.c
+	fc $(TARGET)\tst\limits.sbk $Tlimits.s
+	fc $(TARGET)\tst\limits.2bk $Tlimits.2
+	$C -o $Tlimits$E $Tlimits.s
+	-$Tlimits$E <tst/limits.0 >$Tlimits.1
+	fc $(TARGET)\tst\limits.1bk $Tlimits.1
+$Tparanoia.s:	tst\paranoia.c tst\paranoia.0 all
+	-$C -S -Wf-errout=$Tparanoia.2 -o $Tparanoia.s tst/paranoia.c
+	fc $(TARGET)\tst\paranoia.sbk $Tparanoia.s
+	fc $(TARGET)\tst\paranoia.2bk $Tparanoia.2
+	$C -o $Tparanoia$E $Tparanoia.s
+	-$Tparanoia$E <tst/paranoia.0 >$Tparanoia.1
+	fc $(TARGET)\tst\paranoia.1bk $Tparanoia.1
+$Tsort.s:	tst\sort.c tst\sort.0 all
+	-$C -S -Wf-errout=$Tsort.2 -o $Tsort.s tst/sort.c
+	fc $(TARGET)\tst\sort.sbk $Tsort.s
+	fc $(TARGET)\tst\sort.2bk $Tsort.2
+	$C -o $Tsort$E $Tsort.s
+	-$Tsort$E <tst/sort.0 >$Tsort.1
+	fc $(TARGET)\tst\sort.1bk $Tsort.1
+$Tspill.s:	tst\spill.c tst\spill.0 all
+	-$C -S -Wf-errout=$Tspill.2 -o $Tspill.s tst/spill.c
+	fc $(TARGET)\tst\spill.sbk $Tspill.s
+	fc $(TARGET)\tst\spill.2bk $Tspill.2
+	$C -o $Tspill$E $Tspill.s
+	-$Tspill$E <tst/spill.0 >$Tspill.1
+	fc $(TARGET)\tst\spill.1bk $Tspill.1
+$Tstdarg.s:	tst\stdarg.c tst\stdarg.0 all
+	-$C -S -Wf-errout=$Tstdarg.2 -o $Tstdarg.s tst/stdarg.c
+	fc $(TARGET)\tst\stdarg.sbk $Tstdarg.s
+	fc $(TARGET)\tst\stdarg.2bk $Tstdarg.2
+	$C -o $Tstdarg$E $Tstdarg.s
+	-$Tstdarg$E <tst/stdarg.0 >$Tstdarg.1
+	fc $(TARGET)\tst\stdarg.1bk $Tstdarg.1
+$Tstruct.s:	tst\struct.c tst\struct.0 all
+	-$C -S -Wf-errout=$Tstruct.2 -o $Tstruct.s tst/struct.c
+	fc $(TARGET)\tst\struct.sbk $Tstruct.s
+	fc $(TARGET)\tst\struct.2bk $Tstruct.2
+	$C -o $Tstruct$E $Tstruct.s
+	-$Tstruct$E <tst/struct.0 >$Tstruct.1
+	fc $(TARGET)\tst\struct.1bk $Tstruct.1
+$Tswitch.s:	tst\switch.c tst\switch.0 all
+	-$C -S -Wf-errout=$Tswitch.2 -o $Tswitch.s tst/switch.c
+	fc $(TARGET)\tst\switch.sbk $Tswitch.s
+	fc $(TARGET)\tst\switch.2bk $Tswitch.2
+	$C -o $Tswitch$E $Tswitch.s
+	-$Tswitch$E <tst/switch.0 >$Tswitch.1
+	fc $(TARGET)\tst\switch.1bk $Tswitch.1
+$Twf1.s:	tst\wf1.c tst\wf1.0 all
+	-$C -S -Wf-errout=$Twf1.2 -o $Twf1.s tst/wf1.c
+	fc $(TARGET)\tst\wf1.sbk $Twf1.s
+	fc $(TARGET)\tst\wf1.2bk $Twf1.2
+	$C -o $Twf1$E $Twf1.s
+	-$Twf1$E <tst/wf1.0 >$Twf1.1
+	fc $(TARGET)\tst\wf1.1bk $Twf1.1
+$Tyacc.s:	tst\yacc.c tst\yacc.0 all
+	-$C -S -Wf-errout=$Tyacc.2 -o $Tyacc.s tst/yacc.c
+	fc $(TARGET)\tst\yacc.sbk $Tyacc.s
+	fc $(TARGET)\tst\yacc.2bk $Tyacc.2
+	$C -o $Tyacc$E $Tyacc.s
+	-$Tyacc$E <tst/yacc.0 >$Tyacc.1
+	fc $(TARGET)\tst\yacc.1bk $Tyacc.1
+
+testclean:
+	-del /q $T8q$E $T8q.s $T8q.2 $T8q.1
+	-del /q $Tarray$E $Tarray.s $Tarray.2 $Tarray.1
+	-del /q $Tcf$E $Tcf.s $Tcf.2 $Tcf.1
+	-del /q $Tcq$E $Tcq.s $Tcq.2 $Tcq.1
+	-del /q $Tcvt$E $Tcvt.s $Tcvt.2 $Tcvt.1
+	-del /q $Tfields$E $Tfields.s $Tfields.2 $Tfields.1
+	-del /q $Tfront$E $Tfront.s $Tfront.2 $Tfront.1
+	-del /q $Tincr$E $Tincr.s $Tincr.2 $Tincr.1
+	-del /q $Tinit$E $Tinit.s $Tinit.2 $Tinit.1
+	-del /q $Tlimits$E $Tlimits.s $Tlimits.2 $Tlimits.1
+	-del /q $Tparanoia$E $Tparanoia.s $Tparanoia.2 $Tparanoia.1
+	-del /q $Tsort$E $Tsort.s $Tsort.2 $Tsort.1
+	-del /q $Tspill$E $Tspill.s $Tspill.2 $Tspill.1
+	-del /q $Tstdarg$E $Tstdarg.s $Tstdarg.2 $Tstdarg.1
+	-del /q $Tstruct$E $Tstruct.s $Tstruct.2 $Tstruct.1
+	-del /q $Tswitch$E $Tswitch.s $Tswitch.2 $Tswitch.1
+	-del /q $Twf1$E $Twf1.s $Twf1.2 $Twf1.1
+	-del /q $Tyacc$E $Tyacc.s $Tyacc.2 $Tyacc.1
+
+clean::		testclean
+		-del /q $B*$O
+		-del /q $Bdagcheck.c $Balpha.c $Bmips.c $Bx86.c $Bsparc.c $Bx86linux.c $Bgram.c
+		-del /q $Brcc.c $Brcc.h
+		-del /q $Bq3rcc1$E $Brcc1$E $B1rcc$E $B2rcc$E
+		-del /q $B*.ilk
+
+clobber::	clean
+		-del /q $Bq3rcc$E $B2html$E $Bpass2$E $Blburg$E $Bq3cpp$E $Blcc$E $Bbprint$E $B*$A
+		-del /q $B*.pdb $B*.pch
+
+RCCSRCS=src/alloc.c \
+	src/bind.c \
+	src/dag.c \
+	src/decl.c \
+	src/enode.c \
+	src/error.c \
+	src/expr.c \
+	src/event.c \
+	src/init.c \
+	src/inits.c \
+	src/input.c \
+	src/lex.c \
+	src/list.c \
+	src/main.c \
+	src/output.c \
+	src/prof.c \
+	src/profio.c \
+	src/simp.c \
+	src/stmt.c \
+	src/string.c \
+	src/sym.c \
+	src/trace.c \
+	src/tree.c \
+	src/types.c \
+	src/null.c \
+	src/symbolic.c \
+	src/bytecode.c \
+	src/gen.c \
+	src/stab.c \
+	$Bdagcheck.c \
+	$Balpha.c \
+	$Bmips.c \
+	$Bsparc.c \
+	$Bx86linux.c \
+	$Bx86.c
+
+C=$Blcc -A -d0.6 -Wo-lccdir=$(BUILDDIR) -Isrc -I$(BUILDDIR)
+triple:	$Bq3rcc$E $Blcc$E $Bq3cpp$E
+	$C -o $B1rcc$E -B$B  $(RCCSRCS)
+	$C -o $B2rcc$E -B$B1 $(RCCSRCS)
+	fc /b $B1rcc$E $B2rcc$E

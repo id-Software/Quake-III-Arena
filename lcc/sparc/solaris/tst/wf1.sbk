@@ -1,0 +1,311 @@
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-120,%sp
+st %g0,[%fp+-24]
+set next,%i5
+st %g0,[%i5]
+ba .L3; nop
+.L2:
+add -20,%fp,%o0
+add -24,%fp,%o1
+call lookup; nop
+ld [%o0],%i4
+add %i4,1,%i4
+st %i4,[%o0]
+.L3:
+add -20,%fp,%o0
+call getword; nop
+cmp %o0,0; bne .L2; nop
+ld [%fp+-24],%o0
+call tprint; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.global err
+.align 4
+err:
+save %sp,-96,%sp
+set .L6,%o0
+mov %i0,%o1
+call printf; nop
+set 1,%o0
+call exit; nop
+mov %g0,%i0
+.L5:
+ret; restore
+.type err,#function
+.size err,.-err
+.global getword
+.align 4
+getword:
+save %sp,-96,%sp
+.L8:
+.L9:
+call getchar; nop
+mov %o0,%i3
+mov %i3,%i5
+cmp %i3,-1; be .L11; nop
+mov %i5,%o0
+call isletter; nop
+cmp %o0,0; be .L8; nop
+.L11:
+mov %i0,%i4
+ba .L15; nop
+.L12:
+mov %i4,%i3
+add %i3,1,%i4
+mov %i5,%i2
+stb %i2,[%i3]
+.L13:
+call getchar; nop
+mov %o0,%i5
+.L15:
+mov %i5,%o0
+call isletter; nop
+mov %o0,%i5
+cmp %o0,0; bne .L12; nop
+stb %g0,[%i4]
+mov %i4,%i3
+mov %i0,%i2
+cmp %i3,%i2; bleu .L16; nop
+set 1,%i0
+ba .L7; nop
+.L16:
+mov %g0,%i0
+.L7:
+ret; restore
+.type getword,#function
+.size getword,.-getword
+.global isletter
+.align 4
+isletter:
+cmp %o0,65; bl .L19; nop
+cmp %o0,90; bg .L19; nop
+add %o0,32,%o0
+.L19:
+cmp %o0,97; bl .L21; nop
+cmp %o0,122; bg .L21; nop
+ba .L18; nop
+.L21:
+mov %g0,%o0
+.L18:
+retl; nop
+.type isletter,#function
+.size isletter,.-isletter
+.global lookup
+.align 4
+lookup:
+save %sp,-96,%sp
+ld [%i1],%i4
+cmp %i4,%g0; be .L24; nop
+mov %i0,%o0
+ld [%i1],%i4
+ld [%i4+12],%o1
+call strcmp; nop
+mov %o0,%i5
+cmp %i5,0; bge .L26; nop
+mov %i0,%o0
+ld [%i1],%i4
+add %i4,4,%o1
+call lookup; nop
+mov %o0,%i0
+ba .L23; nop
+.L26:
+cmp %i5,0; ble .L28; nop
+mov %i0,%o0
+ld [%i1],%i4
+add %i4,8,%o1
+call lookup; nop
+mov %o0,%i0
+ba .L23; nop
+.L28:
+ld [%i1],%i0
+ba .L23; nop
+.L24:
+set next,%i4
+ld [%i4],%i4
+cmp %i4,2000; bl .L30; nop
+set .L32,%o0
+call err; nop
+.L30:
+set next,%i4
+ld [%i4],%i4
+sll %i4,4,%i4
+set words,%i3
+st %g0,[%i4+%i3]
+set next,%i4
+ld [%i4],%i4
+sll %i4,4,%i4
+set words+8,%i2
+st %g0,[%i4+%i2]
+set words+4,%i2
+st %g0,[%i4+%i2]
+mov %i0,%o0
+call strlen; nop
+mov %o0,%i4
+add %i4,1,%o0
+call malloc; nop
+set next,%i3
+ld [%i3],%i3
+sll %i3,4,%i3
+set words+12,%i2
+st %o0,[%i3+%i2]
+set next,%i4
+ld [%i4],%i4
+sll %i4,4,%i4
+set words+12,%i3
+ld [%i4+%i3],%i4
+cmp %i4,%g0; bne .L36; nop
+set .L39,%o0
+call err; nop
+.L36:
+set next,%i4
+ld [%i4],%i4
+sll %i4,4,%i4
+set words+12,%i3
+ld [%i4+%i3],%o0
+mov %i0,%o1
+call strcpy; nop
+set next,%i4
+ld [%i4],%i3
+add %i3,1,%i2
+st %i2,[%i4]
+sll %i3,4,%i4
+set words,%i3
+add %i4,%i3,%i4
+st %i4,[%i1]
+mov %i4,%i0
+.L23:
+ret; restore
+.type lookup,#function
+.size lookup,.-lookup
+.global tprint
+.align 4
+tprint:
+save %sp,-96,%sp
+mov %i0,%i5
+cmp %i5,%g0; be .L42; nop
+ld [%i0+4],%o0
+call tprint; nop
+set .L44,%o0
+ld [%i0],%o1
+ld [%i0+12],%o2
+call printf; nop
+ld [%i0+8],%o0
+call tprint; nop
+.L42:
+mov %g0,%i0
+.L41:
+ret; restore
+.type tprint,#function
+.size tprint,.-tprint
+.global strcmp
+.align 4
+strcmp:
+save %sp,-96,%sp
+ba .L47; nop
+.L46:
+mov %i0,%i5
+add %i5,1,%i0
+ldsb [%i5],%i5
+cmp %i5,0; bne .L49; nop
+mov %g0,%i0
+ba .L45; nop
+.L49:
+add %i1,1,%i1
+.L47:
+ldsb [%i0],%i5
+ldsb [%i1],%i4
+cmp %i5,%i4; be .L46; nop
+ldsb [%i0],%i5
+cmp %i5,0; bne .L51; nop
+set -1,%i0
+ba .L45; nop
+.L51:
+ldsb [%i1],%i5
+cmp %i5,0; bne .L53; nop
+set 1,%i0
+ba .L45; nop
+.L53:
+ldsb [%i0],%i5
+ldsb [%i1],%i4
+sub %i5,%i4,%i0
+.L45:
+ret; restore
+.type strcmp,#function
+.size strcmp,.-strcmp
+.section ".bss"
+.global next
+.type next,#object
+.size next,4
+.common next,4,4
+.global words
+.type words,#object
+.size words,32000
+.common words,32000,4
+.section ".rodata"
+.align 1
+.L44:
+.byte 37
+.byte 100
+.byte 9
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.L39:
+.byte 111
+.byte 117
+.byte 116
+.byte 32
+.byte 111
+.byte 102
+.byte 32
+.byte 119
+.byte 111
+.byte 114
+.byte 100
+.byte 32
+.byte 115
+.byte 116
+.byte 111
+.byte 114
+.byte 97
+.byte 103
+.byte 101
+.byte 0
+.align 1
+.L32:
+.byte 111
+.byte 117
+.byte 116
+.byte 32
+.byte 111
+.byte 102
+.byte 32
+.byte 110
+.byte 111
+.byte 100
+.byte 101
+.byte 32
+.byte 115
+.byte 116
+.byte 111
+.byte 114
+.byte 97
+.byte 103
+.byte 101
+.byte 0
+.align 1
+.L6:
+.byte 63
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0

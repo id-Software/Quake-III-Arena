@@ -1,0 +1,333 @@
+.sdata
+.globl words
+.align 2
+words:
+.long 0x1
+.long 0x2
+.long 0x3
+.byte 105
+.byte 102
+.byte 0
+.space 3
+.space 2
+.long 0x4
+.long 0x5
+.space 4
+.byte 102
+.byte 111
+.byte 114
+.space 3
+.space 2
+.long 0x6
+.long 0x7
+.long 0x8
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.space 1
+.space 2
+.long 0x9
+.long 0xa
+.long 0xb
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.space 1
+.space 2
+.long 0x0
+.space 8
+.space 8
+.globl wordlist
+.align 3
+wordlist:
+.quad words
+.globl x
+.align 2
+x:
+.long 0x1
+.long 0x2
+.long 0x3
+.long 0x4
+.long 0x0
+.long 0x5
+.long 0x6
+.space 12
+.long 0x7
+.space 16
+.globl y
+.align 3
+y:
+.quad x
+.quad x+20
+.quad x+40
+.quad 0x0
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4006000,-64
+.frame $sp,80,$26,48
+stq $13,0($sp)
+stq $14,8($sp)
+stq $26,16($sp)
+.prologue 1
+mov $31,$13
+br L.8
+L.5:
+mov $31,$14
+br L.12
+L.9:
+lda $16,L.13
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+sll $13,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,3,$25
+ldq $25,y($25)
+addq $27,$25,$27
+ldl $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+L.10:
+lda $14,1($14)
+L.12:
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+sll $13,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,3,$25
+ldq $25,y($25)
+addq $27,$25,$27
+ldl $27,($27)
+cmpeq $27,$31,$23
+beq $23,L.9
+lda $16,L.14
+jsr $26,printf
+ldgp $gp,0($26)
+L.6:
+lda $13,1($13)
+L.8:
+sll $13,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,3,$27
+ldq $27,y($27)
+cmpeq $27,$31,$23
+beq $23,L.5
+jsr $26,f
+ldgp $gp,0($26)
+ldq $16,wordlist
+jsr $26,g
+ldgp $gp,0($26)
+mov $31,$0
+L.4:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $26,16($sp)
+lda $sp,80($sp)
+ret
+.end main
+.sdata
+.align 3
+L.16:
+.quad L.17
+.quad L.18
+.quad L.19
+.quad L.20
+.quad 0x0
+.globl f
+.text
+.text
+.ent f
+f:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4004000,-72
+.frame $sp,80,$26,48
+stq $14,0($sp)
+stq $26,8($sp)
+.prologue 1
+lda $14,L.16
+br L.24
+L.21:
+lda $16,L.25
+ldq $17,($14)
+jsr $26,printf
+ldgp $gp,0($26)
+L.22:
+lda $14,8($14)
+L.24:
+ldq $27,($14)
+cmpeq $27,$31,$23
+beq $23,L.21
+mov $31,$0
+L.15:
+ldq $14,0($sp)
+ldq $26,8($sp)
+lda $sp,80($sp)
+ret
+.end f
+.globl g
+.text
+.ent g
+g:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4006000,-64
+.frame $sp,80,$26,48
+stq $13,0($sp)
+stq $14,8($sp)
+stq $26,16($sp)
+mov $16,$14
+.prologue 1
+br L.30
+L.27:
+mov $31,$13
+br L.34
+L.31:
+lda $16,L.35
+sll $13,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+addq $27,$14,$27
+ldl $17,($27)
+jsr $26,printf
+ldgp $gp,0($26)
+L.32:
+lda $13,1($13)
+L.34:
+mov $13,$27
+lda $25,3
+cmpult $27,$25,$23
+bne $23,L.31
+lda $16,L.25
+lda $17,12($14)
+jsr $26,printf
+ldgp $gp,0($26)
+L.28:
+lda $14,20($14)
+L.30:
+ldl $27,($14)
+cmpeq $27,$31,$23
+beq $23,L.27
+jsr $26,h
+ldgp $gp,0($26)
+mov $31,$0
+L.26:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $26,16($sp)
+lda $sp,80($sp)
+ret
+.end g
+.globl h
+.text
+.ent h
+h:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4004000,-72
+.frame $sp,80,$26,48
+stq $14,0($sp)
+stq $26,8($sp)
+.prologue 1
+mov $31,$14
+br L.40
+L.37:
+lda $16,L.41
+lda $27,20
+sll $14,8*(8-4),$25
+sra $25,8*(8-4),$25
+mulq $27,$25,$27
+ldl $17,words($27)
+ldl $18,words+4($27)
+ldl $19,words+8($27)
+lda $20,words+12($27)
+jsr $26,printf
+ldgp $gp,0($26)
+L.38:
+lda $14,1($14)
+L.40:
+mov $14,$27
+lda $25,5
+cmpult $27,$25,$23
+bne $23,L.37
+mov $31,$0
+L.36:
+ldq $14,0($sp)
+ldq $26,8($sp)
+lda $sp,80($sp)
+ret
+.end h
+.rdata
+.align 0
+L.41:
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.35:
+.byte 37
+.byte 100
+.byte 32
+.byte 0
+.align 0
+L.25:
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.20:
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.byte 0
+.align 0
+L.19:
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.align 0
+L.18:
+.byte 102
+.byte 111
+.byte 114
+.byte 0
+.align 0
+L.17:
+.byte 105
+.byte 102
+.byte 0
+.align 0
+L.14:
+.byte 10
+.byte 0
+.align 0
+L.13:
+.byte 32
+.byte 37
+.byte 100
+.byte 0

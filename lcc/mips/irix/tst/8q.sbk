@@ -1,0 +1,169 @@
+.set reorder
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+move $30,$0
+L.2:
+sll $24,$30,2
+la $15,1
+sw $15,down($24)
+sw $15,up($24)
+L.3:
+la $30,1($30)
+la $24,15
+blt $30,$24,L.2
+move $30,$0
+L.6:
+sll $24,$30,2
+la $15,1
+sw $15,rows($24)
+L.7:
+la $30,1($30)
+la $24,8
+blt $30,$24,L.6
+move $4,$0
+jal queens
+move $2,$0
+L.1:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end main
+.globl queens
+.text
+.align 2
+.ent queens
+queens:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2800000,-4
+sw $23,16($sp)
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+move $30,$4
+move $23,$0
+L.11:
+sll $15,$23,2
+lw $15,rows($15)
+beq $15,$0,L.15
+subu $15,$23,$30
+sll $15,$15,2
+lw $15,up+28($15)
+beq $15,$0,L.15
+addu $15,$23,$30
+sll $15,$15,2
+lw $15,down($15)
+beq $15,$0,L.15
+addu $15,$23,$30
+sll $15,$15,2
+sw $0,down($15)
+subu $15,$23,$30
+sll $15,$15,2
+sw $0,up+28($15)
+sll $15,$23,2
+sw $0,rows($15)
+sll $24,$30,2
+sw $23,x($24)
+la $24,7
+bne $30,$24,L.19
+jal print
+b L.20
+L.19:
+la $4,1($30)
+jal queens
+L.20:
+la $24,1
+addu $15,$23,$30
+sll $15,$15,2
+sw $24,down($15)
+subu $15,$23,$30
+sll $15,$15,2
+sw $24,up+28($15)
+sll $15,$23,2
+sw $24,rows($15)
+L.15:
+L.12:
+la $23,1($23)
+la $24,8
+blt $23,$24,L.11
+move $2,$0
+L.10:
+lw $23,16($sp)
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,32
+j $31
+.end queens
+.globl print
+.text
+.align 2
+.ent print
+print:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+move $30,$0
+L.23:
+la $4,L.27
+sll $24,$30,2
+lw $24,x($24)
+la $5,49($24)
+jal printf
+L.24:
+la $30,1($30)
+la $24,8
+blt $30,$24,L.23
+la $4,L.28
+jal printf
+move $2,$0
+L.22:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end print
+.globl x
+.comm x,32
+.globl rows
+.comm rows,32
+.globl down
+.comm down,60
+.globl up
+.comm up,60
+.rdata
+.align 0
+L.28:
+.byte 10
+.byte 0
+.align 0
+L.27:
+.byte 37
+.byte 99
+.byte 32
+.byte 0

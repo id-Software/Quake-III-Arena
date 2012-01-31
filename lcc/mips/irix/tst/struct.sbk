@@ -1,0 +1,485 @@
+.set reorder
+.globl addpoint
+.text
+.text
+.align 2
+.ent addpoint
+addpoint:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+sw $5,4($sp)
+sw $6,8($sp)
+sw $7,12($sp)
+lw $24,4+0($sp)
+lw $15,12+0($sp)
+addu $24,$24,$15
+sw $24,4+0($sp)
+lw $24,8+0($sp)
+lw $15,16+0($sp)
+addu $24,$24,$15
+sw $24,8+0($sp)
+la $8,4+0($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($4)
+sw $9,4($4)
+L.1:
+j $31
+.end addpoint
+.globl canonrect
+.text
+.align 2
+.ent canonrect
+canonrect:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0x40e00000,-20
+sw $21,0($sp)
+sw $22,4($sp)
+sw $23,8($sp)
+sw $30,12($sp)
+sw $5,36($sp)
+sw $6,40($sp)
+sw $7,44($sp)
+lw $24,4+32($sp)
+lw $15,12+32($sp)
+bge $24,$15,L.10
+lw $30,4+32($sp)
+b L.11
+L.10:
+lw $30,12+32($sp)
+L.11:
+sw $30,-16+32($sp)
+lw $24,8+32($sp)
+lw $15,16+32($sp)
+bge $24,$15,L.20
+lw $23,8+32($sp)
+b L.21
+L.20:
+lw $23,16+32($sp)
+L.21:
+sw $23,-12+32($sp)
+lw $24,4+32($sp)
+lw $15,12+32($sp)
+ble $24,$15,L.26
+lw $22,4+32($sp)
+b L.27
+L.26:
+lw $22,12+32($sp)
+L.27:
+sw $22,-8+32($sp)
+lw $24,8+32($sp)
+lw $15,16+32($sp)
+ble $24,$15,L.37
+lw $21,8+32($sp)
+b L.38
+L.37:
+lw $21,16+32($sp)
+L.38:
+sw $21,-4+32($sp)
+la $8,-16+32($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($4)
+sw $9,4($4)
+lw $3,8($8)
+lw $9,12($8)
+sw $3,8($4)
+sw $9,12($4)
+L.5:
+lw $21,0($sp)
+lw $22,4($sp)
+lw $23,8($sp)
+lw $30,12($sp)
+addu $sp,$sp,32
+j $31
+.end canonrect
+.globl makepoint
+.text
+.align 2
+.ent makepoint
+makepoint:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+sw $5,-8+8($sp)
+sw $6,-4+8($sp)
+la $8,-8+8($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($4)
+sw $9,4($4)
+L.39:
+addu $sp,$sp,8
+j $31
+.end makepoint
+.globl makerect
+.text
+.align 2
+.ent makerect
+makerect:
+.frame $sp,48,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-48
+.mask 0x82000000,-24
+.cprestore 20
+sw $31,24($sp)
+sw $4,48($sp)
+sw $5,52($sp)
+sw $6,56($sp)
+sw $7,60($sp)
+la $24,-16+48($sp)
+la $8,4+48($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($24)
+sw $9,4($24)
+la $24,-8+48($sp)
+la $8,12+48($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($24)
+sw $9,4($24)
+lw $4,0+48($sp)
+la $8,-16+48($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,4($29)
+sw $9,8($29)
+lw $3,8($8)
+lw $9,12($8)
+sw $3,12($29)
+sw $9,16($29)
+lw $5,4($sp)
+lw $6,8($sp)
+lw $7,12($sp)
+jal canonrect
+L.42:
+lw $25,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,48
+j $31
+.end makerect
+.globl ptinrect
+.text
+.align 2
+.ent ptinrect
+ptinrect:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+.mask 0x40000000,-8
+sw $30,0($sp)
+sw $4,8($sp)
+sw $5,12($sp)
+sw $6,16($sp)
+sw $7,20($sp)
+lw $24,0+8($sp)
+lw $15,8+8($sp)
+blt $24,$15,L.53
+lw $15,16+8($sp)
+bge $24,$15,L.53
+lw $24,4+8($sp)
+lw $15,12+8($sp)
+blt $24,$15,L.53
+lw $24,4+8($sp)
+lw $15,20+8($sp)
+bge $24,$15,L.53
+la $30,1
+b L.54
+L.53:
+move $30,$0
+L.54:
+move $2,$30
+L.45:
+lw $30,0($sp)
+addu $sp,$sp,8
+j $31
+.end ptinrect
+.globl y
+.sdata
+.align 0
+y:
+.byte 97
+.byte 98
+.byte 0
+.globl odd
+.text
+.text
+.align 2
+.ent odd
+odd:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0x82000000,-12
+.cprestore 16
+sw $31,20($sp)
+sw $4,32($sp)
+la $24,-3+32($sp)
+la $8,0+32($sp)
+ulhu $3,0($8)
+ush $3,0($24)
+lbu $3,2($8)
+sb $3,2($24)
+la $4,L.56
+la $5,-3+32($sp)
+jal printf
+move $2,$0
+L.55:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,32
+j $31
+.end odd
+.rdata
+.align 2
+L.58:
+.word 0x0
+.word 0x0
+.align 2
+L.59:
+.word 0x140
+.word 0x140
+.align 2
+L.60:
+.word 0xffffffff
+.word 0xffffffff
+.word 0x1
+.word 0x1
+.word 0x14
+.word 0x12c
+.word 0x1f4
+.word 0x190
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,144,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-144
+.mask 0xc2000000,-112
+.cprestore 24
+sw $30,28($sp)
+sw $31,32($sp)
+la $24,-64+144($sp)
+la $8,L.58
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($24)
+sw $9,4($24)
+la $24,-72+144($sp)
+la $8,L.59
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($24)
+sw $9,4($24)
+la $24,-32+144($sp)
+la $8,L.60
+addu $8,$8,32
+addu $10,$24,32
+L.76:
+addu $8,$8,-8
+addu $10,$10,-8
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($10)
+sw $9,4($10)
+bltu $24,$10,L.76
+la $4,-80+144($sp)
+la $24,-10
+move $5,$24
+move $6,$24
+jal makepoint
+la $4,-88+144($sp)
+la $8,-72+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,4($29)
+sw $9,8($29)
+lw $5,4($sp)
+lw $6,8($sp)
+la $8,-80+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,12($29)
+sw $9,16($29)
+lw $7,12($sp)
+jal addpoint
+la $4,-96+144($sp)
+la $24,10
+move $5,$24
+move $6,$24
+jal makepoint
+la $4,-104+144($sp)
+la $8,-64+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,4($29)
+sw $9,8($29)
+lw $5,4($sp)
+lw $6,8($sp)
+la $8,-96+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,12($29)
+sw $9,16($29)
+lw $7,12($sp)
+jal addpoint
+la $4,-48+144($sp)
+la $8,-88+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,4($29)
+sw $9,8($29)
+lw $5,4($sp)
+lw $6,8($sp)
+la $8,-104+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,12($29)
+sw $9,16($29)
+lw $7,12($sp)
+jal makerect
+move $30,$0
+b L.64
+L.61:
+la $4,-56+144($sp)
+sll $24,$30,3
+la $15,-32+144($sp)
+addu $15,$24,$15
+lw $5,($15)
+la $15,-28+144($sp)
+addu $24,$24,$15
+lw $6,($24)
+jal makepoint
+la $4,L.65
+sll $24,$30,3
+la $15,-32+144($sp)
+addu $24,$24,$15
+lw $5,($24)
+lw $6,-52+144($sp)
+jal printf
+la $8,-56+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,0($29)
+sw $9,4($29)
+lw $4,0($sp)
+lw $5,4($sp)
+la $8,-48+144($sp)
+lw $3,0($8)
+lw $9,4($8)
+sw $3,8($29)
+sw $9,12($29)
+lw $3,8($8)
+lw $9,12($8)
+sw $3,16($29)
+sw $9,20($29)
+lw $6,8($sp)
+lw $7,12($sp)
+jal ptinrect
+bne $2,$0,L.68
+la $4,L.70
+jal printf
+L.68:
+la $4,L.71
+lw $5,-48+144($sp)
+lw $6,-44+144($sp)
+lw $7,-40+144($sp)
+lw $24,-36+144($sp)
+sw $24,16($sp)
+jal printf
+L.62:
+la $30,1($30)
+L.64:
+move $24,$30
+la $15,4
+bltu $24,$15,L.61
+la $8,y
+ulhu $3,0($8)
+sh $3,0($29)
+lbu $3,2($8)
+sb $3,2($29)
+lw $4,0($sp)
+jal odd
+move $4,$0
+jal exit
+move $2,$0
+L.57:
+lw $25,24($sp)
+lw $30,28($sp)
+lw $31,32($sp)
+addu $sp,$sp,144
+j $31
+.end main
+.rdata
+.align 0
+L.71:
+.byte 119
+.byte 105
+.byte 116
+.byte 104
+.byte 105
+.byte 110
+.byte 32
+.byte 91
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 59
+.byte 32
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 93
+.byte 10
+.byte 0
+.align 0
+L.70:
+.byte 110
+.byte 111
+.byte 116
+.byte 32
+.byte 0
+.align 0
+L.65:
+.byte 40
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 41
+.byte 32
+.byte 105
+.byte 115
+.byte 32
+.byte 0
+.align 0
+L.56:
+.byte 37
+.byte 115
+.byte 10
+.byte 0

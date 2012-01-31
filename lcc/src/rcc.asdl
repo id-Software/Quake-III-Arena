@@ -1,0 +1,70 @@
+-- lcc IR
+-- $Id: rcc.asdl 145 2001-10-17 21:53:10Z timo $
+module rcc {
+
+-- Pickles start with an int version number, followed by rcc.program
+
+program = (int nuids,int nlabels,item* items,interface* interfaces,int argc,string *argv)
+
+real	= (int msb,int lsb)
+
+item	= Symbol(symbol symbol)
+	| Type(type type)
+	attributes(int uid)
+
+symbol	= (identifier id,int type,int scope,int sclass,int ref,int flags)
+
+field	= (identifier id,int type,int offset,int bitsize,int lsb)
+
+enum	= (identifier id,int value)
+
+type	= INT
+	| UNSIGNED
+	| FLOAT
+	| VOID
+	| POINTER(int type)
+	| ENUM(identifier tag,enum* ids)
+	| STRUCT(identifier tag,field* fields)
+	| UNION(identifier tag,field* fields)
+	| ARRAY(int type)
+	| FUNCTION(int type,int* formals)
+	| CONST(int type)
+	| VOLATILE(int type)
+	attributes(int size,int align)
+
+interface	= Export(int p)
+		| Import(int p)
+		| Global(int p,int seg)
+		| Local(int uid,symbol p)		-- includes formals
+		| Address(int uid,symbol q,int p,int n)
+		| Segment(int seg)
+		| Defaddress(int p)
+		| Deflabel(int label)
+		| Defconst(int suffix,int size,int value)
+		| Defconstf(int size,real value)
+		| Defstring(string s)
+		| Space(int n)
+		| Function(int f,int* caller,int* callee,int ncalls,interface* codelist)
+		| Blockbeg
+		| Blockend
+		| Forest(node* nodes)
+
+node	= CNST(int value)
+	| CNSTF(real value)
+	| ARG(node left,int len,int align)
+	| ASGN(node left,node right,int len,int align)
+	| CVT(int op,node left,int fromsize)
+	| CALL(node left,int type)
+	| CALLB(node left,node right,int type)
+	| RET
+	| ADDRG(int uid)
+	| ADDRL(int uid)
+	| ADDRF(int uid)
+	| Unary(int op,node left)				-- INDIR RET JUMP NEG BCOM
+	| Binary(int op,node left,node right)			-- ADD SUB DIV MUL MOD BOR BAND BXOR RSH LSH
+	| Compare(int op,node left,node right,int label)	-- EQ NE GT GE LE LT
+	| LABEL(int label)
+	| BRANCH(int label)
+	| CSE(int uid,node node)
+	attributes(int suffix,int size)
+}

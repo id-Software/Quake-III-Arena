@@ -1,0 +1,151 @@
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-64($sp)
+.frame $sp,64,$26,48
+.prologue 1
+mov $31,$0
+L.1:
+lda $sp,64($sp)
+ret
+.end main
+.globl memchar
+.text
+.ent memchar
+memchar:
+ldgp $gp,0($27)
+lda $sp,-96($sp)
+.mask 0x5000000,-88
+.frame $sp,96,$26,48
+stq $24,0($sp)
+stq $26,8($sp)
+.prologue 1
+ldq $27,-72+96($sp)
+lda $25,1($27)
+stq $25,-72+96($sp)
+ldb $27,($27)
+stb $27,-57+96($sp)
+ldq $27,-72+96($sp)
+lda $27,1($27)
+stq $27,-72+96($sp)
+ldb $27,($27)
+stb $27,-57+96($sp)
+ldq $27,-72+96($sp)
+lda $25,-1($27)
+stq $25,-72+96($sp)
+ldb $27,($27)
+stb $27,-57+96($sp)
+ldq $27,-72+96($sp)
+lda $27,-1($27)
+stq $27,-72+96($sp)
+ldb $27,($27)
+stb $27,-57+96($sp)
+mov $31,$0
+L.2:
+ldq $24,0($sp)
+ldq $26,8($sp)
+lda $sp,96($sp)
+ret
+.end memchar
+.globl memint
+.text
+.ent memint
+memint:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.frame $sp,80,$26,48
+.prologue 1
+ldq $27,-72+80($sp)
+lda $25,4($27)
+stq $25,-72+80($sp)
+ldl $27,($27)
+stl $27,-60+80($sp)
+ldq $27,-72+80($sp)
+lda $27,4($27)
+stq $27,-72+80($sp)
+ldl $27,($27)
+stl $27,-60+80($sp)
+ldq $27,-72+80($sp)
+lda $25,-4($27)
+stq $25,-72+80($sp)
+ldl $27,($27)
+stl $27,-60+80($sp)
+ldq $27,-72+80($sp)
+lda $27,-4($27)
+stq $27,-72+80($sp)
+ldl $27,($27)
+stl $27,-60+80($sp)
+mov $31,$0
+L.3:
+lda $sp,80($sp)
+ret
+.end memint
+.globl regchar
+.text
+.ent regchar
+regchar:
+ldgp $gp,0($27)
+lda $sp,-96($sp)
+.mask 0x5006000,-72
+.frame $sp,96,$26,48
+stq $13,0($sp)
+stq $14,8($sp)
+stq $24,16($sp)
+stq $26,24($sp)
+.prologue 1
+mov $13,$27
+lda $13,1($27)
+ldb $14,($27)
+lda $27,1($13)
+mov $27,$13
+ldb $14,($27)
+mov $13,$27
+lda $13,-1($27)
+ldb $14,($27)
+lda $27,-1($13)
+mov $27,$13
+ldb $14,($27)
+mov $31,$0
+L.4:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $24,16($sp)
+ldq $26,24($sp)
+lda $sp,96($sp)
+ret
+.end regchar
+.globl regint
+.text
+.ent regint
+regint:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4006000,-64
+.frame $sp,80,$26,48
+stq $13,0($sp)
+stq $14,8($sp)
+stq $26,16($sp)
+.prologue 1
+mov $13,$27
+lda $13,4($27)
+ldl $14,($27)
+lda $27,4($13)
+mov $27,$13
+ldl $14,($27)
+mov $13,$27
+lda $13,-4($27)
+ldl $14,($27)
+lda $27,-4($13)
+mov $27,$13
+ldl $14,($27)
+mov $31,$0
+L.5:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $26,16($sp)
+lda $sp,80($sp)
+ret
+.end regint

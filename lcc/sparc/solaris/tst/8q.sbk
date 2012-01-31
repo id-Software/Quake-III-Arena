@@ -1,0 +1,144 @@
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-96,%sp
+mov %g0,%i5
+.L2:
+sll %i5,2,%i4
+set 1,%i3
+set down,%i2
+st %i3,[%i4+%i2]
+set up,%i2
+st %i3,[%i4+%i2]
+.L3:
+add %i5,1,%i5
+cmp %i5,15; bl .L2; nop
+mov %g0,%i5
+.L6:
+sll %i5,2,%i4
+set rows,%i3
+set 1,%i2
+st %i2,[%i4+%i3]
+.L7:
+add %i5,1,%i5
+cmp %i5,8; bl .L6; nop
+mov %g0,%o0
+call queens; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.global queens
+.align 4
+queens:
+save %sp,-96,%sp
+mov %g0,%i5
+.L11:
+sll %i5,2,%i3
+set rows,%i2
+ld [%i3+%i2],%i3
+cmp %i3,%g0; be .L15; nop
+sub %i5,%i0,%i3
+sll %i3,2,%i3
+set up+28,%i2
+ld [%i3+%i2],%i3
+cmp %i3,%g0; be .L15; nop
+add %i5,%i0,%i3
+sll %i3,2,%i3
+set down,%i2
+ld [%i3+%i2],%i3
+cmp %i3,%g0; be .L15; nop
+add %i5,%i0,%i3
+sll %i3,2,%i3
+set down,%i2
+st %g0,[%i3+%i2]
+sub %i5,%i0,%i3
+sll %i3,2,%i3
+set up+28,%i2
+st %g0,[%i3+%i2]
+sll %i5,2,%i3
+set rows,%i2
+st %g0,[%i3+%i2]
+sll %i0,2,%i4
+set x,%i3
+st %i5,[%i4+%i3]
+cmp %i0,7; bne .L19; nop
+call print; nop
+ba .L20; nop
+.L19:
+add %i0,1,%o0
+call queens; nop
+.L20:
+set 1,%i4
+add %i5,%i0,%i3
+sll %i3,2,%i3
+set down,%i2
+st %i4,[%i3+%i2]
+sub %i5,%i0,%i3
+sll %i3,2,%i3
+set up+28,%i2
+st %i4,[%i3+%i2]
+sll %i5,2,%i3
+set rows,%i2
+st %i4,[%i3+%i2]
+.L15:
+.L12:
+add %i5,1,%i5
+cmp %i5,8; bl .L11; nop
+mov %g0,%i0
+.L10:
+ret; restore
+.type queens,#function
+.size queens,.-queens
+.global print
+.align 4
+print:
+save %sp,-96,%sp
+mov %g0,%i5
+.L23:
+set .L27,%o0
+sll %i5,2,%i4
+set x,%i3
+ld [%i4+%i3],%i4
+add %i4,49,%o1
+call printf; nop
+.L24:
+add %i5,1,%i5
+cmp %i5,8; bl .L23; nop
+set .L28,%o0
+call printf; nop
+mov %g0,%i0
+.L22:
+ret; restore
+.type print,#function
+.size print,.-print
+.section ".bss"
+.global x
+.type x,#object
+.size x,32
+.common x,32,4
+.global rows
+.type rows,#object
+.size rows,32
+.common rows,32,4
+.global down
+.type down,#object
+.size down,60
+.common down,60,4
+.global up
+.type up,#object
+.size up,60
+.common up,60,4
+.section ".rodata"
+.align 1
+.L28:
+.byte 10
+.byte 0
+.align 1
+.L27:
+.byte 37
+.byte 99
+.byte 32
+.byte 0

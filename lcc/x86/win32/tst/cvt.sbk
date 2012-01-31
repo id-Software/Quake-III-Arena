@@ -1,0 +1,742 @@
+.486
+.model flat
+extrn __fltused:near
+extrn __ftol:near
+public _print
+_TEXT segment
+_print:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+fld qword ptr (_D)
+sub esp,8
+fstp qword ptr [esp]
+fld qword ptr (_d)
+sub esp,8
+fstp qword ptr [esp]
+fld dword ptr (_f)
+sub esp,8
+fstp qword ptr [esp]
+mov edi,dword ptr (_L)
+push edi
+mov edi,dword ptr (_I)
+push edi
+mov di,word ptr (_S)
+movzx edi,di
+push edi
+mov bl,byte ptr (_C)
+movzx edi,bl
+push edi
+mov edi,dword ptr (_l)
+push edi
+mov edi,dword ptr (_i)
+push edi
+movsx edi,word ptr (_s)
+push edi
+movsx edi,byte ptr (_c)
+push edi
+lea edi,(L2)
+push edi
+call _printf
+add esp,60
+L1:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _main
+_main:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,296
+mov byte ptr (_c),1
+movsx edi,byte ptr (_c)
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov esi,edi
+mov ebx,esi
+mov byte ptr (_C),bl
+mov ebx,esi
+mov word ptr (_S),bx
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-8)[ebp]
+fld qword ptr (-8)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-8)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov word ptr (_s),2
+movsx edi,word ptr (_s)
+mov ebx,edi
+mov byte ptr (_c),bl
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov esi,edi
+mov ebx,esi
+mov byte ptr (_C),bl
+mov ebx,esi
+mov word ptr (_S),bx
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-16)[ebp]
+fld qword ptr (-16)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-16)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov dword ptr (_i),3
+mov edi,dword ptr (_i)
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_l),edi
+mov esi,edi
+mov ebx,esi
+mov byte ptr (_C),bl
+mov ebx,esi
+mov word ptr (_S),bx
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-24)[ebp]
+fld qword ptr (-24)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-24)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov dword ptr (_l),4
+mov edi,dword ptr (_l)
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov esi,edi
+mov ebx,esi
+mov byte ptr (_C),bl
+mov ebx,esi
+mov word ptr (_S),bx
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-32)[ebp]
+fld qword ptr (-32)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-32)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov byte ptr (_C),5
+mov bl,byte ptr (_C)
+movzx edi,bl
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov esi,edi
+mov ebx,esi
+mov word ptr (_S),bx
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-40)[ebp]
+fld qword ptr (-40)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-40)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov word ptr (_S),6
+mov di,word ptr (_S)
+movzx edi,di
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov esi,edi
+mov ebx,esi
+mov byte ptr (_C),bl
+mov dword ptr (_I),esi
+mov dword ptr (_L),esi
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp dword ptr (_f)
+push edi
+fild dword ptr 0[esp]
+add esp,4
+fstp qword ptr (-48)[ebp]
+fld qword ptr (-48)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-48)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov dword ptr (_I),7
+mov edi,dword ptr (_I)
+mov ebx,edi
+mov byte ptr (_c),bl
+mov ebx,edi
+mov word ptr (_s),bx
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov ebx,edi
+mov byte ptr (_C),bl
+mov esi,edi
+mov word ptr (_S),si
+mov dword ptr (_L),edi
+fld qword ptr (L4)
+mov esi,edi
+shr esi,1
+push esi
+fild dword ptr 0[esp]
+add esp,4
+fmulp st(1),st
+and edi,1
+push edi
+fild dword ptr 0[esp]
+add esp,4
+faddp st(1),st
+fstp qword ptr (-56)[ebp]
+fld qword ptr (-56)[ebp]
+fstp dword ptr (_f)
+fld qword ptr (-56)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-56)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+mov dword ptr (_L),8
+mov edi,dword ptr (_L)
+mov ebx,edi
+mov byte ptr (_c),bl
+mov ebx,edi
+mov word ptr (_s),bx
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+mov ebx,edi
+mov byte ptr (_C),bl
+mov esi,edi
+mov word ptr (_S),si
+mov si,word ptr (_S)
+movzx esi,si
+mov dword ptr (_I),esi
+fld qword ptr (L4)
+mov esi,edi
+shr esi,1
+push esi
+fild dword ptr 0[esp]
+add esp,4
+fmulp st(1),st
+and edi,1
+push edi
+fild dword ptr 0[esp]
+add esp,4
+faddp st(1),st
+fstp qword ptr (-64)[ebp]
+fld qword ptr (-64)[ebp]
+fstp dword ptr (_f)
+fld qword ptr (-64)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-64)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+fld dword ptr (L5)
+fstp dword ptr (_f)
+fld dword ptr (_f)
+fstp dword ptr (-84)[ebp]
+fld dword ptr (-84)[ebp]
+call __ftol
+mov edi,eax
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+fld dword ptr (L9)
+fcomp dword ptr (-84)[ebp]
+fstsw ax
+sahf
+ja L7
+fld dword ptr (-84)[ebp]
+fsub dword ptr (L9)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-68)[ebp],edi
+jmp L8
+L7:
+fld dword ptr (-84)[ebp]
+call __ftol
+mov edi,eax
+mov dword ptr (-68)[ebp],edi
+L8:
+mov edi,dword ptr (-68)[ebp]
+mov ebx,edi
+mov byte ptr (_C),bl
+fld dword ptr (L9)
+fcomp dword ptr (_f)
+fstsw ax
+sahf
+ja L11
+fld dword ptr (_f)
+fsub dword ptr (L9)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-72)[ebp],edi
+jmp L12
+L11:
+fld dword ptr (_f)
+call __ftol
+mov edi,eax
+mov dword ptr (-72)[ebp],edi
+L12:
+mov edi,dword ptr (-72)[ebp]
+mov word ptr (_S),di
+fld dword ptr (L9)
+fcomp dword ptr (_f)
+fstsw ax
+sahf
+ja L14
+fld dword ptr (_f)
+fsub dword ptr (L9)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-76)[ebp],edi
+jmp L15
+L14:
+fld dword ptr (_f)
+call __ftol
+mov edi,eax
+mov dword ptr (-76)[ebp],edi
+L15:
+mov edi,dword ptr (-76)[ebp]
+mov dword ptr (_I),edi
+fld dword ptr (L9)
+fcomp dword ptr (_f)
+fstsw ax
+sahf
+ja L17
+fld dword ptr (_f)
+fsub dword ptr (L9)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-80)[ebp],edi
+jmp L18
+L17:
+fld dword ptr (_f)
+call __ftol
+mov edi,eax
+mov dword ptr (-80)[ebp],edi
+L18:
+mov edi,dword ptr (-80)[ebp]
+mov dword ptr (_L),edi
+fld dword ptr (_f)
+fstp qword ptr (-120)[ebp]
+fld qword ptr (-120)[ebp]
+fstp qword ptr (_d)
+fld qword ptr (-120)[ebp]
+fstp qword ptr (_D)
+call _print
+add esp,0
+fld qword ptr (L19)
+fstp qword ptr (_d)
+fld qword ptr (_d)
+fstp qword ptr (-144)[ebp]
+fld qword ptr (-144)[ebp]
+call __ftol
+mov edi,eax
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+fld qword ptr (L23)
+fcomp qword ptr (-144)[ebp]
+fstsw ax
+sahf
+ja L21
+fld qword ptr (-144)[ebp]
+fsub qword ptr (L23)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-124)[ebp],edi
+jmp L22
+L21:
+fld qword ptr (-144)[ebp]
+call __ftol
+mov edi,eax
+mov dword ptr (-124)[ebp],edi
+L22:
+mov edi,dword ptr (-124)[ebp]
+mov ebx,edi
+mov byte ptr (_C),bl
+fld qword ptr (L23)
+fcomp qword ptr (_d)
+fstsw ax
+sahf
+ja L25
+fld qword ptr (_d)
+fsub qword ptr (L23)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-128)[ebp],edi
+jmp L26
+L25:
+fld qword ptr (_d)
+call __ftol
+mov edi,eax
+mov dword ptr (-128)[ebp],edi
+L26:
+mov edi,dword ptr (-128)[ebp]
+mov word ptr (_S),di
+fld qword ptr (L23)
+fcomp qword ptr (_d)
+fstsw ax
+sahf
+ja L28
+fld qword ptr (_d)
+fsub qword ptr (L23)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-132)[ebp],edi
+jmp L29
+L28:
+fld qword ptr (_d)
+call __ftol
+mov edi,eax
+mov dword ptr (-132)[ebp],edi
+L29:
+mov edi,dword ptr (-132)[ebp]
+mov dword ptr (_I),edi
+fld qword ptr (L23)
+fcomp qword ptr (_d)
+fstsw ax
+sahf
+ja L31
+fld qword ptr (_d)
+fsub qword ptr (L23)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-136)[ebp],edi
+jmp L32
+L31:
+fld qword ptr (_d)
+call __ftol
+mov edi,eax
+mov dword ptr (-136)[ebp],edi
+L32:
+mov edi,dword ptr (-136)[ebp]
+mov dword ptr (_L),edi
+fld qword ptr (_d)
+fstp dword ptr (_f)
+fld qword ptr (_d)
+fstp qword ptr (_D)
+call _print
+add esp,0
+fld qword ptr (L33)
+fstp qword ptr (_D)
+fld qword ptr (_D)
+fstp qword ptr (-232)[ebp]
+fld qword ptr (-232)[ebp]
+call __ftol
+mov edi,eax
+mov ebx,edi
+mov byte ptr (_c),bl
+mov esi,edi
+mov word ptr (_s),si
+mov dword ptr (_i),edi
+mov dword ptr (_l),edi
+fld qword ptr (L37)
+fcomp qword ptr (-232)[ebp]
+fstsw ax
+sahf
+ja L35
+fld qword ptr (-232)[ebp]
+fsub qword ptr (L37)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-212)[ebp],edi
+jmp L36
+L35:
+fld qword ptr (-232)[ebp]
+call __ftol
+mov edi,eax
+mov dword ptr (-212)[ebp],edi
+L36:
+mov edi,dword ptr (-212)[ebp]
+mov ebx,edi
+mov byte ptr (_C),bl
+fld qword ptr (L37)
+fcomp qword ptr (_D)
+fstsw ax
+sahf
+ja L39
+fld qword ptr (_D)
+fsub qword ptr (L37)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-216)[ebp],edi
+jmp L40
+L39:
+fld qword ptr (_D)
+call __ftol
+mov edi,eax
+mov dword ptr (-216)[ebp],edi
+L40:
+mov edi,dword ptr (-216)[ebp]
+mov word ptr (_S),di
+fld qword ptr (L37)
+fcomp qword ptr (_D)
+fstsw ax
+sahf
+ja L42
+fld qword ptr (_D)
+fsub qword ptr (L37)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-220)[ebp],edi
+jmp L43
+L42:
+fld qword ptr (_D)
+call __ftol
+mov edi,eax
+mov dword ptr (-220)[ebp],edi
+L43:
+mov edi,dword ptr (-220)[ebp]
+mov dword ptr (_I),edi
+fld qword ptr (L37)
+fcomp qword ptr (_D)
+fstsw ax
+sahf
+ja L45
+fld qword ptr (_D)
+fsub qword ptr (L37)
+call __ftol
+mov edi,eax
+lea edi,(080000000H)[edi]
+mov dword ptr (-224)[ebp],edi
+jmp L46
+L45:
+fld qword ptr (_D)
+call __ftol
+mov edi,eax
+mov dword ptr (-224)[ebp],edi
+L46:
+mov edi,dword ptr (-224)[ebp]
+mov dword ptr (_L),edi
+fld qword ptr (_D)
+fstp dword ptr (_f)
+fld qword ptr (_D)
+fstp qword ptr (_d)
+call _print
+add esp,0
+mov dword ptr (_p),0
+mov dword ptr (_p),0
+mov dword ptr (_p),0
+mov dword ptr (_p),0
+mov edi,dword ptr (_P)
+mov dword ptr (_p),edi
+mov dword ptr (_P),0
+mov dword ptr (_P),0
+mov dword ptr (_P),0
+mov dword ptr (_P),0
+mov edi,dword ptr (_p)
+mov dword ptr (_P),edi
+mov eax,0
+L3:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+_TEXT ends
+extrn _printf:near
+_TEXT segment
+_TEXT ends
+_DATA segment
+public _P
+align 4
+_P label byte
+db 4 dup (0)
+public _p
+align 4
+_p label byte
+db 4 dup (0)
+public _D
+align 4
+_D label byte
+db 8 dup (0)
+public _d
+align 4
+_d label byte
+db 8 dup (0)
+public _f
+align 4
+_f label byte
+db 4 dup (0)
+public _L
+align 4
+_L label byte
+db 4 dup (0)
+public _I
+align 4
+_I label byte
+db 4 dup (0)
+public _S
+align 2
+_S label byte
+db 2 dup (0)
+public _C
+align 1
+_C label byte
+db 1 dup (0)
+public _l
+align 4
+_l label byte
+db 4 dup (0)
+public _i
+align 4
+_i label byte
+db 4 dup (0)
+public _s
+align 2
+_s label byte
+db 2 dup (0)
+public _c
+align 1
+_c label byte
+db 1 dup (0)
+_DATA ends
+_TEXT segment
+align 4
+L37 label byte
+dd 00H
+dd 041e00000H
+align 4
+L33 label byte
+dd 00H
+dd 040260000H
+align 4
+L23 label byte
+dd 00H
+dd 041e00000H
+align 4
+L19 label byte
+dd 00H
+dd 040240000H
+align 4
+L9 label byte
+dd 04f000000H
+align 4
+L5 label byte
+dd 041100000H
+align 4
+L4 label byte
+dd 00H
+dd 040000000H
+align 1
+L2 label byte
+db 37
+db 100
+db 32
+db 37
+db 100
+db 32
+db 37
+db 100
+db 32
+db 37
+db 108
+db 100
+db 32
+db 37
+db 117
+db 32
+db 37
+db 117
+db 32
+db 37
+db 117
+db 32
+db 37
+db 108
+db 117
+db 32
+db 37
+db 102
+db 32
+db 37
+db 102
+db 32
+db 37
+db 108
+db 102
+db 10
+db 0
+_TEXT ends
+end

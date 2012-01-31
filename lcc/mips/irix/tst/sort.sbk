@@ -1,0 +1,308 @@
+.set reorder
+.globl in
+.data
+.align 2
+in:
+.word 0xa
+.word 0x20
+.word 0xffffffff
+.word 0x237
+.word 0x3
+.word 0x12
+.word 0x1
+.word 0xffffffcd
+.word 0x315
+.word 0x0
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+la $4,in
+la $5,10
+jal sort
+move $30,$0
+b L.5
+L.2:
+sll $24,$30,2
+lw $4,in($24)
+jal putd
+la $4,10
+jal putchar
+L.3:
+la $30,1($30)
+L.5:
+move $24,$30
+la $15,10
+bltu $24,$15,L.2
+move $2,$0
+L.1:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end main
+.globl putd
+.text
+.align 2
+.ent putd
+putd:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+move $30,$4
+bge $30,$0,L.7
+la $4,45
+jal putchar
+negu $30,$30
+L.7:
+la $24,10
+div $24,$30,$24
+beq $24,$0,L.9
+la $24,10
+div $4,$30,$24
+jal putd
+L.9:
+la $24,10
+rem $24,$30,$24
+la $4,48($24)
+jal putchar
+move $2,$0
+L.6:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end putd
+.globl sort
+.text
+.align 2
+.ent sort
+sort:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+sw $5,28($sp)
+lw $24,0+24($sp)
+sw $24,xx
+move $4,$24
+move $5,$0
+lw $24,4+24($sp)
+subu $24,$24,1
+sw $24,4+24($sp)
+move $6,$24
+jal quick
+move $2,$0
+L.11:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end sort
+.globl quick
+.text
+.align 2
+.ent quick
+quick:
+.frame $sp,40,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-40
+.mask 0xc2e00000,-4
+sw $21,16($sp)
+sw $22,20($sp)
+sw $23,24($sp)
+.cprestore 28
+sw $30,32($sp)
+sw $31,36($sp)
+move $30,$4
+move $23,$5
+move $22,$6
+blt $23,$22,L.13
+b L.12
+L.13:
+move $4,$30
+move $5,$23
+move $6,$22
+jal partition
+move $21,$2
+move $4,$30
+move $5,$23
+subu $6,$21,1
+jal quick
+move $4,$30
+la $5,1($21)
+move $6,$22
+jal quick
+move $2,$0
+L.12:
+lw $21,16($sp)
+lw $22,20($sp)
+lw $23,24($sp)
+lw $25,28($sp)
+lw $30,32($sp)
+lw $31,36($sp)
+addu $sp,$sp,40
+j $31
+.end quick
+.globl partition
+.text
+.align 2
+.ent partition
+partition:
+.frame $sp,48,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-48
+.mask 0xc2f00000,-8
+sw $20,16($sp)
+sw $21,20($sp)
+sw $22,24($sp)
+sw $23,28($sp)
+.cprestore 32
+sw $30,36($sp)
+sw $31,40($sp)
+move $30,$4
+move $23,$5
+move $22,$6
+la $22,1($22)
+move $20,$23
+sll $24,$20,2
+addu $24,$24,$30
+lw $21,($24)
+b L.17
+L.16:
+la $23,1($23)
+b L.20
+L.19:
+la $23,1($23)
+L.20:
+sll $24,$23,2
+addu $24,$24,$30
+lw $24,($24)
+blt $24,$21,L.19
+subu $22,$22,1
+b L.23
+L.22:
+subu $22,$22,1
+L.23:
+sll $24,$22,2
+addu $24,$24,$30
+lw $24,($24)
+bgt $24,$21,L.22
+bge $23,$22,L.25
+sll $24,$23,2
+addu $4,$24,$30
+sll $24,$22,2
+addu $5,$24,$30
+jal exchange
+L.25:
+L.17:
+blt $23,$22,L.16
+sll $24,$20,2
+addu $4,$24,$30
+sll $24,$22,2
+addu $5,$24,$30
+jal exchange
+move $2,$22
+L.15:
+lw $20,16($sp)
+lw $21,20($sp)
+lw $22,24($sp)
+lw $23,28($sp)
+lw $25,32($sp)
+lw $30,36($sp)
+lw $31,40($sp)
+addu $sp,$sp,48
+j $31
+.end partition
+.globl exchange
+.text
+.align 2
+.ent exchange
+exchange:
+.frame $sp,40,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-40
+.mask 0xc2800000,-12
+sw $23,16($sp)
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+move $30,$4
+move $23,$5
+la $4,L.28
+lw $24,xx
+la $15,4
+move $14,$30
+subu $14,$14,$24
+div $5,$14,$15
+move $14,$23
+subu $24,$14,$24
+div $6,$24,$15
+jal printf
+lw $24,($30)
+sw $24,-4+40($sp)
+lw $24,($23)
+sw $24,($30)
+lw $24,-4+40($sp)
+sw $24,($23)
+move $2,$0
+L.27:
+lw $23,16($sp)
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,40
+j $31
+.end exchange
+.globl xx
+.comm xx,4
+.rdata
+.align 0
+L.28:
+.byte 101
+.byte 120
+.byte 99
+.byte 104
+.byte 97
+.byte 110
+.byte 103
+.byte 101
+.byte 40
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 41
+.byte 10
+.byte 0

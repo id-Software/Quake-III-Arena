@@ -1,0 +1,378 @@
+.set reorder
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,48,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-48
+.mask 0x82000000,-28
+.cprestore 16
+sw $31,20($sp)
+sw $0,-24+48($sp)
+sw $0,next
+b L.3
+L.2:
+la $4,-20+48($sp)
+la $5,-24+48($sp)
+jal lookup
+lw $15,($2)
+la $15,1($15)
+sw $15,($2)
+L.3:
+la $4,-20+48($sp)
+jal getword
+bne $2,$0,L.2
+lw $4,-24+48($sp)
+jal tprint
+move $2,$0
+L.1:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,48
+j $31
+.end main
+.globl err
+.text
+.align 2
+.ent err
+err:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+la $4,L.6
+lw $5,0+24($sp)
+jal printf
+la $4,1
+jal exit
+move $2,$0
+L.5:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end err
+.globl getword
+.text
+.align 2
+.ent getword
+getword:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2800000,-4
+sw $23,16($sp)
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+sw $4,32($sp)
+L.8:
+L.9:
+jal getchar
+move $24,$2
+move $30,$24
+la $15,-1
+beq $24,$15,L.11
+move $4,$30
+jal isletter
+beq $2,$0,L.8
+L.11:
+lw $23,0+32($sp)
+b L.15
+L.12:
+move $24,$23
+la $23,1($24)
+move $15,$30
+sb $15,($24)
+L.13:
+jal getchar
+move $30,$2
+L.15:
+move $4,$30
+jal isletter
+move $30,$2
+bne $2,$0,L.12
+sb $0,($23)
+move $24,$23
+lw $15,0+32($sp)
+bleu $24,$15,L.16
+la $2,1
+b L.7
+L.16:
+move $2,$0
+L.7:
+lw $23,16($sp)
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,32
+j $31
+.end getword
+.globl isletter
+.text
+.align 2
+.ent isletter
+isletter:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+la $24,65
+blt $4,$24,L.19
+la $24,90
+bgt $4,$24,L.19
+la $4,32($4)
+L.19:
+la $24,97
+blt $4,$24,L.21
+la $24,122
+bgt $4,$24,L.21
+move $2,$4
+b L.18
+L.21:
+move $2,$0
+L.18:
+j $31
+.end isletter
+.globl lookup
+.text
+.align 2
+.ent lookup
+lookup:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+sw $4,32($sp)
+move $30,$5
+lw $24,($30)
+beq $24,$0,L.24
+lw $4,0+32($sp)
+lw $24,($30)
+lw $5,12($24)
+jal strcmp
+sw $2,-4+32($sp)
+lw $24,-4+32($sp)
+bge $24,$0,L.26
+lw $4,0+32($sp)
+lw $24,($30)
+la $5,4($24)
+jal lookup
+move $24,$2
+b L.23
+L.26:
+lw $24,-4+32($sp)
+ble $24,$0,L.28
+lw $4,0+32($sp)
+lw $24,($30)
+la $5,8($24)
+jal lookup
+move $24,$2
+b L.23
+L.28:
+lw $2,($30)
+b L.23
+L.24:
+lw $24,next
+la $15,2000
+blt $24,$15,L.30
+la $4,L.32
+jal err
+L.30:
+lw $24,next
+sll $24,$24,4
+sw $0,words($24)
+lw $24,next
+sll $24,$24,4
+sw $0,words+8($24)
+sw $0,words+4($24)
+lw $4,0+32($sp)
+jal strlen
+move $24,$2
+la $4,1($24)
+jal malloc
+lw $15,next
+sll $15,$15,4
+sw $2,words+12($15)
+lw $24,next
+sll $24,$24,4
+lw $24,words+12($24)
+bne $24,$0,L.36
+la $4,L.39
+jal err
+L.36:
+lw $24,next
+sll $24,$24,4
+lw $4,words+12($24)
+lw $5,0+32($sp)
+jal strcpy
+lw $24,next
+la $15,1($24)
+sw $15,next
+sll $24,$24,4
+la $24,words($24)
+sw $24,($30)
+move $2,$24
+L.23:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end lookup
+.globl tprint
+.text
+.align 2
+.ent tprint
+tprint:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+move $30,$4
+move $24,$30
+beq $24,$0,L.42
+lw $4,4($30)
+jal tprint
+la $4,L.44
+lw $5,($30)
+lw $6,12($30)
+jal printf
+lw $4,8($30)
+jal tprint
+L.42:
+move $2,$0
+L.41:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end tprint
+.globl strcmp
+.text
+.align 2
+.ent strcmp
+strcmp:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+b L.47
+L.46:
+move $24,$4
+la $4,1($24)
+lb $24,($24)
+bne $24,$0,L.49
+move $2,$0
+b L.45
+L.49:
+la $5,1($5)
+L.47:
+lb $24,($4)
+lb $15,($5)
+beq $24,$15,L.46
+lb $24,($4)
+bne $24,$0,L.51
+la $2,-1
+b L.45
+L.51:
+lb $24,($5)
+bne $24,$0,L.53
+la $2,1
+b L.45
+L.53:
+lb $24,($4)
+lb $15,($5)
+subu $2,$24,$15
+L.45:
+j $31
+.end strcmp
+.globl next
+.comm next,4
+.globl words
+.comm words,32000
+.rdata
+.align 0
+L.44:
+.byte 37
+.byte 100
+.byte 9
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.39:
+.byte 111
+.byte 117
+.byte 116
+.byte 32
+.byte 111
+.byte 102
+.byte 32
+.byte 119
+.byte 111
+.byte 114
+.byte 100
+.byte 32
+.byte 115
+.byte 116
+.byte 111
+.byte 114
+.byte 97
+.byte 103
+.byte 101
+.byte 0
+.align 0
+L.32:
+.byte 111
+.byte 117
+.byte 116
+.byte 32
+.byte 111
+.byte 102
+.byte 32
+.byte 110
+.byte 111
+.byte 100
+.byte 101
+.byte 32
+.byte 115
+.byte 116
+.byte 111
+.byte 114
+.byte 97
+.byte 103
+.byte 101
+.byte 0
+.align 0
+L.6:
+.byte 63
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0

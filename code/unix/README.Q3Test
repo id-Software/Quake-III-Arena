@@ -1,0 +1,306 @@
++----------------------------------------+
+| Q3Test                                 |
+| The Official Quake 3: Arena TEST       |
+| Operating Instructions Readme	     |
+| Revision 2.1                           |
+| Released Friday July 16th, 1999      |
+| Copyright (C) 1999 id Software, inc.   |
++----------------------------------------+
+| Documentation: Paul Jaquays            |
++----------------------------------------+
+
+This game is not yet rated by the ESRB. It contains animated
+violence and blood.  A rating for mature audiences 17+ is 
+anticipated.
+
+1.  Introduction
+2.  Operating Instructions
+3.  Status Readouts
+4.  Player Actions
+5.  The Arena Environment
+6.  The Game Console
+7.  Problem Icons
+
+==================
+== Section 1.   ==
+== INTRODUCTION ==
+==================
+
+	These instructions for game play should work with the versions of the game that are targeted at different platforms.
+
+	Before proceeding onward, click on the EULA_Readme file icon. This is the End User License Agreement. It's the agreement between you and id regarding this test.  Read it. Understand that the acts of loading or running the software, or placing it on your computer hard drive, RAM, or other storage, you are agreeing to be bound by the terms of the End User License Agreement. So it's best to know what you are agreeing to.
+
+	If you agree to the conditions of the End User License Agreement, install the game on your computer's hard drive.
+	If you are using the Win32 version, open the readme file included for GLSetup.  This application will load the most recent versions of the GL drivers needed to play Quake3: Arena.
+
+	The platform-specific instructions for the test are included in a separate Readme file. Refer to the appropriate Readme for your hardware.
+
++----------------+
+| THIS IS A TEST |
++----------------+
+	We want to set the record straight from the outset. This is neither a demo nor an ALPHA version of the final game and should not be expected to behave as such. Q3Test is a test of Quake3: Arena's network technology and graphics compatibility. While many of the game features that you will see in this test are in a highly polished state, do not confuse this with being anything other than what it is intended to be: a test. By running this test openly on the Internet and on a multitude of local networks, we hope to expose problems that could not otherwise be discovered on the limited number of in-house systems and computers we have available. That's why we need your assistance for this test.
+
+	Furthermore, it is anticipated that there may be ongoing revisions and additions made to the test that will make it incompatible with earlier versions.
+
+============================
+== Section 2.             ==
+== OPERATING INSTRUCTIONS ==
+============================
+
+	When you start Q3Test, the game does not automatically load a map. Instead it displays the Main Menu screen.  At this point (or at any time during the game) you may adjust and customize the video and audio settings on your computer, change details regarding your game character, and if desired, change the default controls to ones more to your liking.
+
+At any time during the game, press the Escape key to bring up the Main menu and superimpose it over the game screen. Use the up and down arrow keys to navigate the menu, and press the Enter key to select a function. Press Escape to return to the main level menu (and set any selected choices). Each Main menu function brings up a list of secondary menu items. If you have problems using the secondary menu selections, please refer to the message banner at the bottom of the screen for technical details.
+
+If a menu selection appears in gray, you cannot select or modify it.  Choosing some options in the CONTROL CUSTOMIZATION and GRAPHICS OPTIONS menus will disallow other options. This is because they are either unnecessary (as is the case with MOUSE LOOK if you select the FREE LOOK option), or are not supported (as is the case with COLOR DEPTH if you chose the VOODOO OPENGL).
+
++-----------+
+| MAIN MENU |
++-----------+
+The first three Main Menu options, SEARCH FOR LAN GAME, CONNECT TO NETWORK GAME and START NETWORK GAME are only available if the player is not currently connected to an ongoing game.
+
+SEARCH FOR LAN GAME:
+If your computer is on a Local Area Network (LAN), this will show any currently active Q3Test servers on the network, along with the number of players currently in the game and the maximum number of players that can be in that game.  
+
+Example:  idserver   q3test1   1/8
+
+This indicates that the server on the LAN called "idserver" is currently playing the map "q3test1" and has one player in it out of the possible 8 that can be in the game at one time.
+
+Use the up/down arrow keys to select a server and hit ENTER to command your computer to connect to that game.
+
+CONNECT TO NETWORK GAME: 
+	SERVER: If your computer is connected to the Internet, you can enter the IP address of a server and hit ENTER to attempt to make a connection to that server. For server id's Q3Test server listings, go to http://www.quake3arena.com or check with your favorite 3D gaming web sites for other servers.
+	RATE:  Set the type of network connection you are using. Choices are: "<=28.8K", "33.6K", "56K", "ISDN", and "LAN/cable/xDSL".
+
+START NETWORK GAME:
+To start a network game, whether on a LAN or over the Internet, select this option.  The secondary menu screen has the following options:
+
+START: Launches the game using the parameters currently set on this menu.
+MAP:  This gives access to the list of maps located in the Quake3/Baseq3/Maps directory/folder.  For the purposes of this test, there are only two maps. Use the left and right arrow keys to toggle between the two maps.
+DEDICATED: This is either "no", "dedicated LAN," or "dedicated Internet."
+A dedicated server (set to YES) runs the game, but does not display a graphic version of the game on the screen of the computer running the game. The default value for this is no. This means that you are running the server and participating as a player at the same time.
+TIME LIMIT: entering a non-zero number here sets a time limit (in minutes) for the game duration.  If the game has not ended because a frag limit has been set, then it will end when time runs out.
+FRAG LIMIT: Entering a non-zero number here sets the number of "frags" or "kills" needed to win the game. If the game has not ended because a time limit has been set, then it will end when one player in the game reaches this number of frags.
+MAX PLAYERS: This is the total number of players that may be in the game at any one time.
+HOSTNAME:  This is the name of the server.  In the LAN example above, the hostname is "idserver."
+
+CUSTOMIZE PLAYER: 
+Allows the player to change information about his in-game persona.
+
+NAME: This is the player's name as it will appear on-screen during the game. It may be up to 33 characters long.
+
+SKIN: Visor is the only model in the test. Two skins (red and blue) are available for the model. Use the left and right arrow keys to select one.
+
+EFFECTS COLOR: You can choose an identifying color for your rail gun projectile trails.  Use the left and right arrow keys to select a color. 
+
+HANDICAP: Better players can choose to handicap themselves to balance a match against players of less skill by limiting the maximum amount of health and armor that they can have during the game. Use the left and right arrows to select a value from 25 to 100 points.  Certain items and power ups will temporarily raise this value, but will then count down to the preset value. The default is 100.
+
+CUSTOMIZE CONTROLS: 
+Allows the player to change the assignment of game controls to other keyboard and mouse buttons.  When you visit this menu for the first time, the default assignments for all controls are shown.  To change an assignment, use the up/down arrow keys to select a game function. Press ENTER to activate the change process. Press the keyboard key or mouse input that you want to use for that function.  Up to two keys/buttons may be assigned to each game function in this manner by repeating the process. If you inadvertently use a key assigned to another function, three question marks ("???") appear next to the function that previously used that key.
+
+ALWAYS RUN: setting this to YES causes your player to move faster, but make more noise as he moves. The RUN/WALK key allows the player to switch between fast/noisy and slow/silent movement modes.
+FREELOOK:  If YES, then you may look freely in all directions as if you were moving only your head by moving the mouse around.  If this is Set to NO you must bind a key to mouse look.
+INVERT MOUSE: Selecting YES inverts the up and down view movement directions.
+MOUSE SPEED: This is set on the menu with a slide control. The faster your mouse speed, the greater the on-screen response to small movements of the mouse.  Mouse speed can also be adjusted from the console.  Bring the console down and type in "sensitivity".  The game will respond by printing "sensitivity" is: "__" (the blank indicating the number value currently assigned to mouse speed) default is "5". Use the up arrow key to display sensitivity on the console again, enter a different number value and hit enter.  Higher numbers are more sensitive.  Lower numbers are less sensitive.
+
+SYSTEM CONFIGURATION:
+EFFECTS VOLUME: Use the slide control to adjust game sound playback volume to your liking.
+SOUND QUALITY: Select either Low (16 bit sound running at 11 megahertz) or High (32 bit sound running at 22 megahertz).
+BRIGHTNESS:  First, try running the game with the brightness set to 1.0 (the default level used by the designer when making the map).  If the map is too dark to see in dimly lighted areas or too light in sunny areas, use this slide control to compensate for differences in the way some monitors and video cards draw the game world.  Remember that the arenas are supposed to be dark and foreboding places.
+
+GRAPHICS OPTIONS: 
+This drops you down into another menu layer. The controls here are designed to help you optimize graphics and or/enhance the game's playability on your system. When you are satisfied with your selections, you must move the cursor to the bottom of the screen to the APPLY option to activate them.  Pressing Escape to return to the SYSTEM CONFIGURATION MENU does not activate changes in the graphics settings. Changing anything on this menu will cause the game to restart the video.
+
+GRAPHICS MODE: This is a global setting for the display of the game's screen graphics.  The settings are HIGH QUALITY, NORMAL, FAST, FASTEST, and CUSTOM. Selecting one of these choices affects most of the other settings on this page. If you make any adjustments to other settings on this page, the graphics mode changes to CUSTOM.
+DRIVER:  Consult the platform specific readme for the drivers that will work with your platform. 
+VIDEO MODE:  This is the screen resolution size.  Smaller resolutions can improve performance speed on slower machines.
+COLOR DEPTH: Determines whether you are using 16-bit textures or 32-bit textures. Default means you run with the color depth currently set for your computer's desktop.
+FULLSCREEN: A YES selection allows you to choose to run with the test filling the entire screen.  A NO selection will run the game in a window.  If run in a window, COLOR DEPTH is disabled because you are limited to whatever has been selected for the desktop.
+LIGHTING:  Allows you to chose either a LIGHTMAP or VERTEX lighting.  Using the LIGHTMAP is recommended for best appearance.  VERTEX lighting may improve game performance, but at a cost to appearance.
+GEOMETRIC DETAIL: Lets you adjust the number subdivisions used to define curves in the arena on both world geometry and items, weapons and characters.  HIGH is the normal setting. LOW greatly reduces curve complexity.
+SCREEN SIZE: The slide control changes the amount of screen area devoted to display of the game.  Reducing screen size can improve performance.
+TEXTURE DETAIL: This sliding control allows you to adjust the level of detail displayed. Unless you have an extremely fast computer, the normal setting gives the best balance of detail vs. game speed.
+TEXTURE QUALITY:  This determines whether you wish to use 32-bit textures, 16-bit textures, or compressed textures.  Many of the game's special effects will appear at their best only when defined by 32-bit textures.
+OPENGL EXTENSIONS: Allows you to enable or disable OPENGL extensions.
+DRIVER INFORMATION: Brings up a display of information regarding the drivers currently operating in your machine. It is not interactive. Hit ESC to return to the previous menu.
+
+
+PREFERENCES:  Hitting ENTER here will drop you into another menu that allows you to adjust other game features.
+CROSSHAIR: choose one of four options, none, cross, dot, or angle.
+MARKS ON WALLS: Enable or Disable weapons scars and blood smears.  Disabling this feature may improve performance.
+DYNAMIC LIGHTS:  Enable or Disable lights that move through the world (such as light generated by weapon projectile trails). Disabling this feature may improve performance.
+LIGHT FLARES: Enable or DISABLE glowing light halos around lights.  Disabling this feature may improve performance.
+IDENTIFY TARGET: Enable or Disable the ability to see the name of your foe when you put your crosshair on him (does not function if target is in fog).
+SKY: Set the sky for either HIGH SPEED or HIGH QUALITY.
+
+RESET DEFAULTS: Restore all game settings and controls to their default value by reloading the default configuration.
+
+APPLY:  You must select this and hit ENTER to lock in your choices.  Doing so will restart the game video.
+
+SCREENSHOT: 
+Makes a targa file screen shot of what is currently in view on the screen. Look for it in the Screenshot folder within your Quake 3/Baseq3/screenshots folder.
+
+LEAVE ARENA: 
+This disconnects you from the arena you are currently playing, but does not quit you out of the game.  From here you can connect to other servers or start your own. You can also leave an arena by typing "disconnect" on the command line of the console.
+
+QUIT GAME: 
+Returns you to the desktop.
+
+
+======================
+== Section 6.       ==
+== STATUS READOUTS  ==
+======================
+
+	Your player status is shown as numbers and icons floating in your view at the bottom of the screen.  There is an indicator for your ammo (far left) including the type of ammo currently in use, current health (left-center), your character portrait (center), armor (center-right), and Frag Count (far right). The digital timer in the upper right shows the amount of time you have been in this arena.  When you have a one-use item in your inventory (such as the personal teleporter), its icon will appear on the right side of your display.  When you are fragged, the character portrait and name of the foe who killed you appears in the upper right corner of the display.  When you change weapons, icons representing the ammo of the weapons in your inventory will appear above your character portrait. If you have a weapon, but no ammunition for it, a negation symbol will be superimposed over the ammo icon.
+
++----------------------------+
+| INTERPRETING THE LAGOMETER |
++----------------------------+
+     The Lagometer is the graph in the lower right corner of the status display. It is a test function and not a part of regular game play.  The upper graph (blue/yellow) slides one pixel for every rendered frame. Blue lines below the baseline mean that the frame is interpolating between two valid snapshots. Yellow lines above the baseline mean the frame is extrapolating beyond the latest valid time. The length of the line is proportional to the time. 
+The lower graph (green/yellow/red) slides one pixel for every received snapshot. By default, snapshots come 20 times a second, so if you are running >20 fps, the top graph will move faster, and vice versa. A red bar means the snapshot was dropped by the network. Green and yellow bars are properly received snapshots, with the height of the bar proportional to the ping. A yellow bar indicates that the previous snapshot was intentionally suppressed to stay under the rate limit. 
+The upper graph indicates the consistency of your connection. Ideally, you should always have blue bars of only a pixel or two in height. If you are commonly getting big triangles of yellow on the graph, your connection is inconsistent. 
+     In a heavy firefight, it is normal for modem players to see yellow bars in the bottom graph, which should return to green when the action quiets down. If you are getting several red bars visible, you may want to look for a server that drops less packets. 
+     There are a few tuning variables for people trying to optimize their connection: The most important one is "rate", which is what the connection speed option in the menu sets. We are fairly conservative with the values we set for the given modem speeds: 2500 for 28.8, 3000 for 33, and 3500 for 56k. You may actually be connecting faster than that, and modem compression may be buying you something, so you might get a better play experience by increasing the values slightly.  If you connect at 50000 bps, try a rate of 5000, etc. Quake 3 errs on the conservative side, because too low of a rate will only make the movement of other things in the world choppy, while too high of a rate can cause huge amounts of lag. 
+     Note that the optimal rate will be somewhat lower than a rate for QW or Q2, because Quake 3 now includes the UDP packet header length in the bandwidth estimate.  You can ask for a different number of snapshots by changing the "snaps" variable, but there isn't a lot of benefit to that. Dedicated servers run at 40hz, so stick to divisors of that: 40, 20 (default), 10. A "snaps" of 40 will usually just cause you to hit your rate limit a lot faster. It may be useful for tuning rate, if nothing else. 
+     You can adjust the local timing point with "cg_timenudge ", which effectively adds local lag to try to make sure you interpolate instead of extrapolate. If you really want to play on a server that is dropping a ton of packets, a timenudge of 100 or so might make the game smoother. 
+
+=====================
+== Section 7.      ==
+== PLAYER ACTIONS  ==
+=====================
+
+	The descriptions below are based on the preset default configurations for the game controls.  If you have played first person shooting games previously (such as Quake or Quake 2), you may want to reconfigure the controls to match your preferences.
+
++----------+
+| ACTIONS  |
++----------+
+WALKING:  Use the four arrow keys or the mouse to walk around.  To walk steadily forward, hold down the "forward" key (the up arrow or center button on a 3-button mouse).  Turn left or right with the left or right arrow keys, or by sliding your mouse in the desired direction.
+
+RUNNING:  To run, simply hold down the left Shift key to increase your 
+Speed (unless you have selected "Always Run", in which case it reverts you to a walk.  If you prefer to always run during the game, open the Main menu, then the Customize Controls menu, and select Always Run.
+
+SHOOTING:  Tap the Ctrl key or the left mouse button to fire. Hold the 
+fire key down to keep firing.
+
+LOOKING UP AND DOWN: The letters A and Z allow you to look up and down, 
+respectively.  Start walking forward and your line of vision will 
+automatically readjust to the center position.  You may also choose to 
+select Free Look under the Controls menu which will allow you to move the 
+mouse around as if it was your head movement.
+
+SWIMMING:  While underwater, aim yourself in the direction you wish to go 
+and press the forward key to go in that direction.  Unfortunately, as in 
+real life, you may lose your bearings while underwater.  Use the jump key, 
+(default is the Space Bar), to kick straight up towards the surface. Once on 
+the surface, tread water by holding down the jump key.  To get out of the 
+drink, swim toward the shore and you can either jump up onto the land or 
+walk straight out if it is shallow enough.  There is always a way out of 
+water, but you may have to submerge even deeper in order to find it.
+
+CROUCHING:  Press and hold down the C key to duck and move forward to "duck walk."  When you release the C key, you will return to an upright position.  It is also possible to avoid rockets in this manner.
+
+JUMPING:  Tap the space bar to jump.  You jump farther if you're moving 
+forward at the time.
+
+STRAFING:  Hold down the ALT key and the left or right arrow key and you will side-step in that particular direction. This is perfect for avoiding incoming weapon attacks.
+
+PICKING UP OBJECTS: To pick up items, weapons, and power-ups, simply walk 
+over them.  The weapon cross-hair will pulse larger briefly to indicate you have acquired a new weapon or supply. If you are unable to pick something up, it means you already have the maximum amount possible for that object.
+
+TALKING:  To communicate with other players, press the T key 
+and type in your message.  Press Enter when finished and your words will 
+appear at the top of the screen. You can also enter communications on the command line of the console.
+
+ATTACKING: Point your weapon at an opponent and press the fire button.  Default fire keys are the left mouse and the control key). If a weapon runs out of ammo, it switches to the next available weapon with ammo the next time you fire it.  If you have no ammo at all, you fight with the gauntlet.
+
++--------+
+| DYING: |
++--------+
+	When you die, the weapon you were using (except for the gauntlet and the machine gun), and any active power ups drop where you died.  Armor, ammo and one-use items like the teleporter are lost.  To respawn into the game, press the fire key. When you re-enter the game you are once again armed with only your starting equipment.
+
+===========================
+== Section 8.            ==
+== THE ARENA ENVIRONMENT ==
+===========================
+
++-----------------------+
+| RAPID TRANSIT DEVICES |
++-----------------------+
+TELEPORTERS: These devices instantaneously move you to a pre-selected destination.
+
+PORTALS:  These are devices that generate holes in space through which you can see your ultimate destination and move to it like walking through a doorway.
+
+JUMP PADS: Jump pads throw you upwards to land on higher portions of the arena.  You have some "air" control over your final landing point.
+
+ACCELERATION PADS: Acceleration pads turn you into a human cannon ball, launching you to distant locations in the arena. As with the jump pads, you have some "air" control over your final landing point.
+
++-----------------------+
+| ENVIRONMENTAL HAZARDS |
++-----------------------+
+LAVA:  Walking on lava is not instantly fatal, but even with good armor protection, it can be a relatively quick (and noisy) doom.
+
+THE VOID: Falling off into the infinite blackness of the void is a near inescapable death.
+
++--------------+
+| TEST ARSENAL |
++--------------+
+MACHINE GUN: This is your default weapon. It's an instant hit attack and reasonably accurate even at long range. It uses bullets.
+
+GAUNTLET:  This is either your weapon of last resort when you're out of ammo or a cool tool to humiliate other players. When it hits, it does damage and knocks a foe back. It does not require ammunition, but you have to be in direct contact with a foe and activating (firing) it to cause injury and knockback.
+
+SHOTGUN:  This uses shells for ammunition. The spread of the shotgun blast makes it deadly in close combat, but not the best choice for long-range attacks.
+
+ROCKET LAUNCHER: The rocket launcher delivers heavy fire power to your target, but travels slower compared to other attacks.  Be careful when you use this weapon in close combat.
+
+PLASMA GUN: Powered by Energy cells, this rapid-fire weapon delivers deadly gouts of glowing energy quickly and accurately.  
+
+RAIL GUN:  The Rail Gun fires depleted uranium slugs at super high velocities. It hits instantly and can pass through the bodies of multiple opponents. But be warned, it recharges slowly and can be a liability in close combat. Take note of the distinctive trail of atmospheric disturbance 
+caused by the projectile. The color of the rail gun's trail can be changed under the CUSTOMIZE PLAYER menu on the EFFECTS COLOR line. 
+
+LIGHTNING GUN: Zap them!
+
++------------------+
+| COMBAT SUPPLIES: |
++------------------+
+Pick up these helpful items whenever possible. Some items take effect when 
+picked up, others you must activate during play.
+
+AMMO:  With the exception of the gauntlet, each weapon has a corresponding ammo type. The color of the ammo boxes corresponds with the color of the graphic weapon icons displayed briefly in your heads up display. Each ammo type has a maximum you can carry. 
+
+ARMOR:  There are three armor types: Green armor shards, yellow combat armor and red body armor. Collecting them increases your armor protection.  The red armor and the green armor shards can increase your total armor protection above the maximum for short duration.  The points "decay" back to the normal maximum value.
+
+HEALTH:  There are three types of standard health kits: small (green), medium (yellow) and large (red) encased in crystalline shells. The green health can increase your total health value above the maximum.  Like armor, it "decays" back to your maximum possible health value.
+
+QUAD DAMAGE: The quad temporarily multiplies all your weapon's strengths. 
+
+MEGA HEALTH: This blue health power up provides a temporary but significant boost to your health, taking it above your maximum level.  Like armor, it "decays" back to your maximum possible health value.
+
+PERSONAL TELEPORTER: Grab this single-use power up and use it to escape from dangerous situations.  Activating it immediately teleports you to one of the arena's spawn spots.
+
+=======================
+== Section 9.        ==
+== THE GAME CONSOLE  ==
+=======================
+
+	The game console (or just the console) is a pull down window shade that shows recent game information, including the text of conversations and recently executed game commands.  The bottom line of the console is the command line. While playing Q3test, you can enter into console mode by pressing the tilde (~) key and exit by pressing it again. The console is where you enter all the commands to change the game state.
+
+	For example, one console command is "map <name>" which will load a map
+and start it up.  Starting up a map actually starts a local Server and a Client. For the purposes of this test, most of the console commands will be executed to optimize graphics. Pressing the up and down arrows in the console will change to the last command entered. You can backspace over the command and enter new values if you'd like. There is also a command-completion function.  Type in the first few letters of a command. By pressing the TAB key, you can have the console automatically finish the name of the command for you. 
+
+	When you are in console mode (or when you have selected to "talk" by typing in words to appear on the screen), a blue "voice balloon" will appear over your head. Common game courtesy is to NOT shoot players who are in this mode.
+
+=======================
+== Section 10.       ==
+== PROBLEM ICONS     ==
+=======================
+
+Q3Test has a Problem Icon that you may see on your screen from time to time. When you are disconnected from a Quake Server or the network packet flow is disturbed, you will see a Network Disconnect icon above the spot where your frag count is displayed.  Other players will see it displayed over your character's head (similar to the way the talk balloon is displayed). If you are not immediately reconnected to the server, you will need to disconnect (leave arena) and attempt to reconnect with the server by either using the menu commands or by typing "connect" <server IP address> in the console command line.
+	NOTE:  Courteous players will refrain from getting cheap points by fragging lagged out opponents.
+
+=======================
+== Section 11.       ==
+== MESSAGE OF THE DAY     ==
+=======================
+
+When Quake 3 Arena starts a map up, it sends the GL_RENDERER string to the Message Of The Day server at id.  This responds back with a message of the day to the client.  If you wish to switch this option off, set CL_MOTD to 0 (+set CL_MOTD 0 from the command line). 
+

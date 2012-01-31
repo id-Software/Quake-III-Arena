@@ -1,0 +1,4 @@
+tst/fields.c:6: warning: initializer exceeds bit-field width
+tst/fields.c:8: warning: initializer exceeds bit-field width
+tst/fields.c:30: warning: missing return value
+tst/fields.c:34: warning: missing return value

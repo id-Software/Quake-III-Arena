@@ -1,0 +1,193 @@
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4004000,-72
+.frame $sp,80,$26,48
+stq $14,0($sp)
+stq $26,8($sp)
+.prologue 1
+mov $31,$14
+L.2:
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lda $25,1
+stl $25,down($27)
+stl $25,up($27)
+L.3:
+lda $14,1($14)
+cmplt $14,15,$23
+bne $23,L.2
+mov $31,$14
+L.6:
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+lda $25,1
+stl $25,rows($27)
+L.7:
+lda $14,1($14)
+cmplt $14,8,$23
+bne $23,L.6
+mov $31,$16
+jsr $26,queens
+ldgp $gp,0($26)
+mov $31,$0
+L.1:
+ldq $14,0($sp)
+ldq $26,8($sp)
+lda $sp,80($sp)
+ret
+.end main
+.globl queens
+.text
+.ent queens
+queens:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4006000,-64
+.frame $sp,80,$26,48
+stq $13,0($sp)
+stq $14,8($sp)
+stq $26,16($sp)
+mov $16,$14
+.prologue 1
+mov $31,$13
+L.11:
+sll $13,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+ldl $25,rows($25)
+cmpeq $25,$31,$23
+bne $23,L.15
+subl $13,$14,$25
+lda $25,7($25)
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+ldl $25,up($25)
+cmpeq $25,$31,$23
+bne $23,L.15
+addl $13,$14,$25
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+ldl $25,down($25)
+cmpeq $25,$31,$23
+bne $23,L.15
+addl $13,$14,$25
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $31,down($25)
+subl $13,$14,$25
+lda $25,7($25)
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $31,up($25)
+sll $13,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $31,rows($25)
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+stl $13,x($27)
+cmpeq $14,7,$23
+beq $23,L.17
+jsr $26,print
+ldgp $gp,0($26)
+br L.18
+L.17:
+lda $16,1($14)
+jsr $26,queens
+ldgp $gp,0($26)
+L.18:
+lda $27,1
+addl $13,$14,$25
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $27,down($25)
+subl $13,$14,$25
+lda $25,7($25)
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $27,up($25)
+sll $13,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,2,$25
+stl $27,rows($25)
+L.15:
+L.12:
+lda $13,1($13)
+cmplt $13,8,$23
+bne $23,L.11
+mov $31,$0
+L.10:
+ldq $13,0($sp)
+ldq $14,8($sp)
+ldq $26,16($sp)
+lda $sp,80($sp)
+ret
+.end queens
+.globl print
+.text
+.ent print
+print:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4004000,-72
+.frame $sp,80,$26,48
+stq $14,0($sp)
+stq $26,8($sp)
+.prologue 1
+mov $31,$14
+L.20:
+lda $16,L.24
+sll $14,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,2,$27
+ldl $27,x($27)
+lda $17,49($27)
+jsr $26,printf
+ldgp $gp,0($26)
+L.21:
+lda $14,1($14)
+cmplt $14,8,$23
+bne $23,L.20
+lda $16,L.25
+jsr $26,printf
+ldgp $gp,0($26)
+mov $31,$0
+L.19:
+ldq $14,0($sp)
+ldq $26,8($sp)
+lda $sp,80($sp)
+ret
+.end print
+.globl x
+.comm x,32
+.globl rows
+.comm rows,32
+.globl down
+.comm down,60
+.globl up
+.comm up,60
+.rdata
+.align 0
+L.25:
+.byte 10
+.byte 0
+.align 0
+L.24:
+.byte 37
+.byte 99
+.byte 32
+.byte 0

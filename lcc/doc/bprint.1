@@ -1,0 +1,83 @@
+.\" $Id: bprint.1 145 2001-10-17 21:53:10Z timo $
+.TH BPRINT 1 "local \- $Date: 2001-10-17 16:53:10 -0500 (Wed, 17 Oct 2001) $"
+.SH NAME
+bprint \- expression profiler
+.SH SYNOPSIS
+.B bprint
+[
+.I option ...
+]
+[
+.I file ...
+]
+.SH DESCRIPTION
+.I bprint
+produces on the standard output a listing of the programs compiled by
+.I lcc
+with the
+.B \-b
+option.
+Executing an
+.B a.out
+so compiled appends profiling data to
+.BR prof.out .
+The first token of each expression in the listing is preceded
+by the number of times it was executed
+enclosed in angle brackets as determined from the data in
+.BR prof.out .
+.I bprint
+interprets the following options.
+.TP
+.B \-c
+Compress the
+.B prof.out
+file, which otherwise grows with every execution of
+.BR a.out .
+.TP
+.B \-b
+Print an annotated listing as described above.
+.TP
+.B \-n
+Include line numbers in the listing.
+.TP
+.B \-f
+Print only the number of invocations of each function.
+A second
+.B \-f
+summarizes call sites instead of callers.
+.TP
+.BI \-I \*Sdir
+specifies additional directories in which to seek
+files given in
+.B prof.out
+that do not begin with `/'.
+.PP
+If any file names are given, only the requested data for those files are printed
+in the order presented.
+If no options are given,
+.B \-b
+is assumed.
+.SH FILES
+.PP
+.ta \w'$LCCDIR/liblcc.{a,lib}XX'u
+.nf
+prof.out	profiling data
+$LCCDIR/liblcc.{a,lib}	\fIlcc\fP-specific library
+.SH "SEE ALSO"
+.IR lcc (1), 
+.IR prof (1)
+.SH BUGS
+Macros and comments can confuse
+.I bprint
+because it uses post-expansion source coordinates
+to annotate pre-expansion source files.
+If
+.I bprint
+sees that it's about to print a statement count
+.I inside
+a number or identifier, it moves the count to just
+.I before
+the token.
+.PP
+Can't cope with an ill-formed
+.BR prof.out .

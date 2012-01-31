@@ -1,0 +1,259 @@
+.486
+.model flat
+extrn __fltused:near
+extrn __ftol:near
+public _main
+_TEXT segment
+_main:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+mov eax,0
+L1:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f
+_f:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+call _f
+add esp,0
+mov edi,eax
+call _f
+add esp,0
+lea edi,[eax][edi]
+mov dword ptr (20)[ebp],edi
+mov eax,0
+L2:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f2
+_f2:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,4
+call _f
+add esp,0
+mov edi,eax
+cmp dword ptr (20)[ebp],0
+je L5
+call _f
+add esp,0
+mov esi,eax
+mov dword ptr (-4)[ebp],esi
+jmp L6
+L5:
+mov dword ptr (-4)[ebp],1
+L6:
+mov esi,dword ptr (-4)[ebp]
+lea edi,[esi][edi]
+mov dword ptr (20)[ebp],edi
+mov eax,0
+L3:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f3
+_f3:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,44
+mov dword ptr (-4)[ebp],0
+mov dword ptr (-8)[ebp],0
+mov dword ptr (-12)[ebp],0
+mov dword ptr (-16)[ebp],0
+mov dword ptr (-20)[ebp],0
+mov dword ptr (-24)[ebp],0
+mov dword ptr (-28)[ebp],0
+mov dword ptr (-32)[ebp],0
+mov dword ptr (-36)[ebp],0
+mov dword ptr (-40)[ebp],0
+mov edi,dword ptr (24)[ebp]
+lea esi,(4)[edi]
+mov dword ptr (24)[ebp],esi
+cmp dword ptr (20)[ebp],0
+je L9
+call _f
+add esp,0
+mov esi,eax
+mov dword ptr (-44)[ebp],esi
+jmp L10
+L9:
+mov dword ptr (-44)[ebp],0
+L10:
+mov esi,dword ptr (-44)[ebp]
+mov dword ptr [edi],esi
+mov eax,0
+L7:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f4
+_f4:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,52
+mov dword ptr (-4)[ebp],0
+mov dword ptr (-8)[ebp],0
+mov dword ptr (-12)[ebp],0
+mov dword ptr (-16)[ebp],0
+mov dword ptr (-20)[ebp],0
+mov dword ptr (-24)[ebp],0
+mov edi,dword ptr (_i)
+lea esi,[edi*8]
+fld qword ptr (_a)[esi]
+fstp qword ptr (-36)[ebp]
+fld qword ptr (_b)[esi]
+fstp qword ptr (-44)[ebp]
+fld qword ptr (-36)[ebp]
+fadd qword ptr (-44)[ebp]
+fld qword ptr (L15)
+fcompp
+fstsw ax
+sahf
+je L13
+cmp edi,0
+je L13
+fld qword ptr (-36)[ebp]
+fsub qword ptr (-44)[ebp]
+fld qword ptr (L15)
+fcompp
+fstsw ax
+sahf
+je L13
+mov dword ptr (-28)[ebp],1
+jmp L14
+L13:
+mov dword ptr (-28)[ebp],0
+L14:
+mov edi,dword ptr (-28)[ebp]
+mov dword ptr (_i),edi
+mov eax,0
+L11:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f5
+_f5:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+mov edi,dword ptr (_k)
+mov esi,dword ptr (_m)
+mov ebx,dword ptr (_A)
+mov edx,edi
+imul edx,esi
+lea edx,[ebx][edx*8]
+mov ecx,dword ptr (_j)
+mov eax,ecx
+imul eax,esi
+lea esi,[ebx][eax*8]
+mov ebx,dword ptr (_n)
+mov eax,dword ptr (_B)
+imul edi,ebx
+lea edi,[eax][edi*8]
+imul ecx,ebx
+lea ebx,[eax][ecx*8]
+fld qword ptr [edx]
+fmul qword ptr [esi]
+fld qword ptr [edi]
+fmul qword ptr [ebx]
+faddp st(1),st
+fstp qword ptr (_x)
+fld qword ptr [edx]
+fmul qword ptr [ebx]
+fld qword ptr [edi]
+fmul qword ptr [esi]
+fsubp st(1),st
+fstp qword ptr (_x)
+mov eax,0
+L16:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+_TEXT ends
+_DATA segment
+public _x
+align 4
+_x label byte
+db 8 dup (0)
+public _B
+align 4
+_B label byte
+db 4 dup (0)
+public _A
+align 4
+_A label byte
+db 4 dup (0)
+public _n
+align 4
+_n label byte
+db 4 dup (0)
+public _m
+align 4
+_m label byte
+db 4 dup (0)
+public _k
+align 4
+_k label byte
+db 4 dup (0)
+public _j
+align 4
+_j label byte
+db 4 dup (0)
+public _i
+align 4
+_i label byte
+db 4 dup (0)
+public _b
+align 4
+_b label byte
+db 80 dup (0)
+public _a
+align 4
+_a label byte
+db 80 dup (0)
+_DATA ends
+_TEXT segment
+align 4
+L15 label byte
+dd 00H
+dd 00H
+_TEXT ends
+end

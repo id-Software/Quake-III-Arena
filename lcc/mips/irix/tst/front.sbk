@@ -1,0 +1,416 @@
+.set reorder
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+move $4,$0
+jal exit
+move $2,$0
+L.1:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end main
+.globl nested
+.text
+.align 2
+.ent nested
+nested:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+la $24,4
+bge $4,$24,L.6
+la $24,114
+beq $5,$24,L.9
+L.6:
+la $24,1
+bne $4,$24,L.8
+la $24,104
+beq $5,$24,L.9
+la $24,105
+beq $5,$24,L.9
+L.8:
+la $24,2
+bne $4,$24,L.3
+la $24,111
+beq $5,$24,L.9
+la $24,121
+bne $5,$24,L.3
+L.9:
+move $4,$5
+L.3:
+move $2,$0
+L.2:
+j $31
+.end nested
+.globl s
+.text
+.align 2
+.ent s
+s:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+L.10:
+j $31
+.end s
+.globl Dy
+.sdata
+.align 2
+Dy:
+.word 0x0
+.space 4
+.globl Dz
+.sdata
+.align 2
+Dz:
+.word 0x1
+.space 4
+.globl Dfunc
+.text
+.text
+.align 2
+.ent Dfunc
+Dfunc:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end Dfunc
+.globl f
+.text
+.align 2
+.ent f
+f:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end f
+.globl f1
+.text
+.align 2
+.ent f1
+f1:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end f1
+.globl f2
+.text
+.align 2
+.ent f2
+f2:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+sw $5,28($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end f2
+.globl g
+.text
+.align 2
+.ent g
+g:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end g
+.globl h
+.text
+.align 2
+.ent h
+h:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end h
+.globl h1
+.text
+.align 2
+.ent h1
+h1:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+sw $5,28($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end h1
+.globl h2
+.text
+.align 2
+.ent h2
+h2:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end h2
+.sdata
+.align 2
+L.21:
+.word 0x1
+.globl set1
+.text
+.text
+.align 2
+.ent set1
+set1:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end set1
+.sdata
+.align 2
+L.23:
+.word 0x2
+.globl set2
+.text
+.text
+.align 2
+.ent set2
+set2:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end set2
+.text
+.align 2
+.ent goo
+goo:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end goo
+.globl sss
+.text
+.align 2
+.ent sss
+sss:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end sss
+.lcomm L.27,4
+.globl rrr
+.text
+.text
+.align 2
+.ent rrr
+rrr:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end rrr
+.globl setstatic
+.text
+.align 2
+.ent setstatic
+setstatic:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end setstatic
+.globl gx1
+.text
+.align 2
+.ent gx1
+gx1:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+s.d $f12,24($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end gx1
+.globl ff1
+.text
+.align 2
+.ent ff1
+ff1:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end ff1
+.globl gg1
+.text
+.align 2
+.ent gg1
+gg1:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end gg1
+.globl hh1
+.text
+.align 2
+.ent hh1
+hh1:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+j $31
+.end hh1
+.globl cmp
+.text
+.align 2
+.ent cmp
+cmp:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+sw $5,28($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end cmp
+.globl sort
+.text
+.align 2
+.ent sort
+sort:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end sort
+.globl onearg
+.text
+.align 2
+.ent onearg
+onearg:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end onearg
+.extern xr 4
+.globl ss4
+.comm ss4,4
+.lcomm ss2,4
+.lcomm ss5,4
+.globl ss3
+.comm ss3,4
+.lcomm ss1,4
+.lcomm yy,4
+.globl z
+.comm z,4
+.globl y
+.comm y,4
+.globl x
+.comm x,4
+.globl b
+.comm b,4
+.globl a
+.comm a,4

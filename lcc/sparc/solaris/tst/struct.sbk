@@ -1,0 +1,377 @@
+.global addpoint
+.section ".text"
+.align 4
+addpoint:
+save %sp,-96,%sp
+ld [%i0],%i5
+ld [%i1],%i4
+add %i5,%i4,%i5
+st %i5,[%i0]
+add %i0,4,%i5
+ld [%i5],%i4
+ld [%i1+4],%i3
+add %i4,%i3,%i4
+st %i4,[%i5]
+ld [%fp+64],%i5
+ld [%r24+0],%r1
+ld [%r24+4],%r2
+st %r1,[%r29+0]
+st %r2,[%r29+4]
+.L1:
+jmp %i7+12; restore
+.type addpoint,#function
+.size addpoint,.-addpoint
+.global canonrect
+.align 4
+canonrect:
+save %sp,-112,%sp
+ld [%i0],%i3
+ld [%i0+8],%i2
+cmp %i3,%i2; bge .L6; nop
+ld [%i0],%i5
+ba .L7; nop
+.L6:
+ld [%i0+8],%i5
+.L7:
+st %i5,[%fp+-16]
+ld [%i0+4],%i3
+ld [%i0+12],%i2
+cmp %i3,%i2; bge .L10; nop
+ld [%i0+4],%i4
+ba .L11; nop
+.L10:
+ld [%i0+12],%i4
+.L11:
+st %i4,[%fp+-12]
+ld [%i0],%i2
+ld [%i0+8],%i1
+cmp %i2,%i1; ble .L14; nop
+ld [%i0],%i3
+ba .L15; nop
+.L14:
+ld [%i0+8],%i3
+.L15:
+st %i3,[%fp+-8]
+ld [%i0+4],%i1
+ld [%i0+12],%l7
+cmp %i1,%l7; ble .L19; nop
+ld [%i0+4],%i2
+ba .L20; nop
+.L19:
+ld [%i0+12],%i2
+.L20:
+st %i2,[%fp+-4]
+ld [%fp+64],%i1
+add -16,%fp,%l7
+ld [%r23+0],%r1
+ld [%r23+4],%r2
+st %r1,[%r25+0]
+st %r2,[%r25+4]
+ld [%r23+8],%r1
+ld [%r23+12],%r2
+st %r1,[%r25+8]
+st %r2,[%r25+12]
+.L3:
+jmp %i7+12; restore
+.type canonrect,#function
+.size canonrect,.-canonrect
+.global makepoint
+.align 4
+makepoint:
+save %sp,-104,%sp
+st %i0,[%fp+-8]
+st %i1,[%fp+-4]
+ld [%fp+64],%i5
+add -8,%fp,%i4
+ld [%r28+0],%r1
+ld [%r28+4],%r2
+st %r1,[%r29+0]
+st %r2,[%r29+4]
+.L21:
+jmp %i7+12; restore
+.type makepoint,#function
+.size makepoint,.-makepoint
+.global makerect
+.align 4
+makerect:
+save %sp,-128,%sp
+add -16,%fp,%i5
+ld [%r24+0],%r1
+ld [%r24+4],%r2
+st %r1,[%r29+0]
+st %r2,[%r29+4]
+add -8,%fp,%i5
+ld [%r25+0],%r1
+ld [%r25+4],%r2
+st %r1,[%r29+0]
+st %r2,[%r29+4]
+add -32,%fp,%i5
+add -16,%fp,%i4
+ld [%r28+0],%r1
+ld [%r28+4],%r2
+st %r1,[%r29+0]
+st %r2,[%r29+4]
+ld [%r28+8],%r1
+ld [%r28+12],%r2
+st %r1,[%r29+8]
+st %r2,[%r29+12]
+add -32,%fp,%o0
+ld [%fp+64],%i5
+call canonrect; st %i5,[%sp+64]; unimp 16&0xfff
+.L24:
+jmp %i7+12; restore
+.type makerect,#function
+.size makerect,.-makerect
+.global ptinrect
+.align 4
+ptinrect:
+ld [%o0],%o4
+ld [%o1],%o3
+cmp %o4,%o3; bl .L29; nop
+ld [%o1+8],%o3
+cmp %o4,%o3; bge .L29; nop
+ld [%o0+4],%o4
+ld [%o1+4],%o3
+cmp %o4,%o3; bl .L29; nop
+ld [%o1+12],%o3
+cmp %o4,%o3; bge .L29; nop
+set 1,%o5
+ba .L30; nop
+.L29:
+mov %g0,%o5
+.L30:
+mov %o5,%o0
+.L27:
+retl; nop
+.type ptinrect,#function
+.size ptinrect,.-ptinrect
+.section ".data"
+.global y
+.type y,#object
+.size y,3
+.align 1
+y:
+.byte 97
+.byte 98
+.byte 0
+.global odd
+.section ".text"
+.align 4
+odd:
+save %sp,-96,%sp
+add -3,%fp,%i5
+ldub [%r24+0],%r1
+ldub [%r24+1],%r2
+stb %r1,[%r29+0]
+stb %r2,[%r29+1]
+ldub [%r24+2],%r1
+stb %r1,[%r29+2]
+set .L32,%o0
+add -3,%fp,%o1
+call printf; nop
+mov %g0,%i0
+.L31:
+ret; restore
+.type odd,#function
+.size odd,.-odd
+.section ".rodata"
+.align 4
+.L34:
+.word 0x0
+.word 0x0
+.align 4
+.L35:
+.word 0x140
+.word 0x140
+.align 4
+.L36:
+.word 0xffffffff
+.word 0xffffffff
+.word 0x1
+.word 0x1
+.word 0x14
+.word 0x12c
+.word 0x1f4
+.word 0x190
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-240,%sp
+add -64,%fp,%i4
+set .L34,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+add -72,%fp,%i4
+set .L35,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+add -32,%fp,%i4
+set .L36,%i3
+add %r27,32,%r27
+add %r28,32,%r3
+1: dec 8,%r3
+ld [%r27+-8],%r1
+ld [%r27+-4],%r2
+st %r1,[%r3+0]
+st %r2,[%r3+4]
+cmp %r3,%r28; bgt 1b; dec 8,%r27
+set -10,%i4
+mov %i4,%o0
+mov %i4,%o1
+add -80,%fp,%i4
+call makepoint; st %i4,[%sp+64]; unimp 8&0xfff
+add -88,%fp,%i4
+add -72,%fp,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+add -88,%fp,%o0
+add -80,%fp,%o1
+add -96,%fp,%i4
+call addpoint; st %i4,[%sp+64]; unimp 8&0xfff
+set 10,%i4
+mov %i4,%o0
+mov %i4,%o1
+add -104,%fp,%i4
+call makepoint; st %i4,[%sp+64]; unimp 8&0xfff
+add -112,%fp,%i4
+add -64,%fp,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+add -112,%fp,%o0
+add -104,%fp,%o1
+add -120,%fp,%i4
+call addpoint; st %i4,[%sp+64]; unimp 8&0xfff
+add -96,%fp,%o0
+add -120,%fp,%o1
+add -48,%fp,%i4
+call makerect; st %i4,[%sp+64]; unimp 16&0xfff
+mov %g0,%i5
+ba .L40; nop
+.L37:
+sll %i5,3,%i4
+add -32,%fp,%i3
+ld [%i4+%i3],%o0
+add -28,%fp,%i3
+ld [%i4+%i3],%o1
+add -56,%fp,%i4
+call makepoint; st %i4,[%sp+64]; unimp 8&0xfff
+set .L41,%o0
+sll %i5,3,%i4
+add -32,%fp,%i3
+ld [%i4+%i3],%o1
+ld [%fp+-52],%o2
+call printf; nop
+add -128,%fp,%i4
+add -56,%fp,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+add -128,%fp,%o0
+add -144,%fp,%i4
+add -48,%fp,%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r27+8],%r1
+ld [%r27+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -144,%fp,%o1
+call ptinrect; nop
+cmp %o0,0; bne .L44; nop
+set .L46,%o0
+call printf; nop
+.L44:
+set .L47,%o0
+ld [%fp+-48],%o1
+ld [%fp+-44],%o2
+ld [%fp+-40],%o3
+ld [%fp+-36],%o4
+call printf; nop
+.L38:
+add %i5,1,%i5
+.L40:
+mov %i5,%i4
+set 4,%i3
+cmp %i4,%i3; blu .L37; nop
+add -123,%fp,%i4
+set y,%i3
+ldub [%r27+0],%r1
+ldub [%r27+1],%r2
+stb %r1,[%r28+0]
+stb %r2,[%r28+1]
+ldub [%r27+2],%r1
+stb %r1,[%r28+2]
+add -123,%fp,%o0
+call odd; nop
+mov %g0,%o0
+call exit; nop
+mov %g0,%i0
+.L33:
+ret; restore
+.type main,#function
+.size main,.-main
+.section ".rodata"
+.align 1
+.L47:
+.byte 119
+.byte 105
+.byte 116
+.byte 104
+.byte 105
+.byte 110
+.byte 32
+.byte 91
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 59
+.byte 32
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 93
+.byte 10
+.byte 0
+.align 1
+.L46:
+.byte 110
+.byte 111
+.byte 116
+.byte 32
+.byte 0
+.align 1
+.L41:
+.byte 40
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 41
+.byte 32
+.byte 105
+.byte 115
+.byte 32
+.byte 0
+.align 1
+.L32:
+.byte 37
+.byte 115
+.byte 10
+.byte 0

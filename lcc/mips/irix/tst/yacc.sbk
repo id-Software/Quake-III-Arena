@@ -1,0 +1,2236 @@
+.set reorder
+.globl yyin
+.sdata
+.align 2
+yyin:
+.word _iob
+.globl yyout
+.sdata
+.align 2
+yyout:
+.word _iob+16
+.globl yylex
+.text
+.text
+.align 2
+.ent yylex
+yylex:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+b L.4
+L.3:
+L.6:
+la $24,-1
+blt $30,$24,L.7
+la $24,4
+bgt $30,$24,L.7
+sll $24,$30,2
+lw $24,L.18+4($24)
+.cpadd $24
+j $24
+.rdata
+.align 2
+L.18:
+.gpword L.8
+.gpword L.9
+.gpword L.12
+.gpword L.13
+.gpword L.8
+.gpword L.15
+.text
+L.9:
+jal yywrap
+beq $2,$0,L.8
+move $2,$0
+b L.2
+L.12:
+la $2,257
+b L.2
+L.13:
+la $2,258
+b L.2
+L.15:
+lb $2,yytext
+b L.2
+L.7:
+lw $4,yyout
+la $5,L.17
+move $6,$30
+jal fprintf
+L.8:
+L.4:
+jal yylook
+move $30,$2
+bge $2,$0,L.3
+move $2,$0
+L.2:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end yylex
+.globl yyvstop
+.data
+.align 2
+yyvstop:
+.word 0x0
+.word 0x4
+.word 0x0
+.word 0x3
+.word 0x4
+.word 0x0
+.word 0x2
+.word 0x4
+.word 0x0
+.word 0x1
+.word 0x4
+.word 0x0
+.word 0x2
+.word 0x0
+.word 0x1
+.word 0x0
+.word 0x0
+.globl yycrank
+.data
+.align 0
+yycrank:
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x1
+.byte 0x3
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x1
+.byte 0x4
+.byte 0x1
+.byte 0x3
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x1
+.byte 0x5
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x5
+.byte 0x7
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x1
+.byte 0x6
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x6
+.byte 0x8
+.byte 0x0
+.byte 0x0
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x6
+.byte 0x8
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.byte 0x0
+.globl yysvec
+.data
+.align 2
+yysvec:
+.word 0x0
+.word 0x0
+.word 0x0
+.word yycrank-2
+.word 0x0
+.word 0x0
+.word yycrank
+.word yysvec+12
+.word 0x0
+.word yycrank
+.word 0x0
+.word yyvstop+4
+.word yycrank
+.word 0x0
+.word yyvstop+12
+.word yycrank+4
+.word 0x0
+.word yyvstop+24
+.word yycrank+38
+.word 0x0
+.word yyvstop+36
+.word yycrank
+.word yysvec+60
+.word yyvstop+48
+.word yycrank
+.word yysvec+72
+.word yyvstop+56
+.word 0x0
+.word 0x0
+.word 0x0
+.globl yytop
+.sdata
+.align 2
+yytop:
+.word yycrank+282
+.globl yybgin
+.sdata
+.align 2
+yybgin:
+.word yysvec+12
+.globl yymatch
+.data
+.align 0
+yymatch:
+.byte 0
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 9
+.byte 10
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 9
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 65
+.byte 1
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 65
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 1
+.byte 0
+.globl yyextra
+.data
+.align 0
+yyextra:
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.globl yylineno
+.sdata
+.align 2
+yylineno:
+.word 0x1
+.globl yysptr
+.sdata
+.align 2
+yysptr:
+.word yysbuf
+.globl yyprevious
+.sdata
+.align 2
+yyprevious:
+.word 0xa
+.globl yylook
+.text
+.text
+.align 2
+.ent yylook
+yylook:
+.frame $sp,72,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-72
+.mask 0xc2ff0000,-16
+sw $16,16($sp)
+sw $17,20($sp)
+sw $18,24($sp)
+sw $19,28($sp)
+sw $20,32($sp)
+sw $21,36($sp)
+sw $22,40($sp)
+sw $23,44($sp)
+.cprestore 48
+sw $30,52($sp)
+sw $31,56($sp)
+lw $24,yymorfg
+bne $24,$0,L.35
+la $21,yytext
+b L.36
+L.35:
+sw $0,yymorfg
+lw $24,yyleng
+la $21,yytext($24)
+L.36:
+L.37:
+la $23,yylstate
+lw $24,yybgin
+move $30,$24
+sw $24,yyestate
+lw $24,yyprevious
+la $15,10
+bne $24,$15,L.41
+la $30,12($30)
+L.41:
+L.43:
+lw $22,($30)
+move $24,$22
+la $15,yycrank
+bne $24,$15,L.47
+lw $18,4($30)
+move $24,$18
+bne $24,$0,L.49
+b L.94
+L.49:
+lw $24,($18)
+la $15,yycrank
+bne $24,$15,L.51
+b L.94
+L.51:
+L.47:
+move $24,$21
+sw $24,-12+72($sp)
+la $21,1($24)
+lw $15,yysptr
+la $14,yysbuf
+bleu $15,$14,L.61
+lw $15,yysptr
+la $15,-1($15)
+sw $15,yysptr
+lb $15,($15)
+sw $15,-4+72($sp)
+b L.62
+L.61:
+lw $15,yyin
+lw $14,($15)
+subu $14,$14,1
+sw $14,($15)
+bge $14,$0,L.63
+lw $4,yyin
+jal _filbuf
+move $24,$2
+sw $24,-8+72($sp)
+b L.64
+L.63:
+lw $24,yyin
+la $24,4($24)
+lw $15,($24)
+la $14,1($15)
+sw $14,($24)
+lbu $24,($15)
+sw $24,-8+72($sp)
+L.64:
+lw $24,-8+72($sp)
+sw $24,-4+72($sp)
+L.62:
+lw $24,-4+72($sp)
+sw $24,yytchar
+la $15,10
+bne $24,$15,L.59
+lw $24,yylineno
+la $24,1($24)
+sw $24,yylineno
+lw $16,yytchar
+b L.60
+L.59:
+lw $16,yytchar
+L.60:
+la $24,-1
+bne $16,$24,L.57
+move $17,$0
+b L.58
+L.57:
+lw $17,yytchar
+L.58:
+move $20,$17
+move $24,$17
+lw $15,-12+72($sp)
+sb $24,($15)
+L.65:
+move $19,$22
+move $24,$22
+la $15,yycrank
+bleu $24,$15,L.66
+sll $24,$20,1
+addu $22,$24,$19
+move $24,$22
+lw $15,yytop
+bgtu $24,$15,L.67
+la $24,12
+lb $15,($22)
+mul $24,$24,$15
+la $24,yysvec($24)
+move $15,$30
+bne $24,$15,L.67
+la $24,yysvec
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+bne $15,$24,L.70
+la $24,-1($21)
+move $21,$24
+lb $24,($24)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.72
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.72:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+b L.94
+L.70:
+move $24,$23
+la $23,4($24)
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+move $30,$15
+sw $15,($24)
+b L.43
+L.66:
+move $24,$22
+la $15,yycrank
+bgeu $24,$15,L.75
+la $24,yycrank
+move $15,$22
+subu $24,$24,$15
+la $15,2
+div $24,$24,$15
+sll $24,$24,1
+la $24,yycrank($24)
+move $19,$24
+move $22,$24
+sll $24,$20,1
+addu $22,$24,$22
+move $24,$22
+lw $15,yytop
+bgtu $24,$15,L.77
+la $24,12
+lb $15,($22)
+mul $24,$24,$15
+la $24,yysvec($24)
+move $15,$30
+bne $24,$15,L.77
+la $24,yysvec
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+bne $15,$24,L.79
+la $24,-1($21)
+move $21,$24
+lb $24,($24)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.81
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.81:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+b L.94
+L.79:
+move $24,$23
+la $23,4($24)
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+move $30,$15
+sw $15,($24)
+b L.43
+L.77:
+lb $24,yymatch($20)
+sll $24,$24,1
+addu $22,$24,$19
+move $24,$22
+lw $15,yytop
+bgtu $24,$15,L.83
+la $24,12
+lb $15,($22)
+mul $24,$24,$15
+la $24,yysvec($24)
+move $15,$30
+bne $24,$15,L.83
+la $24,yysvec
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+bne $15,$24,L.85
+la $24,-1($21)
+move $21,$24
+lb $24,($24)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.87
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.87:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+b L.94
+L.85:
+move $24,$23
+la $23,4($24)
+la $15,12
+lb $14,1($22)
+mul $15,$15,$14
+la $15,yysvec($15)
+move $30,$15
+sw $15,($24)
+b L.43
+L.83:
+L.75:
+L.67:
+lw $24,4($30)
+move $30,$24
+beq $24,$0,L.89
+lw $24,($30)
+move $22,$24
+la $15,yycrank
+beq $24,$15,L.89
+b L.65
+L.89:
+la $24,-1($21)
+move $21,$24
+lb $24,($24)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.91
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.91:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+b L.94
+L.93:
+move $24,$21
+la $21,-1($24)
+sb $0,($24)
+lw $24,($23)
+move $15,$0
+move $14,$24
+beq $14,$15,L.96
+lw $24,8($24)
+sw $24,yyfnd
+beq $24,$15,L.96
+lw $24,yyfnd
+lw $24,($24)
+ble $24,$0,L.96
+sw $23,yyolsp
+lw $24,yyfnd
+lw $24,($24)
+lb $24,yyextra($24)
+beq $24,$0,L.98
+b L.101
+L.100:
+la $23,-4($23)
+move $24,$21
+la $21,-1($24)
+lb $24,($24)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.103
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.103:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+L.101:
+lw $24,($23)
+lw $4,8($24)
+lw $24,yyfnd
+lw $24,($24)
+negu $5,$24
+jal yyback
+la $15,1
+beq $2,$15,L.105
+move $24,$23
+la $15,yylstate
+bgtu $24,$15,L.100
+L.105:
+L.98:
+lb $24,($21)
+sw $24,yyprevious
+sw $23,yylsp
+la $24,yytext
+move $15,$21
+subu $24,$15,$24
+la $24,1($24)
+sw $24,yyleng
+lw $24,yyleng
+sb $0,yytext($24)
+lw $24,yyfnd
+la $15,4($24)
+sw $15,yyfnd
+lw $2,($24)
+b L.34
+L.96:
+lb $24,($21)
+sw $24,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.106
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.106:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+L.94:
+move $24,$23
+la $23,-4($24)
+la $15,yylstate
+bgtu $24,$15,L.93
+lb $24,yytext
+bne $24,$0,L.108
+la $24,yysbuf
+sw $24,yysptr
+move $2,$0
+b L.34
+L.108:
+lw $24,yysptr
+la $15,yysbuf
+bleu $24,$15,L.118
+lw $24,yysptr
+la $24,-1($24)
+sw $24,yysptr
+lb $24,($24)
+sw $24,-4+72($sp)
+b L.119
+L.118:
+lw $24,yyin
+lw $15,($24)
+subu $15,$15,1
+sw $15,($24)
+bge $15,$0,L.120
+lw $4,yyin
+jal _filbuf
+move $24,$2
+sw $24,-8+72($sp)
+b L.121
+L.120:
+lw $24,yyin
+la $24,4($24)
+lw $15,($24)
+la $14,1($15)
+sw $14,($24)
+lbu $24,($15)
+sw $24,-8+72($sp)
+L.121:
+lw $24,-8+72($sp)
+sw $24,-4+72($sp)
+L.119:
+lw $24,-4+72($sp)
+sw $24,yytchar
+la $15,10
+bne $24,$15,L.116
+lw $24,yylineno
+la $24,1($24)
+sw $24,yylineno
+lw $16,yytchar
+b L.117
+L.116:
+lw $16,yytchar
+L.117:
+la $24,-1
+bne $16,$24,L.114
+move $17,$0
+b L.115
+L.114:
+lw $17,yytchar
+L.115:
+sb $17,yytext
+sll $24,$17,8*(4-1); sra $24,$24,8*(4-1)
+sw $24,yyprevious
+lw $24,yyprevious
+ble $24,$0,L.122
+lw $24,yyout
+lw $15,($24)
+subu $15,$15,1
+sw $15,($24)
+bge $15,$0,L.125
+lw $24,yyprevious
+and $24,$24,(1<<(8*1))-1
+move $4,$24
+lw $5,yyout
+jal _flsbuf
+b L.126
+L.125:
+lw $24,yyout
+la $24,4($24)
+lw $15,($24)
+la $14,1($15)
+sw $14,($24)
+lw $24,yyprevious
+sb $24,($15)
+L.126:
+L.122:
+la $21,yytext
+b L.37
+L.34:
+lw $16,16($sp)
+lw $17,20($sp)
+lw $18,24($sp)
+lw $19,28($sp)
+lw $20,32($sp)
+lw $21,36($sp)
+lw $22,40($sp)
+lw $23,44($sp)
+lw $25,48($sp)
+lw $30,52($sp)
+lw $31,56($sp)
+addu $sp,$sp,72
+j $31
+.end yylook
+.globl yyback
+.text
+.align 2
+.ent yyback
+yyback:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+move $24,$4
+bne $24,$0,L.131
+move $2,$0
+b L.127
+L.130:
+move $24,$4
+la $4,4($24)
+lw $24,($24)
+bne $24,$5,L.133
+la $2,1
+b L.127
+L.133:
+L.131:
+lw $24,($4)
+bne $24,$0,L.130
+move $2,$0
+L.127:
+j $31
+.end yyback
+.globl yyinput
+.text
+.align 2
+.ent yyinput
+yyinput:
+.frame $sp,40,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-40
+.mask 0xc2e00000,-4
+sw $21,16($sp)
+sw $22,20($sp)
+sw $23,24($sp)
+.cprestore 28
+sw $30,32($sp)
+sw $31,36($sp)
+lw $24,yysptr
+la $15,yysbuf
+bleu $24,$15,L.144
+lw $24,yysptr
+la $24,-1($24)
+sw $24,yysptr
+lb $22,($24)
+b L.145
+L.144:
+lw $24,yyin
+lw $15,($24)
+subu $15,$15,1
+sw $15,($24)
+bge $15,$0,L.146
+lw $4,yyin
+jal _filbuf
+move $24,$2
+move $21,$24
+b L.147
+L.146:
+lw $24,yyin
+la $24,4($24)
+lw $15,($24)
+la $14,1($15)
+sw $14,($24)
+lbu $21,($15)
+L.147:
+move $22,$21
+L.145:
+sw $22,yytchar
+la $24,10
+bne $22,$24,L.142
+lw $24,yylineno
+la $24,1($24)
+sw $24,yylineno
+lw $23,yytchar
+b L.143
+L.142:
+lw $23,yytchar
+L.143:
+la $24,-1
+bne $23,$24,L.140
+move $30,$0
+b L.141
+L.140:
+lw $30,yytchar
+L.141:
+move $2,$30
+L.135:
+lw $21,16($sp)
+lw $22,20($sp)
+lw $23,24($sp)
+lw $25,28($sp)
+lw $30,32($sp)
+lw $31,36($sp)
+addu $sp,$sp,40
+j $31
+.end yyinput
+.globl yyoutput
+.text
+.align 2
+.ent yyoutput
+yyoutput:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+lw $24,yyout
+lw $15,($24)
+subu $15,$15,1
+sw $15,($24)
+bge $15,$0,L.150
+lw $24,0+24($sp)
+and $24,$24,(1<<(8*1))-1
+move $4,$24
+lw $5,yyout
+jal _flsbuf
+b L.151
+L.150:
+lw $24,yyout
+la $24,4($24)
+lw $15,($24)
+la $14,1($15)
+sw $14,($24)
+lw $24,0+24($sp)
+sb $24,($15)
+L.151:
+move $2,$0
+L.148:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end yyoutput
+.globl yyunput
+.text
+.align 2
+.ent yyunput
+yyunput:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+sw $4,yytchar
+lw $24,yytchar
+la $15,10
+bne $24,$15,L.153
+lw $24,yylineno
+subu $24,$24,1
+sw $24,yylineno
+L.153:
+lw $24,yysptr
+la $15,1($24)
+sw $15,yysptr
+lw $15,yytchar
+sb $15,($24)
+move $2,$0
+L.152:
+j $31
+.end yyunput
+.globl main
+.text
+.align 2
+.ent main
+main:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+jal yyparse
+move $2,$0
+L.155:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end main
+.globl yyerror
+.text
+.align 2
+.ent yyerror
+yyerror:
+.frame $sp,24,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-24
+.mask 0x82000000,-4
+.cprestore 16
+sw $31,20($sp)
+sw $4,24($sp)
+la $4,L.157
+lw $5,0+24($sp)
+jal printf
+move $2,$0
+L.156:
+lw $25,16($sp)
+lw $31,20($sp)
+addu $sp,$sp,24
+j $31
+.end yyerror
+.globl yyexca
+.data
+.align 1
+yyexca:
+.half 0xffffffff
+.half 0x1
+.half 0x0
+.half 0xffffffff
+.half 0xfffffffe
+.half 0x0
+.globl yyact
+.data
+.align 1
+yyact:
+.half 0xc
+.half 0x2
+.half 0x9
+.half 0x8
+.half 0x11
+.half 0xb
+.half 0x19
+.half 0x11
+.half 0xf
+.half 0x12
+.half 0x10
+.half 0xa
+.half 0x12
+.half 0x11
+.half 0xf
+.half 0x7
+.half 0x10
+.half 0xd
+.half 0x12
+.half 0x5
+.half 0x3
+.half 0x1
+.half 0x0
+.half 0x13
+.half 0x14
+.half 0x0
+.half 0x0
+.half 0x15
+.half 0x16
+.half 0x17
+.half 0x18
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x6
+.half 0xe
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x4
+.half 0x6
+.globl yypact
+.data
+.align 1
+yypact:
+.half 0xfffffc18
+.half 0xfffffff7
+.half 0xfffffc18
+.half 0x5
+.half 0xfffffff9
+.half 0xffffffc5
+.half 0xfffffc18
+.half 0xfffffc18
+.half 0xfffffc18
+.half 0xffffffd8
+.half 0xffffffe3
+.half 0xffffffd8
+.half 0xffffffd8
+.half 0xfffffc18
+.half 0xfffffc18
+.half 0xffffffd8
+.half 0xffffffd8
+.half 0xffffffd8
+.half 0xffffffd8
+.half 0xffffffda
+.half 0xffffffdd
+.half 0xffffffda
+.half 0xffffffda
+.half 0xfffffc18
+.half 0xfffffc18
+.half 0xfffffc18
+.globl yypgo
+.data
+.align 1
+yypgo:
+.half 0x0
+.half 0x15
+.half 0x14
+.half 0x11
+.half 0xb
+.globl yyr1
+.data
+.align 1
+yyr1:
+.half 0x0
+.half 0x1
+.half 0x1
+.half 0x1
+.half 0x1
+.half 0x2
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x4
+.half 0x3
+.globl yyr2
+.data
+.align 1
+yyr2:
+.half 0x0
+.half 0x0
+.half 0x2
+.half 0x3
+.half 0x3
+.half 0x3
+.half 0x3
+.half 0x3
+.half 0x3
+.half 0x3
+.half 0x2
+.half 0x3
+.half 0x1
+.half 0x1
+.half 0x1
+.globl yychk
+.data
+.align 1
+yychk:
+.half 0xfffffc18
+.half 0xffffffff
+.half 0xa
+.half 0xfffffffe
+.half 0x100
+.half 0xfffffffd
+.half 0x101
+.half 0xa
+.half 0xa
+.half 0x3d
+.half 0xfffffffc
+.half 0x2d
+.half 0x28
+.half 0xfffffffd
+.half 0x102
+.half 0x2b
+.half 0x2d
+.half 0x2a
+.half 0x2f
+.half 0xfffffffc
+.half 0xfffffffc
+.half 0xfffffffc
+.half 0xfffffffc
+.half 0xfffffffc
+.half 0xfffffffc
+.half 0x29
+.globl yydef
+.data
+.align 1
+yydef:
+.half 0x1
+.half 0xfffffffe
+.half 0x2
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0xe
+.half 0x3
+.half 0x4
+.half 0x0
+.half 0x5
+.half 0x0
+.half 0x0
+.half 0xc
+.half 0xd
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0x0
+.half 0xa
+.half 0x0
+.half 0x6
+.half 0x7
+.half 0x8
+.half 0x9
+.half 0xb
+.globl yychar
+.sdata
+.align 2
+yychar:
+.word 0xffffffff
+.globl yynerrs
+.sdata
+.align 2
+yynerrs:
+.word 0x0
+.globl yyerrflag
+.sdata
+.align 1
+yyerrflag:
+.half 0x0
+.globl yyparse
+.text
+.text
+.align 2
+.ent yyparse
+yyparse:
+.frame $sp,360,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-360
+.mask 0xc2fe0000,-308
+sw $17,16($sp)
+sw $18,20($sp)
+sw $19,24($sp)
+sw $20,28($sp)
+sw $21,32($sp)
+sw $22,36($sp)
+sw $23,40($sp)
+.cprestore 44
+sw $30,48($sp)
+sw $31,52($sp)
+move $24,$0
+move $23,$24
+la $15,-1
+sw $15,yychar
+sw $0,yynerrs
+sh $24,yyerrflag
+la $22,-302+360($sp)
+la $20,yyv-4
+L.161:
+la $24,2($22)
+move $22,$24
+la $15,0+360($sp)
+bleu $24,$15,L.162
+la $4,L.165
+jal yyerror
+la $2,1
+b L.158
+L.162:
+sh $23,($22)
+la $20,4($20)
+lw $24,yyval
+sw $24,($20)
+L.166:
+sll $24,$23,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $21,yypact($24)
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+la $15,-1000
+bgt $24,$15,L.167
+b L.169
+L.167:
+lw $24,yychar
+bge $24,$0,L.170
+jal yylex
+sw $2,yychar
+bge $2,$0,L.172
+sw $0,yychar
+L.172:
+L.170:
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+lw $15,yychar
+addu $24,$24,$15
+move $21,$24
+sll $24,$24,8*(4-2); sra $24,$24,8*(4-2)
+blt $24,$0,L.176
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+la $15,249
+blt $24,$15,L.174
+L.176:
+b L.169
+L.174:
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yyact($24)
+move $21,$24
+sll $24,$24,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yychk($24)
+lw $15,yychar
+bne $24,$15,L.177
+la $24,-1
+sw $24,yychar
+lw $24,yylval
+sw $24,yyval
+move $23,$21
+lh $24,yyerrflag
+ble $24,$0,L.161
+lh $24,yyerrflag
+subu $24,$24,1
+sh $24,yyerrflag
+b L.161
+L.177:
+L.169:
+sll $24,$23,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yydef($24)
+move $21,$24
+sll $24,$24,8*(4-2); sra $24,$24,8*(4-2)
+la $15,-2
+bne $24,$15,L.181
+lw $24,yychar
+bge $24,$0,L.183
+jal yylex
+sw $2,yychar
+bge $2,$0,L.185
+sw $0,yychar
+L.185:
+L.183:
+la $19,yyexca
+b L.190
+L.187:
+L.188:
+la $19,4($19)
+L.190:
+lh $24,($19)
+la $15,-1
+bne $24,$15,L.187
+lh $24,2($19)
+sll $15,$23,8*(4-2); sra $15,$15,8*(4-2)
+bne $24,$15,L.187
+b L.192
+L.191:
+lh $24,($19)
+lw $15,yychar
+bne $24,$15,L.194
+b L.193
+L.194:
+L.192:
+la $24,4($19)
+move $19,$24
+lh $24,($24)
+bge $24,$0,L.191
+L.193:
+lh $24,2($19)
+move $21,$24
+sll $24,$24,8*(4-2); sra $24,$24,8*(4-2)
+bge $24,$0,L.196
+move $2,$0
+b L.158
+L.196:
+L.181:
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+bne $24,$0,L.198
+lh $17,yyerrflag
+blt $17,$0,L.200
+la $24,3
+bgt $17,$24,L.200
+sll $24,$17,2
+lw $24,L.216($24)
+.cpadd $24
+j $24
+.rdata
+.align 2
+L.216:
+.gpword L.203
+.gpword L.206
+.gpword L.206
+.gpword L.213
+.text
+L.203:
+la $4,L.204
+jal yyerror
+L.205:
+lw $24,yynerrs
+la $24,1($24)
+sw $24,yynerrs
+L.206:
+la $24,3
+sh $24,yyerrflag
+b L.208
+L.207:
+lh $24,($22)
+sll $24,$24,1
+lh $24,yypact($24)
+la $24,256($24)
+move $21,$24
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+blt $24,$0,L.210
+la $15,249
+bge $24,$15,L.210
+sll $24,$24,1
+lh $24,yyact($24)
+sll $24,$24,1
+lh $24,yychk($24)
+la $15,256
+bne $24,$15,L.210
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $23,yyact($24)
+b L.161
+L.210:
+lh $24,($22)
+sll $24,$24,1
+lh $21,yypact($24)
+la $22,-2($22)
+la $20,-4($20)
+L.208:
+move $24,$22
+la $15,-300+360($sp)
+bgeu $24,$15,L.207
+L.212:
+la $2,1
+b L.158
+L.213:
+lw $24,yychar
+bne $24,$0,L.214
+b L.212
+L.214:
+la $24,-1
+sw $24,yychar
+b L.166
+L.200:
+L.198:
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+la $15,yyr2($24)
+lh $14,($15)
+sll $14,$14,1
+subu $22,$22,$14
+move $30,$20
+lh $15,($15)
+sll $15,$15,2
+subu $20,$20,$15
+lw $15,4($20)
+sw $15,yyval
+sh $21,-302+360($sp)
+lh $21,yyr1($24)
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yypgo($24)
+lh $15,($22)
+addu $24,$24,$15
+la $24,1($24)
+move $18,$24
+sll $24,$18,8*(4-2); sra $24,$24,8*(4-2)
+la $15,249
+bge $24,$15,L.219
+sll $24,$24,1
+lh $24,yyact($24)
+move $23,$24
+sll $24,$24,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yychk($24)
+sll $15,$21,8*(4-2); sra $15,$15,8*(4-2)
+negu $15,$15
+beq $24,$15,L.217
+L.219:
+sll $24,$21,8*(4-2); sra $24,$24,8*(4-2)
+sll $24,$24,1
+lh $24,yypgo($24)
+sll $24,$24,1
+lh $23,yyact($24)
+L.217:
+lh $17,-302+360($sp)
+la $24,4
+blt $17,$24,L.161
+la $24,14
+bgt $17,$24,L.161
+sll $24,$17,2
+lw $24,L.241-16($24)
+.cpadd $24
+j $24
+.rdata
+.align 2
+L.241:
+.gpword L.223
+.gpword L.224
+.gpword L.226
+.gpword L.228
+.gpword L.230
+.gpword L.232
+.gpword L.234
+.gpword L.161
+.gpword L.236
+.gpword L.238
+.gpword L.240
+.text
+L.223:
+sh $0,yyerrflag
+b L.161
+L.224:
+la $4,L.225
+jal printf
+b L.161
+L.226:
+la $4,L.227
+jal printf
+b L.161
+L.228:
+la $4,L.229
+jal printf
+b L.161
+L.230:
+la $4,L.231
+jal printf
+b L.161
+L.232:
+la $4,L.233
+jal printf
+b L.161
+L.234:
+la $4,L.235
+jal printf
+b L.161
+L.236:
+la $4,L.237
+jal printf
+b L.161
+L.238:
+la $4,L.239
+la $5,yytext
+jal printf
+b L.161
+L.240:
+la $4,L.157
+la $5,yytext
+jal printf
+b L.161
+L.158:
+lw $17,16($sp)
+lw $18,20($sp)
+lw $19,24($sp)
+lw $20,28($sp)
+lw $21,32($sp)
+lw $22,36($sp)
+lw $23,40($sp)
+lw $25,44($sp)
+lw $30,48($sp)
+lw $31,52($sp)
+addu $sp,$sp,360
+j $31
+.end yyparse
+.globl yywrap
+.text
+.align 2
+.ent yywrap
+yywrap:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+la $2,1
+L.243:
+j $31
+.end yywrap
+.globl yyv
+.comm yyv,600
+.globl yyfnd
+.comm yyfnd,4
+.globl yyolsp
+.comm yyolsp,4
+.globl yylsp
+.comm yylsp,4
+.globl yylstate
+.comm yylstate,800
+.globl yyestate
+.comm yyestate,4
+.globl yytchar
+.comm yytchar,4
+.globl yysbuf
+.comm yysbuf,200
+.globl yymorfg
+.comm yymorfg,4
+.globl yytext
+.comm yytext,200
+.globl yyleng
+.comm yyleng,4
+.extern _iob 0
+.globl yyval
+.comm yyval,4
+.globl yylval
+.comm yylval,4
+.rdata
+.align 0
+L.239:
+.byte 112
+.byte 117
+.byte 115
+.byte 104
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.237:
+.byte 108
+.byte 111
+.byte 97
+.byte 100
+.byte 10
+.byte 0
+.align 0
+L.235:
+.byte 110
+.byte 101
+.byte 103
+.byte 97
+.byte 116
+.byte 101
+.byte 10
+.byte 0
+.align 0
+L.233:
+.byte 100
+.byte 105
+.byte 118
+.byte 105
+.byte 100
+.byte 101
+.byte 10
+.byte 0
+.align 0
+L.231:
+.byte 109
+.byte 117
+.byte 108
+.byte 116
+.byte 105
+.byte 112
+.byte 108
+.byte 121
+.byte 10
+.byte 0
+.align 0
+L.229:
+.byte 110
+.byte 101
+.byte 103
+.byte 97
+.byte 116
+.byte 101
+.byte 10
+.byte 97
+.byte 100
+.byte 100
+.byte 10
+.byte 0
+.align 0
+L.227:
+.byte 97
+.byte 100
+.byte 100
+.byte 10
+.byte 0
+.align 0
+L.225:
+.byte 115
+.byte 116
+.byte 111
+.byte 114
+.byte 101
+.byte 10
+.byte 0
+.align 0
+L.204:
+.byte 115
+.byte 121
+.byte 110
+.byte 116
+.byte 97
+.byte 120
+.byte 32
+.byte 101
+.byte 114
+.byte 114
+.byte 111
+.byte 114
+.byte 0
+.align 0
+L.165:
+.byte 121
+.byte 97
+.byte 99
+.byte 99
+.byte 32
+.byte 115
+.byte 116
+.byte 97
+.byte 99
+.byte 107
+.byte 32
+.byte 111
+.byte 118
+.byte 101
+.byte 114
+.byte 102
+.byte 108
+.byte 111
+.byte 119
+.byte 0
+.align 0
+L.157:
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.17:
+.byte 98
+.byte 97
+.byte 100
+.byte 32
+.byte 115
+.byte 119
+.byte 105
+.byte 116
+.byte 99
+.byte 104
+.byte 32
+.byte 121
+.byte 121
+.byte 108
+.byte 111
+.byte 111
+.byte 107
+.byte 32
+.byte 37
+.byte 100
+.byte 0

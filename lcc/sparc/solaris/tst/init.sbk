@@ -1,0 +1,277 @@
+.section ".data"
+.global words
+.type words,#object
+.align 4
+words:
+.word 0x1
+.word 0x2
+.word 0x3
+.byte 105
+.byte 102
+.byte 0
+.skip 3
+.skip 2
+.word 0x4
+.word 0x5
+.skip 4
+.byte 102
+.byte 111
+.byte 114
+.skip 3
+.skip 2
+.word 0x6
+.word 0x7
+.word 0x8
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.skip 1
+.skip 2
+.word 0x9
+.word 0xa
+.word 0xb
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.skip 1
+.skip 2
+.word 0x0
+.skip 8
+.skip 8
+.size words,100
+.global wordlist
+.type wordlist,#object
+.size wordlist,4
+.align 4
+wordlist:
+.word words
+.global x
+.type x,#object
+.align 4
+x:
+.word 0x1
+.word 0x2
+.word 0x3
+.word 0x4
+.word 0x0
+.word 0x5
+.word 0x6
+.skip 12
+.word 0x7
+.skip 16
+.size x,60
+.global y
+.type y,#object
+.align 4
+y:
+.word x
+.word x+20
+.word x+40
+.word 0x0
+.size y,16
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-96,%sp
+mov %g0,%i4
+ba .L8; nop
+.L5:
+mov %g0,%i5
+ba .L12; nop
+.L9:
+set .L13,%o0
+sll %i5,2,%i3
+sll %i4,2,%i2
+set y,%i1
+ld [%i2+%i1],%i2
+ld [%i3+%i2],%o1
+call printf; nop
+.L10:
+add %i5,1,%i5
+.L12:
+sll %i5,2,%i3
+sll %i4,2,%i2
+set y,%i1
+ld [%i2+%i1],%i2
+ld [%i3+%i2],%i3
+cmp %i3,0; bne .L9; nop
+set .L14,%o0
+call printf; nop
+.L6:
+add %i4,1,%i4
+.L8:
+sll %i4,2,%i3
+set y,%i2
+ld [%i3+%i2],%i3
+cmp %i3,%g0; bne .L5; nop
+call f; nop
+set wordlist,%i3
+ld [%i3],%o0
+call g; nop
+mov %g0,%i0
+.L4:
+ret; restore
+.type main,#function
+.size main,.-main
+.section ".data"
+.type .16,#object
+.align 4
+.16:
+.word .L17
+.word .L18
+.word .L19
+.word .L20
+.word 0x0
+.size .16,20
+.global f
+.section ".text"
+.align 4
+f:
+save %sp,-96,%sp
+set .16,%i5
+ba .L24; nop
+.L21:
+set .L25,%o0
+ld [%i5],%o1
+call printf; nop
+.L22:
+add %i5,4,%i5
+.L24:
+ld [%i5],%i4
+cmp %i4,%g0; bne .L21; nop
+mov %g0,%i0
+.L15:
+ret; restore
+.type f,#function
+.size f,.-f
+.global g
+.align 4
+g:
+save %sp,-96,%sp
+ba .L30; nop
+.L27:
+mov %g0,%i5
+ba .L34; nop
+.L31:
+set .L35,%o0
+sll %i5,2,%i4
+ld [%i4+%i0],%o1
+call printf; nop
+.L32:
+add %i5,1,%i5
+.L34:
+mov %i5,%i4
+set 3,%i3
+cmp %i4,%i3; blu .L31; nop
+set .L25,%o0
+add %i0,12,%o1
+call printf; nop
+.L28:
+add %i0,20,%i0
+.L30:
+ld [%i0],%i4
+cmp %i4,0; bne .L27; nop
+call h; nop
+mov %g0,%i0
+.L26:
+ret; restore
+.type g,#function
+.size g,.-g
+.global h
+.align 4
+h:
+save %sp,-96,%sp
+mov %g0,%i5
+ba .L40; nop
+.L37:
+set .L41,%o0
+smul %i5,20,%i4
+set words,%i3
+ld [%i4+%i3],%o1
+set words+4,%i3
+ld [%i4+%i3],%o2
+set words+8,%i3
+ld [%i4+%i3],%o3
+set words+12,%i3
+add %i4,%i3,%o4
+call printf; nop
+.L38:
+add %i5,1,%i5
+.L40:
+mov %i5,%i4
+set 5,%i3
+cmp %i4,%i3; blu .L37; nop
+mov %g0,%i0
+.L36:
+ret; restore
+.type h,#function
+.size h,.-h
+.section ".rodata"
+.align 1
+.L41:
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.L35:
+.byte 37
+.byte 100
+.byte 32
+.byte 0
+.align 1
+.L25:
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.L20:
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.byte 0
+.align 1
+.L19:
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.align 1
+.L18:
+.byte 102
+.byte 111
+.byte 114
+.byte 0
+.align 1
+.L17:
+.byte 105
+.byte 102
+.byte 0
+.align 1
+.L14:
+.byte 10
+.byte 0
+.align 1
+.L13:
+.byte 32
+.byte 37
+.byte 100
+.byte 0

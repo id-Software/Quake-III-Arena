@@ -1,0 +1,179 @@
+.TH LBURG 1 "local \- 11/30/94"
+.\" $Id: lburg.1 145 2001-10-17 21:53:10Z timo $
+.SH NAME
+lburg \- lcc's code-generator generator
+.SH SYNOPSIS
+.B lburg
+[
+.I option
+]...
+[ [
+.I input
+]
+.I output
+]
+.br
+.SH DESCRIPTION
+.PP
+.I lburg
+reads an lcc-style BURG specification from
+.I input
+and writes a pattern-matching code generator to
+.IR output .
+If
+.I input
+is `\-' or is omitted,
+.I lburg
+reads the standard input;
+If
+.I output
+is `\-' or is omitted,
+.I lburg
+writes to the standard output.
+.PP
+.I lburg
+accepts specifications that conform to the following EBNF grammar.
+Terminals are enclosed in single quotes or are
+given in uppercase, all other symbols are nonterminals or English phrases,
+{X} denotes zero or more instances of X, and [X] denotes an optional X.
+.PP
+.nf
+.RS
+.ft CW
+spec:     `%{' configuration `%}' { dcl } `%%' { rule }
+               [ `%%' C code ]
+
+dcl:      `%start' nonterm
+          `%term' { ID `=' INT }
+
+rule:     nonterm `:' tree template [ C expression ]
+
+tree:     term `(' tree `,' tree `)'
+          term `(' tree `)'
+          term
+          nonterm
+
+nonterm:  ID
+
+template: `"' { any character except double quote } `"'
+.RE
+.fi
+.PP
+Specifications are structurally similar to
+.IR yacc 's.
+Text between
+`\f(CW%{\fP'
+and
+`\f(CW%}\fP'
+is called the configuration section; there may be several such segments.
+All are concatenated and copied verbatim into the head of the output.
+Text after the second
+`\f(CW%%\fP',
+if any, is also copied verbatim into the output, at the end.
+.PP
+Specifications consist of declarations, a
+`\f(CW%%\fP'
+separator, and rules.
+Input is line-oriented; each declaration and rule must appear on a separate line,
+and declarations must begin in column 1.
+Declarations declare terminals \(em the operators in subject
+trees \(em and associate a unique, positive external symbol
+number with each one.
+Nonterminals are declared by their presence
+on the left side of rules.  The
+\f(CW%start\fP
+declaration optionally declares a nonterminal as the start symbol.
+In the grammar above,
+\f(CWterm\fP
+and
+\f(CWnonterm\fP
+denote identifiers that are terminals and nonterminals.
+.PP
+Rules define tree patterns in a fully parenthesized prefix
+form. Every nonterminal denotes a tree.
+Each operator has a fixed
+arity, which is inferred from the rules in which it is used.
+A chain rule is a rule whose pattern is another nonterminal.
+If no start symbol is declared, the nonterminal defined by the first rule is used.
+.PP
+Each rule ends with an expression that computes the cost of matching
+that rule; omitted costs
+default to zero. Costs of chain rules must be constants.
+.PP
+The configuration section configures the output
+for the trees being parsed and the client's environment.
+As shown, this section must define
+\f(CWNODEPTR_TYPE\fP
+to be a visible typedef symbol for a pointer to a
+node in the subject tree.
+The labeller invokes
+\f(CWOP_LABEL(p)\fP,
+\f(CWLEFT\_CHILD(p)\fP, and
+\f(CWRIGHT\_CHILD(p)\fP
+to read the operator and children from the node pointed to by \f(CWp\fP.
+If the configuration section defines these operations as macros, they are implemented in-line;
+otherwise, they must be implemented as functions.
+.PP
+The matcher
+computes and stores a single integral state in each node of the subject tree.
+The configuration section must define a macro
+\f(CWSTATE_LABEL(p)\fP
+to access the state field of the node pointed to
+by \f(CWp\fP. It must be large enough to hold a pointer, and
+a macro is required because it is used as an lvalue.
+.PP
+.SH OPTIONS
+.TP
+.BI \-p \ prefix
+.br
+.ns
+.TP
+.BI \-p prefix
+Use
+.I prefix
+as the disambiquating prefix for visible names and fields.
+The default is `\f(CW_\fP'.
+.TP
+.B \-T
+Arrange for
+.sp
+.nf
+.ft CW
+    void _trace(NODEPTR_TYPE p, int eruleno,
+                    int cost, int bestcost);
+.sp
+.fi
+.ft R
+to be called at each successful match.
+\f(CWp\fP
+identifies the node and
+\f(CWeruleno\fP
+identifies the matching rule; the rules are numbered
+beginning at 1 in the order they appear in the input.
+\f(CWcost\fP
+is the cost of the match and
+\f(CWbestcost\fP
+is the cost of the best previous match. The current match
+wins only if
+\f(CWcost\fP
+is less than \f(CWbestcost\fP.
+32767 represents the infinite cost of no previous match.
+\f(CW_trace\fP must be declared in the configuration section.
+.SH "SEE ALSO"
+.IR lcc (1)
+.PP
+C. W. Fraser and D. R. Hanson,
+.IR A Retargetable C Compiler: Design and Implementation ,
+Benjamin/Cummings, Redwood City, CA, 1995,
+ISBN 0-8053-1670-1. Chapter 14.
+.PP
+C. W. Fraser, D. R. Hanson and T. A. Proebsting,
+`Engineering a simple, efficient code generator generator,'
+.I
+ACM Letters on Programming Languages and Systems
+.BR 1 ,
+3 (Sep. 1992), 213-226.
+.br
+.SH BUGS
+Mail bug reports along with the shortest input
+that exposes them to drh@cs.princeton.edu.

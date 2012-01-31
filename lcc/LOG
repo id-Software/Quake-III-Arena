@@ -1,0 +1,91 @@
+From lcc 4.0 to 4.1:
+
+Changes:
+
+See doc/4.html for changes in the code-generation interface.
+
+Warns about constants that are too large, eg, short x = 70000;
+
+Warns about expressions that have no effect.
+
+Unsigned shorts are now used for wide-character constants, and
+wchar_t is a typedef for unsigned short.
+
+More assertions in gen.c to confirm that the register allocator is
+configured correctly; ie, that the various masks, wildcards,
+clobbers, and targets are internally consistent. Full checking
+appears impractical, but there's still more than than there was
+before.
+
+On the SPARC, lcc now emits .type and .size directives
+unconditionally.
+
+On the x86, constants are now emitted into the text segment.
+
+If the environment variable "LCCDIR" is defined, it gives the directory
+that contains the preprocessor, the compiler proper, and the
+lcc-specific libraries.
+
+Under Windows, lcc searches the directories named in the environment
+variable "include" for header files.
+
+Errors fixed:
+
+Erroneously complained about unknown sizes for some const fields, eg,
+typedef struct foo ref; struct foo { const ref *q; int a; };
+f(ref *p, int i) { return p->q[i].a; }
+
+-A -A erroneously complained about static main's that didn't conform
+to the ANSI-mandated "int main(void)" or "int main(int, char **)".
+
+Silently generated incorrect code for a structure copy with a
+post-incremented target, eg,
+struct { int x; } data = {1}, copy[2], *q = copy;
+main() { *q++ = data; }
+
+Generated incorrect values in some expressions with constant pointers.
+
+Silently truncated string literals longer than 4095 characters.
+
+Failed to emit debugging information for uninitialized globals.
+
+Failed to diagnose missing sizes in some multi-dimensioned array
+declarators, eg, extern int x[][10]; int x[5][];
+
+Silently emitted incorrect sizes and initalizations for some
+incomplete multi-dimensioned arrays involving pointers and whose size
+is determined by the number of initializers.
+
+Set only the x.name field for some back-end symbols (eg, wildcards),
+and the uninitialized name field crashed some debugging output.
+
+uses() failed to check the register *set* as well as the register
+mask.  There's no known bug demo, but a wildcard set might be
+contrived that would need the test.
+
+Crashed with -b on some conditional expressions involving calls, eg,
+int p; void g(void) { p ? f() : 1; }
+
+On the MIPS, sometimes generated an incorrect frame size and thus a
+crash when floating-point registers were saved.
+
+On the SPARC, erroneously reused a register variable as a temporary
+when the variable is compiler-generated.
+
+On the SPARC with -b, emitted incorrect code for returning structs.
+
+On the x86, conversion from float to int rounded instead of truncated
+with the default floating-point mode.
+
+On the x86, eliminate rtargets for kids after the first (see p. 419).
+
+On the x86, substitute reg for freg, in order to use the common reg
+rules. Needed only for debugging output, since we're not using any
+float regs as regs at this time.
+
+On the x86, "double f(); main(){f();}" wasn't popping the FP register stack.
+
+On the x86, ECX was saved by the callee, when it should have been
+saved by the caller.
+
+$Id: LOG 145 2001-10-17 21:53:10Z timo $

@@ -1,0 +1,107 @@
+.global main
+.section ".text"
+.align 4
+main:
+mov %g0,%o0
+.L1:
+retl; nop
+.type main,#function
+.size main,.-main
+.global memchar
+.align 4
+memchar:
+save %sp,-104,%sp
+ld [%fp+-8],%i5
+add %i5,1,%i4
+st %i4,[%fp+-8]
+ldsb [%i5],%i5
+stb %i5,[%fp+-1]
+ld [%fp+-8],%i5
+add %i5,1,%i5
+st %i5,[%fp+-8]
+ldsb [%i5],%i5
+stb %i5,[%fp+-1]
+ld [%fp+-8],%i5
+add %i5,-1,%i4
+st %i4,[%fp+-8]
+ldsb [%i5],%i5
+stb %i5,[%fp+-1]
+ld [%fp+-8],%i5
+add %i5,-1,%i5
+st %i5,[%fp+-8]
+ldsb [%i5],%i5
+stb %i5,[%fp+-1]
+mov %g0,%i0
+.L2:
+ret; restore
+.type memchar,#function
+.size memchar,.-memchar
+.global memint
+.align 4
+memint:
+save %sp,-104,%sp
+ld [%fp+-8],%i5
+add %i5,4,%i4
+st %i4,[%fp+-8]
+ld [%i5],%i5
+st %i5,[%fp+-4]
+ld [%fp+-8],%i5
+add %i5,4,%i5
+st %i5,[%fp+-8]
+ld [%i5],%i5
+st %i5,[%fp+-4]
+ld [%fp+-8],%i5
+add %i5,-4,%i4
+st %i4,[%fp+-8]
+ld [%i5],%i5
+st %i5,[%fp+-4]
+ld [%fp+-8],%i5
+add %i5,-4,%i5
+st %i5,[%fp+-8]
+ld [%i5],%i5
+st %i5,[%fp+-4]
+mov %g0,%i0
+.L3:
+ret; restore
+.type memint,#function
+.size memint,.-memint
+.global regchar
+.align 4
+regchar:
+mov %o4,%o3
+add %o3,1,%o4
+ldsb [%o3],%o5
+add %o4,1,%o3
+mov %o3,%o4
+ldsb [%o3],%o5
+mov %o4,%o3
+add %o3,-1,%o4
+ldsb [%o3],%o5
+add %o4,-1,%o3
+mov %o3,%o4
+ldsb [%o3],%o5
+mov %g0,%o0
+.L4:
+retl; nop
+.type regchar,#function
+.size regchar,.-regchar
+.global regint
+.align 4
+regint:
+mov %o4,%o3
+add %o3,4,%o4
+ld [%o3],%o5
+add %o4,4,%o3
+mov %o3,%o4
+ld [%o3],%o5
+mov %o4,%o3
+add %o3,-4,%o4
+ld [%o3],%o5
+add %o4,-4,%o3
+mov %o3,%o4
+ld [%o3],%o5
+mov %g0,%o0
+.L5:
+retl; nop
+.type regint,#function
+.size regint,.-regint

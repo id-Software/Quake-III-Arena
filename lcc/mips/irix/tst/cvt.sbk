@@ -1,0 +1,557 @@
+.set reorder
+.globl print
+.text
+.text
+.align 2
+.ent print
+print:
+.frame $sp,72,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-72
+.mask 0x82000000,-4
+.cprestore 64
+sw $31,68($sp)
+la $4,L.2
+lb $5,c
+lh $6,s
+lw $7,i
+lw $24,l
+sw $24,16($sp)
+lbu $24,C
+sw $24,20($sp)
+lhu $24,S
+sw $24,24($sp)
+lw $24,I
+sw $24,28($sp)
+lw $24,L
+sw $24,32($sp)
+l.s $f18,f
+cvt.d.s $f18,$f18
+s.d $f18,40($sp)
+l.d $f18,d
+s.d $f18,48($sp)
+l.d $f18,D
+s.d $f18,56($sp)
+jal printf
+L.1:
+lw $25,64($sp)
+lw $31,68($sp)
+addu $sp,$sp,72
+j $31
+.end print
+.globl main
+.text
+.align 2
+.ent main
+main:
+.frame $sp,72,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-72
+.mask 0xc2ff0000,-16
+sw $16,16($sp)
+sw $17,20($sp)
+sw $18,24($sp)
+sw $19,28($sp)
+sw $20,32($sp)
+sw $21,36($sp)
+sw $22,40($sp)
+sw $23,44($sp)
+.cprestore 48
+sw $30,52($sp)
+sw $31,56($sp)
+la $24,1
+sb $24,c
+lb $24,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+move $15,$24
+move $14,$15
+sb $14,C
+move $14,$15
+sh $14,S
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,2
+sh $24,s
+lh $24,s
+move $15,$24
+sb $15,c
+sw $24,i
+sw $24,l
+move $15,$24
+move $14,$15
+sb $14,C
+move $14,$15
+sh $14,S
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,3
+sw $24,i
+lw $24,i
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,l
+move $15,$24
+move $14,$15
+sb $14,C
+move $14,$15
+sh $14,S
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,4
+sw $24,l
+lw $24,l
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+move $15,$24
+move $14,$15
+sb $14,C
+move $14,$15
+sh $14,S
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,5
+sb $24,C
+lbu $24,C
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+move $15,$24
+move $14,$15
+sh $14,S
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,6
+sh $24,S
+lhu $24,S
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+move $15,$24
+move $14,$15
+sb $14,C
+sw $15,I
+sw $15,L
+mtc1 $24,$f18; cvt.s.w $f18,$f18
+s.s $f18,f
+mtc1 $24,$f18; cvt.d.w $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,7
+sw $24,I
+lw $24,I
+move $14,$24
+sb $14,c
+move $14,$24
+sh $14,s
+sw $24,i
+sw $24,l
+move $15,$24
+sb $15,C
+move $15,$24
+sh $15,S
+sw $24,L
+l.d $f18,L.4
+srl $15,$24,1
+mtc1 $15,$f16; cvt.d.w $f16,$f16
+mul.d $f18,$f18,$f16
+and $24,$24,1
+mtc1 $24,$f16; cvt.d.w $f16,$f16
+add.d $f18,$f18,$f16
+cvt.s.d $f16,$f18
+s.s $f16,f
+s.d $f18,d
+s.d $f18,D
+jal print
+la $24,8
+sw $24,L
+lw $24,L
+move $14,$24
+sb $14,c
+move $14,$24
+sh $14,s
+sw $24,i
+sw $24,l
+move $15,$24
+sb $15,C
+move $15,$24
+sh $15,S
+lhu $15,S
+sw $15,I
+l.d $f18,L.4
+srl $15,$24,1
+mtc1 $15,$f16; cvt.d.w $f16,$f16
+mul.d $f18,$f18,$f16
+and $24,$24,1
+mtc1 $24,$f16; cvt.d.w $f16,$f16
+add.d $f18,$f18,$f16
+cvt.s.d $f16,$f18
+s.s $f16,f
+s.d $f18,d
+s.d $f18,D
+jal print
+l.s $f18,L.5
+s.s $f18,f
+l.s $f18,f
+trunc.w.s $f2,$f18,$24; mfc1 $24,$f2
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+l.s $f16,L.9
+c.lt.s $f18,$f16; bc1t L.7
+sub.s $f16,$f18,$f16
+trunc.w.s $f2,$f16,$24; mfc1 $24,$f2
+la $30,0x80000000($24)
+b L.8
+L.7:
+trunc.w.s $f2,$f18,$24; mfc1 $24,$f2
+move $30,$24
+L.8:
+move $24,$30
+sb $24,C
+l.s $f18,f
+l.s $f16,L.9
+c.lt.s $f18,$f16; bc1t L.11
+sub.s $f16,$f18,$f16
+trunc.w.s $f2,$f16,$24; mfc1 $24,$f2
+la $23,0x80000000($24)
+b L.12
+L.11:
+trunc.w.s $f2,$f18,$24; mfc1 $24,$f2
+move $23,$24
+L.12:
+move $24,$23
+sh $24,S
+l.s $f18,f
+l.s $f16,L.9
+c.lt.s $f18,$f16; bc1t L.14
+sub.s $f16,$f18,$f16
+trunc.w.s $f2,$f16,$24; mfc1 $24,$f2
+la $22,0x80000000($24)
+b L.15
+L.14:
+trunc.w.s $f2,$f18,$24; mfc1 $24,$f2
+move $22,$24
+L.15:
+sw $22,I
+l.s $f18,f
+l.s $f16,L.9
+c.lt.s $f18,$f16; bc1t L.17
+sub.s $f16,$f18,$f16
+trunc.w.s $f2,$f16,$24; mfc1 $24,$f2
+la $21,0x80000000($24)
+b L.18
+L.17:
+trunc.w.s $f2,$f18,$24; mfc1 $24,$f2
+move $21,$24
+L.18:
+sw $21,L
+l.s $f18,f
+cvt.d.s $f18,$f18
+s.d $f18,d
+s.d $f18,D
+jal print
+l.d $f18,L.19
+s.d $f18,d
+l.d $f18,d
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+l.d $f16,L.23
+c.lt.d $f18,$f16; bc1t L.21
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $20,0x80000000($24)
+b L.22
+L.21:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $20,$24
+L.22:
+move $24,$20
+sb $24,C
+l.d $f18,d
+l.d $f16,L.23
+c.lt.d $f18,$f16; bc1t L.25
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $19,0x80000000($24)
+b L.26
+L.25:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $19,$24
+L.26:
+move $24,$19
+sh $24,S
+l.d $f18,d
+l.d $f16,L.23
+c.lt.d $f18,$f16; bc1t L.28
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $18,0x80000000($24)
+b L.29
+L.28:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $18,$24
+L.29:
+sw $18,I
+l.d $f18,d
+l.d $f16,L.23
+c.lt.d $f18,$f16; bc1t L.31
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $17,0x80000000($24)
+b L.32
+L.31:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $17,$24
+L.32:
+sw $17,L
+l.d $f18,d
+cvt.s.d $f16,$f18
+s.s $f16,f
+s.d $f18,D
+jal print
+l.d $f18,L.33
+s.d $f18,D
+l.d $f18,D
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $15,$24
+sb $15,c
+move $15,$24
+sh $15,s
+sw $24,i
+sw $24,l
+l.d $f16,L.37
+c.lt.d $f18,$f16; bc1t L.35
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $16,0x80000000($24)
+b L.36
+L.35:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+move $16,$24
+L.36:
+move $24,$16
+sb $24,C
+l.d $f18,D
+l.d $f16,L.37
+c.lt.d $f18,$f16; bc1t L.39
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $24,0x80000000($24)
+sw $24,-4+72($sp)
+b L.40
+L.39:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+sw $24,-4+72($sp)
+L.40:
+lw $24,-4+72($sp)
+sh $24,S
+l.d $f18,D
+l.d $f16,L.37
+c.lt.d $f18,$f16; bc1t L.42
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $24,0x80000000($24)
+sw $24,-8+72($sp)
+b L.43
+L.42:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+sw $24,-8+72($sp)
+L.43:
+lw $24,-8+72($sp)
+sw $24,I
+l.d $f18,D
+l.d $f16,L.37
+c.lt.d $f18,$f16; bc1t L.45
+sub.d $f16,$f18,$f16
+trunc.w.d $f2,$f16,$24; mfc1 $24,$f2
+la $24,0x80000000($24)
+sw $24,-12+72($sp)
+b L.46
+L.45:
+trunc.w.d $f2,$f18,$24; mfc1 $24,$f2
+sw $24,-12+72($sp)
+L.46:
+lw $24,-12+72($sp)
+sw $24,L
+l.d $f18,D
+cvt.s.d $f16,$f18
+s.s $f16,f
+s.d $f18,d
+jal print
+sw $0,p
+sw $0,p
+sw $0,p
+sw $0,p
+lw $24,P
+sw $24,p
+sw $0,P
+sw $0,P
+sw $0,P
+sw $0,P
+lw $24,p
+sw $24,P
+move $2,$0
+L.3:
+lw $16,16($sp)
+lw $17,20($sp)
+lw $18,24($sp)
+lw $19,28($sp)
+lw $20,32($sp)
+lw $21,36($sp)
+lw $22,40($sp)
+lw $23,44($sp)
+lw $25,48($sp)
+lw $30,52($sp)
+lw $31,56($sp)
+addu $sp,$sp,72
+j $31
+.end main
+.globl P
+.comm P,4
+.globl p
+.comm p,4
+.globl D
+.comm D,8
+.globl d
+.comm d,8
+.globl f
+.comm f,4
+.globl L
+.comm L,4
+.globl I
+.comm I,4
+.globl S
+.comm S,2
+.globl C
+.comm C,1
+.globl l
+.comm l,4
+.globl i
+.comm i,4
+.globl s
+.comm s,2
+.globl c
+.comm c,1
+.rdata
+.align 3
+L.37:
+.word 0x41e00000
+.word 0x0
+.align 3
+L.33:
+.word 0x40260000
+.word 0x0
+.align 3
+L.23:
+.word 0x41e00000
+.word 0x0
+.align 3
+L.19:
+.word 0x40240000
+.word 0x0
+.align 2
+L.9:
+.word 0x4f000000
+.align 2
+L.5:
+.word 0x41100000
+.align 3
+L.4:
+.word 0x40000000
+.word 0x0
+.align 0
+L.2:
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 108
+.byte 100
+.byte 32
+.byte 37
+.byte 117
+.byte 32
+.byte 37
+.byte 117
+.byte 32
+.byte 37
+.byte 117
+.byte 32
+.byte 37
+.byte 108
+.byte 117
+.byte 32
+.byte 37
+.byte 102
+.byte 32
+.byte 37
+.byte 102
+.byte 32
+.byte 37
+.byte 108
+.byte 102
+.byte 10
+.byte 0

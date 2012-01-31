@@ -1,0 +1,202 @@
+.section ".data"
+.global in
+.type in,#object
+.align 4
+in:
+.word 0xa
+.word 0x20
+.word 0xffffffff
+.word 0x237
+.word 0x3
+.word 0x12
+.word 0x1
+.word 0xffffffcd
+.word 0x315
+.word 0x0
+.size in,40
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-96,%sp
+set in,%o0
+set 10,%o1
+call sort; nop
+mov %g0,%i5
+ba .L5; nop
+.L2:
+sll %i5,2,%i4
+set in,%i3
+ld [%i4+%i3],%o0
+call putd; nop
+set 10,%o0
+call putchar; nop
+.L3:
+add %i5,1,%i5
+.L5:
+mov %i5,%i4
+set 10,%i3
+cmp %i4,%i3; blu .L2; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.global putd
+.align 4
+putd:
+save %sp,-96,%sp
+cmp %i0,0; bge .L7; nop
+set 45,%o0
+call putchar; nop
+neg %i0,%i0
+.L7:
+sra %i0,31,%g1; wr %g0,%g1,%y; nop; nop; nop; sdiv %i0,10,%i5
+cmp %i5,0; be .L9; nop
+sra %i0,31,%g1; wr %g0,%g1,%y; nop; nop; nop; sdiv %i0,10,%o0
+call putd; nop
+.L9:
+sra %i0,31,%g1; wr %g0,%g1,%y; nop; nop; nop; sdiv %i0,10,%g1
+; smul %g1,10,%g1; sub %i0,%g1,%i5
+add %i5,48,%o0
+call putchar; nop
+mov %g0,%i0
+.L6:
+ret; restore
+.type putd,#function
+.size putd,.-putd
+.global sort
+.align 4
+sort:
+save %sp,-96,%sp
+set xx,%i5
+st %i0,[%i5]
+mov %i0,%o0
+mov %g0,%o1
+sub %i1,1,%i5
+mov %i5,%i1
+mov %i5,%o2
+call quick; nop
+mov %g0,%i0
+.L11:
+ret; restore
+.type sort,#function
+.size sort,.-sort
+.global quick
+.align 4
+quick:
+save %sp,-96,%sp
+cmp %i1,%i2; bl .L13; nop
+ba .L12; nop
+.L13:
+mov %i0,%o0
+mov %i1,%o1
+mov %i2,%o2
+call partition; nop
+mov %o0,%i5
+mov %i0,%o0
+mov %i1,%o1
+sub %i5,1,%o2
+call quick; nop
+mov %i0,%o0
+add %i5,1,%o1
+mov %i2,%o2
+call quick; nop
+mov %g0,%i0
+.L12:
+ret; restore
+.type quick,#function
+.size quick,.-quick
+.global partition
+.align 4
+partition:
+save %sp,-96,%sp
+add %i2,1,%i2
+mov %i1,%i4
+sll %i4,2,%i3
+ld [%i3+%i0],%i5
+ba .L17; nop
+.L16:
+add %i1,1,%i1
+ba .L20; nop
+.L19:
+add %i1,1,%i1
+.L20:
+sll %i1,2,%i3
+ld [%i3+%i0],%i3
+cmp %i3,%i5; bl .L19; nop
+sub %i2,1,%i2
+ba .L23; nop
+.L22:
+sub %i2,1,%i2
+.L23:
+sll %i2,2,%i3
+ld [%i3+%i0],%i3
+cmp %i3,%i5; bg .L22; nop
+cmp %i1,%i2; bge .L25; nop
+sll %i1,2,%i3
+add %i3,%i0,%o0
+sll %i2,2,%i3
+add %i3,%i0,%o1
+call exchange; nop
+.L25:
+.L17:
+cmp %i1,%i2; bl .L16; nop
+sll %i4,2,%i3
+add %i3,%i0,%o0
+sll %i2,2,%i3
+add %i3,%i0,%o1
+call exchange; nop
+mov %i2,%i0
+.L15:
+ret; restore
+.type partition,#function
+.size partition,.-partition
+.global exchange
+.align 4
+exchange:
+save %sp,-96,%sp
+set .L28,%o0
+set xx,%i4
+ld [%i4],%i4
+mov %i0,%i3
+sub %i3,%i4,%i3
+sra %i3,31,%g1; wr %g0,%g1,%y; nop; nop; nop; sdiv %i3,4,%o1
+mov %i1,%i3
+sub %i3,%i4,%i4
+sra %i4,31,%g1; wr %g0,%g1,%y; nop; nop; nop; sdiv %i4,4,%o2
+call printf; nop
+ld [%i0],%i5
+ld [%i1],%i4
+st %i4,[%i0]
+st %i5,[%i1]
+mov %g0,%i0
+.L27:
+ret; restore
+.type exchange,#function
+.size exchange,.-exchange
+.section ".bss"
+.global xx
+.type xx,#object
+.size xx,4
+.common xx,4,4
+.section ".rodata"
+.align 1
+.L28:
+.byte 101
+.byte 120
+.byte 99
+.byte 104
+.byte 97
+.byte 110
+.byte 103
+.byte 101
+.byte 40
+.byte 37
+.byte 100
+.byte 44
+.byte 37
+.byte 100
+.byte 41
+.byte 10
+.byte 0

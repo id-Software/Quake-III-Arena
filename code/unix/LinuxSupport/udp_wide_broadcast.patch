@@ -1,0 +1,57 @@
+--- linux/include/linux/sysctl.h.orig	2002-08-17 19:52:27.000000000 -0500
++++ linux/include/linux/sysctl.h	2002-08-17 19:53:00.000000000 -0500
+@@ -291,7 +291,8 @@
+ 	NET_IPV4_NONLOCAL_BIND=88,
+ 	NET_IPV4_ICMP_RATELIMIT=89,
+ 	NET_IPV4_ICMP_RATEMASK=90,
+-	NET_TCP_TW_REUSE=91
++	NET_TCP_TW_REUSE=91,
++	NET_UDP_WIDE_BROADCAST=92
+ };
+ 
+ enum {
+--- linux-modified/net/ipv4/sysctl_net_ipv4.c.orig	2002-08-17 19:48:19.000000000 -0500
++++ linux-modified/net/ipv4/sysctl_net_ipv4.c	2002-08-17 19:52:03.000000000 -0500
+@@ -45,6 +45,9 @@
+ extern int inet_peer_gc_mintime;
+ extern int inet_peer_gc_maxtime;
+ 
++/* From udp.c */
++extern int sysctl_udp_wide_broadcast;
++
+ #ifdef CONFIG_SYSCTL
+ static int tcp_retr1_max = 255; 
+ static int ip_local_port_range_min[] = { 1, 1 };
+@@ -221,6 +224,8 @@
+ 	 &sysctl_icmp_ratemask, sizeof(int), 0644, NULL, &proc_dointvec},
+ 	{NET_TCP_TW_REUSE, "tcp_tw_reuse",
+ 	 &sysctl_tcp_tw_reuse, sizeof(int), 0644, NULL, &proc_dointvec},
++	{NET_UDP_WIDE_BROADCAST, "udp_wide_broadcast",
++	 &sysctl_udp_wide_broadcast, sizeof(int), 0644, NULL, &proc_dointvec},
+ 	{0}
+ };
+ 
+--- linux-modified/net/ipv4/udp.c.orig	2002-08-17 19:40:59.000000000 -0500
++++ linux-modified/net/ipv4/udp.c	2002-08-17 23:37:47.000000000 -0500
+@@ -94,6 +94,8 @@
+ #include <net/inet_common.h>
+ #include <net/checksum.h>
+ 
++int sysctl_udp_wide_broadcast = 0;
++
+ /*
+  *	Snmp MIB for the UDP layer
+  */
+@@ -272,9 +274,10 @@
+ 		if ((s->num != hnum)					||
+ 		    (s->daddr && s->daddr!=rmt_addr)			||
+ 		    (s->dport != rmt_port && s->dport != 0)			||
+-		    (s->rcv_saddr  && s->rcv_saddr != loc_addr)		||
+-		    (s->bound_dev_if && s->bound_dev_if != dif))
++		    !(sysctl_udp_wide_broadcast || !(s->rcv_saddr  && s->rcv_saddr != loc_addr))	||
++		    (s->bound_dev_if && s->bound_dev_if != dif)) {
+ 			continue;
++		}
+ 		break;
+   	}
+   	return s;

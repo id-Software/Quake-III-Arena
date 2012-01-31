@@ -1,0 +1,10 @@
+a
+b
+load
+negate
+push 5
+c
+load
+multiply
+add
+store

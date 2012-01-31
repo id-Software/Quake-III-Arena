@@ -1,0 +1,138 @@
+# cgame building
+# builds the cgame for vanilla Q3 and TA
+
+# there are slight differences between Q3 and TA build:
+#   -DMISSIONPACK
+#   TA has cg_newdraw.c and ../ui/ui_shared.c
+# the config is passed in the imported variable TARGET_DIR
+
+# qvm building against native:
+# only native has cg_syscalls.c
+# only qvm has ../game/bg_lib.c
+# qvm uses a custom cg_syscalls.asm with equ stubs
+
+Import qw( BASE_CFLAGS TARGET_DIR INSTALL_DIR NO_VM NO_SO CC CXX LINK );
+
+$env = new cons(
+  # the code has the very bad habit of doing things like #include "../ui/ui_shared.h"
+  # this seems to confuse the dependency analysis, explicit toplevel includes seem to fix
+  CPPPATH => '#cgame:#game:#q3_ui',
+  CC => $CC,
+  CXX => $CXX,
+  LINK => $LINK,
+	ENV => { PATH => $ENV{PATH}, HOME => $ENV{HOME} },
+  CFLAGS => $BASE_CFLAGS . '-fPIC',
+  LDFLAGS => '-shared -ldl -lm'
+);
+
+# for TA, use -DMISSIONPACK
+%ta_env_hash = $env->copy(
+  CPPPATH => '#cgame:#game:#ui'
+  );
+$ta_env_hash{CFLAGS} = '-DMISSIONPACK ' . $ta_env_hash{CFLAGS};
+$ta_env = new cons(%ta_env_hash);
+
+# qvm building
+# we heavily customize the cons environment
+$vm_env = new cons(
+  # the code has the very bad habit of doing things like #include "../ui/ui_shared.h"
+  # this seems to confuse the dependency analysis, explicit toplevel includes seem to fix
+  CPPPATH => '#cgame:#game:#q3_ui',
+  CC => 'q3lcc',
+  CCCOM => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
+  SUFOBJ => '.asm',
+  LINK => 'q3asm',
+  CFLAGS => '-DQ3_VM -DCGAME -S -Wf-target=bytecode -Wf-g',
+  # need to know where to find the compiler tools
+  ENV => { PATH => $ENV{PATH} . ":./qvmtools", },
+);
+
+# TA qvm building
+%vm_ta_env_hash = $vm_env->copy(
+  CPPPATH => '#cgame:#game:#ui'
+  );
+$vm_ta_env_hash{CFLAGS} = '-DMISSIONPACK ' . $vm_ta_env_hash{CFLAGS};
+$vm_ta_env = new cons(%vm_ta_env_hash);
+
+# the file with vmMain function MUST be the first one of the list
+@FILES = qw(
+  cg_main.c
+  ../game/bg_misc.c
+  ../game/bg_pmove.c
+  ../game/bg_slidemove.c
+  ../game/q_math.c
+  ../game/q_shared.c
+  cg_consolecmds.c  
+  cg_draw.c
+  cg_drawtools.c
+  cg_effects.c
+  cg_ents.c
+  cg_event.c
+  cg_info.c
+  cg_localents.c
+  cg_marks.c
+  cg_players.c
+  cg_playerstate.c
+  cg_predict.c
+  cg_scoreboard.c
+  cg_servercmds.c
+  cg_snapshot.c
+  cg_view.c
+  cg_weapons.c
+  );
+$FILESREF = \@FILES;
+
+# only in .so
+# (VM uses a custom .asm with equ stubs)
+@SO_FILES = qw(
+  cg_syscalls.c
+  );
+$SO_FILESREF = \@SO_FILES;
+  
+# only for VM
+@VM_FILES = qw(
+  ../game/bg_lib.c
+  cg_syscalls.asm
+  );
+$VM_FILESREF = \@VM_FILES;  
+
+# common additionals for TA
+@TA_FILES = qw(
+  cg_newdraw.c
+  ../ui/ui_shared.c
+  );
+$TA_FILESREF = \@TA_FILES;
+
+# FIXME CPU string  
+if ($TARGET_DIR eq 'Q3')
+{
+	if ($NO_SO eq 0)
+	{
+		Program $env 'cgamei386.so', @$FILESREF, @$SO_FILESREF;
+		Install $env $INSTALL_DIR, 'cgamei386.so';
+	}
+	if ($NO_VM eq 0)
+	{
+    Depends $vm_env 'cgame.qvm', '#qvmtools/q3lcc';
+    Depends $vm_env 'cgame.qvm', '#qvmtools/q3asm';
+		Program $vm_env 'cgame.qvm', @$FILESREF, @$VM_FILESREF;
+		Install $vm_env $INSTALL_DIR . '/vm', 'cgame.qvm';
+	}
+}
+else
+{
+	if ($NO_SO eq 0)
+	{
+		Program $ta_env 'cgamei386.so',
+			@$FILESREF, @$SO_FILESREF, @$TA_FILESREF;
+		Install $ta_env $INSTALL_DIR, 'cgamei386.so';
+	}
+	if ($NO_VM eq 0)
+	{
+    Depends $vm_env 'cgame.qvm', '#qvmtools/q3lcc';
+    Depends $vm_env 'cgame.qvm', '#qvmtools/q3asm';
+		Program $vm_ta_env 'cgame.qvm', 
+			@$FILESREF, @$VM_FILESREF, @$TA_FILESREF;
+		Install $vm_ta_env $INSTALL_DIR . '/vm', 'cgame.qvm';
+	}	
+}

@@ -1,0 +1,29 @@
+tst/front.c:3: warning: missing return value
+tst/front.c:10: warning: missing return value
+tst/front.c:20: type error in argument 1 to `s'; found `pointer to struct D' expected `pointer to incomplete struct D defined at tst/front.c:14'
+tst/front.c:21: warning: missing return value
+tst/front.c:32: warning: missing return value
+tst/front.c:36: operands of = have illegal types `pointer to int' and `pointer to const int'
+tst/front.c:38: warning: missing return value
+tst/front.c:62: operands of = have illegal types `pointer to char' and `pointer to const void'
+tst/front.c:63: warning: missing return value
+tst/front.c:68: warning: missing return value
+tst/front.c:69: warning: inconsistent linkage for `yy' previously declared at tst/front.c:68
+tst/front.c:69: warning: missing return value
+tst/front.c:71: invalid storage class `static' for `int function goo'
+tst/front.c:71: warning: declaration of `goo' does not match previous declaration at tst/front.c:70
+tst/front.c:71: warning: missing return value
+tst/front.c:74: warning: declaration of `xr' does not match previous declaration at tst/front.c:72
+tst/front.c:74: warning: missing return value
+tst/front.c:81: warning: missing return value
+tst/front.c:82: warning: declaration of `ss2' does not match previous declaration at tst/front.c:81
+tst/front.c:84: warning: inconsistent linkage for `ss5' previously declared at tst/front.c:80
+tst/front.c:92: type error in argument 1 to `gx1'; found `pointer to double' expected `double'
+tst/front.c:92: warning: missing return value
+tst/front.c:95: redeclaration of `hx1' previously declared at tst/front.c:94
+tst/front.c:98: warning: missing return value
+tst/front.c:101: conflicting argument declarations for function `gg1'
+tst/front.c:101: warning: missing return value
+tst/front.c:112: type error in argument 4 to `qsort'; found `pointer to int function(pointer to pointer to char,pointer to pointer to char)' expected `pointer to int function(pointer to const void,pointer to const void)'
+tst/front.c:113: warning: missing return value
+tst/front.c:120: warning: missing return value

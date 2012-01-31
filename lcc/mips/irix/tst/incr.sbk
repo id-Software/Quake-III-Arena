@@ -1,0 +1,149 @@
+.set reorder
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,0,$31
+.set noreorder
+.cpload $25
+.set reorder
+move $2,$0
+L.1:
+j $31
+.end main
+.globl memchar
+.text
+.align 2
+.ent memchar
+memchar:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+lw $24,-8+8($sp)
+la $15,1($24)
+sw $15,-8+8($sp)
+lb $24,($24)
+sb $24,-1+8($sp)
+lw $24,-8+8($sp)
+la $24,1($24)
+sw $24,-8+8($sp)
+lb $24,($24)
+sb $24,-1+8($sp)
+lw $24,-8+8($sp)
+la $15,-1($24)
+sw $15,-8+8($sp)
+lb $24,($24)
+sb $24,-1+8($sp)
+lw $24,-8+8($sp)
+la $24,-1($24)
+sw $24,-8+8($sp)
+lb $24,($24)
+sb $24,-1+8($sp)
+move $2,$0
+L.2:
+addu $sp,$sp,8
+j $31
+.end memchar
+.globl memint
+.text
+.align 2
+.ent memint
+memint:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+lw $24,-8+8($sp)
+la $15,4($24)
+sw $15,-8+8($sp)
+lw $24,($24)
+sw $24,-4+8($sp)
+lw $24,-8+8($sp)
+la $24,4($24)
+sw $24,-8+8($sp)
+lw $24,($24)
+sw $24,-4+8($sp)
+lw $24,-8+8($sp)
+la $15,-4($24)
+sw $15,-8+8($sp)
+lw $24,($24)
+sw $24,-4+8($sp)
+lw $24,-8+8($sp)
+la $24,-4($24)
+sw $24,-8+8($sp)
+lw $24,($24)
+sw $24,-4+8($sp)
+move $2,$0
+L.3:
+addu $sp,$sp,8
+j $31
+.end memint
+.globl regchar
+.text
+.align 2
+.ent regchar
+regchar:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+.mask 0x40800000,-4
+sw $23,0($sp)
+sw $30,4($sp)
+move $24,$23
+la $23,1($24)
+lb $30,($24)
+la $24,1($23)
+move $23,$24
+lb $30,($24)
+move $24,$23
+la $23,-1($24)
+lb $30,($24)
+la $24,-1($23)
+move $23,$24
+lb $30,($24)
+move $2,$0
+L.4:
+lw $23,0($sp)
+lw $30,4($sp)
+addu $sp,$sp,8
+j $31
+.end regchar
+.globl regint
+.text
+.align 2
+.ent regint
+regint:
+.frame $sp,8,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-8
+.mask 0x40800000,-4
+sw $23,0($sp)
+sw $30,4($sp)
+move $24,$23
+la $23,4($24)
+lw $30,($24)
+la $24,4($23)
+move $23,$24
+lw $30,($24)
+move $24,$23
+la $23,-4($24)
+lw $30,($24)
+la $24,-4($23)
+move $23,$24
+lw $30,($24)
+move $2,$0
+L.5:
+lw $23,0($sp)
+lw $30,4($sp)
+addu $sp,$sp,8
+j $31
+.end regint

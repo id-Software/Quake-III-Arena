@@ -1,0 +1,336 @@
+.data
+.globl words
+.align 4
+.type words,@object
+words:
+.long 1
+.long 2
+.long 3
+.byte 105
+.byte 102
+.byte 0
+.space 3
+.space 2
+.long 4
+.long 5
+.space 4
+.byte 102
+.byte 111
+.byte 114
+.space 3
+.space 2
+.long 6
+.long 7
+.long 8
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.space 1
+.space 2
+.long 9
+.long 10
+.long 11
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.space 1
+.space 2
+.long 0
+.space 8
+.space 8
+.size words,100
+.globl wordlist
+.align 4
+.type wordlist,@object
+.size wordlist,4
+wordlist:
+.long words
+.globl x
+.align 4
+.type x,@object
+x:
+.long 1
+.long 2
+.long 3
+.long 4
+.long 0
+.long 5
+.long 6
+.space 12
+.long 7
+.space 16
+.size x,60
+.globl y
+.align 4
+.type y,@object
+y:
+.long x
+.long x+20
+.long x+40
+.long 0
+.size y,16
+.globl main
+.text
+.align 16
+.type main,@function
+main:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $8,%esp
+movl $0,-8(%ebp)
+jmp .LC8
+.LC5:
+movl $0,-4(%ebp)
+jmp .LC12
+.LC9:
+movl -4(%ebp),%edi
+movl -8(%ebp),%esi
+movl y(,%esi,4),%esi
+pushl (%esi,%edi,4)
+pushl $.LC13
+call printf
+addl $8,%esp
+.LC10:
+incl -4(%ebp)
+.LC12:
+movl -4(%ebp),%edi
+movl -8(%ebp),%esi
+movl y(,%esi,4),%esi
+cmpl $0,(%esi,%edi,4)
+jne .LC9
+pushl $.LC14
+call printf
+addl $4,%esp
+.LC6:
+incl -8(%ebp)
+.LC8:
+movl -8(%ebp),%edi
+movl y(,%edi,4),%edi
+cmpl $0,%edi
+jne .LC5
+call f
+pushl wordlist
+call g
+addl $4,%esp
+movl $0,%eax
+.LC4:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf15:
+.size main,.Lf15-main
+.data
+.align 4
+.type keywords.17,@object
+keywords.17:
+.long .LC18
+.long .LC19
+.long .LC20
+.long .LC21
+.long 0
+.size keywords.17,20
+.globl f
+.text
+.align 16
+.type f,@function
+f:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+leal keywords.17,%edi
+movl %edi,-4(%ebp)
+jmp .LC25
+.LC22:
+movl -4(%ebp),%edi
+pushl (,%edi)
+pushl $.LC26
+call printf
+addl $8,%esp
+.LC23:
+movl -4(%ebp),%edi
+leal 4(%edi),%edi
+movl %edi,-4(%ebp)
+.LC25:
+movl -4(%ebp),%edi
+movl (,%edi),%edi
+cmpl $0,%edi
+jne .LC22
+movl $0,%eax
+.LC16:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf27:
+.size f,.Lf27-f
+.globl g
+.align 16
+.type g,@function
+g:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+jmp .LC32
+.LC29:
+movl $0,-4(%ebp)
+jmp .LC36
+.LC33:
+movl -4(%ebp),%edi
+movl 20(%ebp),%esi
+pushl (%esi,%edi,4)
+pushl $.LC37
+call printf
+addl $8,%esp
+.LC34:
+incl -4(%ebp)
+.LC36:
+movl -4(%ebp),%edi
+cmpl $3,%edi
+jb .LC33
+movl 20(%ebp),%edi
+leal 12(%edi),%edi
+pushl %edi
+pushl $.LC26
+call printf
+addl $8,%esp
+.LC30:
+movl 20(%ebp),%edi
+leal 20(%edi),%edi
+movl %edi,20(%ebp)
+.LC32:
+movl 20(%ebp),%edi
+cmpl $0,(,%edi)
+jne .LC29
+call h
+movl $0,%eax
+.LC28:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf38:
+.size g,.Lf38-g
+.globl h
+.align 16
+.type h,@function
+h:
+pushl %ebp
+pushl %ebx
+pushl %esi
+pushl %edi
+movl %esp,%ebp
+subl $4,%esp
+movl $0,-4(%ebp)
+jmp .LC43
+.LC40:
+imul $20,-4(%ebp),%edi
+leal words+12(%edi),%esi
+pushl %esi
+pushl words+8(%edi)
+pushl words+4(%edi)
+pushl words(%edi)
+pushl $.LC44
+call printf
+addl $20,%esp
+.LC41:
+incl -4(%ebp)
+.LC43:
+movl -4(%ebp),%edi
+cmpl $5,%edi
+jb .LC40
+movl $0,%eax
+.LC39:
+movl %ebp,%esp
+popl %edi
+popl %esi
+popl %ebx
+popl %ebp
+ret
+.Lf48:
+.size h,.Lf48-h
+.data
+.align 1
+.LC44:
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.LC37:
+.byte 37
+.byte 100
+.byte 32
+.byte 0
+.align 1
+.LC26:
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.LC21:
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.byte 0
+.align 1
+.LC20:
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.align 1
+.LC19:
+.byte 102
+.byte 111
+.byte 114
+.byte 0
+.align 1
+.LC18:
+.byte 105
+.byte 102
+.byte 0
+.align 1
+.LC14:
+.byte 10
+.byte 0
+.align 1
+.LC13:
+.byte 32
+.byte 37
+.byte 100
+.byte 0
+.text
+.ident "LCC: 4.1"

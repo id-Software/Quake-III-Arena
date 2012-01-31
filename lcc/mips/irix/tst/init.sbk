@@ -1,0 +1,325 @@
+.set reorder
+.globl words
+.data
+.align 2
+words:
+.word 0x1
+.word 0x2
+.word 0x3
+.byte 105
+.byte 102
+.byte 0
+.space 3
+.space 2
+.word 0x4
+.word 0x5
+.space 4
+.byte 102
+.byte 111
+.byte 114
+.space 3
+.space 2
+.word 0x6
+.word 0x7
+.word 0x8
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.space 1
+.space 2
+.word 0x9
+.word 0xa
+.word 0xb
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.space 1
+.space 2
+.word 0x0
+.space 8
+.space 8
+.globl wordlist
+.sdata
+.align 2
+wordlist:
+.word words
+.globl x
+.data
+.align 2
+x:
+.word 0x1
+.word 0x2
+.word 0x3
+.word 0x4
+.word 0x0
+.word 0x5
+.word 0x6
+.space 12
+.word 0x7
+.space 16
+.globl y
+.data
+.align 2
+y:
+.word x
+.word x+20
+.word x+40
+.word 0x0
+.globl main
+.text
+.text
+.align 2
+.ent main
+main:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2800000,-4
+sw $23,16($sp)
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+move $23,$0
+b L.8
+L.5:
+move $30,$0
+b L.12
+L.9:
+la $4,L.13
+sll $24,$30,2
+sll $15,$23,2
+lw $15,y($15)
+addu $24,$24,$15
+lw $5,($24)
+jal printf
+L.10:
+la $30,1($30)
+L.12:
+sll $24,$30,2
+sll $15,$23,2
+lw $15,y($15)
+addu $24,$24,$15
+lw $24,($24)
+bne $24,$0,L.9
+la $4,L.14
+jal printf
+L.6:
+la $23,1($23)
+L.8:
+sll $24,$23,2
+lw $24,y($24)
+bne $24,$0,L.5
+jal f
+lw $4,wordlist
+jal g
+move $2,$0
+L.4:
+lw $23,16($sp)
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,32
+j $31
+.end main
+.data
+.align 2
+L.16:
+.word L.17
+.word L.18
+.word L.19
+.word L.20
+.word 0x0
+.globl f
+.text
+.text
+.align 2
+.ent f
+f:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-8
+.cprestore 16
+sw $30,20($sp)
+sw $31,24($sp)
+la $30,L.16
+b L.24
+L.21:
+la $4,L.25
+lw $5,($30)
+jal printf
+L.22:
+la $30,4($30)
+L.24:
+lw $24,($30)
+bne $24,$0,L.21
+move $2,$0
+L.15:
+lw $25,16($sp)
+lw $30,20($sp)
+lw $31,24($sp)
+addu $sp,$sp,32
+j $31
+.end f
+.globl g
+.text
+.align 2
+.ent g
+g:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2800000,-4
+sw $23,16($sp)
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+move $30,$4
+b L.30
+L.27:
+move $23,$0
+b L.34
+L.31:
+la $4,L.35
+sll $24,$23,2
+addu $24,$24,$30
+lw $5,($24)
+jal printf
+L.32:
+la $23,1($23)
+L.34:
+move $24,$23
+la $15,3
+bltu $24,$15,L.31
+la $4,L.25
+la $5,12($30)
+jal printf
+L.28:
+la $30,20($30)
+L.30:
+lw $24,($30)
+bne $24,$0,L.27
+jal h
+move $2,$0
+L.26:
+lw $23,16($sp)
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,32
+j $31
+.end g
+.globl h
+.text
+.align 2
+.ent h
+h:
+.frame $sp,32,$31
+.set noreorder
+.cpload $25
+.set reorder
+addu $sp,$sp,-32
+.mask 0xc2000000,-4
+.cprestore 20
+sw $30,24($sp)
+sw $31,28($sp)
+move $30,$0
+b L.40
+L.37:
+la $4,L.41
+la $24,20
+mul $24,$24,$30
+lw $5,words($24)
+lw $6,words+4($24)
+lw $7,words+8($24)
+la $24,words+12($24)
+sw $24,16($sp)
+jal printf
+L.38:
+la $30,1($30)
+L.40:
+move $24,$30
+la $15,5
+bltu $24,$15,L.37
+move $2,$0
+L.36:
+lw $25,20($sp)
+lw $30,24($sp)
+lw $31,28($sp)
+addu $sp,$sp,32
+j $31
+.end h
+.rdata
+.align 0
+L.41:
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.35:
+.byte 37
+.byte 100
+.byte 32
+.byte 0
+.align 0
+L.25:
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 0
+L.20:
+.byte 119
+.byte 104
+.byte 105
+.byte 108
+.byte 101
+.byte 0
+.align 0
+L.19:
+.byte 101
+.byte 108
+.byte 115
+.byte 101
+.byte 0
+.align 0
+L.18:
+.byte 102
+.byte 111
+.byte 114
+.byte 0
+.align 0
+L.17:
+.byte 105
+.byte 102
+.byte 0
+.align 0
+L.14:
+.byte 10
+.byte 0
+.align 0
+L.13:
+.byte 32
+.byte 37
+.byte 100
+.byte 0

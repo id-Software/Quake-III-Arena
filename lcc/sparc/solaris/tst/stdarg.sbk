@@ -1,0 +1,376 @@
+.section ".data"
+.global x
+.type x,#object
+.size x,16
+.align 4
+x:
+.word 0x1
+.word 0x2
+.word 0x3
+.word 0x4
+.global main
+.section ".text"
+.align 4
+main:
+save %sp,-192,%sp
+set .L2,%o0
+call print; nop
+set .L3,%o0
+set .L4,%o1
+call print; nop
+set .L5,%o0
+set 3,%o1
+set 10,%o2
+call print; nop
+set .L6,%o0
+set .L7,%o1
+set .L8,%o2
+set 4,%o3
+set 10,%o4
+call print; nop
+set .L9,%o0
+set .L7,%o1
+set .L8,%o2
+set .L10,%i5
+ld2 [%i5],%f30
+st %f30,[%sp+4*3+68]
+st %f31,[%sp+4*4+68]
+ld [%sp+4*3+68],%o3
+ld [%sp+4*4+68],%o4
+set 10,%o5
+call print; nop
+set .L11,%o0
+set x,%i5
+add -16,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -16,%fp,%o1
+add -32,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -32,%fp,%o2
+add -48,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -48,%fp,%o3
+add -64,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -64,%fp,%o4
+add -80,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -80,%fp,%o5
+add -96,%fp,%i4
+ld [%r29+0],%r1
+ld [%r29+4],%r2
+st %r1,[%r28+0]
+st %r2,[%r28+4]
+ld [%r29+8],%r1
+ld [%r29+12],%r2
+st %r1,[%r28+8]
+st %r2,[%r28+12]
+add -96,%fp,%i5
+st %i5,[%sp+4*6+68]
+call print; nop
+mov %g0,%i0
+.L1:
+ret; restore
+.type main,#function
+.size main,.-main
+.global print
+.align 4
+print:
+save %sp,-112,%sp
+st %i1,[%fp+72]
+st %i2,[%fp+76]
+st %i3,[%fp+80]
+st %i4,[%fp+84]
+st %i5,[%fp+88]
+st %i0,[%fp+68]
+add 72,%fp,%i5
+ba .L18; nop
+.L15:
+ld [%fp+68],%i4
+ldsb [%i4],%i4
+cmp %i4,37; bne .L19; nop
+ld [%fp+68],%i3
+add %i3,1,%i3
+st %i3,[%fp+68]
+ldsb [%i3],%i4
+cmp %i4,115; be .L35; nop
+cmp %i4,115; bg .L40; nop
+.L39:
+cmp %i4,98; bl .L21; nop
+cmp %i4,102; bg .L21; nop
+sll %i4,2,%i3
+set .L41-392,%i2
+ld [%i3+%i2],%i3
+jmp %i3; nop
+.section ".rodata"
+.align 4
+.L41:
+.word .L24
+.word .L29
+.word .L31
+.word .L21
+.word .L37
+.section ".text"
+.L40:
+cmp %i4,119; be .L33; nop
+ba .L21; nop
+.L24:
+add %i5,4,%i3
+mov %i3,%i5
+add -16,%fp,%i2
+ld [%i3+-4],%i3
+ld [%r27+0],%r1
+ld [%r27+4],%r2
+st %r1,[%r26+0]
+st %r2,[%r26+4]
+ld [%r27+8],%r1
+ld [%r27+12],%r2
+st %r1,[%r26+8]
+st %r2,[%r26+12]
+set .L25,%o0
+ld [%fp+-16],%o1
+ld [%fp+-12],%o2
+ld [%fp+-8],%o3
+ld [%fp+-4],%o4
+call printf; nop
+ba .L20; nop
+.L29:
+set .L30,%o0
+add %i5,4,%i3
+mov %i3,%i5
+ldsb [%i3+-1],%o1
+call printf; nop
+ba .L20; nop
+.L31:
+set .L32,%o0
+set 4,%i3
+add %i5,%i3,%i3
+mov %i3,%i5
+ld [%i3+-4],%o1
+call printf; nop
+ba .L20; nop
+.L33:
+set .L34,%o0
+add %i5,4,%i3
+mov %i3,%i5
+ldsh [%i3+-2],%o1
+call printf; nop
+ba .L20; nop
+.L35:
+set .L36,%o0
+set 4,%i3
+add %i5,%i3,%i3
+mov %i3,%i5
+ld [%i3+-4],%o1
+call printf; nop
+ba .L20; nop
+.L37:
+set .L38,%o0
+set 8,%i3
+add %i5,%i3,%i3
+mov %i3,%i5
+ld2 [%i3+-8],%f30
+st %f30,[%sp+4*1+68]
+st %f31,[%sp+4*2+68]
+ld [%sp+4*1+68],%o1
+ld [%sp+4*2+68],%o2
+call printf; nop
+ba .L20; nop
+.L21:
+set .L30,%o0
+ld [%fp+68],%i3
+ldsb [%i3],%o1
+call printf; nop
+ba .L20; nop
+.L19:
+set .L30,%o0
+ld [%fp+68],%i3
+ldsb [%i3],%o1
+call printf; nop
+.L20:
+.L16:
+ld [%fp+68],%i3
+add %i3,1,%i3
+st %i3,[%fp+68]
+.L18:
+ld [%fp+68],%i3
+ldsb [%i3],%i3
+cmp %i3,0; bne .L15; nop
+mov %g0,%i0
+.L12:
+ret; restore
+.type print,#function
+.size print,.-print
+.section ".rodata"
+.align 1
+.L38:
+.byte 37
+.byte 102
+.byte 0
+.align 1
+.L36:
+.byte 37
+.byte 115
+.byte 0
+.align 1
+.L34:
+.byte 37
+.byte 120
+.byte 0
+.align 1
+.L32:
+.byte 37
+.byte 100
+.byte 0
+.align 1
+.L30:
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.L25:
+.byte 123
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 32
+.byte 37
+.byte 100
+.byte 125
+.byte 0
+.align 1
+.L11:
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 32
+.byte 37
+.byte 98
+.byte 10
+.byte 0
+.align 8
+.L10:
+.word 0x40140000
+.word 0x0
+.align 1
+.L9:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 102
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.L8:
+.byte 115
+.byte 116
+.byte 0
+.align 1
+.L7:
+.byte 116
+.byte 101
+.byte 0
+.align 1
+.L6:
+.byte 37
+.byte 115
+.byte 37
+.byte 115
+.byte 32
+.byte 37
+.byte 119
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.L5:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 100
+.byte 37
+.byte 99
+.byte 0
+.align 1
+.L4:
+.byte 50
+.byte 0
+.align 1
+.L3:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 37
+.byte 115
+.byte 10
+.byte 0
+.align 1
+.L2:
+.byte 116
+.byte 101
+.byte 115
+.byte 116
+.byte 32
+.byte 49
+.byte 10
+.byte 0

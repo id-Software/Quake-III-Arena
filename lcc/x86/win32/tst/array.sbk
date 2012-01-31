@@ -1,0 +1,240 @@
+.486
+.model flat
+extrn __fltused:near
+extrn __ftol:near
+public _main
+_TEXT segment
+_main:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,60
+mov dword ptr (-8)[ebp],0
+L2:
+mov dword ptr (-4)[ebp],0
+L6:
+mov edi,dword ptr (-4)[ebp]
+mov esi,dword ptr (-8)[ebp]
+mov ebx,esi
+sal ebx,4
+imul esi,esi,1000
+lea esi,[edi][esi]
+mov dword ptr (_x)[ebx][edi*4],esi
+L7:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L6
+mov edi,dword ptr (-8)[ebp]
+mov esi,edi
+sal esi,4
+lea esi,(_x)[esi]
+mov dword ptr (_y)[edi*4],esi
+L3:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L2
+call _f
+add esp,0
+mov dword ptr (-8)[ebp],0
+L10:
+mov edi,dword ptr (-8)[ebp]
+mov esi,edi
+sal esi,4
+lea esi,(-60)[ebp][esi]
+mov dword ptr (-12)[ebp],esi
+mov dword ptr (_y)[edi*4],esi
+mov dword ptr (-4)[ebp],0
+L14:
+mov edi,dword ptr (-4)[ebp]
+lea edi,[edi*4]
+mov esi,dword ptr (-12)[ebp]
+mov ebx,dword ptr (-8)[ebp]
+sal ebx,4
+mov ebx,dword ptr (_x)[ebx][edi]
+mov dword ptr [esi][edi],ebx
+L15:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L14
+L11:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L10
+lea edi,(_y)
+push edi
+lea edi,(-60)[ebp]
+push edi
+call _g
+add esp,8
+mov eax,0
+L1:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _f
+_f:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov dword ptr (-8)[ebp],0
+L19:
+mov dword ptr (-4)[ebp],0
+L23:
+mov edi,dword ptr (-4)[ebp]
+mov esi,dword ptr (-8)[ebp]
+sal esi,4
+mov edi,dword ptr (_x)[esi][edi*4]
+push edi
+lea edi,(L27)
+push edi
+call _printf
+add esp,8
+L24:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L23
+L20:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L19
+lea edi,(L28)
+push edi
+call _printf
+add esp,4
+mov dword ptr (-8)[ebp],0
+L29:
+mov dword ptr (-4)[ebp],0
+L33:
+mov edi,dword ptr (-4)[ebp]
+mov esi,dword ptr (-8)[ebp]
+mov esi,dword ptr (_y)[esi*4]
+mov edi,dword ptr [esi][edi*4]
+push edi
+lea edi,(L27)
+push edi
+call _printf
+add esp,8
+L34:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L33
+L30:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L29
+lea edi,(L28)
+push edi
+call _printf
+add esp,4
+mov eax,0
+L18:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _g
+_g:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov dword ptr (-8)[ebp],0
+L38:
+mov dword ptr (-4)[ebp],0
+L42:
+mov edi,dword ptr (-4)[ebp]
+mov esi,dword ptr (-8)[ebp]
+sal esi,4
+mov ebx,dword ptr (20)[ebp]
+lea esi,[ebx][esi]
+mov edi,dword ptr [esi][edi*4]
+push edi
+lea edi,(L27)
+push edi
+call _printf
+add esp,8
+L43:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L42
+L39:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L38
+lea edi,(L28)
+push edi
+call _printf
+add esp,4
+mov dword ptr (-8)[ebp],0
+L46:
+mov dword ptr (-4)[ebp],0
+L50:
+mov edi,dword ptr (-4)[ebp]
+mov esi,dword ptr (-8)[ebp]
+mov ebx,dword ptr (24)[ebp]
+mov esi,dword ptr [ebx][esi*4]
+mov edi,dword ptr [esi][edi*4]
+push edi
+lea edi,(L27)
+push edi
+call _printf
+add esp,8
+L51:
+inc dword ptr (-4)[ebp]
+cmp dword ptr (-4)[ebp],4
+jl L50
+L47:
+inc dword ptr (-8)[ebp]
+cmp dword ptr (-8)[ebp],3
+jl L46
+lea edi,(L28)
+push edi
+call _printf
+add esp,4
+mov eax,0
+L37:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+_TEXT ends
+extrn _printf:near
+_TEXT segment
+_TEXT ends
+_DATA segment
+public _y
+align 4
+_y label byte
+db 12 dup (0)
+public _x
+align 4
+_x label byte
+db 48 dup (0)
+_DATA ends
+_TEXT segment
+align 1
+L28 label byte
+db 10
+db 0
+align 1
+L27 label byte
+db 32
+db 37
+db 100
+db 0
+_TEXT ends
+end

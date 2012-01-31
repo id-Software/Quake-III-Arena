@@ -1,0 +1,166 @@
+.486
+.model flat
+extrn __fltused:near
+extrn __ftol:near
+public _main
+_TEXT segment
+_main:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+mov eax,0
+L1:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _memchar
+_memchar:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov edi,dword ptr (-8)[ebp]
+lea esi,(1)[edi]
+mov dword ptr (-8)[ebp],esi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea edi,(1)[edi]
+mov dword ptr (-8)[ebp],edi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea esi,(-1)[edi]
+mov dword ptr (-8)[ebp],esi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea edi,(-1)[edi]
+mov dword ptr (-8)[ebp],edi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov eax,0
+L2:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _memint
+_memint:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov edi,dword ptr (-8)[ebp]
+lea esi,(4)[edi]
+mov dword ptr (-8)[ebp],esi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea edi,(4)[edi]
+mov dword ptr (-8)[ebp],edi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea esi,(-4)[edi]
+mov dword ptr (-8)[ebp],esi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea edi,(-4)[edi]
+mov dword ptr (-8)[ebp],edi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov eax,0
+L3:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _regchar
+_regchar:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov edi,dword ptr (-8)[ebp]
+lea esi,(1)[edi]
+mov dword ptr (-8)[ebp],esi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea edi,(1)[edi]
+mov dword ptr (-8)[ebp],edi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea esi,(-1)[edi]
+mov dword ptr (-8)[ebp],esi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov edi,dword ptr (-8)[ebp]
+lea edi,(-1)[edi]
+mov dword ptr (-8)[ebp],edi
+mov bl,byte ptr [edi]
+mov byte ptr (-1)[ebp],bl
+mov eax,0
+L4:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+public _regint
+_regint:
+push ebx
+push esi
+push edi
+push ebp
+mov ebp,esp
+sub esp,8
+mov edi,dword ptr (-8)[ebp]
+lea esi,(4)[edi]
+mov dword ptr (-8)[ebp],esi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea edi,(4)[edi]
+mov dword ptr (-8)[ebp],edi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea esi,(-4)[edi]
+mov dword ptr (-8)[ebp],esi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov edi,dword ptr (-8)[ebp]
+lea edi,(-4)[edi]
+mov dword ptr (-8)[ebp],edi
+mov edi,dword ptr [edi]
+mov dword ptr (-4)[ebp],edi
+mov eax,0
+L5:
+mov esp,ebp
+pop ebp
+pop edi
+pop esi
+pop ebx
+ret
+_TEXT ends
+end

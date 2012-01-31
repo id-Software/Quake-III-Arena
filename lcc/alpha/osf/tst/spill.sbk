@@ -1,0 +1,272 @@
+.globl main
+.text
+.text
+.ent main
+main:
+ldgp $gp,0($27)
+lda $sp,-64($sp)
+.frame $sp,64,$26,48
+.prologue 1
+mov $31,$0
+L.1:
+lda $sp,64($sp)
+ret
+.end main
+.globl f
+.text
+.ent f
+f:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4000000,-80
+.frame $sp,80,$26,48
+stq $26,0($sp)
+stq $16,32($sp)
+.prologue 1
+jsr $26,f
+ldgp $gp,0($26)
+mov $0,$27
+stl $27,-60+80($sp)
+jsr $26,f
+ldgp $gp,0($26)
+ldl $25,-60+80($sp)
+addl $25,$0,$27
+stl $27,-48+80($sp)
+mov $31,$0
+L.2:
+ldq $26,0($sp)
+lda $sp,80($sp)
+ret
+.end f
+.globl f2
+.text
+.ent f2
+f2:
+ldgp $gp,0($27)
+lda $sp,-80($sp)
+.mask 0x4004000,-72
+.frame $sp,80,$26,48
+stq $14,0($sp)
+stq $26,8($sp)
+stq $16,32($sp)
+.prologue 1
+jsr $26,f
+ldgp $gp,0($26)
+mov $0,$27
+stl $27,-60+80($sp)
+ldl $25,-48+80($sp)
+cmpeq $25,$31,$23
+bne $23,L.5
+jsr $26,f
+ldgp $gp,0($26)
+mov $0,$27
+mov $27,$14
+br L.6
+L.5:
+lda $14,1
+L.6:
+ldl $27,-60+80($sp)
+addl $27,$14,$27
+stl $27,-48+80($sp)
+mov $31,$0
+L.3:
+ldq $14,0($sp)
+ldq $26,8($sp)
+lda $sp,80($sp)
+ret
+.end f2
+.globl f3
+.text
+.ent f3
+f3:
+ldgp $gp,0($27)
+lda $sp,-144($sp)
+.mask 0x4007e00,-96
+.frame $sp,144,$26,48
+stq $9,0($sp)
+stq $10,8($sp)
+stq $11,16($sp)
+stq $12,24($sp)
+stq $13,32($sp)
+stq $14,40($sp)
+stq $26,48($sp)
+stq $16,96($sp)
+stq $17,104($sp)
+.prologue 1
+mov $31,$14
+mov $31,$13
+mov $31,$12
+mov $31,$11
+mov $31,$10
+mov $31,$9
+stl $31,-60+144($sp)
+stl $31,-64+144($sp)
+stl $31,-68+144($sp)
+stl $31,-72+144($sp)
+ldq $27,-40+144($sp)
+stq $27,-88+144($sp)
+lda $25,4($27)
+stq $25,-40+144($sp)
+ldl $25,-48+144($sp)
+cmpeq $25,$31,$23
+bne $23,L.9
+jsr $26,f
+ldgp $gp,0($26)
+mov $0,$27
+stl $27,-76+144($sp)
+br L.10
+L.9:
+stl $31,-76+144($sp)
+L.10:
+ldl $27,-76+144($sp)
+ldq $25,-88+144($sp)
+stl $27,($25)
+mov $31,$0
+L.7:
+ldq $9,0($sp)
+ldq $10,8($sp)
+ldq $11,16($sp)
+ldq $12,24($sp)
+ldq $13,32($sp)
+ldq $14,40($sp)
+ldq $26,48($sp)
+lda $sp,144($sp)
+ret
+.end f3
+.globl f4
+.text
+.ent f4
+f4:
+ldgp $gp,0($27)
+lda $sp,-128($sp)
+.mask 0x4007e00,-80
+.frame $sp,128,$26,48
+stq $9,0($sp)
+stq $10,8($sp)
+stq $11,16($sp)
+stq $12,24($sp)
+stq $13,32($sp)
+stq $14,40($sp)
+stq $26,48($sp)
+.prologue 1
+mov $31,$14
+mov $31,$13
+mov $31,$12
+mov $31,$11
+mov $31,$10
+mov $31,$9
+ldl $27,i
+sll $27,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,3,$25
+ldt $f30,a($25)
+ldt $f29,b($25)
+ldt $f28,L.15
+addt $f30,$f29,$f27
+cmpteq $f27,$f28,$f1
+fbne $f1,L.13
+cmpeq $27,$31,$23
+bne $23,L.13
+subt $f30,$f29,$f30
+cmpteq $f30,$f28,$f1
+fbne $f1,L.13
+lda $27,1
+stl $27,-60+128($sp)
+br L.14
+L.13:
+stl $31,-60+128($sp)
+L.14:
+ldl $27,-60+128($sp)
+stl $27,i
+mov $31,$0
+L.11:
+ldq $9,0($sp)
+ldq $10,8($sp)
+ldq $11,16($sp)
+ldq $12,24($sp)
+ldq $13,32($sp)
+ldq $14,40($sp)
+ldq $26,48($sp)
+lda $sp,128($sp)
+ret
+.end f4
+.globl f5
+.text
+.ent f5
+f5:
+ldgp $gp,0($27)
+lda $sp,-64($sp)
+.frame $sp,64,$26,48
+.prologue 1
+ldl $27,k
+ldl $25,m
+ldq $22,A
+mull $27,$25,$8
+sll $8,8*(8-4),$8
+sra $8,8*(8-4),$8
+sll $8,3,$8
+addq $8,$22,$8
+ldl $7,j
+mull $7,$25,$25
+sll $25,8*(8-4),$25
+sra $25,8*(8-4),$25
+sll $25,3,$25
+addq $25,$22,$25
+ldl $22,n
+ldq $6,B
+mull $27,$22,$27
+sll $27,8*(8-4),$27
+sra $27,8*(8-4),$27
+sll $27,3,$27
+addq $27,$6,$27
+mull $7,$22,$22
+sll $22,8*(8-4),$22
+sra $22,8*(8-4),$22
+sll $22,3,$22
+addq $22,$6,$22
+ldt $f30,($8)
+ldt $f29,($25)
+mult $f30,$f29,$f30
+ldt $f29,($27)
+ldt $f28,($22)
+mult $f29,$f28,$f29
+addt $f30,$f29,$f30
+stt $f30,x
+ldt $f30,($8)
+ldt $f29,($22)
+mult $f30,$f29,$f30
+ldt $f29,($27)
+ldt $f28,($25)
+mult $f29,$f28,$f29
+subt $f30,$f29,$f30
+stt $f30,x
+mov $31,$0
+L.16:
+lda $sp,64($sp)
+ret
+.end f5
+.globl x
+.comm x,8
+.globl B
+.comm B,8
+.globl A
+.comm A,8
+.globl n
+.comm n,4
+.globl m
+.comm m,4
+.globl k
+.comm k,4
+.globl j
+.comm j,4
+.globl i
+.comm i,4
+.globl b
+.comm b,80
+.globl a
+.comm a,80
+.rdata
+.align 3
+L.15:
+.long 0x0
+.long 0x0
