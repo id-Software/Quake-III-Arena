@@ -1151,9 +1151,9 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if ( level.time - ent->client->lastCmdTime > 1000 ) {
-		ent->s.eFlags |= EF_CONNECTION;
+		ent->client->ps.eFlags |= EF_CONNECTION;
 	} else {
-		ent->s.eFlags &= ~EF_CONNECTION;
+		ent->client->ps.eFlags &= ~EF_CONNECTION;
 	}
 
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;	// FIXME: get rid of ent->health...
