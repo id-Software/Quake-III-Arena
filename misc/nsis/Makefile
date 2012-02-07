@@ -29,12 +29,7 @@ ifndef USE_INTERNAL_JPEG
 USE_INTERNAL_JPEG=1
 endif
 
-
-ifeq ($(ARCH),x64)
-  SDLDLL=SDL64.dll
-else
-  SDLDLL=SDL.dll
-endif
+SDLDLL=SDL.dll
 
 DEFINES=
 ifeq ($(USE_RENDERER_DLOPEN),1)
