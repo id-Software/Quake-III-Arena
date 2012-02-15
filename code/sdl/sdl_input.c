@@ -561,7 +561,7 @@ struct
 {
 	qboolean buttons[16];  // !!! FIXME: these might be too many.
 	unsigned int oldaxes;
-	int oldaaxes[16];
+	int oldaaxes[MAX_JOYSTICK_AXIS];
 	unsigned int oldhats;
 } stick_state;
 
@@ -808,13 +808,12 @@ static void IN_JoyMove( void )
 	total = SDL_JoystickNumAxes(stick);
 	if (total > 0)
 	{
-		if (total > 16) total = 16;
-		for (i = 0; i < total; i++)
+		if (in_joystickUseAnalog->integer)
 		{
-			Sint16 axis = SDL_JoystickGetAxis(stick, i);
-
-			if (in_joystickUseAnalog->integer)
+			if (total > MAX_JOYSTICK_AXIS) total = MAX_JOYSTICK_AXIS;
+			for (i = 0; i < total; i++)
 			{
+				Sint16 axis = SDL_JoystickGetAxis(stick, i);
 				float f = ( (float) abs(axis) ) / 32767.0f;
 				
 				if( f < in_joystickThreshold->value ) axis = 0;
@@ -825,8 +824,13 @@ static void IN_JoyMove( void )
 					stick_state.oldaaxes[i] = axis;
 				}
 			}
-			else
+		}
+		else
+		{
+			if (total > 16) total = 16;
+			for (i = 0; i < total; i++)
 			{
+				Sint16 axis = SDL_JoystickGetAxis(stick, i);
 				float f = ( (float) axis ) / 32767.0f;
 				if( f < -in_joystickThreshold->value ) {
 					axes |= ( 1 << ( i * 2 ) );
