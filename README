@@ -136,6 +136,7 @@ New cvars
                                       for forward movement speed/direction.
   j_side                            - Joystick analogue to m_side,
                                       for side movement speed/direction.
+  j_up                              - Joystick up movement speed/direction.
   j_pitch                           - Joystick analogue to m_pitch,
                                       for pitch rotation speed/direction.
   j_yaw                             - Joystick analogue to m_yaw,
@@ -144,6 +145,8 @@ New cvars
                                       controls forward/back.
   j_side_axis                       - Selects which joystick axis
                                       controls left/right.
+  j_up_axis                         - Selects which joystick axis
+                                      controls up/down.
   j_pitch_axis                      - Selects which joystick axis
                                       controls pitch.
   j_yaw_axis                        - Selects which joystick axis
