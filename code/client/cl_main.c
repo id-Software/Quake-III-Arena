@@ -96,10 +96,12 @@ cvar_t	*j_pitch;
 cvar_t	*j_yaw;
 cvar_t	*j_forward;
 cvar_t	*j_side;
+cvar_t	*j_up;
 cvar_t	*j_pitch_axis;
 cvar_t	*j_yaw_axis;
 cvar_t	*j_forward_axis;
 cvar_t	*j_side_axis;
+cvar_t	*j_up_axis;
 
 cvar_t	*cl_activeAction;
 
@@ -3524,10 +3526,12 @@ void CL_Init( void ) {
 	j_yaw =          Cvar_Get ("j_yaw",          "-0.022", CVAR_ARCHIVE);
 	j_forward =      Cvar_Get ("j_forward",      "-0.25", CVAR_ARCHIVE);
 	j_side =         Cvar_Get ("j_side",         "0.25", CVAR_ARCHIVE);
+	j_up =           Cvar_Get ("j_up",           "1", CVAR_ARCHIVE);
 	j_pitch_axis =   Cvar_Get ("j_pitch_axis",   "3", CVAR_ARCHIVE);
 	j_yaw_axis =     Cvar_Get ("j_yaw_axis",     "4", CVAR_ARCHIVE);
 	j_forward_axis = Cvar_Get ("j_forward_axis", "1", CVAR_ARCHIVE);
 	j_side_axis =    Cvar_Get ("j_side_axis",    "0", CVAR_ARCHIVE);
+	j_up_axis =      Cvar_Get ("j_up_axis",      "2", CVAR_ARCHIVE);
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
 
