@@ -58,11 +58,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // 4. Exit the game and there will be three dat files and at least three tga files. The 
 //    tga's are in 256x256 pages so if it takes three images to render a 24 point font you 
 //    will end up with fontImage_0_24.tga through fontImage_2_24.tga
-// 5. You will need to flip the tga's in Photoshop as the tga output code writes them upside
-//    down.
-// 6. In future runs of the game, the system looks for these images and data files when a s
+// 5. In future runs of the game, the system looks for these images and data files when a s
 //    specific point sized font is rendered and loads them for use. 
-// 7. Because of the original beta nature of the FreeType code you will probably want to hand
+// 6. Because of the original beta nature of the FreeType code you will probably want to hand
 //    touch the font bitmaps.
 // 
 // Currently a define in the project turns on or off the FreeType code which is currently 
@@ -146,8 +144,11 @@ FT_Bitmap *R_RenderGlyph(FT_GlyphSlot glyph, glyphInfo_t* glyphOut) {
 }
 
 void WriteTGA (char *filename, byte *data, int width, int height) {
-	byte	*buffer;
-	int		i, c;
+	byte			*buffer;
+	int				i, c;
+	int             row;
+	unsigned char  *flip;
+	unsigned char  *src, *dst;
 
 	buffer = ri.Malloc(width*height*4 + 18);
 	Com_Memset (buffer, 0, 18);
@@ -167,6 +168,19 @@ void WriteTGA (char *filename, byte *data, int width, int height) {
 		buffer[i+2] = data[i-18+0];		// red
 		buffer[i+3] = data[i-18+3];		// alpha
 	}
+
+	// flip upside down
+	flip = (unsigned char *)ri.Malloc(width*4);
+	for(row = 0; row < height/2; row++)
+	{
+		src = buffer + 18 + row * 4 * width;
+		dst = buffer + 18 + (height - row - 1) * 4 * width;
+
+		Com_Memcpy(flip, src, width*4);
+		Com_Memcpy(src, dst, width*4);
+		Com_Memcpy(dst, flip, width*4);
+	}
+	ri.Free(flip);
 
 	ri.FS_WriteFile(filename, buffer, c);
 
