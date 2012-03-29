@@ -233,17 +233,11 @@ static glyphInfo_t *RE_ConstructGlyphInfo(unsigned char *imageOut, int *xOut, in
 
     // we need to make sure we fit
     if (*xOut + scaled_width + 1 >= 255) {
-      if (*yOut + *maxHeight + 1 >= 255) {
-        *yOut = -1;
-        *xOut = -1;
-        ri.Free(bitmap->buffer);
-        ri.Free(bitmap);
-        return &glyph;
-      } else {
-        *xOut = 0;
-        *yOut += *maxHeight + 1;
-      }
-    } else if (*yOut + *maxHeight + 1 >= 255) {
+      *xOut = 0;
+      *yOut += *maxHeight + 1;
+    }
+
+    if (*yOut + *maxHeight + 1 >= 255) {
       *yOut = -1;
       *xOut = -1;
       ri.Free(bitmap->buffer);
