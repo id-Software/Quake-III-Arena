@@ -3204,7 +3204,7 @@ void CL_InitRef( void ) {
 		Cvar_ForceReset("cl_renderer");
 
 		Com_sprintf(dllName, sizeof(dllName), "renderer_opengl1_" ARCH_STRING DLL_EXT);
-		rendererLib = Sys_LoadLibrary(dllName);
+		rendererLib = Sys_LoadDll(dllName, qfalse);
 	}
 
 	if(!rendererLib)
