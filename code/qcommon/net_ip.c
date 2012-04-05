@@ -317,7 +317,7 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 				search->ai_addrlen = sadr_len;
 				
 			memcpy(sadr, search->ai_addr, search->ai_addrlen);
-			freeaddrinfo(search);
+			freeaddrinfo(res);
 			
 			return qtrue;
 		}
