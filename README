@@ -298,6 +298,8 @@ New commands
 
   which <filename/path>   - print out the path on disk to a loaded item
 
+  tell <client num> <msg> - send message to a single client (new to server)
+
 
 --------------------------------------------------------- README for Users -----
 
