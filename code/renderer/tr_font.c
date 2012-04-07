@@ -340,12 +340,12 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	image_t *image;
 	qhandle_t h;
 	float max;
+	float dpi = 72;
 	float glyphScale;
 #endif
 	void *faceData;
 	int i, len;
 	char name[1024];
-	float dpi = 72;
 
 	if (!fontName) {
 		ri.Printf(PRINT_ALL, "RE_RegisterFont: called with empty name\n");
