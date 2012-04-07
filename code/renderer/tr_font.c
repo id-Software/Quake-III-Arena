@@ -290,10 +290,10 @@ static glyphInfo_t *RE_ConstructGlyphInfo(unsigned char *imageOut, int *xOut, in
 		glyph.t2 = glyph.t + (float)scaled_height / 256;
 
 		*xOut += scaled_width + 1;
-	}
 
-	ri.Free(bitmap->buffer);
-	ri.Free(bitmap);
+		ri.Free(bitmap->buffer);
+		ri.Free(bitmap);
+	}
 
 	return &glyph;
 }
@@ -340,13 +340,12 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	image_t *image;
 	qhandle_t h;
 	float max;
+	float glyphScale;
 #endif
 	void *faceData;
 	int i, len;
 	char name[1024];
-	float dpi = 72;											//
-	float glyphScale =  72.0f / dpi; 		// change the scale to be relative to 1 based on 72 dpi ( so dpi of 144 means a scale of .5 )
-
+	float dpi = 72;
 
 	if (!fontName) {
 		ri.Printf(PRINT_ALL, "RE_RegisterFont: called with empty name\n");
@@ -356,8 +355,6 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	if (pointSize <= 0) {
 		pointSize = 12;
 	}
-	// we also need to adjust the scale based on point size relative to 48 points as the ui scaling is based on a 48 point font
-	glyphScale *= 48.0f / pointSize;
 
 	// make sure the render thread is stopped
 	R_SyncRenderThread();
@@ -449,7 +446,7 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	maxHeight = 0;
 
 	for (i = GLYPH_START; i < GLYPH_END; i++) {
-		glyph = RE_ConstructGlyphInfo(out, &xOut, &yOut, &maxHeight, face, (unsigned char)i, qtrue);
+		RE_ConstructGlyphInfo(out, &xOut, &yOut, &maxHeight, face, (unsigned char)i, qtrue);
 	}
 
 	xOut = 0;
@@ -513,6 +510,12 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 			i++;
 		}
 	}
+
+	// change the scale to be relative to 1 based on 72 dpi ( so dpi of 144 means a scale of .5 )
+	glyphScale = 72.0f / dpi;
+
+	// we also need to adjust the scale based on point size relative to 48 points as the ui scaling is based on a 48 point font
+	glyphScale *= 48.0f / pointSize;
 
 	registeredFont[registeredFontCount].glyphScale = glyphScale;
 	font->glyphScale = glyphScale;
