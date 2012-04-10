@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2012 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,7 @@ extern "C" {
 /*@{*/
 #define SDL_MAJOR_VERSION	1
 #define SDL_MINOR_VERSION	2
-#define SDL_PATCHLEVEL		14
+#define SDL_PATCHLEVEL		15
 /*@}*/
 
 typedef struct SDL_version {

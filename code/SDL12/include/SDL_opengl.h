@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2012 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -3108,20 +3108,34 @@ typedef char GLchar;			/* native character */
 
 #ifndef GL_VERSION_1_5
 /* GL types for handling large vertex buffer objects */
+#ifdef __APPLE__
+typedef long GLintptr;
+typedef long GLsizeiptr;
+#else
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
+#endif
 #endif
 
 #ifndef GL_ARB_vertex_buffer_object
 /* GL types for handling large vertex buffer objects */
+#ifdef __APPLE__
+typedef long GLintptrARB;
+typedef long GLsizeiptrARB;
+#else
 typedef ptrdiff_t GLintptrARB;
 typedef ptrdiff_t GLsizeiptrARB;
+#endif
 #endif
 
 #ifndef GL_ARB_shader_objects
 /* GL types for handling shader object handles and program/shader text */
 typedef char GLcharARB;		/* native character */
+#if defined(__APPLE__)
+typedef void *GLhandleARB;	/* shader object handle */
+#else
 typedef unsigned int GLhandleARB;	/* shader object handle */
+#endif
 #endif
 
 /* GL types for "half" precision (s10e5) float data in host memory */

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2012 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -43,7 +43,7 @@
 #ifndef DECLSPEC
 # if defined(__BEOS__) || defined(__HAIKU__)
 #  if defined(__GNUC__)
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC
 #  else
 #   define DECLSPEC	__declspec(export)
 #  endif
@@ -132,7 +132,12 @@
 #ifdef __BORLANDC__
 #pragma nopackwarning
 #endif
+#ifdef _M_X64
+/* Use 8-byte alignment on 64-bit architectures, so pointers are aligned */
+#pragma pack(push,8)
+#else
 #pragma pack(push,4)
+#endif
 #elif (defined(__MWERKS__) && defined(__MACOS__))
 #pragma options align=mac68k4byte
 #pragma enumsalwaysint on
