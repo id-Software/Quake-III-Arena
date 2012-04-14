@@ -1,4 +1,5 @@
 #!/bin/sh
+CC=gcc4.0
 APPBUNDLE=ioquake3.app
 BINARY=ioquake3.ub
 DEDBIN=ioq3ded.ub
