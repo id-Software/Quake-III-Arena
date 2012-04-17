@@ -10,8 +10,8 @@ BASEDIR=baseq3
 MPACKDIR=missionpack
 
 BIN_OBJ="
-	build/release-darwin-ppc/ioquake3-smp.ppc
-	build/release-darwin-i386/ioquake3-smp.i386
+	build/release-darwin-ppc/ioquake3.ppc
+	build/release-darwin-i386/ioquake3.i386
 "
 BIN_DEDOBJ="
 	build/release-darwin-ppc/ioq3ded.ppc
