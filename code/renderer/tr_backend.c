@@ -445,6 +445,11 @@ void RB_BeginDrawingView (void) {
 	// 2D images again
 	backEnd.projection2D = qfalse;
 
+	//
+	// set the modelview matrix for the viewer
+	//
+	SetViewportAndScissor();
+
 	// ensures that depth writes are enabled for the depth clear
 	GL_State( GLS_DEFAULT );
 	// clear relevant buffers
@@ -464,11 +469,6 @@ void RB_BeginDrawingView (void) {
 #endif
 	}
 	qglClear( clearBits );
-
-	//
-	// set the modelview matrix for the viewer
-	//
-	SetViewportAndScissor();
 
 	if ( ( backEnd.refdef.rdflags & RDF_HYPERSPACE ) )
 	{
