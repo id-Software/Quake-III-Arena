@@ -591,7 +591,6 @@ issues.
 #define FS_GENERAL_REF	0x01
 #define FS_UI_REF		0x02
 #define FS_CGAME_REF	0x04
-#define FS_QAGAME_REF	0x08
 // number of id paks that will never be autodownloaded from baseq3/missionpack
 #define NUM_ID_PAKS		9
 #define NUM_TA_PAKS		4
@@ -699,9 +698,6 @@ int		FS_Seek( fileHandle_t f, long offset, int origin );
 // seek on a file (doesn't work for zip files!!!!!!!!)
 
 qboolean FS_FilenameCompare( const char *s1, const char *s2 );
-
-const char *FS_GamePureChecksum( void );
-// Returns the checksum of the pk3 from which the server loaded the qagame.qvm
 
 const char *FS_LoadedPakNames( void );
 const char *FS_LoadedPakChecksums( void );

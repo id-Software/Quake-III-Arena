@@ -1222,14 +1222,13 @@ long FS_FOpenFileReadDir(const char *filename, searchpath_t *search, fileHandle_
 						   !FS_IsExt(filename, ".bot", len) &&
 						   !FS_IsExt(filename, ".arena", len) &&
 						   !FS_IsExt(filename, ".menu", len) &&
+						   Q_stricmp(filename, "qagame.qvm") != 0 &&
 						   !strstr(filename, "levelshots"))
 						{
 							pak->referenced |= FS_GENERAL_REF;
 						}
 					}
 
-					if(strstr(filename, "qagame.qvm"))
-						pak->referenced |= FS_QAGAME_REF;
 					if(strstr(filename, "cgame.qvm"))
 						pak->referenced |= FS_CGAME_REF;
 					if(strstr(filename, "ui.qvm"))
@@ -3436,31 +3435,6 @@ static void FS_CheckPak0( void )
 	}
 }
 #endif
-
-/*
-=====================
-FS_GamePureChecksum
-
-Returns the checksum of the pk3 from which the server loaded the qagame.qvm
-=====================
-*/
-const char *FS_GamePureChecksum( void ) {
-	static char	info[MAX_STRING_TOKENS];
-	searchpath_t *search;
-
-	info[0] = 0;
-
-	for ( search = fs_searchpaths ; search ; search = search->next ) {
-		// is the element a pak file?
-		if ( search->pack ) {
-			if (search->pack->referenced & FS_QAGAME_REF) {
-				Com_sprintf(info, sizeof(info), "%d", search->pack->checksum);
-			}
-		}
-	}
-
-	return info;
-}
 
 /*
 =====================
