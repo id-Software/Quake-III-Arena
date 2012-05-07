@@ -3831,13 +3831,16 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 void Item_Paint(itemDef_t *item) {
   vec4_t red;
-  menuDef_t *parent = (menuDef_t*)item->parent;
+  menuDef_t *parent;
+
   red[0] = red[3] = 1;
   red[1] = red[2] = 0;
 
   if (item == NULL) {
     return;
   }
+
+  parent = (menuDef_t*)item->parent;
 
   if (item->window.flags & WINDOW_ORBITING) {
     if (DC->realTime > item->window.nextTime) {
