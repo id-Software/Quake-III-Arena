@@ -1644,11 +1644,14 @@ void CheckTeamLeader( int team ) {
 				break;
 			}
 		}
-		for ( i = 0 ; i < level.maxclients ; i++ ) {
-			if (level.clients[i].sess.sessionTeam != team)
-				continue;
-			level.clients[i].sess.teamLeader = qtrue;
-			break;
+
+		if (i >= level.maxclients) {
+			for ( i = 0 ; i < level.maxclients ; i++ ) {
+				if (level.clients[i].sess.sessionTeam != team)
+					continue;
+				level.clients[i].sess.teamLeader = qtrue;
+				break;
+			}
 		}
 	}
 }
