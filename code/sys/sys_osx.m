@@ -35,28 +35,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #import <Cocoa/Cocoa.h>
 
 /*
-================
-Sys_TempPath
-================
-*/
-const char *Sys_TempPath( void )
-{
-	static UInt8 posixPath[ MAX_OSPATH ];
-	FSRef ref;
-	if( FSFindFolder( kOnAppropriateDisk,
-				kTemporaryFolderType, kCreateFolder, &ref ) == noErr )
-	{
-		if( FSRefMakePath( &ref, posixPath,
-					sizeof( posixPath ) - 1 ) == noErr )
-		{
-			return (const char *)posixPath;
-		}
-	}
-
-	return "/tmp";
-}
-
-/*
 ==============
 Sys_Dialog
 
