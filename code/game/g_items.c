@@ -953,8 +953,8 @@ void G_RunItem( gentity_t *ent ) {
 	int			contents;
 	int			mask;
 
-	// if groundentity has been set to -1, it may have been pushed off an edge
-	if ( ent->s.groundEntityNum == -1 ) {
+	// if its groundentity has been set to none, it may have been pushed off an edge
+	if ( ent->s.groundEntityNum == ENTITYNUM_NONE ) {
 		if ( ent->s.pos.trType != TR_GRAVITY ) {
 			ent->s.pos.trType = TR_GRAVITY;
 			ent->s.pos.trTime = level.time;
