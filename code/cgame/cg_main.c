@@ -1442,12 +1442,12 @@ void CG_LoadMenus(const char *menuFile) {
 		Com_Printf( S_COLOR_YELLOW "menu file not found: %s, using default\n", menuFile );
 		len = trap_FS_FOpenFile( "ui/hud.txt", &f, FS_READ );
 		if (!f) {
-			trap_Error( va( S_COLOR_RED "default menu file not found: ui/hud.txt, unable to continue!\n") );
+			trap_Error( va( S_COLOR_RED "default menu file not found: ui/hud.txt, unable to continue!" ) );
 		}
 	}
 
 	if ( len >= MAX_MENUDEFFILE ) {
-		trap_Error( va( S_COLOR_RED "menu file too large: %s is %i, max allowed is %i\n", menuFile, len, MAX_MENUDEFFILE ) );
+		trap_Error( va( S_COLOR_RED "menu file too large: %s is %i, max allowed is %i", menuFile, len, MAX_MENUDEFFILE ) );
 		trap_FS_FCloseFile( f );
 		return;
 	}

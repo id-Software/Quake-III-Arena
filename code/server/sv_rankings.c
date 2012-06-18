@@ -1004,7 +1004,7 @@ static void SV_RankNewGameCBF( GR_NEWGAME* gr_newgame, void* cbf_arg )
 	}
 	else if( gr_newgame->status == GR_STATUS_BADLEAGUE )
 	{
-		SV_RankError( "SV_RankNewGameCBF: Invalid League name\n" );
+		SV_RankError( "SV_RankNewGameCBF: Invalid League name" );
 	}
 	else
 	{
