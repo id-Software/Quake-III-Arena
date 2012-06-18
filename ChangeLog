@@ -279,7 +279,7 @@
 		added Wheel support to the DirectInput code IN_DIMouse (in_mouse 1)
 		tweaked the Wheel mouse reading for in_mouse -1 (old win32 input code)
 			handle correctly when zDelta is > 120
-			provide a in_logitechbug cvar to handle buggy Logitech MouseWare driver sending wheel events twice
+			provide an in_logitechbug cvar to handle buggy Logitech MouseWare driver sending wheel events twice
 
 2002-9-26 Timothee Besset <ttimo@idsoftware.com>
 	+ ATVI Quake 3 1.32 Patch #38

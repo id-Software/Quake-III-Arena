@@ -72,7 +72,7 @@ void BotSetUserInfo(bot_state_t *bs, char *key, char *value);
 void BotSetTeamStatus(bot_state_t *bs);
 //returns the name of the client
 char *ClientName(int client, char *name, int size);
-//returns an simplyfied client name
+//returns a simplified client name
 char *EasyClientName(int client, char *name, int size);
 //returns the skin used by the client
 char *ClientSkin(int client, char *skin, int size);

@@ -3954,7 +3954,7 @@ int CL_ServerStatus( char *serverAddress, char *serverStatusString, int maxLen )
 
 	// if this server status request has the same address
 	if ( NET_CompareAdr( to, serverStatus->address) ) {
-		// if we recieved an response for this server status request
+		// if we received a response for this server status request
 		if (!serverStatus->pending) {
 			Q_strncpyz(serverStatusString, serverStatus->string, maxLen);
 			serverStatus->retrieved = qtrue;

@@ -33,7 +33,7 @@ int length(List list) {
 	return n;
 }
 
-/* ltov - convert list to an NULL-terminated vector allocated in arena */
+/* ltov - convert list to a NULL-terminated vector allocated in arena */
 void *ltov(List *list, unsigned arena) {
 	int i = 0;
 	void **array = newarray(length(*list) + 1, sizeof array[0], arena);

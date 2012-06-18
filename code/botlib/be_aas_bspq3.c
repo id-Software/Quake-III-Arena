@@ -469,7 +469,7 @@ void AAS_DumpBSPData(void)
 	Com_Memset( &bspworld, 0, sizeof(bspworld) );
 } //end of the function AAS_DumpBSPData
 //===========================================================================
-// load an bsp file
+// load a .bsp file
 //
 // Parameter:				-
 // Returns:					-

@@ -491,7 +491,7 @@ sfxHandle_t S_AL_RegisterSound( const char *sample, qboolean compressed )
 =================
 S_AL_BufferGet
 
-Return's an sfx's buffer
+Return's a sfx's buffer
 =================
 */
 static

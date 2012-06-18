@@ -99,7 +99,7 @@ the symbol's <code>type</code> field.</p>
 
 <h2><a NAME="operators">5.5 Dag Operators</a></h2>
 
-<p>The <code>op</code> field a of <code>node</code> structure holds a dag operator, which
+<p>The <code>op</code> field of a <code>node</code> structure holds a dag operator, which
 consists of a generic operator, a type suffix, and a size indicator. The type suffixes
 are:</p>
 
@@ -516,7 +516,7 @@ e.g.,</p>
 <p>The type suffix for a conversion operator denotes the type of the result and the size
 indicator gives the size of the result. For example, <code>CVUI4</code> converts an
 unsigned (<code>U</code>) to a 4-byte signed integer (<code>I4</code>). The <code>syms[0]</code>
-field points to a symbol-table entry for a integer constant that gives the size of the
+field points to a symbol-table entry for an integer constant that gives the size of the
 source operand. For example, if <code>syms[0]</code> in a <code>CVUI4</code> points to a
 symbol-table entry for 2, the conversion widens a 2-byte unsigned integer to a 4-byte
 signed integer. Conversions that widen unsigned integers zero-extend; those that widen

@@ -764,7 +764,7 @@ int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 		reachnum = AAS_NextAreaReachability(areanum, reachnum))
 	{
 #ifdef AVOIDREACH
-		//check if it isn't an reachability to avoid
+		//check if it isn't a reachability to avoid
 		for (i = 0; i < MAX_AVOIDREACH; i++)
 		{
 			if (avoidreach[i] == reachnum && avoidreachtimes[i] >= AAS_Time()) break;

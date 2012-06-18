@@ -879,7 +879,7 @@ int PS_ReadToken(script_t *script, token_t *token)
 	{
 		if (!PS_ReadString(script, token, '\"')) return 0;
 	} //end if
-	//if an literal
+	//if a literal
 	else if (*script->script_p == '\'')
 	{
 		//if (!PS_ReadLiteral(script, token)) return 0;

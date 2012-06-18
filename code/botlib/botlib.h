@@ -102,7 +102,7 @@ struct weaponinfo_s;
 #define ACTION_FOLLOWME			0x08000000
 #define ACTION_JUMPEDLASTFRAME		0x10000000
 
-//the bot input, will be converted to an usercmd_t
+//the bot input, will be converted to a usercmd_t
 typedef struct bot_input_s
 {
 	float thinktime;		//time since last output (in seconds)

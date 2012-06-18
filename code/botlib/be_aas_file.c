@@ -281,7 +281,7 @@ void AAS_FileInfo(void)
 } //end of the function AAS_FileInfo
 #endif //AASFILEDEBUG
 //===========================================================================
-// allocate memory and read a lump of a AAS file
+// allocate memory and read a lump of an AAS file
 //
 // Parameter:				-
 // Returns:					-

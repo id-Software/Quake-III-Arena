@@ -2080,7 +2080,7 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 					return NULL;
 				} //end if
 				StripDoubleQuotes(token.string);
-				//after the chat name we expect a opening brace
+				//after the chat name we expect an opening brace
 				if (!PC_ExpectTokenString(source, "{"))
 				{
 					FreeSource(source);

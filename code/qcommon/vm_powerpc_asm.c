@@ -374,7 +374,7 @@ static const struct powerpc_operand powerpc_operands[] =
   /* The SH field in an X or M form instruction.  */
 #define SH RS + 1
 #define SH_MASK (0x1f << 11)
-  /* The other UIMM field in a EVX form instruction.  */
+  /* The other UIMM field in an EVX form instruction.  */
 #define EVUIMM SH
   { 0x1f, 11, NULL, 0 },
 
@@ -657,19 +657,19 @@ insert_rbs (unsigned long insn,
 #define SC(op, sa, lk) (OP (op) | ((((unsigned long)(sa)) & 1) << 1) | ((lk) & 1))
 #define SC_MASK (OP_MASK | (((unsigned long)0x3ff) << 16) | (((unsigned long)1) << 1) | 1)
 
-/* An VX form instruction.  */
+/* A VX form instruction.  */
 #define VX(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x7ff))
 
-/* The mask for an VX form instruction.  */
+/* The mask for a VX form instruction.  */
 #define VX_MASK	VX(0x3f, 0x7ff)
 
-/* An VA form instruction.  */
+/* A VA form instruction.  */
 #define VXA(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x03f))
 
-/* The mask for an VA form instruction.  */
+/* The mask for a VA form instruction.  */
 #define VXA_MASK VXA(0x3f, 0x3f)
 
-/* An VXR form instruction.  */
+/* A VXR form instruction.  */
 #define VXR(op, xop, rc) (OP (op) | (((rc) & 1) << 10) | (((unsigned long)(xop)) & 0x3ff))
 
 /* The mask for a VXR form instruction.  */

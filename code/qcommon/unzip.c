@@ -376,11 +376,11 @@ local uLong unzlocal_SearchCentralDir(pzlib_filefunc_def,filestream)
 
 /*
   Open a Zip file. path contain the full pathname (by example,
-     on a Windows NT computer "c:\\test\\zlib114.zip" or on an Unix computer
+     on a Windows NT computer "c:\\test\\zlib114.zip" or on a Unix computer
      "zlib/zlib114.zip".
      If the zipfile cannot be opened (file doesn't exist or in not valid), the
        return value is NULL.
-     Else, the return value is a unzFile Handle, usable with other function
+     Else, the return value is an unzFile Handle, usable with other function
        of this unzip package.
 */
 extern unzFile ZEXPORT unzOpen2 (path, pzlib_filefunc_def)

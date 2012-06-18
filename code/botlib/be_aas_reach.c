@@ -412,7 +412,7 @@ int AAS_BestReachableArea(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t goalor
 		else
 		{
 			//it can very well happen that the AAS_PointAreaNum function tells that
-			//a point is in an area and that starting a AAS_TraceClientBBox from that
+			//a point is in an area and that starting an AAS_TraceClientBBox from that
 			//point will return trace.startsolid qtrue
 #if 0
 			if (AAS_PointAreaNum(start))

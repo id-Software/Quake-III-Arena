@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	OPSTACK_MASK	(OPSTACK_SIZE-1)
 
 // don't change
-// Hardcoded in q3asm an reserved at end of bss
+// Hardcoded in q3asm a reserved at end of bss
 #define	PROGRAM_STACK_SIZE	0x10000
 #define	PROGRAM_STACK_MASK	(PROGRAM_STACK_SIZE-1)
 

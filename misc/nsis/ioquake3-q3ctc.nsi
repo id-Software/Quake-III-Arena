@@ -1,4 +1,4 @@
-; sample NSIS description file for a ioquake3 mod installer
+; sample NSIS description file for an ioquake3 mod installer
 
 !define NAME "Catch the Chicken"
 !define FSNAME "ioquake3-q3ctc"

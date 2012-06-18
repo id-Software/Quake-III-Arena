@@ -362,7 +362,7 @@ void Huff_Decompress(msg_t *mbuf, int offset) {
 	for ( j = 0; j < cch; j++ ) {
 		ch = 0;
 		// don't overflow reading from the messages
-		// FIXME: would it be better to have a overflow check in get_bit ?
+		// FIXME: would it be better to have an overflow check in get_bit ?
 		if ( (bloc >> 3) > size ) {
 			seq[j] = 0;
 			break;

@@ -423,7 +423,7 @@ void AAS_Shutdown(void)
 	//aas has not been initialized
 	aasworld.initialized = qfalse;
 	//NOTE: as soon as a new .bsp file is loaded the .bsp file memory is
-	// freed an reallocated, so there's no need to free that memory here
+	// freed and reallocated, so there's no need to free that memory here
 	//print shutdown
 	botimport.Print(PRT_MESSAGE, "AAS shutdown.\n");
 } //end of the function AAS_Shutdown
