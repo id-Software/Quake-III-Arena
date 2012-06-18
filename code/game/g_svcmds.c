@@ -266,7 +266,7 @@ void Svcmd_AddIP_f (void)
 	char		str[MAX_TOKEN_CHARS];
 
 	if ( trap_Argc() < 2 ) {
-		G_Printf("Usage:  addip <ip-mask>\n");
+		G_Printf("Usage: addip <ip-mask>\n");
 		return;
 	}
 
@@ -288,7 +288,7 @@ void Svcmd_RemoveIP_f (void)
 	char		str[MAX_TOKEN_CHARS];
 
 	if ( trap_Argc() < 2 ) {
-		G_Printf("Usage:  sv removeip <ip-mask>\n");
+		G_Printf("Usage: removeip <ip-mask>\n");
 		return;
 	}
 
@@ -422,6 +422,11 @@ forceteam <player> <team>
 void	Svcmd_ForceTeam_f( void ) {
 	gclient_t	*cl;
 	char		str[MAX_TOKEN_CHARS];
+
+	if ( trap_Argc() < 3 ) {
+		G_Printf("Usage: forceteam <player> <team>\n");
+		return;
+	}
 
 	// find the player
 	trap_Argv( 1, str, sizeof( str ) );
