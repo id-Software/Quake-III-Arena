@@ -1696,7 +1696,7 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hSkin, refEntity_t *torso 
 		dir[2] += 100;
 		VectorNormalize( dir );
 		d = DotProduct(pole.axis[2], dir);
-		// if there is anough movement orthogonal to the flag pole
+		// if there is enough movement orthogonal to the flag pole
 		if (fabs(d) < 0.9) {
 			//
 			d = DotProduct(pole.axis[0], dir);

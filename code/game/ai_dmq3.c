@@ -713,7 +713,7 @@ void BotCTFSeekGoals(bot_state_t *bs) {
 	//if the bot is roaming
 	if (bs->ctfroam_time > FloatTime())
 		return;
-	//if the bot has anough aggression to decide what to do
+	//if the bot has enough aggression to decide what to do
 	if (BotAggression(bs) < 50)
 		return;
 	//set the time to send a message to the team mates
@@ -960,7 +960,7 @@ void Bot1FCTFSeekGoals(bot_state_t *bs) {
 	//if the bot is roaming
 	if (bs->ctfroam_time > FloatTime())
 		return;
-	//if the bot has anough aggression to decide what to do
+	//if the bot has enough aggression to decide what to do
 	if (BotAggression(bs) < 50)
 		return;
 	//set the time to send a message to the team mates
@@ -1074,7 +1074,7 @@ void BotObeliskSeekGoals(bot_state_t *bs) {
 	//if the bot is roaming
 	if (bs->ctfroam_time > FloatTime())
 		return;
-	//if the bot has anough aggression to decide what to do
+	//if the bot has enough aggression to decide what to do
 	if (BotAggression(bs) < 50)
 		return;
 	//set the time to send a message to the team mates
@@ -1219,7 +1219,7 @@ void BotHarvesterSeekGoals(bot_state_t *bs) {
 	//if the bot is roaming
 	if (bs->ctfroam_time > FloatTime())
 		return;
-	//if the bot has anough aggression to decide what to do
+	//if the bot has enough aggression to decide what to do
 	if (BotAggression(bs) < 50)
 		return;
 	//set the time to send a message to the team mates
@@ -2515,7 +2515,7 @@ int BotWantsToCamp(bot_state_t *bs) {
 		bs->camp_time = FloatTime();
 		return qfalse;
 	}
-	//if the bot isn't healthy anough
+	//if the bot isn't healthy enough
 	if (BotAggression(bs) < 50) return qfalse;
 	//the bot should have at least have the rocket launcher, the railgun or the bfg10k with some ammo
 	if ((bs->inventory[INVENTORY_ROCKETLAUNCHER] <= 0 || bs->inventory[INVENTORY_ROCKETS] < 10) &&
@@ -2607,7 +2607,7 @@ void BotRoamGoal(bot_state_t *bs, vec3_t goal) {
 		//direction and length towards the roam target
 		VectorSubtract(trace.endpos, bs->origin, dir);
 		len = VectorNormalize(dir);
-		//if the roam target is far away anough
+		//if the roam target is far away enough
 		if (len > 200) {
 			//the roam target is in the given direction before walls
 			VectorScale(dir, len * trace.fraction - 40, dir);
@@ -3398,7 +3398,7 @@ void BotAimAtEnemy(bot_state_t *bs) {
 			VectorSubtract(entinfo.origin, bs->enemyorigin, dir);
 			//if the enemy is NOT pretty far away and strafing just small steps left and right
 			if (!(dist > 100 && VectorLengthSquared(dir) < Square(32))) {
-				//if skilled anough do exact prediction
+				//if skilled enough do exact prediction
 				if (aim_skill > 0.8 &&
 						//if the weapon is ready to fire
 						bs->cur_ps.weaponstate == WEAPON_READY) {
@@ -3458,10 +3458,10 @@ void BotAimAtEnemy(bot_state_t *bs) {
 				//if hitpoint is not vertically too far from the ground target
 				if (fabs(trace.endpos[2] - groundtarget[2]) < 50) {
 					VectorSubtract(trace.endpos, groundtarget, dir);
-					//if the hitpoint is near anough the ground target
+					//if the hitpoint is near enough the ground target
 					if (VectorLengthSquared(dir) < Square(60)) {
 						VectorSubtract(trace.endpos, start, dir);
-						//if the hitpoint is far anough from the bot
+						//if the hitpoint is far enough from the bot
 						if (VectorLengthSquared(dir) > Square(100)) {
 							//check if the bot is visible from the ground target
 							trace.endpos[2] += 1;
@@ -3483,7 +3483,7 @@ void BotAimAtEnemy(bot_state_t *bs) {
 		//
 		VectorCopy(bs->lastenemyorigin, bestorigin);
 		bestorigin[2] += 8;
-		//if the bot is skilled anough
+		//if the bot is skilled enough
 		if (aim_skill > 0.5) {
 			//do prediction shots around corners
 			if (wi.number == WP_BFG ||

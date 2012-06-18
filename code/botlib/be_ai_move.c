@@ -1988,7 +1988,7 @@ bot_moveresult_t BotTravel_Ladder(bot_movestate_t *ms, aas_reachability_t *reach
 	{
 		//botimport.Print(PRT_MESSAGE, "moving towards ladder\n");
 		VectorSubtract(reach->end, ms->origin, dir);
-		//make sure the horizontal movement is large anough
+		//make sure the horizontal movement is large enough
 		VectorCopy(dir, hordir);
 		hordir[2] = 0;
 		dist = VectorNormalize(hordir);
