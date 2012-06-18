@@ -1533,7 +1533,7 @@ void NET_Config( qboolean enableNetworking ) {
 			ip_socket = INVALID_SOCKET;
 		}
 
-		if(multicast6_socket)
+		if(multicast6_socket != INVALID_SOCKET)
 		{
 			if(multicast6_socket != ip6_socket)
 				closesocket(multicast6_socket);
