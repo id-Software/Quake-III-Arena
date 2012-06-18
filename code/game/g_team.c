@@ -768,8 +768,10 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 			player->client->pers.teamState.lasthurtcarrier = -5;
 		} else if (player->client->sess.sessionTeam ==
 			cl->sess.sessionTeam) {
+#ifdef MISSIONPACK
 			if (player != other)
 				AddScore(player, ent->r.currentOrigin, CTF_TEAM_BONUS);
+#endif
 			// award extra points for capture assists
 			if (player->client->pers.teamState.lastreturnedflag + 
 				CTF_RETURN_FLAG_ASSIST_TIMEOUT > level.time) {
@@ -831,9 +833,9 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 		Team_SetFlagStatus( team, FLAG_TAKEN );
 #ifdef MISSIONPACK
 	}
-#endif
 
 	AddScore(other, ent->r.currentOrigin, CTF_FLAG_BONUS);
+#endif
 	cl->pers.teamState.flagsince = level.time;
 	Team_TakeFlagSound( ent, team );
 
