@@ -49,7 +49,7 @@ The "base path" is the path to the directory holding all the game directories an
 the executable.  It defaults to ".", but can be overridden with a "+set fs_basepath c:\quake3"
 command line to allow code debugging in a different directory.  Basepath cannot
 be modified at all after startup.  Any files that are created (demos, screenshots,
-etc) will be created reletive to the base path, so base path should usually be writable.
+etc) will be created relative to the base path, so base path should usually be writable.
 
 The "home path" is the path used for all write access. On win32 systems we have "base path"
 == "home path", but on *nix systems the base installation is usually readonly, and
@@ -1912,7 +1912,7 @@ void FS_FreeFile( void *buffer ) {
 ============
 FS_WriteFile
 
-Filename are reletive to the quake search path
+Filename are relative to the quake search path
 ============
 */
 void FS_WriteFile( const char *qpath, const void *buffer, int size ) {

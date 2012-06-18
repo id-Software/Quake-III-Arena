@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 LIGHT FLARES
 
 A light flare is an effect that takes place inside the eye when bright light
-sources are visible.  The size of the flare reletive to the screen is nearly
+sources are visible.  The size of the flare relative to the screen is nearly
 constant, irrespective of distance, but the intensity should be proportional to the
 projected area of the light source.
 

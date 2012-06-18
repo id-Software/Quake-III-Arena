@@ -1940,7 +1940,7 @@ static void FixRenderCommandList( int newShader ) {
 SortNewShader
 
 Positions the most recently created shader in the tr.sortedShaders[]
-array so that the shader->sort key is sorted reletive to the other
+array so that the shader->sort key is sorted relative to the other
 shaders.
 
 Sets shader->sortedIndex
