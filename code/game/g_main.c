@@ -1083,7 +1083,7 @@ void ExitLevel (void) {
 		cl->ps.persistant[PERS_SCORE] = 0;
 	}
 
-	// we need to do this here before chaning to CON_CONNECTING
+	// we need to do this here before changing to CON_CONNECTING
 	G_WriteSessionData();
 
 	// change all client states to connecting, so the early players into the

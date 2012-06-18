@@ -333,7 +333,7 @@ Informs all masters that this server is going down
 =================
 */
 void SV_MasterShutdown( void ) {
-	// send a hearbeat right now
+	// send a heartbeat right now
 	svs.nextHeartbeatTime = -9999;
 	SV_MasterHeartbeat(HEARTBEAT_FOR_MASTER);
 
