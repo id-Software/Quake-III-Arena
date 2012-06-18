@@ -33,8 +33,6 @@ PUSHMOVE
 ===============================================================================
 */
 
-void MatchTeam( gentity_t *teamLeader, int moverState, int time );
-
 typedef struct {
 	gentity_t	*ent;
 	vec3_t	origin;
