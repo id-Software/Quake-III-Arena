@@ -2301,7 +2301,6 @@ int BotWantsToRetreat(bot_state_t *bs) {
 #endif
 	//
 	if (bs->enemy >= 0) {
-		//if the enemy is carrying a flag
 		BotEntityInfo(bs->enemy, &entinfo);
 		// if the enemy is carrying a flag
 		if (EntityCarriesFlag(&entinfo)) return qfalse;

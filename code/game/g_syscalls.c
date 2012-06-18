@@ -48,6 +48,7 @@ void	trap_Printf( const char *fmt ) {
 void trap_Error(const char *fmt)
 {
 	syscall(G_ERROR, fmt);
+	// shut up GCC warning about returning functions, because we know better
 	exit(1);
 }
 
@@ -227,7 +228,6 @@ int trap_RealTime( qtime_t *qtime ) {
 
 void trap_SnapVector( float *v ) {
 	syscall( G_SNAPVECTOR, v );
-	return;
 }
 
 // BotLib traps start here

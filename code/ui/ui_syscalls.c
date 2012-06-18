@@ -47,6 +47,7 @@ void trap_Print( const char *string ) {
 void trap_Error(const char *string)
 {
 	syscall(UI_ERROR, string);
+	// shut up GCC warning about returning functions, because we know better
 	exit(1);
 }
 
