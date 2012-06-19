@@ -1074,7 +1074,7 @@ int AAS_ReadRouteCache(void)
 	} //end if
 	if (routecacheheader.version != RCVERSION)
 	{
-		AAS_Error("route cache dump has wrong version %d, should be %d", routecacheheader.version, RCVERSION);
+		AAS_Error("route cache dump has wrong version %d, should be %d\n", routecacheheader.version, RCVERSION);
 		return qfalse;
 	} //end if
 	if (routecacheheader.numareas != aasworld.numareas)

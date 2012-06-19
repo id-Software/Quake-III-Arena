@@ -1622,7 +1622,7 @@ Motivation: not wanting to scrollback for pages to find asm error.
 	}
 	// In some case it Segfault without this check
 	if ( numAsmFiles == 0 ) {
-		Error( "No file to assemble\n" );
+		Error( "No file to assemble" );
 	}
 
 	InitTables();
