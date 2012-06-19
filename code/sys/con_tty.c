@@ -322,8 +322,7 @@ void CON_Init( void )
 	characters  EOF,  EOL,  EOL2, ERASE, KILL, REPRINT,
 	STATUS, and WERASE, and buffers by lines.
 	ISIG: when any of the characters  INTR,  QUIT,  SUSP,  or
-	DSUSP are received, generate the corresponding sig­
-	nal
+	DSUSP are received, generate the corresponding signal
 	*/
 	tc.c_lflag &= ~(ECHO | ICANON);
 
