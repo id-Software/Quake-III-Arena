@@ -298,7 +298,7 @@ New commands
 
   which <filename/path>   - print out the path on disk to a loaded item
 
-  execq <filename>        - quite exec command, doesn't print "execing file.cfg"
+  execq <filename>        - quiet exec command, doesn't print "execing file.cfg"
 
   tell <client num> <msg> - send message to a single client (new to server)
 
