@@ -1,6 +1,6 @@
 code
 
-equ	trap_Printf				-1
+equ	trap_Print				-1
 equ	trap_Error				-2
 equ	trap_Milliseconds		-3
 equ	trap_Cvar_Register		-4
