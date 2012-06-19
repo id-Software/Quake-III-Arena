@@ -336,7 +336,7 @@ Dlls will call this directly
 ============
 */
 intptr_t QDECL VM_DllSyscall( intptr_t arg, ... ) {
-#if !id386
+#if !id386 || defined __clang__
   // rcg010206 - see commentary above
   intptr_t args[16];
   int i;
@@ -835,7 +835,7 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9]);
 	} else {
-#if id386 || idsparc // i386/sparc calling convention doesn't need conversion
+#if ( id386 || idsparc ) && !defined __clang__ // calling convention doesn't need conversion in some cases
 #ifndef NO_VM_COMPILED
 		if ( vm->compiled )
 			r = VM_CallCompiled( vm, (int*)&callnum );
