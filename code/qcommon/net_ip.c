@@ -1655,7 +1655,8 @@ void NET_Sleep(int msec)
 {
 	struct timeval timeout;
 	fd_set fdr;
-	int highestfd = -1, retval;
+	int retval;
+	SOCKET highestfd = INVALID_SOCKET;
 
 	if(msec < 0)
 		msec = 0;
@@ -1672,7 +1673,7 @@ void NET_Sleep(int msec)
 	{
 		FD_SET(ip6_socket, &fdr);
 		
-		if((int)ip6_socket > highestfd)
+		if(ip6_socket > highestfd)
 			highestfd = ip6_socket;
 	}
 
@@ -1680,7 +1681,7 @@ void NET_Sleep(int msec)
 	timeout.tv_usec = (msec%1000)*1000;
 	
 #ifdef _WIN32
-	if(highestfd < 0)
+	if(highestfd == INVALID_SOCKET)
 	{
 		// windows ain't happy when select is called without valid FDs
 		SleepEx(msec, 0);
