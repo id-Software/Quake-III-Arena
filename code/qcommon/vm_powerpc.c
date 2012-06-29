@@ -311,7 +311,7 @@ typedef struct VM_Data {
 
 	// function pointers, no use to waste registers for them
 	long int (* AsmCall)( int, int );
-	void (* BlockCopy )( unsigned int, unsigned int, unsigned int );
+	void (* BlockCopy )( unsigned int, unsigned int, size_t );
 
 	// instruction pointers, rarely used so don't waste register
 	ppc_instruction_t *iPointers;
