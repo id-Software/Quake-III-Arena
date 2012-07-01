@@ -742,7 +742,7 @@ void BotAddAvoidSpot(int movestate, vec3_t origin, float radius, int type)
 int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 									  int lastgoalareanum, int lastareanum,
 									  int *avoidreach, float *avoidreachtimes, int *avoidreachtries,
-									  bot_goal_t *goal, int travelflags, int movetravelflags,
+									  bot_goal_t *goal, int travelflags,
 									  struct bot_avoidspot_s *avoidspots, int numavoidspots, int *flags)
 {
 	int i, t, besttime, bestreachnum, reachnum;
@@ -754,7 +754,6 @@ int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 	if (AAS_AreaDoNotEnter(areanum) || AAS_AreaDoNotEnter(goal->areanum))
 	{
 		travelflags |= TFL_DONOTENTER;
-		movetravelflags |= TFL_DONOTENTER;
 	} //end if
 	//use the routing to find the next area to go to
 	besttime = 0;
@@ -787,7 +786,7 @@ int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 		if (lastgoalareanum == goal->areanum && reach.areanum == lastareanum) continue;
 		//if (AAS_AreaContentsTravelFlags(reach.areanum) & ~travelflags) continue;
 		//if the travel isn't valid
-		if (!BotValidTravel(origin, &reach, movetravelflags)) continue;
+		if (!BotValidTravel(origin, &reach, travelflags)) continue;
 		//get the travel time
 		t = AAS_AreaTravelTimeToGoalArea(reach.areanum, reach.end, goal->areanum, travelflags);
 		//if the goal area isn't reachable from the reachable area
@@ -874,7 +873,7 @@ int BotMovementViewTarget(int movestate, bot_goal_t *goal, int travelflags, floa
 		reachnum = BotGetReachabilityToGoal(reach.end, reach.areanum,
 						ms->lastgoalareanum, lastareanum,
 							ms->avoidreach, ms->avoidreachtimes, ms->avoidreachtries,
-									goal, travelflags, travelflags, NULL, 0, NULL);
+									goal, travelflags, NULL, 0, NULL);
 		VectorCopy(reach.end, end);
 		lastareanum = reach.areanum;
 		if (lastareanum == goal->areanum)
@@ -933,7 +932,7 @@ int BotPredictVisiblePosition(vec3_t origin, int areanum, bot_goal_t *goal, int 
 		reachnum = BotGetReachabilityToGoal(end, areanum,
 						lastgoalareanum, lastareanum,
 							avoidreach, avoidreachtimes, avoidreachtries,
-									goal, travelflags, travelflags, NULL, 0, NULL);
+									goal, travelflags, NULL, 0, NULL);
 		if (!reachnum) return qfalse;
 		AAS_ReachabilityFromNum(reachnum, &reach);
 		//
@@ -3246,7 +3245,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 			reachnum = BotGetReachabilityToGoal(ms->origin, ms->areanum,
 								ms->lastgoalareanum, ms->lastareanum,
 											ms->avoidreach, ms->avoidreachtimes, ms->avoidreachtries,
-														goal, travelflags, travelflags,
+														goal, travelflags,
 																ms->avoidspots, ms->numavoidspots, &resultflags);
 			//the area number the reachability starts in
 			ms->reachareanum = ms->areanum;
@@ -3369,7 +3368,7 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 				lastreachnum = BotGetReachabilityToGoal(end, areas[i],
 							ms->lastgoalareanum, ms->lastareanum,
 							ms->avoidreach, ms->avoidreachtimes, ms->avoidreachtries,
-							goal, travelflags, TFL_JUMPPAD, ms->avoidspots, ms->numavoidspots, NULL);
+							goal, TFL_JUMPPAD, ms->avoidspots, ms->numavoidspots, NULL);
 				if (lastreachnum)
 				{
 					ms->lastreachnum = lastreachnum;
@@ -3389,7 +3388,6 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 							ms->lastreachnum = lastreachnum;
 							ms->lastareanum = areas[i];
 							//botimport.Print(PRT_MESSAGE, "found jumppad reachability hard!!\n");
-							break;
 						} //end if
 					} //end for
 					if (lastreachnum) break;

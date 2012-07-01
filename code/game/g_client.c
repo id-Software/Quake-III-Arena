@@ -722,6 +722,8 @@ void ClientUserinfoChanged( int clientNum ) {
 	// check for malformed or illegal info strings
 	if ( !Info_Validate(userinfo) ) {
 		strcpy (userinfo, "\\name\\badinfo");
+		// don't keep those clients and userinfo
+		trap_DropClient(clientNum, "Invalid userinfo");
 	}
 
 	// check for local client
@@ -938,7 +940,12 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 			return "Invalid password";
 		}
 	}
-
+	// if a player reconnects quickly after a disconnect, the client disconnect may never be called, thus flag can get lost in the ether
+	if (ent->inuse) {
+		G_LogPrintf("Forcing disconnect on active client: %i\n", ent-g_entities);
+		// so lets just fix up anything that should happen on a disconnect
+		ClientDisconnect(ent-g_entities);
+	}
 	// they can connect
 	ent->client = level.clients + clientNum;
 	client = ent->client;
@@ -1271,7 +1278,7 @@ void ClientDisconnect( int clientNum ) {
 	G_RemoveQueuedBotBegin( clientNum );
 
 	ent = g_entities + clientNum;
-	if ( !ent->client ) {
+	if (!ent->client || ent->client->pers.connected == CON_DISCONNECTED) {
 		return;
 	}
 

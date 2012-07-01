@@ -668,20 +668,21 @@ CG_AdjustPositionForMover
 Also called by client movement prediction code
 =========================
 */
-void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out ) {
+void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t angles_in, vec3_t angles_out) {
 	centity_t	*cent;
 	vec3_t	oldOrigin, origin, deltaOrigin;
-	vec3_t	oldAngles, angles;
-	//vec3_t	deltaAngles;
+	vec3_t	oldAngles, angles, deltaAngles;
 
 	if ( moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL ) {
 		VectorCopy( in, out );
+		VectorCopy(angles_in, angles_out);
 		return;
 	}
 
 	cent = &cg_entities[ moverNum ];
 	if ( cent->currentState.eType != ET_MOVER ) {
 		VectorCopy( in, out );
+		VectorCopy(angles_in, angles_out);
 		return;
 	}
 
@@ -692,10 +693,10 @@ void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int
 	BG_EvaluateTrajectory( &cent->currentState.apos, toTime, angles );
 
 	VectorSubtract( origin, oldOrigin, deltaOrigin );
-	//VectorSubtract( angles, oldAngles, deltaAngles );
+	VectorSubtract( angles, oldAngles, deltaAngles );
 
 	VectorAdd( in, deltaOrigin, out );
-
+	VectorAdd( angles_in, deltaAngles, angles_out );
 	// FIXME: origin change when on a rotating object
 }
 
@@ -773,7 +774,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 	// player state
 	if ( cent != &cg.predictedPlayerEntity ) {
 		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum, 
-		cg.snap->serverTime, cg.time, cent->lerpOrigin );
+		cg.snap->serverTime, cg.time, cent->lerpOrigin, cent->lerpAngles, cent->lerpAngles);
 	}
 }
 

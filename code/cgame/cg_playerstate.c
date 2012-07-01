@@ -375,7 +375,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 	}
 	if (ps->persistant[PERS_GAUNTLET_FRAG_COUNT] != ops->persistant[PERS_GAUNTLET_FRAG_COUNT]) {
 #ifdef MISSIONPACK
-		if (ops->persistant[PERS_GAUNTLET_FRAG_COUNT] == 1) {
+		if (ps->persistant[PERS_GAUNTLET_FRAG_COUNT] == 1) {
 			sfx = cgs.media.firstHumiliationSound;
 		} else {
 			sfx = cgs.media.humiliationSound;

@@ -323,7 +323,7 @@ void ElevatorBottomCenter(aas_reachability_t *reach, vec3_t bottomcenter);
 int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 									  int lastgoalareanum, int lastareanum,
 									  int *avoidreach, float *avoidreachtimes, int *avoidreachtries,
-									  bot_goal_t *goal, int travelflags, int movetravelflags,
+									  bot_goal_t *goal, int travelflags,
 									  struct bot_avoidspot_s *avoidspots, int numavoidspots, int *flags);
 
 int AAS_PointLight(vec3_t origin, int *red, int *green, int *blue);

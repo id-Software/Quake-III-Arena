@@ -1590,7 +1590,7 @@ void ClientCommand( int clientNum ) {
 	char	cmd[MAX_TOKEN_CHARS];
 
 	ent = g_entities + clientNum;
-	if ( !ent->client ) {
+	if (!ent->client || ent->client->pers.connected != CON_CONNECTED) {
 		return;		// not fully in game yet
 	}
 

@@ -2615,7 +2615,7 @@ void CG_ResetPlayerEntity( centity_t *cent ) {
 	cent->pe.legs.pitchAngle = 0;
 	cent->pe.legs.pitching = qfalse;
 
-	memset( &cent->pe.torso, 0, sizeof( cent->pe.legs ) );
+	memset( &cent->pe.torso, 0, sizeof( cent->pe.torso ) );
 	cent->pe.torso.yawAngle = cent->rawAngles[YAW];
 	cent->pe.torso.yawing = qfalse;
 	cent->pe.torso.pitchAngle = cent->rawAngles[PITCH];
