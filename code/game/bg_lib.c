@@ -768,6 +768,43 @@ double atan2( double y, double x ) {
 
 #endif
 
+/*
+===============
+powN
+
+Raise a double to a integer power
+===============
+*/
+static double powN( double base, int exp )
+{
+	if( exp >= 0 )
+	{
+		double result = 1.0;
+
+		// calculate x, x^2, x^4, ... by repeated squaring
+		// and multiply together the ones corresponding to the
+		// binary digits of the exponent
+		// e.g. x^73 = x^(1 + 8 + 64) = x * x^8 * x^64
+		while( exp > 0 )
+		{
+			if( exp % 2 == 1 )
+				result *= base;
+
+			base *= base;
+			exp /= 2;
+		}
+
+		return result;
+	}
+	// if exp is INT_MIN, the next clause will be upset,
+	// because -exp isn't representable
+	else if( exp == INT_MIN )
+		return powN( base, exp + 1 ) / base;
+	// x < 0
+	else
+		return 1.0 / powN( base, -exp );
+}
+
 double tan( double x ) {
 	return sin(x) / cos(x);
 }
@@ -1042,7 +1079,6 @@ double strtod( const char *nptr, char **endptr )
 		if( end != s && tolower( *nptr ) == 'p' )
 		{
 			int exp;
-			float res2;
 			// apparently (confusingly) the exponent should be
 			// decimal
 			exp = strtol( &nptr[1], (char **)&end, 10 );
@@ -1053,28 +1089,8 @@ double strtod( const char *nptr, char **endptr )
 					*endptr = (char *)nptr;
 				return res;
 			}
-			if( exp > 0 )
-			{
-				while( exp-- > 0 )
-				{
-					res2 = res * 2;
-					// check for infinity
-					if( res2 <= res )
-						break;
-					res = res2;
-				}
-			}
-			else
-			{
-				while( exp++ < 0 )
-				{
-					res2 = res / 2;
-					// check for underflow
-					if( res2 >= res )
-						break;
-					res = res2;
-				}
-			}
+
+			res *= powN( 2, exp );
 		}
 		if( endptr )
 			*endptr = (char *)end;
@@ -1108,7 +1124,6 @@ double strtod( const char *nptr, char **endptr )
 		if( p != end && tolower( *nptr ) == 'e' )
 		{
 			int exp;
-			float res10;
 			exp = strtol( &nptr[1], (char **)&end, 10 );
 			if( &nptr[1] == end )
 			{
@@ -1117,30 +1132,8 @@ double strtod( const char *nptr, char **endptr )
 					*endptr = (char *)nptr;
 				return res;
 			}
-			if( exp > 0 )
-			{
-				while( exp-- > 0 )
-				{
-					res10 = res * 10;
-					// check for infinity to save us time
-					if( res10 <= res )
-						break;
-					res = res10;
-				}
-			}
-			else if( exp < 0 )
-			{
-				while( exp++ < 0 )
-				{
-					res10 = res / 10;
-					// check for underflow
-					// (test for 0 would probably be just
-					// as good)
-					if( res10 >= res )
-						break;
-					res = res10;
-				}
-			}
+
+			res *= powN( 10, exp );
 		}
 		if( endptr )
 			*endptr = (char *)end;
@@ -1907,19 +1900,6 @@ static LDOUBLE abs_val (LDOUBLE value)
   return result;
 }
 
-static LDOUBLE pow10 (int exp)
-{
-  LDOUBLE result = 1;
-
-  while (exp)
-  {
-    result *= 10;
-    exp--;
-  }
-  
-  return result;
-}
-
 static long round (LDOUBLE value)
 {
   long intpart;
@@ -1982,12 +1962,12 @@ static int fmtfp (char *buffer, size_t *currlen, size_t maxlen,
   /* We "cheat" by converting the fractional part to integer by
    * multiplying by a factor of 10
    */
-  fracpart = round ((pow10 (max)) * (ufvalue - intpart));
+  fracpart = round ((powN (10, max)) * (ufvalue - intpart));
 
-  if (fracpart >= pow10 (max))
+  if (fracpart >= powN (10, max))
   {
     intpart++;
-    fracpart -= pow10 (max);
+    fracpart -= powN (10, max);
   }
 
 #ifdef DEBUG_SNPRINTF
