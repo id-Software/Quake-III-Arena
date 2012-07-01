@@ -493,6 +493,12 @@ QuakeLive mouse acceleration (patch and this text written by TTimo from id)
 
 ---------------------------------------------------- README for Developers -----
 
+pk3dir
+  Ioquake3 has a useful new feature for mappers. Paths in a game directory with
+  the extension ".pk3dir" are treated like pak files. This means you can keep
+  all files specific to your map in one directory tree and easily zip this
+  folder for distribution.
+
 64bit mods
   If you wish to compile external mods as shared libraries on a 64bit platform,
   and the mod source is derived from the id Q3 SDK, you will need to modify the
