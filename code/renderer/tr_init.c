@@ -214,9 +214,6 @@ static void InitOpenGL( void )
 	// init command buffers and SMP
 	R_InitCommandBuffers();
 
-	// print info
-	GfxInfo_f();
-
 	// set default state
 	GL_SetDefaultState();
 }
@@ -1239,6 +1236,8 @@ void R_Init( void ) {
 	if ( err != GL_NO_ERROR )
 		ri.Printf (PRINT_ALL, "glGetError() = 0x%x\n", err);
 
+	// print info
+	GfxInfo_f();
 	ri.Printf( PRINT_ALL, "----- finished R_Init -----\n" );
 }
 
