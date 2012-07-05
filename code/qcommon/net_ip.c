@@ -651,6 +651,7 @@ void Sys_SendPacket( int length, const void *data, netadr_t to ) {
 	}
 
 	if( (ip_socket == INVALID_SOCKET && to.type == NA_IP) ||
+		(ip_socket == INVALID_SOCKET && to.type == NA_BROADCAST) ||
 		(ip6_socket == INVALID_SOCKET && to.type == NA_IP6) ||
 		(ip6_socket == INVALID_SOCKET && to.type == NA_MULTICAST6) )
 		return;
@@ -690,7 +691,7 @@ void Sys_SendPacket( int length, const void *data, netadr_t to ) {
 			return;
 		}
 
-		Com_Printf( "NET_SendPacket: %s\n", NET_ErrorString() );
+		Com_Printf( "Sys_SendPacket: %s\n", NET_ErrorString() );
 	}
 }
 
