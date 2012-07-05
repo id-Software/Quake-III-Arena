@@ -942,9 +942,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	}
 	// if a player reconnects quickly after a disconnect, the client disconnect may never be called, thus flag can get lost in the ether
 	if (ent->inuse) {
-		G_LogPrintf("Forcing disconnect on active client: %i\n", ent-g_entities);
+		G_LogPrintf("Forcing disconnect on active client: %i\n", clientNum);
 		// so lets just fix up anything that should happen on a disconnect
-		ClientDisconnect(ent-g_entities);
+		ClientDisconnect(clientNum);
 	}
 	// they can connect
 	ent->client = level.clients + clientNum;
