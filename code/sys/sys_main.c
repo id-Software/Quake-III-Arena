@@ -140,7 +140,12 @@ Sys_PIDFileName
 */
 static char *Sys_PIDFileName( void )
 {
-	return va( "%s/%s", Sys_DefaultHomePath( ), PID_FILENAME );
+	const char *homePath = Sys_DefaultHomePath( );
+
+	if( *homePath != NULL )
+		return va( "%s/%s", Sys_DefaultHomePath( ), PID_FILENAME );
+
+	return NULL;
 }
 
 /*
@@ -155,6 +160,9 @@ qboolean Sys_WritePIDFile( void )
 	char      *pidFile = Sys_PIDFileName( );
 	FILE      *f;
 	qboolean  stale = qfalse;
+
+	if( pidFile == NULL )
+		return qfalse;
 
 	// First, check if the pid file is already there
 	if( ( f = fopen( pidFile, "r" ) ) != NULL )
@@ -204,7 +212,10 @@ static __attribute__ ((noreturn)) void Sys_Exit( int exitCode )
 	if( exitCode < 2 )
 	{
 		// Normal exit
-		remove( Sys_PIDFileName( ) );
+		char *pidFile = Sys_PIDFileName( );
+
+		if( pidFile != NULL )
+			remove( pidFile );
 	}
 
 	Sys_PlatformExit( );
