@@ -390,55 +390,28 @@ static void ErrJump(void)
 /*
 =================
 DoSyscall
-Uses asm to retrieve arguments from registers to work around different calling conventions
+
+Assembler helper routines will write its arguments directly to global variables so as to
+work around different calling conventions
 =================
 */
 
-#if defined(_MSC_VER) && idx64
+int vm_syscallNum;
+int vm_programStack;
+int *vm_opStackBase;
+uint8_t vm_opStackOfs;
+intptr_t vm_arg;
 
-extern void qsyscall64(void);
-extern uint8_t qvmcall64(int *programStack, int *opStack, intptr_t *instructionPointers, byte *dataBase);
-
-// Microsoft does not support inline assembler on x64 platforms. Meh.
-void DoSyscall(int syscallNum, int programStack, int *opStackBase, uint8_t opStackOfs, intptr_t arg)
-{
-#else
 static void DoSyscall(void)
 {
-	int syscallNum;
-	int programStack;
-	int *opStackBase;
-	uint8_t opStackOfs;
-	intptr_t arg;
-#endif
-
 	vm_t *savedVM;
-
-#if defined(_MSC_VER)
-  #if !idx64
-	__asm
-	{
-		mov	dword ptr syscallNum, eax
-		mov	dword ptr programStack, esi
-		mov	byte ptr opStackOfs, bl
-		mov	dword ptr opStackBase, edi
-		mov	dword ptr arg, ecx
-	}
-  #endif
-#else
-	__asm__ volatile(
-		""
-		: "=a" (syscallNum), "=S" (programStack), "=D" (opStackBase), "=b" (opStackOfs),
-		  "=c" (arg)
-		);
-#endif
 
 	// save currentVM so as to allow for recursive VM entry
 	savedVM = currentVM;
 	// modify VM stack pointer for recursive VM entry
-	currentVM->programStack = programStack - 4;
+	currentVM->programStack = vm_programStack - 4;
 
-	if(syscallNum < 0)
+	if(vm_syscallNum < 0)
 	{
 		int *data;
 #if idx64
@@ -446,34 +419,34 @@ static void DoSyscall(void)
 		intptr_t args[16];
 #endif
 		
-		data = (int *) (savedVM->dataBase + programStack + 4);
+		data = (int *) (savedVM->dataBase + vm_programStack + 4);
 
 #if idx64
-		args[0] = ~syscallNum;
+		args[0] = ~vm_syscallNum;
 		for(index = 1; index < ARRAY_LEN(args); index++)
 			args[index] = data[index];
 			
-		opStackBase[opStackOfs + 1] = savedVM->systemCall(args);
+		vm_opStackBase[vm_opStackOfs + 1] = savedVM->systemCall(args);
 #else
-		data[0] = ~syscallNum;
-		opStackBase[opStackOfs + 1] = savedVM->systemCall((intptr_t *) data);
+		data[0] = ~vm_syscallNum;
+		vm_opStackBase[vm_opStackOfs + 1] = savedVM->systemCall((intptr_t *) data);
 #endif
 	}
 	else
 	{
-		switch(syscallNum)
+		switch(vm_syscallNum)
 		{
 		case VM_JMP_VIOLATION:
 			ErrJump();
 		break;
 		case VM_BLOCK_COPY: 
-			if(opStackOfs < 1)
+			if(vm_opStackOfs < 1)
 				Com_Error(ERR_DROP, "VM_BLOCK_COPY failed due to corrupted opStack");
 			
-			VM_BlockCopy(opStackBase[(opStackOfs - 1)], opStackBase[opStackOfs], arg);
+			VM_BlockCopy(vm_opStackBase[(vm_opStackOfs - 1)], vm_opStackBase[vm_opStackOfs], vm_arg);
 		break;
 		default:
-			Com_Error(ERR_DROP, "Unknown VM operation %d", syscallNum);
+			Com_Error(ERR_DROP, "Unknown VM operation %d", vm_syscallNum);
 		break;
 		}
 	}
@@ -504,13 +477,8 @@ Call to DoSyscall()
 int EmitCallDoSyscall(vm_t *vm)
 {
 	// use edx register to store DoSyscall address
-#if defined(_MSC_VER) && idx64
-	EmitRexString(0x48, "BA");		// mov edx, qsyscall64
-	EmitPtr(qsyscall64);
-#else
 	EmitRexString(0x48, "BA");		// mov edx, DoSyscall
 	EmitPtr(DoSyscall);
-#endif
 
 	// Push important registers to stack as we can't really make
 	// any assumptions about calling conventions.
@@ -522,6 +490,27 @@ int EmitCallDoSyscall(vm_t *vm)
 	EmitRexString(0x41, "51");		// push r9
 #endif
 
+	// write arguments to global vars
+	// syscall number
+	EmitString("A3");			// mov [0x12345678], eax
+	EmitPtr(&vm_syscallNum);
+	// vm_programStack value
+	EmitString("89 F0");			// mov eax, esi
+	EmitString("A3");			// mov [0x12345678], eax
+	EmitPtr(&vm_programStack);
+	// vm_opStackOfs 
+	EmitString("88 D8");			// mov al, bl
+	EmitString("A2");			// mov [0x12345678], al
+	EmitPtr(&vm_opStackOfs);
+	// vm_opStackBase
+	EmitRexString(0x48, "89 F8");		// mov eax, edi
+	EmitRexString(0x48, "A3");		// mov [0x12345678], eax
+	EmitPtr(&vm_opStackBase);
+	// vm_arg
+	EmitString("89 C8");			// mov eax, ecx
+	EmitString("A3");			// mov [0x12345678], eax
+	EmitPtr(&vm_arg);
+	
 	// align the stack pointer to a 16-byte-boundary
 	EmitString("55");			// push ebp
 	EmitRexString(0x48, "89 E5");		// mov ebp, esp
