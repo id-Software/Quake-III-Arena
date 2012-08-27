@@ -250,7 +250,25 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 
 	ri.Printf (PRINT_ALL, "...setting mode %d:", mode );
 
-	if ( !R_GetModeInfo( &glConfig.vidWidth, &glConfig.vidHeight, &glConfig.windowAspect, mode ) )
+	if (mode == -2)
+	{
+		// use desktop video resolution
+		if( videoInfo->current_h > 0 )
+		{
+			glConfig.vidWidth = videoInfo->current_w;
+			glConfig.vidHeight = videoInfo->current_h;
+		}
+		else
+		{
+			glConfig.vidWidth = 480;
+			glConfig.vidHeight = 640;
+			ri.Printf( PRINT_ALL,
+					"Cannot determine display resolution, assuming 640x480\n" );
+		}
+
+		glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
+	}
+	else if ( !R_GetModeInfo( &glConfig.vidWidth, &glConfig.vidHeight, &glConfig.windowAspect, mode ) )
 	{
 		ri.Printf( PRINT_ALL, " invalid mode\n" );
 		return RSERR_INVALID_MODE;
