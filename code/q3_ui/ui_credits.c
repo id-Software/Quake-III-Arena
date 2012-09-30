@@ -57,6 +57,7 @@ static void UI_CreditMenu_Draw_ioq3( void ) {
 		"Vincent Cojot",
 		"Ryan C. Gordon",
 		"Aaron Gyes",
+		"Zack Middleton",
 		"Ludwig Nussel",
 		"Julian Priestley",
 		"Scirocco Six",
