@@ -368,7 +368,11 @@ static void UI_SPLevelMenu_ResetAction( qboolean result ) {
 
 	// clear game variables
 	UI_NewGame();
-	trap_Cvar_SetValue( "ui_spSelection", -4 );
+	if ( UI_GetSpecialArenaInfo( "training" ) ) {
+		trap_Cvar_SetValue( "ui_spSelection", -4 );
+	} else {
+		trap_Cvar_SetValue( "ui_spSelection", 0 );
+	}
 
 	// make the level select menu re-initialize
 	UI_PopMenu();
