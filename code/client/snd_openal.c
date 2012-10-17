@@ -540,6 +540,7 @@ static src_t srcList[MAX_SRC];
 static int srcCount = 0;
 static int srcActiveCnt = 0;
 static qboolean alSourcesInitialised = qfalse;
+static int lastListenerNumber = -1;
 static vec3_t lastListenerOrigin = { 0.0f, 0.0f, 0.0f };
 
 typedef struct sentity_s
@@ -640,7 +641,7 @@ static qboolean S_AL_HearingThroughEntity( int entityNum )
 {
 	float	distanceSq;
 
-	if( clc.clientNum == entityNum )
+	if( lastListenerNumber == entityNum )
 	{
 		// FIXME: <tim@ngus.net> 28/02/06 This is an outrageous hack to detect
 		// whether or not the player is rendering in third person or not. We can't
@@ -2151,6 +2152,7 @@ void S_AL_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int 
 	orientation[0] = axis[0][0]; orientation[1] = axis[0][1]; orientation[2] = axis[0][2];
 	orientation[3] = axis[2][0]; orientation[4] = axis[2][1]; orientation[5] = axis[2][2];
 
+	lastListenerNumber = entityNum;
 	VectorCopy( sorigin, lastListenerOrigin );
 
 	// Set OpenAL listener paramaters
