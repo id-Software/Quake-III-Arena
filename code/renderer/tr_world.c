@@ -652,7 +652,7 @@ void R_AddWorldSurfaces (void) {
 	}
 
 	tr.currentEntityNum = REFENTITYNUM_WORLD;
-	tr.shiftedEntityNum = tr.currentEntityNum << QSORT_ENTITYNUM_SHIFT;
+	tr.shiftedEntityNum = tr.currentEntityNum << QSORT_REFENTITYNUM_SHIFT;
 
 	// determine which leaves are in the PVS / areamask
 	R_MarkLeaves ();

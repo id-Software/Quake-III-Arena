@@ -101,7 +101,7 @@ void R_AddPolygonSurfaces( void ) {
 	srfPoly_t	*poly;
 
 	tr.currentEntityNum = REFENTITYNUM_WORLD;
-	tr.shiftedEntityNum = tr.currentEntityNum << QSORT_ENTITYNUM_SHIFT;
+	tr.shiftedEntityNum = tr.currentEntityNum << QSORT_REFENTITYNUM_SHIFT;
 
 	for ( i = 0, poly = tr.refdef.polys; i < tr.refdef.numPolys ; i++, poly++ ) {
 		sh = R_GetShaderByHandle( poly->hShader );
@@ -208,8 +208,8 @@ void RE_AddRefEntityToScene( const refEntity_t *ent ) {
 	if ( !tr.registered ) {
 		return;
 	}
-	if ( r_numentities >= MAX_ENTITIES ) {
-		ri.Printf(PRINT_DEVELOPER, "RE_AddRefEntityToScene: Dropping refEntity, reached MAX_ENTITIES\n");
+	if ( r_numentities >= MAX_REFENTITIES ) {
+		ri.Printf(PRINT_DEVELOPER, "RE_AddRefEntityToScene: Dropping refEntity, reached MAX_REFENTITIES\n");
 		return;
 	}
 	if ( Q_isnan(ent->origin[0]) || Q_isnan(ent->origin[1]) || Q_isnan(ent->origin[2]) ) {
