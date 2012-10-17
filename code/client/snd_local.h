@@ -74,6 +74,8 @@ typedef struct {
 
 #define MAX_DOPPLER_SCALE 50.0f //arbitrary
 
+#define THIRD_PERSON_THRESHOLD_SQ (48.0f*48.0f)
+
 typedef struct loopSound_s {
 	vec3_t		origin;
 	vec3_t		velocity;
@@ -102,6 +104,7 @@ typedef struct
 	qboolean	fixed_origin;	// use origin instead of fetching entnum's origin
 	sfx_t		*thesfx;		// sfx structure
 	qboolean	doppler;
+	qboolean	fullVolume;
 } channel_t;
 
 
