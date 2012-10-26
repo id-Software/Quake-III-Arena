@@ -1342,7 +1342,8 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			for ( stage2 = stage + 1; stage2 < MAX_SHADER_STAGES; stage2++ )
 			{
 				shaderStage_t *pStage2 = input->xstages[stage2];
-				unsigned int srcBlendBits, dstBlendBits;
+				unsigned int srcBlendBits;
+				//unsigned int dstBlendBits;
 
 				if ( !pStage2 )
 				{
@@ -1350,7 +1351,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 				}
 
 				srcBlendBits = pStage2->stateBits & GLS_SRCBLEND_BITS;
-				dstBlendBits = pStage2->stateBits & GLS_DSTBLEND_BITS;
+				//dstBlendBits = pStage2->stateBits & GLS_DSTBLEND_BITS;
 
 				if (srcBlendBits == GLS_SRCBLEND_DST_COLOR)
 				{

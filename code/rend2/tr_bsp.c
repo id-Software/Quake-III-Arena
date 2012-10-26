@@ -2172,7 +2172,7 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 		{
 			//ri.Printf(PRINT_ALL, "Found!\n");
 			if (size != sizeof(float) * 3 * (verts->filelen / sizeof(*dv)))
-				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!\n", filename, size, (int)(sizeof(float)) * 3 * (verts->filelen / sizeof(*dv)));
+				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!\n", filename, size, (int)((sizeof(float)) * 3 * (verts->filelen / sizeof(*dv))));
 		}
 	}
 
