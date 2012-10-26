@@ -54,6 +54,7 @@ static void UI_CreditMenu_Draw_ioq3( void ) {
 	// (These are in alphabetical order, for the defense of everyone's egos.)
 	static const char *names[] = {
 		"Tim Angus",
+		"James Canete",
 		"Vincent Cojot",
 		"Ryan C. Gordon",
 		"Aaron Gyes",
