@@ -11,7 +11,6 @@ compatibility with existing Quake 3 mods.
 -------------------------------------------------------------------------------
 
   - Compatible with most vanilla Quake 3 mods.
-  - Faster than original renderer on modern GPUs.
   - HDR Rendering, and support for HDR lightmaps
   - Tone mapping and auto-exposure.
   - Cascaded shadow maps.
