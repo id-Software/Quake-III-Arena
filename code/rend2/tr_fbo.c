@@ -795,7 +795,7 @@ void FBO_FastBlit(FBO_t *src, vec4i_t srcBox, FBO_t *dst, vec4i_t dstBox, int bu
 	}
 
 	// get to a neutral state first
-	FBO_Bind(NULL);
+	//FBO_Bind(NULL);
 
 	srcFb = src ? src->frameBuffer : 0;
 	dstFb = dst ? dst->frameBuffer : 0;

@@ -1713,7 +1713,7 @@ void RB_StageIteratorGeneric( void )
 	//
 	// pshadows!
 	//
-	if ( tess.pshadowBits && tess.shader->sort <= SS_OPAQUE
+	if (glRefConfig.framebufferObject && tess.pshadowBits && tess.shader->sort <= SS_OPAQUE
 		&& !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) ) {
 		ProjectPshadowVBOGLSL();
 	}

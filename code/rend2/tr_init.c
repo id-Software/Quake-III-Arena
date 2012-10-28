@@ -1411,7 +1411,8 @@ void R_Init( void ) {
 
 	R_InitImages();
 
-	FBO_Init();
+	if (glRefConfig.framebufferObject)
+		FBO_Init();
 
 	GLSL_InitGPUShaders();
 
@@ -1463,7 +1464,8 @@ void RE_Shutdown( qboolean destroyWindow ) {
 		R_SyncRenderThread();
 		R_ShutdownCommandBuffers();
 		R_ShutDownQueries();
-		FBO_Shutdown();
+		if (glRefConfig.framebufferObject)
+			FBO_Shutdown();
 		R_DeleteTextures();
 		R_ShutdownVBOs();
 		GLSL_ShutdownGPUShaders();
