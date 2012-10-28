@@ -40,10 +40,6 @@ typedef unsigned int glIndex_t;
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-#ifndef ARRAY_SIZE
-#	define ARRAY_SIZE(arr)                          (sizeof(arr) / sizeof(arr[0]))
-#endif
-
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
 // parallel on a dual cpu machine
