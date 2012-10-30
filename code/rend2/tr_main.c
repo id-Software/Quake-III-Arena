@@ -1868,7 +1868,7 @@ void R_DecomposeSort( unsigned sort, int *entityNum, shader_t **shader,
 	*fogNum = ( sort >> QSORT_FOGNUM_SHIFT ) & 31;
 	*shader = tr.sortedShaders[ ( sort >> QSORT_SHADERNUM_SHIFT ) & (MAX_SHADERS-1) ];
 	*entityNum = ( sort >> QSORT_REFENTITYNUM_SHIFT ) & REFENTITYNUM_MASK;
-	*pshadowMap = (sort & 2) >> 1;
+	*pshadowMap = (sort >> QSORT_PSHADOW_SHIFT ) & 1;
 	*dlightMap = sort & 1;
 }
 
