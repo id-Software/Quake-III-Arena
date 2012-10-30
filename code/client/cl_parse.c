@@ -538,10 +538,10 @@ void CL_ParseGamestate( msg_t *msg ) {
 		CL_StopRecord_f();
 	
 	// reinitialize the filesystem if the game directory has changed
-	if(!cls.oldGameSet && (Cvar_Flags("fs_game") & CVAR_MODIFIED))
+	if(!cl_oldGameSet && (Cvar_Flags("fs_game") & CVAR_MODIFIED))
 	{
-		cls.oldGameSet = qtrue;
-		Q_strncpyz(cls.oldGame, oldGame, sizeof(cls.oldGame));
+		cl_oldGameSet = qtrue;
+		Q_strncpyz(cl_oldGame, oldGame, sizeof(cl_oldGame));
 	}
 
 	FS_ConditionalRestart(clc.checksumFeed, qfalse);
