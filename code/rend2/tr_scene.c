@@ -507,11 +507,6 @@ void RE_RenderScene( const refdef_t *fd ) {
 	
 	parms.stereoFrame = tr.refdef.stereoFrame;
 
-	if (glRefConfig.framebufferObject)
-	{
-		parms.targetFbo = tr.renderFbo;
-	}
-
 	VectorCopy( fd->vieworg, parms.or.origin );
 	VectorCopy( fd->viewaxis[0], parms.or.axis[0] );
 	VectorCopy( fd->viewaxis[1], parms.or.axis[1] );

@@ -661,6 +661,8 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 	vec2_t texCoords[4];
 	vec2_t invTexRes;
 	FBO_t *oldFbo = glState.currentFBO;
+	matrix_t projection;
+	int width, height;
 
 	if (!src)
 		return;
@@ -726,11 +728,25 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 
 	FBO_Bind(dst);
 
-	RB_SetGL2D();
+	if (glState.currentFBO)
+	{
+		width = glState.currentFBO->width;
+		height = glState.currentFBO->height;
+	}
+	else
+	{
+		width = glConfig.vidWidth;
+		height = glConfig.vidHeight;
+	}
 
-	GL_SelectTexture(TB_COLORMAP);
+	qglViewport( 0, 0, width, height );
+	qglScissor( 0, 0, width, height );
 
-	GL_Bind(src);
+	Matrix16Ortho(0, width, height, 0, 0, 1, projection);
+
+	qglDisable( GL_CULL_FACE );
+
+	GL_BindToTMU(src, TB_COLORMAP);
 
 	VectorSet4(quadVerts[0], dstBox[0], dstBox[1], 0, 1);
 	VectorSet4(quadVerts[1], dstBox[2], dstBox[1], 0, 1);
@@ -749,7 +765,7 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 
 	GLSL_BindProgram(shaderProgram);
 	
-	GLSL_SetUniformMatrix16(shaderProgram, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMatrix16(shaderProgram, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, projection);
 	GLSL_SetUniformVec4(shaderProgram, TEXTURECOLOR_UNIFORM_COLOR, color);
 	GLSL_SetUniformVec2(shaderProgram, TEXTURECOLOR_UNIFORM_INVTEXRES, invTexRes);
 	GLSL_SetUniformVec2(shaderProgram, TEXTURECOLOR_UNIFORM_AUTOEXPOSUREMINMAX, tr.refdef.autoExposureMinMax);
