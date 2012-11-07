@@ -974,6 +974,8 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	tess.numIndexes = 0;
 	tess.numVertexes = 0;
 	tess.firstIndex = 0;
+	tess.minIndex = 0;
+	tess.maxIndex = 0;
 
 	tess.xyz[tess.numVertexes][0] = x;
 	tess.xyz[tess.numVertexes][1] = y;
@@ -1021,6 +1023,8 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	tess.indexes[tess.numIndexes++] = 0;
 	tess.indexes[tess.numIndexes++] = 2;
 	tess.indexes[tess.numIndexes++] = 3;
+	tess.minIndex = 0;
+	tess.maxIndex = 3;
 
 	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
 	RB_UpdateVBOs(ATTR_POSITION | ATTR_TEXCOORD);
@@ -1035,7 +1039,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	VectorSet4(color, 1, 1, 1, 1);
 	GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, color);
 
-	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex);
+	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 	
 	//R_BindNullVBO();
 	//R_BindNullIBO();
@@ -1043,6 +1047,8 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	tess.numIndexes = 0;
 	tess.numVertexes = 0;
 	tess.firstIndex = 0;
+	tess.minIndex = 0;
+	tess.maxIndex = 0;
 }
 
 void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {

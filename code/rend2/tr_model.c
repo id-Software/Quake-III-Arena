@@ -762,6 +762,10 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vboSurf->mdvSurface = surf;
 			vboSurf->numIndexes = surf->numTriangles * 3;
 			vboSurf->numVerts = surf->numVerts;
+			
+			vboSurf->minIndex = 0;
+			vboSurf->maxIndex = surf->numVerts;
+
 			vboSurf->vbo = R_CreateVBO(va("staticMD3Mesh_VBO '%s'", surf->name), data, dataSize, VBO_USAGE_STATIC);
 
 			vboSurf->vbo->ofs_xyz       = ofs_xyz;

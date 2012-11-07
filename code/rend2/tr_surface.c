@@ -214,16 +214,20 @@ void RB_InstantQuad2(vec4_t quadVerts[4], vec2_t texCoords[4])
 	tess.indexes[tess.numIndexes++] = 0;
 	tess.indexes[tess.numIndexes++] = 2;
 	tess.indexes[tess.numIndexes++] = 3;
+	tess.minIndex = 0;
+	tess.maxIndex = 3;
 
 	RB_UpdateVBOs(ATTR_POSITION | ATTR_TEXCOORD);
 
 	GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
 
-	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex);
+	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 
 	tess.numIndexes = 0;
 	tess.numVertexes = 0;
 	tess.firstIndex = 0;
+	tess.minIndex = 0;
+	tess.maxIndex = 0;
 }
 
 
@@ -461,7 +465,7 @@ static void RB_SurfaceHelper( int numVerts, srfVert_t *verts, int numTriangles, 
 	tess.numVertexes += numVerts;
 }
 
-static qboolean RB_SurfaceHelperVBO(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndexes, int firstIndex, int dlightBits, int pshadowBits, qboolean shaderCheck)
+static qboolean RB_SurfaceHelperVBO(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndexes, int firstIndex, int minIndex, int maxIndex, int dlightBits, int pshadowBits, qboolean shaderCheck)
 {
 	int i, mergeForward, mergeBack;
 	GLvoid *firstIndexOffset, *lastIndexOffset;
@@ -517,20 +521,26 @@ static qboolean RB_SurfaceHelperVBO(VBO_t *vbo, IBO_t *ibo, int numVerts, int nu
 	if (mergeBack != -1 && mergeForward == -1)
 	{
 		tess.multiDrawNumIndexes[mergeBack] += numIndexes;
-		tess.multiDrawLastIndex[mergeBack]   = (byte *)tess.multiDrawFirstIndex[mergeBack] + tess.multiDrawNumIndexes[mergeBack] * sizeof(GL_INDEX_TYPE);
+		tess.multiDrawLastIndex[mergeBack]   = tess.multiDrawFirstIndex[mergeBack] + tess.multiDrawNumIndexes[mergeBack];
+		tess.multiDrawMinIndex[mergeBack] = MIN(tess.multiDrawMinIndex[mergeBack], minIndex);
+		tess.multiDrawMaxIndex[mergeBack] = MAX(tess.multiDrawMaxIndex[mergeBack], maxIndex);
 		backEnd.pc.c_multidrawsMerged++;
 	}
 	else if (mergeBack == -1 && mergeForward != -1)
 	{
 		tess.multiDrawNumIndexes[mergeForward] += numIndexes;
 		tess.multiDrawFirstIndex[mergeForward]  = firstIndexOffset;
-		tess.multiDrawLastIndex[mergeForward]   = (byte *)tess.multiDrawFirstIndex[mergeForward] + tess.multiDrawNumIndexes[mergeForward] * sizeof(GL_INDEX_TYPE);
+		tess.multiDrawLastIndex[mergeForward]   = tess.multiDrawFirstIndex[mergeForward] + tess.multiDrawNumIndexes[mergeForward];
+		tess.multiDrawMinIndex[mergeForward] = MIN(tess.multiDrawMinIndex[mergeForward], minIndex);
+		tess.multiDrawMaxIndex[mergeForward] = MAX(tess.multiDrawMaxIndex[mergeForward], maxIndex);
 		backEnd.pc.c_multidrawsMerged++;
 	}
 	else if (mergeBack != -1 && mergeForward != -1)
 	{
 		tess.multiDrawNumIndexes[mergeBack] += numIndexes + tess.multiDrawNumIndexes[mergeForward];
-		tess.multiDrawLastIndex[mergeBack]   = (byte *)tess.multiDrawFirstIndex[mergeBack] + tess.multiDrawNumIndexes[mergeBack] * sizeof(GL_INDEX_TYPE);
+		tess.multiDrawLastIndex[mergeBack]   = tess.multiDrawFirstIndex[mergeBack] + tess.multiDrawNumIndexes[mergeBack];
+		tess.multiDrawMinIndex[mergeBack] = MIN(tess.multiDrawMinIndex[mergeBack], MIN(tess.multiDrawMinIndex[mergeForward], minIndex));
+		tess.multiDrawMaxIndex[mergeBack] = MAX(tess.multiDrawMaxIndex[mergeBack], MAX(tess.multiDrawMaxIndex[mergeForward], maxIndex));
 		tess.multiDrawPrimitives--;
 
 		if (mergeForward != tess.multiDrawPrimitives)
@@ -545,6 +555,8 @@ static qboolean RB_SurfaceHelperVBO(VBO_t *vbo, IBO_t *ibo, int numVerts, int nu
 		tess.multiDrawNumIndexes[tess.multiDrawPrimitives] = numIndexes;
 		tess.multiDrawFirstIndex[tess.multiDrawPrimitives] = firstIndexOffset;
 		tess.multiDrawLastIndex[tess.multiDrawPrimitives] = lastIndexOffset;
+		tess.multiDrawMinIndex[tess.multiDrawPrimitives] = minIndex;
+		tess.multiDrawMaxIndex[tess.multiDrawPrimitives] = maxIndex;
 		tess.multiDrawPrimitives++;
 	}
 
@@ -562,7 +574,7 @@ RB_SurfaceTriangles
 =============
 */
 static void RB_SurfaceTriangles( srfTriangles_t *srf ) {
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
+	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
 	{
 		return;
 	}
@@ -623,6 +635,8 @@ static void RB_SurfaceBeam( void )
 	tess.numVertexes = 0;
 	tess.numIndexes = 0;
 	tess.firstIndex = 0;
+	tess.minIndex = 0;
+	tess.maxIndex = 0;
 
 	for ( i = 0; i <= NUM_BEAM_SEGS; i++ ) {
 		VectorCopy(start_points[ i % NUM_BEAM_SEGS ], tess.xyz[tess.numVertexes++]);
@@ -638,6 +652,9 @@ static void RB_SurfaceBeam( void )
 		tess.indexes[tess.numIndexes++] =      (i + 1) * 2;
 		tess.indexes[tess.numIndexes++] = 1  + (i + 1) * 2;
 	}
+
+	tess.minIndex = 0;
+	tess.maxIndex = tess.numVertexes;
 
 	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
 	RB_UpdateVBOs(ATTR_POSITION);
@@ -658,11 +675,13 @@ static void RB_SurfaceBeam( void )
 		GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, color);
 	}
 
-	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex);
+	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 
 	tess.numIndexes = 0;
 	tess.numVertexes = 0;
 	tess.firstIndex = 0;
+	tess.minIndex = 0;
+	tess.maxIndex = 0;
 }
 
 //================================================================================
@@ -1286,7 +1305,7 @@ RB_SurfaceFace
 ==============
 */
 static void RB_SurfaceFace( srfSurfaceFace_t *srf ) {
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
+	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
 	{
 		return;
 	}
@@ -1353,7 +1372,7 @@ static void RB_SurfaceGrid( srfGridMesh_t *srf ) {
 	int     pshadowBits;
 	//int		*vDlightBits;
 
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
+	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qtrue ) )
 	{
 		return;
 	}
@@ -1611,7 +1630,7 @@ static void RB_SurfaceFlare(srfFlare_t *surf)
 
 static void RB_SurfaceVBOMesh(srfVBOMesh_t * srf)
 {
-	RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qfalse );
+	RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits[backEnd.smpFrame], srf->pshadowBits[backEnd.smpFrame], qfalse );
 }
 
 void RB_SurfaceVBOMDVMesh(srfVBOMDVMesh_t * surface)
@@ -1636,6 +1655,8 @@ void RB_SurfaceVBOMDVMesh(srfVBOMDVMesh_t * surface)
 
 	tess.numIndexes += surface->numIndexes;
 	tess.numVertexes += surface->numVerts;
+	tess.minIndex = surface->minIndex;
+	tess.maxIndex = surface->maxIndex;
 
 	//mdvModel = surface->mdvModel;
 	//mdvSurface = surface->mdvSurface;

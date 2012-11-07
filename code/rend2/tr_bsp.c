@@ -1939,11 +1939,16 @@ static void R_CreateWorldVBO(void)
 			{
 				srfTriangle_t  *tri;
 
+				srf->minIndex = numVerts + srf->triangles->indexes[0];
+				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
 				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 				{
 					for(j = 0; j < 3; j++)
 					{
 						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
 					}
 				}
 
@@ -1963,11 +1968,16 @@ static void R_CreateWorldVBO(void)
 			{
 				srfTriangle_t  *tri;
 
+				srf->minIndex = numVerts + srf->triangles->indexes[0];
+				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
 				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 				{
 					for(j = 0; j < 3; j++)
 					{
 						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
 					}
 				}
 
@@ -1987,11 +1997,16 @@ static void R_CreateWorldVBO(void)
 			{
 				srfTriangle_t  *tri;
 
+				srf->minIndex = numVerts + srf->triangles->indexes[0];
+				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
 				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 				{
 					for(j = 0; j < 3; j++)
 					{
 						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
 					}
 				}
 
@@ -3100,6 +3115,15 @@ void R_MergeLeafSurfaces(void)
 		vboSurf->numIndexes = numTriangles * 3;
 		vboSurf->numVerts = numVerts;
 		vboSurf->firstIndex = firstIndex;
+
+		vboSurf->minIndex = *(iboIndexes + firstIndex);
+		vboSurf->maxIndex = *(iboIndexes + firstIndex);
+
+		for (j = 1; j < numTriangles * 3; j++)
+		{
+			vboSurf->minIndex = MIN(vboSurf->minIndex, *(iboIndexes + firstIndex + j));
+			vboSurf->maxIndex = MAX(vboSurf->maxIndex, *(iboIndexes + firstIndex + j));
+		}
 
 		vboSurf->shader = surf1->shader;
 		vboSurf->fogIndex = surf1->fogIndex;
