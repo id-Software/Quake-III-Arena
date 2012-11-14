@@ -718,7 +718,7 @@ enum
 enum
 {
 	GENERICDEF_USE_DEFORM_VERTEXES  = 0x0001,
-	GENERICDEF_USE_TCGEN            = 0x0002,
+	GENERICDEF_USE_TCGEN_AND_TCMOD  = 0x0002,
 	GENERICDEF_USE_VERTEX_ANIMATION = 0x0004,
 	GENERICDEF_USE_FOG              = 0x0008,
 	GENERICDEF_USE_RGBAGEN          = 0x0010,
@@ -729,19 +729,34 @@ enum
 
 enum
 {
-	LIGHTDEF_USE_LIGHTMAP      = 0x0001,
-	LIGHTDEF_USE_LIGHT_VECTOR  = 0x0002,
-	LIGHTDEF_USE_LIGHT_VERTEX  = 0x0003,
-	LIGHTDEF_LIGHTTYPE_MASK    = 0x0003,
-	LIGHTDEF_USE_NORMALMAP     = 0x0004,
-	LIGHTDEF_USE_SPECULARMAP   = 0x0008,
-	LIGHTDEF_USE_DELUXEMAP     = 0x0010,
-	LIGHTDEF_USE_PARALLAXMAP   = 0x0020,
-	LIGHTDEF_USE_SHADOWMAP     = 0x0040,
-	LIGHTDEF_TCGEN_ENVIRONMENT = 0x0080,
-	LIGHTDEF_ENTITY            = 0x0100,
-	LIGHTDEF_ALL               = 0x01FF,
-	LIGHTDEF_COUNT             = 0x0200
+	FOGDEF_USE_DEFORM_VERTEXES  = 0x0001,
+	FOGDEF_USE_VERTEX_ANIMATION = 0x0002,
+	FOGDEF_ALL                  = 0x0003,
+	FOGDEF_COUNT                = 0x0004,
+};
+
+enum
+{
+	DLIGHTDEF_USE_DEFORM_VERTEXES  = 0x0001,
+	DLIGHTDEF_ALL                  = 0x0001,
+	DLIGHTDEF_COUNT                = 0x0002,
+};
+
+enum
+{
+	LIGHTDEF_USE_LIGHTMAP        = 0x0001,
+	LIGHTDEF_USE_LIGHT_VECTOR    = 0x0002,
+	LIGHTDEF_USE_LIGHT_VERTEX    = 0x0003,
+	LIGHTDEF_LIGHTTYPE_MASK      = 0x0003,
+	LIGHTDEF_ENTITY              = 0x0004,
+	LIGHTDEF_USE_TCGEN_AND_TCMOD = 0x0008,
+	LIGHTDEF_USE_NORMALMAP       = 0x0010,
+	LIGHTDEF_USE_SPECULARMAP     = 0x0020,
+	LIGHTDEF_USE_DELUXEMAP       = 0x0040,
+	LIGHTDEF_USE_PARALLAXMAP     = 0x0080,
+	LIGHTDEF_USE_SHADOWMAP       = 0x0100,
+	LIGHTDEF_ALL                 = 0x01FF,
+	LIGHTDEF_COUNT               = 0x0200
 };
 
 enum
@@ -769,8 +784,8 @@ typedef struct shaderProgram_s
 	// uniform parameters
 	int   numUniforms;
 	GLint *uniforms;
-	GLint *uniformTypes;
-	int   *uniformBufferOffsets;
+	char  *uniformTypes;         // max 127 uniform types
+	short *uniformBufferOffsets; // max 32767/64=511 uniforms
 	char  *uniformBuffer;
 } shaderProgram_t;
 
@@ -839,6 +854,7 @@ enum
 	GENERIC_UNIFORM_SPECULARMAP,
 	GENERIC_UNIFORM_SHADOWMAP,
 	GENERIC_UNIFORM_DIFFUSETEXMATRIX,
+	GENERIC_UNIFORM_DIFFUSETEXOFFTURB,
 	//GENERIC_UNIFORM_NORMALTEXMATRIX,
 	//GENERIC_UNIFORM_SPECULARTEXMATRIX,
 	GENERIC_UNIFORM_TEXTURE1ENV,
@@ -1863,8 +1879,8 @@ typedef struct {
 	//
 	shaderProgram_t genericShader[GENERICDEF_COUNT];
 	shaderProgram_t textureColorShader;
-	shaderProgram_t fogShader;
-	shaderProgram_t dlightallShader;
+	shaderProgram_t fogShader[FOGDEF_COUNT];
+	shaderProgram_t dlightShader[DLIGHTDEF_COUNT];
 	shaderProgram_t lightallShader[LIGHTDEF_COUNT];
 	shaderProgram_t shadowmapShader;
 	shaderProgram_t pshadowShader;

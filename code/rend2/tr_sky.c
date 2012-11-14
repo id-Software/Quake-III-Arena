@@ -440,7 +440,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 */
 	{
 		shaderProgram_t *sp = &tr.lightallShader[0];
-		matrix_t matrix;
+		vec4_t vector;
 
 		GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
 		GLSL_BindProgram(sp);
@@ -459,8 +459,11 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		color[3] = 0.0f;
 		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_VERTCOLOR, color);
 
-		Matrix16Identity(matrix);
-		GLSL_SetUniformMatrix16(sp, GENERIC_UNIFORM_DIFFUSETEXMATRIX, matrix);
+		VectorSet4(vector, 1.0, 0.0, 0.0, 1.0);
+		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_DIFFUSETEXMATRIX, vector);
+
+		VectorSet4(vector, 0.0, 0.0, 0.0, 0.0);
+		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_DIFFUSETEXOFFTURB, vector);
 	}
 
 	R_DrawElementsVBO(tess.numIndexes - tess.firstIndex, tess.firstIndex, tess.minIndex, tess.maxIndex);

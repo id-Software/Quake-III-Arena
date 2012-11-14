@@ -2234,9 +2234,9 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 		}
 	}
 
-	if (environment)
+	if (environment || diffuse->bundle[0].numTexMods)
 	{
-		defs |= LIGHTDEF_TCGEN_ENVIRONMENT;
+		defs |= LIGHTDEF_USE_TCGEN_AND_TCMOD;
 	}
 
 	//ri.Printf(PRINT_ALL, ".\n");
