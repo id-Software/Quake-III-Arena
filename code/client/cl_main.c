@@ -591,23 +591,6 @@ void CL_AddReliableCommand(const char *cmd, qboolean isDisconnectCmd)
 }
 
 /*
-======================
-CL_ChangeReliableCommand
-======================
-*/
-void CL_ChangeReliableCommand( void ) {
-	int index, l;
-
-	index = clc.reliableSequence & ( MAX_RELIABLE_COMMANDS - 1 );
-	l = strlen(clc.reliableCommands[ index ]);
-	if ( l >= MAX_STRING_CHARS - 1 ) {
-		l = MAX_STRING_CHARS - 2;
-	}
-	clc.reliableCommands[ index ][ l ] = '\n';
-	clc.reliableCommands[ index ][ l+1 ] = '\0';
-}
-
-/*
 =======================================================================
 
 CLIENT SIDE DEMO RECORDING
