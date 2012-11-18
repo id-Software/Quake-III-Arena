@@ -210,7 +210,7 @@ void CL_ConfigstringModified( void ) {
 
 	index = atoi( Cmd_Argv(1) );
 	if ( index < 0 || index >= MAX_CONFIGSTRINGS ) {
-		Com_Error( ERR_DROP, "configstring > MAX_CONFIGSTRINGS" );
+		Com_Error( ERR_DROP, "CL_ConfigstringModified: bad index %i", index );
 	}
 	// get everything after "cs <num>"
 	s = Cmd_ArgsFrom(2);
