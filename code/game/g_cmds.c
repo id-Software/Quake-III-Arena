@@ -153,6 +153,32 @@ char	*ConcatArgs( int start ) {
 	return line;
 }
 
+
+/*
+==================
+StringIsInteger
+==================
+*/
+qboolean StringIsInteger( const char * s ) {
+	int			i;
+	int			len;
+	qboolean	foundDigit;
+
+	len = strlen( s );
+	foundDigit = qfalse;
+
+	for ( i=0 ; i < len ; i++ ) {
+		if ( !isdigit( s[i] ) ) {
+			return qfalse;
+		}
+
+		foundDigit = qtrue;
+	}
+
+	return foundDigit;
+}
+
+
 /*
 ==================
 ClientNumberFromString
@@ -166,20 +192,15 @@ int ClientNumberFromString( gentity_t *to, char *s ) {
 	int			idnum;
 	char		cleanName[MAX_STRING_CHARS];
 
-	// numeric values are just slot numbers
-	if (s[0] >= '0' && s[0] <= '9') {
+	// numeric values could be slot numbers
+	if ( StringIsInteger( s ) ) {
 		idnum = atoi( s );
-		if ( idnum < 0 || idnum >= level.maxclients ) {
-			trap_SendServerCommand( to-g_entities, va("print \"Bad client slot: %i\n\"", idnum));
-			return -1;
+		if ( idnum >= 0 && idnum < level.maxclients ) {
+			cl = &level.clients[idnum];
+			if ( cl->pers.connected == CON_CONNECTED ) {
+				return idnum;
+			}
 		}
-
-		cl = &level.clients[idnum];
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			trap_SendServerCommand( to-g_entities, va("print \"Client %i is not active\n\"", idnum));
-			return -1;
-		}
-		return idnum;
 	}
 
 	// check for a name match
