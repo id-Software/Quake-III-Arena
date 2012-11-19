@@ -258,14 +258,17 @@ static sfx_t *S_FindName( const char *name ) {
 	sfx_t	*sfx;
 
 	if (!name) {
-		Com_Error (ERR_FATAL, "S_FindName: NULL");
+		Com_Error(ERR_FATAL, "Sound name is NULL");
 	}
+
 	if (!name[0]) {
-		Com_Error (ERR_FATAL, "S_FindName: empty name");
+		Com_Printf( S_COLOR_YELLOW "WARNING: Sound name is empty\n" );
+		return NULL;
 	}
 
 	if (strlen(name) >= MAX_QPATH) {
-		Com_Error (ERR_FATAL, "Sound name too long: %s", name);
+		Com_Printf( S_COLOR_YELLOW "WARNING: Sound name is too long: %s\n", name );
+		return NULL;
 	}
 
 	hash = S_HashSFXName(name);
@@ -351,12 +354,11 @@ sfxHandle_t	S_Base_RegisterSound( const char *name, qboolean compressed ) {
 		return 0;
 	}
 
-	if ( strlen( name ) >= MAX_QPATH ) {
-		Com_Printf( "Sound name exceeds MAX_QPATH\n" );
+	sfx = S_FindName( name );
+	if ( !sfx ) {
 		return 0;
 	}
 
-	sfx = S_FindName( name );
 	if ( sfx->soundData ) {
 		if ( sfx->defaultSound ) {
 			Com_Printf( S_COLOR_YELLOW "WARNING: could not find %s - using default\n", sfx->soundName );
