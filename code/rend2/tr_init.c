@@ -107,6 +107,9 @@ cvar_t  *r_mergeMultidraws;
 cvar_t  *r_mergeLeafSurfaces;
 
 cvar_t  *r_cameraExposure;
+
+cvar_t  *r_softOverbright;
+
 cvar_t  *r_hdr;
 cvar_t  *r_postProcess;
 
@@ -1148,6 +1151,8 @@ void R_Register( void )
 	r_stereoEnabled = ri.Cvar_Get( "r_stereoEnabled", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_greyscale = ri.Cvar_Get("r_greyscale", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	ri.Cvar_CheckRange(r_greyscale, 0, 1, qfalse);
+
+	r_softOverbright = ri.Cvar_Get( "r_softOverbright", "1", CVAR_ARCHIVE | CVAR_LATCH );
 
 	r_hdr = ri.Cvar_Get( "r_hdr", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_postProcess = ri.Cvar_Get( "r_postProcess", "1", CVAR_ARCHIVE );

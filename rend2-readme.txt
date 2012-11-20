@@ -92,12 +92,18 @@ Cvars for simple rendering features:
                                      0    - None. (default)
                                      1-16 - Some.
                                      17+  - Too much!
-									 
+
   r_ssao                         - Enable screen-space ambient occlusion.
                                    Currently eats framerate and has some
-								   visible artifacts.
-								     0 - No. (default)
-									 1 - Yes.
+                                   visible artifacts.
+                                     0 - No. (default)
+                                     1 - Yes.
+
+  r_softOverbright               - Enable software overbrighting.  This enables
+                                   overbrighting even in a window.  Is disabled
+                                   when r_toneMap 1 and r_hdr 1.
+                                     0 - No.
+                                     1 - Yes. (default)
 
 Cvars for HDR and tonemapping:
   r_hdr                          - Do scene rendering in a framebuffer with
@@ -123,63 +129,63 @@ Cvars for HDR and tonemapping:
 
   r_forceToneMap                 - Cheat.  Override built-in and map tonemap
                                    settings and use cvars r_forceToneMapAvg,
-								   r_forceToneMapMin, and r_forceToneMapMax.
-								     0 - No. (default)
-									 1 - Yes.
+                                   r_forceToneMapMin, and r_forceToneMapMax.
+                                     0 - No. (default)
+                                     1 - Yes.
 
   r_forceToneMapAvg              - Cheat.  Map average scene luminance to this
                                    value, in powers of two.  Requires 
-								   r_forceToneMap.
-								    -2.0 - Dark.
-								    -1.0 - Kinda dark. (default).
-									 2.0 - Too bright.
+                                   r_forceToneMap.
+                                    -2.0 - Dark.
+                                    -1.0 - Kinda dark. (default).
+                                     2.0 - Too bright.
 
   r_forceToneMapMin              - Cheat.  After mapping average, luminance
                                    below this level is mapped to black.
-								   Requires r_forceToneMap.
-								    -5    - Not noticeable.
-									-3.25 - Normal. (default)
-									 0.0  - Too dark.
+                                   Requires r_forceToneMap.
+                                    -5    - Not noticeable.
+                                    -3.25 - Normal. (default)
+                                     0.0  - Too dark.
 
   r_forceToneMapMin              - Cheat.  After mapping average, luminance
                                    above this level is mapped to white.
-								   Requires r_forceToneMap.
-								    0.0 - Too bright.
-									1.0 - Normal. (default).
-									2.0 - Washed out.
+                                   Requires r_forceToneMap.
+                                    0.0 - Too bright.
+                                    1.0 - Normal. (default).
+                                    2.0 - Washed out.
 
   r_autoExposure                 - Do automatic exposure based on scene
                                    brightness.  Hardcoded to -2 to 2 on maps
-								   that don't specify otherwise.  Requires
+                                   that don't specify otherwise.  Requires
                                    r_hdr, r_postprocess, and r_toneMap.
                                      0 - No.
                                      1 - Yes. (default)
-									 
+                                     
   r_forceAutoExposure            - Cheat.  Override built-in and map auto
                                    exposure settings and use cvars
-								   r_forceAutoExposureMin and 
-								   r_forceAutoExposureMax.
-								     0 - No. (default)
-									 1 - Yes.
+                                   r_forceAutoExposureMin and 
+                                   r_forceAutoExposureMax.
+                                     0 - No. (default)
+                                     1 - Yes.
 
   r_forceAutoExposureMin         - Cheat.  Set minimum exposure to this value,
                                    in powers of two.  Requires
-								   r_forceAutoExpsure.
-								    -3.0 - Dimmer.
-									-2.0 - Normal. (default)
-									-1.0 - Brighter.
+                                   r_forceAutoExpsure.
+                                    -3.0 - Dimmer.
+                                    -2.0 - Normal. (default)
+                                    -1.0 - Brighter.
 
   r_forceAutoExposureMax         - Cheat.  Set maximum exposure to this value,
                                    in powers of two.  Requires
-								   r_forceAutoExpsure.
-								     1.0 - Dimmer.
-									 2.0 - Normal. (default)
-									 3.0 - Brighter.
+                                   r_forceAutoExpsure.
+                                     1.0 - Dimmer.
+                                     2.0 - Normal. (default)
+                                     3.0 - Brighter.
 
   r_srgb                         - Treat all input textures as sRGB, and do
                                    final rendering in a sRGB framebuffer.  Only
-								   required if assets were created with it in
-								   mind.
+                                   required if assets were created with it in
+                                   mind.
                                      0 - No. (default)
                                      1 - Yes.
 
@@ -191,8 +197,8 @@ Cvars for advanced material usage:
                                      1 - Yes. (default)
                                      2 - Yes, and use Oren-Nayar reflectance
                                          model.
-								     3 - Yes, and use tri-Ace's Oren-Nayar
-									     reflectance model.
+                                     3 - Yes, and use tri-Ace's Oren-Nayar
+                                         reflectance model.
 
   r_specularMapping              - Enable specular mapping for materials that
                                    support it, and also specify advanced
@@ -563,7 +569,7 @@ contributed thoughts, ideas, and whole swaths of code to this project.
 
   - Zachary 'Zakk' Slater, Thilo Schulz, Tim Angus, and the rest of the
     ioquake3 team and contributors, for improving massively upon the raw Quake
-	3 source, and accepting my and gimhael's modular renderer patch.
+    3 source, and accepting my and gimhael's modular renderer patch.
 
   - Robert 'Tr3B' Beckebans and the other contributors to XReaL, for letting me
     liberally copy code from you. :)
@@ -574,7 +580,7 @@ contributed thoughts, ideas, and whole swaths of code to this project.
     
   - Yoshiharu Gotanda, Tatsuya Shoji, and the rest of tri-Ace's R&D Department,
     for creating the tri-Ace shading equations and posting their derivations in
-	simple English.
+    simple English.
     
   - Matthias 'gimhael' Bentrup, for random ideas and bits of code.
   

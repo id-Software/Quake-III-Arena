@@ -309,7 +309,7 @@ FBO_Bind
 */
 void FBO_Bind(FBO_t * fbo)
 {
-	if (fbo && glState.currentFBO == fbo)
+	if (glState.currentFBO == fbo)
 		return;
 		
 	if (r_logFile->integer)
@@ -405,6 +405,8 @@ void FBO_Init(void)
 		ri.Cvar_SetValue("r_ext_framebuffer_multisample", (float)multisample);
 	}
 	
+	// only create a render FBO if we need to resolve MSAA or do HDR
+	// otherwise just render straight to the screen (tr.renderFbo = NULL)
 	if (multisample && glRefConfig.framebufferMultisample)
 	{
 		tr.renderFbo = FBO_Create("_render", tr.renderDepthImage->width, tr.renderDepthImage->height);
@@ -427,7 +429,7 @@ void FBO_Init(void)
 
 		R_CheckFBO(tr.msaaResolveFbo);
 	}
-	else
+	else if (r_hdr->integer)
 	{
 		tr.renderFbo = FBO_Create("_render", tr.renderDepthImage->width, tr.renderDepthImage->height);
 		FBO_Bind(tr.renderFbo);
@@ -443,10 +445,13 @@ void FBO_Init(void)
 
 	// clear render buffer
 	// this fixes the corrupt screen bug with r_hdr 1 on older hardware
-	FBO_Bind(tr.renderFbo);
-	qglClearColor( 1, 0, 0.5, 1 );
-	qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	FBO_Bind(NULL);
+	if (tr.renderFbo)
+	{
+		FBO_Bind(tr.renderFbo);
+		qglClearColor( 1, 0, 0.5, 1 );
+		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		FBO_Bind(NULL);
+	}
 
 #ifdef REACTION
 	{
@@ -525,6 +530,7 @@ void FBO_Init(void)
 		R_CheckFBO(tr.targetLevelsFbo);
 	}
 
+	if (r_softOverbright->integer)
 	{
 		//tr.screenScratchFbo = FBO_Create("_screenscratch", width, height);
 		tr.screenScratchFbo = FBO_Create("_screenscratch", tr.screenScratchImage->width, tr.screenScratchImage->height);

@@ -485,7 +485,7 @@ void RB_BeginDrawingView (void) {
 		// drawing more world check is in case of double renders, such as skyportals
 		if (backEnd.viewParms.targetFbo == NULL)
 		{
-			if (backEnd.framePostProcessed && (backEnd.refdef.rdflags & RDF_NOWORLDMODEL))
+			if (!tr.renderFbo || (backEnd.framePostProcessed && (backEnd.refdef.rdflags & RDF_NOWORLDMODEL)))
 			{
 				FBO_Bind(tr.screenScratchFbo);
 			}
@@ -959,7 +959,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	// FIXME: HUGE hack
 	if (glRefConfig.framebufferObject)
 	{
-		if (backEnd.framePostProcessed)
+		if (!tr.renderFbo || backEnd.framePostProcessed)
 		{
 			FBO_Bind(tr.screenScratchFbo);
 		}
@@ -1108,7 +1108,7 @@ const void *RB_StretchPic ( const void *data ) {
 	// FIXME: HUGE hack
 	if (glRefConfig.framebufferObject)
 	{
-		if (backEnd.framePostProcessed)
+		if (!tr.renderFbo || backEnd.framePostProcessed)
 		{
 			FBO_Bind(tr.screenScratchFbo);
 		}
@@ -1223,58 +1223,22 @@ const void	*RB_DrawSurfs( const void *data ) {
 		qglColorMask(!backEnd.colorMask[0], !backEnd.colorMask[1], !backEnd.colorMask[2], !backEnd.colorMask[3]);
 		backEnd.depthFill = qfalse;
 
-		// If we're using multisampling, resolve the depth first
 		if (tr.msaaResolveFbo)
 		{
+			// If we're using multisampling, resolve the depth first
 			FBO_FastBlit(tr.renderFbo, NULL, tr.msaaResolveFbo, NULL, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		}
+		else if (tr.renderFbo == NULL)
+		{
+			// If we're rendering directly to the screen, copy the depth to a texture
+			GL_BindToTMU(tr.renderDepthImage, 0);
+			qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, glConfig.vidWidth, glConfig.vidHeight, 0);
 		}
 
 		if (r_ssao->integer)
-		{			
-			vec2_t srcTexScale;
-			vec4_t color;
-			vec4_t quadVerts[4];
-			vec2_t texCoords[4];
-			vec2_t invTexRes;
-			
-			matrix_t idmatrix;
-
-			srcTexScale[0] = srcTexScale[1] = 1.0f;
-			color[0] = color[1] = color[2] = color[3] = 1.0f;
-
-			FBO_Bind(tr.hdrDepthFbo);
-
-			qglViewport(0, 0, tr.hdrDepthFbo->width, tr.hdrDepthFbo->height);
-			qglScissor(0, 0, tr.hdrDepthFbo->width, tr.hdrDepthFbo->height);
-
-			Matrix16Identity(idmatrix);
-
-			VectorSet4(quadVerts[0], -1,  1, 0, 1);
-			VectorSet4(quadVerts[1],  1,  1, 0, 1);
-			VectorSet4(quadVerts[2],  1, -1, 0, 1);
-			VectorSet4(quadVerts[3], -1, -1, 0, 1);
-
-			texCoords[0][0] = 0; texCoords[0][1] = 1;
-			texCoords[1][0] = 1; texCoords[1][1] = 1;
-			texCoords[2][0] = 1; texCoords[2][1] = 0;
-			texCoords[3][0] = 0; texCoords[3][1] = 0;
-
-			invTexRes[0] = 0.0f;
-			invTexRes[1] = 0.0f;
-
-			GL_State( GLS_DEPTHTEST_DISABLE );
-
-			GLSL_BindProgram(&tr.textureColorShader);
-			
-			GL_BindToTMU(tr.renderDepthImage, TB_COLORMAP);
-
-			GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, idmatrix);
-			GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, color);
-			GLSL_SetUniformVec2(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_INVTEXRES, invTexRes);
-			GLSL_SetUniformVec2(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_AUTOEXPOSUREMINMAX, tr.refdef.autoExposureMinMax);
-			GLSL_SetUniformVec3(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_TONEMINAVGMAXLINEAR, tr.refdef.toneMinAvgMaxLinear);
-
-			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
+		{
+			// need the depth in a texture we can do GL_LINEAR sampling on, so copy it to an HDR image
+			FBO_BlitFromTexture(tr.renderDepthImage, NULL, NULL, tr.hdrDepthFbo, NULL, NULL, NULL, 0);
 		}
 
 		if (backEnd.viewParms.flags & VPF_USESUNLIGHT)
@@ -1584,7 +1548,7 @@ const void *RB_ClearDepth(const void *data)
 
 	if (glRefConfig.framebufferObject)
 	{
-		if (backEnd.framePostProcessed)
+		if (!tr.renderFbo || backEnd.framePostProcessed)
 		{
 			FBO_Bind(tr.screenScratchFbo);
 		}
@@ -1599,7 +1563,7 @@ const void *RB_ClearDepth(const void *data)
 	// if we're doing MSAA, clear the depth texture for the resolve buffer
 	if (tr.msaaResolveFbo)
 	{
-		FBO_Bind(tr.screenScratchFbo);
+		FBO_Bind(tr.msaaResolveFbo);
 		qglClear(GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -1648,47 +1612,38 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	if (glRefConfig.framebufferObject)
 	{
-		// copy final image to screen
-		vec4_t color;
-
-		if (backEnd.framePostProcessed)
+		if (!backEnd.framePostProcessed)
 		{
-			// frame was postprocessed into screen fbo, copy from there
-		}
-		else if (!glRefConfig.framebuffer_srgb)
-		{
-			// Copy render to screenscratch, possibly resolving MSAA
-			FBO_FastBlit(tr.renderFbo, NULL, tr.screenScratchFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		}
-		else
-		{
-			FBO_t *srcFbo = tr.renderFbo;
-
-			if (tr.msaaResolveFbo)
+			if (tr.msaaResolveFbo && r_hdr->integer)
 			{
-				// Resolve the MSAA before copying
-				FBO_FastBlit(srcFbo, NULL, tr.msaaResolveFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-				srcFbo = tr.msaaResolveFbo;
+				// Resolving an RGB16F MSAA FBO to the screen messes with the brightness, so resolve to an RGB16F FBO first
+				FBO_FastBlit(tr.renderFbo, NULL, tr.msaaResolveFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+				FBO_FastBlit(tr.msaaResolveFbo, NULL, tr.screenScratchFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			}
-
-			// need to copy from resolve to screenscratch to fix gamma
-			FBO_Blit(srcFbo, NULL, NULL, tr.screenScratchFbo, NULL, NULL, NULL, 0);
+			else if (tr.renderFbo)
+			{
+				FBO_FastBlit(tr.renderFbo, NULL, tr.screenScratchFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			}
 		}
-		
-		color[0] =
-		color[1] =
-		color[2] = pow(2, tr.overbrightBits); //exp2(tr.overbrightBits);
-		color[3] = 1.0f;
 
-		// turn off colormask when copying final image
-		if (backEnd.colorMask[0] || backEnd.colorMask[1] || backEnd.colorMask[2] || backEnd.colorMask[3])
-			qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-			
-		FBO_Blit(tr.screenScratchFbo, NULL, NULL, NULL, NULL, NULL, color, 0);
+		if (tr.screenScratchFbo)
+		{
+			vec4_t color;
 
-		if (backEnd.colorMask[0] || backEnd.colorMask[1] || backEnd.colorMask[2] || backEnd.colorMask[3])
-			qglColorMask(!backEnd.colorMask[0], !backEnd.colorMask[1], !backEnd.colorMask[2], !backEnd.colorMask[3]);
+			color[0] =
+			color[1] =
+			color[2] = pow(2, tr.overbrightBits); //exp2(tr.overbrightBits);
+			color[3] = 1.0f;
+
+			// turn off colormask when copying final image
+			if (backEnd.colorMask[0] || backEnd.colorMask[1] || backEnd.colorMask[2] || backEnd.colorMask[3])
+				qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+				
+			FBO_Blit(tr.screenScratchFbo, NULL, NULL, NULL, NULL, NULL, color, 0);
+
+			if (backEnd.colorMask[0] || backEnd.colorMask[1] || backEnd.colorMask[2] || backEnd.colorMask[3])
+				qglColorMask(!backEnd.colorMask[0], !backEnd.colorMask[1], !backEnd.colorMask[2], !backEnd.colorMask[3]);
+		}
 	}
 
 	if ( !glState.finishCalled ) {
@@ -1750,11 +1705,9 @@ const void *RB_PostProcess(const void *data)
 	FBO_t *srcFbo;
 	qboolean autoExposure;
 
-	if (!glRefConfig.framebufferObject)
+	if (!glRefConfig.framebufferObject || !r_postProcess->integer)
 	{
 		// do nothing
-		backEnd.framePostProcessed = qtrue;
-
 		return (const void *)(cmd + 1);
 	}
 
@@ -1766,36 +1719,37 @@ const void *RB_PostProcess(const void *data)
 		srcFbo = tr.msaaResolveFbo;
 	}
 
-	if (r_postProcess->integer && r_ssao->integer)
+	if (r_ssao->integer)
 	{
-		vec4i_t dstBox;
-		VectorSet4(dstBox, 0, 0, srcFbo->width, srcFbo->height);
-		FBO_BlitFromTexture(tr.screenSsaoImage, NULL, NULL, srcFbo, dstBox, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
+		FBO_BlitFromTexture(tr.screenSsaoImage, NULL, NULL, srcFbo, NULL, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 	}
 
-	if (r_postProcess->integer && (r_toneMap->integer || r_forceToneMap->integer))
+	if (srcFbo)
 	{
-		autoExposure = r_autoExposure->integer || r_forceAutoExposure;
-		RB_ToneMap(srcFbo, autoExposure);
-	}
-	else if (!glRefConfig.framebuffer_srgb && r_cameraExposure->value == 0.0f)
-	{
-		FBO_FastBlit(srcFbo, NULL, tr.screenScratchFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	}
-	else
-	{
-		vec4_t color;
+		if (r_hdr->integer && (r_toneMap->integer || r_forceToneMap->integer))
+		{
+			autoExposure = r_autoExposure->integer || r_forceAutoExposure->integer;
+			RB_ToneMap(srcFbo, autoExposure);
+		}
+		else if (!glRefConfig.framebuffer_srgb && r_cameraExposure->value == 0.0f)
+		{
+			FBO_FastBlit(srcFbo, NULL, tr.screenScratchFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
+		else
+		{
+			vec4_t color;
 
-		color[0] =
-		color[1] =
-		color[2] = pow(2, r_cameraExposure->value); //exp2(r_cameraExposure->value);
-		color[3] = 1.0f;
+			color[0] =
+			color[1] =
+			color[2] = pow(2, r_cameraExposure->value); //exp2(r_cameraExposure->value);
+			color[3] = 1.0f;
 
-		FBO_Blit(srcFbo, NULL, NULL, tr.screenScratchFbo, NULL, NULL, color, 0);
+			FBO_Blit(srcFbo, NULL, NULL, tr.screenScratchFbo, NULL, NULL, color, 0);
+		}
 	}
 
 #ifdef REACTION
-	if (r_postProcess->integer && glRefConfig.framebufferObject)
+	if (1)
 	{
 		RB_GodRays();
 
@@ -1820,16 +1774,16 @@ const void *RB_PostProcess(const void *data)
 	if (0)
 	{
 		vec4i_t dstBox;
-		VectorSet4(dstBox, 256, tr.screenScratchFbo->height - 256, 256, 256);
+		VectorSet4(dstBox, 256, glConfig.vidHeight - 256, 256, 256);
 		FBO_BlitFromTexture(tr.renderDepthImage, NULL, NULL, tr.screenScratchFbo, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 512, tr.screenScratchFbo->height - 256, 256, 256);
+		VectorSet4(dstBox, 512, glConfig.vidHeight - 256, 256, 256);
 		FBO_BlitFromTexture(tr.screenShadowImage, NULL, NULL, tr.screenScratchFbo, dstBox, NULL, NULL, 0);
 	}
 
 	if (0)
 	{
 		vec4i_t dstBox;
-		VectorSet4(dstBox, 256, tr.screenScratchFbo->height - 256, 256, 256);
+		VectorSet4(dstBox, 256, glConfig.vidHeight - 256, 256, 256);
 		FBO_BlitFromTexture(tr.renderImage, NULL, NULL, tr.screenScratchFbo, dstBox, NULL, NULL, 0);
 	}
 

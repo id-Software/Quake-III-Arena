@@ -502,29 +502,21 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 				if (glRefConfig.framebufferObject)
 				{
 					// clear all framebuffers
-					// FIXME: must be a better way to do this
-					int i;
-
-					for (i = 0; i < 3; i++)
+					if (tr.msaaResolveFbo)
 					{
-						if (i == 1 && !tr.msaaResolveFbo)
-							continue;
+						FBO_Bind(tr.msaaResolveFbo);
+						qglClear(GL_COLOR_BUFFER_BIT);
+					}
 
-						switch(i)
-						{
-							case 0:
-								FBO_Bind(tr.renderFbo);
-								break;
+					if (tr.renderFbo)
+					{
+						FBO_Bind(tr.renderFbo);
+						qglClear(GL_COLOR_BUFFER_BIT);
+					}
 
-							case 1:
-								FBO_Bind(tr.msaaResolveFbo);
-								break;
-
-							case 2:
-								FBO_Bind(tr.screenScratchFbo);
-								break;
-						}
-
+					if (tr.screenScratchFbo)
+					{
+						FBO_Bind(tr.screenScratchFbo);
 						qglClear(GL_COLOR_BUFFER_BIT);
 					}
 

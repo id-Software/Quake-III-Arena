@@ -112,14 +112,16 @@ void RB_BokehBlur(float blur)
 		if (blur > 0.0f)
 		{
 			// create a quarter texture
-			FBO_Blit(tr.screenScratchFbo, NULL, NULL, tr.quarterFbo[0], NULL, NULL, NULL, 0);
+			//FBO_Blit(NULL, NULL, NULL, tr.quarterFbo[0], NULL, NULL, NULL, 0);
+			FBO_FastBlit(tr.screenScratchFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		}
 
 #ifndef HQ_BLUR
 		if (blur > 1.0f)
 		{
 			// create a 1/16th texture
-			FBO_Blit(tr.quarterFbo[0], NULL, NULL, tr.textureScratchFbo[0], NULL, NULL, NULL, 0);
+			//FBO_Blit(tr.quarterFbo[0], NULL, NULL, tr.textureScratchFbo[0], NULL, NULL, NULL, 0);
+			FBO_FastBlit(tr.quarterFbo[0], NULL, tr.textureScratchFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		}
 #endif
 
@@ -340,16 +342,15 @@ void RB_GodRays(void)
 		VectorSet4(color, mul, mul, mul, 1);
 
 		// first, downsample the framebuffer
-		VectorSet4(srcBox, 0, 0, tr.godRaysFbo->width, tr.godRaysFbo->height);
-		VectorSet4(dstBox, 0, 0, tr.quarterFbo[0]->width, tr.quarterFbo[0]->height);
-		FBO_Blit(tr.godRaysFbo, srcBox, texScale, tr.quarterFbo[0], dstBox, &tr.textureColorShader, color, 0);
-		
 		if (colorize)
 		{
-			VectorSet4(srcBox, 0, 0, tr.screenScratchFbo->width, tr.screenScratchFbo->height);
-			FBO_Blit(tr.screenScratchFbo, srcBox, texScale, tr.quarterFbo[0], dstBox, &tr.textureColorShader, color, 
-			         GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
-		}	
+			FBO_FastBlit(tr.screenScratchFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			FBO_Blit(tr.godRaysFbo, NULL, NULL, tr.quarterFbo[0], NULL, NULL, color, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
+		}
+		else
+		{
+			FBO_FastBlit(tr.godRaysFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		}
 	}
 
 	// radial blur passes, ping-ponging between the two quarter-size buffers
@@ -375,7 +376,7 @@ void RB_GodRays(void)
 		VectorSet4(color, mul, mul, mul, 1);
 
 		VectorSet4(srcBox, 0, 0, tr.quarterFbo[0]->width, tr.quarterFbo[0]->height);
-		VectorSet4(dstBox, 0, 0, tr.screenScratchFbo->width, tr.screenScratchFbo->height);
+		VectorSet4(dstBox, 0, 0, glConfig.vidWidth, glConfig.vidHeight);
 		FBO_Blit(tr.quarterFbo[0], srcBox, texScale, tr.screenScratchFbo, dstBox, &tr.textureColorShader, color, GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE);
 	}
 }
@@ -462,13 +463,8 @@ void RB_GaussianBlur(float blur)
 		VectorSet4(color, 1, 1, 1, 1);
 
 		// first, downsample the framebuffer
-		VectorSet4(srcBox, 0, 0, tr.screenScratchFbo->width, tr.screenScratchFbo->height);
-		VectorSet4(dstBox, 0, 0, tr.quarterFbo[0]->width, tr.quarterFbo[0]->height);
-		FBO_Blit(tr.screenScratchFbo, srcBox, texScale, tr.quarterFbo[0], dstBox, &tr.textureColorShader, color, 0);
-
-		VectorSet4(srcBox, 0, 0, tr.quarterFbo[0]->width, tr.quarterFbo[0]->height);
-		VectorSet4(dstBox, 0, 0, tr.textureScratchFbo[0]->width, tr.textureScratchFbo[0]->height);
-		FBO_Blit(tr.quarterFbo[0], srcBox, texScale, tr.textureScratchFbo[0], dstBox, &tr.textureColorShader, color, 0);
+		FBO_FastBlit(tr.screenScratchFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		FBO_FastBlit(tr.quarterFbo[0], NULL, tr.textureScratchFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		// set the alpha channel
 		VectorSet4(srcBox, 0, 0, tr.whiteImage->width, tr.whiteImage->height);
@@ -483,7 +479,7 @@ void RB_GaussianBlur(float blur)
 
 		// finally, merge back to framebuffer
 		VectorSet4(srcBox, 0, 0, tr.textureScratchFbo[0]->width, tr.textureScratchFbo[0]->height);
-		VectorSet4(dstBox, 0, 0, tr.screenScratchFbo->width,     tr.screenScratchFbo->height);
+		VectorSet4(dstBox, 0, 0, glConfig.vidWidth,              glConfig.vidHeight);
 		color[3] = factor;
 		FBO_Blit(tr.textureScratchFbo[0], srcBox, texScale, tr.screenScratchFbo, dstBox, &tr.textureColorShader, color, GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
 	}
