@@ -111,11 +111,11 @@ Section "${NAME}" sec_base
   WriteUninstaller "uninstall-${FSNAME}.exe"
 
 !ifdef STANDALONE
-!define ARGS "+set com_standalone 1 "
+!define ARGS "+set com_basegame ${MODDIR}"
 !else
-!define ARGS ""
+!define ARGS "+set fs_game ${MODDIR}"
 !endif
-  CreateShortCut "$SMPROGRAMS\ioquake3\${NAME}.lnk" "$INSTDIR\ioquake3.x86.exe" "${ARGS}+set fs_game ${MODDIR}" "$INSTDIR\ioquake3.x86.exe" 0 "" "" "${NAME}"
+  CreateShortCut "$SMPROGRAMS\ioquake3\${NAME}.lnk" "$INSTDIR\ioquake3.x86.exe" "${ARGS}" "$INSTDIR\ioquake3.x86.exe" 0 "" "" "${NAME}"
 
 SectionEnd
 
