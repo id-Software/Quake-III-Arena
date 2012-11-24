@@ -2360,38 +2360,6 @@ void CL_CheckForResend( void ) {
 	}
 }
 
-/*
-===================
-CL_DisconnectPacket
-
-Sometimes the server can drop the client and the netchan based
-disconnect can be lost.  If the client continues to send packets
-to the server, the server will send out of band disconnect packets
-to the client so it doesn't have to wait for the full timeout period.
-===================
-*/
-void CL_DisconnectPacket( netadr_t from ) {
-	if ( clc.state < CA_AUTHORIZING ) {
-		return;
-	}
-
-	// if not from our server, ignore it
-	if ( !NET_CompareAdr( from, clc.netchan.remoteAddress ) ) {
-		return;
-	}
-
-	// if we have received packets within three seconds, ignore it
-	// (it might be a malicious spoof)
-	if ( cls.realtime - clc.lastPacketTime < 3000 ) {
-		return;
-	}
-
-	// drop the connection
-	Com_Printf( "Server disconnected for unknown reason\n" );
-	Cvar_Set("com_errorMessage", "Server disconnected for unknown reason\n" );
-	CL_Disconnect( qtrue );
-}
-
 
 /*
 ===================
