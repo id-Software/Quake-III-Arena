@@ -365,7 +365,7 @@ void UI_MainMenu( void ) {
 	s_main.cinematics.color					= color_red;
 	s_main.cinematics.style					= style;
 
-	if (UI_TeamArenaExists()) {
+	if ( !uis.demoversion && UI_TeamArenaExists() ) {
 		teamArena = qtrue;
 		y += MAIN_MENU_VERTICAL_SPACING;
 		s_main.teamArena.generic.type			= MTYPE_PTEXT;
@@ -379,16 +379,18 @@ void UI_MainMenu( void ) {
 		s_main.teamArena.style					= style;
 	}
 
-	y += MAIN_MENU_VERTICAL_SPACING;
-	s_main.mods.generic.type			= MTYPE_PTEXT;
-	s_main.mods.generic.flags			= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
-	s_main.mods.generic.x				= 320;
-	s_main.mods.generic.y				= y;
-	s_main.mods.generic.id				= ID_MODS;
-	s_main.mods.generic.callback		= Main_MenuEvent; 
-	s_main.mods.string					= "MODS";
-	s_main.mods.color					= color_red;
-	s_main.mods.style					= style;
+	if ( !uis.demoversion ) {
+		y += MAIN_MENU_VERTICAL_SPACING;
+		s_main.mods.generic.type			= MTYPE_PTEXT;
+		s_main.mods.generic.flags			= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+		s_main.mods.generic.x				= 320;
+		s_main.mods.generic.y				= y;
+		s_main.mods.generic.id				= ID_MODS;
+		s_main.mods.generic.callback		= Main_MenuEvent; 
+		s_main.mods.string					= "MODS";
+		s_main.mods.color					= color_red;
+		s_main.mods.style					= style;
+	}
 
 	y += MAIN_MENU_VERTICAL_SPACING;
 	s_main.exit.generic.type				= MTYPE_PTEXT;
@@ -409,7 +411,9 @@ void UI_MainMenu( void ) {
 	if (teamArena) {
 		Menu_AddItem( &s_main.menu,	&s_main.teamArena );
 	}
-	Menu_AddItem( &s_main.menu,	&s_main.mods );
+	if ( !uis.demoversion ) {
+		Menu_AddItem( &s_main.menu,	&s_main.mods );
+	}
 	Menu_AddItem( &s_main.menu,	&s_main.exit );             
 
 	trap_Key_SetCatcher( KEYCATCH_UI );
