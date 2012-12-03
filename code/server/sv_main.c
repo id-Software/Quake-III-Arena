@@ -570,6 +570,10 @@ static void SVC_Status( netadr_t from ) {
 		return;
 	}
 
+	// A maximum challenge length of 128 should be more than plenty.
+	if(strlen(Cmd_Argv(1)) > 128)
+		return;
+
 	strcpy( infostring, Cvar_InfoString( CVAR_SERVERINFO ) );
 
 	// echo back the parameter to status. so master servers can use it as a challenge
