@@ -63,10 +63,6 @@ varying vec3      var_VertLight;
 varying vec3      var_WorldLight;
 #endif
 
-#if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT) && defined(USE_SHADOWMAP)
-varying vec4   var_ScreenPos;
-#endif
-
 #define EPSILON 0.00000001
 
 #if defined(USE_PARALLAXMAP)
@@ -228,8 +224,7 @@ void main()
 	vec3 ambientLight  = u_AmbientLight;
 
   #if defined(USE_SHADOWMAP)
-	//vec2 shadowTex = gl_FragCoord.xy * r_FBufScale;
-	vec2 shadowTex = var_ScreenPos.xy / var_ScreenPos.w;
+	vec2 shadowTex = gl_FragCoord.xy * r_FBufScale;
 	directedLight *= texture2D(u_ShadowMap, shadowTex).r;
   #endif
 #elif defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)

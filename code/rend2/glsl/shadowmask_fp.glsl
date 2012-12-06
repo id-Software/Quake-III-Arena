@@ -15,7 +15,7 @@ uniform mat4      u_ShadowMvp3;
 uniform vec3   u_ViewOrigin;
 uniform vec4   u_ViewInfo; // zfar / znear, zfar
 
-varying vec2   var_ScreenTex;
+varying vec2   var_DepthTex;
 varying vec3   var_ViewDir;
 
 // Input: It uses texture coords as the random number seed.
@@ -41,7 +41,7 @@ float PCF(const sampler2D shadowmap, const vec2 st, const float dist)
 	float scale = 2.0 / r_shadowMapSize;
 		
 #if defined(USE_SHADOW_FILTER)
-	float r = random(var_ScreenTex.xy);
+	float r = random(var_DepthTex.xy);
 	float sinr = sin(r) * scale;
 	float cosr = cos(r) * scale;
 	mat2 rmat = mat2(cosr, sinr, -sinr, cosr);
@@ -78,7 +78,7 @@ void main()
 {
 	float result;
 	
-	float depth = getLinearDepth(u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x);
+	float depth = getLinearDepth(u_ScreenDepthMap, var_DepthTex, u_ViewInfo.x);
 	float sampleZ = u_ViewInfo.y * depth;
 
 	vec4 biasPos = vec4(u_ViewOrigin + var_ViewDir * depth * 0.99, 1.0);

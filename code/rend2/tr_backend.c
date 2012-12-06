@@ -1245,21 +1245,37 @@ const void	*RB_DrawSurfs( const void *data ) {
 		{
 			vec4_t quadVerts[4];
 			vec2_t texCoords[4];
+			vec4_t box;
 
 			FBO_Bind(tr.screenShadowFbo);
 
-			qglViewport(0, 0, tr.screenShadowFbo->width, tr.screenShadowFbo->height);
-			qglScissor(0, 0, tr.screenShadowFbo->width, tr.screenShadowFbo->height);
+			box[0] = (backEnd.refdef.x     ) * tr.screenShadowFbo->width  / (float)glConfig.vidWidth;
+			box[1] = (backEnd.refdef.y     ) * tr.screenShadowFbo->height / (float)glConfig.vidHeight;
+			box[2] = (backEnd.refdef.width ) * tr.screenShadowFbo->width  / (float)glConfig.vidWidth;
+			box[3] = (backEnd.refdef.height) * tr.screenShadowFbo->height / (float)glConfig.vidHeight;
 
-			VectorSet4(quadVerts[0], -1,  1, 0, 1);
-			VectorSet4(quadVerts[1],  1,  1, 0, 1);
-			VectorSet4(quadVerts[2],  1, -1, 0, 1);
-			VectorSet4(quadVerts[3], -1, -1, 0, 1);
+			qglViewport(box[0], box[1], box[2], box[3]);
+			qglScissor(box[0], box[1], box[2], box[3]);
 
-			texCoords[0][0] = 0; texCoords[0][1] = 1;
-			texCoords[1][0] = 1; texCoords[1][1] = 1;
-			texCoords[2][0] = 1; texCoords[2][1] = 0;
-			texCoords[3][0] = 0; texCoords[3][1] = 0;
+			box[0] = (backEnd.refdef.x                        ) / (float)glConfig.vidWidth;
+			box[1] = (backEnd.refdef.y                        ) / (float)glConfig.vidHeight;
+			box[2] = (backEnd.refdef.x + backEnd.refdef.width ) / (float)glConfig.vidWidth;
+			box[3] = (backEnd.refdef.y + backEnd.refdef.height) / (float)glConfig.vidHeight;
+
+			texCoords[0][0] = box[0]; texCoords[0][1] = box[3];
+			texCoords[1][0] = box[2]; texCoords[1][1] = box[3];
+			texCoords[2][0] = box[2]; texCoords[2][1] = box[1];
+			texCoords[3][0] = box[0]; texCoords[3][1] = box[1];
+
+			box[0] = -1.0f;
+			box[1] = -1.0f;
+			box[2] =  1.0f;
+			box[3] =  1.0f;
+
+			VectorSet4(quadVerts[0], box[0], box[3], 0, 1);
+			VectorSet4(quadVerts[1], box[2], box[3], 0, 1);
+			VectorSet4(quadVerts[2], box[2], box[1], 0, 1);
+			VectorSet4(quadVerts[3], box[0], box[1], 0, 1);
 
 			GL_State( GLS_DEPTHTEST_DISABLE );
 

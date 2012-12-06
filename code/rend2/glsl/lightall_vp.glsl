@@ -92,10 +92,6 @@ varying vec3   var_VertLight;
 varying vec3   var_WorldLight;
 #endif
 
-#if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT) && defined(USE_SHADOWMAP)
-varying vec4   var_ScreenPos;
-#endif
-
 #if defined(USE_TCMOD)
 vec2 ModTexCoords(vec2 st, vec3 position, vec4 texMatrix, vec4 offTurb)
 {
@@ -132,10 +128,6 @@ void main()
 #endif
 
 	gl_Position = u_ModelViewProjectionMatrix * position;
-
-#if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT) && defined(USE_SHADOWMAP)
-	var_ScreenPos = gl_Position + vec2(1.0, 0.0).xxyx * gl_Position.w;
-#endif
 
 #if (defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
 	vec3 worldLight = attr_LightDirection;
