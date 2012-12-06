@@ -1179,7 +1179,7 @@ static void RB_FogPass( void ) {
 	{
 		int index = 0;
 
-		if (deformGen |= DGEN_NONE)
+		if (deformGen != DGEN_NONE)
 			index |= FOGDEF_USE_DEFORM_VERTEXES;
 
 		if (glState.vertexAttribsInterpolation)
