@@ -93,6 +93,7 @@ Section "ioquake3 (required)"
   File "../../build/release-mingw32-x86/ioquake3.x86.exe"
 !ifdef USE_RENDERER_DLOPEN
   File "../../build/release-mingw32-x86/renderer_opengl1_x86.dll"
+  File "../../build/release-mingw32-x86/renderer_rend2_x86.dll"
 !endif
 
   File "../../COPYING.txt"
