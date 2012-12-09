@@ -8,7 +8,6 @@ ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-x86_64
 BASEDIR=baseq3
 MPACKDIR=missionpack
-RENDERDIR=build/release-darwin-x86_64
 
 BIN_OBJ="
 	build/release-darwin-x86_64/ioquake3.x86_64
@@ -26,10 +25,11 @@ MPACK_OBJ="
 	build/release-darwin-x86_64/$MPACKDIR/uix86_64.dylib
 	build/release-darwin-x86_64/$MPACKDIR/qagamex86_64.dylib
 "
-
 RENDER_OBJ="
 	build/release-darwin-x86_64/renderer_opengl1_smp_x86_64.dylib
 	build/release-darwin-x86_64/renderer_opengl1_x86_64.dylib
+	build/release-darwin-x86_64/renderer_rend2_smp_x86_64.dylib
+	build/release-darwin-x86_64/renderer_rend2_x86_64.dylib
 "
 
 cd `dirname $0`
