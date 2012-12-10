@@ -300,28 +300,54 @@ void main()
 #elif defined(USE_LIGHT)
 	worldLight = normalize(worldLight);
 
-  #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
-	#if defined(r_normalAmbient)
-	vec3 ambientLight = directedLight * r_normalAmbient;
-	directedLight -= ambientLight;
-    #else
-	vec3 ambientLight = vec3(0.0);
-    #endif
-	directedLight /= max(dot(surfNormal, worldLight), 0.004);
-  #endif
-
-	float NL = clamp(dot(worldNormal,  worldLight),   0.0, 1.0);
 	float surfNL = clamp(dot(surfNormal,  worldLight),   0.0, 1.0);
-	NL = min(NL, surfNL * 2.0);
-	float NE = clamp(dot(worldNormal,  SampleToView), 0.0, 1.0);
+
+  #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
+    #if defined(USE_STANDARD_DELUXEMAP)
+	// Standard deluxe mapping treats the light sample as fully directed
+	// and doesn't compensate for light angle attenuation.
+	vec3 ambientLight = vec3(0.0);
+    #else
+	// Separate the light sample into directed and ambient parts.
+	//
+	// ambientMax  - if the cosine of the angle between the surface
+	//               normal and the light is below this value, the light
+	//               is fully ambient.
+	// directedMax - if the cosine of the angle between the surface
+	//               normal and the light is above this value, the light
+	//               is fully directed.
+	const float ambientMax  = 0.25;
+	const float directedMax = 0.5;
+
+	float directedScale = clamp((surfNL - ambientMax) / (directedMax - ambientMax), 0.0, 1.0);
 	
+	// Scale the directed portion to compensate for the baked-in
+	// light angle attenuation.
+	directedScale /= max(surfNL, ambientMax);
+	
+      #if defined(r_normalAmbient)
+	directedScale *= 1.0 - r_normalAmbient;
+      #endif
+
+	// Recover any unused light as ambient
+	vec3 ambientLight = directedLight;
+	directedLight *= directedScale;
+	ambientLight -= directedLight * surfNL;
+    #endif
+  #endif
+	
+	float NL = clamp(dot(worldNormal,  worldLight),   0.0, 1.0);
+	float NE = clamp(dot(worldNormal,  SampleToView), 0.0, 1.0);
+
 	float fzero = u_MaterialInfo.x;
 	float shininess = u_MaterialInfo.y;
+
   #if defined(USE_SPECULARMAP)
 	vec4 specular = texture2D(u_SpecularMap, tex);
 	//specular.rgb = clamp(specular.rgb - diffuse.rgb, 0.0, 1.0);
 	shininess *= specular.a;
   #endif
+
 	float directedDiff = NL * CalcDiffuse(worldNormal, worldLight, SampleToView, NE, NL, fzero, shininess);
 	diffuse.rgb *= directedLight * directedDiff + ambientDiff * ambientLight;
   
