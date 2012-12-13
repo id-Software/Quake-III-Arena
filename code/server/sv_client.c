@@ -1966,15 +1966,19 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		}
 	} while ( 1 );
 
+	// read optional voip data
+	if ( c == clc_voip ) {
+#ifdef USE_VOIP
+		SV_UserVoip( cl, msg );
+		c = MSG_ReadByte( msg );
+#endif
+	}
+
 	// read the usercmd_t
 	if ( c == clc_move ) {
 		SV_UserMove( cl, msg, qtrue );
 	} else if ( c == clc_moveNoDelta ) {
 		SV_UserMove( cl, msg, qfalse );
-	} else if ( c == clc_voip ) {
-#ifdef USE_VOIP
-		SV_UserVoip( cl, msg );
-#endif
 	} else if ( c != clc_EOF ) {
 		Com_Printf( "WARNING: bad command byte for client %i\n", (int) (cl - svs.clients) );
 	}
