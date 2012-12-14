@@ -769,7 +769,7 @@ void CL_ParseVoip ( msg_t *msg ) {
 		// reset the bits just in case.
 		speex_bits_reset(&clc.speexDecoderBits[sender]);
 		seqdiff = 0;
-	} else if (seqdiff > 100) { // more than 2 seconds of audio dropped?
+	} else if (seqdiff * clc.speexFrameSize * 2 >= sizeof (decoded)) { // dropped more than we can handle?
 		// just start over.
 		Com_DPrintf("VoIP: Dropped way too many (%d) frames from client #%d\n",
 		            seqdiff, sender);
