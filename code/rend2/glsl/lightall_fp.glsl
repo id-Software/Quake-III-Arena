@@ -46,7 +46,9 @@ varying vec4      var_Color;
 varying vec3      var_Position;
 #endif
 
+#if defined(USE_TCGEN) || defined(USE_NORMALMAP) || (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
 varying vec3      var_SampleToView;
+#endif
 
 #if !defined(USE_FAST_LIGHT)
 varying vec3      var_Normal;

@@ -65,7 +65,7 @@ varying vec2   var_DiffuseTex;
 varying vec2   var_LightTex;
 #endif
 
-#if defined(USE_NORMALMAP) || defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+#if defined(USE_TCGEN) || defined(USE_NORMALMAP) || (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
 varying vec3   var_SampleToView;
 #endif
 
@@ -154,7 +154,7 @@ void main()
 	vec3 SampleToView = u_ViewOrigin - position.xyz;
 #endif
 
-#if defined(USE_NORMALMAP) || defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+#if defined(USE_TCGEN) || defined(USE_NORMALMAP) || (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
 	var_SampleToView = SampleToView;
 #endif
 
