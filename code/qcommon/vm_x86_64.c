@@ -86,8 +86,8 @@ static intptr_t CROSSCALL callAsmCall(intptr_t callProgramStack, int64_t callSys
 {
 	vm_t *savedVM;
 	intptr_t ret = 0x77;
-	intptr_t args[16];
-//	int iargs[16];
+	intptr_t args[MAX_VMSYSCALL_ARGS];
+//	int iargs[MAX_VMSYSCALL_ARGS];
 	int i;
 
 //	Dfprintf(stderr, "callAsmCall(%ld, %ld)\n", callProgramStack, callSyscallNum);
@@ -1024,6 +1024,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	byte	*image;
 	void	*entryPoint;
 	int	*opStack;
+	int		arg;
 
 	currentVM = vm;
 	
@@ -1046,18 +1047,11 @@ int VM_CallCompiled(vm_t *vm, int *args)
 
 	programCounter = 0;
 
-	programStack -= 48;
+	programStack -= ( 8 + 4 * MAX_VMMAIN_ARGS );
 
-	*(int *)&image[ programStack + 44] = args[9];
-	*(int *)&image[ programStack + 40] = args[8];
-	*(int *)&image[ programStack + 36] = args[7];
-	*(int *)&image[ programStack + 32] = args[6];
-	*(int *)&image[ programStack + 28] = args[5];
-	*(int *)&image[ programStack + 24] = args[4];
-	*(int *)&image[ programStack + 20] = args[3];
-	*(int *)&image[ programStack + 16] = args[2];
-	*(int *)&image[ programStack + 12] = args[1];
-	*(int *)&image[ programStack + 8 ] = args[0];
+	for ( arg = 0; arg < MAX_VMMAIN_ARGS; arg++ )
+		*(int *)&image[ programStack + 8 + arg * 4 ] = args[ arg ];
+
 	*(int *)&image[ programStack + 4 ] = 0x77777777;	// return stack
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
@@ -1091,7 +1085,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	if(opStackRet != 1 || *opStack != 0xDEADBEEF)
 		Com_Error(ERR_DROP, "opStack corrupted in compiled code (offset %ld)", opStackRet);
 
-	if ( programStack != stackOnEntry - 48 ) {
+	if ( programStack != stackOnEntry - ( 8 + 4 * MAX_VMMAIN_ARGS ) ) {
 		Com_Error( ERR_DROP, "programStack corrupted in compiled code" );
 	}
 

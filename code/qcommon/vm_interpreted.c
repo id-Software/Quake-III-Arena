@@ -326,6 +326,7 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	int		*codeImage;
 	int		v1;
 	int		dataMask;
+	int		arg;
 #ifdef DEBUG_VM
 	vmSymbol_t	*profileSymbol;
 #endif
@@ -349,18 +350,11 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	
 	programCounter = 0;
 
-	programStack -= 48;
+	programStack -= ( 8 + 4 * MAX_VMMAIN_ARGS );
 
-	*(int *)&image[ programStack + 44] = args[9];
-	*(int *)&image[ programStack + 40] = args[8];
-	*(int *)&image[ programStack + 36] = args[7];
-	*(int *)&image[ programStack + 32] = args[6];
-	*(int *)&image[ programStack + 28] = args[5];
-	*(int *)&image[ programStack + 24] = args[4];
-	*(int *)&image[ programStack + 20] = args[3];
-	*(int *)&image[ programStack + 16] = args[2];
-	*(int *)&image[ programStack + 12] = args[1];
-	*(int *)&image[ programStack + 8 ] = args[0];
+	for ( arg = 0; arg < MAX_VMMAIN_ARGS; arg++ )
+		*(int *)&image[ programStack + 8 + arg * 4 ] = args[ arg ];
+
 	*(int *)&image[ programStack + 4 ] = 0;	// return stack
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
@@ -508,10 +502,10 @@ nextInstruction2:
 					// the vm has ints on the stack, we expect
 					// pointers so we might have to convert it
 					if (sizeof(intptr_t) != sizeof(int)) {
-						intptr_t argarr[16];
-						int *imagePtr = (int *)&image[programStack];
+						intptr_t argarr[ MAX_VMSYSCALL_ARGS ];
+						int *imagePtr = (int *)&image[ programStack ];
 						int i;
-						for (i = 0; i < 16; ++i) {
+						for (i = 0; i < ARRAY_LEN(argarr); ++i) {
 							argarr[i] = *(++imagePtr);
 						}
 						r = vm->systemCall( argarr );

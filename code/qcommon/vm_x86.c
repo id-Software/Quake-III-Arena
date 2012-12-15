@@ -416,7 +416,7 @@ static void DoSyscall(void)
 		int *data;
 #if idx64
 		int index;
-		intptr_t args[16];
+		intptr_t args[MAX_VMSYSCALL_ARGS];
 #endif
 		
 		data = (int *) (savedVM->dataBase + vm_programStack + 4);
@@ -1714,6 +1714,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	byte	*image;
 	int	*opStack;
 	int		opStackOfs;
+	int		arg;
 
 	currentVM = vm;
 
@@ -1726,18 +1727,11 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	// set up the stack frame 
 	image = vm->dataBase;
 
-	programStack -= 48;
+	programStack -= ( 8 + 4 * MAX_VMMAIN_ARGS );
 
-	*(int *)&image[ programStack + 44] = args[9];
-	*(int *)&image[ programStack + 40] = args[8];
-	*(int *)&image[ programStack + 36] = args[7];
-	*(int *)&image[ programStack + 32] = args[6];
-	*(int *)&image[ programStack + 28] = args[5];
-	*(int *)&image[ programStack + 24] = args[4];
-	*(int *)&image[ programStack + 20] = args[3];
-	*(int *)&image[ programStack + 16] = args[2];
-	*(int *)&image[ programStack + 12] = args[1];
-	*(int *)&image[ programStack + 8 ] = args[0];
+	for ( arg = 0; arg < MAX_VMMAIN_ARGS; arg++ )
+		*(int *)&image[ programStack + 8 + arg * 4 ] = args[ arg ];
+
 	*(int *)&image[ programStack + 4 ] = 0;	// return stack
 	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
 
@@ -1799,7 +1793,7 @@ int VM_CallCompiled(vm_t *vm, int *args)
 	{
 		Com_Error(ERR_DROP, "opStack corrupted in compiled code");
 	}
-	if(programStack != stackOnEntry - 48)
+	if(programStack != stackOnEntry - (8 + 4 * MAX_VMMAIN_ARGS))
 		Com_Error(ERR_DROP, "programStack corrupted in compiled code");
 
 	vm->programStack = stackOnEntry;

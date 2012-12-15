@@ -808,11 +808,11 @@ static int asmcall(int call, int pstack)
 		argPosition[0] = -1 - call;
 		ret = currentVM->systemCall(argPosition);
 	} else {
-		intptr_t args[11];
+		intptr_t args[MAX_VMSYSCALL_ARGS];
 
 		args[0] = -1 - call;
 		int *argPosition = (int *)((byte *)currentVM->dataBase + pstack + 4);
-		for( i = 1; i < 11; i++ )
+		for( i = 1; i < ARRAY_LEN(args); i++ )
 			args[i] = argPosition[i];
 
 		ret = currentVM->systemCall(args);
@@ -1650,9 +1650,9 @@ int VM_CallCompiled(vm_t *vm, int *args)
 
 	vm->currentlyInterpreting = qtrue;
 
-	programStack -= 48;
+	programStack -= ( 8 + 4 * MAX_VMMAIN_ARGS );
 	argPointer = (int *)&image[ programStack + 8 ];
-	memcpy( argPointer, args, 4 * 9 );
+	memcpy( argPointer, args, 4 * MAX_VMMAIN_ARGS );
 	argPointer[-1] = 0;
 	argPointer[-2] = -1;
 

@@ -338,7 +338,7 @@ Dlls will call this directly
 intptr_t QDECL VM_DllSyscall( intptr_t arg, ... ) {
 #if !id386 || defined __clang__
   // rcg010206 - see commentary above
-  intptr_t args[16];
+  intptr_t args[MAX_VMSYSCALL_ARGS];
   int i;
   va_list ap;
   
@@ -823,7 +823,7 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
 		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
-		int args[10];
+		int args[MAX_VMMAIN_ARGS-1];
 		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < ARRAY_LEN(args); i++) {
@@ -833,7 +833,7 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 
 		r = vm->entryPoint( callnum,  args[0],  args[1],  args[2], args[3],
                             args[4],  args[5],  args[6], args[7],
-                            args[8],  args[9]);
+                            args[8],  args[9], args[10], args[11]);
 	} else {
 #if ( id386 || idsparc ) && !defined __clang__ // calling convention doesn't need conversion in some cases
 #ifndef NO_VM_COMPILED
@@ -845,7 +845,7 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 #else
 		struct {
 			int callnum;
-			int args[10];
+			int args[MAX_VMMAIN_ARGS-1];
 		} a;
 		va_list ap;
 
