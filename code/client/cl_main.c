@@ -127,6 +127,7 @@ clientConnection_t	clc;
 clientStatic_t		cls;
 vm_t				*cgvm;
 
+char				cl_reconnectServername[MAX_OSPATH];
 char				cl_oldGame[MAX_QPATH];
 qboolean			cl_oldGameSet;
 
@@ -1688,12 +1689,14 @@ CL_Reconnect_f
 ================
 */
 void CL_Reconnect_f( void ) {
-	if ( !strlen( clc.servername ) || !strcmp( clc.servername, "localhost" ) ) {
+	if ( !strlen( cl_reconnectServername ) )
+		return;
+	if ( !strcmp( cl_reconnectServername, "localhost" ) ) {
 		Com_Printf( "Can't reconnect to localhost.\n" );
 		return;
 	}
 	Cvar_Set("ui_singlePlayerActive", "0");
-	Cbuf_AddText( va("connect %s\n", clc.servername ) );
+	Cbuf_AddText( va("connect %s\n", cl_reconnectServername ) );
 }
 
 /*
@@ -1749,6 +1752,7 @@ void CL_Connect_f( void ) {
 	Con_Close();
 
 	Q_strncpyz( clc.servername, server, sizeof(clc.servername) );
+	Q_strncpyz( cl_reconnectServername, server, sizeof( cl_reconnectServername ) );
 
 	if (!NET_StringToAdr(clc.servername, &clc.serverAddress, family) ) {
 		Com_Printf ("Bad server address\n");
