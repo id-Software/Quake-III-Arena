@@ -562,7 +562,7 @@ delta functions
 
 extern cvar_t *cl_shownet;
 
-#define	LOG(x) if( cl_shownet->integer == 4 ) { Com_Printf("%s ", x ); };
+#define	LOG(x) if( cl_shownet && cl_shownet->integer == 4 ) { Com_Printf("%s ", x ); };
 
 void MSG_WriteDelta( msg_t *msg, int oldV, int newV, int bits ) {
 	if ( oldV == newV ) {
@@ -1050,7 +1050,7 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 	if ( MSG_ReadBits( msg, 1 ) == 1 ) {
 		Com_Memset( to, 0, sizeof( *to ) );	
 		to->number = MAX_GENTITIES - 1;
-		if ( cl_shownet->integer >= 2 || cl_shownet->integer == -1 ) {
+		if ( cl_shownet && ( cl_shownet->integer >= 2 || cl_shownet->integer == -1 ) ) {
 			Com_Printf( "%3i: #%-3i remove\n", msg->readcount, number );
 		}
 		return;
@@ -1072,7 +1072,7 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 
 	// shownet 2/3 will interleave with other printed info, -1 will
 	// just print the delta records`
-	if ( cl_shownet->integer >= 2 || cl_shownet->integer == -1 ) {
+	if ( cl_shownet && ( cl_shownet->integer >= 2 || cl_shownet->integer == -1 ) ) {
 		print = 1;
 		Com_Printf( "%3i: #%-3i ", msg->readcount, to->number );
 	} else {
@@ -1389,7 +1389,7 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 
 	// shownet 2/3 will interleave with other printed info, -2 will
 	// just print the delta records
-	if ( cl_shownet->integer >= 2 || cl_shownet->integer == -2 ) {
+	if ( cl_shownet && ( cl_shownet->integer >= 2 || cl_shownet->integer == -2 ) ) {
 		print = 1;
 		Com_Printf( "%3i: playerstate ", msg->readcount );
 	} else {
