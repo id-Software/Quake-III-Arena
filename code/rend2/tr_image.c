@@ -2152,6 +2152,26 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 		}
 	}
 
+	// Convert to RGB if sRGB textures aren't supported in hardware
+	if (!glRefConfig.texture_srgb && (flags & IMGFLAG_SRGB))
+	{
+		byte *in = data;
+		int c = width * height;
+		while (c--)
+		{
+			for (i = 0; i < 3; i++)
+			{
+				float x = ByteToFloat(in[i]);
+				x = sRGBtoRGB(x);
+				in[i] = FloatToByte(x);
+			}
+			in += 4;
+		}
+
+		// FIXME: Probably should mark the image as non-sRGB as well
+		flags &= ~IMGFLAG_SRGB;
+	}
+
 	// normals are always swizzled
 	if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 	{
@@ -2947,10 +2967,7 @@ void R_CreateBuiltinImages( void ) {
 		{
 			int format;
 
-			if (glRefConfig.texture_srgb && glRefConfig.framebuffer_srgb)
-				format = GL_SRGB8_ALPHA8_EXT;
-			else
-				format = GL_RGBA8;
+			format = GL_RGBA8;
 
 			tr.screenScratchImage = R_CreateImage("*screenScratch", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, format);
 		}
@@ -3085,10 +3102,21 @@ void R_SetColorMappings( void ) {
 	}
 
 	for ( i = 0; i < 256; i++ ) {
+		int i2;
+
+		if (r_srgb->integer)
+		{
+			i2 = 255 * RGBtosRGB(i/255.0f) + 0.5f;
+		}
+		else
+		{
+			i2 = i;
+		}
+
 		if ( g == 1 ) {
-			inf = i;
+			inf = i2;
 		} else {
-			inf = 255 * pow ( i/255.0f, 1.0f / g ) + 0.5f;
+			inf = 255 * pow ( i2/255.0f, 1.0f / g ) + 0.5f;
 		}
 		inf <<= shift;
 		if (inf < 0) {

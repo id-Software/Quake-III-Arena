@@ -1711,7 +1711,6 @@ typedef struct {
 	qboolean framebufferBlit;
 
 	qboolean texture_srgb;
-	qboolean framebuffer_srgb;
 
 	qboolean depthClamp;
 } glRefConfig_t;
