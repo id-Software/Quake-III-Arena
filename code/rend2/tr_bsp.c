@@ -3295,9 +3295,9 @@ void RE_LoadWorldMap( const char *name ) {
 	tr.autoExposureMinMax[1] = 2.0f;
 
 	// set default tone mapping settings
-	tr.toneMinAvgMaxLevel[0] = -3.25f;
-	tr.toneMinAvgMaxLevel[1] = -1.0f;
-	tr.toneMinAvgMaxLevel[2] = 1.0f;
+	tr.toneMinAvgMaxLevel[0] = -8.0f;
+	tr.toneMinAvgMaxLevel[1] = -2.0f;
+	tr.toneMinAvgMaxLevel[2] = 0.0f;
 
 	tr.worldMapLoaded = qtrue;
 
