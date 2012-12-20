@@ -1033,7 +1033,7 @@ define DO_REF_STR
 $(echo_cmd) "REF_STR $<"
 $(Q)rm -f $@
 $(Q)echo "const char *fallbackShader_$(notdir $(basename $<)) =" >> $@
-$(Q)cat $< | sed 's/\\/\\\\/;s/\t/\\t/;s/\"/\\"/;s/$$/\\n"/;s/^/"/' >> $@
+$(Q)cat $< | sed 's/^/\"/;s/$$/\\n\"/' >> $@
 $(Q)echo ";" >> $@
 endef
 

@@ -44,7 +44,11 @@ Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 # "8" is the Darwin major kernel version.
 TIGERHOST=`uname -r |perl -w -p -e 's/\A(\d+)\..*\Z/$1/; $_ = (($_ >= 8) ? "1" : "0");'`
 
-# we want to use the oldest available SDK for max compatiblity
+# we want to use the oldest available SDK for max compatiblity. However 10.4 and older
+# can not build 64bit binaries, making 10.5 the minimum version.   This has been tested 
+# with xcode 3.1 (xcode31_2199_developerdvd.dmg).  It contains the 10.5 SDK and a decent
+# enough gcc to actually compile ioquake3
+
 unset X86_SDK
 unset X86_CFLAGS
 unset X86_LDFLAGS
@@ -122,8 +126,14 @@ echo "
 	</plist>
 	" > $DESTDIR/$APPBUNDLE/Contents/Info.plist
 
-lipo -create -o $DESTDIR/$APPBUNDLE/Contents/MacOS/$BINARY $BIN_OBJ
-lipo -create -o $DESTDIR/$APPBUNDLE/Contents/MacOS/$DEDBIN $BIN_DEDOBJ
+for i in $BIN_OBJ $BIN_DEDOBJ $RENDER_OBJ
+do
+        install_name_tool -change "@rpath/SDL.framework/Versions/A/SDL" "@executable_path/../Frameworks/SDL.framework/Versions/A/SDL" $i
+done
+
+
+cp $BIN_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$BINARY
+cp $BIN_DEDOBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$DEDBIN
 cp $RENDER_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/
 cp $BASE_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR/
 cp $MPACK_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR/
