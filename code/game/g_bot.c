@@ -248,7 +248,7 @@ void G_AddRandomBot( int team ) {
 			if ( cl->pers.connected != CON_CONNECTED ) {
 				continue;
 			}
-			if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
+			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 				continue;
 			}
 			if ( team >= 0 && cl->sess.sessionTeam != team ) {
@@ -271,7 +271,7 @@ void G_AddRandomBot( int team ) {
 			if ( cl->pers.connected != CON_CONNECTED ) {
 				continue;
 			}
-			if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
+			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 				continue;
 			}
 			if ( team >= 0 && cl->sess.sessionTeam != team ) {
@@ -312,13 +312,13 @@ int G_RemoveRandomBot( int team ) {
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
-		if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
+		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
 		if ( team >= 0 && cl->sess.sessionTeam != team ) {
 			continue;
 		}
-		trap_SendConsoleCommand( EXEC_INSERT, va("clientkick %d\n", cl->ps.clientNum) );
+		trap_SendConsoleCommand( EXEC_INSERT, va("clientkick %d\n", i) );
 		return qtrue;
 	}
 	return qfalse;
@@ -339,7 +339,7 @@ int G_CountHumanPlayers( int team ) {
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
-		if ( g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT ) {
+		if ( g_entities[i].r.svFlags & SVF_BOT ) {
 			continue;
 		}
 		if ( team >= 0 && cl->sess.sessionTeam != team ) {
@@ -365,7 +365,7 @@ int G_CountBotPlayers( int team ) {
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
-		if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
+		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
 		if ( team >= 0 && cl->sess.sessionTeam != team ) {
@@ -562,13 +562,20 @@ G_AddBot
 static void G_AddBot( const char *name, float skill, const char *team, int delay, char *altname) {
 	int				clientNum;
 	char			*botinfo;
-	gentity_t		*bot;
 	char			*key;
 	char			*s;
 	char			*botname;
 	char			*model;
 	char			*headmodel;
 	char			userinfo[MAX_INFO_STRING];
+
+	// have the server allocate a client slot
+	clientNum = trap_BotAllocateClient();
+	if ( clientNum == -1 ) {
+		G_Printf( S_COLOR_RED "Unable to add bot. All player slots are in use.\n" );
+		G_Printf( S_COLOR_RED "Start server with more 'open' slots (or check setting of sv_maxclients cvar).\n" );
+		return;
+	}
 
 	// get the botinfo from bots.txt
 	botinfo = G_GetBotInfoByName( name );
@@ -591,7 +598,7 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	Info_SetValueForKey( userinfo, "name", botname );
 	Info_SetValueForKey( userinfo, "rate", "25000" );
 	Info_SetValueForKey( userinfo, "snaps", "20" );
-	Info_SetValueForKey( userinfo, "skill", va("%1.2f", skill) );
+	Info_SetValueForKey( userinfo, "skill", va("%5.2f", skill) );
 
 	if ( skill >= 1 && skill < 2 ) {
 		Info_SetValueForKey( userinfo, "handicap", "50" );
@@ -647,16 +654,8 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 		trap_Print( S_COLOR_RED "Error: bot has no aifile specified\n" );
 		return;
 	}
+	Info_SetValueForKey( userinfo, "characterfile", s );
 
-	// have the server allocate a client slot
-	clientNum = trap_BotAllocateClient();
-	if ( clientNum == -1 ) {
-		G_Printf( S_COLOR_RED "Unable to add bot. All player slots are in use.\n" );
-		G_Printf( S_COLOR_RED "Start server with more 'open' slots (or check setting of sv_maxclients cvar).\n" );
-		return;
-	}
-
-	// initialize the bot settings
 	if( !team || !*team ) {
 		if( g_gametype.integer >= GT_TEAM ) {
 			if( PickTeam(clientNum) == TEAM_RED) {
@@ -670,13 +669,7 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 			team = "red";
 		}
 	}
-	Info_SetValueForKey( userinfo, "characterfile", Info_ValueForKey( botinfo, "aifile" ) );
-	Info_SetValueForKey( userinfo, "skill", va( "%5.2f", skill ) );
 	Info_SetValueForKey( userinfo, "team", team );
-
-	bot = &g_entities[ clientNum ];
-	bot->r.svFlags |= SVF_BOT;
-	bot->inuse = qtrue;
 
 	// register the userinfo
 	trap_SetUserinfo( clientNum, userinfo );

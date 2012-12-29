@@ -1231,7 +1231,7 @@ void CheckIntermissionExit( void ) {
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
-		if ( g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT ) {
+		if ( g_entities[i].r.svFlags & SVF_BOT ) {
 			continue;
 		}
 
