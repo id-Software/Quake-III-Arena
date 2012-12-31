@@ -405,7 +405,7 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),darwin)
   HAVE_VM_COMPILED=true
-  LIBS = -framework Cocoa -framework SDL
+  LIBS = -framework Cocoa
   CLIENT_LIBS=
   RENDERER_LIBS=
   OPTIMIZEVM=
@@ -462,8 +462,8 @@ ifeq ($(PLATFORM),darwin)
   LIBSDLMAIN=$(B)/libSDLmain.a
   LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
   CLIENT_LIBS += -framework IOKit \
-    -framework SDL
-  RENDERER_LIBS += -framework OpenGL -framework SDL
+    $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
+  RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
 
   OPTIMIZEVM += -falign-loops=16
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
