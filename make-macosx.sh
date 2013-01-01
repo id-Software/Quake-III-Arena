@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# BUILDARCH can be set to either i386, x86_64 or ppc
-BUILDARCH=x86_64
 
 CC=gcc-4.0
 APPBUNDLE=ioquake3.app
@@ -12,6 +10,28 @@ ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-${BUILDARCH}
 BASEDIR=baseq3
 MPACKDIR=missionpack
+
+# Lets make the user give us a target build system
+
+if [ $# -ne 1 ]; then
+	echo "Usage:   $0 target_architecture"
+	echo "Example: $0 i386"
+	echo
+	echo "If you don't know or care about architectures please consider using make-macosx-ub.sh instead of this script."
+	exit 1
+fi
+
+if [ "$1" == "i386" ]; then
+	BUILDARCH=i386
+elif [ "$1" == "x86_64" ]; then
+	BUILDARCH=x86_64
+elif [ "$1" == "ppc" ]; then
+	BUILDARCH=ppc
+else
+	echo "Invalid architecture: $1"
+	echo "Valid architectures are i386, x86_64 or ppc"
+	exit 1
+fi
 
 BIN_OBJ="
 	build/release-darwin-${BUILDARCH}/ioquake3.${BUILDARCH}
