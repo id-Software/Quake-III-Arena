@@ -16,6 +16,7 @@ MPACKDIR=missionpack
 if [ $# -ne 1 ]; then
 	echo "Usage:   $0 target_architecture"
 	echo "Example: $0 i386"
+	echo "other valid options are x86_64 or ppc"
 	echo
 	echo "If you don't know or care about architectures please consider using make-macosx-ub.sh instead of this script."
 	exit 1
