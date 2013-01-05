@@ -267,7 +267,7 @@ ifneq ($(BUILD_CLIENT),0)
   endif
 endif
 
-# Add svn version info
+# Add git version info
 USE_GIT=
 ifeq ($(wildcard .git),.git)
   GIT_REV=$(shell git show -s --pretty=format:%h-%ad --date=short)
@@ -2662,10 +2662,7 @@ else
 endif
 
 dist:
-	rm -rf $(CLIENTBIN)-$(VERSION)
-	svn export . $(CLIENTBIN)-$(VERSION)
-	tar --owner=root --group=root --force-local -cjf $(CLIENTBIN)-$(VERSION).tar.bz2 $(CLIENTBIN)-$(VERSION)
-	rm -rf $(CLIENTBIN)-$(VERSION)
+	git archive --format zip --output $(CLIENTBIN)-$(VERSION).zip HEAD
 
 #############################################################################
 # DEPENDENCIES
