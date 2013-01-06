@@ -79,7 +79,7 @@ typedef struct flare_s {
 	vec3_t		color;
 } flare_t;
 
-#define		MAX_FLARES		128
+#define		MAX_FLARES		256
 
 flare_t		r_flareStructs[MAX_FLARES];
 flare_t		*r_activeFlares, *r_inactiveFlares;
