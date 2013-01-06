@@ -1,17 +1,7 @@
 #!/bin/sh
 #
 
-CC=gcc-4.0
-APPBUNDLE=ioquake3.app
-BINARY=ioquake3.${BUILDARCH}
-DEDBIN=ioq3ded.${BUILDARCH}
-PKGINFO=APPLIOQ3
-ICNS=misc/quake3.icns
-DESTDIR=build/release-darwin-${BUILDARCH}
-BASEDIR=baseq3
-MPACKDIR=missionpack
-
-# Lets make the user give us a target build system
+# Lets make the user gives us a target build system
 
 if [ $# -ne 1 ]; then
 	echo "Usage:   $0 target_architecture"
@@ -33,6 +23,16 @@ else
 	echo "Valid architectures are i386, x86_64 or ppc"
 	exit 1
 fi
+
+CC=gcc-4.0
+APPBUNDLE=ioquake3.app
+BINARY=ioquake3.${BUILDARCH}
+DEDBIN=ioq3ded.${BUILDARCH}
+PKGINFO=APPLIOQ3
+ICNS=misc/quake3.icns
+DESTDIR=build/release-darwin-${BUILDARCH}
+BASEDIR=baseq3
+MPACKDIR=missionpack
 
 BIN_OBJ="
 	build/release-darwin-${BUILDARCH}/ioquake3.${BUILDARCH}
