@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 
-# Lets make the user gives us a target build system
+# Let's make the user give us a target build system
 
 if [ $# -ne 1 ]; then
 	echo "Usage:   $0 target_architecture"
