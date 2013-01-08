@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "cgame.vcproj", "{C878E295-CB82-4B40-8ECF-5CE5525466FA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "game.vcproj", "{F9EE10DA-2404-4154-B904-F93C936C040A}"
@@ -9,6 +9,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quake3", "quake3.vcproj", "{81CB51C4-B434-4E12-B69B-BAEE102F2852}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "ui.vcproj", "{A8EAC38E-C7DA-42F8-811D-77FD092B9D19}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rend2", "rend2.vcproj", "{F7B397A4-8111-421B-A23B-B9A2CE509183}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opengl1", "opengl1.vcproj", "{CD289B03-887C-4602-BDCE-AB6785A7489E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,22 @@ Global
 		{A8EAC38E-C7DA-42F8-811D-77FD092B9D19}.Release TA|Win32.ActiveCfg = Release TA|Win32
 		{A8EAC38E-C7DA-42F8-811D-77FD092B9D19}.Release TA|Win32.Build.0 = Release TA|Win32
 		{A8EAC38E-C7DA-42F8-811D-77FD092B9D19}.Release|Win32.ActiveCfg = Release|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Debug TA|Win32.ActiveCfg = Debug TA|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Debug TA|Win32.Build.0 = Debug TA|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Debug|Win32.Build.0 = Debug|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Release TA|Win32.ActiveCfg = Release TA|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Release TA|Win32.Build.0 = Release TA|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Release|Win32.ActiveCfg = Release|Win32
+		{F7B397A4-8111-421B-A23B-B9A2CE509183}.Release|Win32.Build.0 = Release|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Debug TA|Win32.ActiveCfg = Debug TA|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Debug TA|Win32.Build.0 = Debug TA|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Debug|Win32.Build.0 = Debug|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Release TA|Win32.ActiveCfg = Release TA|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Release TA|Win32.Build.0 = Release TA|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Release|Win32.ActiveCfg = Release|Win32
+		{CD289B03-887C-4602-BDCE-AB6785A7489E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
