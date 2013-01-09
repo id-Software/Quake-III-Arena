@@ -383,11 +383,11 @@ char *CON_Input( void )
 		return NULL;
 	}
 
-	CON_HistAdd();
-	Com_Printf( "%s\n", qconsole_line );
-
 	qconsole_linelen = 0;
 	CON_Show();
+
+	CON_HistAdd();
+	Com_Printf( "%s\n", qconsole_line );
 
 	return qconsole_line;
 }
