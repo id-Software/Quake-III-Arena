@@ -685,11 +685,13 @@ int R_CullBox(vec3_t worldBounds[2]) {
 	int             i;
 	cplane_t       *frust;
 	qboolean        anyClip;
-	int             r;
+	int             r, numPlanes;
+
+	numPlanes = (tr.viewParms.flags & VPF_FARPLANEFRUSTUM) ? 5 : 4;
 
 	// check against frustum planes
 	anyClip = qfalse;
-	for(i = 0; i < 4 /*FRUSTUM_PLANES*/; i++)
+	for(i = 0; i < numPlanes; i++)
 	{
 		frust = &tr.viewParms.frustum[i];
 
@@ -771,7 +773,7 @@ int R_CullPointAndRadiusEx( const vec3_t pt, float radius, const cplane_t* frust
 */
 int R_CullPointAndRadius( const vec3_t pt, float radius )
 {
-	return R_CullPointAndRadiusEx(pt, radius, tr.viewParms.frustum, ARRAY_LEN(tr.viewParms.frustum));
+	return R_CullPointAndRadiusEx(pt, radius, tr.viewParms.frustum, (tr.viewParms.flags & VPF_FARPLANEFRUSTUM) ? 5 : 4);
 }
 
 /*
@@ -1132,6 +1134,7 @@ void R_SetupFrustum (viewParms_t *dest, float xmin, float xmax, float ymax, floa
 		dest->frustum[4].type = PLANE_NON_AXIAL;
 		dest->frustum[4].dist = DotProduct (farpoint, dest->frustum[4].normal);
 		SetPlaneSignbits( &dest->frustum[4] );
+		dest->flags |= VPF_FARPLANEFRUSTUM;
 	}
 }
 
@@ -1316,6 +1319,8 @@ void R_SetupProjectionOrtho(viewParms_t *dest, vec3_t viewBounds[2])
 		dest->frustum[i].type = PLANE_NON_AXIAL;
 		SetPlaneSignbits (&dest->frustum[i]);
 	}
+
+	dest->flags |= VPF_FARPLANEFRUSTUM;
 }
 
 /*
@@ -1719,6 +1724,8 @@ qboolean R_MirrorViewBySurface (drawSurf_t *drawSurf, int entityNum) {
 
 	newParms = tr.viewParms;
 	newParms.isPortal = qtrue;
+	newParms.zFar = 0.0f;
+	newParms.flags &= ~VPF_FARPLANEFRUSTUM;
 	if ( !R_GetPortalOrientations( drawSurf, entityNum, &surface, &camera, 
 		newParms.pvsOrigin, &newParms.isMirror ) ) {
 		return qfalse;		// bad portal, no portalentity
@@ -2572,6 +2579,8 @@ void R_RenderPshadowMaps(const refdef_t *fd)
 					dest->frustum[j].type = PLANE_NON_AXIAL;
 					SetPlaneSignbits (&dest->frustum[j]);
 				}
+
+				dest->flags |= VPF_FARPLANEFRUSTUM;
 			}
 
 			for (j = 0; j < shadow->numEntities; j++)
