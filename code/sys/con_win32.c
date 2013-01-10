@@ -174,15 +174,12 @@ static void CON_Show( void )
 	COORD writeSize = { MAX_EDIT_LINE, 1 };
 	COORD writePos = { 0, 0 };
 	SMALL_RECT writeArea = { 0, 0, 0, 0 };
+	COORD cursorPos;
 	int i;
 	CHAR_INFO line[ MAX_EDIT_LINE ];
 	WORD attrib;
 
 	GetConsoleScreenBufferInfo( qconsole_hout, &binfo );
-
-	// if we're in the middle of printf, don't bother writing the buffer
-	if( binfo.dwCursorPosition.X != 0 )
-		return;
 
 	writeArea.Left = 0;
 	writeArea.Top = binfo.dwCursorPosition.Y; 
@@ -219,6 +216,12 @@ static void CON_Show( void )
 		WriteConsoleOutput( qconsole_hout, line, writeSize,
 			writePos, &writeArea );
 	}
+
+	// set curor position
+	cursorPos.Y = binfo.dwCursorPosition.Y;
+	cursorPos.X = qconsole_linelen > binfo.srWindow.Right ? binfo.srWindow.Right : qconsole_linelen;
+
+	SetConsoleCursorPosition( qconsole_hout, cursorPos );
 }
 
 /*
@@ -262,7 +265,6 @@ CON_Init
 */
 void CON_Init( void )
 {
-	CONSOLE_CURSOR_INFO curs;
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	int i;
 
@@ -290,12 +292,6 @@ void CON_Init( void )
 	qconsole_backgroundAttrib = qconsole_attrib & (BACKGROUND_BLUE|BACKGROUND_GREEN|BACKGROUND_RED|BACKGROUND_INTENSITY);
 
 	SetConsoleTitle(CLIENT_WINDOW_TITLE " Dedicated Server Console");
-
-	// make cursor invisible
-	GetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
-	curs.dwSize = 1;
-	curs.bVisible = FALSE;
-	SetConsoleCursorInfo( qconsole_hout, &curs );
 
 	// initialize history
 	for( i = 0; i < QCONSOLE_HISTORY; i++ )
