@@ -223,11 +223,31 @@ static void CON_Show( void )
 
 /*
 ==================
+CON_Hide
+==================
+*/
+static void CON_Hide( void )
+{
+	int realLen;
+
+	realLen = qconsole_linelen;
+
+	// remove input line from console output buffer
+	qconsole_linelen = 0;
+	CON_Show( );
+
+	qconsole_linelen = realLen;
+}
+
+
+/*
+==================
 CON_Shutdown
 ==================
 */
 void CON_Shutdown( void )
 {
+	CON_Hide( );
 	SetConsoleMode( qconsole_hin, qconsole_orig_mode );
 	SetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
 	SetConsoleTextAttribute( qconsole_hout, qconsole_attrib );
@@ -458,6 +478,8 @@ CON_Print
 */
 void CON_Print( const char *msg )
 {
+	CON_Hide( );
+
 	CON_WindowsColorPrint( msg );
 
 	CON_Show( );
