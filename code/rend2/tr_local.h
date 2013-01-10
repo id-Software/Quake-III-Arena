@@ -1002,12 +1002,13 @@ typedef struct {
 } fog_t;
 
 typedef enum {
-	VPF_NONE         = 0x00,
-	VPF_SHADOWMAP    = 0x01,
-	VPF_DEPTHSHADOW  = 0x02,
-	VPF_DEPTHCLAMP   = 0x04,
-	VPF_ORTHOGRAPHIC = 0x08,
-	VPF_USESUNLIGHT  = 0x10,
+	VPF_NONE            = 0x00,
+	VPF_SHADOWMAP       = 0x01,
+	VPF_DEPTHSHADOW     = 0x02,
+	VPF_DEPTHCLAMP      = 0x04,
+	VPF_ORTHOGRAPHIC    = 0x08,
+	VPF_USESUNLIGHT     = 0x10,
+	VPF_FARPLANEFRUSTUM = 0x20
 } viewParmFlags_t;
 
 typedef struct {

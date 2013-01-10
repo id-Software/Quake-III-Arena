@@ -308,7 +308,7 @@ static void RB_SurfaceSprite( void ) {
 			ri.Printf(PRINT_WARNING, "Multiple sun flares not supported\n");
 			return;
 		}
-		if (R_CullPointAndRadiusEx(ent->e.origin, ent->e.radius, backEnd.viewParms.frustum, ARRAY_LEN(backEnd.viewParms.frustum)) == CULL_OUT)
+		if (R_CullPointAndRadiusEx(ent->e.origin, ent->e.radius, backEnd.viewParms.frustum, (backEnd.viewParms.flags & VPF_FARPLANEFRUSTUM) ? 5 : 4) == CULL_OUT)
 			return;
 		colors[0] = colors[1] = colors[2] = colors[3] = ent->e.shaderRGBA[glRefConfig.framebufferObject] / 255.0f;
 		if (colors[0] == 0)
