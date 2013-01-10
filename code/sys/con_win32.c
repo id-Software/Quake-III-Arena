@@ -42,6 +42,7 @@ static int qconsole_history_oldest = 0;
 // current edit buffer
 static char qconsole_line[ MAX_EDIT_LINE ];
 static int qconsole_linelen = 0;
+static qboolean qconsole_drawinput = qtrue;
 
 static HANDLE qconsole_hout;
 static HANDLE qconsole_hin;
@@ -180,6 +181,10 @@ static void CON_Show( void )
 	WORD attrib;
 
 	GetConsoleScreenBufferInfo( qconsole_hout, &binfo );
+
+	// if we're in the middle of printf, don't bother writing the buffer
+	if( !qconsole_drawinput )
+		return;
 
 	writeArea.Left = 0;
 	writeArea.Top = binfo.dwCursorPosition.Y; 
@@ -424,6 +429,8 @@ void CON_WindowsColorPrint( const char *msg )
 
 	while( *msg )
 	{
+		qconsole_drawinput = ( *msg == '\n' );
+
 		if( Q_IsColorString( msg ) || *msg == '\n' )
 		{
 			// First empty the buffer
