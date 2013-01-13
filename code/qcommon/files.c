@@ -1360,10 +1360,17 @@ long FS_FOpenFileRead(const char *filename, fileHandle_t *file, qboolean uniqueF
 		fprintf(missingFiles, "%s\n", filename);
 #endif
 
-        if(file)
-        	*file = 0;
-        	
-	return -1;
+	if(file)
+	{
+		*file = 0;
+		return -1;
+	}
+	else
+	{
+		// When file is NULL, we're querying the existance of the file
+		// If we've got here, it doesn't exist
+		return 0;
+	}
 }
 
 /*
