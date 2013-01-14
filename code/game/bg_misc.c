@@ -1272,7 +1272,7 @@ void BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t resu
 		result[2] -= DEFAULT_GRAVITY * deltaTime;		// FIXME: local gravity...
 		break;
 	default:
-		Com_Error( ERR_DROP, "BG_EvaluateTrajectoryDelta: unknown trType: %i", tr->trTime );
+		Com_Error( ERR_DROP, "BG_EvaluateTrajectoryDelta: unknown trType: %i", tr->trType );
 		break;
 	}
 }
