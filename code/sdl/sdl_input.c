@@ -756,15 +756,20 @@ static void IN_ProcessEvents( void )
 						case 1:   b = K_MOUSE1;     break;
 						case 2:   b = K_MOUSE3;     break;
 						case 3:   b = K_MOUSE2;     break;
-						case 4:   b = K_MWHEELUP;   break;
-						case 5:   b = K_MWHEELDOWN; break;
-						case 6:   b = K_MOUSE4;     break;
-						case 7:   b = K_MOUSE5;     break;
+						case 4:   b = K_MOUSE4;     break;
+						case 5:   b = K_MOUSE5;     break;
 						default:  b = K_AUX1 + ( e.button.button - 8 ) % 16; break;
 					}
 					Com_QueueEvent( 0, SE_KEY, b,
 						( e.type == SDL_MOUSEBUTTONDOWN ? qtrue : qfalse ), 0, NULL );
 				}
+				break;
+
+			case SDL_MOUSEWHEEL:
+				if( e.wheel.y > 0 )
+					Com_QueueEvent( 0, SE_KEY, K_MWHEELUP, qtrue, 0, NULL );
+				else
+					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qtrue, 0, NULL );
 				break;
 
 			case SDL_QUIT:
