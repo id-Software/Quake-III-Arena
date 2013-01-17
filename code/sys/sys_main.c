@@ -245,12 +245,8 @@ cpuFeatures_t Sys_GetProcessorFeatures( void )
 #ifndef DEDICATED
 	if( SDL_HasRDTSC( ) )    features |= CF_RDTSC;
 	if( SDL_HasMMX( ) )      features |= CF_MMX;
-	if( SDL_HasMMXExt( ) )   features |= CF_MMX_EXT;
-	if( SDL_Has3DNow( ) )    features |= CF_3DNOW;
-	if( SDL_Has3DNowExt( ) ) features |= CF_3DNOW_EXT;
 	if( SDL_HasSSE( ) )      features |= CF_SSE;
 	if( SDL_HasSSE2( ) )     features |= CF_SSE2;
-	if( SDL_HasAltiVec( ) )  features |= CF_ALTIVEC;
 #endif
 
 	return features;
@@ -593,19 +589,20 @@ int main( int argc, char **argv )
 #	endif
 
 	// Run time
-	const SDL_version *ver = SDL_Linked_Version( );
+	SDL_version ver;
+	SDL_VERSION( &ver );
 
 #define MINSDL_VERSION \
 	XSTRING(MINSDL_MAJOR) "." \
 	XSTRING(MINSDL_MINOR) "." \
 	XSTRING(MINSDL_PATCH)
 
-	if( SDL_VERSIONNUM( ver->major, ver->minor, ver->patch ) <
+	if( SDL_VERSIONNUM( ver.major, ver.minor, ver.patch ) <
 			SDL_VERSIONNUM( MINSDL_MAJOR, MINSDL_MINOR, MINSDL_PATCH ) )
 	{
 		Sys_Dialog( DT_ERROR, va( "SDL version " MINSDL_VERSION " or greater is required, "
 			"but only version %d.%d.%d was found. You may be able to obtain a more recent copy "
-			"from http://www.libsdl.org/.", ver->major, ver->minor, ver->patch ), "SDL Library Too Old" );
+			"from http://www.libsdl.org/.", ver.major, ver.minor, ver.patch ), "SDL Library Too Old" );
 
 		Sys_Exit( 1 );
 	}

@@ -167,7 +167,7 @@ typedef struct {
 	void	(*CL_WriteAVIVideoFrame)( const byte *buffer, int size );
 
 	// input event handling
-	void	(*IN_Init)( void );
+	void	(*IN_Init)( void *windowData );
 	void	(*IN_Shutdown)( void );
 	void	(*IN_Restart)( void );
 

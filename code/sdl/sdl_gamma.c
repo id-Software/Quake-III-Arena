@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderer/tr_local.h"
 #include "../qcommon/qcommon.h"
 
+extern SDL_Window *SDL_window;
+
 /*
 =================
 GLimp_SetGamma
@@ -86,6 +88,6 @@ void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned 
 		}
 	}
 
-	SDL_SetGammaRamp(table[0], table[1], table[2]);
+	SDL_SetWindowGammaRamp(SDL_window, table[0], table[1], table[2]);
 }
 
