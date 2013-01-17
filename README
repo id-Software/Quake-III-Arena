@@ -282,7 +282,7 @@ New commands
   stopmusic               - stop background music
   minimize                - Minimize the game and show desktop
   togglemenu              - causes escape key event for opening/closing menu, or
-                            going to a pervious menu. works in binds, even in UI
+                            going to a previous menu. works in binds, even in UI
 
   print                   - print out the contents of a cvar
   unset                   - unset a user created cvar
