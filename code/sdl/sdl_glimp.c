@@ -770,13 +770,8 @@ success:
 	glConfig.hardwareType = GLHW_GENERIC;
 
 	// Only using SDL_SetWindowBrightness to determine if hardware gamma is supported
-	glConfig.deviceSupportsGamma = SDL_SetWindowBrightness( SDL_window, 1.0f ) >= 0;
-
-	if ( -1 == r_ignorehwgamma->integer)
-		glConfig.deviceSupportsGamma = 1;
-
-	if ( 1 == r_ignorehwgamma->integer)
-		glConfig.deviceSupportsGamma = 0;
+	glConfig.deviceSupportsGamma = !r_ignorehwgamma->integer &&
+		SDL_SetWindowBrightness( SDL_window, 1.0f ) >= 0;
 
 	// get our config strings
 	Q_strncpyz( glConfig.vendor_string, (char *) qglGetString (GL_VENDOR), sizeof( glConfig.vendor_string ) );
