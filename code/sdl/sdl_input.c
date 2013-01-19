@@ -729,17 +729,43 @@ static void IN_ProcessEvents( void )
 
 			case SDL_TEXTINPUT:
 				{
-					int i;
-					int numChars = strlen( e.text.text );
+					char *c = e.text.text;
 
-					for( i = 0; i < numChars; i++ )
+					// Quick and dirty UTF-8 to UTF-32 conversion
+					while( *c )
 					{
-						char c = e.text.text[ i ];
+						int utf32 = 0;
 
-						if( !IN_IsConsoleKey( 0, c ) )
-							Com_QueueEvent( 0, SE_CHAR, c, 0, 0, NULL );
-					}
-				}
+						if( ( *c & 0x80 ) == 0 )
+							utf32 = *c++;
+						else if( ( *c & 0xE0 ) == 0xC0 ) // 110x xxxx
+						{
+							utf32 |= ( *c++ & 0x1F ) << 6;
+							utf32 |= ( *c++ & 0x3F );
+						}
+						else if( ( *c & 0xF0 ) == 0xE0 ) // 1110 xxxx
+						{
+							utf32 |= ( *c++ & 0x0F ) << 12;
+							utf32 |= ( *c++ & 0x3F ) << 6;
+							utf32 |= ( *c++ & 0x3F );
+						}
+						else if( ( *c & 0xF8 ) == 0xF0 ) // 1111 0xxx
+						{
+							utf32 |= ( *c++ & 0x07 ) << 18;
+							utf32 |= ( *c++ & 0x3F ) << 6;
+							utf32 |= ( *c++ & 0x3F ) << 6;
+							utf32 |= ( *c++ & 0x3F );
+						}
+						else
+						{
+							Com_DPrintf( "Unrecognised UTF-8 lead byte: 0x%x\n", (unsigned int)*c );
+							c++;
+						}
+
+						if( utf32 != 0 )
+							Com_QueueEvent( 0, SE_CHAR, utf32, 0, 0, NULL );
+          }
+        }
 				break;
 
 			case SDL_MOUSEMOTION:
