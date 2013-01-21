@@ -67,8 +67,9 @@ static void IN_PrintKey( const SDL_Keysym *keysym, keyNum_t key, qboolean down )
 	else
 		Com_Printf( "  " );
 
-	Com_Printf( "0x%02x \"%s\"", keysym->scancode,
-			SDL_GetKeyName( keysym->sym ) );
+	Com_Printf( "Scancode: 0x%02x(%s) Sym: 0x%02x(%s)",
+			keysym->scancode, SDL_GetScancodeName( keysym->scancode ),
+			keysym->sym, SDL_GetKeyName( keysym->sym ) );
 
 	if( keysym->mod & KMOD_LSHIFT )   Com_Printf( " KMOD_LSHIFT" );
 	if( keysym->mod & KMOD_RSHIFT )   Com_Printf( " KMOD_RSHIFT" );
@@ -91,23 +92,25 @@ static void IN_PrintKey( const SDL_Keysym *keysym, keyNum_t key, qboolean down )
 /*
 ===============
 IN_IsConsoleKey
-//FIXME: SDL 1.3 allow scancode based console key selection
+
+TODO: If the SDL_Scancode situation improves, use it instead of
+      both of these methods
 ===============
 */
-static qboolean IN_IsConsoleKey( keyNum_t key, const unsigned char character )
+static qboolean IN_IsConsoleKey( keyNum_t key, int character )
 {
 	typedef struct consoleKey_s
 	{
 		enum
 		{
-			KEY,
+			QUAKE_KEY,
 			CHARACTER
 		} type;
 
 		union
 		{
 			keyNum_t key;
-			unsigned char character;
+			int character;
 		} u;
 	} consoleKey_t;
 
@@ -139,11 +142,11 @@ static qboolean IN_IsConsoleKey( keyNum_t key, const unsigned char character )
 			if( charCode > 0 )
 			{
 				c->type = CHARACTER;
-				c->u.character = (unsigned char)charCode;
+				c->u.character = charCode;
 			}
 			else
 			{
-				c->type = KEY;
+				c->type = QUAKE_KEY;
 				c->u.key = Key_StringToKeynum( token );
 
 				// 0 isn't a key
@@ -165,7 +168,7 @@ static qboolean IN_IsConsoleKey( keyNum_t key, const unsigned char character )
 
 		switch( c->type )
 		{
-			case KEY:
+			case QUAKE_KEY:
 				if( key && c->u.key == key )
 					return qtrue;
 				break;
@@ -277,7 +280,7 @@ static keyNum_t IN_TranslateSDLToQ3Key( SDL_Keysym *keysym, qboolean down )
 	if( in_keyboardDebug->integer )
 		IN_PrintKey( keysym, key, down );
 
-	if( IN_IsConsoleKey( key, '\0' ) )
+	if( IN_IsConsoleKey( key, 0 ) )
 	{
 		// Console keys can't be bound or generate characters
 		key = K_CONSOLE;
@@ -706,6 +709,7 @@ static void IN_ProcessEvents( void )
 {
 	SDL_Event e;
 	keyNum_t key = 0;
+	static keyNum_t lastKeyDown = 0;
 
 	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
 			return;
@@ -715,19 +719,21 @@ static void IN_ProcessEvents( void )
 		switch( e.type )
 		{
 			case SDL_KEYDOWN:
-				key = IN_TranslateSDLToQ3Key( &e.key.keysym, qtrue );
-				if( key )
+				if( ( key = IN_TranslateSDLToQ3Key( &e.key.keysym, qtrue ) ) )
 					Com_QueueEvent( 0, SE_KEY, key, qtrue, 0, NULL );
+
+				lastKeyDown = key;
 				break;
 
 			case SDL_KEYUP:
-				key = IN_TranslateSDLToQ3Key( &e.key.keysym, qfalse );
-
-				if( key )
+				if( ( key = IN_TranslateSDLToQ3Key( &e.key.keysym, qfalse ) ) )
 					Com_QueueEvent( 0, SE_KEY, key, qfalse, 0, NULL );
+
+				lastKeyDown = 0;
 				break;
 
 			case SDL_TEXTINPUT:
+				if( lastKeyDown != K_CONSOLE )
 				{
 					char *c = e.text.text;
 
@@ -763,7 +769,15 @@ static void IN_ProcessEvents( void )
 						}
 
 						if( utf32 != 0 )
-							Com_QueueEvent( 0, SE_CHAR, utf32, 0, 0, NULL );
+						{
+							if( IN_IsConsoleKey( 0, utf32 ) )
+							{
+								Com_QueueEvent( 0, SE_KEY, K_CONSOLE, qtrue, 0, NULL );
+								Com_QueueEvent( 0, SE_KEY, K_CONSOLE, qfalse, 0, NULL );
+							}
+							else
+								Com_QueueEvent( 0, SE_CHAR, utf32, 0, 0, NULL );
+						}
           }
         }
 				break;
