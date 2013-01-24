@@ -829,8 +829,7 @@ void GLSL_InitGPUShaders(void)
 
 	ri.Printf(PRINT_ALL, "------- GLSL_InitGPUShaders -------\n");
 
-	// make sure the render thread is stopped
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	startTime = ri.Milliseconds();
 

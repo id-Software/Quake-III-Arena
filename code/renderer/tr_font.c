@@ -356,8 +356,7 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 		pointSize = 12;
 	}
 
-	// make sure the render thread is stopped
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	if (registeredFontCount >= MAX_FONTS) {
 		ri.Printf(PRINT_WARNING, "RE_RegisterFont: Too many fonts registered already.\n");

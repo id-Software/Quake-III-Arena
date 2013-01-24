@@ -206,13 +206,13 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 	}
 
 	if ( *surf->data == SF_FACE ) {
-		((srfSurfaceFace_t *)surf->data)->dlightBits[ tr.smpFrame ] = dlightBits;
+		((srfSurfaceFace_t *)surf->data)->dlightBits = dlightBits;
 	} else if ( *surf->data == SF_GRID ) {
-		((srfGridMesh_t *)surf->data)->dlightBits[ tr.smpFrame ]    = dlightBits;
+		((srfGridMesh_t *)surf->data)->dlightBits    = dlightBits;
 	} else if ( *surf->data == SF_TRIANGLES ) {
-		((srfTriangles_t *)surf->data)->dlightBits[ tr.smpFrame ]   = dlightBits;
+		((srfTriangles_t *)surf->data)->dlightBits   = dlightBits;
 	} else if ( *surf->data == SF_VBO_MESH ) {
-		((srfVBOMesh_t *)surf->data)->dlightBits[ tr.smpFrame ]     = dlightBits;
+		((srfVBOMesh_t *)surf->data)->dlightBits     = dlightBits;
 	} else {
 		dlightBits = 0;
 	}
@@ -289,13 +289,13 @@ static int R_PshadowSurface( msurface_t *surf, int pshadowBits ) {
 	}
 
 	if ( *surf->data == SF_FACE ) {
-		((srfSurfaceFace_t *)surf->data)->pshadowBits[ tr.smpFrame ] = pshadowBits;
+		((srfSurfaceFace_t *)surf->data)->pshadowBits = pshadowBits;
 	} else if ( *surf->data == SF_GRID ) {
-		((srfGridMesh_t *)surf->data)->pshadowBits[ tr.smpFrame ]    = pshadowBits;
+		((srfGridMesh_t *)surf->data)->pshadowBits    = pshadowBits;
 	} else if ( *surf->data == SF_TRIANGLES ) {
-		((srfTriangles_t *)surf->data)->pshadowBits[ tr.smpFrame ]   = pshadowBits;
+		((srfTriangles_t *)surf->data)->pshadowBits   = pshadowBits;
 	} else if ( *surf->data == SF_VBO_MESH ) {
-		((srfVBOMesh_t *)surf->data)->pshadowBits[ tr.smpFrame ]     = pshadowBits;
+		((srfVBOMesh_t *)surf->data)->pshadowBits     = pshadowBits;
 	} else {
 		pshadowBits = 0;
 	}
