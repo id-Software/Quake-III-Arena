@@ -51,9 +51,7 @@ MPACK_OBJ="
 	build/release-darwin-${BUILDARCH}/$MPACKDIR/qagame${BUILDARCH}.dylib
 "
 RENDER_OBJ="
-	build/release-darwin-${BUILDARCH}/renderer_opengl1_smp_${BUILDARCH}.dylib
 	build/release-darwin-${BUILDARCH}/renderer_opengl1_${BUILDARCH}.dylib
-	build/release-darwin-${BUILDARCH}/renderer_rend2_smp_${BUILDARCH}.dylib
 	build/release-darwin-${BUILDARCH}/renderer_rend2_${BUILDARCH}.dylib
 "
 
