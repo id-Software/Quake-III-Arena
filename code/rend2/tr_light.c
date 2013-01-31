@@ -441,7 +441,11 @@ int R_LightDirForPoint( vec3_t point, vec3_t lightDir, vec3_t normal, world_t *w
 	Com_Memset(&ent, 0, sizeof(ent));
 	VectorCopy( point, ent.e.origin );
 	R_SetupEntityLightingGrid( &ent, world );
-	VectorCopy(ent.lightDir, lightDir);
+
+	if (DotProduct(ent.lightDir, normal) > 0.2f)
+		VectorCopy(ent.lightDir, lightDir);
+	else
+		VectorCopy(normal, lightDir);
 
 	return qtrue;
 }

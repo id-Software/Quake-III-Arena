@@ -1329,6 +1329,11 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 				index |= LIGHTDEF_ENTITY;
 			}
 
+			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && ((index & LIGHTDEF_USE_LIGHTMAP) || (index & LIGHTDEF_USE_LIGHT_VERTEX)))
+			{
+				index |= LIGHTDEF_USE_SHADOWMAP;
+			}
+
 			if (r_lightmap->integer && index & LIGHTDEF_USE_LIGHTMAP)
 			{
 				index = LIGHTDEF_USE_LIGHTMAP;
@@ -1491,6 +1496,14 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		else if ( pStage->glslShaderGroup )
 		{
 			int i;
+
+			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && ((pStage->glslShaderIndex & LIGHTDEF_USE_LIGHTMAP) || (pStage->glslShaderIndex & LIGHTDEF_USE_LIGHT_VERTEX)))
+			{
+				GL_BindToTMU(tr.screenShadowImage, TB_SHADOWMAP);
+				GLSL_SetUniformVec3(sp, GENERIC_UNIFORM_AMBIENTLIGHT,   backEnd.refdef.sunAmbCol);
+				GLSL_SetUniformVec3(sp, GENERIC_UNIFORM_DIRECTEDLIGHT,  backEnd.refdef.sunCol);
+				GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_LIGHTORIGIN, backEnd.refdef.sunDir);
+			}
 
 			if ((r_lightmap->integer == 1 || r_lightmap->integer == 2) && pStage->bundle[TB_LIGHTMAP].image[0])
 			{
@@ -1782,11 +1795,13 @@ void RB_StageIteratorGeneric( void )
 		}
 	}
 
+#if 0
 	if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && tess.shader->sort <= SS_OPAQUE 
 	//if ((tr.sunShadows || r_forceSunlight->value > 0.0f) && tess.shader->sort <= SS_OPAQUE 
 	    && !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) && tess.xstages[0]->glslShaderGroup == tr.lightallShader) {
 		ForwardSunlight();
 	}
+#endif
 
 	//
 	// now do fog

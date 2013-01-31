@@ -1047,7 +1047,8 @@ void GLSL_InitGPUShaders(void)
 		if (!(i & LIGHTDEF_USE_NORMALMAP) && (i & LIGHTDEF_USE_PARALLAXMAP))
 			continue;
 
-		if (!((i & LIGHTDEF_LIGHTTYPE_MASK) == LIGHTDEF_USE_LIGHT_VECTOR))
+		//if (!((i & LIGHTDEF_LIGHTTYPE_MASK) == LIGHTDEF_USE_LIGHT_VECTOR))
+		if (!(i & LIGHTDEF_LIGHTTYPE_MASK))
 		{
 			if (i & LIGHTDEF_USE_SHADOWMAP)
 				continue;
