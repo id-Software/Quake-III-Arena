@@ -82,7 +82,6 @@ Makefile.local:
   DEFAULT_BASEDIR    - extra path to search for baseq3 and such
   BUILD_SERVER       - build the 'ioq3ded' server binary
   BUILD_CLIENT       - build the 'ioquake3' client binary
-  BUILD_CLIENT_SMP   - build the 'ioquake3-smp' client binary
   BUILD_BASEGAME     - build the 'baseq3' binaries
   BUILD_MISSIONPACK  - build the 'missionpack' binaries
   BUILD_GAME_SO      - build the game shared libraries
@@ -281,6 +280,8 @@ New commands
   stopvideo               - stop video capture
   stopmusic               - stop background music
   minimize                - Minimize the game and show desktop
+  togglemenu              - causes escape key event for opening/closing menu, or
+                            going to a previous menu. works in binds, even in UI
 
   print                   - print out the contents of a cvar
   unset                   - unset a user created cvar

@@ -370,8 +370,7 @@ void FBO_Init(void)
 
 	GL_CheckErrors();
 
-	// make sure the render thread is stopped
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 /*	if(glRefConfig.textureNonPowerOfTwo)
 	{

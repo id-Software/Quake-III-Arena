@@ -42,6 +42,7 @@ static int qconsole_history_oldest = 0;
 // current edit buffer
 static char qconsole_line[ MAX_EDIT_LINE ];
 static int qconsole_linelen = 0;
+static qboolean qconsole_drawinput = qtrue;
 
 static HANDLE qconsole_hout;
 static HANDLE qconsole_hin;
@@ -174,6 +175,7 @@ static void CON_Show( void )
 	COORD writeSize = { MAX_EDIT_LINE, 1 };
 	COORD writePos = { 0, 0 };
 	SMALL_RECT writeArea = { 0, 0, 0, 0 };
+	COORD cursorPos;
 	int i;
 	CHAR_INFO line[ MAX_EDIT_LINE ];
 	WORD attrib;
@@ -181,7 +183,7 @@ static void CON_Show( void )
 	GetConsoleScreenBufferInfo( qconsole_hout, &binfo );
 
 	// if we're in the middle of printf, don't bother writing the buffer
-	if( binfo.dwCursorPosition.X != 0 )
+	if( !qconsole_drawinput )
 		return;
 
 	writeArea.Left = 0;
@@ -219,7 +221,32 @@ static void CON_Show( void )
 		WriteConsoleOutput( qconsole_hout, line, writeSize,
 			writePos, &writeArea );
 	}
+
+	// set curor position
+	cursorPos.Y = binfo.dwCursorPosition.Y;
+	cursorPos.X = qconsole_linelen > binfo.srWindow.Right ? binfo.srWindow.Right : qconsole_linelen;
+
+	SetConsoleCursorPosition( qconsole_hout, cursorPos );
 }
+
+/*
+==================
+CON_Hide
+==================
+*/
+static void CON_Hide( void )
+{
+	int realLen;
+
+	realLen = qconsole_linelen;
+
+	// remove input line from console output buffer
+	qconsole_linelen = 0;
+	CON_Show( );
+
+	qconsole_linelen = realLen;
+}
+
 
 /*
 ==================
@@ -228,6 +255,7 @@ CON_Shutdown
 */
 void CON_Shutdown( void )
 {
+	CON_Hide( );
 	SetConsoleMode( qconsole_hin, qconsole_orig_mode );
 	SetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
 	SetConsoleTextAttribute( qconsole_hout, qconsole_attrib );
@@ -242,7 +270,6 @@ CON_Init
 */
 void CON_Init( void )
 {
-	CONSOLE_CURSOR_INFO curs;
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	int i;
 
@@ -270,12 +297,6 @@ void CON_Init( void )
 	qconsole_backgroundAttrib = qconsole_attrib & (BACKGROUND_BLUE|BACKGROUND_GREEN|BACKGROUND_RED|BACKGROUND_INTENSITY);
 
 	SetConsoleTitle(CLIENT_WINDOW_TITLE " Dedicated Server Console");
-
-	// make cursor invisible
-	GetConsoleCursorInfo( qconsole_hout, &qconsole_orig_cursorinfo );
-	curs.dwSize = 1;
-	curs.bVisible = FALSE;
-	SetConsoleCursorInfo( qconsole_hout, &curs );
 
 	// initialize history
 	for( i = 0; i < QCONSOLE_HISTORY; i++ )
@@ -408,6 +429,8 @@ void CON_WindowsColorPrint( const char *msg )
 
 	while( *msg )
 	{
+		qconsole_drawinput = ( *msg == '\n' );
+
 		if( Q_IsColorString( msg ) || *msg == '\n' )
 		{
 			// First empty the buffer
@@ -458,6 +481,8 @@ CON_Print
 */
 void CON_Print( const char *msg )
 {
+	CON_Hide( );
+
 	CON_WindowsColorPrint( msg );
 
 	CON_Show( );

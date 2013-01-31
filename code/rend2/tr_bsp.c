@@ -218,7 +218,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 	buf = fileBase + l->fileofs;
 
 	// we are about to upload textures
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	tr.lightmapSize = DEFAULT_LIGHTMAP_SIZE;
 	numLightmaps = len / (tr.lightmapSize * tr.lightmapSize * 3);
@@ -3185,7 +3185,7 @@ void R_MergeLeafSurfaces(void)
 	}
 
 	// finish up the ibo
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	qglGenBuffersARB(1, &ibo->indexesVBO);
 
