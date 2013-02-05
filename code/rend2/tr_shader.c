@@ -3696,6 +3696,31 @@ static void CreateExternalShaders( void ) {
 	}
 
 	tr.sunShader = R_FindShader( "sun", LIGHTMAP_NONE, qtrue );
+
+	tr.sunFlareShader = R_FindShader( "gfx/2d/sunflare", LIGHTMAP_NONE, qtrue);
+
+	// HACK: if sunflare is missing, make one using the flare image or dlight image
+	if (tr.sunFlareShader->defaultShader)
+	{
+		image_t *image;
+
+		if (!tr.flareShader->defaultShader && tr.flareShader->stages[0] && tr.flareShader->stages[0]->bundle[0].image[0])
+			image = tr.flareShader->stages[0]->bundle[0].image[0];
+		else
+			image = tr.dlightImage;
+
+		Com_Memset( &shader, 0, sizeof( shader ) );
+		Com_Memset( &stages, 0, sizeof( stages ) );
+
+		Q_strncpyz( shader.name, "gfx/2d/sunflare", sizeof( shader.name ) );
+
+		shader.lightmapIndex = LIGHTMAP_NONE;
+		stages[0].bundle[0].image[0] = image;
+		stages[0].active = qtrue;
+		stages[0].stateBits = GLS_DEFAULT;
+		tr.sunFlareShader = FinishShader();
+	}
+
 }
 
 /*
