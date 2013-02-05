@@ -793,16 +793,12 @@ void R_InitSkyTexCoords( float heightCloud )
 /*
 ** RB_DrawSun
 */
-void RB_DrawSun( void ) {
+void RB_DrawSun( float scale, shader_t *shader ) {
 	float		size;
 	float		dist;
 	vec3_t		origin, vec1, vec2;
-	vec3_t		temp;
 
 	if ( !backEnd.skyRenderedThisView ) {
-		return;
-	}
-	if ( !r_drawSun->integer ) {
 		return;
 	}
 
@@ -810,15 +806,15 @@ void RB_DrawSun( void ) {
 	//qglTranslatef (backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1], backEnd.viewParms.or.origin[2]);
 	{
 		// FIXME: this could be a lot cleaner
-		matrix_t trans, product;
+		matrix_t translation, modelview;
 
-		Matrix16Translation( backEnd.viewParms.or.origin, trans );
-		Matrix16Multiply( backEnd.viewParms.world.modelMatrix, trans, product );
-		GL_SetModelviewMatrix( product );
+		Matrix16Translation( backEnd.viewParms.or.origin, translation );
+		Matrix16Multiply( backEnd.viewParms.world.modelMatrix, translation, modelview );
+		GL_SetModelviewMatrix( modelview );
 	}
 
 	dist = 	backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
-	size = dist * 0.4;
+	size = dist * scale;
 
 	VectorScale( tr.sunDirection, dist, origin );
 	PerpendicularVector( vec1, tr.sunDirection );
@@ -830,58 +826,13 @@ void RB_DrawSun( void ) {
 	// farthest depth range
 	qglDepthRange( 1.0, 1.0 );
 
-	// FIXME: use quad stamp
-	RB_BeginSurface( tr.sunShader, tess.fogNum );
-		VectorCopy( origin, temp );
-		VectorSubtract( temp, vec1, temp );
-		VectorSubtract( temp, vec2, temp );
-		VectorCopy( temp, tess.xyz[tess.numVertexes] );
-		tess.texCoords[tess.numVertexes][0][0] = 0;
-		tess.texCoords[tess.numVertexes][0][1] = 0;
-		tess.vertexColors[tess.numVertexes][0] = 1.0f;
-		tess.vertexColors[tess.numVertexes][1] = 1.0f;
-		tess.vertexColors[tess.numVertexes][2] = 1.0f;
-		tess.numVertexes++;
+	RB_BeginSurface( shader, 0 );
 
-		VectorCopy( origin, temp );
-		VectorAdd( temp, vec1, temp );
-		VectorSubtract( temp, vec2, temp );
-		VectorCopy( temp, tess.xyz[tess.numVertexes] );
-		tess.texCoords[tess.numVertexes][0][0] = 0;
-		tess.texCoords[tess.numVertexes][0][1] = 1;
-		tess.vertexColors[tess.numVertexes][0] = 1.0f;
-		tess.vertexColors[tess.numVertexes][1] = 1.0f;
-		tess.vertexColors[tess.numVertexes][2] = 1.0f;
-		tess.numVertexes++;
-
-		VectorCopy( origin, temp );
-		VectorAdd( temp, vec1, temp );
-		VectorAdd( temp, vec2, temp );
-		VectorCopy( temp, tess.xyz[tess.numVertexes] );
-		tess.texCoords[tess.numVertexes][0][0] = 1;
-		tess.texCoords[tess.numVertexes][0][1] = 1;
-		tess.vertexColors[tess.numVertexes][0] = 1.0f;
-		tess.vertexColors[tess.numVertexes][1] = 1.0f;
-		tess.vertexColors[tess.numVertexes][2] = 1.0f;
-		tess.numVertexes++;
-
-		VectorCopy( origin, temp );
-		VectorSubtract( temp, vec1, temp );
-		VectorAdd( temp, vec2, temp );
-		VectorCopy( temp, tess.xyz[tess.numVertexes] );
-		tess.texCoords[tess.numVertexes][0][0] = 1;
-		tess.texCoords[tess.numVertexes][0][1] = 0;
-		tess.vertexColors[tess.numVertexes][0] = 1.0f;
-		tess.vertexColors[tess.numVertexes][1] = 1.0f;
-		tess.vertexColors[tess.numVertexes][2] = 1.0f;
-		tess.numVertexes++;
-
-		tess.indexes[tess.numIndexes++] = 0;
-		tess.indexes[tess.numIndexes++] = 1;
-		tess.indexes[tess.numIndexes++] = 2;
-		tess.indexes[tess.numIndexes++] = 0;
-		tess.indexes[tess.numIndexes++] = 2;
-		tess.indexes[tess.numIndexes++] = 3;
+	{
+		vec4_t color;
+		color[0] = color[1] = color[2] = color[3] = 1;
+		RB_AddQuadStamp(origin, vec1, vec2, color);
+	}
 
 	RB_EndSurface();
 

@@ -2959,9 +2959,9 @@ void R_CreateBuiltinImages( void ) {
 			hdrFormat = GL_RGB16F_ARB;
 
 		tr.renderImage = R_CreateImage("_render", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, hdrFormat);
-#ifdef REACTION
-		tr.godRaysImage = R_CreateImage("*godRays", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, GL_RGBA8);
-#endif
+
+		if (r_drawSunRays->integer)
+			tr.sunRaysImage = R_CreateImage("*sunRays", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, GL_RGBA8);
 
 		if (r_softOverbright->integer)
 		{

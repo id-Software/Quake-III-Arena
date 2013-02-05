@@ -210,7 +210,6 @@ void RB_BokehBlur(float blur)
 }
 
 
-#ifdef REACTION
 static void RB_RadialBlur(FBO_t *srcFbo, FBO_t *dstFbo, int passes, float stretch, float x, float y, float w, float h, float xcenter, float ycenter, float alpha)
 {
 	vec4i_t srcBox, dstBox;
@@ -285,11 +284,10 @@ static qboolean RB_UpdateSunFlareVis(void)
 	return sampleCount > 0;
 }
 
-void RB_GodRays(void)
+void RB_SunRays(void)
 {
 	vec4i_t srcBox, dstBox;
 	vec4_t color;
-	vec3_t dir;
 	float dot;
 	const float cutoff = 0.25f;
 	qboolean colorize = qtrue;
@@ -298,26 +296,31 @@ void RB_GodRays(void)
 	matrix_t mvp;
 	vec4_t pos, hpos;
 
-	if (!backEnd.viewHasSunFlare)
-		return;
-
-	VectorSubtract(backEnd.sunFlarePos, backEnd.viewParms.or.origin, dir);
-	VectorNormalize(dir);
-
-	dot = DotProduct(dir, backEnd.viewParms.or.axis[0]);
+	dot = DotProduct(tr.sunDirection, backEnd.viewParms.or.axis[0]);
 	if (dot < cutoff)
 		return;
 
 	if (!RB_UpdateSunFlareVis())
 		return;
 
-	VectorCopy(backEnd.sunFlarePos, pos);
-	pos[3] = 1.f;
+	// From RB_DrawSun()
+	{
+		float dist;
+		matrix_t trans, model, mvp;
+
+		Matrix16Translation( backEnd.viewParms.or.origin, trans );
+		Matrix16Multiply( backEnd.viewParms.world.modelMatrix, trans, model );
+		Matrix16Multiply(backEnd.viewParms.projectionMatrix, model, mvp);
+
+		dist = backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
+
+		VectorScale( tr.sunDirection, dist, pos );
+	}
 
 	// project sun point
-	Matrix16Multiply(backEnd.viewParms.projectionMatrix, backEnd.viewParms.world.modelMatrix, mvp);
+	//Matrix16Multiply(backEnd.viewParms.projectionMatrix, backEnd.viewParms.world.modelMatrix, mvp);
 	Matrix16Transform(mvp, pos, hpos);
-		
+
 	// transform to UV coords
 	hpos[3] = 0.5f / hpos[3];
 
@@ -345,11 +348,11 @@ void RB_GodRays(void)
 		if (colorize)
 		{
 			FBO_FastBlit(tr.screenScratchFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-			FBO_Blit(tr.godRaysFbo, NULL, NULL, tr.quarterFbo[0], NULL, NULL, color, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
+			FBO_Blit(tr.sunRaysFbo, NULL, NULL, tr.quarterFbo[0], NULL, NULL, color, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 		}
 		else
 		{
-			FBO_FastBlit(tr.godRaysFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			FBO_FastBlit(tr.sunRaysFbo, NULL, tr.quarterFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		}
 	}
 
@@ -380,7 +383,6 @@ void RB_GodRays(void)
 		FBO_Blit(tr.quarterFbo[0], srcBox, texScale, tr.screenScratchFbo, dstBox, &tr.textureColorShader, color, GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE);
 	}
 }
-#endif
 
 static void RB_BlurAxis(FBO_t *srcFbo, FBO_t *dstFbo, float strength, qboolean horizontal)
 {
