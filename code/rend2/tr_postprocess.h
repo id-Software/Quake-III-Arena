@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void RB_ToneMap(FBO_t *hdrFbo, int autoExposure);
 void RB_BokehBlur(float blur);
-void RB_GodRays(void);
+void RB_SunRays(void);
 void RB_GaussianBlur(float blur);
 
 #endif

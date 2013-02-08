@@ -452,20 +452,17 @@ void FBO_Init(void)
 		FBO_Bind(NULL);
 	}
 
-#ifdef REACTION
+	if (r_drawSunRays->integer)
 	{
-		tr.godRaysFbo = FBO_Create("_godRays", tr.renderDepthImage->width, tr.renderDepthImage->height);
-		FBO_Bind(tr.godRaysFbo);
+		tr.sunRaysFbo = FBO_Create("_sunRays", tr.renderDepthImage->width, tr.renderDepthImage->height);
+		FBO_Bind(tr.sunRaysFbo);
 
-		//FBO_CreateBuffer(tr.godRaysFbo, GL_RGBA8, 0, multisample);
-		FBO_AttachTextureImage(tr.godRaysImage, 0);
+		FBO_AttachTextureImage(tr.sunRaysImage, 0);
 
-		//FBO_CreateBuffer(tr.godRaysFbo, GL_DEPTH_COMPONENT24_ARB, 0, multisample);
 		R_AttachFBOTextureDepth(tr.renderDepthImage->texnum);
 
-		R_CheckFBO(tr.godRaysFbo);
+		R_CheckFBO(tr.sunRaysFbo);
 	}
-#endif
 
 	// FIXME: Don't use separate color/depth buffers for a shadow buffer
 	for( i = 0; i < MAX_DRAWN_PSHADOWS; i++)
