@@ -1060,47 +1060,93 @@ qboolean CanDamage (gentity_t *targ, vec3_t origin) {
 	vec3_t	dest;
 	trace_t	tr;
 	vec3_t	midpoint;
+	vec3_t	offsetmins = {-15, -15, -15};
+	vec3_t	offsetmaxs = {15, 15, 15};
 
 	// use the midpoint of the bounds instead of the origin, because
 	// bmodels may have their origin is 0,0,0
 	VectorAdd (targ->r.absmin, targ->r.absmax, midpoint);
 	VectorScale (midpoint, 0.5, midpoint);
 
-	VectorCopy (midpoint, dest);
-	trap_Trace ( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+	VectorCopy(midpoint, dest);
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
 	if (tr.fraction == 1.0 || tr.entityNum == targ->s.number)
 		return qtrue;
 
 	// this should probably check in the plane of projection, 
-	// rather than in world coordinate, and also include Z
-	VectorCopy (midpoint, dest);
-	dest[0] += 15.0;
-	dest[1] += 15.0;
-	trap_Trace ( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+	// rather than in world coordinate
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
 	if (tr.fraction == 1.0)
 		return qtrue;
 
-	VectorCopy (midpoint, dest);
-	dest[0] += 15.0;
-	dest[1] -= 15.0;
-	trap_Trace ( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
 	if (tr.fraction == 1.0)
 		return qtrue;
 
-	VectorCopy (midpoint, dest);
-	dest[0] -= 15.0;
-	dest[1] += 15.0;
-	trap_Trace ( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
 	if (tr.fraction == 1.0)
 		return qtrue;
 
-	VectorCopy (midpoint, dest);
-	dest[0] -= 15.0;
-	dest[1] -= 15.0;
-	trap_Trace ( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
 	if (tr.fraction == 1.0)
 		return qtrue;
 
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmins[2];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
 
 	return qfalse;
 }
