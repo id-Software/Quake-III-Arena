@@ -49,11 +49,11 @@ VBO_t          *R_CreateVBO(const char *name, byte * vertexes, int vertexesSize,
 
 	if(strlen(name) >= MAX_QPATH)
 	{
-		ri.Error(ERR_DROP, "R_CreateVBO: \"%s\" is too long\n", name);
+		ri.Error(ERR_DROP, "R_CreateVBO: \"%s\" is too long", name);
 	}
 
 	if ( tr.numVBOs == MAX_VBOS ) {
-		ri.Error( ERR_DROP, "R_CreateVBO: MAX_VBOS hit\n");
+		ri.Error( ERR_DROP, "R_CreateVBO: MAX_VBOS hit");
 	}
 
 	R_IssuePendingRenderCommands();
@@ -117,11 +117,11 @@ VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vert
 
 	if(strlen(name) >= MAX_QPATH)
 	{
-		ri.Error(ERR_DROP, "R_CreateVBO2: \"%s\" is too long\n", name);
+		ri.Error(ERR_DROP, "R_CreateVBO2: \"%s\" is too long", name);
 	}
 
 	if ( tr.numVBOs == MAX_VBOS ) {
-		ri.Error( ERR_DROP, "R_CreateVBO2: MAX_VBOS hit\n");
+		ri.Error( ERR_DROP, "R_CreateVBO2: MAX_VBOS hit");
 	}
 
 	R_IssuePendingRenderCommands();
@@ -466,11 +466,11 @@ IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, v
 
 	if(strlen(name) >= MAX_QPATH)
 	{
-		ri.Error(ERR_DROP, "R_CreateIBO: \"%s\" is too long\n", name);
+		ri.Error(ERR_DROP, "R_CreateIBO: \"%s\" is too long", name);
 	}
 
 	if ( tr.numIBOs == MAX_IBOS ) {
-		ri.Error( ERR_DROP, "R_CreateIBO: MAX_IBOS hit\n");
+		ri.Error( ERR_DROP, "R_CreateIBO: MAX_IBOS hit");
 	}
 
 	R_IssuePendingRenderCommands();
@@ -534,11 +534,11 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 
 	if(strlen(name) >= MAX_QPATH)
 	{
-		ri.Error(ERR_DROP, "R_CreateIBO2: \"%s\" is too long\n", name);
+		ri.Error(ERR_DROP, "R_CreateIBO2: \"%s\" is too long", name);
 	}
 
 	if ( tr.numIBOs == MAX_IBOS ) {
-		ri.Error( ERR_DROP, "R_CreateIBO2: MAX_IBOS hit\n");
+		ri.Error( ERR_DROP, "R_CreateIBO2: MAX_IBOS hit");
 	}
 
 	R_IssuePendingRenderCommands();

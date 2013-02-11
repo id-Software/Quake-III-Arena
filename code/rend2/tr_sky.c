@@ -393,7 +393,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 
 			if(tess.numVertexes >= SHADER_MAX_VERTEXES)
 			{
-				ri.Error(ERR_DROP, "SHADER_MAX_VERTEXES hit in DrawSkySideVBO()\n");
+				ri.Error(ERR_DROP, "SHADER_MAX_VERTEXES hit in DrawSkySideVBO()");
 			}
 		}
 	}
@@ -404,7 +404,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		{
 			if (tess.numIndexes + 6 >= SHADER_MAX_INDEXES)
 			{
-				ri.Error(ERR_DROP, "SHADER_MAX_INDEXES hit in DrawSkySideVBO()\n");
+				ri.Error(ERR_DROP, "SHADER_MAX_INDEXES hit in DrawSkySideVBO()");
 			}
 
 			tess.indexes[tess.numIndexes++] =  s +       t      * (maxs[0] - mins[0] + 1) + firstVertex;
