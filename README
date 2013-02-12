@@ -497,8 +497,8 @@ QuakeLive mouse acceleration (patch and this text written by TTimo from id)
 ---------------------------------------------------- README for Developers -----
 
 pk3dir
-  Ioquake3 has a useful new feature for mappers. Paths in a game directory with
-  the extension ".pk3dir" are treated like pak files. This means you can keep
+  ioquake3 has a useful new feature for mappers. Paths in a game directory with
+  the extension ".pk3dir" are treated like pk3 files. This means you can keep
   all files specific to your map in one directory tree and easily zip this
   folder for distribution.
 
