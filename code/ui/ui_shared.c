@@ -5145,6 +5145,20 @@ static void Item_ApplyHacks( itemDef_t *item ) {
 		}
 	}
 
+	if ( item->type == ITEM_TYPE_EDITFIELD && item->cvar && ( !Q_stricmp( item->cvar, "ui_Name" ) || !Q_stricmp( item->cvar, "ui_findplayer" ) ) ) {
+		editFieldDef_t *editField = (editFieldDef_t *)item->typeData;
+
+		// enough to hold a full player name
+		if ( editField->maxChars < MAX_NAME_LENGTH ) {
+			if ( editField->maxPaintChars > editField->maxChars ) {
+				editField->maxPaintChars = editField->maxChars;
+			}
+
+			Com_Printf( "Extended player name field using cvar %s to %d characters\n", item->cvar, MAX_NAME_LENGTH );
+			editField->maxChars = MAX_NAME_LENGTH;
+		}
+	}
+
 }
 
 /*
