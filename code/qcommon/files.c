@@ -2860,11 +2860,17 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 	// Get .pk3 files
 	pakfiles = Sys_ListFiles(curpath, ".pk3", NULL, &numfiles, qfalse);
 
-	// Get top level directories (we'll filter them later since the Sys_ListFiles filtering is terrible)
-	pakdirs = Sys_ListFiles(curpath, "/", NULL, &numdirs, qfalse);
-
 	qsort( pakfiles, numfiles, sizeof(char*), paksort );
-	qsort( pakdirs, numdirs, sizeof(char *), paksort );
+
+	if ( fs_numServerPaks ) {
+		numdirs = 0;
+		pakdirs = NULL;
+	} else {
+		// Get top level directories (we'll filter them later since the Sys_ListFiles filtering is terrible)
+		pakdirs = Sys_ListFiles(curpath, "/", NULL, &numdirs, qfalse);
+
+		qsort( pakdirs, numdirs, sizeof(char *), paksort );
+	}
 
 	pakfilesi = 0;
 	pakdirsi = 0;
