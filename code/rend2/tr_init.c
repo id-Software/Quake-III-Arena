@@ -538,7 +538,11 @@ const void *RB_TakeScreenshotCmd( const void *data ) {
 	const screenshotCommand_t	*cmd;
 	
 	cmd = (const screenshotCommand_t *)data;
-	
+
+	// finish any 2D drawing if needed
+	if(tess.numIndexes)
+		RB_EndSurface();
+
 	if (cmd->jpeg)
 		RB_TakeScreenshotJPEG( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
 	else
@@ -820,7 +824,11 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	size_t				memcount, linelen;
 	int				padwidth, avipadwidth, padlen, avipadlen;
 	GLint packAlign;
-	
+
+	// finish any 2D drawing if needed
+	if(tess.numIndexes)
+		RB_EndSurface();
+
 	cmd = (const videoFrameCommand_t *)data;
 	
 	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
