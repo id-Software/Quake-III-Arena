@@ -52,7 +52,7 @@ MPACK_OBJ="
 "
 RENDER_OBJ="
 	build/release-darwin-${BUILDARCH}/renderer_opengl1_${BUILDARCH}.dylib
-	build/release-darwin-${BUILDARCH}/renderer_rend2_${BUILDARCH}.dylib
+	build/release-darwin-${BUILDARCH}/renderer_opengl2_${BUILDARCH}.dylib
 "
 
 cd `dirname $0`
