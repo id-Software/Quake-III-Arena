@@ -47,8 +47,8 @@ endif
 ifndef BUILD_MISSIONPACK
   BUILD_MISSIONPACK=
 endif
-ifndef BUILD_RENDERER_REND2
-  BUILD_RENDERER_REND2=
+ifndef BUILD_RENDERER_OPENGL2
+  BUILD_RENDERER_OPENGL2=
 endif
 
 #############################################################################
@@ -211,8 +211,8 @@ BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
 BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)
 CDIR=$(MOUNT_DIR)/client
 SDIR=$(MOUNT_DIR)/server
-RDIR=$(MOUNT_DIR)/renderer
-R2DIR=$(MOUNT_DIR)/rend2
+RGL1DIR=$(MOUNT_DIR)/renderergl1
+RGL2DIR=$(MOUNT_DIR)/renderergl2
 CMDIR=$(MOUNT_DIR)/qcommon
 SDLDIR=$(MOUNT_DIR)/sdl
 ASMDIR=$(MOUNT_DIR)/asm
@@ -852,13 +852,13 @@ endif
 ifneq ($(BUILD_CLIENT),0)
   ifneq ($(USE_RENDERER_DLOPEN),0)
     TARGETS += $(B)/$(CLIENTBIN)$(FULLBINEXT) $(B)/renderer_opengl1_$(SHLIBNAME)
-    ifneq ($(BUILD_RENDERER_REND2), 0)
-      TARGETS += $(B)/renderer_rend2_$(SHLIBNAME)
+    ifneq ($(BUILD_RENDERER_OPENGL2), 0)
+      TARGETS += $(B)/renderer_opengl2_$(SHLIBNAME)
     endif
   else
     TARGETS += $(B)/$(CLIENTBIN)$(FULLBINEXT)
-    ifneq ($(BUILD_RENDERER_REND2), 0)
-      TARGETS += $(B)/$(CLIENTBIN)_rend2$(FULLBINEXT)
+    ifneq ($(BUILD_RENDERER_OPENGL2), 0)
+      TARGETS += $(B)/$(CLIENTBIN)_opengl2$(FULLBINEXT)
     endif
   endif
 endif
@@ -1165,9 +1165,9 @@ makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
 	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
 	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
-	@if [ ! -d $(B)/renderer ];then $(MKDIR) $(B)/renderer;fi
-	@if [ ! -d $(B)/rend2 ];then $(MKDIR) $(B)/rend2;fi
-	@if [ ! -d $(B)/rend2/glsl ];then $(MKDIR) $(B)/rend2/glsl;fi
+	@if [ ! -d $(B)/renderergl1 ];then $(MKDIR) $(B)/renderergl1;fi
+	@if [ ! -d $(B)/renderergl2 ];then $(MKDIR) $(B)/renderergl2;fi
+	@if [ ! -d $(B)/renderergl2/glsl ];then $(MKDIR) $(B)/renderergl2/glsl;fi
 	@if [ ! -d $(B)/ded ];then $(MKDIR) $(B)/ded;fi
 	@if [ ! -d $(B)/$(BASEGAME) ];then $(MKDIR) $(B)/$(BASEGAME);fi
 	@if [ ! -d $(B)/$(BASEGAME)/cgame ];then $(MKDIR) $(B)/$(BASEGAME)/cgame;fi
@@ -1473,171 +1473,171 @@ else
 endif
 
 Q3R2OBJ = \
-  $(B)/rend2/tr_animation.o \
-  $(B)/rend2/tr_backend.o \
-  $(B)/rend2/tr_bsp.o \
-  $(B)/rend2/tr_cmds.o \
-  $(B)/rend2/tr_curve.o \
-  $(B)/rend2/tr_extramath.o \
-  $(B)/rend2/tr_extensions.o \
-  $(B)/rend2/tr_fbo.o \
-  $(B)/rend2/tr_flares.o \
-  $(B)/rend2/tr_font.o \
-  $(B)/rend2/tr_glsl.o \
-  $(B)/rend2/tr_image.o \
-  $(B)/rend2/tr_image_png.o \
-  $(B)/rend2/tr_image_jpg.o \
-  $(B)/rend2/tr_image_bmp.o \
-  $(B)/rend2/tr_image_tga.o \
-  $(B)/rend2/tr_image_pcx.o \
-  $(B)/rend2/tr_init.o \
-  $(B)/rend2/tr_light.o \
-  $(B)/rend2/tr_main.o \
-  $(B)/rend2/tr_marks.o \
-  $(B)/rend2/tr_mesh.o \
-  $(B)/rend2/tr_model.o \
-  $(B)/rend2/tr_model_iqm.o \
-  $(B)/rend2/tr_noise.o \
-  $(B)/rend2/tr_postprocess.o \
-  $(B)/rend2/tr_scene.o \
-  $(B)/rend2/tr_shade.o \
-  $(B)/rend2/tr_shade_calc.o \
-  $(B)/rend2/tr_shader.o \
-  $(B)/rend2/tr_shadows.o \
-  $(B)/rend2/tr_sky.o \
-  $(B)/rend2/tr_surface.o \
-  $(B)/rend2/tr_vbo.o \
-  $(B)/rend2/tr_world.o \
+  $(B)/renderergl2/tr_animation.o \
+  $(B)/renderergl2/tr_backend.o \
+  $(B)/renderergl2/tr_bsp.o \
+  $(B)/renderergl2/tr_cmds.o \
+  $(B)/renderergl2/tr_curve.o \
+  $(B)/renderergl2/tr_extramath.o \
+  $(B)/renderergl2/tr_extensions.o \
+  $(B)/renderergl2/tr_fbo.o \
+  $(B)/renderergl2/tr_flares.o \
+  $(B)/renderergl2/tr_font.o \
+  $(B)/renderergl2/tr_glsl.o \
+  $(B)/renderergl2/tr_image.o \
+  $(B)/renderergl2/tr_image_png.o \
+  $(B)/renderergl2/tr_image_jpg.o \
+  $(B)/renderergl2/tr_image_bmp.o \
+  $(B)/renderergl2/tr_image_tga.o \
+  $(B)/renderergl2/tr_image_pcx.o \
+  $(B)/renderergl2/tr_init.o \
+  $(B)/renderergl2/tr_light.o \
+  $(B)/renderergl2/tr_main.o \
+  $(B)/renderergl2/tr_marks.o \
+  $(B)/renderergl2/tr_mesh.o \
+  $(B)/renderergl2/tr_model.o \
+  $(B)/renderergl2/tr_model_iqm.o \
+  $(B)/renderergl2/tr_noise.o \
+  $(B)/renderergl2/tr_postprocess.o \
+  $(B)/renderergl2/tr_scene.o \
+  $(B)/renderergl2/tr_shade.o \
+  $(B)/renderergl2/tr_shade_calc.o \
+  $(B)/renderergl2/tr_shader.o \
+  $(B)/renderergl2/tr_shadows.o \
+  $(B)/renderergl2/tr_sky.o \
+  $(B)/renderergl2/tr_surface.o \
+  $(B)/renderergl2/tr_vbo.o \
+  $(B)/renderergl2/tr_world.o \
   \
-  $(B)/renderer/sdl_gamma.o \
-  $(B)/renderer/sdl_glimp.o
+  $(B)/renderergl1/sdl_gamma.o \
+  $(B)/renderergl1/sdl_glimp.o
 
 Q3R2STRINGOBJ = \
-  $(B)/rend2/glsl/bokeh_fp.o \
-  $(B)/rend2/glsl/bokeh_vp.o \
-  $(B)/rend2/glsl/calclevels4x_fp.o \
-  $(B)/rend2/glsl/calclevels4x_vp.o \
-  $(B)/rend2/glsl/depthblur_fp.o \
-  $(B)/rend2/glsl/depthblur_vp.o \
-  $(B)/rend2/glsl/dlight_fp.o \
-  $(B)/rend2/glsl/dlight_vp.o \
-  $(B)/rend2/glsl/down4x_fp.o \
-  $(B)/rend2/glsl/down4x_vp.o \
-  $(B)/rend2/glsl/fogpass_fp.o \
-  $(B)/rend2/glsl/fogpass_vp.o \
-  $(B)/rend2/glsl/generic_fp.o \
-  $(B)/rend2/glsl/generic_vp.o \
-  $(B)/rend2/glsl/lightall_fp.o \
-  $(B)/rend2/glsl/lightall_vp.o \
-  $(B)/rend2/glsl/pshadow_fp.o \
-  $(B)/rend2/glsl/pshadow_vp.o \
-  $(B)/rend2/glsl/shadowfill_fp.o \
-  $(B)/rend2/glsl/shadowfill_vp.o \
-  $(B)/rend2/glsl/shadowmask_fp.o \
-  $(B)/rend2/glsl/shadowmask_vp.o \
-  $(B)/rend2/glsl/ssao_fp.o \
-  $(B)/rend2/glsl/ssao_vp.o \
-  $(B)/rend2/glsl/texturecolor_fp.o \
-  $(B)/rend2/glsl/texturecolor_vp.o \
-  $(B)/rend2/glsl/tonemap_fp.o \
-  $(B)/rend2/glsl/tonemap_vp.o
+  $(B)/renderergl2/glsl/bokeh_fp.o \
+  $(B)/renderergl2/glsl/bokeh_vp.o \
+  $(B)/renderergl2/glsl/calclevels4x_fp.o \
+  $(B)/renderergl2/glsl/calclevels4x_vp.o \
+  $(B)/renderergl2/glsl/depthblur_fp.o \
+  $(B)/renderergl2/glsl/depthblur_vp.o \
+  $(B)/renderergl2/glsl/dlight_fp.o \
+  $(B)/renderergl2/glsl/dlight_vp.o \
+  $(B)/renderergl2/glsl/down4x_fp.o \
+  $(B)/renderergl2/glsl/down4x_vp.o \
+  $(B)/renderergl2/glsl/fogpass_fp.o \
+  $(B)/renderergl2/glsl/fogpass_vp.o \
+  $(B)/renderergl2/glsl/generic_fp.o \
+  $(B)/renderergl2/glsl/generic_vp.o \
+  $(B)/renderergl2/glsl/lightall_fp.o \
+  $(B)/renderergl2/glsl/lightall_vp.o \
+  $(B)/renderergl2/glsl/pshadow_fp.o \
+  $(B)/renderergl2/glsl/pshadow_vp.o \
+  $(B)/renderergl2/glsl/shadowfill_fp.o \
+  $(B)/renderergl2/glsl/shadowfill_vp.o \
+  $(B)/renderergl2/glsl/shadowmask_fp.o \
+  $(B)/renderergl2/glsl/shadowmask_vp.o \
+  $(B)/renderergl2/glsl/ssao_fp.o \
+  $(B)/renderergl2/glsl/ssao_vp.o \
+  $(B)/renderergl2/glsl/texturecolor_fp.o \
+  $(B)/renderergl2/glsl/texturecolor_vp.o \
+  $(B)/renderergl2/glsl/tonemap_fp.o \
+  $(B)/renderergl2/glsl/tonemap_vp.o
 
 Q3ROBJ = \
-  $(B)/renderer/tr_animation.o \
-  $(B)/renderer/tr_backend.o \
-  $(B)/renderer/tr_bsp.o \
-  $(B)/renderer/tr_cmds.o \
-  $(B)/renderer/tr_curve.o \
-  $(B)/renderer/tr_flares.o \
-  $(B)/renderer/tr_font.o \
-  $(B)/renderer/tr_image.o \
-  $(B)/renderer/tr_image_png.o \
-  $(B)/renderer/tr_image_jpg.o \
-  $(B)/renderer/tr_image_bmp.o \
-  $(B)/renderer/tr_image_tga.o \
-  $(B)/renderer/tr_image_pcx.o \
-  $(B)/renderer/tr_init.o \
-  $(B)/renderer/tr_light.o \
-  $(B)/renderer/tr_main.o \
-  $(B)/renderer/tr_marks.o \
-  $(B)/renderer/tr_mesh.o \
-  $(B)/renderer/tr_model.o \
-  $(B)/renderer/tr_model_iqm.o \
-  $(B)/renderer/tr_noise.o \
-  $(B)/renderer/tr_scene.o \
-  $(B)/renderer/tr_shade.o \
-  $(B)/renderer/tr_shade_calc.o \
-  $(B)/renderer/tr_shader.o \
-  $(B)/renderer/tr_shadows.o \
-  $(B)/renderer/tr_sky.o \
-  $(B)/renderer/tr_surface.o \
-  $(B)/renderer/tr_world.o \
+  $(B)/renderergl1/tr_animation.o \
+  $(B)/renderergl1/tr_backend.o \
+  $(B)/renderergl1/tr_bsp.o \
+  $(B)/renderergl1/tr_cmds.o \
+  $(B)/renderergl1/tr_curve.o \
+  $(B)/renderergl1/tr_flares.o \
+  $(B)/renderergl1/tr_font.o \
+  $(B)/renderergl1/tr_image.o \
+  $(B)/renderergl1/tr_image_png.o \
+  $(B)/renderergl1/tr_image_jpg.o \
+  $(B)/renderergl1/tr_image_bmp.o \
+  $(B)/renderergl1/tr_image_tga.o \
+  $(B)/renderergl1/tr_image_pcx.o \
+  $(B)/renderergl1/tr_init.o \
+  $(B)/renderergl1/tr_light.o \
+  $(B)/renderergl1/tr_main.o \
+  $(B)/renderergl1/tr_marks.o \
+  $(B)/renderergl1/tr_mesh.o \
+  $(B)/renderergl1/tr_model.o \
+  $(B)/renderergl1/tr_model_iqm.o \
+  $(B)/renderergl1/tr_noise.o \
+  $(B)/renderergl1/tr_scene.o \
+  $(B)/renderergl1/tr_shade.o \
+  $(B)/renderergl1/tr_shade_calc.o \
+  $(B)/renderergl1/tr_shader.o \
+  $(B)/renderergl1/tr_shadows.o \
+  $(B)/renderergl1/tr_sky.o \
+  $(B)/renderergl1/tr_surface.o \
+  $(B)/renderergl1/tr_world.o \
   \
-  $(B)/renderer/sdl_gamma.o \
-  $(B)/renderer/sdl_glimp.o
+  $(B)/renderergl1/sdl_gamma.o \
+  $(B)/renderergl1/sdl_glimp.o
 
 ifneq ($(USE_RENDERER_DLOPEN), 0)
   Q3ROBJ += \
-    $(B)/renderer/q_shared.o \
-    $(B)/renderer/puff.o \
-    $(B)/renderer/q_math.o \
-    $(B)/renderer/tr_subs.o
+    $(B)/renderergl1/q_shared.o \
+    $(B)/renderergl1/puff.o \
+    $(B)/renderergl1/q_math.o \
+    $(B)/renderergl1/tr_subs.o
 
   Q3R2OBJ += \
-    $(B)/renderer/q_shared.o \
-    $(B)/renderer/puff.o \
-    $(B)/renderer/q_math.o \
-    $(B)/renderer/tr_subs.o
+    $(B)/renderergl1/q_shared.o \
+    $(B)/renderergl1/puff.o \
+    $(B)/renderergl1/q_math.o \
+    $(B)/renderergl1/tr_subs.o
 endif
 
 ifneq ($(USE_INTERNAL_JPEG),0)
   JPGOBJ = \
-    $(B)/renderer/jaricom.o \
-    $(B)/renderer/jcapimin.o \
-    $(B)/renderer/jcapistd.o \
-    $(B)/renderer/jcarith.o \
-    $(B)/renderer/jccoefct.o  \
-    $(B)/renderer/jccolor.o \
-    $(B)/renderer/jcdctmgr.o \
-    $(B)/renderer/jchuff.o   \
-    $(B)/renderer/jcinit.o \
-    $(B)/renderer/jcmainct.o \
-    $(B)/renderer/jcmarker.o \
-    $(B)/renderer/jcmaster.o \
-    $(B)/renderer/jcomapi.o \
-    $(B)/renderer/jcparam.o \
-    $(B)/renderer/jcprepct.o \
-    $(B)/renderer/jcsample.o \
-    $(B)/renderer/jctrans.o \
-    $(B)/renderer/jdapimin.o \
-    $(B)/renderer/jdapistd.o \
-    $(B)/renderer/jdarith.o \
-    $(B)/renderer/jdatadst.o \
-    $(B)/renderer/jdatasrc.o \
-    $(B)/renderer/jdcoefct.o \
-    $(B)/renderer/jdcolor.o \
-    $(B)/renderer/jddctmgr.o \
-    $(B)/renderer/jdhuff.o \
-    $(B)/renderer/jdinput.o \
-    $(B)/renderer/jdmainct.o \
-    $(B)/renderer/jdmarker.o \
-    $(B)/renderer/jdmaster.o \
-    $(B)/renderer/jdmerge.o \
-    $(B)/renderer/jdpostct.o \
-    $(B)/renderer/jdsample.o \
-    $(B)/renderer/jdtrans.o \
-    $(B)/renderer/jerror.o \
-    $(B)/renderer/jfdctflt.o \
-    $(B)/renderer/jfdctfst.o \
-    $(B)/renderer/jfdctint.o \
-    $(B)/renderer/jidctflt.o \
-    $(B)/renderer/jidctfst.o \
-    $(B)/renderer/jidctint.o \
-    $(B)/renderer/jmemmgr.o \
-    $(B)/renderer/jmemnobs.o \
-    $(B)/renderer/jquant1.o \
-    $(B)/renderer/jquant2.o \
-    $(B)/renderer/jutils.o
+    $(B)/renderergl1/jaricom.o \
+    $(B)/renderergl1/jcapimin.o \
+    $(B)/renderergl1/jcapistd.o \
+    $(B)/renderergl1/jcarith.o \
+    $(B)/renderergl1/jccoefct.o  \
+    $(B)/renderergl1/jccolor.o \
+    $(B)/renderergl1/jcdctmgr.o \
+    $(B)/renderergl1/jchuff.o   \
+    $(B)/renderergl1/jcinit.o \
+    $(B)/renderergl1/jcmainct.o \
+    $(B)/renderergl1/jcmarker.o \
+    $(B)/renderergl1/jcmaster.o \
+    $(B)/renderergl1/jcomapi.o \
+    $(B)/renderergl1/jcparam.o \
+    $(B)/renderergl1/jcprepct.o \
+    $(B)/renderergl1/jcsample.o \
+    $(B)/renderergl1/jctrans.o \
+    $(B)/renderergl1/jdapimin.o \
+    $(B)/renderergl1/jdapistd.o \
+    $(B)/renderergl1/jdarith.o \
+    $(B)/renderergl1/jdatadst.o \
+    $(B)/renderergl1/jdatasrc.o \
+    $(B)/renderergl1/jdcoefct.o \
+    $(B)/renderergl1/jdcolor.o \
+    $(B)/renderergl1/jddctmgr.o \
+    $(B)/renderergl1/jdhuff.o \
+    $(B)/renderergl1/jdinput.o \
+    $(B)/renderergl1/jdmainct.o \
+    $(B)/renderergl1/jdmarker.o \
+    $(B)/renderergl1/jdmaster.o \
+    $(B)/renderergl1/jdmerge.o \
+    $(B)/renderergl1/jdpostct.o \
+    $(B)/renderergl1/jdsample.o \
+    $(B)/renderergl1/jdtrans.o \
+    $(B)/renderergl1/jerror.o \
+    $(B)/renderergl1/jfdctflt.o \
+    $(B)/renderergl1/jfdctfst.o \
+    $(B)/renderergl1/jfdctint.o \
+    $(B)/renderergl1/jidctflt.o \
+    $(B)/renderergl1/jidctfst.o \
+    $(B)/renderergl1/jidctint.o \
+    $(B)/renderergl1/jmemmgr.o \
+    $(B)/renderergl1/jmemnobs.o \
+    $(B)/renderergl1/jquant1.o \
+    $(B)/renderergl1/jquant2.o \
+    $(B)/renderergl1/jutils.o
 endif
 
 ifeq ($(ARCH),i386)
@@ -1807,7 +1807,7 @@ $(B)/renderer_opengl1_$(SHLIBNAME): $(Q3ROBJ) $(JPGOBJ)
 	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3ROBJ) $(JPGOBJ) \
 		$(THREAD_LIBS) $(LIBSDLMAIN) $(RENDERER_LIBS) $(LIBS)
 
-$(B)/renderer_rend2_$(SHLIBNAME): $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ)
+$(B)/renderer_opengl2_$(SHLIBNAME): $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) \
 		$(THREAD_LIBS) $(LIBSDLMAIN) $(RENDERER_LIBS) $(LIBS)
@@ -1818,7 +1818,7 @@ $(B)/$(CLIENTBIN)$(FULLBINEXT): $(Q3OBJ) $(Q3ROBJ) $(JPGOBJ) $(LIBSDLMAIN)
 		-o $@ $(Q3OBJ) $(Q3ROBJ) $(JPGOBJ) \
 		$(LIBSDLMAIN) $(CLIENT_LIBS) $(RENDERER_LIBS) $(LIBS)
 
-$(B)/$(CLIENTBIN)_rend2$(FULLBINEXT): $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) $(LIBSDLMAIN)
+$(B)/$(CLIENTBIN)_opengl2$(FULLBINEXT): $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) \
 		-o $@ $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) \
@@ -2346,25 +2346,25 @@ $(B)/client/%.o: $(SYSDIR)/%.rc
 	$(DO_WINDRES)
 
 
-$(B)/renderer/%.o: $(CMDIR)/%.c
+$(B)/renderergl1/%.o: $(CMDIR)/%.c
 	$(DO_REF_CC)
 
-$(B)/renderer/%.o: $(SDLDIR)/%.c
+$(B)/renderergl1/%.o: $(SDLDIR)/%.c
 	$(DO_REF_CC)
 
-$(B)/renderer/%.o: $(JPDIR)/%.c
+$(B)/renderergl1/%.o: $(JPDIR)/%.c
 	$(DO_REF_CC)
 
-$(B)/renderer/%.o: $(RDIR)/%.c
+$(B)/renderergl1/%.o: $(RGL1DIR)/%.c
 	$(DO_REF_CC)
 
-$(B)/rend2/glsl/%.c: $(R2DIR)/glsl/%.glsl
+$(B)/renderergl2/glsl/%.c: $(RGL2DIR)/glsl/%.glsl
 	$(DO_REF_STR)
 
-$(B)/rend2/glsl/%.o: $(B)/rend2/glsl/%.c
+$(B)/renderergl2/glsl/%.o: $(B)/renderergl2/glsl/%.c
 	$(DO_REF_CC)
 
-$(B)/rend2/%.o: $(R2DIR)/%.c
+$(B)/renderergl2/%.o: $(RGL2DIR)/%.c
 	$(DO_REF_CC)
 
 
@@ -2513,8 +2513,8 @@ ifneq ($(BUILD_CLIENT),0)
 	$(INSTALL) $(STRIP_FLAG) -m 0755 $(BR)/$(CLIENTBIN)$(FULLBINEXT) $(COPYBINDIR)/$(CLIENTBIN)$(FULLBINEXT)
   ifneq ($(USE_RENDERER_DLOPEN),0)
 	$(INSTALL) $(STRIP_FLAG) -m 0755 $(BR)/renderer_opengl1_$(SHLIBNAME) $(COPYBINDIR)/renderer_opengl1_$(SHLIBNAME)
-    ifneq ($(BUILD_RENDERER_REND2),0)
-	$(INSTALL) $(STRIP_FLAG) -m 0755 $(BR)/renderer_rend2_$(SHLIBNAME) $(COPYBINDIR)/renderer_rend2_$(SHLIBNAME)
+    ifneq ($(BUILD_RENDERER_OPENGL2),0)
+	$(INSTALL) $(STRIP_FLAG) -m 0755 $(BR)/renderer_opengl2_$(SHLIBNAME) $(COPYBINDIR)/renderer_opengl2_$(SHLIBNAME)
     endif
   endif
 endif

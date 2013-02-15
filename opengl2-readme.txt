@@ -1,7 +1,7 @@
-Rend2
+OpenGL2
 <insert ascii art here>
 
-Rend2 is an alternate renderer for ioquake3.  It aims to implement modern
+OpenGL2 is an alternate renderer for ioquake3.  It aims to implement modern
 features and technologies into the id tech 3 engine, but without sacrificing
 compatibility with existing Quake 3 mods.
 
@@ -24,25 +24,6 @@ compatibility with existing Quake 3 mods.
 
 
 -------------------------------------------------------------------------------
-  COMPILATION
--------------------------------------------------------------------------------
-
-For *nix/MinGW:
-
-1. Download an appropriate version of the ioq3 source code.  For version 32 of
-   Rend2, r2328 should do, though the latest may work as well.  For 
-   details on how to do this, see http://ioquake3.org/get-it/source-codes/ .
-   
-2. Copy the patch file (for v32, vbos-glsl-31a.diff) into the directory you put
-   the ioq3 source code.  There should be a README in that directory.
-   
-3. Run 'patch -p0 <vbos-glsl-31a.diff' then 'make'.
-
-Compiling on different platforms and with different compilers hasn't been
-tested.  The MSVC project file should work, but it hasn't been tested.
-
-
--------------------------------------------------------------------------------
   INSTALLATION
 -------------------------------------------------------------------------------
 
@@ -60,7 +41,7 @@ For Win32:
      
      ioquake3.x86.exe
      renderer_opengl1_x86.dll
-     renderer_rend2_x86.dll
+     renderer_opengl2_x86.dll
      
    These can be found in build/release-mingw32-x86 after compiling, or bug
    someone to release binaries.
@@ -72,7 +53,7 @@ For Win32:
 
 1. Start ioquake3. (ioquake3.x86.exe on Win32)
  
-2. Open the console (default key ~) and type '/cl_renderer rend2; vid_restart'
+2. Open the console (default key ~) and type '/cl_renderer opengl2; vid_restart'
 
 3. Enjoy.
 
@@ -354,7 +335,7 @@ Cvars that have broken bits:
   MATERIALS
 -------------------------------------------------------------------------------
 
-Rend2 supports .mtr files, which are basically the same as .shader files, and
+OpenGL2 supports .mtr files, which are basically the same as .shader files, and
 are located in the same place, but override existing .shader files if they 
 exist.  This is to allow maps and mods to use the new material features without
 breaking the map when using the old renderer.
@@ -389,7 +370,7 @@ shader files.  The next thing to notice are the new keywords.  Here is what
 they mean:
 
   stage <type>        
-    - State how this imagemap will be used by Rend2:
+    - State how this imagemap will be used by OpenGL2:
         diffuseMap        - Standard, same as no stage entry
         normalMap         - Image will be used as a normal map
         normalParallaxMap - Image will be used as a normal map with 

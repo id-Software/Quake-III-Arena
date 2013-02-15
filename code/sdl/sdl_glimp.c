@@ -31,7 +31,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 #include <math.h>
 
-#include "../renderer/tr_local.h"
+//FIXME: factor out the bits that are actually needed here into a renderercommon header
+#include "../renderergl1/tr_local.h"
 #include "../sys/sys_local.h"
 #include "sdl_icon.h"
 
