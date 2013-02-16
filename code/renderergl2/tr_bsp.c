@@ -789,7 +789,7 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 	surf->data = (surfaceType_t *)cv;
 
 #ifdef USE_VERT_TANGENT_SPACE
-	// Tr3B - calc tangent spaces
+	// Calculate tangent spaces
 	{
 		srfVert_t      *dv[3];
 
@@ -1022,7 +1022,7 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	}
 
 #ifdef USE_VERT_TANGENT_SPACE
-	// Tr3B - calc tangent spaces
+	// Calculate tangent spaces
 	{
 		srfVert_t      *dv[3];
 
@@ -2316,7 +2316,7 @@ static	void R_LoadSubmodels( lump_t *l ) {
 
 		if(i == 0)
 		{
-			// Tr3B: add this for limiting VBO surface creation
+			// Add this for limiting VBO surface creation
 			s_worldData.numWorldSurfaces = out->numSurfaces;
 		}
 	}

@@ -326,13 +326,6 @@ void RB_SunRays(void)
 
 	pos[0] = 0.5f + hpos[0] * hpos[3];
 	pos[1] = 0.5f - hpos[1] * hpos[3];
-	
-	// viewport dimensions
-	// JBravo: Apparently not used
-/*	w = glConfig.vidWidth;
-	h = glConfig.vidHeight;
-	w2 = glConfig.vidWidth / 2;
-	h2 = glConfig.vidHeight / 2; */
 
 	// initialize quarter buffers
 	{

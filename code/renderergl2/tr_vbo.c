@@ -842,7 +842,7 @@ RB_UpdateVBOs
 
 Adapted from Tess_UpdateVBOs from xreal
 
-Tr3B: update the default VBO to replace the client side vertex arrays
+Update the default VBO to replace the client side vertex arrays
 ==============
 */
 void RB_UpdateVBOs(unsigned int attribBits)

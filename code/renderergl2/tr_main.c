@@ -495,7 +495,8 @@ qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 /*
 =================
 R_FindSurfaceTriangleWithEdge
-Tr3B - recoded from Q2E
+
+Recoded from Q2E
 =================
 */
 static int R_FindSurfaceTriangleWithEdge(int numTriangles, srfTriangle_t * triangles, int start, int end, int ignore)
@@ -539,7 +540,8 @@ static int R_FindSurfaceTriangleWithEdge(int numTriangles, srfTriangle_t * trian
 /*
 =================
 R_CalcSurfaceTriangleNeighbors
-Tr3B - recoded from Q2E
+
+Recoded from Q2E
 =================
 */
 void R_CalcSurfaceTriangleNeighbors(int numTriangles, srfTriangle_t * triangles)
