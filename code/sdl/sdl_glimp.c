@@ -31,8 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 #include <math.h>
 
-//FIXME: factor out the bits that are actually needed here into a renderercommon header
-#include "../renderergl1/tr_local.h"
+#include "../renderercommon/tr_common.h"
 #include "../sys/sys_local.h"
 #include "sdl_icon.h"
 
@@ -86,9 +85,6 @@ void GLimp_Shutdown( void )
 
 	SDL_QuitSubSystem( SDL_INIT_VIDEO );
 	screen = NULL;
-
-	Com_Memset( &glConfig, 0, sizeof( glConfig ) );
-	Com_Memset( &glState, 0, sizeof( glState ) );
 }
 
 /*
