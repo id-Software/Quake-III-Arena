@@ -600,7 +600,7 @@ qboolean FS_FileInPathExists(const char *testpath)
 {
 	FILE *filep;
 
-	filep = fopen(testpath, "rb");
+	filep = Sys_FOpen(testpath, "rb");
 	
 	if(filep)
 	{
@@ -675,7 +675,7 @@ fileHandle_t FS_SV_FOpenFileWrite( const char *filename ) {
 	}
 
 	Com_DPrintf( "writing to: %s\n", ospath );
-	fsh[f].handleFiles.file.o = fopen( ospath, "wb" );
+	fsh[f].handleFiles.file.o = Sys_FOpen( ospath, "wb" );
 
 	Q_strncpyz( fsh[f].name, filename, sizeof( fsh[f].name ) );
 
@@ -720,7 +720,7 @@ long FS_SV_FOpenFileRead(const char *filename, fileHandle_t *fp)
 		Com_Printf( "FS_SV_FOpenFileRead (fs_homepath): %s\n", ospath );
 	}
 
-	fsh[f].handleFiles.file.o = fopen( ospath, "rb" );
+	fsh[f].handleFiles.file.o = Sys_FOpen( ospath, "rb" );
 	fsh[f].handleSync = qfalse;
 	if (!fsh[f].handleFiles.file.o)
 	{
@@ -736,7 +736,7 @@ long FS_SV_FOpenFileRead(const char *filename, fileHandle_t *fp)
 				Com_Printf( "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath );
 			}
 
-			fsh[f].handleFiles.file.o = fopen( ospath, "rb" );
+			fsh[f].handleFiles.file.o = Sys_FOpen( ospath, "rb" );
 			fsh[f].handleSync = qfalse;
 		}
 
@@ -878,7 +878,7 @@ fileHandle_t FS_FOpenFileWrite( const char *filename ) {
 	// enabling the following line causes a recursive function call loop
 	// when running with +set logfile 1 +set developer 1
 	//Com_DPrintf( "writing to: %s\n", ospath );
-	fsh[f].handleFiles.file.o = fopen( ospath, "wb" );
+	fsh[f].handleFiles.file.o = Sys_FOpen( ospath, "wb" );
 
 	Q_strncpyz( fsh[f].name, filename, sizeof( fsh[f].name ) );
 
@@ -923,7 +923,7 @@ fileHandle_t FS_FOpenFileAppend( const char *filename ) {
 		return 0;
 	}
 
-	fsh[f].handleFiles.file.o = fopen( ospath, "ab" );
+	fsh[f].handleFiles.file.o = Sys_FOpen( ospath, "ab" );
 	fsh[f].handleSync = qfalse;
 	if (!fsh[f].handleFiles.file.o) {
 		f = 0;
@@ -1162,7 +1162,7 @@ long FS_FOpenFileReadDir(const char *filename, searchpath_t *search, fileHandle_
 			dir = search->dir;
 
 			netpath = FS_BuildOSPath(dir->path, dir->gamedir, filename);
-			filep = fopen (netpath, "rb");
+			filep = Sys_FOpen(netpath, "rb");
 
 			if(filep)
 			{
@@ -1296,7 +1296,7 @@ long FS_FOpenFileReadDir(const char *filename, searchpath_t *search, fileHandle_
 		dir = search->dir;
 
 		netpath = FS_BuildOSPath(dir->path, dir->gamedir, filename);
-		filep = fopen(netpath, "rb");
+		filep = Sys_FOpen(netpath, "rb");
 
 		if (filep == NULL)
 		{
@@ -3312,7 +3312,7 @@ static void FS_Startup( const char *gameName )
 
 #ifdef FS_MISSING
 	if (missingFiles == NULL) {
-		missingFiles = fopen( "\\missing.txt", "ab" );
+		missingFiles = Sys_FOpen( "\\missing.txt", "ab" );
 	}
 #endif
 	Com_Printf( "%d files in pk3 files\n", fs_packFiles );
