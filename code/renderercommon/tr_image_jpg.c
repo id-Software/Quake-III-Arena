@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "tr_local.h"
+#include "../renderergl1/tr_local.h"
 
 /*
  * Include file for users of JPEG library.
