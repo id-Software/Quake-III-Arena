@@ -98,6 +98,7 @@ Makefile.local:
   USE_CURL           - use libcurl for http/ftp download support
   USE_CURL_DLOPEN    - link with libcurl at runtime
   USE_CODEC_VORBIS   - enable Ogg Vorbis support
+  USE_CODEC_OPUS     - enable Ogg Opus support
   USE_MUMBLE         - enable Mumble support
   USE_VOIP           - enable built-in VoIP support
   USE_INTERNAL_SPEEX - build internal speex library instead of dynamically
@@ -107,6 +108,8 @@ Makefile.local:
                        for x86_64
   USE_INTERNAL_ZLIB  - build and link against internal zlib
   USE_INTERNAL_JPEG  - build and link against internal JPEG library
+  USE_INTERNAL_OGG   - build and link against internal ogg library
+  USE_INTERNAL_OPUS  - build and link against internal opus/opusfile libraries
   USE_LOCAL_HEADERS  - use headers local to ioq3 instead of system ones
   DEBUG_CFLAGS       - C compiler flags to use for building debug version
   COPYDIR            - the target installation directory
