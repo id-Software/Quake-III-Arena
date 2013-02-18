@@ -1,9 +1,9 @@
 #ifndef __CONFIG_TYPES_H__
 #define __CONFIG_TYPES_H__
 
-/* #define INCLUDE_INTTYPES_H */
-#define INCLUDE_STDINT_H
-/* #define INCLUDE_SYS_TYPES_H */
+/* #define INCLUDE_INTTYPES_H 1 */
+#define INCLUDE_STDINT_H 1
+/* #define INCLUDE_SYS_TYPES_H 1 */
 
 #if INCLUDE_INTTYPES_H
 #  include <inttypes.h>
