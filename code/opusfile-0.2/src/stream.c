@@ -54,7 +54,9 @@ static int op_fread(void *_stream,unsigned char *_ptr,int _buf_size){
 }
 
 static int op_fseek(void *_stream,opus_int64 _offset,int _whence){
-#if defined(_MSC_VER) || defined(_WIN32)
+#if defined(__MINGW32__)
+  return fseeko64((FILE *)_stream,_offset,_whence);
+#elif defined(_MSC_VER)
   return _fseeki64((FILE *)_stream,_offset,_whence);
 #else
   return fseeko((FILE *)_stream,(off_t)_offset,_whence);
@@ -62,7 +64,9 @@ static int op_fseek(void *_stream,opus_int64 _offset,int _whence){
 }
 
 static opus_int64 op_ftell(void *_stream){
-#if defined(_MSC_VER) || defined(_WIN32)
+#if defined(__MINGW32__)
+  return ftello64((FILE *)_stream);
+#elif defined(_MSC_VER)
   return _ftelli64((FILE *)_stream);
 #else
   return ftello((FILE *)_stream);
