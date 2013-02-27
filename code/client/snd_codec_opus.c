@@ -449,4 +449,4 @@ void *S_OggOpus_CodecLoad(const char *filename, snd_info_t *info)
 	return buffer;
 }
 
-#endif // USE_CODEC_VORBIS
+#endif // USE_CODEC_OPUS
