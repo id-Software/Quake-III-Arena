@@ -153,12 +153,12 @@ bot_weaponstate_t *BotWeaponStateFromHandle(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		botimport.Print(PRT_FATAL, "weapon state handle %d out of range\n", handle);
 		return NULL;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		botimport.Print(PRT_FATAL, "invalid weapon state %d\n", handle);
 		return NULL;
 	} //end if
 	return botweaponstates[handle];
@@ -483,12 +483,12 @@ void BotFreeWeaponState(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		botimport.Print(PRT_FATAL, "weapon state handle %d out of range\n", handle);
 		return;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		botimport.Print(PRT_FATAL, "invalid weapon state %d\n", handle);
 		return;
 	} //end if
 	BotFreeWeaponWeights(handle);
