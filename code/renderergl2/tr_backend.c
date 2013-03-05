@@ -1186,7 +1186,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			FBO_Bind(tr.screenShadowFbo);
 
 			box[0] = (backEnd.refdef.x     ) * tr.screenShadowFbo->width  / (float)glConfig.vidWidth;
-			box[1] = (backEnd.refdef.y     ) * tr.screenShadowFbo->height / (float)glConfig.vidHeight;
+			box[1] = (glConfig.vidHeight - ( backEnd.refdef.y + backEnd.refdef.height )) * tr.screenShadowFbo->height / (float)glConfig.vidHeight;
 			box[2] = (backEnd.refdef.width ) * tr.screenShadowFbo->width  / (float)glConfig.vidWidth;
 			box[3] = (backEnd.refdef.height) * tr.screenShadowFbo->height / (float)glConfig.vidHeight;
 
@@ -1194,9 +1194,9 @@ const void	*RB_DrawSurfs( const void *data ) {
 			qglScissor(box[0], box[1], box[2], box[3]);
 
 			box[0] = (backEnd.refdef.x                        ) / (float)glConfig.vidWidth;
-			box[1] = (backEnd.refdef.y                        ) / (float)glConfig.vidHeight;
+			box[1] = 1.0 - (backEnd.refdef.y + backEnd.refdef.height) / (float)glConfig.vidHeight;
 			box[2] = (backEnd.refdef.x + backEnd.refdef.width ) / (float)glConfig.vidWidth;
-			box[3] = (backEnd.refdef.y + backEnd.refdef.height) / (float)glConfig.vidHeight;
+			box[3] = 1.0 - (backEnd.refdef.y                        ) / (float)glConfig.vidHeight;
 
 			texCoords[0][0] = box[0]; texCoords[0][1] = box[3];
 			texCoords[1][0] = box[2]; texCoords[1][1] = box[3];
