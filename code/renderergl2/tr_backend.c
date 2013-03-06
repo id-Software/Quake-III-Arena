@@ -843,7 +843,6 @@ Used for cinematics.
 void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
 	int			i, j;
 	int			start, end;
-	vec4_t color;
 	vec4_t quadVerts[4];
 	vec2_t texCoords[4];
 
@@ -901,12 +900,10 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	VectorSet2(texCoords[2], (cols - 0.5f) / cols, (rows - 0.5f) / rows);
 	VectorSet2(texCoords[3], 0.5f / cols,          (rows - 0.5f) / rows);
 
-	VectorSet4(color, 1.0f, 1.0f, 1.0f, 1.0f);
-
 	GLSL_BindProgram(&tr.textureColorShader);
 	
 	GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, color);
+	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, colorWhite);
 
 	RB_InstantQuad2(quadVerts, texCoords);
 }

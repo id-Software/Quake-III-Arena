@@ -124,44 +124,30 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, float color[4], 
 	// constant normal all the way around
 	VectorSubtract( vec3_origin, backEnd.viewParms.or.axis[0], normal );
 
-	tess.normal[ndx][0] = tess.normal[ndx+1][0] = tess.normal[ndx+2][0] = tess.normal[ndx+3][0] = normal[0];
-	tess.normal[ndx][1] = tess.normal[ndx+1][1] = tess.normal[ndx+2][1] = tess.normal[ndx+3][1] = normal[1];
-	tess.normal[ndx][2] = tess.normal[ndx+1][2] = tess.normal[ndx+2][2] = tess.normal[ndx+3][2] = normal[2];
+	VectorCopy(normal, tess.normal[ndx]);
+	VectorCopy(normal, tess.normal[ndx+1]);
+	VectorCopy(normal, tess.normal[ndx+2]);
+	VectorCopy(normal, tess.normal[ndx+3]);
 	
 	// standard square texture coordinates
-	tess.texCoords[ndx][0][0] = tess.texCoords[ndx][1][0] = s1;
-	tess.texCoords[ndx][0][1] = tess.texCoords[ndx][1][1] = t1;
+	VectorSet2(tess.texCoords[ndx  ][0], s1, t1);
+	VectorSet2(tess.texCoords[ndx  ][1], s1, t1);
 
-	tess.texCoords[ndx+1][0][0] = tess.texCoords[ndx+1][1][0] = s2;
-	tess.texCoords[ndx+1][0][1] = tess.texCoords[ndx+1][1][1] = t1;
+	VectorSet2(tess.texCoords[ndx+1][0], s2, t1);
+	VectorSet2(tess.texCoords[ndx+1][1], s2, t1);
 
-	tess.texCoords[ndx+2][0][0] = tess.texCoords[ndx+2][1][0] = s2;
-	tess.texCoords[ndx+2][0][1] = tess.texCoords[ndx+2][1][1] = t2;
+	VectorSet2(tess.texCoords[ndx+2][0], s2, t2);
+	VectorSet2(tess.texCoords[ndx+2][1], s2, t2);
 
-	tess.texCoords[ndx+3][0][0] = tess.texCoords[ndx+3][1][0] = s1;
-	tess.texCoords[ndx+3][0][1] = tess.texCoords[ndx+3][1][1] = t2;
+	VectorSet2(tess.texCoords[ndx+3][0], s1, t2);
+	VectorSet2(tess.texCoords[ndx+3][1], s1, t2);
 
 	// constant color all the way around
 	// should this be identity and let the shader specify from entity?
-	tess.vertexColors[ndx][0] = color[0];
-	tess.vertexColors[ndx][1] = color[1];
-	tess.vertexColors[ndx][2] = color[2];
-	tess.vertexColors[ndx][3] = color[3];
-
-	tess.vertexColors[ndx+1][0] = color[0];
-	tess.vertexColors[ndx+1][1] = color[1];
-	tess.vertexColors[ndx+1][2] = color[2];
-	tess.vertexColors[ndx+1][3] = color[3];
-
-	tess.vertexColors[ndx+2][0] = color[0];
-	tess.vertexColors[ndx+2][1] = color[1];
-	tess.vertexColors[ndx+2][2] = color[2];
-	tess.vertexColors[ndx+2][3] = color[3];
-
-	tess.vertexColors[ndx+3][0] = color[0];
-	tess.vertexColors[ndx+3][1] = color[1];
-	tess.vertexColors[ndx+3][2] = color[2];
-	tess.vertexColors[ndx+3][3] = color[3];
+	VectorCopy4(color, tess.vertexColors[ndx]);
+	VectorCopy4(color, tess.vertexColors[ndx+1]);
+	VectorCopy4(color, tess.vertexColors[ndx+2]);
+	VectorCopy4(color, tess.vertexColors[ndx+3]);
 
 	tess.numVertexes += 4;
 	tess.numIndexes += 6;
@@ -233,36 +219,19 @@ void RB_InstantQuad2(vec4_t quadVerts[4], vec2_t texCoords[4])
 
 void RB_InstantQuad(vec4_t quadVerts[4])
 {
-	vec4_t color;
 	vec2_t texCoords[4];
-	vec2_t invTexRes;
 
-	VectorSet4(color, 1, 1, 1, 1);
-
-	texCoords[0][0] = 0;
-	texCoords[0][1] = 0;
-
-	texCoords[1][0] = 1;
-	texCoords[1][1] = 0;
-
-	texCoords[2][0] = 1;
-	texCoords[2][1] = 1;
-
-	texCoords[3][0] = 0;
-	texCoords[3][1] = 1;
-
-	invTexRes[0] = 1.0f / 256.0f;
-	invTexRes[1] = 1.0f / 256.0f;
+	VectorSet2(texCoords[0], 0.0f, 0.0f);
+	VectorSet2(texCoords[1], 1.0f, 0.0f);
+	VectorSet2(texCoords[2], 1.0f, 1.0f);
+	VectorSet2(texCoords[3], 0.0f, 1.0f);
 
 	GLSL_BindProgram(&tr.textureColorShader);
 	
 	GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, color);
-	GLSL_SetUniformVec2(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_INVTEXRES, invTexRes);
-	GLSL_SetUniformVec2(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_AUTOEXPOSUREMINMAX, tr.refdef.autoExposureMinMax);
-	GLSL_SetUniformVec3(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_TONEMINAVGMAXLINEAR, tr.refdef.toneMinAvgMaxLinear);
+	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, colorWhite);
 
-	RB_InstantQuad2(quadVerts, texCoords); //, color, &tr.textureColorShader, invTexRes);
+	RB_InstantQuad2(quadVerts, texCoords);
 }
 
 
@@ -342,9 +311,9 @@ static void RB_SurfacePolychain( srfPoly_t *p ) {
 	tess.numVertexes = numv;
 }
 
-static void RB_SurfaceHelper( int numVerts, srfVert_t *verts, int numTriangles, srfTriangle_t *triangles, int dlightBits, int pshadowBits)
+static void RB_SurfaceVertsAndTris( int numVerts, srfVert_t *verts, int numTriangles, srfTriangle_t *triangles, int dlightBits, int pshadowBits)
 {
-	int			i;
+	int             i;
 	srfTriangle_t  *tri;
 	srfVert_t      *dv;
 	float          *xyz, *normal, *texCoords, *lightCoords, *lightdir;
@@ -352,7 +321,7 @@ static void RB_SurfaceHelper( int numVerts, srfVert_t *verts, int numTriangles, 
 	float          *tangent, *bitangent;
 #endif
 	glIndex_t      *index;
-	float		*color;
+	float          *color;
 
 	RB_CheckVBOandIBO(tess.vbo, tess.ibo);
 
@@ -445,7 +414,7 @@ static void RB_SurfaceHelper( int numVerts, srfVert_t *verts, int numTriangles, 
 	tess.numVertexes += numVerts;
 }
 
-static qboolean RB_SurfaceHelperVBO(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndexes, int firstIndex, int minIndex, int maxIndex, int dlightBits, int pshadowBits, qboolean shaderCheck)
+static qboolean RB_SurfaceVbo(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndexes, int firstIndex, int minIndex, int maxIndex, int dlightBits, int pshadowBits, qboolean shaderCheck)
 {
 	int i, mergeForward, mergeBack;
 	GLvoid *firstIndexOffset, *lastIndexOffset;
@@ -554,13 +523,13 @@ RB_SurfaceTriangles
 =============
 */
 static void RB_SurfaceTriangles( srfTriangles_t *srf ) {
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceHelper(srf->numVerts, srf->verts, srf->numTriangles,
+	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
 			srf->triangles, srf->dlightBits, srf->pshadowBits);
 }
 
@@ -575,6 +544,7 @@ static void RB_SurfaceBeam( void )
 {
 #define NUM_BEAM_SEGS 6
 	refEntity_t *e;
+	shaderProgram_t *sp = &tr.textureColorShader;
 	int	i;
 	vec3_t perpvec;
 	vec3_t direction, normalized_direction;
@@ -641,21 +611,12 @@ static void RB_SurfaceBeam( void )
 	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
 	RB_UpdateVBOs(ATTR_POSITION);
 	
-	{
-		shaderProgram_t *sp = &tr.textureColorShader;
-		vec4_t color;
-
-		GLSL_VertexAttribsState(ATTR_POSITION);
-		GLSL_BindProgram(sp);
+	GLSL_VertexAttribsState(ATTR_POSITION);
+	GLSL_BindProgram(sp);
 		
-		GLSL_SetUniformMatrix16(sp, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMatrix16(sp, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 					
-		color[0] = 1.0f;
-		color[1] = 0.0f;
-		color[2] = 0.0f;
-		color[3] = 1.0f;
-		GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, color);
-	}
+	GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, colorRed);
 
 	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 
@@ -1287,13 +1248,13 @@ RB_SurfaceFace
 ==============
 */
 static void RB_SurfaceFace( srfSurfaceFace_t *srf ) {
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceHelper(srf->numVerts, srf->verts, srf->numTriangles,
+	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
 			srf->triangles, srf->dlightBits, srf->pshadowBits);
 }
 
@@ -1356,7 +1317,7 @@ static void RB_SurfaceGrid( srfGridMesh_t *srf ) {
 	int     pshadowBits;
 	//int		*vDlightBits;
 
-	if( RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
@@ -1615,7 +1576,7 @@ static void RB_SurfaceFlare(srfFlare_t *surf)
 
 static void RB_SurfaceVBOMesh(srfVBOMesh_t * srf)
 {
-	RB_SurfaceHelperVBO (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex,
+	RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex,
 			srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qfalse );
 }
 

@@ -828,11 +828,7 @@ void RB_DrawSun( float scale, shader_t *shader ) {
 
 	RB_BeginSurface( shader, 0 );
 
-	{
-		vec4_t color;
-		color[0] = color[1] = color[2] = color[3] = 1;
-		RB_AddQuadStamp(origin, vec1, vec2, color);
-	}
+	RB_AddQuadStamp(origin, vec1, vec2, colorWhite);
 
 	RB_EndSurface();
 

@@ -720,7 +720,7 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 	}
 	else
 	{
-		color[0] = color[1] = color[2] = color[3] = 1.0f;
+		VectorCopy4(colorWhite, color);
 	}
 
 	if (!shaderProgram)
