@@ -843,8 +843,9 @@ Used for cinematics.
 void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
 	int			i, j;
 	int			start, end;
-	shaderProgram_t *sp = &tr.textureColorShader;
 	vec4_t color;
+	vec4_t quadVerts[4];
+	vec2_t texCoords[4];
 
 	if ( !tr.registered ) {
 		return;
@@ -868,24 +869,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 		ri.Error (ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows);
 	}
 
-	GL_Bind( tr.scratchImage[client] );
-
-	// if the scratchImage isn't in the format we want, specify it as a new texture
-	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
-		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
-		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );	
-	} else {
-		if (dirty) {
-			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
-			// it and don't try and do a texture compression
-			qglTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		}
-	}
+	RE_UploadCinematic (w, h, cols, rows, data, client, dirty);
 
 	if ( r_speeds->integer ) {
 		end = ri.Milliseconds();
@@ -907,84 +891,24 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 
 	RB_SetGL2D();
 
-	tess.numIndexes = 0;
-	tess.numVertexes = 0;
-	tess.firstIndex = 0;
-	tess.minIndex = 0;
-	tess.maxIndex = 0;
+	VectorSet4(quadVerts[0], x,     y,     0.0f, 1.0f);
+	VectorSet4(quadVerts[1], x + w, y,     0.0f, 1.0f);
+	VectorSet4(quadVerts[2], x + w, y + h, 0.0f, 1.0f);
+	VectorSet4(quadVerts[3], x,     y + h, 0.0f, 1.0f);
 
-	tess.xyz[tess.numVertexes][0] = x;
-	tess.xyz[tess.numVertexes][1] = y;
-	tess.xyz[tess.numVertexes][2] = 0;
-	tess.xyz[tess.numVertexes][3] = 1;
-	tess.texCoords[tess.numVertexes][0][0] = 0.5f / cols;
-	tess.texCoords[tess.numVertexes][0][1] = 0.5f / rows;
-	tess.texCoords[tess.numVertexes][1][0] = 0;
-	tess.texCoords[tess.numVertexes][1][1] = 1;
-	tess.numVertexes++;
+	VectorSet2(texCoords[0], 0.5f / cols,          0.5f / rows);
+	VectorSet2(texCoords[1], (cols - 0.5f) / cols, 0.5f / rows);
+	VectorSet2(texCoords[2], (cols - 0.5f) / cols, (rows - 0.5f) / rows);
+	VectorSet2(texCoords[3], 0.5f / cols,          (rows - 0.5f) / rows);
 
-	tess.xyz[tess.numVertexes][0] = x + w;
-	tess.xyz[tess.numVertexes][1] = y;
-	tess.xyz[tess.numVertexes][2] = 0;
-	tess.xyz[tess.numVertexes][3] = 1;
-	tess.texCoords[tess.numVertexes][0][0] = (cols - 0.5f) / cols;
-	tess.texCoords[tess.numVertexes][0][1] = 0.5f / rows;
-	tess.texCoords[tess.numVertexes][1][0] = 0;
-	tess.texCoords[tess.numVertexes][1][1] = 1;
-	tess.numVertexes++;
+	VectorSet4(color, 1.0f, 1.0f, 1.0f, 1.0f);
 
-	tess.xyz[tess.numVertexes][0] = x + w;
-	tess.xyz[tess.numVertexes][1] = y + h;
-	tess.xyz[tess.numVertexes][2] = 0;
-	tess.xyz[tess.numVertexes][3] = 1;
-	tess.texCoords[tess.numVertexes][0][0] = (cols - 0.5f) / cols;
-	tess.texCoords[tess.numVertexes][0][1] = (rows - 0.5f) / rows;
-	tess.texCoords[tess.numVertexes][1][0] = 0;
-	tess.texCoords[tess.numVertexes][1][1] = 1;
-	tess.numVertexes++;
-
-	tess.xyz[tess.numVertexes][0] = x;
-	tess.xyz[tess.numVertexes][1] = y + h;
-	tess.xyz[tess.numVertexes][2] = 0;
-	tess.xyz[tess.numVertexes][3] = 1;
-	tess.texCoords[tess.numVertexes][0][0] = 0.5f / cols;
-	tess.texCoords[tess.numVertexes][0][1] = (rows - 0.5f) / rows;
-	tess.texCoords[tess.numVertexes][1][0] = 0;
-	tess.texCoords[tess.numVertexes][1][1] = 1;
-	tess.numVertexes++;
-
-	tess.indexes[tess.numIndexes++] = 0;
-	tess.indexes[tess.numIndexes++] = 1;
-	tess.indexes[tess.numIndexes++] = 2;
-	tess.indexes[tess.numIndexes++] = 0;
-	tess.indexes[tess.numIndexes++] = 2;
-	tess.indexes[tess.numIndexes++] = 3;
-	tess.minIndex = 0;
-	tess.maxIndex = 3;
-
-	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
-	RB_UpdateVBOs(ATTR_POSITION | ATTR_TEXCOORD);
+	GLSL_BindProgram(&tr.textureColorShader);
 	
-	sp = &tr.textureColorShader;
+	GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, color);
 
-	GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
-	
-	GLSL_BindProgram(sp);
-
-	GLSL_SetUniformMatrix16(sp, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-	VectorSet4(color, 1, 1, 1, 1);
-	GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, color);
-
-	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
-	
-	//R_BindNullVBO();
-	//R_BindNullIBO();
-
-	tess.numIndexes = 0;
-	tess.numVertexes = 0;
-	tess.firstIndex = 0;
-	tess.minIndex = 0;
-	tess.maxIndex = 0;
+	RB_InstantQuad2(quadVerts, texCoords);
 }
 
 void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
