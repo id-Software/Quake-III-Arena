@@ -2,5 +2,9 @@ language: c
 compiler:
   - gcc
   - clang
-# Change this to your needs
+
 script: make
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libgl1-mesa-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
