@@ -3,11 +3,11 @@ compiler:
   - gcc
   - clang
 
-script: make
+script: make USE_CODEC_VORBIS=1 USE_FREETYPE=1 CFLAGS=-DRAVENMD4
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libgl1-mesa-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
+  - sudo apt-get install -qq libgl1-mesa-dev libsdl1.2-dev libvorbis-dev libfreetype6-dev
   
 notifications:
   irc: "irc.freenode.org#ioquake3"
