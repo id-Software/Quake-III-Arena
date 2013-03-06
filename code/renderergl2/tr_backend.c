@@ -1196,7 +1196,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			box[0] = backEnd.viewParms.viewportX               / (float)glConfig.vidWidth;
 			box[1] = backEnd.viewParms.viewportY               / (float)glConfig.vidHeight;
 			box[2] = box[0] + backEnd.viewParms.viewportWidth  / (float)glConfig.vidWidth;
-			box[3] = box[1] - backEnd.viewParms.viewportHeight / (float)glConfig.vidHeight;
+			box[3] = box[1] + backEnd.viewParms.viewportHeight / (float)glConfig.vidHeight;
 
 			texCoords[0][0] = box[0]; texCoords[0][1] = box[3];
 			texCoords[1][0] = box[2]; texCoords[1][1] = box[3];
