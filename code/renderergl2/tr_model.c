@@ -1403,7 +1403,7 @@ static mdvTag_t *R_GetTag( mdvModel_t *mod, int frame, const char *_tagName ) {
 }
 
 #ifdef RAVENMD4
-void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, md3Tag_t * dest) 
+void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, mdvTag_t * dest)
 {
 	int				i, j, k;
 	int				frameSize;
@@ -1421,8 +1421,6 @@ void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, md3Tag_t
 	{
 		if ( !strcmp( tag->name, tagName ) )
 		{
-			Q_strncpyz(dest->name, tag->name, sizeof(dest->name));
-
 			// uncompressed model...
 			//
 			frameSize = (intptr_t)( &((mdrFrame_t *)0)->bones[ mod->numBones ] );
@@ -1444,7 +1442,6 @@ void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, md3Tag_t
 
 	AxisClear( dest->axis );
 	VectorClear( dest->origin );
-	strcpy(dest->name,"");
 }
 #endif
 
@@ -1457,7 +1454,7 @@ int R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFram
 					 float frac, const char *tagName ) {
 	mdvTag_t	*start, *end;
 #ifdef RAVENMD4
-	md3Tag_t	start_space, end_space;
+	mdvTag_t	start_space, end_space;
 #endif
 	int		i;
 	float		frontLerp, backLerp;
