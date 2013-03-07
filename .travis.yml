@@ -7,7 +7,8 @@ script: ./build-test.sh
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libgl1-mesa-dev libsdl1.2-dev libvorbis-dev libfreetype6-dev mingw32
+  - sudo apt-get remove -qq -y mingw32
+  - sudo apt-get install -q -y libgl1-mesa-dev libsdl1.2-dev libvorbis-dev libfreetype6-dev mingw-w64
   
 notifications:
   irc: "irc.freenode.org#ioquake3"
