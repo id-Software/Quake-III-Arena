@@ -9,17 +9,20 @@ failed=0;
 make clean
 (make USE_CODEC_VORBIS=1 USE_FREETYPE=1 CFLAGS=-DRAVENMD4) || failed=1;
 
-# Test mingw (gcc)
-if [ "$CC" = "gcc" ]; then
-	# clear CC so script will set it.
-    export CC=
-    (exec ./cross-make-mingw.sh) || failed=1;
+# Test mingw
+if [ "$CC" = "clang" ]; then
+	# skip mingw if travis-ci clang build
+	echo "Skipping mingw build because there is no mingw clang compiler available.";
+else
+	# clear CC so cross-make-mingw script will set it.
+	export CC=
+	(exec ./cross-make-mingw.sh) || failed=1;
 fi
 
 if [ $failed -eq 1 ]; then
-  echo "Build failure.";
+	echo "Build failure.";
 else
-  echo "All builds successful.";
+	echo "All builds successful.";
 fi
 
 exit $failed;
