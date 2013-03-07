@@ -3,11 +3,10 @@
 failed=0;
 
 # Default Build
-(make) || failed=1;
+(make clean release) || failed=1;
 
 # Test additional options
-make clean
-(make USE_CODEC_VORBIS=1 USE_FREETYPE=1 CFLAGS=-DRAVENMD4) || failed=1;
+(make clean release USE_CODEC_VORBIS=1 USE_FREETYPE=1 CFLAGS=-DRAVENMD4) || failed=1;
 
 # Test mingw
 if [ "$CC" = "clang" ]; then
@@ -16,7 +15,7 @@ if [ "$CC" = "clang" ]; then
 else
 	# clear CC so cross-make-mingw script will set it.
 	export CC=
-	(exec ./cross-make-mingw.sh) || failed=1;
+	(exec ./cross-make-mingw.sh clean release) || failed=1;
 fi
 
 if [ $failed -eq 1 ]; then
