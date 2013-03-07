@@ -12,3 +12,5 @@ before_install:
   
 notifications:
   irc: "irc.freenode.org#ioquake3"
+  on_success: change
+  on_failure: always
