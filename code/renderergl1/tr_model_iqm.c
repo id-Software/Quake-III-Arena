@@ -51,6 +51,11 @@ static void Matrix34Multiply( float *a, float *b, float *out ) {
 	out[10] = a[8] * b[2] + a[9] * b[6] + a[10] * b[10];
 	out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
 }
+static void Matrix34Multiply_OnlySetOrigin( float *a, float *b, float *out ) {
+	out[ 3] = a[0] * b[3] + a[1] * b[7] + a[ 2] * b[11] + a[ 3];
+	out[ 7] = a[4] * b[3] + a[5] * b[7] + a[ 6] * b[11] + a[ 7];
+	out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
+}
 static void InterpolateMatrix( float *a, float *b, float lerp, float *mat ) {
 	float unLerp = 1.0f - lerp;
 
@@ -132,8 +137,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	unsigned short		*framedata;
 	char			*str;
 	int			i, j;
-	float			jointMats[IQM_MAX_JOINTS * 2 * 12];
-	float			*mat;
+	float			jointInvMats[IQM_MAX_JOINTS * 12];
+	float			*mat, *matInv;
 	size_t			size, joint_names;
 	iqmData_t		*iqmData;
 	srfIQModel_t		*surface;
@@ -418,7 +423,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	// allocate the model and copy the data
 	size = sizeof(iqmData_t);
 	size += header->num_meshes * sizeof( srfIQModel_t );
-	size += header->num_joints * header->num_frames * 12 * sizeof( float );
+	size += header->num_joints * header->num_frames * 12 * sizeof( float ); // joint mats
+	size += header->num_joints * header->num_frames * 12 * sizeof( float ); // pose mats
 	if(header->ofs_bounds)
 		size += header->num_frames * 6 * sizeof(float);	// model bounds
 	size += header->num_vertexes * 3 * sizeof(float);	// positions
@@ -443,7 +449,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->num_surfaces = header->num_meshes;
 	iqmData->num_joints   = header->num_joints;
 	iqmData->surfaces     = (srfIQModel_t *)(iqmData + 1);
-	iqmData->poseMats     = (float *) (iqmData->surfaces + iqmData->num_surfaces);
+	iqmData->jointMats    = (float *) (iqmData->surfaces + iqmData->num_surfaces);
+	iqmData->poseMats     = iqmData->jointMats + 12 * header->num_joints * header->num_frames;
 	if(header->ofs_bounds)
 	{
 		iqmData->bounds       = iqmData->poseMats + 12 * header->num_joints * header->num_frames;
@@ -462,8 +469,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->names        = (char *)(iqmData->triangles + 3 * header->num_triangles);
 
 	// calculate joint matrices and their inverses
-	// they are needed only until the pose matrices are calculated
-	mat = jointMats;
+	// joint inverses are needed only until the pose matrices are calculated
+	mat = iqmData->jointMats;
+	matInv = jointInvMats;
 	joint = (iqmJoint_t *)((byte *)header + header->ofs_joints);
 	for( i = 0; i < header->num_joints; i++, joint++ ) {
 		float baseFrame[12], invBaseFrame[12];
@@ -473,17 +481,17 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 		if ( joint->parent >= 0 )
 		{
-			Matrix34Multiply( jointMats + 2 * 12 * joint->parent, baseFrame, mat );
+			Matrix34Multiply( iqmData->jointMats + 12 * joint->parent, baseFrame, mat );
 			mat += 12;
-			Matrix34Multiply( invBaseFrame, jointMats + 2 * 12 * joint->parent + 12, mat );
-			mat += 12;
+			Matrix34Multiply( invBaseFrame, jointInvMats + 12 * joint->parent, matInv );
+			matInv += 12;
 		}
 		else
 		{
 			Com_Memcpy( mat, baseFrame,    sizeof(baseFrame)    );
 			mat += 12;
-			Com_Memcpy( mat, invBaseFrame, sizeof(invBaseFrame) );
-			mat += 12;
+			Com_Memcpy( matInv, invBaseFrame, sizeof(invBaseFrame) );
+			matInv += 12;
 		}
 	}
 
@@ -535,13 +543,13 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			JointToMatrix( rotate, scale, translate, mat1 );
 			
 			if( pose->parent >= 0 ) {
-				Matrix34Multiply( jointMats + 12 * 2 * pose->parent,
+				Matrix34Multiply( iqmData->jointMats + 12 * pose->parent,
 						  mat1, mat2 );
 			} else {
 				Com_Memcpy( mat2, mat1, sizeof(mat1) );
 			}
 			
-			Matrix34Multiply( mat2, jointMats + 12 * (2 * j + 1), mat );
+			Matrix34Multiply( mat2, jointInvMats + 12 * j, mat );
 			mat += 12;
 		}
 	}
@@ -861,7 +869,7 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 }
 
 
-static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
+static void ComputePoseMats( iqmData_t *data, int frame, int oldframe,
 			      float backlerp, float *mat ) {
 	float	*mat1, *mat2;
 	int	*joint = data->jointParents;
@@ -897,6 +905,23 @@ static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
 	}
 }
 
+static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
+			      float backlerp, float *mat ) {
+	float	*mat1;
+	int	i;
+
+	ComputePoseMats( data, frame, oldframe, backlerp, mat );
+
+	for( i = 0; i < data->num_joints; i++ ) {
+		float outmat[12];
+		mat1 = mat + 12 * i;
+
+		Com_Memcpy(outmat, mat1, sizeof(outmat));
+
+		Matrix34Multiply_OnlySetOrigin( outmat, data->jointMats + 12 * i, mat1 );
+	}
+}
+
 
 /*
 =================
@@ -927,7 +952,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	RB_CHECKOVERFLOW( surf->num_vertexes, surf->num_triangles * 3 );
 
 	// compute interpolated joint matrices
-	ComputeJointMats( data, frame, oldframe, backlerp, jointMats );
+	ComputePoseMats( data, frame, oldframe, backlerp, jointMats );
 
 	// transform vertexes and fill other data
 	for( i = 0; i < surf->num_vertexes;

@@ -1250,6 +1250,7 @@ typedef struct {
 	int		*triangles;
 
 	int		*jointParents;
+	float		*jointMats;
 	float		*poseMats;
 	float		*bounds;
 	char		*names;
