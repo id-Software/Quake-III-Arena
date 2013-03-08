@@ -423,7 +423,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	// allocate the model and copy the data
 	size = sizeof(iqmData_t);
 	size += header->num_meshes * sizeof( srfIQModel_t );
-	size += header->num_joints * header->num_frames * 12 * sizeof( float ); // joint mats
+	size += header->num_joints * 12 * sizeof( float ); // joint mats
 	size += header->num_joints * header->num_frames * 12 * sizeof( float ); // pose mats
 	if(header->ofs_bounds)
 		size += header->num_frames * 6 * sizeof(float);	// model bounds
@@ -450,7 +450,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->num_joints   = header->num_joints;
 	iqmData->surfaces     = (srfIQModel_t *)(iqmData + 1);
 	iqmData->jointMats    = (float *) (iqmData->surfaces + iqmData->num_surfaces);
-	iqmData->poseMats     = iqmData->jointMats + 12 * header->num_joints * header->num_frames;
+	iqmData->poseMats     = iqmData->jointMats + 12 * header->num_joints;
 	if(header->ofs_bounds)
 	{
 		iqmData->bounds       = iqmData->poseMats + 12 * header->num_joints * header->num_frames;
