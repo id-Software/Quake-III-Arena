@@ -2,6 +2,7 @@ language: c
 compiler:
   - gcc
   - clang
+  - i686-w64-mingw32-gcc
 
 script: ./build-test.sh
 
