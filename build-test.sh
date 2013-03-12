@@ -3,7 +3,7 @@
 failed=0;
 
 # check if testing mingw
-if [ "$CC" = "i686-w64-mingw-gcc" ]; then
+if [ "$CC" = "i686-w64-mingw32-gcc" ]; then
 	MAKE=./cross-make-mingw.sh
 else
 	MAKE=make
