@@ -146,7 +146,6 @@ R_ImageList_f
 ===============
 */
 void R_ImageList_f( void ) {
-#if 1
 	int i;
 	int estTotalSize = 0;
 
@@ -283,107 +282,6 @@ void R_ImageList_f( void ) {
 	ri.Printf (PRINT_ALL, " ---------\n");
 	ri.Printf (PRINT_ALL, " approx %i bytes\n", estTotalSize);
 	ri.Printf (PRINT_ALL, " %i total images\n\n", tr.numImages );
-#else
-	int		i;
-	image_t	*image;
-	int		texels;
-	const char *yesno[] = {
-		"no ", "yes"
-	};
-
-	ri.Printf (PRINT_ALL, "\n      -w-- -h-- -mm- -TMU- -if-- wrap --name-------\n");
-	texels = 0;
-
-	for ( i = 0 ; i < tr.numImages ; i++ ) {
-		image = tr.images[ i ];
-
-		texels += image->uploadWidth*image->uploadHeight;
-		ri.Printf (PRINT_ALL,  "%4i: %4i %4i  %s   %d   ",
-			i, image->uploadWidth, image->uploadHeight, yesno[(image->flags & IMGFLAG_MIPMAP) ? 1 : 0], image->TMU );
-		switch ( image->internalFormat ) {
-		case 1:
-			ri.Printf( PRINT_ALL, "I    " );
-			break;
-		case 2:
-			ri.Printf( PRINT_ALL, "IA   " );
-			break;
-		case 3:
-			ri.Printf( PRINT_ALL, "RGB  " );
-			break;
-		case 4:
-			ri.Printf( PRINT_ALL, "RGBA " );
-			break;
-		case GL_RGBA8:
-			ri.Printf( PRINT_ALL, "RGBA8" );
-			break;
-		case GL_RGB8:
-			ri.Printf( PRINT_ALL, "RGB8" );
-			break;
-		case GL_RGB4_S3TC:
-			ri.Printf( PRINT_ALL, "S3TC " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-			ri.Printf( PRINT_ALL, "DXT1 " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			ri.Printf( PRINT_ALL, "DXT5 " );
-			break;
-		case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
-			ri.Printf( PRINT_ALL, "LATC " );
-			break;
-		case GL_RGBA4:
-			ri.Printf( PRINT_ALL, "RGBA4" );
-			break;
-		case GL_RGB5:
-			ri.Printf( PRINT_ALL, "RGB5 " );
-			break;
-		case GL_SRGB_EXT:
-			ri.Printf( PRINT_ALL, "sRGB " );
-			break;
-		case GL_SRGB8_EXT:
-			ri.Printf( PRINT_ALL, "sRGB8" );
-			break;
-		case GL_SRGB_ALPHA_EXT:
-		case GL_SRGB8_ALPHA8_EXT:
-			ri.Printf( PRINT_ALL, "sRGBA" );
-			break;
-			/*
-		case GL_SLUMINANCE_EXT:
-			break;
-		case GL_SLUMINANCE8_EXT:
-			break;
-		case GL_SLUMINANCE_ALPHA_EXT:
-			break;
-		case GL_SLUMINANCE8_ALPHA8_EXT:
-			break;
-			*/
-		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
-			ri.Printf( PRINT_ALL, "sDXT1" );
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
-			ri.Printf( PRINT_ALL, "sDXT5" );
-			break;
-		case GL_COMPRESSED_RGBA_BPTC_UNORM_ARB:
-			ri.Printf( PRINT_ALL, "BPTC " );
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB:
-			ri.Printf( PRINT_ALL, "sBPTC" );
-			break;
-		default:
-			ri.Printf( PRINT_ALL, "???? " );
-		}
-
-		if (image->flags & IMGFLAG_CLAMPTOEDGE)
-			ri.Printf( PRINT_ALL, "clmp " );
-		else
-			ri.Printf( PRINT_ALL, "rept " );
-		
-		ri.Printf( PRINT_ALL, " %s\n", image->imgName );
-	}
-	ri.Printf (PRINT_ALL, " ---------\n");
-	ri.Printf (PRINT_ALL, " %i total texels (not including mipmaps)\n", texels);
-	ri.Printf (PRINT_ALL, " %i total images\n\n", tr.numImages );
-#endif
 }
 
 //=======================================================================
