@@ -2935,7 +2935,6 @@ static const float OP_STEREO_DOWNMIX[OP_NCHANNELS_MAX-2][OP_NCHANNELS_MAX][2]={
 
 static int op_stereo_filter(OggOpusFile *_of,void *_dst,int _dst_sz,
  op_sample *_src,int _nsamples,int _nchannels){
-  _of=_of;
   _nsamples=OP_MIN(_nsamples,_dst_sz>>1);
   if(_nchannels==2)memcpy(_dst,_src,_nsamples*2*sizeof(*_src));
   else{
