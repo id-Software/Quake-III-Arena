@@ -80,44 +80,6 @@ typedef struct {
 	float		modelMatrix[16];
 } orientationr_t;
 
-typedef enum
-{
-	IMGTYPE_COLORALPHA, // for color, lightmap, diffuse, and specular
-	IMGTYPE_NORMAL,
-	IMGTYPE_NORMALHEIGHT,
-	IMGTYPE_DELUXE, // normals are swizzled, deluxe are not
-} imgType_t;
-
-typedef enum
-{
-	IMGFLAG_NONE           = 0x0000,
-	IMGFLAG_MIPMAP         = 0x0001,
-	IMGFLAG_PICMIP         = 0x0002,
-	IMGFLAG_CUBEMAP        = 0x0004,
-	IMGFLAG_NO_COMPRESSION = 0x0010,
-	IMGFLAG_NOLIGHTSCALE   = 0x0020,
-	IMGFLAG_CLAMPTOEDGE    = 0x0040,
-	IMGFLAG_SRGB           = 0x0080,
-	IMGFLAG_GENNORMALMAP   = 0x0100,
-} imgFlags_t;
-
-typedef struct image_s {
-	char		imgName[MAX_QPATH];		// game path, including extension
-	int			width, height;				// source image
-	int			uploadWidth, uploadHeight;	// after power of two and picmip but not including clamp to MAX_TEXTURE_SIZE
-	GLuint		texnum;					// gl texture binding
-
-	int			frameUsed;			// for texture usage in frame statistics
-
-	int			internalFormat;
-	int			TMU;				// only needed for voodoo2
-
-	imgType_t   type;
-	imgFlags_t  flags;
-
-	struct image_s*	next;
-} image_t;
-
 //===============================================================================
 
 typedef enum {
@@ -331,13 +293,6 @@ typedef struct {
 } shaderStage_t;
 
 struct shaderCommands_s;
-
-// any change in the LIGHTMAP_* defines here MUST be reflected in
-// R_FindShader() in tr_bsp.c
-#define LIGHTMAP_2D         -4	// shader is for 2D rendering
-#define LIGHTMAP_BY_VERTEX  -3	// pre-lit triangle models
-#define LIGHTMAP_WHITEIMAGE -2
-#define LIGHTMAP_NONE       -1
 
 typedef enum {
 	CT_FRONT_SIDED,
@@ -1118,7 +1073,6 @@ extern	cvar_t	*r_showImages;
 extern	cvar_t	*r_debugSort;
 
 extern	cvar_t	*r_printShaders;
-extern	cvar_t	*r_saveFontData;
 
 extern cvar_t	*r_marksOnTriangleMeshes;
 
@@ -1217,10 +1171,6 @@ qboolean	R_GetEntityToken( char *buffer, int size );
 model_t		*R_AllocModel( void );
 
 void    	R_Init( void );
-image_t	*R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags );
-
-image_t *R_CreateImage( const char *name, byte *pic, int width, int height,
-		imgType_t type, imgFlags_t flags, int internalFormat );
 
 void		R_SetColorMappings( void );
 void		R_GammaCorrect( byte *buffer, int bufSize );
@@ -1246,11 +1196,6 @@ const void *RB_TakeVideoFrameCmd( const void *data );
 //
 // tr_shader.c
 //
-qhandle_t		 RE_RegisterShaderLightMap( const char *name, int lightmapIndex );
-qhandle_t		 RE_RegisterShader( const char *name );
-qhandle_t		 RE_RegisterShaderNoMip( const char *name );
-qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_t *image, qboolean mipRawImage);
-
 shader_t	*R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImage );
 shader_t	*R_GetShaderByHandle( qhandle_t hShader );
 shader_t	*R_GetShaderByState( int index, long *cycleTime );
@@ -1677,11 +1622,6 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 		          int image_width, int image_height, byte *image_buffer, int padding);
 void RE_TakeVideoFrame( int width, int height,
 		byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
-
-// font stuff
-void R_InitFreeType( void );
-void R_DoneFreeType( void );
-void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
 
 
 #endif //TR_LOCAL_H
