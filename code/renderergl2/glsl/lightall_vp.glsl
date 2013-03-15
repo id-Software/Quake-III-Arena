@@ -1,5 +1,5 @@
 attribute vec4 attr_TexCoord0;
-#if defined(USE_LIGHTMAP)
+#if defined(USE_LIGHTMAP) || defined(USE_TCGEN)
 attribute vec4 attr_TexCoord1;
 #endif
 attribute vec4 attr_Color;
@@ -31,6 +31,8 @@ uniform vec3   u_ViewOrigin;
 
 #if defined(USE_TCGEN)
 uniform int    u_TCGen0;
+uniform vec3   u_TCGen0Vector0;
+uniform vec3   u_TCGen0Vector1;
 #endif
 
 #if defined(USE_TCMOD)
@@ -90,6 +92,29 @@ varying vec3   var_VertLight;
 
 #if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
 varying vec3   var_WorldLight;
+#endif
+
+#if defined(USE_TCGEN)
+vec2 GenTexCoords(int TCGen, vec3 position, vec3 normal, vec3 TCGenVector0, vec3 TCGenVector1)
+{
+	vec2 tex = attr_TexCoord0.st;
+
+	if (TCGen == TCGEN_LIGHTMAP)
+	{
+		tex = attr_TexCoord1.st;
+	}
+	else if (TCGen == TCGEN_ENVIRONMENT_MAPPED)
+	{
+		vec3 viewer = normalize(u_ViewOrigin - position);
+		tex = -reflect(viewer, normal).yz * vec2(0.5, -0.5) + 0.5;
+	}
+	else if (TCGen == TCGEN_VECTOR)
+	{
+		tex = vec2(dot(position, TCGenVector0), dot(position, TCGenVector1));
+	}
+	
+	return tex;
+}
 #endif
 
 #if defined(USE_TCMOD)
@@ -158,18 +183,11 @@ void main()
 	var_SampleToView = SampleToView;
 #endif
 
-	vec2 tex;
-
 #if defined(USE_TCGEN)
-	if (u_TCGen0 == TCGEN_ENVIRONMENT_MAPPED)
-	{
-		tex = -reflect(normalize(SampleToView), normal).yz * vec2(0.5, -0.5) + 0.5;
-	}
-	else
+	vec2 tex = GenTexCoords(u_TCGen0, position.xyz, normal, u_TCGen0Vector0, u_TCGen0Vector1);
+#else
+	vec2 tex = attr_TexCoord0.st;
 #endif
-	{
-		tex = attr_TexCoord0.st;
-	}
 
 #if defined(USE_TCMOD)
 	var_DiffuseTex = ModTexCoords(tex, position.xyz, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
