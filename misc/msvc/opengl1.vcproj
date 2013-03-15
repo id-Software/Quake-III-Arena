@@ -49,7 +49,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="..\..\code\SDL12\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;&quot;..\..\code\jpeg-8c&quot;"
-				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_RENDERER_DLOPEN"
+				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -348,7 +348,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\code\SDL12\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;&quot;..\..\code\jpeg-8c&quot;"
-				PreprocessorDefinitions="_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_RENDERER_DLOPEN"
+				PreprocessorDefinitions="_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)\opengl1.pch"
@@ -444,123 +444,123 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_animation.c"
+				RelativePath="..\..\code\renderergl1\tr_animation.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_backend.c"
+				RelativePath="..\..\code\renderergl1\tr_backend.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_bsp.c"
+				RelativePath="..\..\code\renderergl1\tr_bsp.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_cmds.c"
+				RelativePath="..\..\code\renderergl1\tr_cmds.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_curve.c"
+				RelativePath="..\..\code\renderergl1\tr_curve.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_flares.c"
+				RelativePath="..\..\code\renderergl1\tr_flares.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_font.c"
+				RelativePath="..\..\code\renderercommon\tr_font.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image.c"
+				RelativePath="..\..\code\renderergl1\tr_image.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image_bmp.c"
+				RelativePath="..\..\code\renderercommon\tr_image_bmp.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image_jpg.c"
+				RelativePath="..\..\code\renderercommon\tr_image_jpg.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image_pcx.c"
+				RelativePath="..\..\code\renderercommon\tr_image_pcx.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image_png.c"
+				RelativePath="..\..\code\renderercommon\tr_image_png.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_image_tga.c"
+				RelativePath="..\..\code\renderercommon\tr_image_tga.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_init.c"
+				RelativePath="..\..\code\renderergl1\tr_init.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_light.c"
+				RelativePath="..\..\code\renderergl1\tr_light.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_main.c"
+				RelativePath="..\..\code\renderergl1\tr_main.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_marks.c"
+				RelativePath="..\..\code\renderergl1\tr_marks.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_mesh.c"
+				RelativePath="..\..\code\renderergl1\tr_mesh.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_model.c"
+				RelativePath="..\..\code\renderergl1\tr_model.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_model_iqm.c"
+				RelativePath="..\..\code\renderergl1\tr_model_iqm.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_noise.c"
+				RelativePath="..\..\code\renderercommon\tr_noise.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_scene.c"
+				RelativePath="..\..\code\renderergl1\tr_scene.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_shade.c"
+				RelativePath="..\..\code\renderergl1\tr_shade.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_shade_calc.c"
+				RelativePath="..\..\code\renderergl1\tr_shade_calc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_shader.c"
+				RelativePath="..\..\code\renderergl1\tr_shader.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_shadows.c"
+				RelativePath="..\..\code\renderergl1\tr_shadows.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_sky.c"
+				RelativePath="..\..\code\renderergl1\tr_sky.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_subs.c"
+				RelativePath="..\..\code\renderergl1\tr_subs.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_surface.c"
+				RelativePath="..\..\code\renderergl1\tr_surface.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_world.c"
+				RelativePath="..\..\code\renderergl1\tr_world.c"
 				>
 			</File>
 		</Filter>
@@ -585,7 +585,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\qgl.h"
+				RelativePath="..\..\code\renderercommon\qgl.h"
 				>
 			</File>
 			<File
@@ -629,7 +629,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\renderer\tr_public.h"
+				RelativePath="..\..\code\renderercommon\tr_public.h"
 				>
 			</File>
 			<File
