@@ -1249,11 +1249,9 @@ void R_AddEntitySurfaces (void) {
 				case MOD_MD4:
 					R_AddAnimSurfaces( ent );
 					break;
-#ifdef RAVENMD4
 				case MOD_MDR:
 					R_MDRAddAnimSurfaces( ent );
 					break;
-#endif
 				case MOD_IQM:
 					R_AddIQMSurfaces( ent );
 					break;

@@ -1000,9 +1000,7 @@ typedef enum {
 	SF_POLY,
 	SF_MDV,
 	SF_MD4,
-#ifdef RAVENMD4
 	SF_MDR,
-#endif
 	SF_IQM,
 	SF_FLARE,
 	SF_ENTITY,				// beams, rails, lightning, etc that can be determined by entity
@@ -1505,9 +1503,7 @@ typedef enum {
 	MOD_BRUSH,
 	MOD_MESH,
 	MOD_MD4,
-#ifdef RAVENMD4
 	MOD_MDR,
-#endif
 	MOD_IQM
 } modtype_t;
 
@@ -2467,7 +2463,6 @@ void RE_AddLightToScene( const vec3_t org, float intensity, float r, float g, fl
 void RE_AddAdditiveLightToScene( const vec3_t org, float intensity, float r, float g, float b );
 void RE_RenderScene( const refdef_t *fd );
 
-#ifdef RAVENMD4
 /*
 =============================================================
 
@@ -2486,7 +2481,6 @@ UNCOMPRESSING BONES
 #define MC_SCALE_Z (1.0f/64)
 
 void MC_UnCompress(float mat[3][4],const unsigned char * comp);
-#endif
 
 /*
 =============================================================
@@ -2499,10 +2493,8 @@ ANIMATED MODELS
 // void R_MakeAnimModel( model_t *model );      haven't seen this one really, so not needed I guess.
 void R_AddAnimSurfaces( trRefEntity_t *ent );
 void RB_SurfaceAnim( md4Surface_t *surfType );
-#ifdef RAVENMD4
 void R_MDRAddAnimSurfaces( trRefEntity_t *ent );
 void RB_MDRSurfaceAnim( md4Surface_t *surface );
-#endif
 qboolean R_LoadIQM (model_t *mod, void *buffer, int filesize, const char *name );
 void R_AddIQMSurfaces( trRefEntity_t *ent );
 void RB_IQMSurfaceAnim( surfaceType_t *surface );

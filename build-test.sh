@@ -16,9 +16,7 @@ fi
 
 # Test additional options
 if [ $haveExternalLibs -eq 1 ]; then
-	($MAKE clean release USE_CODEC_VORBIS=1 USE_FREETYPE=1 CFLAGS=-DRAVENMD4) || failed=1;
-else
-	($MAKE clean release CFLAGS=-DRAVENMD4) || failed=1;
+	($MAKE clean release USE_CODEC_VORBIS=1 USE_FREETYPE=1) || failed=1;
 fi
 
 if [ $failed -eq 1 ]; then

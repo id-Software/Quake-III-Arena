@@ -168,7 +168,6 @@ void RB_SurfaceAnim( md4Surface_t *surface ) {
 }
 
 
-#ifdef RAVENMD4
 
 // copied and adapted from tr_mesh.c
 
@@ -655,4 +654,3 @@ void MC_UnCompress(float mat[3][4],const unsigned char * comp)
 	val-=1<<(MC_BITS_VECT-1);
 	mat[2][2]=((float)(val))*MC_SCALE_VECT;
 }
-#endif
