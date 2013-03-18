@@ -338,6 +338,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		return qfalse;
 	}
 
+	joint_names = 0;
+
 	if ( header->num_joints )
 	{
 		// check and swap joints
@@ -346,7 +348,6 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			return qfalse;
 		}
 		joint = (iqmJoint_t *)((byte *)header + header->ofs_joints);
-		joint_names = 0;
 		for( i = 0; i < header->num_joints; i++, joint++ ) {
 			LL( joint->name );
 			LL( joint->parent );
