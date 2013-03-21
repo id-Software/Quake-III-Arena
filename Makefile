@@ -88,7 +88,7 @@ endif
 export ARCH
 
 # For historical compatibility reasons on non-windows
-# platform output files use i386 instead of x86
+# platforms output files use i386 instead of x86
 ifeq ($(ARCH),x86)
   ifneq ($(PLATFORM),mingw32)
     FILE_ARCH=i386
