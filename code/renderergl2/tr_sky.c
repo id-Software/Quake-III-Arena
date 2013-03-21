@@ -429,13 +429,13 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
 		GLSL_BindProgram(sp);
 		
-		GLSL_SetUniformMatrix16(sp, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+		GLSL_SetUniformMatrix16(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 		
 		color[0] = 
 		color[1] = 
 		color[2] = tr.identityLight;
 		color[3] = 1.0f;
-		GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, color);
+		GLSL_SetUniformVec4(sp, UNIFORM_COLOR, color);
 	}
 */
 	{
@@ -445,25 +445,25 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
 		GLSL_BindProgram(sp);
 		
-		GLSL_SetUniformMatrix16(sp, GENERIC_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+		GLSL_SetUniformMatrix16(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 		
 		color[0] = 
 		color[1] = 
 		color[2] = tr.identityLight;
 		color[3] = 1.0f;
-		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_BASECOLOR, color);
+		GLSL_SetUniformVec4(sp, UNIFORM_BASECOLOR, color);
 
 		color[0] = 
 		color[1] = 
 		color[2] = 
 		color[3] = 0.0f;
-		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_VERTCOLOR, color);
+		GLSL_SetUniformVec4(sp, UNIFORM_VERTCOLOR, color);
 
 		VectorSet4(vector, 1.0, 0.0, 0.0, 1.0);
-		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_DIFFUSETEXMATRIX, vector);
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, vector);
 
 		VectorSet4(vector, 0.0, 0.0, 0.0, 0.0);
-		GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_DIFFUSETEXOFFTURB, vector);
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, vector);
 	}
 
 	R_DrawElementsVBO(tess.numIndexes - tess.firstIndex, tess.firstIndex, tess.minIndex, tess.maxIndex);

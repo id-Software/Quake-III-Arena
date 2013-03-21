@@ -902,8 +902,8 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 
 	GLSL_BindProgram(&tr.textureColorShader);
 	
-	GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, colorWhite);
+	GLSL_SetUniformMatrix16(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformVec4(&tr.textureColorShader, UNIFORM_COLOR, colorWhite);
 
 	RB_InstantQuad2(quadVerts, texCoords);
 }
@@ -1143,11 +1143,11 @@ const void	*RB_DrawSurfs( const void *data ) {
 			GL_BindToTMU(tr.sunShadowDepthImage[1], TB_SHADOWMAP2);
 			GL_BindToTMU(tr.sunShadowDepthImage[2], TB_SHADOWMAP3);
 
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_SHADOWMVP,  backEnd.refdef.sunShadowMvp[0]);
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_SHADOWMVP2, backEnd.refdef.sunShadowMvp[1]);
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_SHADOWMVP3, backEnd.refdef.sunShadowMvp[2]);
+			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP,  backEnd.refdef.sunShadowMvp[0]);
+			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP2, backEnd.refdef.sunShadowMvp[1]);
+			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP3, backEnd.refdef.sunShadowMvp[2]);
 			
-			GLSL_SetUniformVec3(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_VIEWORIGIN,  backEnd.refdef.vieworg);
+			GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWORIGIN,  backEnd.refdef.vieworg);
 			{
 				vec4_t viewInfo;
 				vec3_t viewVector;
@@ -1159,15 +1159,15 @@ const void	*RB_DrawSurfs( const void *data ) {
 				float zmin = r_znear->value;
 
 				VectorScale(backEnd.refdef.viewaxis[0], zmax, viewVector);
-				GLSL_SetUniformVec3(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_VIEWFORWARD, viewVector);
+				GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWFORWARD, viewVector);
 				VectorScale(backEnd.refdef.viewaxis[1], xmax, viewVector);
-				GLSL_SetUniformVec3(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_VIEWLEFT,    viewVector);
+				GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWLEFT,    viewVector);
 				VectorScale(backEnd.refdef.viewaxis[2], ymax, viewVector);
-				GLSL_SetUniformVec3(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_VIEWUP,      viewVector);
+				GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWUP,      viewVector);
 
 				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
 
-				GLSL_SetUniformVec4(&tr.shadowmaskShader, SHADOWMASK_UNIFORM_VIEWINFO, viewInfo);
+				GLSL_SetUniformVec4(&tr.shadowmaskShader, UNIFORM_VIEWINFO, viewInfo);
 			}
 
 
@@ -1208,7 +1208,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
 
-				GLSL_SetUniformVec4(&tr.ssaoShader, SSAO_UNIFORM_VIEWINFO, viewInfo);
+				GLSL_SetUniformVec4(&tr.ssaoShader, UNIFORM_VIEWINFO, viewInfo);
 			}
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
@@ -1232,7 +1232,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
 
-				GLSL_SetUniformVec4(&tr.depthBlurShader[0], DEPTHBLUR_UNIFORM_VIEWINFO, viewInfo);
+				GLSL_SetUniformVec4(&tr.depthBlurShader[0], UNIFORM_VIEWINFO, viewInfo);
 			}
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
@@ -1256,7 +1256,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
 
-				GLSL_SetUniformVec4(&tr.depthBlurShader[1], DEPTHBLUR_UNIFORM_VIEWINFO, viewInfo);
+				GLSL_SetUniformVec4(&tr.depthBlurShader[1], UNIFORM_VIEWINFO, viewInfo);
 			}
 
 

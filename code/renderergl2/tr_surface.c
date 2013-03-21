@@ -228,8 +228,8 @@ void RB_InstantQuad(vec4_t quadVerts[4])
 
 	GLSL_BindProgram(&tr.textureColorShader);
 	
-	GLSL_SetUniformMatrix16(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-	GLSL_SetUniformVec4(&tr.textureColorShader, TEXTURECOLOR_UNIFORM_COLOR, colorWhite);
+	GLSL_SetUniformMatrix16(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformVec4(&tr.textureColorShader, UNIFORM_COLOR, colorWhite);
 
 	RB_InstantQuad2(quadVerts, texCoords);
 }
@@ -614,9 +614,9 @@ static void RB_SurfaceBeam( void )
 	GLSL_VertexAttribsState(ATTR_POSITION);
 	GLSL_BindProgram(sp);
 		
-	GLSL_SetUniformMatrix16(sp, TEXTURECOLOR_UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMatrix16(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 					
-	GLSL_SetUniformVec4(sp, TEXTURECOLOR_UNIFORM_COLOR, colorRed);
+	GLSL_SetUniformVec4(sp, UNIFORM_COLOR, colorRed);
 
 	R_DrawElementsVBO(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 
