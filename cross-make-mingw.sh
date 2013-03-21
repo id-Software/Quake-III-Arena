@@ -7,6 +7,7 @@ then
     CMD_PREFIX="amd64-mingw32msvc x86_64-w64-mingw32"
 else
     CMD_PREFIX="i586-mingw32msvc i686-w64-mingw32"
+    export ARCH=x86
 fi
 
 if [ "$CC" = "cc" ] || [ "$CC" = "gcc" ];
