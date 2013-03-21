@@ -2,7 +2,17 @@
 
 # Note: This works in Linux and cygwin
 
-CMD_PREFIX="i586-mingw32msvc i686-w64-mingw32";
+if [ "$ARCH" = "x86_64" ];
+then
+    CMD_PREFIX="amd64-mingw32msvc x86_64-w64-mingw32"
+else
+    CMD_PREFIX="i586-mingw32msvc i686-w64-mingw32"
+fi
+
+if [ "$CC" = "cc" ] || [ "$CC" = "gcc" ];
+then
+    CC=
+fi
 
 if [ "X$CC" = "X" ]; then
     for check in $CMD_PREFIX; do
@@ -30,6 +40,5 @@ if [ "X$WINDRES" = "X" -o "X$CC" = "X" ]; then
 fi
 
 export PLATFORM=mingw32
-export ARCH=x86
 
 exec make $*
