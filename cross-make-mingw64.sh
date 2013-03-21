@@ -30,6 +30,6 @@ if [ "X$WINDRES" = "X" -o "X$CC" = "X" ]; then
 fi
 
 export PLATFORM=mingw32
-export ARCH=x64
+export ARCH=x86_64
 
 exec make $*
