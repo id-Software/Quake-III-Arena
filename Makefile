@@ -477,16 +477,6 @@ else # ifeq darwin
 
 ifeq ($(PLATFORM),mingw32)
 
-  # Some MinGW installations define CC to cc, but don't actually provide cc,
-  # so check that CC points to a real binary and use gcc if it doesn't
-  ifeq ($(call bin_path, $(CC)),)
-    CC=gcc
-  endif
-
-  ifndef WINDRES
-    WINDRES=windres
-  endif
-
   ifeq ($(CROSS_COMPILING),1)
     # If CC is already set to something generic, we probably want to use
     # something more specific
@@ -508,6 +498,16 @@ ifeq ($(PLATFORM),mingw32)
 
       WINDRES=$(strip $(foreach MINGW_PREFIX, $(MINGW_PREFIXES), \
          $(call bin_path, $(MINGW_PREFIX)-windres)))
+    endif
+  else
+    # Some MinGW installations define CC to cc, but don't actually provide cc,
+    # so check that CC points to a real binary and use gcc if it doesn't
+    ifeq ($(call bin_path, $(CC)),)
+      CC=gcc
+    endif
+
+    ifndef WINDRES
+      WINDRES=windres
     endif
   endif
 
@@ -1141,6 +1141,9 @@ targets: makedirs
 	@echo "  COMPILE_PLATFORM: $(COMPILE_PLATFORM)"
 	@echo "  COMPILE_ARCH: $(COMPILE_ARCH)"
 	@echo "  CC: $(CC)"
+ifeq ($(PLATFORM),mingw32)
+	@echo "  WINDRES: $(WINDRES)"
+endif
 	@echo ""
 	@echo "  CFLAGS:"
 	-@for i in $(CFLAGS); \
