@@ -480,22 +480,24 @@ ifeq ($(PLATFORM),mingw32)
   ifeq ($(CROSS_COMPILING),1)
     # If CC is already set to something generic, we probably want to use
     # something more specific
-    ifneq ($(findstring $(CC),cc gcc),)
+    ifneq ($(findstring $(strip $(CC)),cc gcc),)
       CC=
     endif
 
-    # We need to figure out the correct compiler
-    ifeq ($(CC),)
-      ifeq ($(ARCH),x86_64)
-        MINGW_PREFIXES=amd64-mingw32msvc x86_64-w64-mingw32
-      endif
-      ifeq ($(ARCH),x86)
-        MINGW_PREFIXES=i586-mingw32msvc i686-w64-mingw32
-      endif
+    # We need to figure out the correct gcc and windres
+    ifeq ($(ARCH),x86_64)
+      MINGW_PREFIXES=amd64-mingw32msvc x86_64-w64-mingw32
+    endif
+    ifeq ($(ARCH),x86)
+      MINGW_PREFIXES=i586-mingw32msvc i686-w64-mingw32
+    endif
 
+    ifndef CC
       CC=$(strip $(foreach MINGW_PREFIX, $(MINGW_PREFIXES), \
          $(call bin_path, $(MINGW_PREFIX)-gcc)))
+    endif
 
+    ifndef WINDRES
       WINDRES=$(strip $(foreach MINGW_PREFIX, $(MINGW_PREFIXES), \
          $(call bin_path, $(MINGW_PREFIX)-windres)))
     endif
