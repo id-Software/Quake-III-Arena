@@ -6,15 +6,15 @@
 
 COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'|sed -e 's/\//_/g')
 
-COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
+COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/x86/)
 
 ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
+  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
 ifeq ($(COMPILE_PLATFORM),darwin)
   # Apple does some things a little differently...
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/i386/)
+  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
 
 ifndef BUILD_STANDALONE
@@ -57,9 +57,6 @@ PLATFORM=$(COMPILE_PLATFORM)
 endif
 export PLATFORM
 
-ifeq ($(COMPILE_ARCH),i386)
-  COMPILE_ARCH=x86
-endif
 ifeq ($(COMPILE_ARCH),i86pc)
   COMPILE_ARCH=x86
 endif
@@ -86,19 +83,6 @@ ifndef ARCH
 ARCH=$(COMPILE_ARCH)
 endif
 export ARCH
-
-# For historical compatibility reasons on non-windows
-# platforms output files use i386 instead of x86
-ifeq ($(ARCH),x86)
-  ifneq ($(PLATFORM),mingw32)
-    FILE_ARCH=i386
-  endif
-endif
-
-ifndef FILE_ARCH
-FILE_ARCH=$(ARCH)
-endif
-export FILE_ARCH
 
 ifneq ($(PLATFORM),$(COMPILE_PLATFORM))
   CROSS_COMPILING=1
@@ -524,7 +508,6 @@ ifeq ($(PLATFORM),mingw32)
       -fstrength-reduce
     OPTIMIZE = $(OPTIMIZEVM) --fast-math
     HAVE_VM_COMPILED = true
-    FILE_ARCH=x64
   endif
   ifeq ($(ARCH),x86)
     OPTIMIZEVM = -O3 -march=i586 -fno-omit-frame-pointer \
@@ -653,10 +636,6 @@ ifeq ($(PLATFORM),freebsd)
       BASE_CFLAGS += -m64
     endif
   endif
-
-  ifeq ($(ARCH),x86_64)
-    FILE_ARCH=amd64
-  endif
 else # ifeq freebsd
 
 #############################################################################
@@ -702,10 +681,6 @@ ifeq ($(PLATFORM),openbsd)
       CLIENT_LIBS += -lcurl
     endif
   endif
-
-  ifeq ($(ARCH),x86_64)
-    FILE_ARCH=amd64
-  endif
 else # ifeq openbsd
 
 #############################################################################
@@ -727,10 +702,6 @@ ifeq ($(PLATFORM),netbsd)
   endif
 
   BUILD_CLIENT = 0
-
-  ifeq ($(ARCH),x86_64)
-    FILE_ARCH=amd64
-  endif
 else # ifeq netbsd
 
 #############################################################################
@@ -850,11 +821,11 @@ ifeq ($(USE_FREETYPE),1)
 endif
 
 ifndef FULLBINEXT
-  FULLBINEXT=.$(FILE_ARCH)$(BINEXT)
+  FULLBINEXT=.$(ARCH)$(BINEXT)
 endif
 
 ifndef SHLIBNAME
-  SHLIBNAME=$(FILE_ARCH).$(SHLIBEXT)
+  SHLIBNAME=$(ARCH).$(SHLIBEXT)
 endif
 
 ifneq ($(BUILD_SERVER),0)
@@ -1142,7 +1113,6 @@ targets: makedirs
 	@echo "Building $(CLIENTBIN) in $(B):"
 	@echo "  PLATFORM: $(PLATFORM)"
 	@echo "  ARCH: $(ARCH)"
-	@echo "  FILE_ARCH: $(FILE_ARCH)"
 	@echo "  VERSION: $(VERSION)"
 	@echo "  COMPILE_PLATFORM: $(COMPILE_PLATFORM)"
 	@echo "  COMPILE_ARCH: $(COMPILE_ARCH)"
