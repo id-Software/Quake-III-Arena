@@ -64,15 +64,11 @@ Installation, for *nix
      point releases.
   2. Run 'make copyfiles'.
 
-It is also possible to cross compile for Windows under *nix using MinGW. A
-script is available to build a cross compilation environment from
-http://www.libsdl.org/extras/win32/cross/build-cross.sh. The gcc/binutils
-version numbers that the script downloads may need to be altered.
-Alternatively, your distribution may have mingw32 packages available. On
-debian/Ubuntu, these are mingw32, mingw32-runtime and mingw32-binutils. Cross
-compiling is simply a case of using './cross-make-mingw.sh' in place of 'make',
-though you may find you need to change the value of the variables in this
-script to match your environment.
+It is also possible to cross compile for Windows under *nix using MinGW. Your
+distribution may have mingw32 packages available. On debian/Ubuntu, you need to
+install 'mingw-w64'. Thereafter cross compiling is simply a case running
+'PLATFORM=mingw32 ARCH=x86 make' in place of 'make'. ARCH may also be set to
+x86_64.
 
 The following variables may be set, either on the command line or in
 Makefile.local:

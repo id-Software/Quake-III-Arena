@@ -478,13 +478,37 @@ else # ifeq darwin
 ifeq ($(PLATFORM),mingw32)
 
   # Some MinGW installations define CC to cc, but don't actually provide cc,
-  # so explicitly use gcc instead (which is the only option anyway)
+  # so check that CC points to a real binary and use gcc if it doesn't
   ifeq ($(call bin_path, $(CC)),)
     CC=gcc
   endif
 
   ifndef WINDRES
     WINDRES=windres
+  endif
+
+  ifeq ($(CROSS_COMPILING),1)
+    # If CC is already set to something generic, we probably want to use
+    # something more specific
+    ifneq ($(findstring $(CC),cc gcc),)
+      CC=
+    endif
+
+    # We need to figure out the correct compiler
+    ifeq ($(CC),)
+      ifeq ($(ARCH),x86_64)
+        MINGW_PREFIXES=amd64-mingw32msvc x86_64-w64-mingw32
+      endif
+      ifeq ($(ARCH),x86)
+        MINGW_PREFIXES=i586-mingw32msvc i686-w64-mingw32
+      endif
+
+      CC=$(strip $(foreach MINGW_PREFIX, $(MINGW_PREFIXES), \
+         $(call bin_path, $(MINGW_PREFIX)-gcc)))
+
+      WINDRES=$(strip $(foreach MINGW_PREFIX, $(MINGW_PREFIXES), \
+         $(call bin_path, $(MINGW_PREFIX)-windres)))
+    endif
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \

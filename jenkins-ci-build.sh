@@ -9,17 +9,8 @@ then
     export USE_FREETYPE=1
 fi
 
-if [ "$PLATFORM" = "mingw32" ];
-then
-	MAKE=./cross-make-mingw.sh
-else
-	MAKE=make
-fi
-
 CORES=`awk '/^processor/ { N++} END { print N }' /proc/cpuinfo`
 
-# Default Build
-($MAKE -j${CORES} clean ${BUILD_TYPE})
-SUCCESS=$?
+make -j${CORES} clean ${BUILD_TYPE}
 
-exit ${SUCCESS}
+exit $?
