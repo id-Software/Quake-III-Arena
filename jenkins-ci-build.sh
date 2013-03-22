@@ -11,6 +11,6 @@ fi
 
 CORES=`awk '/^processor/ { N++} END { print N }' /proc/cpuinfo`
 
-make -j${CORES} clean ${BUILD_TYPE}
+make -j${CORES} distclean ${BUILD_TYPE}
 
 exit $?
