@@ -5,6 +5,7 @@ failed=0;
 # check if testing mingw
 if [ "$CC" = "i686-w64-mingw32-gcc" ]; then
 	export PLATFORM=mingw32
+	export ARCH=x86
 	haveExternalLibs=0
 else
 	haveExternalLibs=1
