@@ -4,14 +4,12 @@ compiler:
   - clang
   - i686-w64-mingw32-gcc
 
-script: ./build-test.sh
+script: ./travis-ci-build.sh
 
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get remove -qq -y mingw32
   - sudo apt-get install -q -y libgl1-mesa-dev libsdl1.2-dev libvorbis-dev libfreetype6-dev mingw-w64
-  
+
 notifications:
-  irc: "irc.freenode.org#ioquake3"
-  on_success: change
-  on_failure: always
+  email: false
