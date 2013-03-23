@@ -670,8 +670,6 @@ else # ifeq freebsd
 
 ifeq ($(PLATFORM),openbsd)
 
-  ARCH=$(shell uname -m)
-
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON -DMAP_ANONYMOUS=MAP_ANON
   CLIENT_CFLAGS += $(SDL_CFLAGS)
@@ -768,8 +766,6 @@ ifeq ($(PLATFORM),sunos)
   INSTALL=ginstall
   MKDIR=gmkdir
   COPYDIR="/usr/local/share/games/quake3"
-
-  ARCH=sparc
 
   ifneq ($(ARCH),x86)
     ifneq ($(ARCH),sparc)
