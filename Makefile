@@ -2747,3 +2747,8 @@ endif
 	release targets \
 	toolsclean toolsclean2 toolsclean-debug toolsclean-release \
 	$(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
+
+# If the target name contains "clean", don't do a parallel build
+ifneq ($(findstring clean, $(MAKECMDGOALS)),)
+.NOTPARALLEL:
+endif
