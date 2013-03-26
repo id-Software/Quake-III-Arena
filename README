@@ -32,7 +32,7 @@ Some of the major features currently implemented are:
   * Many, many bug fixes
 
 The map editor and associated compiling tools are not included. We suggest you
-use a modern copy from http://www.qeradiant.com/.
+use a modern copy from http://icculus.org/gtkradiant/.
 
 The original id software readme that accompanied the Q3 source release has been
 renamed to id-readme.txt so as to prevent confusion. Please refer to the
@@ -64,15 +64,11 @@ Installation, for *nix
      point releases.
   2. Run 'make copyfiles'.
 
-It is also possible to cross compile for Windows under *nix using MinGW. A
-script is available to build a cross compilation environment from
-http://www.libsdl.org/extras/win32/cross/build-cross.sh. The gcc/binutils
-version numbers that the script downloads may need to be altered.
-Alternatively, your distribution may have mingw32 packages available. On
-debian/Ubuntu, these are mingw32, mingw32-runtime and mingw32-binutils. Cross
-compiling is simply a case of using './cross-make-mingw.sh' in place of 'make',
-though you may find you need to change the value of the variables in this
-script to match your environment.
+It is also possible to cross compile for Windows under *nix using MinGW. Your
+distribution may have mingw32 packages available. On debian/Ubuntu, you need to
+install 'mingw-w64'. Thereafter cross compiling is simply a case running
+'PLATFORM=mingw32 ARCH=x86 make' in place of 'make'. ARCH may also be set to
+x86_64.
 
 The following variables may be set, either on the command line or in
 Makefile.local:
@@ -98,15 +94,16 @@ Makefile.local:
   USE_CURL           - use libcurl for http/ftp download support
   USE_CURL_DLOPEN    - link with libcurl at runtime
   USE_CODEC_VORBIS   - enable Ogg Vorbis support
+  USE_CODEC_OPUS     - enable Ogg Opus support
   USE_MUMBLE         - enable Mumble support
   USE_VOIP           - enable built-in VoIP support
   USE_INTERNAL_SPEEX - build internal speex library instead of dynamically
                        linking against system libspeex
   USE_FREETYPE       - enable FreeType support for rendering fonts
-  USE_OLD_VM64       - use Ludwig Nussel's old JIT compiler implementation
-                       for x86_64
   USE_INTERNAL_ZLIB  - build and link against internal zlib
   USE_INTERNAL_JPEG  - build and link against internal JPEG library
+  USE_INTERNAL_OGG   - build and link against internal ogg library
+  USE_INTERNAL_OPUS  - build and link against internal opus/opusfile libraries
   USE_LOCAL_HEADERS  - use headers local to ioq3 instead of system ones
   DEBUG_CFLAGS       - C compiler flags to use for building debug version
   COPYDIR            - the target installation directory
@@ -495,6 +492,12 @@ QuakeLive mouse acceleration (patch and this text written by TTimo from id)
 
 
 ---------------------------------------------------- README for Developers -----
+
+pk3dir
+  ioquake3 has a useful new feature for mappers. Paths in a game directory with
+  the extension ".pk3dir" are treated like pk3 files. This means you can keep
+  all files specific to your map in one directory tree and easily zip this
+  folder for distribution.
 
 64bit mods
   If you wish to compile external mods as shared libraries on a 64bit platform,

@@ -98,7 +98,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PATH_SEP '\\'
 
 #if defined( __WIN64__ ) 
-#define ARCH_STRING "x64"
+#define ARCH_STRING "x86_64"
 #elif defined _M_ALPHA
 #define ARCH_STRING "AXP"
 #endif
@@ -154,7 +154,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "ppc"
 #define Q3_BIG_ENDIAN
 #elif defined __i386__
-#define ARCH_STRING "i386"
+#define ARCH_STRING "x86"
 #define Q3_LITTLE_ENDIAN
 #elif defined __x86_64__
 #undef idx64
@@ -179,16 +179,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define OS_STRING "kFreeBSD"
 #endif
 
-#ifdef __clang__
-#define ID_INLINE static inline
-#else
 #define ID_INLINE inline
-#endif
 
 #define PATH_SEP '/'
 
 #if defined __i386__
-#define ARCH_STRING "i386"
+#define ARCH_STRING "x86"
 #elif defined __x86_64__
 #undef idx64
 #define idx64 1
@@ -252,11 +248,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PATH_SEP '/'
 
 #ifdef __i386__
-#define ARCH_STRING "i386"
+#define ARCH_STRING "x86"
 #elif defined __amd64__
 #undef idx64
 #define idx64 1
-#define ARCH_STRING "amd64"
+#define ARCH_STRING "x86_64"
 #elif defined __axp__
 #define ARCH_STRING "alpha"
 #endif
@@ -283,7 +279,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PATH_SEP '/'
 
 #ifdef __i386__
-#define ARCH_STRING "i386"
+#define ARCH_STRING "x86"
 #elif defined __sparc
 #define ARCH_STRING "sparc"
 #endif

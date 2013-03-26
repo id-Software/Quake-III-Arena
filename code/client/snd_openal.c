@@ -656,7 +656,7 @@ static qboolean S_AL_HearingThroughEntity( int entityNum )
 
 	if( lastListenerNumber == entityNum )
 	{
-		// FIXME: <tim@ngus.net> 28/02/06 This is an outrageous hack to detect
+		// This is an outrageous hack to detect
 		// whether or not the player is rendering in third person or not. We can't
 		// ask the renderer because the renderer has no notion of entities and we
 		// can't ask cgame since that would involve changing the API and hence mod

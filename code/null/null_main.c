@@ -82,6 +82,10 @@ int		Sys_Milliseconds (void) {
 	return 0;
 }
 
+FILE	*Sys_FOpen(const char *ospath, const char *mode) {
+	return fopen( ospath, mode );
+}
+
 void	Sys_Mkdir (char *path) {
 }
 

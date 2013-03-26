@@ -5,23 +5,28 @@
 
 if [ $# -ne 1 ]; then
 	echo "Usage:   $0 target_architecture"
-	echo "Example: $0 i386"
+	echo "Example: $0 x86"
 	echo "other valid options are x86_64 or ppc"
 	echo
 	echo "If you don't know or care about architectures please consider using make-macosx-ub.sh instead of this script."
 	exit 1
 fi
 
-if [ "$1" == "i386" ]; then
-	BUILDARCH=i386
+if [ "$1" == "x86" ]; then
+	BUILDARCH=x86
+	DARWIN_GCC_ARCH=i386
 elif [ "$1" == "x86_64" ]; then
 	BUILDARCH=x86_64
 elif [ "$1" == "ppc" ]; then
 	BUILDARCH=ppc
 else
 	echo "Invalid architecture: $1"
-	echo "Valid architectures are i386, x86_64 or ppc"
+	echo "Valid architectures are x86, x86_64 or ppc"
 	exit 1
+fi
+
+if [ -z "$DARWIN_GCC_ARCH" ]; then
+	DARWIN_GCC_ARCH=${BUILDARCH}
 fi
 
 CC=gcc-4.0
@@ -35,10 +40,10 @@ BASEDIR=baseq3
 MPACKDIR=missionpack
 
 BIN_OBJ="
-	build/release-darwin-${BUILDARCH}/ioquake3.${BUILDARCH}
+	build/release-darwin-${BUILDARCH}/${BINARY}
 "
 BIN_DEDOBJ="
-	build/release-darwin-${BUILDARCH}/ioq3ded.${BUILDARCH}
+	build/release-darwin-${BUILDARCH}/${DEDBIN}
 "
 BASE_OBJ="
 	build/release-darwin-${BUILDARCH}/$BASEDIR/cgame${BUILDARCH}.dylib
@@ -52,7 +57,7 @@ MPACK_OBJ="
 "
 RENDER_OBJ="
 	build/release-darwin-${BUILDARCH}/renderer_opengl1_${BUILDARCH}.dylib
-	build/release-darwin-${BUILDARCH}/renderer_rend2_${BUILDARCH}.dylib
+	build/release-darwin-${BUILDARCH}/renderer_opengl2_${BUILDARCH}.dylib
 "
 
 cd `dirname $0`
@@ -79,7 +84,7 @@ unset ARCH_LDFLAGS
 
 if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
 	ARCH_SDK=/Developer/SDKs/MacOSX10.5.sdk
-	ARCH_CFLAGS="-arch ${BUILDARCH} -isysroot /Developer/SDKs/MacOSX10.5.sdk \
+	ARCH_CFLAGS="-arch ${DARWIN_GCC_ARCH} -isysroot /Developer/SDKs/MacOSX10.5.sdk \
 			-DMAC_OS_X_VERSION_MIN_REQUIRED=1050"
 	ARCH_LDFLAGS=" -mmacosx-version-min=10.5"
 fi

@@ -281,12 +281,6 @@ typedef struct {
  * - Thilo Schulz (arny@ats.s.bawue.de)
  */
 
-// If you want to enable support for Raven's .mdr / md4 format, uncomment the next
-// line.
-//#define RAVENMD4
-
-#ifdef RAVENMD4
-
 #define MDR_IDENT	(('5'<<24)+('M'<<16)+('D'<<8)+'R')
 #define MDR_VERSION	2
 #define	MDR_MAX_BONES	128
@@ -389,7 +383,6 @@ typedef struct {
 	int			ofsEnd;				// end of file
 } mdrHeader_t;
 
-#endif
 
 /*
 ==============================================================================

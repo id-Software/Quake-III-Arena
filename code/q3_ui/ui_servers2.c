@@ -784,11 +784,6 @@ void ArenaServers_LoadFavorites( void )
 		if (!adrstr[0])
 			continue;
 
-		// quick sanity check to avoid slow domain name resolving
-		// first character must be numeric
-		if (adrstr[0] < '0' || adrstr[0] > '9')
-			continue;
-
 		// favorite server addresses must be maintained outside refresh list
 		// this mimics local and global netadr's stored in client
 		// these can be fetched to fill ping list
