@@ -310,7 +310,7 @@ void S_AdpcmEncodeSound( sfx_t *sfx, short *samples ) {
 		newchunk = SND_malloc();
 		if (sfx->soundData == NULL) {
 			sfx->soundData = newchunk;
-		} else {
+		} else if (chunk != NULL) {
 			chunk->next = newchunk;
 		}
 		chunk = newchunk;

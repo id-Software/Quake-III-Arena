@@ -1766,7 +1766,7 @@ static qboolean ParseShader( char **text )
 		// light <value> determines flaring in q3map, not needed here
 		else if ( !Q_stricmp(token, "light") ) 
 		{
-			token = COM_ParseExt( text, qfalse );
+			COM_ParseExt( text, qfalse );
 			continue;
 		}
 		// cull <face>
@@ -2907,7 +2907,6 @@ static shader_t *FinishShader( void ) {
 	//
 	if ( stage > 1 && ( (r_vertexLight->integer && !r_uiFullScreen->integer) || glConfig.hardwareType == GLHW_PERMEDIA2 ) ) {
 		VertexLightingCollapse();
-		stage = 1;
 		hasLightmapStage = qfalse;
 	}
 

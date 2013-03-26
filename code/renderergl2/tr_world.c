@@ -635,7 +635,7 @@ R_ClusterPVS
 ==============
 */
 static const byte *R_ClusterPVS (int cluster) {
-	if (!tr.world || !tr.world->vis || cluster < 0 || cluster >= tr.world->numClusters ) {
+	if (!tr.world->vis || cluster < 0 || cluster >= tr.world->numClusters ) {
 		return tr.world->novis;
 	}
 

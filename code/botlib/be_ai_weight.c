@@ -272,7 +272,6 @@ fuzzyseperator_t *ReadFuzzySeperators_r(source_t *source)
 		fs->child = NULL;
 		if (lastfs) lastfs->next = fs;
 		else firstfs = fs;
-		lastfs = fs;
 	} //end if
 	//
 	return firstfs;

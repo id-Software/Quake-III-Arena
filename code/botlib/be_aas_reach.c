@@ -3237,8 +3237,10 @@ aas_lreachability_t *AAS_FindFaceReachabilities(vec3_t *facepoints, int numpoint
 		//
 		if (towardsface) VectorCopy(bestend, testpoint);
 		else VectorCopy(beststart, testpoint);
-		testpoint[2] = 0;
-		testpoint[2] = (bestfaceplane->dist - DotProduct(bestfaceplane->normal, testpoint)) / bestfaceplane->normal[2];
+		if (bestfaceplane != NULL)
+			testpoint[2] = (bestfaceplane->dist - DotProduct(bestfaceplane->normal, testpoint)) / bestfaceplane->normal[2];
+		else
+			testpoint[2] = 0;
 		//
 		if (!AAS_PointInsideFace(bestfacenum, testpoint, 0.1f))
 		{
@@ -3786,7 +3788,7 @@ int AAS_Reachability_Grapple(int area1num, int area2num)
 	aas_face_t *face2;
 	aas_area_t *area1, *area2;
 	aas_lreachability_t *lreach;
-	vec3_t areastart, facecenter, start, end, dir, down = {0, 0, -1};
+	vec3_t areastart = {0, 0, 0}, facecenter, start, end, dir, down = {0, 0, -1};
 	vec_t *v;
 
 	//only grapple when on the ground or swimming

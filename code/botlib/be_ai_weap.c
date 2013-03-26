@@ -446,12 +446,6 @@ void BotResetWeaponState(int weaponstate)
 
 	ws = BotWeaponStateFromHandle(weaponstate);
 	if (!ws) return;
-	weaponweightconfig = ws->weaponweightconfig;
-	weaponweightindex = ws->weaponweightindex;
-
-	//Com_Memset(ws, 0, sizeof(bot_weaponstate_t));
-	ws->weaponweightconfig = weaponweightconfig;
-	ws->weaponweightindex = weaponweightindex;
 } //end of the function BotResetWeaponState
 //========================================================================
 //
