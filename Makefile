@@ -1209,8 +1209,14 @@ endif
 	@echo ""
 ifneq ($(TARGETS),)
   ifndef DEBUG_MAKEFILE
-		@$(MAKE) $(TARGETS) V=$(V)
+	@$(MAKE) $(TARGETS) $(B).zip V=$(V)
   endif
+endif
+
+$(B).zip: $(TARGETS)
+ifdef ARCHIVE
+	@rm -f $@
+	@(cd $(B) && zip -r9 ../../$@ $(NAKED_TARGETS))
 endif
 
 makedirs:
