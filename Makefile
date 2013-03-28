@@ -425,6 +425,13 @@ ifeq ($(PLATFORM),darwin)
     OPTIMIZEVM += -arch x86_64 -mfpmath=sse
   endif
 
+  # When compiling on OSX for OSX, we're not cross compiling as far as the
+  # Makefile is concerned, as target architecture is specified as a compiler
+  # argument
+  ifeq ($(COMPILE_PLATFORM),darwin)
+    CROSS_COMPILING=0
+  endif
+
   ifeq ($(CROSS_COMPILING),1)
     ifeq ($(ARCH),ppc)
       CC=powerpc-apple-darwin10-gcc
