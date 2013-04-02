@@ -878,209 +878,6 @@ static void ForwardDlight( void ) {
 }
 
 
-static void ForwardSunlight( void ) {
-//	int		l;
-	//vec3_t	origin;
-	//float	scale;
-	int stage;
-	int stageGlState[2];
-	qboolean alphaOverride = qfalse;
-
-	int deformGen;
-	vec5_t deformParams;
-	
-	vec4_t fogDistanceVector, fogDepthVector = {0, 0, 0, 0};
-	float eyeT = 0;
-
-	shaderCommands_t *input = &tess;
-	
-	ComputeDeformValues(&deformGen, deformParams);
-
-	ComputeFogValues(fogDistanceVector, fogDepthVector, &eyeT);
-
-	// deal with vertex alpha blended surfaces
-	if (input->xstages[0] && input->xstages[1] && 
-		(input->xstages[1]->alphaGen == AGEN_VERTEX || input->xstages[1]->alphaGen == AGEN_ONE_MINUS_VERTEX))
-	{
-		stageGlState[0] = input->xstages[0]->stateBits & (GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
-
-		if (stageGlState[0] == 0 || stageGlState[0] == (GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO))
-		{
-			stageGlState[1] = input->xstages[1]->stateBits & (GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
-
-			if (stageGlState[1] == (GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA))
-			{
-				alphaOverride = qtrue;
-				stageGlState[0] = GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_EQUAL;
-				stageGlState[1] = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_EQUAL;
-			}
-			else if (stageGlState[1] == (GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA | GLS_DSTBLEND_SRC_ALPHA))
-			{
-				alphaOverride = qtrue;
-				stageGlState[0] = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_EQUAL;
-				stageGlState[1] = GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_EQUAL;
-			}
-		}
-	}
-
-	if (!alphaOverride)
-	{
-		stageGlState[0] =
-		stageGlState[1] = GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_EQUAL;
-	}
-
-	for ( stage = 0; stage < 2 /*MAX_SHADER_STAGES */; stage++ )
-	{
-		shaderStage_t *pStage = input->xstages[stage];
-		shaderProgram_t *sp;
-		vec4_t vector;
-		matrix_t matrix;
-
-		if ( !pStage )
-		{
-			break;
-		}
-
-		//VectorCopy( dl->transformed, origin );
-
-		//if (pStage->glslShaderGroup == tr.lightallShader)
-		{
-			int index = pStage->glslShaderIndex;
-
-			index &= ~(LIGHTDEF_LIGHTTYPE_MASK | LIGHTDEF_USE_DELUXEMAP);
-			index |= LIGHTDEF_USE_LIGHT_VECTOR | LIGHTDEF_USE_SHADOWMAP;
-
-			if (backEnd.currentEntity && backEnd.currentEntity != &tr.worldEntity)
-			{
-				index |= LIGHTDEF_ENTITY;
-			}
-
-			sp = &tr.lightallShader[index];
-		}
-
-		backEnd.pc.c_lightallDraws++;
-
-		GLSL_BindProgram(sp);
-
-		GLSL_SetUniformMatrix16(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
-		GLSL_SetUniformVec3(sp, UNIFORM_VIEWORIGIN, backEnd.viewParms.or.origin);
-
-		GLSL_SetUniformFloat(sp, UNIFORM_VERTEXLERP, glState.vertexAttribsInterpolation);
-
-		GLSL_SetUniformInt(sp, UNIFORM_DEFORMGEN, deformGen);
-		if (deformGen != DGEN_NONE)
-		{
-			GLSL_SetUniformFloat5(sp, UNIFORM_DEFORMPARAMS, deformParams);
-			GLSL_SetUniformFloat(sp, UNIFORM_TIME, tess.shaderTime);
-		}
-
-		if ( input->fogNum ) {
-			vec4_t fogColorMask;
-
-			GLSL_SetUniformVec4(sp, UNIFORM_FOGDISTANCE, fogDistanceVector);
-			GLSL_SetUniformVec4(sp, UNIFORM_FOGDEPTH, fogDepthVector);
-			GLSL_SetUniformFloat(sp, UNIFORM_FOGEYET, eyeT);
-
-			ComputeFogColorMask(pStage, fogColorMask);
-
-			GLSL_SetUniformVec4(sp, UNIFORM_FOGCOLORMASK, fogColorMask);
-		}
-
-		{
-			vec4_t baseColor;
-			vec4_t vertColor;
-
-			ComputeShaderColors(pStage, baseColor, vertColor);
-
-			if (alphaOverride)
-			{
-				if (input->xstages[1]->alphaGen == AGEN_VERTEX)
-				{
-					baseColor[3] = 0.0f;
-					vertColor[3] = 1.0f;
-				}
-				else if (input->xstages[1]->alphaGen == AGEN_ONE_MINUS_VERTEX)
-				{
-					baseColor[3] = 1.0f;
-					vertColor[3] = -1.0f;
-				}
-			}
-
-			GLSL_SetUniformVec4(sp, UNIFORM_BASECOLOR, baseColor);
-			GLSL_SetUniformVec4(sp, UNIFORM_VERTCOLOR, vertColor);
-		}
-
-		if (pStage->alphaGen == AGEN_PORTAL)
-		{
-			GLSL_SetUniformFloat(sp, UNIFORM_PORTALRANGE, tess.shader->portalRange);
-		}
-
-		GLSL_SetUniformInt(sp, UNIFORM_COLORGEN, pStage->rgbGen);
-		GLSL_SetUniformInt(sp, UNIFORM_ALPHAGEN, pStage->alphaGen);
-
-		GLSL_SetUniformVec3(sp, UNIFORM_DIRECTEDLIGHT, backEnd.refdef.sunCol);
-		GLSL_SetUniformVec3(sp, UNIFORM_AMBIENTLIGHT,  backEnd.refdef.sunAmbCol);
-
-		GLSL_SetUniformVec4(sp, UNIFORM_LIGHTORIGIN, backEnd.refdef.sunDir);
-
-		GLSL_SetUniformFloat(sp, UNIFORM_LIGHTRADIUS, 9999999999.9f);
-
-		GLSL_SetUniformVec2(sp, UNIFORM_MATERIALINFO, pStage->materialInfo);
-		
-		GL_State( stageGlState[stage] );
-
-		GLSL_SetUniformMatrix16(sp, UNIFORM_MODELMATRIX, backEnd.or.transformMatrix);
-
-		if (pStage->bundle[TB_DIFFUSEMAP].image[0])
-			R_BindAnimatedImageToTMU( &pStage->bundle[TB_DIFFUSEMAP], TB_DIFFUSEMAP);
-
-		if (pStage->bundle[TB_NORMALMAP].image[0])
-			R_BindAnimatedImageToTMU( &pStage->bundle[TB_NORMALMAP], TB_NORMALMAP);
-
-		if (pStage->bundle[TB_SPECULARMAP].image[0])
-			R_BindAnimatedImageToTMU( &pStage->bundle[TB_SPECULARMAP], TB_SPECULARMAP);
-
-		/*
-		{
-			GL_BindToTMU(tr.sunShadowDepthImage[0], TB_SHADOWMAP);
-			GL_BindToTMU(tr.sunShadowDepthImage[1], TB_SHADOWMAP2);
-			GL_BindToTMU(tr.sunShadowDepthImage[2], TB_SHADOWMAP3);
-			GLSL_SetUniformMatrix16(sp, UNIFORM_SHADOWMVP, backEnd.refdef.sunShadowMvp[0]);
-			GLSL_SetUniformMatrix16(sp, UNIFORM_SHADOWMVP2, backEnd.refdef.sunShadowMvp[1]);
-			GLSL_SetUniformMatrix16(sp, UNIFORM_SHADOWMVP3, backEnd.refdef.sunShadowMvp[2]);
-		}
-		*/
-		GL_BindToTMU(tr.screenShadowImage, TB_SHADOWMAP);
-
-		ComputeTexMatrix( pStage, TB_DIFFUSEMAP, matrix );
-
-		VectorSet4(vector, matrix[0], matrix[1], matrix[4], matrix[5]);
-		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, vector);
-
-		VectorSet4(vector, matrix[8], matrix[9], matrix[12], matrix[13]);
-		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, vector);
-
-		GLSL_SetUniformInt(sp, UNIFORM_TCGEN0, pStage->bundle[0].tcGen);
-
-		//
-		// draw
-		//
-
-		if (input->multiDrawPrimitives)
-		{
-			R_DrawMultiElementsVBO(input->multiDrawPrimitives, input->multiDrawMinIndex, input->multiDrawMaxIndex, input->multiDrawNumIndexes, input->multiDrawFirstIndex);
-		}
-		else
-		{
-			R_DrawElementsVBO(input->numIndexes, input->firstIndex, input->minIndex, input->maxIndex);
-		}
-
-		backEnd.pc.c_totalIndexes += tess.numIndexes;
-		backEnd.pc.c_dlightIndexes += tess.numIndexes;
-	}
-}
-
-
 static void ProjectPshadowVBOGLSL( void ) {
 	int		l;
 	vec3_t	origin;
@@ -1329,7 +1126,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 				index |= LIGHTDEF_ENTITY;
 			}
 
-			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && ((index & LIGHTDEF_USE_LIGHTMAP) || (index & LIGHTDEF_USE_LIGHT_VERTEX)))
+			if (r_sunlightMode->integer && (backEnd.viewParms.flags & VPF_USESUNLIGHT) && (index & LIGHTDEF_LIGHTTYPE_MASK))
 			{
 				index |= LIGHTDEF_USE_SHADOWMAP;
 			}
@@ -1497,12 +1294,12 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		{
 			int i;
 
-			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && ((pStage->glslShaderIndex & LIGHTDEF_USE_LIGHTMAP) || (pStage->glslShaderIndex & LIGHTDEF_USE_LIGHT_VERTEX)))
+			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && (pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK))
 			{
 				GL_BindToTMU(tr.screenShadowImage, TB_SHADOWMAP);
-				GLSL_SetUniformVec3(sp, GENERIC_UNIFORM_AMBIENTLIGHT,   backEnd.refdef.sunAmbCol);
-				GLSL_SetUniformVec3(sp, GENERIC_UNIFORM_DIRECTEDLIGHT,  backEnd.refdef.sunCol);
-				GLSL_SetUniformVec4(sp, GENERIC_UNIFORM_LIGHTORIGIN, backEnd.refdef.sunDir);
+				GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTAMBIENT, backEnd.refdef.sunAmbCol);
+				GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTCOLOR,   backEnd.refdef.sunCol);
+				GLSL_SetUniformVec4(sp, UNIFORM_PRIMARYLIGHTORIGIN,  backEnd.refdef.sunDir);
 			}
 
 			if ((r_lightmap->integer == 1 || r_lightmap->integer == 2) && pStage->bundle[TB_LIGHTMAP].image[0])
@@ -1794,14 +1591,6 @@ void RB_StageIteratorGeneric( void )
 			ProjectDlightTexture();
 		}
 	}
-
-#if 0
-	if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && tess.shader->sort <= SS_OPAQUE 
-	//if ((tr.sunShadows || r_forceSunlight->value > 0.0f) && tess.shader->sort <= SS_OPAQUE 
-	    && !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) && tess.xstages[0]->glslShaderGroup == tr.lightallShader) {
-		ForwardSunlight();
-	}
-#endif
 
 	//
 	// now do fog

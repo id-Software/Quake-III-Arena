@@ -61,6 +61,10 @@ uniform float  u_LightRadius;
   #endif
 #endif
 
+#if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
+uniform vec4  u_PrimaryLightOrigin;
+#endif
+
 varying vec2   var_DiffuseTex;
 
 #if defined(USE_LIGHTMAP)
@@ -91,7 +95,11 @@ varying vec3   var_VertLight;
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
-varying vec3   var_WorldLight;
+varying vec3   var_LightDirection;
+#endif
+
+#if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
+varying vec3   var_PrimaryLightDirection;
 #endif
 
 #if defined(USE_TCGEN)
@@ -124,7 +132,7 @@ vec2 ModTexCoords(vec2 st, vec3 position, vec4 texMatrix, vec4 offTurb)
 	float phase = offTurb.w;
 	vec2 st2 = vec2(dot(st, texMatrix.xz), dot(st, texMatrix.yw)) + offTurb.xy;
 
-	vec3 offsetPos = position / 1024.0;
+	vec3 offsetPos = vec3(0); //position / 1024.0;
 	offsetPos.x += offsetPos.z;
 	
 	vec2 texOffset = sin((offsetPos.xy + vec2(phase)) * 2.0 * M_PI);
@@ -155,7 +163,7 @@ void main()
 	gl_Position = u_ModelViewProjectionMatrix * position;
 
 #if (defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
-	vec3 worldLight = attr_LightDirection;
+	vec3 L = attr_LightDirection;
 #endif
 	
 #if defined(USE_MODELMATRIX)
@@ -167,7 +175,7 @@ void main()
   #endif
 
   #if defined(USE_LIGHTMAP) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
-	worldLight = (u_ModelMatrix * vec4(worldLight, 0.0)).xyz;
+	L = (u_ModelMatrix * vec4(L, 0.0)).xyz;
   #endif
 #endif
 
@@ -175,24 +183,20 @@ void main()
 	var_Position = position.xyz;
 #endif
 
-#if defined(USE_TCGEN) || defined(USE_NORMALMAP) || defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 SampleToView = u_ViewOrigin - position.xyz;
-#endif
-
 #if defined(USE_TCGEN) || defined(USE_NORMALMAP) || (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
-	var_SampleToView = SampleToView;
+	var_SampleToView = u_ViewOrigin - position.xyz;
 #endif
 
 #if defined(USE_TCGEN)
-	vec2 tex = GenTexCoords(u_TCGen0, position.xyz, normal, u_TCGen0Vector0, u_TCGen0Vector1);
+	vec2 texCoords = GenTexCoords(u_TCGen0, position.xyz, normal, u_TCGen0Vector0, u_TCGen0Vector1);
 #else
-	vec2 tex = attr_TexCoord0.st;
+	vec2 texCoords = attr_TexCoord0.st;
 #endif
 
 #if defined(USE_TCMOD)
-	var_DiffuseTex = ModTexCoords(tex, position.xyz, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
+	var_DiffuseTex = ModTexCoords(texCoords, position.xyz, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
 #else
-	var_DiffuseTex = tex;
+	var_DiffuseTex = texCoords;
 #endif
 
 #if defined(USE_LIGHTMAP)
@@ -209,10 +213,10 @@ void main()
 
 #if defined(USE_LIGHT) && !defined(USE_DELUXEMAP)
   #if defined(USE_LIGHT_VECTOR)
-	vec3 worldLight = u_LightOrigin.xyz - (position.xyz * u_LightOrigin.w);
+	vec3 L = u_LightOrigin.xyz - (position.xyz * u_LightOrigin.w);
   #endif
   #if !defined(USE_FAST_LIGHT)
-	var_WorldLight = worldLight;
+	var_LightDirection = L;
   #endif
 #endif
 	
@@ -226,12 +230,16 @@ void main()
 
 #if defined(USE_LIGHT_VECTOR) && defined(USE_FAST_LIGHT)
   #if defined(USE_INVSQRLIGHT)
-	float intensity = 1.0 / dot(worldLight, worldLight);
+	float intensity = 1.0 / dot(L, L);
   #else
-	float intensity = clamp((1.0 - dot(worldLight, worldLight) / (u_LightRadius * u_LightRadius)) * 1.07, 0.0, 1.0);
+	float intensity = clamp((1.0 - dot(L, L) / (u_LightRadius * u_LightRadius)) * 1.07, 0.0, 1.0);
   #endif
-	float NL = clamp(dot(normal, normalize(worldLight)), 0.0, 1.0);
+	float NL = clamp(dot(normal, normalize(L)), 0.0, 1.0);
 
 	var_Color.rgb *= u_DirectedLight * intensity * NL + u_AmbientLight;
 #endif
+
+#if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
+	var_PrimaryLightDirection = u_PrimaryLightOrigin.xyz - (position.xyz * u_PrimaryLightOrigin.w);
+#endif	
 }

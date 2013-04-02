@@ -27,10 +27,18 @@ uniform int    u_TCGen0;
 #endif
 
 #if defined(USE_LIGHT_VECTOR)
+uniform vec4      u_LightOrigin;
 uniform vec3      u_DirectedLight;
 uniform vec3      u_AmbientLight;
 uniform float     u_LightRadius;
 #endif
+
+#if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
+uniform vec3  u_PrimaryLightColor;
+uniform vec3  u_PrimaryLightAmbient;
+uniform float u_PrimaryLightRadius;
+#endif
+
 
 #if defined(USE_LIGHT)
 uniform vec2      u_MaterialInfo;
@@ -62,8 +70,13 @@ varying vec3      var_Bitangent;
 varying vec3      var_VertLight;
 
 #if defined(USE_LIGHT) && !defined(USE_DELUXEMAP)
-varying vec3      var_WorldLight;
+varying vec3      var_LightDirection;
 #endif
+
+#if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
+varying vec3      var_PrimaryLightDirection;
+#endif
+
 
 #define EPSILON 0.00000001
 
@@ -199,14 +212,14 @@ float CalcSpecular(float NH, float NL, float NE, float EH, float fzero, float sh
 void main()
 {
 #if !defined(USE_FAST_LIGHT) && (defined(USE_LIGHT) || defined(USE_NORMALMAP))
-	vec3 surfNormal = normalize(var_Normal);
+	vec3 surfN = normalize(var_Normal);
 #endif
 
 #if defined(USE_DELUXEMAP)
-	vec3 worldLight = 2.0 * texture2D(u_DeluxeMap, var_LightTex).xyz - vec3(1.0);
-	//worldLight += var_WorldLight * 0.0001;
+	vec3 L = 2.0 * texture2D(u_DeluxeMap, var_LightTex).xyz - vec3(1.0);
+	//L += var_LightDirection * 0.0001;
 #elif defined(USE_LIGHT)
-	vec3 worldLight = var_WorldLight;
+	vec3 L = var_LightDirection;
 #endif
 
 #if defined(USE_LIGHTMAP)
@@ -214,101 +227,110 @@ void main()
   #if defined(RGBE_LIGHTMAP)
 	lightSample.rgb *= exp2(lightSample.a * 255.0 - 128.0);
   #endif
-	vec3 directedLight = lightSample.rgb;
+	vec3 lightColor = lightSample.rgb;
 #elif defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
   #if defined(USE_INVSQRLIGHT)
-	float intensity = 1.0 / dot(worldLight, worldLight);
+	float intensity = 1.0 / dot(L, L);
   #else
-	float intensity = clamp((1.0 - dot(worldLight, worldLight) / (u_LightRadius * u_LightRadius)) * 1.07, 0.0, 1.0);
+	float intensity = clamp((1.0 - dot(L, L) / (u_LightRadius * u_LightRadius)) * 1.07, 0.0, 1.0);
   #endif
 
-	vec3 directedLight = u_DirectedLight * intensity;
-	vec3 ambientLight  = u_AmbientLight;
-
-  #if defined(USE_SHADOWMAP)
-	vec2 shadowTex = gl_FragCoord.xy * r_FBufScale;
-	directedLight *= texture2D(u_ShadowMap, shadowTex).r;
-  #endif
+	vec3 lightColor = u_DirectedLight * intensity;
+	vec3 ambientColor  = u_AmbientLight;
 #elif defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
-	vec3 directedLight = var_VertLight;
+	vec3 lightColor = var_VertLight;
 #endif
 	
 #if defined(USE_TCGEN) || defined(USE_NORMALMAP) || (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
-	vec3 SampleToView = normalize(var_SampleToView);
+	vec3 E = normalize(var_SampleToView);
 #endif
-	vec2 tex = var_DiffuseTex;
+	vec2 texCoords = var_DiffuseTex;
 
 	float ambientDiff = 1.0;
 
 #if defined(USE_NORMALMAP)
   #if defined(USE_VERT_TANGENT_SPACE)
-    vec3   tangent = var_Tangent;
-	vec3 bitangent = var_Bitangent;
+	mat3 tangentToWorld = mat3(var_Tangent, var_Bitangent, var_Normal);
   #else
 	vec3 q0  = dFdx(var_Position);
 	vec3 q1  = dFdy(var_Position);
-	vec2 st0 = dFdx(tex);
-	vec2 st1 = dFdy(tex);
+	vec2 st0 = dFdx(texCoords);
+	vec2 st1 = dFdy(texCoords);
 	float dir = sign(st1.t * st0.s - st0.t * st1.s);
 
-	vec3   tangent = normalize( q0 * st1.t - q1 * st0.t) * dir;
-	vec3 bitangent = -normalize( q0 * st1.s - q1 * st0.s) * dir;
-  #endif
+	vec3   tangent =  normalize(q0 * st1.t - q1 * st0.t) * dir;
+	vec3 bitangent = -normalize(q0 * st1.s - q1 * st0.s) * dir;
 
 	mat3 tangentToWorld = mat3(tangent, bitangent, var_Normal);
+  #endif
 
   #if defined(USE_PARALLAXMAP)
-	vec3 offsetDir = normalize(SampleToView * tangentToWorld);
-    #if 0
-    float height = SampleHeight(u_NormalMap, tex);
-	float pdist = 0.05 * height - (0.05 / 2.0);
-    #else
+	vec3 offsetDir = normalize(E * tangentToWorld);
 	offsetDir.xy *= -0.05 / offsetDir.z;
-	float pdist = RayIntersectDisplaceMap(tex, offsetDir.xy, u_NormalMap);
-    #endif	
-	tex += offsetDir.xy * pdist;
+
+	texCoords += offsetDir.xy * RayIntersectDisplaceMap(texCoords, offsetDir.xy, u_NormalMap);
   #endif
+	vec3 texN;
   #if defined(SWIZZLE_NORMALMAP)
-	vec3 normal = 2.0 * texture2D(u_NormalMap, tex).agb - 1.0;
+	texN.xy = 2.0 * texture2D(u_NormalMap, texCoords).ag - 1.0;
   #else
-	vec3 normal = 2.0 * texture2D(u_NormalMap, tex).rgb - 1.0;
+	texN.xy = 2.0 * texture2D(u_NormalMap, texCoords).rg - 1.0;
   #endif
-	normal.z = sqrt(clamp(1.0 - dot(normal.xy, normal.xy), 0.0, 1.0));
-	vec3 worldNormal = tangentToWorld * normal;
+	texN.z = sqrt(clamp(1.0 - dot(texN.xy, texN.xy), 0.0, 1.0));
+	vec3 N = tangentToWorld * texN;
   #if defined(r_normalAmbient)
-	ambientDiff = 0.781341 * normal.z + 0.218659;
+	ambientDiff = 0.781341 * texN.z + 0.218659;
   #endif
-#elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 worldNormal = surfNormal;
+#elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT) 
+	vec3 N = surfN;
 #endif
 
 #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || (defined(USE_TCGEN) && defined(USE_NORMALMAP))
-	worldNormal = normalize(worldNormal);
+	N = normalize(N);
 #endif
 
 #if defined(USE_TCGEN) && defined(USE_NORMALMAP)
 	if (u_TCGen0 == TCGEN_ENVIRONMENT_MAPPED)
 	{
-		tex = -reflect(normalize(SampleToView), worldNormal).yz * vec2(0.5, -0.5) + 0.5;
+		texCoords = -reflect(E, N).yz * vec2(0.5, -0.5) + 0.5;
 	}
 #endif
 
-	vec4 diffuse = texture2D(u_DiffuseMap, tex);
+	vec4 diffuse = texture2D(u_DiffuseMap, texCoords);
 
 #if defined(USE_LIGHT) && defined(USE_FAST_LIGHT)
   #if defined(USE_LIGHTMAP)
-	diffuse.rgb *= directedLight;
+	diffuse.rgb *= lightColor;
   #endif
 #elif defined(USE_LIGHT)
-	worldLight = normalize(worldLight);
+	L = normalize(L);
 
-	float surfNL = clamp(dot(surfNormal,  worldLight),   0.0, 1.0);
+	float surfNL = clamp(dot(surfN,  L),   0.0, 1.0);
+	
+  #if defined(USE_SHADOWMAP) 
+	vec2 shadowTex = gl_FragCoord.xy * r_FBufScale;
+	float shadowValue = texture2D(u_ShadowMap, shadowTex).r;
+
+	// surfaces not facing the light are always shadowed
+	shadowValue *= step(0.0, dot(surfN, var_PrimaryLightDirection));
+  
+    #if defined(SHADOWMAP_MODULATE)
+	//vec3 shadowColor = min(u_PrimaryLightAmbient, lightColor);
+	vec3 shadowColor = u_PrimaryLightAmbient * lightColor;
+		
+      #if 0
+	// Only shadow when the world light is parallel to the primary light
+	shadowValue = 1.0 + (shadowValue - 1.0) * clamp(dot(L, var_PrimaryLightDirection), 0.0, 1.0);
+	  #endif
+	lightColor = mix(shadowColor, lightColor, shadowValue);
+	#endif
+  #endif
 
   #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
     #if defined(USE_STANDARD_DELUXEMAP)
 	// Standard deluxe mapping treats the light sample as fully directed
 	// and doesn't compensate for light angle attenuation.
-	vec3 ambientLight = vec3(0.0);
+	vec3 ambientColor = vec3(0.0);
     #else
 	// Separate the light sample into directed and ambient parts.
 	//
@@ -332,45 +354,71 @@ void main()
       #endif
 
 	// Recover any unused light as ambient
-	vec3 ambientLight = directedLight;
-	directedLight *= directedScale;
-	ambientLight -= directedLight * surfNL;
+	vec3 ambientColor = lightColor;
+	lightColor *= directedScale;
+	ambientColor -= lightColor * surfNL;
     #endif
   #endif
-	
-	float NL = clamp(dot(worldNormal,  worldLight),   0.0, 1.0);
-	float NE = clamp(dot(worldNormal,  SampleToView), 0.0, 1.0);
+
+	float NL = clamp(dot(N, L), 0.0, 1.0);
+	float NE = clamp(dot(N, E), 0.0, 1.0);
 
 	float fzero = u_MaterialInfo.x;
 	float shininess = u_MaterialInfo.y;
 
   #if defined(USE_SPECULARMAP)
-	vec4 specular = texture2D(u_SpecularMap, tex);
+	vec4 specular = texture2D(u_SpecularMap, texCoords);
 	//specular.rgb = clamp(specular.rgb - diffuse.rgb, 0.0, 1.0);
 	shininess *= specular.a;
   #endif
 
-	float directedDiff = NL * CalcDiffuse(worldNormal, worldLight, SampleToView, NE, NL, fzero, shininess);
-	diffuse.rgb *= directedLight * directedDiff + ambientDiff * ambientLight;
+	float diffuseIntensity = NL * CalcDiffuse(N, L, E, NE, NL, fzero, shininess);
+  #if defined(USE_PRIMARY_LIGHT)
+	vec3 L2 = var_PrimaryLightDirection;
+	
+	float NL2 = clamp(dot(N, L2), 0.0, 1.0);
+	float diffuseIntensity2 = NL2 * CalcDiffuse(N, L2, E, NE, NL2, fzero, shininess);
+    #if defined(USE_SHADOWMAP)
+	diffuseIntensity2 *= shadowValue;
+	#endif
+	
+	diffuse.rgb *= lightColor * diffuseIntensity + u_PrimaryLightColor * diffuseIntensity2 + ambientDiff * ambientColor;
+  #else
+	diffuse.rgb *= lightColor * diffuseIntensity + ambientDiff * ambientColor;
+  #endif
   
   #if defined(USE_SPECULARMAP)
-	vec3 halfAngle = normalize(worldLight + SampleToView);
+	vec3 H = normalize(L + E);
 
-	float EH = clamp(dot(SampleToView, halfAngle), 0.0, 1.0);
-	float NH = clamp(dot(worldNormal,  halfAngle), 0.0, 1.0);
+	float EH = clamp(dot(E, H), 0.0, 1.0);
+	float NH = clamp(dot(N, H), 0.0, 1.0);
 
-	float directedSpec = NL * CalcSpecular(NH, NL, NE, EH, fzero, shininess);
+	float specularIntensity = NL * CalcSpecular(NH, NL, NE, EH, fzero, shininess);
   
     #if defined(r_normalAmbient)
-	vec3 ambientHalf = normalize(surfNormal + SampleToView);
-	float ambientSpec = max(dot(ambientHalf, worldNormal) + 0.5, 0.0);
+	vec3 ambientHalf = normalize(surfN + E);
+	float ambientSpec = max(dot(ambientHalf, N) + 0.5, 0.0);
 	ambientSpec *= ambientSpec * 0.44;
 	ambientSpec = pow(ambientSpec, shininess) * fzero;
-	specular.rgb *= directedSpec * directedLight + ambientSpec * ambientLight;
-    #else
-	specular.rgb *= directedSpec * directedLight;
-    #endif
-  #endif
+	#else
+	float ambientSpec = 0.0;
+	#endif
+	#if defined(USE_PRIMARY_LIGHT)
+	vec3 H2 = normalize(L2 + E);
+	float EH2 = clamp(dot(E, H2), 0.0, 1.0);
+	float NH2 = clamp(dot(N, H2), 0.0, 1.0);
+
+	float specularIntensity2 = NL * CalcSpecular(NH2, NL2, NE, EH2, fzero, shininess);
+
+      #if defined(USE_SHADOWMAP)
+	specularIntensity2 *= shadowValue;
+      #endif
+	
+	specular.rgb *= specularIntensity * lightColor + specularIntensity2 * u_PrimaryLightColor + ambientSpec * ambientColor;
+	#else
+	specular.rgb *= specularIntensity * lightColor + ambientSpec * ambientColor;
+	#endif
+  #endif  
 #endif
 
 	gl_FragColor = diffuse;

@@ -2493,6 +2493,30 @@ static qboolean CollapseStagesToGLSL(void)
 	if (numStages == i && i >= 2 && CollapseMultitexture())
 		numStages--;
 
+	// convert any remaining lightmap stages to a lighting pass with a white texture
+	// only do this with r_sunlightMode non-zero, as it's only for correct shadows.
+	if (r_sunlightMode->integer)
+	{
+		for (i = 0; i < MAX_SHADER_STAGES; i++)
+		{
+			shaderStage_t *pStage = &stages[i];
+
+			if (!pStage->active)
+				continue;
+
+			if (pStage->bundle[TB_DIFFUSEMAP].isLightmap)
+			{
+				pStage->glslShaderGroup = tr.lightallShader;
+				pStage->glslShaderIndex = LIGHTDEF_USE_LIGHTMAP;
+				if (r_deluxeMapping->integer && tr.worldDeluxeMapping)
+					pStage->glslShaderIndex |= LIGHTDEF_USE_DELUXEMAP;
+				pStage->bundle[TB_LIGHTMAP] = pStage->bundle[TB_DIFFUSEMAP];
+				pStage->bundle[TB_DIFFUSEMAP].image[0] = tr.whiteImage;
+				pStage->bundle[TB_DIFFUSEMAP].isLightmap = qfalse;
+			}
+		}
+	}
+
 	return numStages;
 }
 

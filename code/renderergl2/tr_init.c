@@ -144,6 +144,7 @@ cvar_t  *r_forceSun;
 cvar_t  *r_forceSunMapLightScale;
 cvar_t  *r_forceSunLightScale;
 cvar_t  *r_forceSunAmbientScale;
+cvar_t  *r_sunlightMode;
 cvar_t  *r_drawSunRays;
 cvar_t  *r_sunShadows;
 cvar_t  *r_shadowFilter;
@@ -1195,10 +1196,11 @@ void R_Register( void )
 	r_genNormalMaps = ri.Cvar_Get( "r_genNormalMaps", "0", CVAR_ARCHIVE | CVAR_LATCH );
 
 	r_forceSun = ri.Cvar_Get( "r_forceSun", "0", CVAR_CHEAT );
-	r_forceSunMapLightScale = ri.Cvar_Get( "r_forceSunMapLightScale", "0.5", CVAR_CHEAT );
-	r_forceSunLightScale = ri.Cvar_Get( "r_forceSunLightScale", "0.5", CVAR_CHEAT );
-	r_forceSunAmbientScale = ri.Cvar_Get( "r_forceSunAmbientScale", "0.2", CVAR_CHEAT );
+	r_forceSunMapLightScale = ri.Cvar_Get( "r_forceSunMapLightScale", "1.0", CVAR_CHEAT );
+	r_forceSunLightScale = ri.Cvar_Get( "r_forceSunLightScale", "1.0", CVAR_CHEAT );
+	r_forceSunAmbientScale = ri.Cvar_Get( "r_forceSunAmbientScale", "0.75", CVAR_CHEAT );
 	r_drawSunRays = ri.Cvar_Get( "r_drawSunRays", "0", CVAR_ARCHIVE | CVAR_LATCH );
+	r_sunlightMode = ri.Cvar_Get( "r_sunlightMode", "1", CVAR_ARCHIVE | CVAR_LATCH );
 
 	r_sunShadows = ri.Cvar_Get( "r_sunShadows", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_shadowFilter = ri.Cvar_Get( "r_shadowFilter", "1", CVAR_ARCHIVE | CVAR_LATCH );

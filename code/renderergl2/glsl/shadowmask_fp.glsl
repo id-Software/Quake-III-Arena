@@ -86,7 +86,7 @@ void main()
 	vec4 shadowpos = u_ShadowMvp * biasPos;
 	
 #if defined(USE_SHADOW_CASCADE)
-	const float fadeTo = 0.5;
+	const float fadeTo = 1.0;
 	result = fadeTo;
 #else
 	result = 0.0;
