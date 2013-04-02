@@ -41,8 +41,8 @@ Out must have space for two more vertexes than in
 static void R_ChopPolyBehindPlane( int numInPoints, vec3_t inPoints[MAX_VERTS_ON_POLY],
 								   int *numOutPoints, vec3_t outPoints[MAX_VERTS_ON_POLY], 
 							vec3_t normal, vec_t dist, vec_t epsilon) {
-	float		dists[MAX_VERTS_ON_POLY+4];
-	int			sides[MAX_VERTS_ON_POLY+4];
+	float		dists[MAX_VERTS_ON_POLY+4] = { 0 };
+	int			sides[MAX_VERTS_ON_POLY+4] = { 0 };
 	int			counts[3];
 	float		dot;
 	int			i, j;

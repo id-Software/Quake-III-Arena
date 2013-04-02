@@ -425,6 +425,13 @@ ifeq ($(PLATFORM),darwin)
     OPTIMIZEVM += -arch x86_64 -mfpmath=sse
   endif
 
+  # When compiling on OSX for OSX, we're not cross compiling as far as the
+  # Makefile is concerned, as target architecture is specified as a compiler
+  # argument
+  ifeq ($(COMPILE_PLATFORM),darwin)
+    CROSS_COMPILING=0
+  endif
+
   ifeq ($(CROSS_COMPILING),1)
     ifeq ($(ARCH),ppc)
       CC=powerpc-apple-darwin10-gcc
@@ -854,7 +861,7 @@ ifndef CC
 endif
 
 ifndef RANLIB
-  RANLIB=gcc
+  RANLIB=ranlib
 endif
 
 ifneq ($(HAVE_VM_COMPILED),true)
@@ -918,8 +925,8 @@ ifneq ($(BUILD_GAME_QVM),0)
   endif
   ifneq ($(BUILD_MISSIONPACK),0)
     TARGETS += \
-      $(B)/$(MISSIONPACK)/vm/qagame.qvm \
       $(B)/$(MISSIONPACK)/vm/cgame.qvm \
+      $(B)/$(MISSIONPACK)/vm/qagame.qvm \
       $(B)/$(MISSIONPACK)/vm/ui.qvm
   endif
 endif
@@ -1152,11 +1159,30 @@ release:
 	  OPTIMIZE="-DNDEBUG $(OPTIMIZE)" OPTIMIZEVM="-DNDEBUG $(OPTIMIZEVM)" \
 	  CLIENT_CFLAGS="$(CLIENT_CFLAGS)" SERVER_CFLAGS="$(SERVER_CFLAGS)" V=$(V)
 
+ifneq ($(call bin_path, tput),)
+  TERM_COLUMNS=$(shell echo $$((`tput cols`-4)))
+else
+  TERM_COLUMNS=76
+endif
+
+NAKED_TARGETS=$(shell echo $(TARGETS) | sed -e "s!$(B)/!!g")
+
+print_list=@for i in $(1); \
+     do \
+             echo "    $$i"; \
+     done
+
+ifneq ($(call bin_path, fmt),)
+  print_wrapped=@echo $(1) | fmt -w $(TERM_COLUMNS) | sed -e "s/^\(.*\)$$/    \1/"
+else
+  print_wrapped=$(print_list)
+endif
+
 # Create the build directories, check libraries and print out
 # an informational message, then start building
 targets: makedirs
 	@echo ""
-	@echo "Building $(CLIENTBIN) in $(B):"
+	@echo "Building in $(B):"
 	@echo "  PLATFORM: $(PLATFORM)"
 	@echo "  ARCH: $(ARCH)"
 	@echo "  VERSION: $(VERSION)"
@@ -1168,55 +1194,36 @@ ifeq ($(PLATFORM),mingw32)
 endif
 	@echo ""
 	@echo "  CFLAGS:"
-	-@for i in $(CFLAGS); \
-	do \
-		echo "    $$i"; \
-	done
-	-@for i in $(OPTIMIZE); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(CFLAGS) $(OPTIMIZE))
 	@echo ""
 	@echo "  CLIENT_CFLAGS:"
-	-@for i in $(CLIENT_CFLAGS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(CLIENT_CFLAGS))
 	@echo ""
 	@echo "  SERVER_CFLAGS:"
-	-@for i in $(SERVER_CFLAGS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(SERVER_CFLAGS))
 	@echo ""
 	@echo "  LDFLAGS:"
-	-@for i in $(LDFLAGS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(LDFLAGS))
 	@echo ""
 	@echo "  LIBS:"
-	-@for i in $(LIBS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(LIBS))
 	@echo ""
 	@echo "  CLIENT_LIBS:"
-	-@for i in $(CLIENT_LIBS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_wrapped, $(CLIENT_LIBS))
 	@echo ""
 	@echo "  Output:"
-	-@for i in $(TARGETS); \
-	do \
-		echo "    $$i"; \
-	done
+	$(call print_list, $(NAKED_TARGETS))
 	@echo ""
 ifneq ($(TARGETS),)
   ifndef DEBUG_MAKEFILE
-		@$(MAKE) $(TARGETS) V=$(V)
+	@$(MAKE) $(TARGETS) $(B).zip V=$(V)
   endif
+endif
+
+$(B).zip: $(TARGETS)
+ifdef ARCHIVE
+	@rm -f $@
+	@(cd $(B) && zip -r9 ../../$@ $(NAKED_TARGETS))
 endif
 
 makedirs:
@@ -2747,3 +2754,8 @@ endif
 	release targets \
 	toolsclean toolsclean2 toolsclean-debug toolsclean-release \
 	$(OBJ_D_FILES) $(TOOLSOBJ_D_FILES)
+
+# If the target name contains "clean", don't do a parallel build
+ifneq ($(findstring clean, $(MAKECMDGOALS)),)
+.NOTPARALLEL:
+endif

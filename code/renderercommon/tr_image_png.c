@@ -540,7 +540,6 @@ static uint32_t DecompressIDATs(struct BufferedFile *BF, uint8_t **Buffer)
 	 */
 
 	DecompressedData = NULL;
-	DecompressedDataLength = 0;
 	*Buffer = DecompressedData;
 
 	CompressedData = NULL;

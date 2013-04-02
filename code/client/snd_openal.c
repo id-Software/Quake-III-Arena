@@ -2496,8 +2496,6 @@ qboolean S_AL_Init( soundInterface_t *si )
 				devicelist += curlen + 1;
 			}
 		}
-		else
-			devicelist = "";
 
 		s_alAvailableDevices = Cvar_Get("s_alAvailableDevices", devicenames, CVAR_ROM | CVAR_NORESTART);
 	}

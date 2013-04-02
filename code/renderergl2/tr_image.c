@@ -326,7 +326,6 @@ static void ResampleTexture( byte *in, int inwidth, int inheight, byte *out,
 	for (i=0 ; i<outheight ; i++) {
 		inrow = in + 4*inwidth*(int)((i+0.25)*inheight/outheight);
 		inrow2 = in + 4*inwidth*(int)((i+0.75)*inheight/outheight);
-		frac = fracstep >> 1;
 		for (j=0 ; j<outwidth ; j++) {
 			pix1 = inrow + p1[j];
 			pix2 = inrow + p2[j];
@@ -957,7 +956,7 @@ static void DoLinear(byte *in, byte *out, int width, int height)
 
 	for (y = 1; y < height - 1; y += 2)
 	{
-		byte sd[4], se[4], sh[4], si[4];
+		byte sd[4] = {0}, se[4] = {0}, sh[4] = {0}, si[4] = {0};
 		byte *line2, *line3;
 
 		x = 1;
@@ -1572,8 +1571,8 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 {
 	int width =         *inout_width;
 	int height =        *inout_height;
-	int scaled_width =  *inout_scaled_width;
-	int scaled_height = *inout_scaled_height;
+	int scaled_width;
+	int scaled_height;
 	qboolean picmip = flags & IMGFLAG_PICMIP;
 	qboolean mipmap = flags & IMGFLAG_MIPMAP;
 	qboolean clampToEdge = flags & IMGFLAG_CLAMPTOEDGE;
@@ -1769,7 +1768,6 @@ static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean light
 	}
 	else if(lightMap)
 	{
-		samples = 4;
 		if(r_greyscale->integer)
 			internalFormat = GL_LUMINANCE;
 		else
