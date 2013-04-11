@@ -1408,9 +1408,17 @@ void GLSL_ShutdownGPUShaders(void)
 	GLSL_DeleteGPUShader(&tr.shadowmapShader);
 	GLSL_DeleteGPUShader(&tr.pshadowShader);
 	GLSL_DeleteGPUShader(&tr.down4xShader);
-	
+	GLSL_DeleteGPUShader(&tr.bokehShader);
+	GLSL_DeleteGPUShader(&tr.tonemapShader);
+
 	for ( i = 0; i < 2; i++)
 		GLSL_DeleteGPUShader(&tr.calclevels4xShader[i]);
+
+	GLSL_DeleteGPUShader(&tr.shadowmaskShader);
+	GLSL_DeleteGPUShader(&tr.ssaoShader);
+
+	for ( i = 0; i < 2; i++)
+		GLSL_DeleteGPUShader(&tr.depthBlurShader[i]);
 
 	glState.currentProgram = 0;
 	qglUseProgramObjectARB(0);
