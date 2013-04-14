@@ -1025,7 +1025,6 @@ bot_randomlist_t *BotLoadRandomStrings(char *filename)
 			} //end if
 			while(!PC_CheckTokenString(source, "}"))
 			{
-				size_t len;
 				if (!BotLoadChatMessage(source, chatmessagestring))
 				{
 					FreeSource(source);

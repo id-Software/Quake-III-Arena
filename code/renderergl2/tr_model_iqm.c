@@ -206,7 +206,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	}
 	vertexarray = (iqmVertexArray_t *)((byte *)header + header->ofs_vertexarrays);
 	for( i = 0; i < header->num_vertexarrays; i++, vertexarray++ ) {
-		int	j, n, *intPtr;
+		int	n, *intPtr;
 
 		if( vertexarray->size <= 0 || vertexarray->size > 4 ) {
 			return qfalse;

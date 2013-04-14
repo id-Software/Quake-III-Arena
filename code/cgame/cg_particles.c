@@ -636,7 +636,6 @@ void CG_AddParticleToScene (cparticle_t *p, vec3_t org, float alpha)
 	}
 	else if (p->type == P_FLAT_SCALEUP)
 	{
-		float width, height;
 		float sinR, cosR;
 
 		if (p->color == BLOODRED)

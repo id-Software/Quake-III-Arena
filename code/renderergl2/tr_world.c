@@ -157,7 +157,6 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 	
 	if ( surf->cullinfo.type & CULLINFO_PLANE )
 	{
-		int i;
 		for ( i = 0 ; i < tr.refdef.num_dlights ; i++ ) {
 			if ( ! ( dlightBits & ( 1 << i ) ) ) {
 				continue;
@@ -238,7 +237,6 @@ static int R_PshadowSurface( msurface_t *surf, int pshadowBits ) {
 	
 	if ( surf->cullinfo.type & CULLINFO_PLANE )
 	{
-		int i;
 		for ( i = 0 ; i < tr.refdef.num_pshadows ; i++ ) {
 			if ( ! ( pshadowBits & ( 1 << i ) ) ) {
 				continue;

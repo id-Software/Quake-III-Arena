@@ -789,7 +789,6 @@ void CL_ParseVoip ( msg_t *msg ) {
 	}
 
 	for (i = 0; i < frames; i++) {
-		char encoded[256];
 		const int len = MSG_ReadByte(msg);
 		if (len < 0) {
 			Com_DPrintf("VoIP: Short packet!\n");
