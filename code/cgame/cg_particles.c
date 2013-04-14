@@ -1320,7 +1320,6 @@ void CG_ParticleExplosion (char *animStr, vec3_t origin, vec3_t vel, int duratio
 // Rafael Shrapnel
 void CG_AddParticleShrapnel (localEntity_t *le)
 {
-	return;
 }
 // done.
 

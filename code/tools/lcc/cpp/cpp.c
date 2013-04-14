@@ -250,7 +250,6 @@ control(Tokenrow *trp)
 		break;
 	}
 	setempty(trp);
-	return;
 }
 
 void *
