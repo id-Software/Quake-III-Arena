@@ -1398,7 +1398,7 @@ Return the searchpath in "startSearch".
 =================
 */
 
-vmInterpret_t FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, int enableDll)
+int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, int enableDll)
 {
 	searchpath_t *search, *lastSearch;
 	directory_t *dir;
