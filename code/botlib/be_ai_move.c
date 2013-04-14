@@ -3455,8 +3455,6 @@ void BotMoveToGoal(bot_moveresult_t *result, int movestate, bot_goal_t *goal, in
 	if (result->blocked) ms->reachability_time -= 10 * ms->thinktime;
 	//copy the last origin
 	VectorCopy(ms->origin, ms->lastorigin);
-	//return the movement result
-	return;
 } //end of the function BotMoveToGoal
 //===========================================================================
 //
