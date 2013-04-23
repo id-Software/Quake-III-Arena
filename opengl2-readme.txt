@@ -240,20 +240,30 @@ Cvars for the sunlight and cascaded shadow maps:
 
   r_forceSunMapLightScale        - Cheat. Scale map brightness by this factor
                                    when r_forceSun 1.
-                                     0.5 - Default
+                                     1.0 - Default
                                      
   r_forceSunLightScale           - Cheat. Scale sun brightness by this factor
                                    when r_forceSun 1.
-                                     0.5 - Default
+                                     1.0 - Default
                                      
   r_forceSunAmbientScale         - Cheat. Scale sun ambient brightness by this 
                                    factor when r_forceSun 1.
-                                     0.2 - Default
+                                     0.5 - Default
 
   r_sunShadows                   - Enable sunlight and cascaded shadow maps for
                                    it on maps that support it.
                                      0 - No.
                                      1 - Yes. (default)
+
+  r_sunlightMode                 - Specify the method used to add sunlight to
+                                   the scene.
+                                     0 - No.
+                                     1 - Multiply lit areas by light scale, and
+                                         shadowed areas by ambient scale.
+                                         (default)
+                                     2 - Add light.  Looks better, but is slower
+                                         and doesn't integrate well with existing
+                                         maps.
 
   r_shadowFilter                 - Enable filtering shadows for a smoother
                                    look.
@@ -468,8 +478,8 @@ and is the equivalent for 'exactVertex'.
 
 This adds a new keyword to sky materials, q3gl2_sun.  The syntax is:
 
-  q3gl2_sun <red> <green> <blue> <intensity> <degrees> <mapLightScale> 
-  <ambientLightScale>
+  q3gl2_sun <red> <green> <blue> <intensity> <degrees> <elevation> 
+  <mapLightScale> <ambientLightScale>
   
 Note the first six parameters are the same as in q3map_sun or q3map_sunExt,
 and the last two indicate scaling factors for the map brightness and an ambient
@@ -477,8 +487,9 @@ light of the same color as the sun.
 
 There are currently two ways to use this in your own (and other people's) maps.
 
-  1. Create your map as normal and add a 'q3gl2_sun' line after your 
-     'q3map_sun' line in your sky material, like so:
+  1. Create your map as normal, set r_sunlightMode to 1, and add a 
+     'q3gl2_sun' line after your 'q3map_sun' line in your sky material, like
+     so:
      
     textures/skies/bluesky
     {
@@ -489,7 +500,7 @@ There are currently two ways to use this in your own (and other people's) maps.
         surfaceparm nolightmap
         surfaceparm sky
         q3map_sunExt 240 238 200 100 195 35 3 16
-        q3gl2_sun 240 238 200 50 195 35 3 0.5 0.2
+        q3gl2_sun 240 238 200 50 195 35 3 1.0 0.2
         q3map_skylight 50 16
         q3map_lightimage $whiteimage
 
@@ -501,7 +512,8 @@ There are currently two ways to use this in your own (and other people's) maps.
      can be used with existing maps without recompilation.  The downside is
      artifacts like doubled shadows and uneven shadow edges.
      
-  2. Use 'q3gl2_sun' instead of 'q3map_sun' or 'q3map_sunExt', like so:
+  2. Set r_sunlightMode to 2 and use 'q3gl2_sun' instead of 'q3map_sun' or
+     'q3map_sunExt', like so:
   
     textures/skies/bluesky
     {

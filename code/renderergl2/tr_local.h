@@ -1789,10 +1789,10 @@ typedef struct {
 	int						viewCluster;
 
 	float                   mapLightScale;
+	float                   sunShadowScale;
 
 	qboolean                sunShadows;
 	vec3_t					sunLight;			// from the sky shader for this level
-	vec3_t					sunAmbient;
 	vec3_t					sunDirection;
 
 	frontEndCounters_t		pc;

@@ -360,19 +360,34 @@ void RE_RenderScene( const refdef_t *fd ) {
 		VectorSet(tr.refdef.sunCol, 0, 0, 0);
 		VectorSet(tr.refdef.sunAmbCol, 0, 0, 0);
 	}
-	else if (r_forceSun->integer == 1)
-	{
-		float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
-		tr.refdef.colorScale = r_forceSunMapLightScale->value;
-		VectorScale(tr.sunLight, scale * r_forceSunLightScale->value, tr.refdef.sunCol);
-		VectorScale(tr.sunLight, scale * r_forceSunAmbientScale->value, tr.refdef.sunAmbCol);
-	}
 	else
 	{
-		float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
-		tr.refdef.colorScale = tr.mapLightScale;
-		VectorScale(tr.sunLight,   scale, tr.refdef.sunCol);
-		VectorScale(tr.sunAmbient, scale, tr.refdef.sunAmbCol);
+		tr.refdef.colorScale = r_forceSun->integer ? r_forceSunMapLightScale->value : tr.mapLightScale;
+
+		if (r_sunlightMode->integer == 1)
+		{
+			tr.refdef.sunCol[0] =
+			tr.refdef.sunCol[1] =
+			tr.refdef.sunCol[2] = 1.0f;
+
+			tr.refdef.sunAmbCol[0] =
+			tr.refdef.sunAmbCol[1] =
+			tr.refdef.sunAmbCol[2] = r_forceSun->integer ? r_forceSunAmbientScale->value : tr.sunShadowScale;
+		}
+		else
+		{
+			float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
+			if (r_forceSun->integer)
+			{
+				VectorScale(tr.sunLight, scale * r_forceSunLightScale->value,   tr.refdef.sunCol);
+				VectorScale(tr.sunLight, scale * r_forceSunAmbientScale->value, tr.refdef.sunAmbCol);
+			}
+			else
+			{
+				VectorScale(tr.sunLight, scale,                     tr.refdef.sunCol);
+				VectorScale(tr.sunLight, scale * tr.sunShadowScale, tr.refdef.sunAmbCol);
+			}
+		}
 	}
 
 	if (r_forceAutoExposure->integer)
