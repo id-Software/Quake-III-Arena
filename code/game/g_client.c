@@ -540,7 +540,7 @@ TeamCount
 Returns number of players on a team
 ================
 */
-team_t TeamCount( int ignoreClientNum, int team ) {
+int TeamCount( int ignoreClientNum, team_t team ) {
 	int		i;
 	int		count = 0;
 
