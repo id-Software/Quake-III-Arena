@@ -142,6 +142,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	size_t			size, joint_names;
 	iqmData_t		*iqmData;
 	srfIQModel_t		*surface;
+	char			meshName[MAX_QPATH];
 
 	if( filesize < sizeof(iqmHeader_t) ) {
 		return qfalse;
@@ -310,17 +311,25 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		LL( mesh->first_triangle );
 		LL( mesh->num_triangles );
 
+		if ( mesh->name < header->num_text ) {
+			Q_strncpyz( meshName, (char*)header + header->ofs_text + mesh->name, sizeof (meshName) );
+		} else {
+			meshName[0] = '\0';
+		}
+
 		// check ioq3 limits
 		if ( mesh->num_vertexes > SHADER_MAX_VERTEXES ) 
 		{
-			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i verts on a surface (%i).\n",
-				  mod_name, SHADER_MAX_VERTEXES, mesh->num_vertexes );
+			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i verts on %s (%i).\n",
+				  mod_name, SHADER_MAX_VERTEXES, meshName[0] ? meshName : "a surface",
+				  mesh->num_vertexes );
 			return qfalse;
 		}
 		if ( mesh->num_triangles*3 > SHADER_MAX_INDEXES ) 
 		{
-			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i triangles on a surface (%i).\n",
-				  mod_name, SHADER_MAX_INDEXES / 3, mesh->num_triangles );
+			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i triangles on %s (%i).\n",
+				  mod_name, SHADER_MAX_INDEXES / 3, meshName[0] ? meshName : "a surface",
+				  mesh->num_triangles );
 			return qfalse;
 		}
 
