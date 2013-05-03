@@ -140,45 +140,45 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 }
 #endif
 
-float CalcDiffuse(vec3 N, vec3 L, vec3 E, float NE, float NL, float fzero, float shininess)
+vec3 CalcDiffuse(vec3 diffuseAlbedo, vec3 N, vec3 L, vec3 E, float NE, float NL, float shininess)
 {
   #if defined(USE_OREN_NAYAR) || defined(USE_TRIACE_OREN_NAYAR)
 	float gamma = dot(E, L) - NE * NL;
 	float B = 2.22222 + 0.1 * shininess;
 		
-	#if defined(USE_OREN_NAYAR)
+    #if defined(USE_OREN_NAYAR)
 	float A = 1.0 - 1.0 / (2.0 + 0.33 * shininess);
 	gamma = clamp(gamma, 0.0, 1.0);
-	#endif
+    #endif
 	
-	#if defined(USE_TRIACE_OREN_NAYAR)
+    #if defined(USE_TRIACE_OREN_NAYAR)
 	float A = 1.0 - 1.0 / (2.0 + 0.65 * shininess);
 
 	if (gamma >= 0.0)
-	#endif
+    #endif
 	{
 		B *= max(max(NL, NE), EPSILON);
 	}
 
-	return (A + gamma / B) * (1.0 - fzero);
+	return diffuseAlbedo * (A + gamma / B);
   #else
-	return 1.0 - fzero;
+	return diffuseAlbedo;
   #endif
 }
 
 #if defined(USE_SPECULARMAP)
-float CalcSpecular(float NH, float NL, float NE, float EH, float fzero, float shininess)
+vec3 CalcSpecular(vec3 specularReflectance, float NH, float NL, float NE, float EH, float shininess)
 {
   #if defined(USE_BLINN) || defined(USE_TRIACE) || defined(USE_TORRANCE_SPARROW)
 	float blinn = pow(NH, shininess);
   #endif
 
   #if defined(USE_BLINN)
-	return blinn;
+	return specularReflectance * blinn;
   #endif
 
   #if defined(USE_COOK_TORRANCE) || defined (USE_TRIACE) || defined (USE_TORRANCE_SPARROW)
-	float fresnel = fzero + (1.0 - fzero) * pow(1.0 - EH, 5);
+	vec3 fresnel = specularReflectance + (vec3(1.0) - specularReflectance) * pow(1.0 - EH, 5);
   #endif
 
   #if defined(USE_COOK_TORRANCE) || defined(USE_TORRANCE_SPARROW)
@@ -296,11 +296,15 @@ void main()
 	}
 #endif
 
-	vec4 diffuse = texture2D(u_DiffuseMap, texCoords);
+	vec4 diffuseAlbedo = texture2D(u_DiffuseMap, texCoords);
+#if defined(USE_LIGHT) && defined(USE_GAMMA2_TEXTURES)
+	diffuseAlbedo.rgb *= diffuseAlbedo.rgb;
+#endif
 
 #if defined(USE_LIGHT) && defined(USE_FAST_LIGHT)
-  #if defined(USE_LIGHTMAP)
-	diffuse.rgb *= lightColor;
+	gl_FragColor = diffuse.rgb;
+  #if defined(USE_LIGHTMAP) 
+	gl_FragColor *= lightColor;
   #endif
 #elif defined(USE_LIGHT)
 	L = normalize(L);
@@ -317,13 +321,13 @@ void main()
     #if defined(SHADOWMAP_MODULATE)
 	//vec3 shadowColor = min(u_PrimaryLightAmbient, lightColor);
 	vec3 shadowColor = u_PrimaryLightAmbient * lightColor;
-		
+
       #if 0
 	// Only shadow when the world light is parallel to the primary light
 	shadowValue = 1.0 + (shadowValue - 1.0) * clamp(dot(L, var_PrimaryLightDirection), 0.0, 1.0);
-	  #endif
+      #endif
 	lightColor = mix(shadowColor, lightColor, shadowValue);
-	#endif
+    #endif
   #endif
 
   #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
@@ -363,28 +367,28 @@ void main()
 	float NL = clamp(dot(N, L), 0.0, 1.0);
 	float NE = clamp(dot(N, E), 0.0, 1.0);
 
-	float fzero = u_MaterialInfo.x;
+	float maxReflectance = u_MaterialInfo.x;
 	float shininess = u_MaterialInfo.y;
 
   #if defined(USE_SPECULARMAP)
-	vec4 specular = texture2D(u_SpecularMap, texCoords);
-	//specular.rgb = clamp(specular.rgb - diffuse.rgb, 0.0, 1.0);
-	shininess *= specular.a;
+	vec4 specularReflectance = texture2D(u_SpecularMap, texCoords);
+	specularReflectance.rgb *= maxReflectance;
+	shininess *= specularReflectance.a;
+	// adjust diffuse by specular reflectance, to maintain energy conservation
+	diffuseAlbedo.rgb *= vec3(1.0) - specularReflectance.rgb;
   #endif
 
-	float diffuseIntensity = NL * CalcDiffuse(N, L, E, NE, NL, fzero, shininess);
+	gl_FragColor.rgb = lightColor * NL * CalcDiffuse(diffuseAlbedo.rgb, N, L, E, NE, NL, shininess);
+	gl_FragColor.rgb += ambientDiff * ambientColor * diffuseAlbedo.rgb;
   #if defined(USE_PRIMARY_LIGHT)
 	vec3 L2 = var_PrimaryLightDirection;
-	
 	float NL2 = clamp(dot(N, L2), 0.0, 1.0);
-	float diffuseIntensity2 = NL2 * CalcDiffuse(N, L2, E, NE, NL2, fzero, shininess);
+
     #if defined(USE_SHADOWMAP)
-	diffuseIntensity2 *= shadowValue;
-	#endif
-	
-	diffuse.rgb *= lightColor * diffuseIntensity + u_PrimaryLightColor * diffuseIntensity2 + ambientDiff * ambientColor;
-  #else
-	diffuse.rgb *= lightColor * diffuseIntensity + ambientDiff * ambientColor;
+	gl_FragColor.rgb += u_PrimaryLightColor * shadowValue * NL2 * CalcDiffuse(diffuseAlbedo.rgb, N, L2, E, NE, NL2, shininess);
+    #else
+	gl_FragColor.rgb += u_PrimaryLightColor * NL2 * CalcDiffuse(diffuseAlbedo.rgb, N, L2, E, NE, NL2, shininess);
+    #endif
   #endif
   
   #if defined(USE_SPECULARMAP)
@@ -393,39 +397,33 @@ void main()
 	float EH = clamp(dot(E, H), 0.0, 1.0);
 	float NH = clamp(dot(N, H), 0.0, 1.0);
 
-	float specularIntensity = NL * CalcSpecular(NH, NL, NE, EH, fzero, shininess);
+	gl_FragColor.rgb += lightColor * NL * CalcSpecular(specularReflectance.rgb, NH, NL, NE, EH, shininess);
   
     #if defined(r_normalAmbient)
 	vec3 ambientHalf = normalize(surfN + E);
 	float ambientSpec = max(dot(ambientHalf, N) + 0.5, 0.0);
 	ambientSpec *= ambientSpec * 0.44;
-	ambientSpec = pow(ambientSpec, shininess) * fzero;
-	#else
-	float ambientSpec = 0.0;
-	#endif
-	#if defined(USE_PRIMARY_LIGHT)
+	gl_FragColor.rgb += specularReflectance.rgb * ambientSpec * ambientColor;
+    #endif
+
+    #if defined(USE_PRIMARY_LIGHT)
 	vec3 H2 = normalize(L2 + E);
 	float EH2 = clamp(dot(E, H2), 0.0, 1.0);
 	float NH2 = clamp(dot(N, H2), 0.0, 1.0);
 
-	float specularIntensity2 = NL * CalcSpecular(NH2, NL2, NE, EH2, fzero, shininess);
 
       #if defined(USE_SHADOWMAP)
-	specularIntensity2 *= shadowValue;
+	gl_FragColor.rgb += u_PrimaryLightColor * shadowValue * NL2 * CalcSpecular(specularReflectance.rgb, NH2, NL2, NE, EH2, shininess);
+      #else
+	gl_FragColor.rgb += u_PrimaryLightColor * NL2 * CalcSpecular(specularReflectance.rgb, NH2, NL2, NE, EH2, shininess);
       #endif
-	
-	specular.rgb *= specularIntensity * lightColor + specularIntensity2 * u_PrimaryLightColor + ambientSpec * ambientColor;
-	#else
-	specular.rgb *= specularIntensity * lightColor + ambientSpec * ambientColor;
-	#endif
+    #endif
   #endif  
+#else
+	gl_FragColor.rgb = diffuseAlbedo.rgb;
 #endif
 
-	gl_FragColor = diffuse;
-
-#if defined(USE_SPECULARMAP) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	gl_FragColor.rgb += specular.rgb;
-#endif
+	gl_FragColor.a = diffuseAlbedo.a;
 
 	gl_FragColor *= var_Color;
 }
