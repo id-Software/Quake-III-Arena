@@ -437,8 +437,8 @@ static qboolean RB_SurfaceVbo(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndex
 	// merge this into any existing multidraw primitives
 	mergeForward = -1;
 	mergeBack = -1;
-	firstIndexOffset = BUFFER_OFFSET(firstIndex * sizeof(GL_INDEX_TYPE));
-	lastIndexOffset  = BUFFER_OFFSET((firstIndex + numIndexes) * sizeof(GL_INDEX_TYPE));
+	firstIndexOffset = BUFFER_OFFSET(firstIndex * sizeof(glIndex_t));
+	lastIndexOffset  = BUFFER_OFFSET((firstIndex + numIndexes) * sizeof(glIndex_t));
 
 	if (r_mergeMultidraws->integer)
 	{

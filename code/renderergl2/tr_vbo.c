@@ -506,12 +506,11 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 	IBO_t          *ibo;
 	int             i, j;
 
-	byte           *indexes;
+	glIndex_t       *indexes;
 	int             indexesSize;
-	int             indexesOfs;
+	int             indexesCount;
 
 	srfTriangle_t  *tri;
-	glIndex_t       index;
 	int				glUsage;
 
 	switch (usage)
@@ -548,17 +547,15 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 
 	Q_strncpyz(ibo->name, name, sizeof(ibo->name));
 
-	indexesSize = numTriangles * 3 * sizeof(int);
+	indexesSize = numTriangles * 3 * sizeof(glIndex_t);
 	indexes = ri.Hunk_AllocateTempMemory(indexesSize);
-	indexesOfs = 0;
+	indexesCount = 0;
 
 	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
 	{
 		for(j = 0; j < 3; j++)
 		{
-			index = tri->indexes[j];
-			memcpy(indexes + indexesOfs, &index, sizeof(glIndex_t));
-			indexesOfs += sizeof(glIndex_t);
+			indexes[indexesCount++] = tri->indexes[j];
 		}
 	}
 
