@@ -61,7 +61,7 @@ int qvmftolsse(void)
 long qftolx87(float f)
 {
   long retval;
-  unsigned short oldcw;
+  unsigned short oldcw = 0;
 
   __asm__ volatile
   (
@@ -81,7 +81,7 @@ long qftolx87(float f)
 int qvmftolx87(void)
 {
   int retval;
-  unsigned short oldcw;
+  unsigned short oldcw = 0;
 
   __asm__ volatile
   (

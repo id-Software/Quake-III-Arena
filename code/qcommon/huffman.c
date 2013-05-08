@@ -405,7 +405,6 @@ void Huff_Compress(msg_t *mbuf, int offset) {
 	huff.tree->weight = 0;
 	huff.lhead->next = huff.lhead->prev = NULL;
 	huff.tree->parent = huff.tree->left = huff.tree->right = NULL;
-	huff.loc[NYT] = huff.tree;
 
 	seq[0] = (size>>8);
 	seq[1] = size&0xff;
@@ -442,6 +441,5 @@ void Huff_Init(huffman_t *huff) {
 	huff->compressor.tree->weight = 0;
 	huff->compressor.lhead->next = huff->compressor.lhead->prev = NULL;
 	huff->compressor.tree->parent = huff->compressor.tree->left = huff->compressor.tree->right = NULL;
-	huff->compressor.loc[NYT] = huff->compressor.tree;
 }
 

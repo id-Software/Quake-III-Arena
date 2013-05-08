@@ -89,15 +89,15 @@ char *Sys_DefaultHomePath( void )
 	TCHAR szPath[MAX_PATH];
 	FARPROC qSHGetFolderPath;
 	HMODULE shfolder = LoadLibrary("shfolder.dll");
-	
+
+	if(shfolder == NULL)
+	{
+		Com_Printf("Unable to load SHFolder.dll\n");
+		return NULL;
+	}
+
 	if(!*homePath && com_homepath)
 	{
-		if(shfolder == NULL)
-		{
-			Com_Printf("Unable to load SHFolder.dll\n");
-			return NULL;
-		}
-
 		qSHGetFolderPath = GetProcAddress(shfolder, "SHGetFolderPathA");
 		if(qSHGetFolderPath == NULL)
 		{
@@ -120,10 +120,9 @@ char *Sys_DefaultHomePath( void )
 			Q_strcat(homePath, sizeof(homePath), com_homepath->string);
 		else
 			Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_WIN);
-
-		FreeLibrary(shfolder);
 	}
 
+	FreeLibrary(shfolder);
 	return homePath;
 }
 
@@ -281,6 +280,15 @@ const char *Sys_Dirname( char *path )
 	dir[ length ] = '\0';
 
 	return dir;
+}
+
+/*
+==============
+Sys_FOpen
+==============
+*/
+FILE *Sys_FOpen( const char *ospath, const char *mode ) {
+	return fopen( ospath, mode );
 }
 
 /*

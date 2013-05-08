@@ -144,19 +144,19 @@ int Export_BotLibSetup(void)
 
 	if(botDeveloper)
 	{
-		char *homedir, *gamedir, *basedir;
+		char *homedir, *gamedir, *basegame;
 		char logfilename[MAX_OSPATH];
 
 		homedir = LibVarGetString("homedir");
 		gamedir = LibVarGetString("gamedir");
-		basedir = LibVarGetString("com_basegame");
+		basegame = LibVarGetString("basegame");
 
 		if (*homedir)
 		{
 			if(*gamedir)
 				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, gamedir, PATH_SEP);
-			else if(*basedir)
-				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, basedir, PATH_SEP);
+			else if(*basegame)
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, basegame, PATH_SEP);
 			else
 				Com_sprintf(logfilename, sizeof(logfilename), "%s%c" BASEGAME "%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
 		}
@@ -546,7 +546,7 @@ int BotExportTest(int parm0, char *parm1, vec3_t parm2, vec3_t parm3)
 		reachnum = BotGetReachabilityToGoal(origin, newarea,
 									  lastgoalareanum, lastareanum,
 									  avoidreach, avoidreachtimes, avoidreachtries,
-									  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
+									  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
 									  NULL, 0, &resultFlags);
 		AAS_ReachabilityFromNum(reachnum, &reach);
 		AAS_ShowReachability(&reach);
@@ -565,7 +565,7 @@ int BotExportTest(int parm0, char *parm1, vec3_t parm2, vec3_t parm3)
 			reachnum = BotGetReachabilityToGoal(curorigin, curarea,
 										  lastgoalareanum, lastareanum,
 										  avoidreach, avoidreachtimes, avoidreachtries,
-										  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
+										  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
 										  NULL, 0, &resultFlags);
 			AAS_ReachabilityFromNum(reachnum, &reach);
 			AAS_ShowReachability(&reach);

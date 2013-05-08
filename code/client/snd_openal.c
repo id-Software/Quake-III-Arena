@@ -656,7 +656,7 @@ static qboolean S_AL_HearingThroughEntity( int entityNum )
 
 	if( lastListenerNumber == entityNum )
 	{
-		// FIXME: <tim@ngus.net> 28/02/06 This is an outrageous hack to detect
+		// This is an outrageous hack to detect
 		// whether or not the player is rendering in third person or not. We can't
 		// ask the renderer because the renderer has no notion of entities and we
 		// can't ask cgame since that would involve changing the API and hence mod
@@ -2125,6 +2125,8 @@ static cvar_t *s_alCapture;
 #define ALDRIVER_DEFAULT "OpenAL32.dll"
 #elif defined(MACOS_X)
 #define ALDRIVER_DEFAULT "/System/Library/Frameworks/OpenAL.framework/OpenAL"
+#elif defined(__OpenBSD__)
+#define ALDRIVER_DEFAULT "libopenal.so"
 #else
 #define ALDRIVER_DEFAULT "libopenal.so.1"
 #endif
@@ -2496,8 +2498,6 @@ qboolean S_AL_Init( soundInterface_t *si )
 				devicelist += curlen + 1;
 			}
 		}
-		else
-			devicelist = "";
 
 		s_alAvailableDevices = Cvar_Get("s_alAvailableDevices", devicenames, CVAR_ROM | CVAR_NORESTART);
 	}

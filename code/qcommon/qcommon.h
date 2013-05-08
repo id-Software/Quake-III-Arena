@@ -95,9 +95,6 @@ float	MSG_ReadAngle16 (msg_t *sb);
 void	MSG_ReadData (msg_t *sb, void *buffer, int size);
 int		MSG_LookaheadByte (msg_t *msg);
 
-void MSG_WriteDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
-void MSG_ReadDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
-
 void MSG_WriteDeltaUsercmdKey( msg_t *msg, int key, usercmd_t *from, usercmd_t *to );
 void MSG_ReadDeltaUsercmdKey( msg_t *msg, int key, usercmd_t *from, usercmd_t *to );
 
@@ -135,6 +132,8 @@ NET
 #define	PACKET_MASK		(PACKET_BACKUP-1)
 
 #define	MAX_PACKET_USERCMDS		32		// max number of usercmd_t in a packet
+
+#define	MAX_SNAPSHOT_ENTITIES	256
 
 #define	PORT_ANY			-1
 
@@ -642,7 +641,7 @@ fileHandle_t	FS_FCreateOpenPipeFile( const char *filename );
 
 fileHandle_t FS_SV_FOpenFileWrite( const char *filename );
 long		FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp );
-void	FS_SV_Rename( const char *from, const char *to );
+void	FS_SV_Rename( const char *from, const char *to, qboolean safe );
 long		FS_FOpenFileRead( const char *qpath, fileHandle_t *file, qboolean uniqueFILE );
 // if uniqueFILE is true, then a new FILE will be fopened even if the file
 // is found in an already open pak file.  If uniqueFILE is false, you must call
@@ -1089,8 +1088,6 @@ void	Sys_Print( const char *msg );
 // any game related timing information should come from event timestamps
 int		Sys_Milliseconds (void);
 
-void	Sys_SnapVector( float *v );
-
 qboolean Sys_RandomBytes( byte *string, int len );
 
 // the system console is shown when a dedicated server is running
@@ -1108,6 +1105,7 @@ qboolean	Sys_StringToAdr( const char *s, netadr_t *a, netadrtype_t family );
 qboolean	Sys_IsLANAddress (netadr_t adr);
 void		Sys_ShowIP(void);
 
+FILE	*Sys_FOpen( const char *ospath, const char *mode );
 qboolean Sys_Mkdir( const char *path );
 FILE	*Sys_Mkfifo( const char *ospath );
 char	*Sys_Cwd( void );

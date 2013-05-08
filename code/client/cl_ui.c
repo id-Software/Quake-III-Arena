@@ -146,7 +146,7 @@ static int LAN_AddServer(int source, const char *name, const char *address) {
 			break;
 	}
 	if (servers && *count < max) {
-		NET_StringToAdr( address, &adr, NA_IP );
+		NET_StringToAdr( address, &adr, NA_UNSPEC );
 		for ( i = 0; i < *count; i++ ) {
 			if (NET_CompareAdr(servers[i].adr, adr)) {
 				break;
@@ -190,7 +190,7 @@ static void LAN_RemoveServer(int source, const char *addr) {
 	}
 	if (servers) {
 		netadr_t comp;
-		NET_StringToAdr( addr, &comp, NA_IP );
+		NET_StringToAdr( addr, &comp, NA_UNSPEC );
 		for (i = 0; i < *count; i++) {
 			if (NET_CompareAdr( comp, servers[i].adr)) {
 				int j = i;
@@ -750,7 +750,7 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 		return 0;
 
 	case UI_CVAR_CREATE:
-		Cvar_Get( VMA(1), VMA(2), args[3] );
+		Cvar_Register( NULL, VMA(1), VMA(2), args[3] );
 		return 0;
 
 	case UI_CVAR_INFOSTRINGBUFFER:

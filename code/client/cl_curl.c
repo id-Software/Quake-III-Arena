@@ -304,7 +304,7 @@ void CL_cURL_PerformDownload(void)
 	}
 	FS_FCloseFile(clc.download);
 	if(msg->msg == CURLMSG_DONE && msg->data.result == CURLE_OK) {
-		FS_SV_Rename(clc.downloadTempName, clc.downloadName);
+		FS_SV_Rename(clc.downloadTempName, clc.downloadName, qfalse);
 		clc.downloadRestart = qtrue;
 	}
 	else {

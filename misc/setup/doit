@@ -73,7 +73,7 @@ for arch in "${archs[@]}"; do
 	install -m 755 $topdir/build/release-linux-$arch/ioquake3.$arch $dst/ioquake3.$arch
 	install -m 755 $topdir/build/release-linux-$arch/ioq3ded.$arch $dst/ioq3ded.$arch
 	install -m 755 $topdir/build/release-linux-$arch/renderer_opengl1_$arch.so $dst/renderer_opengl1_$arch.so
-	install -m 755 $topdir/build/release-linux-$arch/renderer_rend2_$arch.so $dst/renderer_rend2_$arch.so
+	install -m 755 $topdir/build/release-linux-$arch/renderer_opengl2_$arch.so $dst/renderer_opengl2_$arch.so
 	install -m 644 $topdir/build/release-linux-$arch/baseq3/*.so $dst/baseq3
 	install -m 644 $topdir/build/release-linux-$arch/missionpack/*.so $dst/missionpack
 	for i in cgame qagame ui; do

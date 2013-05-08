@@ -887,9 +887,6 @@ void Z_Free( void *ptr ) {
 		block->size += other->size;
 		block->next = other->next;
 		block->next->prev = block;
-		if (other == zone->rover) {
-			zone->rover = block;
-		}
 	}
 }
 
