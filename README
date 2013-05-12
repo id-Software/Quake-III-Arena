@@ -97,6 +97,10 @@ Makefile.local:
   USE_CODEC_OPUS     - enable Ogg Opus support
   USE_MUMBLE         - enable Mumble support
   USE_VOIP           - enable built-in VoIP support
+  USE_INTERNAL_LIBS  - build internal libraries instead of dynamically
+                       linking against system libraries; this just sets
+		       the default for USE_INTERNAL_SPEEX etc.
+		       and USE_LOCAL_HEADERS
   USE_INTERNAL_SPEEX - build internal speex library instead of dynamically
                        linking against system libspeex
   USE_FREETYPE       - enable FreeType support for rendering fonts
