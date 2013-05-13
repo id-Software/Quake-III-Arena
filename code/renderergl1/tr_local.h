@@ -1593,8 +1593,6 @@ extern	int		max_polyverts;
 
 extern	backEndData_t	*backEndData;	// the second one may not be allocated
 
-extern	volatile renderCommandList_t	*renderCommandList;
-
 
 void *R_GetCommandBuffer( int bytes );
 void RB_ExecuteRenderCommands( const void *data );
