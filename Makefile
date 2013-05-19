@@ -1038,7 +1038,13 @@ ifeq ($(USE_INTERNAL_JPEG),1)
   BASE_CFLAGS += -DUSE_INTERNAL_JPEG
   BASE_CFLAGS += -I$(JPDIR)
 else
-  RENDERER_LIBS += -ljpeg
+  # libjpeg doesn't have pkg-config yet, but let users override with
+  # "make JPEG_CFLAGS=-I/opt/jpeg/include JPEG_LIBS='-L/opt/jpeg/lib -ljpeg'"
+  # if they need to
+  JPEG_CFLAGS ?=
+  JPEG_LIBS ?= -ljpeg
+  BASE_CFLAGS += $(JPEG_CFLAGS)
+  RENDERER_LIBS += $(JPEG_LIBS)
 endif
 
 ifeq ($(USE_FREETYPE),1)
