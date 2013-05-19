@@ -271,6 +271,9 @@ ifneq ($(BUILD_CLIENT),0)
     OPENAL_LIBS=$(shell pkg-config --silence-errors --libs openal)
     SDL_CFLAGS=$(shell pkg-config --silence-errors --cflags sdl|sed 's/-Dmain=SDL_main//')
     SDL_LIBS=$(shell pkg-config --silence-errors --libs sdl)
+  else
+    # assume they're in the system default paths (no -I or -L needed)
+    CURL_LIBS=-lcurl
   endif
   # Use sdl-config if all else fails
   ifeq ($(SDL_CFLAGS),)
@@ -375,8 +378,9 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
@@ -456,8 +460,9 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
@@ -666,8 +671,9 @@ ifeq ($(PLATFORM),freebsd)
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifeq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
@@ -760,7 +766,7 @@ ifeq ($(PLATFORM),openbsd)
 
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 else # ifeq openbsd
