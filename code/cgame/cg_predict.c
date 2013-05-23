@@ -283,17 +283,17 @@ static void CG_TouchItem( centity_t *cent ) {
 	// We don't predict touching our own flag
 #ifdef MISSIONPACK
 	if( cgs.gametype == GT_1FCTF ) {
-		if( item->giTag != PW_NEUTRALFLAG ) {
+		if( item->giType == IT_TEAM && item->giTag != PW_NEUTRALFLAG ) {
 			return;
 		}
 	}
 #endif
 	if( cgs.gametype == GT_CTF ) {
 		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_RED &&
-			item->giTag == PW_REDFLAG)
+			item->giType == IT_TEAM && item->giTag == PW_REDFLAG)
 			return;
 		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_BLUE &&
-			item->giTag == PW_BLUEFLAG)
+			item->giType == IT_TEAM && item->giTag == PW_BLUEFLAG)
 			return;
 	}
 
