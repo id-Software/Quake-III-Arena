@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_extratypes.h, for mods that want to extend tr_types.h without losing compatibility with original VMs
 
 // extra refdef flags start at 0x0008
-#define RDF_NOFOG		0x0008		// don't apply fog
+#define RDF_NOFOG		0x0008		// don't apply fog to polys added using RE_AddPolyToScene
 #define RDF_EXTRA		0x0010		// Makro - refdefex_t to follow after refdef_t
 #define RDF_SUNLIGHT    0x0020      // SmileTheory - render sunlight and shadows
 
