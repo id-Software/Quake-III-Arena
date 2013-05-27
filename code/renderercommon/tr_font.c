@@ -73,10 +73,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef BUILD_FREETYPE
 #include <ft2build.h>
+#include FT_FREETYPE_H
 #include FT_ERRORS_H
 #include FT_SYSTEM_H
 #include FT_IMAGE_H
-#include FT_FREETYPE_H
 #include FT_OUTLINE_H
 
 #define _FLOOR(x)  ((x) & -64)
