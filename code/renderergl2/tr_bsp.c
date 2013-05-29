@@ -3376,6 +3376,7 @@ void RE_LoadWorldMap( const char *name ) {
 			gridLightCol[0] = ByteToFloat(data[3]);
 			gridLightCol[1] = ByteToFloat(data[4]);
 			gridLightCol[2] = ByteToFloat(data[5]);
+			(void)gridLightCol; // Suppress unused-but-set-variable warning
 
 			lat = data[7];
 			lng = data[6];
