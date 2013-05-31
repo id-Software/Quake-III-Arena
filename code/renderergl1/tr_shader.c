@@ -2955,7 +2955,7 @@ static void ScanAndLoadShaderFiles( void )
 			oldp = p;
 			
 			token = COM_ParseExt(&p, qtrue);
-			if(token[0] != '{' && token[1] != '\0')
+			if(token[0] != '{' || token[1] != '\0')
 			{
 				ri.Printf(PRINT_WARNING, "WARNING: Bad shader file %s has incorrect syntax.\n", filename);
 				ri.FS_FreeFile(buffers[i]);
