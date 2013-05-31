@@ -1515,6 +1515,7 @@ static void RB_SurfaceAxis( void ) {
 	// FIXME: implement this
 #if 0
 	GL_Bind( tr.whiteImage );
+	GL_State( GLS_DEFAULT );
 	qglLineWidth( 3 );
 	qglBegin( GL_LINES );
 	qglColor3f( 1,0,0 );
