@@ -3601,7 +3601,13 @@ static void ScanAndLoadShaderFiles( void )
 			token = COM_ParseExt(&p, qtrue);
 			if(token[0] != '{' || token[1] != '\0')
 			{
-				ri.Printf(PRINT_WARNING, "WARNING: Bad shader file %s has incorrect syntax.\n", filename);
+				ri.Printf(PRINT_WARNING, "WARNING: Ignoring shader file %s. Shader \"%s\" on line %d missing opening brace",
+							filename, shaderName, shaderLine);
+				if (token[0])
+				{
+					ri.Printf(PRINT_WARNING, " (found \"%s\" on line %d)", token, COM_GetCurrentParseLine());
+				}
+				ri.Printf(PRINT_WARNING, ".\n");
 				ri.FS_FreeFile(buffers[i]);
 				buffers[i] = NULL;
 				break;
