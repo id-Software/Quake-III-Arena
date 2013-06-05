@@ -352,11 +352,6 @@ void CL_SystemInfoChanged( void ) {
 	// in some cases, outdated cp commands might get sent with this news serverId
 	cl.serverId = atoi( Info_ValueForKey( systemInfo, "sv_serverid" ) );
 
-	// don't set any vars when playing a demo
-	if ( clc.demoplaying ) {
-		return;
-	}
-
 #ifdef USE_VOIP
 #ifdef LEGACY_PROTOCOL
 	if(clc.compat)
@@ -368,6 +363,11 @@ void CL_SystemInfoChanged( void ) {
 		clc.voipEnabled = atoi(s);
 	}
 #endif
+
+	// don't set any vars when playing a demo
+	if ( clc.demoplaying ) {
+		return;
+	}
 
 	s = Info_ValueForKey( systemInfo, "sv_cheats" );
 	cl_connectedToCheatServer = atoi( s );
