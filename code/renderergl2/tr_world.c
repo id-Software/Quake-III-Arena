@@ -36,6 +36,10 @@ static qboolean	R_CullSurface( msurface_t *surf ) {
 		return qfalse;
 	}
 
+	if ( *surf->data == SF_GRID && r_nocurves->integer ) {
+		return qtrue;
+	}
+
 	if (surf->cullinfo.type & CULLINFO_PLANE)
 	{
 		// Only true for SF_FACE, so treat like its own function
@@ -554,7 +558,7 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits, 
 		}
 
 		// add merged and unmerged surfaces
-		if (tr.world->viewSurfaces)
+		if (tr.world->viewSurfaces && !r_nocurves->integer)
 			view = tr.world->viewSurfaces + node->firstmarksurface;
 		else
 			view = tr.world->marksurfaces + node->firstmarksurface;
