@@ -218,6 +218,8 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 
 	if ( dlightBits ) {
 		tr.pc.c_dlightSurfaces++;
+	} else {
+		tr.pc.c_dlightSurfacesCulled++;
 	}
 
 	return dlightBits;
