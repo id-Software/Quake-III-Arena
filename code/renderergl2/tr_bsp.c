@@ -524,11 +524,13 @@ static float FatPackU(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
 	if(tr.fatLightmapSize > 0)
 	{
-		int             x = lightmapnum % tr.fatLightmapStep;
+		int             x;
+
+		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
+
+		x = lightmapnum % tr.fatLightmapStep;
 
 		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)x);
 	}
@@ -544,11 +546,13 @@ static float FatPackV(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
 	if(tr.fatLightmapSize > 0)
 	{
-		int             y = lightmapnum / tr.fatLightmapStep;
+		int             y;
+
+		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
+
+		y = lightmapnum / tr.fatLightmapStep;
 
 		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)y);
 	}
