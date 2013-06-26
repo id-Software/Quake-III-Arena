@@ -503,7 +503,8 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 			xOut = 0;
 			yOut = 0;
 			ri.Free(imageBuff);
-			i++;
+			if(i == GLYPH_END)
+				i++;
 		} else {
 			Com_Memcpy(&font->glyphs[i], glyph, sizeof(glyphInfo_t));
 			i++;
