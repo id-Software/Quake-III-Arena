@@ -252,6 +252,9 @@ void SV_MasterHeartbeat(const char *message)
 	if ( svs.time < svs.nextHeartbeatTime )
 		return;
 
+	if ( !Q_stricmp( com_gamename->string, LEGACY_MASTER_GAMENAME ) )
+		message = LEGACY_HEARTBEAT_FOR_MASTER;
+
 	svs.nextHeartbeatTime = svs.time + HEARTBEAT_MSEC;
 
 	// send to group masters
