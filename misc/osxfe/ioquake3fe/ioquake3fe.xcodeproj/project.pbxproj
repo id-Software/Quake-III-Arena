@@ -3,16 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		278714DB1791207600094CA3 /* quake3_flat.icns in Resources */ = {isa = PBXBuildFile; fileRef = 278714DA1791207600094CA3 /* quake3_flat.icns */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C30C62180F677DD30043A4E2 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = C30C62170F677DD30043A4E2 /* Controller.m */; };
 		C30C631D0F67A37E0043A4E2 /* ErrorWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C30C631C0F67A37E0043A4E2 /* ErrorWindow.m */; };
-		C30C638F0F67AA7B0043A4E2 /* ioquake3.icns in Resources */ = {isa = PBXBuildFile; fileRef = C30C638E0F67AA7B0043A4E2 /* ioquake3.icns */; };
 		C34EC1F60F68433A00C42E7D /* ErrorWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = C34EC1F50F68433A00C42E7D /* ErrorWindowController.m */; };
 		C37357890F68280200B1A10C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C37357850F68280200B1A10C /* MainMenu.xib */; };
 		C373578A0F68280200B1A10C /* ErrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = C37357870F68280200B1A10C /* ErrorWindow.xib */; };
@@ -22,6 +22,7 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		278714DA1791207600094CA3 /* quake3_flat.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = quake3_flat.icns; path = ../../quake3_flat.icns; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -32,7 +33,6 @@
 		C30C62170F677DD30043A4E2 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		C30C631B0F67A37E0043A4E2 /* ErrorWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorWindow.h; sourceTree = "<group>"; };
 		C30C631C0F67A37E0043A4E2 /* ErrorWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorWindow.m; sourceTree = "<group>"; };
-		C30C638E0F67AA7B0043A4E2 /* ioquake3.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = ioquake3.icns; sourceTree = "<group>"; };
 		C34EC1F40F68433A00C42E7D /* ErrorWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorWindowController.h; sourceTree = "<group>"; };
 		C34EC1F50F68433A00C42E7D /* ErrorWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorWindowController.m; sourceTree = "<group>"; };
 		C37357860F68280200B1A10C /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -116,7 +116,7 @@
 			children = (
 				C37357850F68280200B1A10C /* MainMenu.xib */,
 				C37357870F68280200B1A10C /* ErrorWindow.xib */,
-				C30C638E0F67AA7B0043A4E2 /* ioquake3.icns */,
+				278714DA1791207600094CA3 /* quake3_flat.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 			);
@@ -158,9 +158,16 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ioquake3fe" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* ioquake3fe */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -176,9 +183,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
-				C30C638F0F67AA7B0043A4E2 /* ioquake3.icns in Resources */,
 				C37357890F68280200B1A10C /* MainMenu.xib in Resources */,
 				C373578A0F68280200B1A10C /* ErrorWindow.xib in Resources */,
+				278714DB1791207600094CA3 /* quake3_flat.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,15 +237,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ioquake3fe_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = ioquake3fe;
 			};
 			name = Debug;
@@ -247,12 +255,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ioquake3fe_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = ioquake3fe;
 			};
 			name = Release;
@@ -260,26 +270,24 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.4;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.4;
+				SDKROOT = "";
 			};
 			name = Release;
 		};
