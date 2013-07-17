@@ -994,9 +994,8 @@
 				INFOPLIST_FILE = "ioquake3-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
 					"\"$(SRCROOT)/../../code/libs/macosx\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-dqrqeayrbnbwitdwenoviousqwyc/Build/Products/Debug\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-bwsysqgnnblpppgnczkimhgcpjhj/Build/Products/Debug\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = ioquake3;
@@ -1020,9 +1019,8 @@
 				INFOPLIST_FILE = "ioquake3-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
 					"\"$(SRCROOT)/../../code/libs/macosx\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-dqrqeayrbnbwitdwenoviousqwyc/Build/Products/Debug\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-bwsysqgnnblpppgnczkimhgcpjhj/Build/Products/Debug\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = ioquake3;
