@@ -116,7 +116,7 @@ HAS_LIPO=`command -v lipo`
 HAS_CP=`command -v cp`
 
 # if lipo is not available, we cannot make a universal binary, print a warning
-if [ ! -x "${HAS_LIPO}" ]; then
+if [ ! -x "${HAS_LIPO}" ] && [ "${CURRENT_ARCH}" == "" ]; then
 	CURRENT_ARCH=`uname -m`
 	if [ "${CURRENT_ARCH}" == "i386" ]; then CURRENT_ARCH="x86"; fi
 	echo "$0 cannot make a universal binary, falling back to architecture ${CURRENT_ARCH}"
