@@ -303,6 +303,7 @@ BUNDLEDIR="${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}"
 
 # TODO: figure out if we can make universal binaries when cross-compiling.
 # lipo on non-mac os x platforms? libtool?
+# simply copying here might stomp on other architectures....
 function action()
 {
 	HAS_LIPO=`which lipo`
