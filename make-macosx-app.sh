@@ -3,7 +3,11 @@
 # Let's make the user give us a target to work with
 # architecture is optional
 # if used, it we will store the .app bundle in the target arch build directory
-if [ $# == 0 ] || [ $# -gt 2 ]; then
+
+# TODO: check for 1 or two parameters
+#if [ $# == 0 ] || [ $# -gt 2 ]; then
+
+if [ "$1" == "" ]; then
 	echo "Usage:   $0 target <arch>"
 	echo "Example: $0 release x86"
 	echo "Valid targets are:"
