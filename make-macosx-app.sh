@@ -1,13 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 # Let's make the user give us a target to work with
 # architecture is optional
 # if used, it we will store the .app bundle in the target arch build directory
-
-# TODO: check for 1 or two parameters
-#if [ $# = 0 ] || [ $# -gt 2 ]; then
-
-if [ "$1" = "" ]; then
+if [ $# == 0 ] || [ $# -gt 2 ]; then
 	echo "Usage:   $0 target <arch>"
 	echo "Example: $0 release x86"
 	echo "Valid targets are:"
@@ -22,9 +18,9 @@ if [ "$1" = "" ]; then
 	exit 1
 fi
 
-if [ "$1" = "release" ]; then
+if [ "$1" == "release" ]; then
 	TARGET_NAME="release"
-elif [ "$1" = "debug" ]; then
+elif [ "$1" == "debug" ]; then
 	TARGET_NAME="debug"
 else
 	echo "Invalid target: $1"
@@ -37,11 +33,11 @@ fi
 CURRENT_ARCH=""
 
 if [ "$2" != "" ]; then
-	if [ "$2" = "x86" ]; then
+	if [ "$2" == "x86" ]; then
 		CURRENT_ARCH="x86"
-	elif [ "$2" = "x86_64" ]; then
+	elif [ "$2" == "x86_64" ]; then
 		CURRENT_ARCH="x86_64"
-	elif [ "$2" = "ppc" ]; then
+	elif [ "$2" == "ppc" ]; then
 		CURRENT_ARCH="ppc"
 	else
 		echo "Invalid architecture: $1"
@@ -78,7 +74,7 @@ function symlinkArch()
     IS64=`file "${SRCFILE}.${EXT}" | grep "x86_64" | awk '{print $NF}'`
 	ISPPC=`file "${SRCFILE}.${EXT}" | grep "ppc" | awk '{print $NF}'`
 
-    if [ "${IS32}" = "i386" ]; then
+    if [ "${IS32}" == "i386" ]; then
         if [ ! -L "${DSTFILE}x86.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}x86.${EXT}"
         fi
@@ -86,7 +82,7 @@ function symlinkArch()
         rm "${DSTFILE}x86.${EXT}"
     fi
 
-    if [ "${IS64}" = "x86_64" ]; then
+    if [ "${IS64}" == "x86_64" ]; then
         if [ ! -L "${DSTFILE}x86_64.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}x86_64.${EXT}"
         fi
@@ -94,7 +90,7 @@ function symlinkArch()
         rm "${DSTFILE}x86_64.${EXT}"
     fi
 
-    if [ "${ISPPC}" = "ppc" ]; then
+    if [ "${ISPPC}" == "ppc" ]; then
         if [ ! -L "${DSTFILE}ppc.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}ppc.${EXT}"
         fi
@@ -219,7 +215,7 @@ for ARCH in $SEARCH_ARCHS; do
 	fi
 done
 
-if [ "${2}" = "" ]; then
+if [ "${2}" == "" ]; then
 	BUILT_PRODUCTS_DIR="${OBJROOT}"
 else
 	BUILT_PRODUCTS_DIR="${OBJROOT}/${TARGET_NAME}-darwin-${CURRENT_ARCH}"
@@ -234,7 +230,7 @@ fi
 
 Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 
-if [ "${IOQ3_CLIENT_ARCHS}" = "" ]; then
+if [ "${IOQ3_CLIENT_ARCHS}" == "" ]; then
 	echo "$0: no ioquake3 binary architectures were found for target '${TARGET_NAME}'"
 	exit 1
 else
