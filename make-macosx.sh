@@ -34,7 +34,6 @@ APPBUNDLE=ioquake3.app
 BINARY=ioquake3.${BUILDARCH}
 DEDBIN=ioq3ded.${BUILDARCH}
 PKGINFO=APPLIOQ3
-ICNS=misc/quake3.icns
 DESTDIR=build/release-darwin-${BUILDARCH}
 BASEDIR=baseq3
 MPACKDIR=missionpack
@@ -107,61 +106,5 @@ if [ -d build/release-darwin-${BUILDARCH} ]; then
 fi
 (ARCH=${BUILDARCH} CFLAGS=$ARCH_CFLAGS LDFLAGS=$ARCH_LDFLAGS make -j$NCPU) || exit 1;
 
-echo "Creating .app bundle $DESTDIR/$APPBUNDLE"
-if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR ]; then
-	mkdir -p $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR || exit 1;
-fi
-if [ ! -d $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR ]; then
-	mkdir -p $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR || exit 1;
-fi
-if [ ! -d $DESTDIR/$APPBUNDLE/Contents/Resources ]; then
-	mkdir -p $DESTDIR/$APPBUNDLE/Contents/Resources
-fi
-cp $ICNS $DESTDIR/$APPBUNDLE/Contents/Resources/ioquake3.icns || exit 1;
-echo $PKGINFO > $DESTDIR/$APPBUNDLE/Contents/PkgInfo
-echo "
-	<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-	<!DOCTYPE plist
-		PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\"
-		\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-	<plist version=\"1.0\">
-	<dict>
-		<key>CFBundleDevelopmentRegion</key>
-		<string>English</string>
-		<key>CFBundleExecutable</key>
-		<string>$BINARY</string>
-		<key>CFBundleGetInfoString</key>
-		<string>ioquake3 $Q3_VERSION</string>
-		<key>CFBundleIconFile</key>
-		<string>ioquake3.icns</string>
-		<key>CFBundleIdentifier</key>
-		<string>org.ioquake.ioquake3</string>
-		<key>CFBundleInfoDictionaryVersion</key>
-		<string>6.0</string>
-		<key>CFBundleName</key>
-		<string>ioquake3</string>
-		<key>CFBundlePackageType</key>
-		<string>APPL</string>
-		<key>CFBundleShortVersionString</key>
-		<string>$Q3_VERSION</string>
-		<key>CFBundleSignature</key>
-		<string>$PKGINFO</string>
-		<key>CFBundleVersion</key>
-		<string>$Q3_VERSION</string>
-		<key>NSExtensions</key>
-		<dict/>
-		<key>NSPrincipalClass</key>
-		<string>NSApplication</string>
-	</dict>
-	</plist>
-	" > $DESTDIR/$APPBUNDLE/Contents/Info.plist
-
-
-cp $BIN_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$BINARY
-cp $BIN_DEDOBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$DEDBIN
-cp $RENDER_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/
-cp $BASE_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$BASEDIR/
-cp $MPACK_OBJ $DESTDIR/$APPBUNDLE/Contents/MacOS/$MPACKDIR/
-cp code/libs/macosx/*.dylib $DESTDIR/$APPBUNDLE/Contents/MacOS/
-cp code/libs/macosx/*.dylib $DESTDIR
-
+# use the following shell script to build an application bundle
+"./make-macosx-app.sh" release ${BUILDARCH}

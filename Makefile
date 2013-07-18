@@ -1205,6 +1205,9 @@ endif
 
 NAKED_TARGETS=$(shell echo $(TARGETS) | sed -e "s!$(B)/!!g")
 
+MACOSX_TARGET_STRING=$(shell if [ "$(B)" == "$(BR)" ]; then echo "release"; elif [ "$(B)" == "$(BD)" ]; then echo "debug"; fi)
+MACOSX_MAKE_APP=@if [ -x "./make-macosx-app.sh" ]; then "./make-macosx-app.sh" $(MACOSX_TARGET_STRING) $(ARCH); fi
+
 print_list=@for i in $(1); \
      do \
              echo "    $$i"; \
@@ -1259,9 +1262,18 @@ ifneq ($(TARGETS),)
 endif
 
 $(B).zip: $(TARGETS)
-ifdef ARCHIVE
+ifeq ($(PLATFORM),darwin)
+  ifdef ARCHIVE
+	$(call MACOSX_MAKE_APP)
+	@rm -f $@
+	@(if [ -d "$(B)/ioquake3.app" ]; then cd $(B) && zip --symlinks -r9 ../../$@ `find "ioquake3.app" -print | sed -e "s!$(B)/!!g"`; fi)
+  endif
+endif
+ifneq ($(PLATFORM),darwin)
+  ifdef ARCHIVE
 	@rm -f $@
 	@(cd $(B) && zip -r9 ../../$@ $(NAKED_TARGETS))
+  endif
 endif
 
 makedirs:
