@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Let's make the user give us a target to work with
-# architecture is optional
-# if used, it we will store the .app bundle in the target arch build directory
+# Let's make the user give us a target to work with.
+# architecture is assumed universal if not specified, and is optional.
+# if arch is defined, it we will store the .app bundle in the target arch build directory
 if [ $# == 0 ] || [ $# -gt 2 ]; then
 	echo "Usage:   $0 target <arch>"
 	echo "Example: $0 release x86"
@@ -18,6 +18,7 @@ if [ $# == 0 ] || [ $# -gt 2 ]; then
 	exit 1
 fi
 
+# validate target name
 if [ "$1" == "release" ]; then
 	TARGET_NAME="release"
 elif [ "$1" == "debug" ]; then
@@ -32,6 +33,7 @@ fi
 
 CURRENT_ARCH=""
 
+# validate the architecture if it was specified
 if [ "$2" != "" ]; then
 	if [ "$2" == "x86" ]; then
 		CURRENT_ARCH="x86"
@@ -50,6 +52,9 @@ if [ "$2" != "" ]; then
 	fi
 fi
 
+# symlinkArch() creates a symlink with the architecture suffix.
+# meant for universal binaries, but also handles the way this script generates
+# application bundles for a single architecture as well.
 function symlinkArch()
 {
     EXT="dylib"
@@ -107,13 +112,24 @@ SEARCH_ARCHS="																	\
 	ppc																			\
 "
 
-# if the optional arch parameter is used, we'll set CURRENT_ARCH
+HAS_LIPO=`command -v lipo`
+HAS_CP=`command -v cp`
+
+# if lipo is not available, we cannot make a universal binary, print a warning
+if [ ! -x "${HAS_LIPO}" ]; then
+	CURRENT_ARCH=`uname -m`
+	if [ "${CURRENT_ARCH}" == "i386" ]; then CURRENT_ARCH="x86"; fi
+	echo "$0 cannot make a universal binary, falling back to architecture ${CURRENT_ARCH}"
+fi
+
+# if the optional arch parameter is used, replace SEARCH_ARCHS to only work with one
 if [ "${CURRENT_ARCH}" != "" ]; then
 	SEARCH_ARCHS="${CURRENT_ARCH}"
 fi
 
 AVAILABLE_ARCHS=""
 
+IOQ3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
 IOQ3_CLIENT_ARCHS=""
 IOQ3_SERVER_ARCHS=""
 IOQ3_RENDERER_GL1_ARCHS=""
@@ -157,6 +173,7 @@ UNLOCALIZED_RESOURCES_FOLDER_PATH="${CONTENTS_FOLDER_PATH}/Resources"
 EXECUTABLE_FOLDER_PATH="${CONTENTS_FOLDER_PATH}/MacOS"
 EXECUTABLE_NAME="${PRODUCT_NAME}"
 
+# loop through the architectures to build string lists for each universal binary
 for ARCH in $SEARCH_ARCHS; do
 	CURRENT_ARCH=${ARCH}
 	BUILT_PRODUCTS_DIR="${OBJROOT}/${TARGET_NAME}-darwin-${CURRENT_ARCH}"
@@ -213,14 +230,11 @@ for ARCH in $SEARCH_ARCHS; do
 	if [ -e ${BUILT_PRODUCTS_DIR}/${BASEDIR}/${IOQ3_MP_UI} ]; then
 		IOQ3_MP_UI_ARCHS="${BUILT_PRODUCTS_DIR}/${MISSIONPACKDIR}/${IOQ3_UI} ${IOQ3_MP_UI_ARCHS}"
 	fi
+
+	#echo "valid arch: ${ARCH}"
 done
 
-if [ "${2}" == "" ]; then
-	BUILT_PRODUCTS_DIR="${OBJROOT}"
-else
-	BUILT_PRODUCTS_DIR="${OBJROOT}/${TARGET_NAME}-darwin-${CURRENT_ARCH}"
-fi
-
+# final preparations and checks before attempting to make the application bundle
 cd `dirname $0`
 
 if [ ! -f Makefile ]; then
@@ -228,21 +242,33 @@ if [ ! -f Makefile ]; then
 	exit 1
 fi
 
-Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
-
 if [ "${IOQ3_CLIENT_ARCHS}" == "" ]; then
 	echo "$0: no ioquake3 binary architectures were found for target '${TARGET_NAME}'"
 	exit 1
-else
-	echo "Creating bundle '${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}'"
-	echo "with architectures:"
-	for ARCH in ${VALID_ARCHS}; do
-		echo " ${ARCH}"
-	done
-	echo ""
 fi
 
+# set the final application bundle output directory
+if [ "${2}" == "" ]; then
+	BUILT_PRODUCTS_DIR="${OBJROOT}/${TARGET_NAME}-darwin-universal"
+	if [ ! -d ${BUILT_PRODUCTS_DIR} ]; then
+		mkdir -p ${BUILT_PRODUCTS_DIR} || exit 1;
+	fi
+else
+	BUILT_PRODUCTS_DIR="${OBJROOT}/${TARGET_NAME}-darwin-${CURRENT_ARCH}"
+fi
 
+BUNDLEBINDIR="${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}"
+
+
+# here we go
+echo "Creating bundle '${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}'"
+echo "with architectures:"
+for ARCH in ${VALID_ARCHS}; do
+	echo " ${ARCH}"
+done
+echo ""
+
+# make the application bundle directories
 if [ ! -d ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}/$BASEDIR ]; then
 	mkdir -p ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}/$BASEDIR || exit 1;
 fi
@@ -253,10 +279,10 @@ if [ ! -d ${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH} ]; then
 	mkdir -p ${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH} || exit 1;
 fi
 
+# copy and generate some application bundle resources
+cp code/libs/macosx/*.dylib ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}
 cp ${ICNSDIR}/${ICNS} ${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/$ICNS || exit 1;
-
 echo -n ${PKGINFO} > ${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/PkgInfo || exit 1;
-
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\">
@@ -276,11 +302,11 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>${Q3_VERSION}</string>
+    <string>${IOQ3_VERSION}</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleVersion</key>
-    <string>${Q3_VERSION}</string>
+    <string>${IOQ3_VERSION}</string>
     <key>CGDisableCoalescedUpdates</key>
     <true/>
     <key>LSMinimumSystemVersion</key>
@@ -293,52 +319,57 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 </plist>
 " > ${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Info.plist
 
-cp code/libs/macosx/*.dylib ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}
-
-#
-# use lipo to create a universal binary in to the appropriate bundle location
-# then symlink appropriate architecture names for universal (fat) binary support
-#
-BUNDLEDIR="${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}"
-
-# TODO: figure out if we can make universal binaries when cross-compiling.
-# lipo on non-mac os x platforms? libtool?
-# simply copying here might stomp on other architectures....
+# action takes care of generating universal binaries if lipo is available
+# otherwise, it falls back to using a simple copy, expecting the first item in
+# the second parameter list to be the desired architecture
 function action()
 {
-	#echo "action ${1} ${2}"
+	COMMAND=""
 
-	if [ -x "/usr/bin/lipo" ]; then
-		lipo -create -o "${1}" "${2}"
-	#elif [ "/usr/bin/libtool" ]; then
-		#libtool -dynamic -o ${1} ${2}
+	if [ -x "${HAS_LIPO}" ]; then
+		COMMAND="${HAS_LIPO} -create -o"
+		$HAS_LIPO -create -o "${1}" ${2} # make sure $2 is treated as a list of files
+	elif [ -x ${HAS_CP} ]; then
+		COMMAND="${HAS_CP}"
+		SRC="${2// */}" # in case there is a list here, use only the first item
+		$HAS_CP "${SRC}" "${1}"
 	else
-		cp "${2}" "${1}"
+		"$0 cannot create an application bundle."
+		exit 1
 	fi
+
+	#echo "${COMMAND}" "${1}" "${2}"
 }
 
+#
+# the meat of universal binary creation
+# destination file names do not have architecture suffix.
+# action will handle merging universal binaries if supported.
+# symlink appropriate architecture names for universal (fat) binary support.
+#
+
 # executables
-action ${BUNDLEDIR}/${EXECUTABLE_NAME}				${IOQ3_CLIENT_ARCHS}
-action ${BUNDLEDIR}/${DEDICATED_NAME}				${IOQ3_SERVER_ARCHS}
+action ${BUNDLEBINDIR}/${EXECUTABLE_NAME}				"${IOQ3_CLIENT_ARCHS}"
+action ${BUNDLEBINDIR}/${DEDICATED_NAME}				"${IOQ3_SERVER_ARCHS}"
 
 # renderers
-action ${BUNDLEDIR}/${RENDERER_OPENGL1_NAME}		${IOQ3_RENDERER_GL1_ARCHS}
-action ${BUNDLEDIR}/${RENDERER_OPENGL2_NAME}		${IOQ3_RENDERER_GL2_ARCHS}
-symlinkArch "${RENDERER_OPENGL}1" "${RENDERER_OPENGL}1" "_" "${BUNDLEDIR}"
-symlinkArch "${RENDERER_OPENGL}2" "${RENDERER_OPENGL}2" "_" "${BUNDLEDIR}"
+action ${BUNDLEBINDIR}/${RENDERER_OPENGL1_NAME}		"${IOQ3_RENDERER_GL1_ARCHS}"
+action ${BUNDLEBINDIR}/${RENDERER_OPENGL2_NAME}		"${IOQ3_RENDERER_GL2_ARCHS}"
+symlinkArch "${RENDERER_OPENGL}1" "${RENDERER_OPENGL}1" "_" "${BUNDLEBINDIR}"
+symlinkArch "${RENDERER_OPENGL}2" "${RENDERER_OPENGL}2" "_" "${BUNDLEBINDIR}"
 
 # game
-action ${BUNDLEDIR}/${BASEDIR}/${CGAME_NAME}		${IOQ3_CGAME_ARCHS}
-action ${BUNDLEDIR}/${BASEDIR}/${GAME_NAME}		${IOQ3_GAME_ARCHS}
-action ${BUNDLEDIR}/${BASEDIR}/${UI_NAME}			${IOQ3_UI_ARCHS}
-symlinkArch "cgame"		"cgame"		""	"${BUNDLEDIR}/${BASEDIR}"
-symlinkArch "qagame"	"qagame"	""	"${BUNDLEDIR}/${BASEDIR}"
-symlinkArch "ui"		"ui"		""	"${BUNDLEDIR}/${BASEDIR}"
+action ${BUNDLEBINDIR}/${BASEDIR}/${CGAME_NAME}			"${IOQ3_CGAME_ARCHS}"
+action ${BUNDLEBINDIR}/${BASEDIR}/${GAME_NAME}			"${IOQ3_GAME_ARCHS}"
+action ${BUNDLEBINDIR}/${BASEDIR}/${UI_NAME}			"${IOQ3_UI_ARCHS}"
+symlinkArch "${CGAME}"	"${CGAME}"	""	"${BUNDLEBINDIR}/${BASEDIR}"
+symlinkArch "${GAME}"	"${GAME}"	""	"${BUNDLEBINDIR}/${BASEDIR}"
+symlinkArch "${UI}"		"${UI}"		""	"${BUNDLEBINDIR}/${BASEDIR}"
 
 # missionpack
-action ${BUNDLEDIR}/${MISSIONPACKDIR}/${CGAME_NAME}	${IOQ3_MP_CGAME_ARCHS}
-action ${BUNDLEDIR}/${MISSIONPACKDIR}/${GAME_NAME}		${IOQ3_MP_GAME_ARCHS}
-action ${BUNDLEDIR}/${MISSIONPACKDIR}/${UI_NAME}		${IOQ3_MP_UI_ARCHS}
-symlinkArch "cgame"		"cgame"		""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
-symlinkArch "qagame"	"qagame"	""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
-symlinkArch "ui"		"ui"		""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
+action ${BUNDLEBINDIR}/${MISSIONPACKDIR}/${CGAME_NAME}	"${IOQ3_MP_CGAME_ARCHS}"
+action ${BUNDLEBINDIR}/${MISSIONPACKDIR}/${GAME_NAME}	"${IOQ3_MP_GAME_ARCHS}"
+action ${BUNDLEBINDIR}/${MISSIONPACKDIR}/${UI_NAME}		"${IOQ3_MP_UI_ARCHS}"
+symlinkArch "${CGAME}"	"${CGAME}"	""	"${BUNDLEBINDIR}/${MISSIONPACKDIR}"
+symlinkArch "${GAME}"	"${GAME}"	""	"${BUNDLEBINDIR}/${MISSIONPACKDIR}"
+symlinkArch "${UI}"		"${UI}"		""	"${BUNDLEBINDIR}/${MISSIONPACKDIR}"
