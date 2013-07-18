@@ -436,12 +436,12 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	// make a 256x256 image buffer, once it is full, register it, clean it and keep going 
 	// until all glyphs are rendered
 
-	out = ri.Malloc(1024*1024);
+	out = ri.Malloc(256*256);
 	if (out == NULL) {
 		ri.Printf(PRINT_WARNING, "RE_RegisterFont: ri.Malloc failure during output image creation.\n");
 		return;
 	}
-	Com_Memset(out, 0, 1024*1024);
+	Com_Memset(out, 0, 256*256);
 
 	maxHeight = 0;
 
@@ -500,7 +500,7 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 				Q_strncpyz(font->glyphs[j].shaderName, name, sizeof(font->glyphs[j].shaderName));
 			}
 			lastStart = i;
-			Com_Memset(out, 0, 1024*1024);
+			Com_Memset(out, 0, 256*256);
 			xOut = 0;
 			yOut = 0;
 			ri.Free(imageBuff);
