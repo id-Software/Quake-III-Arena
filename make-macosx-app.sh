@@ -301,28 +301,46 @@ cp code/libs/macosx/*.dylib ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}
 #
 BUNDLEDIR="${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}"
 
+# TODO: figure out if we can make universal binaries when cross-compiling.
+# lipo on non-mac os x platforms? libtool?
+function action()
+{
+	HAS_LIPO=`which lipo`
+	HAS_LIBTOOL=`which libtool`
+
+	#echo "action ${1} ${2}"
+
+	if [ HAS_LIPO != "" ]; then
+		lipo -create -o "${1}" "${2}"
+	#elif [ HAS_LIBTOOL != "" ]; then
+		#libtool -dynamic -o ${1} ${2}
+	else
+		cp "${2}" "${1}"
+	fi
+}
+
 # executables
-lipo -create -o ${BUNDLEDIR}/${EXECUTABLE_NAME}				${IOQ3_CLIENT_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${DEDICATED_NAME}				${IOQ3_SERVER_ARCHS}
+action ${BUNDLEDIR}/${EXECUTABLE_NAME}				${IOQ3_CLIENT_ARCHS}
+action ${BUNDLEDIR}/${DEDICATED_NAME}				${IOQ3_SERVER_ARCHS}
 
 # renderers
-lipo -create -o ${BUNDLEDIR}/${RENDERER_OPENGL1_NAME}		${IOQ3_RENDERER_GL1_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${RENDERER_OPENGL2_NAME}		${IOQ3_RENDERER_GL2_ARCHS}
+action ${BUNDLEDIR}/${RENDERER_OPENGL1_NAME}		${IOQ3_RENDERER_GL1_ARCHS}
+action ${BUNDLEDIR}/${RENDERER_OPENGL2_NAME}		${IOQ3_RENDERER_GL2_ARCHS}
 symlinkArch "${RENDERER_OPENGL}1" "${RENDERER_OPENGL}1" "_" "${BUNDLEDIR}"
 symlinkArch "${RENDERER_OPENGL}2" "${RENDERER_OPENGL}2" "_" "${BUNDLEDIR}"
 
 # game
-lipo -create -o ${BUNDLEDIR}/${BASEDIR}/${CGAME_NAME}		${IOQ3_CGAME_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${BASEDIR}/${GAME_NAME}		${IOQ3_GAME_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${BASEDIR}/${UI_NAME}			${IOQ3_UI_ARCHS}
+action ${BUNDLEDIR}/${BASEDIR}/${CGAME_NAME}		${IOQ3_CGAME_ARCHS}
+action ${BUNDLEDIR}/${BASEDIR}/${GAME_NAME}		${IOQ3_GAME_ARCHS}
+action ${BUNDLEDIR}/${BASEDIR}/${UI_NAME}			${IOQ3_UI_ARCHS}
 symlinkArch "cgame"		"cgame"		""	"${BUNDLEDIR}/${BASEDIR}"
 symlinkArch "qagame"	"qagame"	""	"${BUNDLEDIR}/${BASEDIR}"
 symlinkArch "ui"		"ui"		""	"${BUNDLEDIR}/${BASEDIR}"
 
 # missionpack
-lipo -create -o ${BUNDLEDIR}/${MISSIONPACKDIR}/${CGAME_NAME}	${IOQ3_MP_CGAME_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${MISSIONPACKDIR}/${GAME_NAME}		${IOQ3_MP_GAME_ARCHS}
-lipo -create -o ${BUNDLEDIR}/${MISSIONPACKDIR}/${UI_NAME}		${IOQ3_MP_UI_ARCHS}
+action ${BUNDLEDIR}/${MISSIONPACKDIR}/${CGAME_NAME}	${IOQ3_MP_CGAME_ARCHS}
+action ${BUNDLEDIR}/${MISSIONPACKDIR}/${GAME_NAME}		${IOQ3_MP_GAME_ARCHS}
+action ${BUNDLEDIR}/${MISSIONPACKDIR}/${UI_NAME}		${IOQ3_MP_UI_ARCHS}
 symlinkArch "cgame"		"cgame"		""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
 symlinkArch "qagame"	"qagame"	""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
 symlinkArch "ui"		"ui"		""	"${BUNDLEDIR}/${MISSIONPACKDIR}"
