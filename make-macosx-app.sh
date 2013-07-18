@@ -306,14 +306,11 @@ BUNDLEDIR="${BUILT_PRODUCTS_DIR}/${EXECUTABLE_FOLDER_PATH}"
 # simply copying here might stomp on other architectures....
 function action()
 {
-	HAS_LIPO=`which lipo`
-	HAS_LIBTOOL=`which libtool`
-
 	#echo "action ${1} ${2}"
 
-	if [ HAS_LIPO != "" ]; then
+	if [ -x "/usr/bin/lipo" ]; then
 		lipo -create -o "${1}" "${2}"
-	#elif [ HAS_LIBTOOL != "" ]; then
+	#elif [ "/usr/bin/libtool" ]; then
 		#libtool -dynamic -o ${1} ${2}
 	else
 		cp "${2}" "${1}"
