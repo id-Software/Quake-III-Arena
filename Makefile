@@ -1205,8 +1205,8 @@ endif
 
 NAKED_TARGETS=$(shell echo $(TARGETS) | sed -e "s!$(B)/!!g")
 
-MACOSX_TARGET_STRING=$(shell if [ "$(B)" == "$(BR)" ]; then echo "release"; elif [ "$(B)" == "$(BD)" ]; then echo "debug"; fi)
-MACOSX_MAKE_APP=@if [ -x "./make-macosx-app.sh" ]; then "./make-macosx-app.sh" $(MACOSX_TARGET_STRING) $(ARCH); fi
+#MACOSX_TARGET_STRING=$(shell if [ "$(B)" == "$(BR)" ]; then echo "release"; elif [ "$(B)" == "$(BD)" ]; then echo "debug"; fi)
+MACOSX_MAKE_APP=@if [ -x "./make-macosx-app.sh" ]; then "./make-macosx-app.sh" release $(ARCH); fi
 
 print_list=@for i in $(1); \
      do \

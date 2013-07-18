@@ -234,10 +234,10 @@ if [ "${IOQ3_CLIENT_ARCHS}" == "" ]; then
 	echo "$0: no ioquake3 binary architectures were found for target '${TARGET_NAME}'"
 	exit 1
 else
-	echo "Creating bundle '${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}'\c"
-	echo " with architectures: \c"
+	echo "Creating bundle '${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}'"
+	echo "with architectures:"
 	for ARCH in ${VALID_ARCHS}; do
-		echo "${ARCH} \c"
+		echo " ${ARCH}"
 	done
 	echo ""
 fi
