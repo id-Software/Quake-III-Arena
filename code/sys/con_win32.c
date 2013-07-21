@@ -37,6 +37,7 @@ static CONSOLE_CURSOR_INFO qconsole_orig_cursorinfo;
 // cmd history
 static char qconsole_history[ QCONSOLE_HISTORY ][ MAX_EDIT_LINE ];
 static int qconsole_history_pos = -1;
+static int qconsole_history_lines = 0;
 static int qconsole_history_oldest = 0;
 
 // current edit buffer
@@ -107,6 +108,9 @@ static void CON_HistAdd( void )
 	Q_strncpyz( qconsole_history[ qconsole_history_oldest ], qconsole_line,
 		sizeof( qconsole_history[ qconsole_history_oldest ] ) );
 
+	if( qconsole_history_lines < QCONSOLE_HISTORY )
+		qconsole_history_lines++;
+
 	if( qconsole_history_oldest >= QCONSOLE_HISTORY - 1 )
 		qconsole_history_oldest = 0;
 	else
@@ -128,7 +132,7 @@ static void CON_HistPrev( void )
 		( QCONSOLE_HISTORY - 1 ) : ( qconsole_history_pos - 1 );
 
 	// don' t allow looping through history
-	if( pos == qconsole_history_oldest )
+	if( pos == qconsole_history_oldest || pos >= qconsole_history_lines )
 		return;
 
 	qconsole_history_pos = pos;
@@ -146,12 +150,17 @@ static void CON_HistNext( void )
 {
 	int pos;
 
+	// don' t allow looping through history
+	if( qconsole_history_pos == qconsole_history_oldest )
+		return;
+
 	pos = ( qconsole_history_pos >= QCONSOLE_HISTORY - 1 ) ?
 		0 : ( qconsole_history_pos + 1 ); 
 
 	// clear the edit buffer if they try to advance to a future command
 	if( pos == qconsole_history_oldest )
 	{
+		qconsole_history_pos = pos;
 		qconsole_line[ 0 ] = '\0';
 		qconsole_linelen = 0;
 		return;
