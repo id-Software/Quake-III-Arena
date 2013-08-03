@@ -75,11 +75,11 @@ function symlinkArch()
 
     pushd "${DSTPATH}" > /dev/null
 
-    IS32=`file "${SRCFILE}.${EXT}" | grep "i386" | awk '{print $NF}'`
-    IS64=`file "${SRCFILE}.${EXT}" | grep "x86_64" | awk '{print $NF}'`
-	ISPPC=`file "${SRCFILE}.${EXT}" | grep "ppc" | awk '{print $NF}'`
+    IS32=`file "${SRCFILE}.${EXT}" | grep "i386"`
+    IS64=`file "${SRCFILE}.${EXT}" | grep "x86_64"`
+    ISPPC=`file "${SRCFILE}.${EXT}" | grep "ppc"`
 
-    if [ "${IS32}" == "i386" ]; then
+    if [ "${IS32}" != "" ]; then
         if [ ! -L "${DSTFILE}x86.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}x86.${EXT}"
         fi
@@ -87,7 +87,7 @@ function symlinkArch()
         rm "${DSTFILE}x86.${EXT}"
     fi
 
-    if [ "${IS64}" == "x86_64" ]; then
+    if [ "${IS64}" != "" ]; then
         if [ ! -L "${DSTFILE}x86_64.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}x86_64.${EXT}"
         fi
@@ -95,7 +95,7 @@ function symlinkArch()
         rm "${DSTFILE}x86_64.${EXT}"
     fi
 
-    if [ "${ISPPC}" == "ppc" ]; then
+    if [ "${ISPPC}" != "" ]; then
         if [ ! -L "${DSTFILE}ppc.${EXT}" ]; then
             ln -s "${SRCFILE}.${EXT}" "${DSTFILE}ppc.${EXT}"
         fi
