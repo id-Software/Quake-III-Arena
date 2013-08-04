@@ -1,18 +1,11 @@
 #!/bin/bash
 CC=gcc-4.0
-BINARY=ioquake3.ub
 
 cd `dirname $0`
 if [ ! -f Makefile ]; then
 	echo "This script must be run from the ioquake3 build directory"
 	exit 1
 fi
-
-Q3_VERSION=`grep '^VERSION=' Makefile | sed -e 's/.*=\(.*\)/\1/'`
-
-# We only care if we're >= 10.4, not if we're specifically Tiger.
-# "8" is the Darwin major kernel version.
-TIGERHOST=`uname -r |perl -w -p -e 's/\A(\d+)\..*\Z/$1/; $_ = (($_ >= 8) ? "1" : "0");'`
 
 # we want to use the oldest available SDK for max compatiblity. However 10.4 and older
 # can not build 64bit binaries, making 10.5 the minimum version.   This has been tested 
