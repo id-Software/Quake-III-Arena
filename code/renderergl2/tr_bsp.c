@@ -350,7 +350,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 				}
 
 				if (!size)
-					ri.Error(ERR_DROP, "Bad header for %s!\n", filename);
+					ri.Error(ERR_DROP, "Bad header for %s!", filename);
 
 				size -= 2;
 				p += 2;
@@ -368,10 +368,10 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 
 #if 0 // HDRFILE_RGBE
 				if (size != tr.lightmapSize * tr.lightmapSize * 4)
-					ri.Error(ERR_DROP, "Bad size for %s (%i)!\n", filename, size);
+					ri.Error(ERR_DROP, "Bad size for %s (%i)!", filename, size);
 #else // HDRFILE_FLOAT
 				if (size != tr.lightmapSize * tr.lightmapSize * 12)
-					ri.Error(ERR_DROP, "Bad size for %s (%i)!\n", filename, size);
+					ri.Error(ERR_DROP, "Bad size for %s (%i)!", filename, size);
 #endif
 			}
 			else
@@ -524,11 +524,13 @@ static float FatPackU(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
 	if(tr.fatLightmapSize > 0)
 	{
-		int             x = lightmapnum % tr.fatLightmapStep;
+		int             x;
+
+		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
+
+		x = lightmapnum % tr.fatLightmapStep;
 
 		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)x);
 	}
@@ -544,11 +546,13 @@ static float FatPackV(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
 	if(tr.fatLightmapSize > 0)
 	{
-		int             y = lightmapnum / tr.fatLightmapStep;
+		int             y;
+
+		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
+
+		y = lightmapnum / tr.fatLightmapStep;
 
 		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)y);
 	}
@@ -2184,7 +2188,7 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 		{
 			//ri.Printf(PRINT_ALL, "Found!\n");
 			if (size != sizeof(float) * 3 * (verts->filelen / sizeof(*dv)))
-				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!\n", filename, size, (int)((sizeof(float)) * 3 * (verts->filelen / sizeof(*dv))));
+				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!", filename, size, (int)((sizeof(float)) * 3 * (verts->filelen / sizeof(*dv))));
 		}
 	}
 
@@ -2685,7 +2689,7 @@ void R_LoadLightGrid( lump_t *l ) {
 
 			if (size != sizeof(float) * 6 * numGridPoints)
 			{
-				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!\n", filename, size, (int)(sizeof(float)) * 6 * numGridPoints);
+				ri.Error(ERR_DROP, "Bad size for %s (%i, expected %i)!", filename, size, (int)(sizeof(float)) * 6 * numGridPoints);
 			}
 
 			w->hdrLightGrid = ri.Hunk_Alloc(size, h_low);
@@ -3352,11 +3356,11 @@ void RE_LoadWorldMap( const char *name ) {
 	if (0)
 	{
 		world_t	*w;
-
-		w = &s_worldData;
 		uint8_t *primaryLightGrid, *data;
 		int lightGridSize;
 		int i;
+
+		w = &s_worldData;
 
 		lightGridSize = w->lightGridBounds[0] * w->lightGridBounds[1] * w->lightGridBounds[2];
 		primaryLightGrid = ri.Malloc(lightGridSize * sizeof(*primaryLightGrid));
@@ -3376,6 +3380,7 @@ void RE_LoadWorldMap( const char *name ) {
 			gridLightCol[0] = ByteToFloat(data[3]);
 			gridLightCol[1] = ByteToFloat(data[4]);
 			gridLightCol[2] = ByteToFloat(data[5]);
+			(void)gridLightCol; // Suppress unused-but-set-variable warning
 
 			lat = data[7];
 			lng = data[6];

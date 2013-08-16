@@ -790,15 +790,15 @@ static void IN_ProcessEvents( void )
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
 				{
-					unsigned char b;
+					int b;
 					switch( e.button.button )
 					{
-						case 1:   b = K_MOUSE1;     break;
-						case 2:   b = K_MOUSE3;     break;
-						case 3:   b = K_MOUSE2;     break;
-						case 4:   b = K_MOUSE4;     break;
-						case 5:   b = K_MOUSE5;     break;
-						default:  b = K_AUX1 + ( e.button.button - 8 ) % 16; break;
+						case SDL_BUTTON_LEFT:   b = K_MOUSE1;     break;
+						case SDL_BUTTON_MIDDLE: b = K_MOUSE3;     break;
+						case SDL_BUTTON_RIGHT:  b = K_MOUSE2;     break;
+						case SDL_BUTTON_X1:     b = K_MOUSE4;     break;
+						case SDL_BUTTON_X2:     b = K_MOUSE5;     break;
+						default:                b = K_AUX1 + ( e.button.button - SDL_BUTTON_X2 + 1 ) % 16; break;
 					}
 					Com_QueueEvent( 0, SE_KEY, b,
 						( e.type == SDL_MOUSEBUTTONDOWN ? qtrue : qfalse ), 0, NULL );
@@ -885,7 +885,7 @@ void IN_Frame( void )
 	if( ( vidRestartTime != 0 ) && ( vidRestartTime < Sys_Milliseconds( ) ) )
 	{
 		vidRestartTime = 0;
-		Cbuf_AddText( "vid_restart" );
+		Cbuf_AddText( "vid_restart\n" );
 	}
 }
 

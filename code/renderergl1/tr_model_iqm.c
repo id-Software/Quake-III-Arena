@@ -206,7 +206,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	}
 	vertexarray = (iqmVertexArray_t *)((byte *)header + header->ofs_vertexarrays);
 	for( i = 0; i < header->num_vertexarrays; i++, vertexarray++ ) {
-		int	j, n, *intPtr;
+		int n, *intPtr;
 
 		if( vertexarray->size <= 0 || vertexarray->size > 4 ) {
 			return qfalse;
@@ -318,17 +318,17 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		}
 
 		// check ioq3 limits
-		if ( mesh->num_vertexes > SHADER_MAX_VERTEXES ) 
+		if ( mesh->num_vertexes >= SHADER_MAX_VERTEXES ) 
 		{
 			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i verts on %s (%i).\n",
-				  mod_name, SHADER_MAX_VERTEXES, meshName[0] ? meshName : "a surface",
+				  mod_name, SHADER_MAX_VERTEXES - 1, meshName[0] ? meshName : "a surface",
 				  mesh->num_vertexes );
 			return qfalse;
 		}
-		if ( mesh->num_triangles*3 > SHADER_MAX_INDEXES ) 
+		if ( mesh->num_triangles*3 >= SHADER_MAX_INDEXES ) 
 		{
 			ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has more than %i triangles on %s (%i).\n",
-				  mod_name, SHADER_MAX_INDEXES / 3, meshName[0] ? meshName : "a surface",
+				  mod_name, ( SHADER_MAX_INDEXES / 3 ) - 1, meshName[0] ? meshName : "a surface",
 				  mesh->num_triangles );
 			return qfalse;
 		}
@@ -953,10 +953,10 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	float		jointMats[IQM_MAX_JOINTS * 12];
 	int		i;
 
-	vec4_t		*outXYZ = &tess.xyz[tess.numVertexes];
-	vec4_t		*outNormal = &tess.normal[tess.numVertexes];
-	vec2_t		(*outTexCoord)[2] = &tess.texCoords[tess.numVertexes];
-	color4ub_t	*outColor = &tess.vertexColors[tess.numVertexes];
+	vec4_t		*outXYZ;
+	vec4_t		*outNormal;
+	vec2_t		(*outTexCoord)[2];
+	color4ub_t	*outColor;
 
 	int	frame = data->num_frames ? backEnd.currentEntity->e.frame % data->num_frames : 0;
 	int	oldframe = data->num_frames ? backEnd.currentEntity->e.oldframe % data->num_frames : 0;
@@ -967,6 +967,11 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	glIndex_t	base;
 
 	RB_CHECKOVERFLOW( surf->num_vertexes, surf->num_triangles * 3 );
+
+	outXYZ = &tess.xyz[tess.numVertexes];
+	outNormal = &tess.normal[tess.numVertexes];
+	outTexCoord = &tess.texCoords[tess.numVertexes];
+	outColor = &tess.vertexColors[tess.numVertexes];
 
 	// compute interpolated joint matrices
 	if ( data->num_joints > 0 ) {

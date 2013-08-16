@@ -415,6 +415,7 @@ static void ProjectDlightTexture( void ) {
 
 		backEnd.pc.c_totalIndexes += tess.numIndexes;
 		backEnd.pc.c_dlightIndexes += tess.numIndexes;
+		backEnd.pc.c_dlightVertexes += tess.numVertexes;
 	}
 }
 
@@ -874,6 +875,7 @@ static void ForwardDlight( void ) {
 
 		backEnd.pc.c_totalIndexes += tess.numIndexes;
 		backEnd.pc.c_dlightIndexes += tess.numIndexes;
+		backEnd.pc.c_dlightVertexes += tess.numVertexes;
 	}
 }
 

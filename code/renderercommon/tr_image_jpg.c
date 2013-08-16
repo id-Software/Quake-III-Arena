@@ -42,7 +42,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #  endif
 #endif
 
-static void R_JPGErrorExit(j_common_ptr cinfo)
+static void __attribute__((__noreturn__)) R_JPGErrorExit(j_common_ptr cinfo)
 {
   char buffer[JMSG_LENGTH_MAX];
   

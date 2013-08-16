@@ -218,7 +218,6 @@ expand(Tokenrow *trp, Nlist *np)
 	insertrow(trp, ntokc, &ntr);
 	trp->tp -= rowlen(&ntr);
 	dofree(ntr.bp);
-	return;
 }	
 
 /*

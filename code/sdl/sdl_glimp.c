@@ -820,7 +820,7 @@ void GLimp_EndFrame( void )
 
 			// SDL_WM_ToggleFullScreen didn't work, so do it the slow way
 			if( !sdlToggled )
-				ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart");
+				ri.Cmd_ExecuteText(EXEC_APPEND, "vid_restart\n");
 
 			ri.IN_Restart( );
 		}
