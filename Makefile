@@ -474,11 +474,11 @@ ifeq ($(PLATFORM),darwin)
 
   # We copy sdlmain before ranlib'ing it so that subversion doesn't think
   #  the file has been modified by each build.
-  LIBSDLMAIN=$(B)/libSDLmain.a
-  LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDLmain.a
+  LIBSDLMAIN=$(B)/libSDL2main.a
+  LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDL2main.a
   CLIENT_LIBS += -framework IOKit \
-    $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
-  RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL-1.2.0.dylib
+    $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+  RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
 
   OPTIMIZEVM += -falign-loops=16
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
