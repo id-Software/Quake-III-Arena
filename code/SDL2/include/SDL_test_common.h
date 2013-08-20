@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_test_common.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
@@ -34,9 +34,9 @@
 
 #include "SDL.h"
 
-#ifdef __NDS__
-#define DEFAULT_WINDOW_WIDTH  256
-#define DEFAULT_WINDOW_HEIGHT (2*192)
+#if defined(__PSP__)
+#define DEFAULT_WINDOW_WIDTH  480
+#define DEFAULT_WINDOW_HEIGHT 272
 #else
 #define DEFAULT_WINDOW_WIDTH  640
 #define DEFAULT_WINDOW_HEIGHT 480
@@ -69,6 +69,9 @@ typedef struct
     int window_minH;
     int window_maxW;
     int window_maxH;
+    int logical_w;
+    int logical_h;
+    float scale;
     int depth;
     int refresh_rate;
     int num_windows;
@@ -104,14 +107,13 @@ typedef struct
     int gl_accelerated;
     int gl_major_version;
     int gl_minor_version;
+    int gl_debug;
 } SDLTest_CommonState;
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* Function prototypes */
@@ -175,9 +177,7 @@ void SDLTest_CommonQuit(SDLTest_CommonState * state);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

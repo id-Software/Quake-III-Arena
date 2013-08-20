@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_endian.h
- *  
+ *
  *  Functions for reading and writing endian-specific values
  */
 
@@ -34,8 +34,8 @@
  *  \name The two types of endianness
  */
 /*@{*/
-#define SDL_LIL_ENDIAN	1234
-#define SDL_BIG_ENDIAN	4321
+#define SDL_LIL_ENDIAN  1234
+#define SDL_BIG_ENDIAN  4321
 /*@}*/
 
 #ifndef SDL_BYTEORDER           /* Not defined in SDL_config.h? */
@@ -48,9 +48,9 @@
     (defined(__MIPS__) && defined(__MISPEB__)) || \
     defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
     defined(__sparc__)
-#define SDL_BYTEORDER	SDL_BIG_ENDIAN
+#define SDL_BYTEORDER   SDL_BIG_ENDIAN
 #else
-#define SDL_BYTEORDER	SDL_LIL_ENDIAN
+#define SDL_BYTEORDER   SDL_LIL_ENDIAN
 #endif
 #endif /* __linux __ */
 #endif /* !SDL_BYTEORDER */
@@ -59,36 +59,29 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
  *  \file SDL_endian.h
- *  
- *  Uses inline functions for compilers that support them, and static
- *  functions for those that do not.  Because these functions become
- *  static for compilers that do not support inline functions, this
- *  header should only be included in files that actually use them.
  */
 #if defined(__GNUC__) && defined(__i386__) && \
    !(__GNUC__ == 2 && __GNUC_MINOR__ == 95 /* broken gcc version */)
-static __inline__ Uint16
+SDL_FORCE_INLINE Uint16
 SDL_Swap16(Uint16 x)
 {
   __asm__("xchgb %b0,%h0": "=q"(x):"0"(x));
     return x;
 }
 #elif defined(__GNUC__) && defined(__x86_64__)
-static __inline__ Uint16
+SDL_FORCE_INLINE Uint16
 SDL_Swap16(Uint16 x)
 {
   __asm__("xchgb %b0,%h0": "=Q"(x):"0"(x));
     return x;
 }
 #elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static __inline__ Uint16
+SDL_FORCE_INLINE Uint16
 SDL_Swap16(Uint16 x)
 {
     int result;
@@ -97,14 +90,14 @@ SDL_Swap16(Uint16 x)
     return (Uint16)result;
 }
 #elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__)) && !defined(__mcoldfire__)
-static __inline__ Uint16
+SDL_FORCE_INLINE Uint16
 SDL_Swap16(Uint16 x)
 {
   __asm__("rorw #8,%0": "=d"(x): "0"(x):"cc");
     return x;
 }
 #else
-static __inline__ Uint16
+SDL_FORCE_INLINE Uint16
 SDL_Swap16(Uint16 x)
 {
     return SDL_static_cast(Uint16, ((x << 8) | (x >> 8)));
@@ -112,21 +105,21 @@ SDL_Swap16(Uint16 x)
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
-static __inline__ Uint32
+SDL_FORCE_INLINE Uint32
 SDL_Swap32(Uint32 x)
 {
   __asm__("bswap %0": "=r"(x):"0"(x));
     return x;
 }
 #elif defined(__GNUC__) && defined(__x86_64__)
-static __inline__ Uint32
+SDL_FORCE_INLINE Uint32
 SDL_Swap32(Uint32 x)
 {
   __asm__("bswapl %0": "=r"(x):"0"(x));
     return x;
 }
 #elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static __inline__ Uint32
+SDL_FORCE_INLINE Uint32
 SDL_Swap32(Uint32 x)
 {
     Uint32 result;
@@ -137,14 +130,14 @@ SDL_Swap32(Uint32 x)
     return result;
 }
 #elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__)) && !defined(__mcoldfire__)
-static __inline__ Uint32
+SDL_FORCE_INLINE Uint32
 SDL_Swap32(Uint32 x)
 {
   __asm__("rorw #8,%0\n\tswap %0\n\trorw #8,%0": "=d"(x): "0"(x):"cc");
     return x;
 }
 #else
-static __inline__ Uint32
+SDL_FORCE_INLINE Uint32
 SDL_Swap32(Uint32 x)
 {
     return SDL_static_cast(Uint32, ((x << 24) | ((x << 8) & 0x00FF0000) |
@@ -153,7 +146,7 @@ SDL_Swap32(Uint32 x)
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
-static __inline__ Uint64
+SDL_FORCE_INLINE Uint64
 SDL_Swap64(Uint64 x)
 {
     union
@@ -171,14 +164,14 @@ SDL_Swap64(Uint64 x)
     return v.u;
 }
 #elif defined(__GNUC__) && defined(__x86_64__)
-static __inline__ Uint64
+SDL_FORCE_INLINE Uint64
 SDL_Swap64(Uint64 x)
 {
   __asm__("bswapq %0": "=r"(x):"0"(x));
     return x;
 }
 #else
-static __inline__ Uint64
+SDL_FORCE_INLINE Uint64
 SDL_Swap64(Uint64 x)
 {
     Uint32 hi, lo;
@@ -195,7 +188,7 @@ SDL_Swap64(Uint64 x)
 #endif
 
 
-static __inline__ float
+SDL_FORCE_INLINE float
 SDL_SwapFloat(float x)
 {
     union
@@ -215,31 +208,29 @@ SDL_SwapFloat(float x)
  */
 /*@{*/
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-#define SDL_SwapLE16(X)	(X)
-#define SDL_SwapLE32(X)	(X)
-#define SDL_SwapLE64(X)	(X)
-#define SDL_SwapFloatLE(X)	(X)
-#define SDL_SwapBE16(X)	SDL_Swap16(X)
-#define SDL_SwapBE32(X)	SDL_Swap32(X)
-#define SDL_SwapBE64(X)	SDL_Swap64(X)
-#define SDL_SwapFloatBE(X)	SDL_SwapFloat(X)
+#define SDL_SwapLE16(X) (X)
+#define SDL_SwapLE32(X) (X)
+#define SDL_SwapLE64(X) (X)
+#define SDL_SwapFloatLE(X)  (X)
+#define SDL_SwapBE16(X) SDL_Swap16(X)
+#define SDL_SwapBE32(X) SDL_Swap32(X)
+#define SDL_SwapBE64(X) SDL_Swap64(X)
+#define SDL_SwapFloatBE(X)  SDL_SwapFloat(X)
 #else
-#define SDL_SwapLE16(X)	SDL_Swap16(X)
-#define SDL_SwapLE32(X)	SDL_Swap32(X)
-#define SDL_SwapLE64(X)	SDL_Swap64(X)
-#define SDL_SwapFloatLE(X)	SDL_SwapFloat(X)
-#define SDL_SwapBE16(X)	(X)
-#define SDL_SwapBE32(X)	(X)
-#define SDL_SwapBE64(X)	(X)
-#define SDL_SwapFloatBE(X)	(X)
+#define SDL_SwapLE16(X) SDL_Swap16(X)
+#define SDL_SwapLE32(X) SDL_Swap32(X)
+#define SDL_SwapLE64(X) SDL_Swap64(X)
+#define SDL_SwapFloatLE(X)  SDL_SwapFloat(X)
+#define SDL_SwapBE16(X) (X)
+#define SDL_SwapBE32(X) (X)
+#define SDL_SwapBE64(X) (X)
+#define SDL_SwapFloatBE(X)  (X)
 #endif
 /*@}*//*Swap to native*/
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

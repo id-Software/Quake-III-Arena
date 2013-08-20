@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -37,23 +37,23 @@
 #ifndef DECLSPEC
 # if defined(__BEOS__) || defined(__HAIKU__)
 #  if defined(__GNUC__)
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC __declspec(dllexport)
 #  else
-#   define DECLSPEC	__declspec(export)
+#   define DECLSPEC __declspec(export)
 #  endif
 # elif defined(__WIN32__)
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC
 #   else
-#    define DECLSPEC	__declspec(dllimport)
+#    define DECLSPEC    __declspec(dllimport)
 #   endif
 #  else
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC __declspec(dllexport)
 #  endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
-#   define DECLSPEC	__attribute__ ((visibility("default")))
+#   define DECLSPEC __attribute__ ((visibility("default")))
 #  else
 #   define DECLSPEC
 #  endif
@@ -106,7 +106,7 @@
     defined(__WATCOMC__) || defined(__LCC__) || \
     defined(__DECC)
 #ifndef __inline__
-#define __inline__	__inline
+#define __inline__  __inline
 #endif
 #define SDL_INLINE_OKAY
 #else
@@ -126,6 +126,16 @@
 */
 #ifndef SDL_INLINE_OKAY
 #define __inline__
+#endif
+
+#ifndef SDL_FORCE_INLINE
+#if defined(_MSC_VER)
+#define SDL_FORCE_INLINE __forceinline
+#elif ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
+#define SDL_FORCE_INLINE __attribute__((always_inline)) static inline
+#else
+#define SDL_FORCE_INLINE static __inline__
+#endif
 #endif
 
 /* Apparently this is needed by several Windows compilers */

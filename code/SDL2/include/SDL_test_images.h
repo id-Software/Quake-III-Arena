@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,16 +21,16 @@
 
 /**
  *  \file SDL_test_images.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-/* 
+/*
 
  Defines some images for tests.
-  
+
 */
 
 #ifndef _SDL_test_images_h
@@ -41,9 +41,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -52,12 +50,8 @@ extern "C" {
 typedef struct SDLTest_SurfaceImage_s {
   int width;
   int height;
-  unsigned int bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
-#if (defined(__GNUC__) && (__GNUC__ <= 2))
-  unsigned char pixel_data[0];
-#else
-  unsigned char pixel_data[];
-#endif
+  unsigned int bytes_per_pixel; /* 3:RGB, 4:RGBA */
+  const char *pixel_data;
 } SDLTest_SurfaceImage_t;
 
 /* Test images */
@@ -75,9 +69,7 @@ SDL_Surface *SDLTest_ImagePrimitivesBlend();
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

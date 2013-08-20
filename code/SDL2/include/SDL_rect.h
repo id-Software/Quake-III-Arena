@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_rect.h
- *  
+ *
  *  Header file for SDL_rect definition and management functions.
  */
 
@@ -36,9 +36,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -54,7 +52,7 @@ typedef struct
 
 /**
  *  \brief A rectangle, with the origin at the upper left.
- *  
+ *
  *  \sa SDL_RectEmpty
  *  \sa SDL_RectEquals
  *  \sa SDL_HasIntersection
@@ -71,18 +69,23 @@ typedef struct SDL_Rect
 /**
  *  \brief Returns true if the rectangle has no area.
  */
-#define SDL_RectEmpty(X)    ((!(X)) || ((X)->w <= 0) || ((X)->h <= 0))
+SDL_FORCE_INLINE SDL_bool SDL_RectEmpty(const SDL_Rect *r)
+{
+    return ((!r) || (r->w <= 0) || (r->h <= 0)) ? SDL_TRUE : SDL_FALSE;
+}
 
 /**
  *  \brief Returns true if the two rectangles are equal.
  */
-#define SDL_RectEquals(A, B)   (((A)) && ((B)) && \
-                                ((A)->x == (B)->x) && ((A)->y == (B)->y) && \
-                                ((A)->w == (B)->w) && ((A)->h == (B)->h))
+SDL_FORCE_INLINE SDL_bool SDL_RectEquals(const SDL_Rect *a, const SDL_Rect *b)
+{
+    return (a && b && (a->x == b->x) && (a->y == b->y) &&
+            (a->w == b->w) && (a->h == b->h)) ? SDL_TRUE : SDL_FALSE;
+}
 
 /**
  *  \brief Determine whether two rectangles intersect.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasIntersection(const SDL_Rect * A,
@@ -90,7 +93,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasIntersection(const SDL_Rect * A,
 
 /**
  *  \brief Calculate the intersection of two rectangles.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRect(const SDL_Rect * A,
@@ -116,7 +119,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_EnclosePoints(const SDL_Point * points,
 
 /**
  *  \brief Calculate the intersection of a rectangle and line segment.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
@@ -126,9 +129,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_hints.h
- *  
+ *
  *  Official documentation for SDL configuration variables
  *
  *  This file contains functions to set and get configuration hints,
@@ -44,15 +44,13 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
- *  \brief  A variable controlling how 3D acceleration is used to accelerate the SDL 1.2 screen surface. 
+ *  \brief  A variable controlling how 3D acceleration is used to accelerate the SDL screen surface.
  *
- *  SDL can try to accelerate the SDL 1.2 screen surface by using streaming
+ *  SDL can try to accelerate the SDL screen surface by using streaming
  *  textures with a 3D rendering engine.  This variable controls whether and
  *  how this is done.
  *
@@ -102,14 +100,14 @@ extern "C" {
  *  This variable can be set to the following values:
  *    "0" or "nearest" - Nearest pixel sampling
  *    "1" or "linear"  - Linear filtering (supported by OpenGL and Direct3D)
- *    "2" or "best"    - Anisotropic filtering (supported by Direct3D)
+ *    "2" or "best"    - Currently this is the same as "linear"
  *
  *  By default nearest pixel sampling is used
  */
 #define SDL_HINT_RENDER_SCALE_QUALITY       "SDL_RENDER_SCALE_QUALITY"
 
 /**
- *  \brief  A variable controlling whether updates to the SDL 1.2 screen surface should be synchronized with the vertical refresh, to avoid tearing.
+ *  \brief  A variable controlling whether updates to the SDL screen surface should be synchronized with the vertical refresh, to avoid tearing.
  *
  *  This variable can be set to the following values:
  *    "0"       - Disable vsync
@@ -169,7 +167,7 @@ extern "C" {
  */
 #define SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS   "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"
 
-	
+
 /**
  *  \brief  A variable controlling whether the idle timer is disabled on iOS.
  *
@@ -183,7 +181,7 @@ extern "C" {
  *    "1"       - Disable idle timer
  */
 #define SDL_HINT_IDLE_TIMER_DISABLED "SDL_IOS_IDLE_TIMER_DISABLED"
-	
+
 /**
  *  \brief  A variable controlling which orientations are allowed on iOS.
  *
@@ -197,22 +195,66 @@ extern "C" {
 
 
 /**
+ *  \brief  A variable that lets you disable the detection and use of Xinput gamepad devices
+ *
+ *  The variable can be set to the following values:
+ *    "0"       - Disable XInput timer (only uses direct input)
+ *    "1"       - Enable XInput timer (the default)
+ */
+#define SDL_HINT_XINPUT_ENABLED "SDL_XINPUT_ENABLED"
+
+
+/**
  *  \brief  A variable that lets you manually hint extra gamecontroller db entries
  *
- *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
+ *  The variable should be newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
+ *
+ *  This hint must be set before calling SDL_Init(SDL_INIT_GAMECONTROLLER)
+ *  You can update mappings after the system is initialized with SDL_GameControllerMappingForGUID() and SDL_GameControllerAddMapping()
  */
 #define SDL_HINT_GAMECONTROLLERCONFIG "SDL_GAMECONTROLLERCONFIG"
 
 
 /**
+ *  \brief  A variable that lets you enable joystick (and gamecontroller) events even when your app is in the background.
+ *
+ *  The variable can be set to the following values:
+ *    "0"       - Disable joystick & gamecontroller input events when the
+ *                application is in the background.
+ *    "1"       - Enable joystick & gamecontroller input events when the
+ *                application is in the backgroumd.
+ *
+ *  The default value is "0".  This hint may be set at any time.
+ */
+#define SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"
+
+
+/**
  *  \brief If set to 0 then never set the top most bit on a SDL Window, even if the video mode expects it.
- *		This is a debugging aid for developers and not expected to be used by end users. The default is "1"
+ *      This is a debugging aid for developers and not expected to be used by end users. The default is "1"
  *
  *  This variable can be set to the following values:
  *    "0"       - don't allow topmost
  *    "1"       - allow topmost
  */
 #define SDL_HINT_ALLOW_TOPMOST "SDL_ALLOW_TOPMOST"
+
+
+/**
+ *  \brief A variable that controls the timer resolution, in milliseconds.
+ *
+ *  The higher resolution the timer, the more frequently the CPU services
+ *  timer interrupts, and the more precise delays are, but this takes up
+ *  power and CPU time.  This hint is only used on Windows 7 and earlier.
+ *
+ *  See this blog post for more information:
+ *  http://randomascii.wordpress.com/2013/07/08/windows-timer-resolution-megawatts-wasted/
+ *
+ *  If this variable is set to "0", the system timer resolution is not set.
+ *
+ *  The default value is "1". This hint may be set at any time.
+ */
+#define SDL_HINT_TIMER_RESOLUTION "SDL_TIMER_RESOLUTION"
 
 
 
@@ -233,7 +275,7 @@ typedef enum
  *  The priority controls the behavior when setting a hint that already
  *  has a value.  Hints will replace existing hints of their priority and
  *  lower.  Environment variables are considered to have override priority.
- * 
+ *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_SetHintWithPriority(const char *name,
@@ -242,19 +284,41 @@ extern DECLSPEC SDL_bool SDLCALL SDL_SetHintWithPriority(const char *name,
 
 /**
  *  \brief Set a hint with normal priority
- * 
+ *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_SetHint(const char *name,
                                              const char *value);
 
-
 /**
  *  \brief Get a hint
- *  
+ *
  *  \return The string value of a hint variable.
  */
 extern DECLSPEC const char * SDLCALL SDL_GetHint(const char *name);
+
+/**
+ *  \brief Add a function to watch a particular hint
+ *
+ *  \param name The hint to watch
+ *  \param callback The function to call when the hint value changes
+ *  \param userdata A pointer to pass to the callback function
+ */
+typedef void (*SDL_HintCallback)(void *userdata, const char *name, const char *oldValue, const char *newValue);
+extern DECLSPEC void SDLCALL SDL_AddHintCallback(const char *name,
+                                                 SDL_HintCallback callback,
+                                                 void *userdata);
+
+/**
+ *  \brief Remove a function watching a particular hint
+ *
+ *  \param name The hint being watched
+ *  \param callback The function being called when the hint value changes
+ *  \param userdata A pointer being passed to the callback function
+ */
+extern DECLSPEC void SDLCALL SDL_DelHintCallback(const char *name,
+                                                 SDL_HintCallback callback,
+                                                 void *userdata);
 
 /**
  *  \brief  Clear all hints
@@ -266,9 +330,7 @@ extern DECLSPEC void SDLCALL SDL_ClearHints(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

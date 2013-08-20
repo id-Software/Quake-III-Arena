@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,14 +26,16 @@
 
 /**
  *  \file SDL_config_minimal.h
- *  
+ *
  *  This is the minimal configuration that can be used to build SDL.
  */
 
-#include <stddef.h>
-#include <stdarg.h>
+#define HAVE_STDARG_H   1
+#define HAVE_STDDEF_H   1
 
-#if !defined(_STDINT_H_) && !defined(_STDINT_H) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
+/* Most everything except Visual Studio 2008 and earlier has stdint.h now */
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+/* Here are some reasonable defaults */
 typedef unsigned int size_t;
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
@@ -44,31 +46,33 @@ typedef unsigned int uint32_t;
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 typedef unsigned long uintptr_t;
-#endif /* if (stdint.h isn't available) */
+#else
+#define HAVE_STDINT_H 1
+#endif /* Visual Studio 2008 */
 
 #ifdef __GNUC__
 #define HAVE_GCC_SYNC_LOCK_TEST_AND_SET 1
 #endif
 
 /* Enable the dummy audio driver (src/audio/dummy/\*.c) */
-#define SDL_AUDIO_DRIVER_DUMMY	1
+#define SDL_AUDIO_DRIVER_DUMMY  1
 
 /* Enable the stub joystick driver (src/joystick/dummy/\*.c) */
-#define SDL_JOYSTICK_DISABLED	1
+#define SDL_JOYSTICK_DISABLED   1
 
 /* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
-#define SDL_HAPTIC_DISABLED	1
+#define SDL_HAPTIC_DISABLED 1
 
 /* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
-#define SDL_LOADSO_DISABLED	1
+#define SDL_LOADSO_DISABLED 1
 
 /* Enable the stub thread support (src/thread/generic/\*.c) */
-#define SDL_THREADS_DISABLED	1
+#define SDL_THREADS_DISABLED    1
 
 /* Enable the stub timer support (src/timer/dummy/\*.c) */
-#define SDL_TIMERS_DISABLED	1
+#define SDL_TIMERS_DISABLED 1
 
 /* Enable the dummy video driver (src/video/dummy/\*.c) */
-#define SDL_VIDEO_DRIVER_DUMMY	1
+#define SDL_VIDEO_DRIVER_DUMMY  1
 
 #endif /* _SDL_config_minimal_h */

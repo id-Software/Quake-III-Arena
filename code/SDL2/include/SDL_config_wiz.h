@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -51,7 +51,7 @@
 #define HAVE_FREE 1
 #define HAVE_ALLOCA 1
 #define HAVE_GETENV 1
-#define HAVE_SETENV	1
+#define HAVE_SETENV 1
 #define HAVE_PUTENV 1
 #define HAVE_UNSETENV 1
 #define HAVE_QSORT 1

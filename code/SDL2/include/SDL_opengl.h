@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_opengl.h
- *  
+ *
  *  This is a simple file to encapsulate the OpenGL API headers.
  */
 
@@ -38,14 +38,6 @@
 #define NOMINMAX                /* Don't defined min() and max() */
 #endif
 #include <windows.h>
-#endif
-
-#ifdef __HAIKU__  /* !!! FIXME: temp compiler warning fix... */
-#define NO_SDL_GLEXT 1
-#endif
-
-#ifdef __FreeBSD__  /* !!! FIXME: temp compiler warning fix... */
-#define NO_SDL_GLEXT 1
 #endif
 
 #ifdef __glext_h_
@@ -67,23 +59,22 @@
 
 /**
  *  \file SDL_opengl.h
- *  
+ *
  *  This file is included because glext.h is not available on some systems.
  *  If you don't want this version included, simply define ::NO_SDL_GLEXT.
- *  
+ *
  *  The latest version is available from:
- *  	http://www.opengl.org/registry/
+ *      http://www.opengl.org/registry/
  */
 
 /**
  *  \def NO_SDL_GLEXT
- *  
- *  Define this if you have your own version of glext.h and want to disable the 
+ *
+ *  Define this if you have your own version of glext.h and want to disable the
  *  version included in SDL_opengl.h.
  */
 
 #if !defined(NO_SDL_GLEXT) && !defined(GL_GLEXT_LEGACY)
-/* *INDENT-OFF* */
 #ifndef __glext_h_
 #define __glext_h_
 
@@ -93,7 +84,7 @@ extern "C" {
 
 /*
 ** Copyright (c) 2007-2010 The Khronos Group Inc.
-** 
+**
 ** Permission is hereby granted, free of charge, to any person obtaining a
 ** copy of this software and/or associated documentation files (the
 ** "Materials"), to deal in the Materials without restriction, including
@@ -101,10 +92,10 @@ extern "C" {
 ** distribute, sublicense, and/or sell copies of the Materials, and to
 ** permit persons to whom the Materials are furnished to do so, subject to
 ** the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included
 ** in all copies or substantial portions of the Materials.
-** 
+**
 ** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -11126,7 +11117,6 @@ typedef void (APIENTRYP PFNGLVDPAUUNMAPSURFACESNVPROC) (GLsizei numSurface, cons
 #endif
 
 #endif
-/* *INDENT-ON* */
 #endif /* NO_SDL_GLEXT */
 
 #endif /* !__IPHONEOS__ */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_stdinc.h
- *  
+ *
  *  This is a general header that includes C language support.
  */
 
@@ -29,7 +29,6 @@
 #define _SDL_stdinc_h
 
 #include "SDL_config.h"
-
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -81,12 +80,12 @@
 /**
  *  The number of elements in an array.
  */
-#define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
-#define SDL_TABLESIZE(table)	SDL_arraysize(table)
+#define SDL_arraysize(array)    (sizeof(array)/sizeof(array[0]))
+#define SDL_TABLESIZE(table)    SDL_arraysize(table)
 
 /**
  *  \name Cast operators
- *  
+ *
  *  Use proper C++ casts when compiled as C++ to be compatible with the option
  *  -Wold-style-cast of GCC (and -Werror=old-style-cast in GCC 4.2 and above).
  */
@@ -94,9 +93,11 @@
 #ifdef __cplusplus
 #define SDL_reinterpret_cast(type, expression) reinterpret_cast<type>(expression)
 #define SDL_static_cast(type, expression) static_cast<type>(expression)
+#define SDL_const_cast(type, expression) const_cast<type>(expression)
 #else
 #define SDL_reinterpret_cast(type, expression) ((type)(expression))
 #define SDL_static_cast(type, expression) ((type)(expression))
+#define SDL_const_cast(type, expression) ((type)(expression))
 #endif
 /*@}*//*Cast operators*/
 
@@ -175,14 +176,10 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
    enums having the size of an int must be enabled.
    This is "-b" for Borland C/C++ and "-ei" for Watcom C/C++ (v11).
 */
-/* Enable enums always int in CodeWarrior (for MPW use "-enum int") */
-#ifdef __MWERKS__
-#pragma enumsalwaysint on
-#endif
 
 /** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
-#if !defined(__NINTENDODS__) && !defined(__ANDROID__) 
+#if !defined(__ANDROID__)
    /* TODO: include/SDL_stdinc.h:174: error: size of array 'SDL_dummy_enum' is negative */
 typedef enum
 {
@@ -197,33 +194,7 @@ SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
-#endif
-
-#ifdef HAVE_MALLOC
-#define SDL_malloc	malloc
-#else
-extern DECLSPEC void *SDLCALL SDL_malloc(size_t size);
-#endif
-
-#ifdef HAVE_CALLOC
-#define SDL_calloc	calloc
-#else
-extern DECLSPEC void *SDLCALL SDL_calloc(size_t nmemb, size_t size);
-#endif
-
-#ifdef HAVE_REALLOC
-#define SDL_realloc	realloc
-#else
-extern DECLSPEC void *SDLCALL SDL_realloc(void *mem, size_t size);
-#endif
-
-#ifdef HAVE_FREE
-#define SDL_free	free
-#else
-extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #endif
 
 #if defined(HAVE_ALLOCA) && !defined(alloca)
@@ -256,381 +227,112 @@ char *alloca();
 #define SDL_stack_free(data)            SDL_free(data)
 #endif
 
-#ifdef HAVE_GETENV
-#define SDL_getenv	getenv
-#else
+extern DECLSPEC void *SDLCALL SDL_malloc(size_t size);
+extern DECLSPEC void *SDLCALL SDL_calloc(size_t nmemb, size_t size);
+extern DECLSPEC void *SDLCALL SDL_realloc(void *mem, size_t size);
+extern DECLSPEC void SDLCALL SDL_free(void *mem);
+
 extern DECLSPEC char *SDLCALL SDL_getenv(const char *name);
-#endif
+extern DECLSPEC int SDLCALL SDL_setenv(const char *name, const char *value, int overwrite);
 
-/* SDL_putenv() has moved to SDL_compat. */
-#ifdef HAVE_SETENV
-#define SDL_setenv	setenv
-#else
-extern DECLSPEC int SDLCALL SDL_setenv(const char *name, const char *value,
-                                       int overwrite);
-#endif
+extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *));
 
-#ifdef HAVE_QSORT
-#define SDL_qsort	qsort
-#else
-extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
-                                       int (*compare) (const void *,
-                                                       const void *));
-#endif
+extern DECLSPEC int SDLCALL SDL_abs(int x);
 
-#ifdef HAVE_ABS
-#define SDL_abs		abs
-#else
-#define SDL_abs(X)	((X) < 0 ? -(X) : (X))
-#endif
+/* !!! FIXME: these have side effects. You probably shouldn't use them. */
+/* !!! FIXME: Maybe we do forceinline functions of SDL_mini, SDL_minf, etc? */
+#define SDL_min(x, y) (((x) < (y)) ? (x) : (y))
+#define SDL_max(x, y) (((x) > (y)) ? (x) : (y))
 
-#define SDL_min(x, y)	(((x) < (y)) ? (x) : (y))
-#define SDL_max(x, y)	(((x) > (y)) ? (x) : (y))
+extern DECLSPEC int SDLCALL SDL_isdigit(int x);
+extern DECLSPEC int SDLCALL SDL_isspace(int x);
+extern DECLSPEC int SDLCALL SDL_toupper(int x);
+extern DECLSPEC int SDLCALL SDL_tolower(int x);
 
-#ifdef HAVE_CTYPE_H
-#define SDL_isdigit(X)  isdigit(X)
-#define SDL_isspace(X)  isspace(X)
-#define SDL_toupper(X)  toupper(X)
-#define SDL_tolower(X)  tolower(X)
-#else
-#define SDL_isdigit(X)  (((X) >= '0') && ((X) <= '9'))
-#define SDL_isspace(X)  (((X) == ' ') || ((X) == '\t') || ((X) == '\r') || ((X) == '\n'))
-#define SDL_toupper(X)  (((X) >= 'a') && ((X) <= 'z') ? ('A'+((X)-'a')) : (X))
-#define SDL_tolower(X)  (((X) >= 'A') && ((X) <= 'Z') ? ('a'+((X)-'A')) : (X))
-#endif
-
-#ifdef HAVE_MEMSET
-#define SDL_memset      memset
-#else
 extern DECLSPEC void *SDLCALL SDL_memset(void *dst, int c, size_t len);
-#endif
-#define SDL_zero(x)	SDL_memset(&(x), 0, sizeof((x)))
-#define SDL_zerop(x)	SDL_memset((x), 0, sizeof(*(x)))
 
+#define SDL_zero(x) SDL_memset(&(x), 0, sizeof((x)))
+#define SDL_zerop(x) SDL_memset((x), 0, sizeof(*(x)))
+
+/* Note that memset() is a byte assignment and this is a 32-bit assignment, so they're not directly equivalent. */
+SDL_FORCE_INLINE void SDL_memset4(void *dst, int val, size_t dwords)
+{
 #if defined(__GNUC__) && defined(i386)
-#define SDL_memset4(dst, val, len)				\
-do {								\
-	int u0, u1, u2;						\
-	__asm__ __volatile__ (					\
-		"cld\n\t"					\
-		"rep ; stosl\n\t"				\
-		: "=&D" (u0), "=&a" (u1), "=&c" (u2)		\
-		: "0" (dst), "1" (val), "2" (SDL_static_cast(Uint32, len))	\
-		: "memory" );					\
-} while(0)
-#endif
-#ifndef SDL_memset4
-#define SDL_memset4(dst, val, len)		\
-do {						\
-	unsigned _count = (len);		\
-	unsigned _n = (_count + 3) / 4;		\
-	Uint32 *_p = SDL_static_cast(Uint32 *, dst);		\
-	Uint32 _val = (val);			\
-	if (len == 0) break;			\
-        switch (_count % 4) {			\
-        case 0: do {    *_p++ = _val;		\
-        case 3:         *_p++ = _val;		\
-        case 2:         *_p++ = _val;		\
-        case 1:         *_p++ = _val;		\
-		} while ( --_n );		\
-	}					\
-} while(0)
-#endif
-
-/* We can count on memcpy existing on Mac OS X and being well-tuned. */
-#if defined(__MACOSX__)
-#define SDL_memcpy      memcpy
-#elif defined(__GNUC__) && defined(i386) && !defined(__WIN32__)
-#define SDL_memcpy(dst, src, len)					  \
-do {									  \
-	int u0, u1, u2;						  	  \
-	__asm__ __volatile__ (						  \
-		"cld\n\t"						  \
-		"rep ; movsl\n\t"					  \
-		"testb $2,%b4\n\t"					  \
-		"je 1f\n\t"						  \
-		"movsw\n"						  \
-		"1:\ttestb $1,%b4\n\t"					  \
-		"je 2f\n\t"						  \
-		"movsb\n"						  \
-		"2:"							  \
-		: "=&c" (u0), "=&D" (u1), "=&S" (u2)			  \
-		: "0" (SDL_static_cast(unsigned, len)/4), "q" (len), "1" (dst),"2" (src) \
-		: "memory" );						  \
-} while(0)
-#endif
-#ifndef SDL_memcpy
-#ifdef HAVE_MEMCPY
-#define SDL_memcpy      memcpy
-#elif defined(HAVE_BCOPY)
-#define SDL_memcpy(d, s, n)	bcopy((s), (d), (n))
+    int u0, u1, u2;
+    __asm__ __volatile__ (
+        "cld \n\t"
+        "rep ; stosl \n\t"
+        : "=&D" (u0), "=&a" (u1), "=&c" (u2)
+        : "0" (dst), "1" (val), "2" (SDL_static_cast(Uint32, dwords))
+        : "memory"
+    );
 #else
-extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src,
-                                         size_t len);
+    size_t _n = (dwords + 3) / 4;
+    Uint32 *_p = SDL_static_cast(Uint32 *, dst);
+    Uint32 _val = (val);
+    if (dwords == 0)
+        return;
+    switch (dwords % 4)
+    {
+        case 0: do {    *_p++ = _val;
+        case 3:         *_p++ = _val;
+        case 2:         *_p++ = _val;
+        case 1:         *_p++ = _val;
+        } while ( --_n );
+    }
 #endif
-#endif
+}
 
-/* We can count on memcpy existing on Mac OS X and being well-tuned. */
-#if defined(__MACOSX__)
-#define SDL_memcpy4(dst, src, len)	SDL_memcpy((dst), (src), (len) << 2)
-#elif defined(__GNUC__) && defined(i386)
-#define SDL_memcpy4(dst, src, len)				\
-do {								\
-	int ecx, edi, esi;					\
-	__asm__ __volatile__ (					\
-		"cld\n\t"					\
-		"rep ; movsl"					\
-		: "=&c" (ecx), "=&D" (edi), "=&S" (esi)		\
-		: "0" (SDL_static_cast(unsigned, len)), "1" (dst), "2" (src)	\
-		: "memory" );					\
-} while(0)
-#endif
-#ifndef SDL_memcpy4
-#define SDL_memcpy4(dst, src, len)	SDL_memcpy((dst), (src), (len) << 2)
-#endif
 
-#ifdef HAVE_MEMMOVE
-#define SDL_memmove     memmove
-#else
-extern DECLSPEC void *SDLCALL SDL_memmove(void *dst, const void *src,
-                                          size_t len);
-#endif
+extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src, size_t len);
 
-#ifdef HAVE_MEMCMP
-#define SDL_memcmp      memcmp
-#else
-extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2,
-                                       size_t len);
-#endif
+SDL_FORCE_INLINE void *SDL_memcpy4(void *dst, const void *src, size_t dwords)
+{
+    return SDL_memcpy(dst, src, dwords * 4);
+}
 
-#ifdef HAVE_STRLEN
-#define SDL_strlen      strlen
-#else
-extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
-#endif
+extern DECLSPEC void *SDLCALL SDL_memmove(void *dst, const void *src, size_t len);
+extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2, size_t len);
 
-#ifdef HAVE_WCSLEN
-#define SDL_wcslen      wcslen
-#else
-#if !defined(wchar_t) && defined(__NINTENDODS__)
-#define wchar_t short           /* TODO: figure out why libnds doesn't have this */
-#endif
-extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t * string);
-#endif
-
-#ifdef HAVE_WCSLCPY
-#define SDL_wcslcpy      wcslcpy
-#else
+extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t *wstr);
 extern DECLSPEC size_t SDLCALL SDL_wcslcpy(wchar_t *dst, const wchar_t *src, size_t maxlen);
-#endif
-
-#ifdef HAVE_WCSLCAT
-#define SDL_wcslcat      wcslcat
-#else
 extern DECLSPEC size_t SDLCALL SDL_wcslcat(wchar_t *dst, const wchar_t *src, size_t maxlen);
-#endif
 
+extern DECLSPEC size_t SDLCALL SDL_strlen(const char *str);
+extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src, size_t maxlen);
+extern DECLSPEC size_t SDLCALL SDL_utf8strlcpy(char *dst, const char *src, size_t dst_bytes);
+extern DECLSPEC size_t SDLCALL SDL_strlcat(char *dst, const char *src, size_t maxlen);
+extern DECLSPEC char *SDLCALL SDL_strdup(const char *str);
+extern DECLSPEC char *SDLCALL SDL_strrev(char *str);
+extern DECLSPEC char *SDLCALL SDL_strupr(char *str);
+extern DECLSPEC char *SDLCALL SDL_strlwr(char *str);
+extern DECLSPEC char *SDLCALL SDL_strchr(const char *str, int c);
+extern DECLSPEC char *SDLCALL SDL_strrchr(const char *str, int c);
+extern DECLSPEC char *SDLCALL SDL_strstr(const char *haystack, const char *needle);
 
-#ifdef HAVE_STRLCPY
-#define SDL_strlcpy     strlcpy
-#else
-extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src,
-                                           size_t maxlen);
-#endif
+extern DECLSPEC char *SDLCALL SDL_itoa(int value, char *str, int radix);
+extern DECLSPEC char *SDLCALL SDL_uitoa(unsigned int value, char *str, int radix);
+extern DECLSPEC char *SDLCALL SDL_ltoa(long value, char *str, int radix);
+extern DECLSPEC char *SDLCALL SDL_ultoa(unsigned long value, char *str, int radix);
+extern DECLSPEC char *SDLCALL SDL_lltoa(Sint64 value, char *str, int radix);
+extern DECLSPEC char *SDLCALL SDL_ulltoa(Uint64 value, char *str, int radix);
 
-extern DECLSPEC size_t SDLCALL SDL_utf8strlcpy(char *dst, const char *src,
-                                            size_t dst_bytes);
+extern DECLSPEC int SDLCALL SDL_atoi(const char *str);
+extern DECLSPEC double SDLCALL SDL_atof(const char *str);
+extern DECLSPEC long SDLCALL SDL_strtol(const char *str, char **endp, int base);
+extern DECLSPEC unsigned long SDLCALL SDL_strtoul(const char *str, char **endp, int base);
+extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *str, char **endp, int base);
+extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *str, char **endp, int base);
+extern DECLSPEC double SDLCALL SDL_strtod(const char *str, char **endp);
 
-#ifdef HAVE_STRLCAT
-#define SDL_strlcat    strlcat
-#else
-extern DECLSPEC size_t SDLCALL SDL_strlcat(char *dst, const char *src,
-                                           size_t maxlen);
-#endif
-
-#ifdef HAVE_STRDUP
-#define SDL_strdup     strdup
-#else
-extern DECLSPEC char *SDLCALL SDL_strdup(const char *string);
-#endif
-
-#ifdef HAVE__STRREV
-#define SDL_strrev      _strrev
-#else
-extern DECLSPEC char *SDLCALL SDL_strrev(char *string);
-#endif
-
-#ifdef HAVE__STRUPR
-#define SDL_strupr      _strupr
-#else
-extern DECLSPEC char *SDLCALL SDL_strupr(char *string);
-#endif
-
-#ifdef HAVE__STRLWR
-#define SDL_strlwr      _strlwr
-#else
-extern DECLSPEC char *SDLCALL SDL_strlwr(char *string);
-#endif
-
-#ifdef HAVE_STRCHR
-#define SDL_strchr      strchr
-#elif defined(HAVE_INDEX)
-#define SDL_strchr      index
-#else
-extern DECLSPEC char *SDLCALL SDL_strchr(const char *string, int c);
-#endif
-
-#ifdef HAVE_STRRCHR
-#define SDL_strrchr     strrchr
-#elif defined(HAVE_RINDEX)
-#define SDL_strrchr     rindex
-#else
-extern DECLSPEC char *SDLCALL SDL_strrchr(const char *string, int c);
-#endif
-
-#ifdef HAVE_STRSTR
-#define SDL_strstr      strstr
-#else
-extern DECLSPEC char *SDLCALL SDL_strstr(const char *haystack,
-                                         const char *needle);
-#endif
-
-#ifdef HAVE_ITOA
-#define SDL_itoa        itoa
-#else
-#define SDL_itoa(value, string, radix)	SDL_ltoa((long)value, string, radix)
-#endif
-
-#ifdef HAVE__LTOA
-#define SDL_ltoa        _ltoa
-#else
-extern DECLSPEC char *SDLCALL SDL_ltoa(long value, char *string, int radix);
-#endif
-
-#ifdef HAVE__UITOA
-#define SDL_uitoa       _uitoa
-#else
-#define SDL_uitoa(value, string, radix)	SDL_ultoa((long)value, string, radix)
-#endif
-
-#ifdef HAVE__ULTOA
-#define SDL_ultoa       _ultoa
-#else
-extern DECLSPEC char *SDLCALL SDL_ultoa(unsigned long value, char *string,
-                                        int radix);
-#endif
-
-#ifdef HAVE_STRTOL
-#define SDL_strtol      strtol
-#else
-extern DECLSPEC long SDLCALL SDL_strtol(const char *string, char **endp,
-                                        int base);
-#endif
-
-#ifdef HAVE_STRTOUL
-#define SDL_strtoul      strtoul
-#else
-extern DECLSPEC unsigned long SDLCALL SDL_strtoul(const char *string,
-                                                  char **endp, int base);
-#endif
-
-#ifdef HAVE__I64TOA
-#define SDL_lltoa       _i64toa
-#else
-extern DECLSPEC char *SDLCALL SDL_lltoa(Sint64 value, char *string,
-                                        int radix);
-#endif
-
-#ifdef HAVE__UI64TOA
-#define SDL_ulltoa      _ui64toa
-#else
-extern DECLSPEC char *SDLCALL SDL_ulltoa(Uint64 value, char *string,
-                                         int radix);
-#endif
-
-#ifdef HAVE_STRTOLL
-#define SDL_strtoll     strtoll
-#else
-extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *string, char **endp,
-                                           int base);
-#endif
-
-#ifdef HAVE_STRTOULL
-#define SDL_strtoull     strtoull
-#else
-extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *string, char **endp,
-                                            int base);
-#endif
-
-#ifdef HAVE_STRTOD
-#define SDL_strtod      strtod
-#else
-extern DECLSPEC double SDLCALL SDL_strtod(const char *string, char **endp);
-#endif
-
-#ifdef HAVE_ATOI
-#define SDL_atoi        atoi
-#else
-#define SDL_atoi(X)     SDL_strtol(X, NULL, 0)
-#endif
-
-#ifdef HAVE_ATOF
-#define SDL_atof        atof
-#else
-#define SDL_atof(X)     SDL_strtod(X, NULL)
-#endif
-
-#ifdef HAVE_STRCMP
-#define SDL_strcmp      strcmp
-#else
 extern DECLSPEC int SDLCALL SDL_strcmp(const char *str1, const char *str2);
-#endif
+extern DECLSPEC int SDLCALL SDL_strncmp(const char *str1, const char *str2, size_t maxlen);
+extern DECLSPEC int SDLCALL SDL_strcasecmp(const char *str1, const char *str2);
+extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1, const char *str2, size_t len);
 
-#ifdef HAVE_STRNCMP
-#define SDL_strncmp     strncmp
-#else
-extern DECLSPEC int SDLCALL SDL_strncmp(const char *str1, const char *str2,
-                                        size_t maxlen);
-#endif
-
-#ifdef HAVE_STRCASECMP
-#define SDL_strcasecmp  strcasecmp
-#elif defined(HAVE__STRICMP)
-#define SDL_strcasecmp  _stricmp
-#else
-extern DECLSPEC int SDLCALL SDL_strcasecmp(const char *str1,
-                                           const char *str2);
-#endif
-
-#ifdef HAVE_STRNCASECMP
-#define SDL_strncasecmp strncasecmp
-#elif defined(HAVE__STRNICMP)
-#define SDL_strncasecmp _strnicmp
-#else
-extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1,
-                                            const char *str2, size_t maxlen);
-#endif
-
-#ifdef HAVE_SSCANF
-#define SDL_sscanf      sscanf
-#else
-extern DECLSPEC int SDLCALL SDL_sscanf(const char *text, const char *fmt,
-                                       ...);
-#endif
-
-#ifdef HAVE_SNPRINTF
-#define SDL_snprintf    snprintf
-#else
-extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen,
-                                         const char *fmt, ...);
-#endif
-
-#ifdef HAVE_VSNPRINTF
-#define SDL_vsnprintf   vsnprintf
-#else
-extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
-                                          const char *fmt, va_list ap);
-#endif
+extern DECLSPEC int SDLCALL SDL_sscanf(const char *text, const char *fmt, ...);
+extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...);
+extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap);
 
 #ifndef HAVE_M_PI
 #ifndef M_PI
@@ -638,106 +340,32 @@ extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
 #endif
 #endif
 
-#ifdef HAVE_ATAN
-#define SDL_atan        atan
-#else
 extern DECLSPEC double SDLCALL SDL_atan(double x);
-#endif
-
-#ifdef HAVE_ATAN2
-#define SDL_atan2       atan2
-#else
-extern DECLSPEC double SDLCALL SDL_atan2(double y, double x);
-#endif
-
-#ifdef HAVE_CEIL
-#define SDL_ceil        ceil
-#else
-#define SDL_ceil(x)     ((double)(int)((x)+0.5))
-#endif
-
-#ifdef HAVE_COPYSIGN
-#define SDL_copysign    copysign
-#else
+extern DECLSPEC double SDLCALL SDL_atan2(double x, double y);
+extern DECLSPEC double SDLCALL SDL_ceil(double x);
 extern DECLSPEC double SDLCALL SDL_copysign(double x, double y);
-#endif
-
-#ifdef HAVE_COS
-#define SDL_cos         cos
-#else
 extern DECLSPEC double SDLCALL SDL_cos(double x);
-#endif
-
-#ifdef HAVE_COSF
-#define SDL_cosf        cosf
-#else
-#define SDL_cosf(x) (float)SDL_cos((double)x)
-#endif
-
-#ifdef HAVE_FABS
-#define SDL_fabs        fabs
-#else
+extern DECLSPEC float SDLCALL SDL_cosf(float x);
 extern DECLSPEC double SDLCALL SDL_fabs(double x);
-#endif
-
-#ifdef HAVE_FLOOR
-#define SDL_floor       floor
-#else
 extern DECLSPEC double SDLCALL SDL_floor(double x);
-#endif
-
-#ifdef HAVE_LOG
-#define SDL_log         log
-#else
 extern DECLSPEC double SDLCALL SDL_log(double x);
-#endif
-
-#ifdef HAVE_POW
-#define SDL_pow         pow
-#else
 extern DECLSPEC double SDLCALL SDL_pow(double x, double y);
-#endif
-
-#ifdef HAVE_SCALBN
-#define SDL_scalbn      scalbn
-#else
 extern DECLSPEC double SDLCALL SDL_scalbn(double x, int n);
-#endif
-
-#ifdef HAVE_SIN
-#define SDL_sin         sin
-#else
 extern DECLSPEC double SDLCALL SDL_sin(double x);
-#endif
-
-#ifdef HAVE_SINF
-#define SDL_sinf        sinf
-#else
-#define SDL_sinf(x) (float)SDL_sin((double)x)
-#endif
-
-#ifdef HAVE_SQRT
-#define SDL_sqrt        sqrt
-#else
+extern DECLSPEC float SDLCALL SDL_sinf(float x);
 extern DECLSPEC double SDLCALL SDL_sqrt(double x);
-#endif
 
 /* The SDL implementation of iconv() returns these error codes */
-#define SDL_ICONV_ERROR		(size_t)-1
-#define SDL_ICONV_E2BIG		(size_t)-2
-#define SDL_ICONV_EILSEQ	(size_t)-3
-#define SDL_ICONV_EINVAL	(size_t)-4
+#define SDL_ICONV_ERROR     (size_t)-1
+#define SDL_ICONV_E2BIG     (size_t)-2
+#define SDL_ICONV_EILSEQ    (size_t)-3
+#define SDL_ICONV_EINVAL    (size_t)-4
 
-#if defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
-#define SDL_iconv_t     iconv_t
-#define SDL_iconv_open  iconv_open
-#define SDL_iconv_close iconv_close
-#else
+/* SDL_iconv_* are now always real symbols/types, not macros or inlined. */
 typedef struct _SDL_iconv_t *SDL_iconv_t;
 extern DECLSPEC SDL_iconv_t SDLCALL SDL_iconv_open(const char *tocode,
                                                    const char *fromcode);
 extern DECLSPEC int SDLCALL SDL_iconv_close(SDL_iconv_t cd);
-#endif
 extern DECLSPEC size_t SDLCALL SDL_iconv(SDL_iconv_t cd, const char **inbuf,
                                          size_t * inbytesleft, char **outbuf,
                                          size_t * outbytesleft);
@@ -749,15 +377,13 @@ extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
                                                const char *fromcode,
                                                const char *inbuf,
                                                size_t inbytesleft);
-#define SDL_iconv_utf8_locale(S)	SDL_iconv_string("", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_locale(S)    SDL_iconv_string("", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs2(S)      (Uint16 *)SDL_iconv_string("UCS-2-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs4(S)      (Uint32 *)SDL_iconv_string("UCS-4-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

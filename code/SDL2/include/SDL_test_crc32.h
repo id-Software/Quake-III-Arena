@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,16 +21,16 @@
 
 /**
  *  \file SDL_test_crc32.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-/* 
+/*
 
  Implements CRC32 calculations (default output is Perl String::CRC32 compatible).
-  
+
 */
 
 #ifndef _SDL_test_crc32_h
@@ -39,9 +39,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 
@@ -50,20 +48,20 @@ extern "C" {
 /* Definition shared by all CRC routines */
 
 #ifndef CrcUint32
- #define CrcUint32	unsigned int
+ #define CrcUint32  unsigned int
 #endif
 #ifndef CrcUint8
- #define CrcUint8	unsigned char
+ #define CrcUint8   unsigned char
 #endif
 
 #ifdef ORIGINAL_METHOD
- #define CRC32_POLY 0x04c11db7 	 /* AUTODIN II, Ethernet, & FDDI */
+ #define CRC32_POLY 0x04c11db7   /* AUTODIN II, Ethernet, & FDDI */
 #else
  #define CRC32_POLY 0xEDB88320   /* Perl String::CRC32 compatible */
 #endif
 
-/** 
- * Data structure for CRC32 (checksum) computation 
+/**
+ * Data structure for CRC32 (checksum) computation
  */
   typedef struct {
     CrcUint32    crc32_table[256]; /* CRC table */
@@ -71,12 +69,12 @@ extern "C" {
 
 /* ---------- Function Prototypes ------------- */
 
-/** 
+/**
  * /brief Initialize the CRC context
  *
  * Note: The function initializes the crc table required for all crc calculations.
  *
- * /param crcContext		pointer to context variable
+ * /param crcContext        pointer to context variable
  *
  * /returns 0 for OK, -1 on error
  *
@@ -86,8 +84,8 @@ extern "C" {
 
 /**
  * /brief calculate a crc32 from a data block
- * 
- * /param crcContext	     pointer to context variable
+ *
+ * /param crcContext         pointer to context variable
  * /param inBuf              input buffer to checksum
  * /param inLen              length of input buffer
  * /param crc32              pointer to Uint32 to store the final CRC into
@@ -106,7 +104,7 @@ int SDLTest_Crc32CalcBuffer(SDLTest_Crc32Context * crcContext, CrcUint8 *inBuf, 
 /**
  * /brief clean up CRC context
  *
- * /param crcContext		pointer to context variable
+ * /param crcContext        pointer to context variable
  *
  * /returns 0 for OK, -1 on error
  *
@@ -117,9 +115,7 @@ int SDLTest_Crc32Done(SDLTest_Crc32Context * crcContext);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

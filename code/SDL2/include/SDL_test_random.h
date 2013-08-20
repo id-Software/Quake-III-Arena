@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,20 +21,20 @@
 
 /**
  *  \file SDL_test_random.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-/* 
+/*
 
- A "32-bit Multiply with carry random number generator. Very fast. 
- Includes a list of recommended multipliers.                         
+ A "32-bit Multiply with carry random number generator. Very fast.
+ Includes a list of recommended multipliers.
 
  multiply-with-carry generator: x(n) = a*x(n-1) + carry mod 2^32.
  period: (a*2^31)-1
- 
+
 */
 
 #ifndef _SDL_test_random_h
@@ -43,9 +43,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* --- Definitions */
@@ -53,7 +51,7 @@ extern "C" {
 /*
  * Macros that return a random number in a specific format.
  */
-#define SDLTest_RandomInt(c)		((int)SDLTest_Random(c))
+#define SDLTest_RandomInt(c)        ((int)SDLTest_Random(c))
 
 /*
  * Context structure for the random number generator state.
@@ -70,7 +68,7 @@ extern "C" {
 /* --- Function prototypes */
 
 /**
- *  \brief Initialize random number generator with two integers. 
+ *  \brief Initialize random number generator with two integers.
  *
  *  Note: The random sequence of numbers returned by ...Random() is the
  *  same for the same two integers and has a period of 2^31.
@@ -81,10 +79,10 @@ extern "C" {
  *
  */
  void SDLTest_RandomInit(SDLTest_RandomContext * rndContext, unsigned int xi,
-				  unsigned int ci);
+                  unsigned int ci);
 
 /**
- *  \brief Initialize random number generator based on current system time. 
+ *  \brief Initialize random number generator based on current system time.
  *
  *  \param rndContext     pointer to context structure
  *
@@ -93,7 +91,7 @@ extern "C" {
 
 
 /**
- *  \brief Initialize random number generator based on current system time. 
+ *  \brief Initialize random number generator based on current system time.
  *
  *  Note: ...RandomInit() or ...RandomInitTime() must have been called
  *  before using this function.
@@ -108,9 +106,7 @@ extern "C" {
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

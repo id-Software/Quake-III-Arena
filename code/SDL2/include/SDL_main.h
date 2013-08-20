@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,18 +26,40 @@
 
 /**
  *  \file SDL_main.h
- *  
+ *
  *  Redefine main() on some platforms so that it is called by SDL.
  */
 
-#if defined(__WIN32__) || defined(__IPHONEOS__) || defined(__ANDROID__)
 #ifndef SDL_MAIN_HANDLED
+#if defined(__WIN32__)
+/* On Windows SDL provides WinMain(), which parses the command line and passes
+   the arguments to your main function.
+
+   If you provide your own WinMain(), you may define SDL_MAIN_HANDLED
+ */
+#define SDL_MAIN_AVAILABLE
+
+#elif defined(__IPHONEOS__)
+/* On iOS SDL provides a main function that creates an application delegate
+   and starts the iOS application run loop.
+
+   See src/video/uikit/SDL_uikitappdelegate.m for more details.
+ */
 #define SDL_MAIN_NEEDED
+
+#elif defined(__ANDROID__)
+/* On Android SDL provides a Java class in SDLActivity.java that is the
+   main activity entry point.
+
+   See README-android.txt for more details on extending that class.
+ */
+#define SDL_MAIN_NEEDED
+
 #endif
-#endif
+#endif /* SDL_MAIN_HANDLED */
 
 #ifdef __cplusplus
-#define C_LINKAGE	"C"
+#define C_LINKAGE   "C"
 #else
 #define C_LINKAGE
 #endif /* __cplusplus */
@@ -57,8 +79,8 @@
  *  \endcode
  */
 
-#ifdef SDL_MAIN_NEEDED
-#define main	SDL_main
+#if defined(SDL_MAIN_NEEDED) || defined(SDL_MAIN_AVAILABLE)
+#define main    SDL_main
 #endif
 
 /**
@@ -69,10 +91,17 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 
 #include "begin_code.h"
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
+
+/*
+ *  This is called by the real SDL main function to let the rest of the
+ *  library know that initialization was done properly.
+ *
+ *  Calling this yourself without knowing what you're doing can cause
+ *  crashes and hard to diagnose problems with your application.
+ */
+extern DECLSPEC void SDL_SetMainReady(void);
 
 #ifdef __WIN32__
 
@@ -87,9 +116,7 @@ extern DECLSPEC void SDLCALL SDL_UnregisterApp(void);
 
 
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

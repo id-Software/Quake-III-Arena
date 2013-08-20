@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,7 +24,7 @@
 
 /**
  *  \file SDL_timer.h
- *  
+ *
  *  Header for the SDL time management routines.
  */
 
@@ -34,14 +34,12 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
  * \brief Get the number of milliseconds since the SDL library initialization.
- *  
+ *
  * \note This value wraps if the program runs for more than ~49 days.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_GetTicks(void);
@@ -63,7 +61,7 @@ extern DECLSPEC void SDLCALL SDL_Delay(Uint32 ms);
 
 /**
  *  Function prototype for the timer callback function.
- *  
+ *
  *  The callback function is passed the current timer interval and returns
  *  the next timer interval.  If the returned value is the same as the one
  *  passed in, the periodic alarm continues, otherwise a new alarm is
@@ -97,9 +95,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RemoveTimer(SDL_TimerID id);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

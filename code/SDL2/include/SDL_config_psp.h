@@ -19,15 +19,15 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_iphoneos_h
-#define _SDL_config_iphoneos_h
+#ifndef _SDL_config_psp_h
+#define _SDL_config_psp_h
 
 #include "SDL_platform.h"
 
-#ifdef __LP64__
-#define SIZEOF_VOIDP 8
-#else
-#define SIZEOF_VOIDP 4
+
+
+#ifdef __GNUC__
+#define HAVE_GCC_SYNC_LOCK_TEST_AND_SET 1
 #endif
 
 #define HAVE_GCC_ATOMICS    1
@@ -97,55 +97,40 @@
 #define HAVE_SIN    1
 #define HAVE_SINF   1
 #define HAVE_SQRT   1
-#define HAVE_SIGACTION  1
 #define HAVE_SETJMP 1
 #define HAVE_NANOSLEEP  1
-#define HAVE_SYSCONF    1
-#define HAVE_SYSCTLBYNAME 1
+//#define HAVE_SYSCONF  1
+//#define HAVE_SIGACTION    1
 
-/* enable iPhone version of Core Audio driver */
-#define SDL_AUDIO_DRIVER_COREAUDIO 1
-/* Enable the dummy audio driver (src/audio/dummy/\*.c) */
-#define SDL_AUDIO_DRIVER_DUMMY  1
 
-/* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
-#define SDL_HAPTIC_DISABLED 1
+/* PSP isn't that sophisticated */
+#define LACKS_SYS_MMAN_H 1
 
-/* Enable Unix style SO loading */
-/* Technically this works, but it violates the iPhone developer agreement */
-/* #define SDL_LOADSO_DLOPEN 1 */
+/* Enable the stub thread support (src/thread/psp/\*.c) */
+#define SDL_THREAD_PSP  1
 
-/* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
-#define SDL_LOADSO_DISABLED 1
+/* Enable the stub timer support (src/timer/psp/\*.c) */
+#define SDL_TIMERS_PSP  1
 
-/* Enable various threading systems */
-#define SDL_THREAD_PTHREAD  1
-#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX  1
+/* Enable the stub joystick driver (src/joystick/psp/\*.c) */
+#define SDL_JOYSTICK_PSP        1
 
-/* Enable various timer systems */
-#define SDL_TIMER_UNIX  1
+/* Enable the stub audio driver (src/audio/psp/\*.c) */
+#define SDL_AUDIO_DRIVER_PSP    1
 
-/* Supported video drivers */
-#define SDL_VIDEO_DRIVER_UIKIT  1
-#define SDL_VIDEO_DRIVER_DUMMY  1
+/* PSP video dirver */
+#define SDL_VIDEO_DRIVER_PSP   1
 
-/* enable OpenGL ES */
-#define SDL_VIDEO_OPENGL_ES 1
-#define SDL_VIDEO_RENDER_OGL_ES 1
-#define SDL_VIDEO_RENDER_OGL_ES2    1
+/* PSP render dirver */
+#define SDL_VIDEO_RENDER_PSP   1
 
-/* Enable system power support */
-#define SDL_POWER_UIKIT 1
+#define SDL_POWER_PSP          1
 
-/* enable iPhone keyboard support */
-#define SDL_IPHONE_KEYBOARD 1
+/* PSP doesn't have haptic device (src/haptic/dummy/\*.c) */
+#define SDL_HAPTIC_DISABLED    1
 
-/* enable joystick subsystem */
-#define SDL_JOYSTICK_DISABLED 0
+/* PSP can't load shared object (src/loadso/dummy/\*.c) */
+#define SDL_LOADSO_DISABLED    1
 
-/* Set max recognized G-force from accelerometer
-   See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
- */
-#define SDL_IPHONE_MAX_GFORCE 5.0
 
-#endif /* _SDL_config_iphoneos_h */
+#endif /* _SDL_config_psp_h */
