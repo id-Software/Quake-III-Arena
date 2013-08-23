@@ -2515,6 +2515,21 @@ static qboolean CollapseStagesToGLSL(void)
 		}
 	}
 
+	// convert any remaining lightingdiffuse stages to a lighting pass
+	for (i = 0; i < MAX_SHADER_STAGES; i++)
+	{
+		shaderStage_t *pStage = &stages[i];
+
+		if (!pStage->active)
+			continue;
+
+		if (pStage->rgbGen == CGEN_LIGHTING_DIFFUSE)
+		{
+			pStage->glslShaderGroup = tr.lightallShader;
+			pStage->glslShaderIndex = LIGHTDEF_USE_LIGHT_VECTOR;
+		}
+	}
+
 	return numStages;
 }
 
