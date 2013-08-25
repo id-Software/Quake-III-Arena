@@ -522,8 +522,9 @@ void Sys_ErrorDialog( const char *error )
 #endif
 
 	// Make sure the write path for the crashlog exists...
-	if( FS_CreatePath( ospath ) ) {
-		Com_Printf( "ERROR: couldn't create path '%s' for crash log.\n", ospath );
+	if(!Sys_Mkdir(ospath))
+	{
+		Com_Printf("ERROR: couldn't create path '%s' for crash log.\n", ospath);
 		return;
 	}
 
