@@ -200,7 +200,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 	SDL_DisplayMode desktopMode;
 	int display = 0;
-	int x = 0, y = 0;
+	int x = SDL_WINDOWPOS_UNDEFINED, y = SDL_WINDOWPOS_UNDEFINED;
 
 	ri.Printf( PRINT_ALL, "Initializing OpenGL display\n");
 
