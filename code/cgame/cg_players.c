@@ -185,7 +185,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 			text_p = prev;	// unget the token
 			break;
 		}
-		Com_Printf( "unknown token '%s' is %s\n", token, filename );
+		Com_Printf( "unknown token '%s' in %s\n", token, filename );
 	}
 
 	// read information for each frame
