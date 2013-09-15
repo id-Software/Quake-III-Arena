@@ -46,7 +46,7 @@ typedef enum
 } rserr_t;
 
 SDL_Window *SDL_window = NULL;
-static SDL_GLContext *SDL_glContext = NULL;
+static SDL_GLContext SDL_glContext = NULL;
 
 cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
 cvar_t *r_allowResize; // make window resizable
@@ -102,8 +102,8 @@ GLimp_CompareModes
 static int GLimp_CompareModes( const void *a, const void *b )
 {
 	const float ASPECT_EPSILON = 0.001f;
-	SDL_Rect *modeA = (SDL_Rect *)&a;
-	SDL_Rect *modeB = (SDL_Rect *)&b;
+	SDL_Rect *modeA = (SDL_Rect *)a;
+	SDL_Rect *modeB = (SDL_Rect *)b;
 	float aspectA = (float)modeA->w / (float)modeA->h;
 	float aspectB = (float)modeB->w / (float)modeB->h;
 	int areaA = modeA->w * modeA->h;
@@ -445,12 +445,6 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 		if( ( SDL_glContext = SDL_GL_CreateContext( SDL_window ) ) == NULL )
 		{
 			ri.Printf( PRINT_DEVELOPER, "SDL_GL_CreateContext failed: %s\n", SDL_GetError( ) );
-			continue;
-		}
-
-		if( SDL_GL_MakeCurrent( SDL_window, SDL_glContext ) < 0 )
-		{
-			ri.Printf( PRINT_DEVELOPER, "SDL_GL_MakeCurrent failed: %s\n", SDL_GetError( ) );
 			continue;
 		}
 
