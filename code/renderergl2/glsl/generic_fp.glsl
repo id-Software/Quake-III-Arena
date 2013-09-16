@@ -20,8 +20,8 @@ void main()
 	vec4 color  = texture2D(u_DiffuseMap, var_DiffuseTex);
 #if defined(USE_LIGHTMAP)
 	vec4 color2 = texture2D(u_LightMap, var_LightTex);
-  #if defined(RGBE_LIGHTMAP)
-	color2.rgb *= exp2(color2.a * 255.0 - 128.0);
+  #if defined(RGBM_LIGHTMAP)
+	color2.rgb *= 32.0 * color2.a;
 	color2.a = 1.0;
   #endif
 

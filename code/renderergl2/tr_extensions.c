@@ -595,18 +595,49 @@ void GLimp_InitExtraExtensions()
 
 	// GL_EXT_texture_sRGB
 	extension = "GL_EXT_texture_sRGB";
-	glRefConfig.texture_srgb = qfalse;
+	glRefConfig.textureSrgb = qfalse;
 	if (GLimp_HaveExtension(extension))
 	{
 		if (r_srgb->integer)
-			glRefConfig.texture_srgb = qtrue;
+			glRefConfig.textureSrgb = qtrue;
 
-		ri.Printf(PRINT_ALL, result[glRefConfig.texture_srgb], extension);
+		ri.Printf(PRINT_ALL, result[glRefConfig.textureSrgb], extension);
 	}
 	else
 	{
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
+
+	// GL_EXT_framebuffer_sRGB
+	extension = "GL_EXT_framebuffer_sRGB";
+	glRefConfig.framebufferSrgb = qfalse;
+	if (GLimp_HaveExtension(extension))
+	{
+		if (r_srgb->integer)
+			glRefConfig.framebufferSrgb = qtrue;
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferSrgb], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
+
+	// GL_EXT_texture_sRGB_decode
+	extension = "GL_EXT_texture_sRGB_decode";
+	glRefConfig.textureSrgbDecode = qfalse;
+	if (GLimp_HaveExtension(extension))
+	{
+		if (r_srgb->integer)
+			glRefConfig.textureSrgbDecode = qtrue;
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.textureSrgbDecode], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
+
 
 	glRefConfig.textureCompression = TCR_NONE;
 
@@ -658,6 +689,19 @@ void GLimp_InitExtraExtensions()
 	if( GLimp_HaveExtension( extension ) )
 	{
 		glRefConfig.depthClamp = qtrue;
+		ri.Printf(PRINT_ALL, result[1], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
+
+	// GL_ARB_seamless_cube_map
+	extension = "GL_ARB_seamless_cube_map";
+	glRefConfig.seamlessCubeMap = qfalse;
+	if( GLimp_HaveExtension( extension ) )
+	{
+		glRefConfig.seamlessCubeMap = qtrue;
 		ri.Printf(PRINT_ALL, result[1], extension);
 	}
 	else

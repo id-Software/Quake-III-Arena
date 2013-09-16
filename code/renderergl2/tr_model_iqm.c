@@ -786,6 +786,7 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 	qboolean		personalModel;
 	int			cull;
 	int			fogNum;
+	int         cubemapIndex;
 	shader_t		*shader;
 	skin_t			*skin;
 
@@ -838,6 +839,8 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 	//
 	fogNum = R_ComputeIQMFogNum( data, ent );
 
+	cubemapIndex = R_CubemapForPoint(ent->e.origin);
+
 	for ( i = 0 ; i < data->num_surfaces ; i++ ) {
 		if(ent->e.customShader)
 			shader = R_GetShaderByHandle( ent->e.customShader );
@@ -866,7 +869,7 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 			&& fogNum == 0
 			&& !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) ) 
 			&& shader->sort == SS_OPAQUE ) {
-			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, 0, 0 );
+			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, 0, 0, 0 );
 		}
 
 		// projection shadows work fine with personal models
@@ -874,11 +877,11 @@ void R_AddIQMSurfaces( trRefEntity_t *ent ) {
 			&& fogNum == 0
 			&& (ent->e.renderfx & RF_SHADOW_PLANE )
 			&& shader->sort == SS_OPAQUE ) {
-			R_AddDrawSurf( (void *)surface, tr.projectionShadowShader, 0, 0, 0 );
+			R_AddDrawSurf( (void *)surface, tr.projectionShadowShader, 0, 0, 0, 0 );
 		}
 
 		if( !personalModel ) {
-			R_AddDrawSurf( (void *)surface, shader, fogNum, 0, 0 );
+			R_AddDrawSurf( (void *)surface, shader, fogNum, 0, 0, cubemapIndex );
 		}
 
 		surface++;

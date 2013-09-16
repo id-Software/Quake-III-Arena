@@ -579,6 +579,19 @@ void FBO_Init(void)
 		R_CheckFBO(tr.screenSsaoFbo);
 	}
 
+	{
+		tr.renderCubeFbo = FBO_Create("_renderCubeFbo", tr.renderCubeImage->width, tr.renderCubeImage->height);
+		FBO_Bind(tr.renderCubeFbo);
+		
+		//FBO_AttachTextureImage(tr.renderCubeImage, 0);
+		R_AttachFBOTexture2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB, tr.renderCubeImage->texnum, 0);
+		glState.currentFBO->colorImage[0] = tr.renderCubeImage;
+
+		FBO_CreateBuffer(tr.renderCubeFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
+
+		R_CheckFBO(tr.renderCubeFbo);
+	}
+
 	GL_CheckErrors();
 
 	FBO_Bind(NULL);
@@ -783,7 +796,10 @@ void FBO_Blit(FBO_t *src, vec4i_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, vec4
 	vec4i_t srcBox;
 
 	if (!src)
+	{
+		ri.Printf(PRINT_WARNING, "Tried to blit from a NULL FBO!\n");
 		return;
+	}
 
 	// framebuffers are 0 bottom, Y up.
 	if (inSrcBox)

@@ -186,7 +186,7 @@ because a surface may be forced to perform a RB_End due
 to overflow.
 ==============
 */
-void RB_BeginSurface( shader_t *shader, int fogNum ) {
+void RB_BeginSurface( shader_t *shader, int fogNum, int cubemapIndex ) {
 
 	shader_t *state = (shader->remappedShader) ? shader->remappedShader : shader;
 
@@ -196,6 +196,7 @@ void RB_BeginSurface( shader_t *shader, int fogNum ) {
 	tess.multiDrawPrimitives = 0;
 	tess.shader = state;
 	tess.fogNum = fogNum;
+	tess.cubemapIndex = cubemapIndex;
 	tess.dlightBits = 0;		// will be OR'd in by surface functions
 	tess.pshadowBits = 0;       // will be OR'd in by surface functions
 	tess.xstages = state->stages;
@@ -846,7 +847,7 @@ static void ForwardDlight( void ) {
 		if (r_dlightMode->integer >= 2)
 		{
 			GL_SelectTexture(TB_SHADOWMAP);
-			GL_BindCubemap(tr.shadowCubemaps[l]);
+			GL_Bind(tr.shadowCubemaps[l]);
 			GL_SelectTexture(0);
 		}
 
@@ -1133,6 +1134,11 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 				index |= LIGHTDEF_USE_SHADOWMAP;
 			}
 
+			if (!(tr.viewParms.flags & VPF_NOCUBEMAPS) && (index & LIGHTDEF_LIGHTTYPE_MASK) && input->cubemapIndex)
+			{
+				index |= LIGHTDEF_USE_CUBEMAP;
+			}
+
 			if (r_lightmap->integer && index & LIGHTDEF_USE_LIGHTMAP)
 			{
 				index = LIGHTDEF_USE_LIGHTMAP;
@@ -1177,39 +1183,10 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		{
 			vec4_t baseColor;
 			vec4_t vertColor;
-			qboolean tint = qtrue;
-			int stage2;
 
 			ComputeShaderColors(pStage, baseColor, vertColor);
 
-			for ( stage2 = stage + 1; stage2 < MAX_SHADER_STAGES; stage2++ )
-			{
-				shaderStage_t *pStage2 = input->xstages[stage2];
-				unsigned int srcBlendBits;
-				//unsigned int dstBlendBits;
-
-				if ( !pStage2 )
-				{
-					break;
-				}
-
-				srcBlendBits = pStage2->stateBits & GLS_SRCBLEND_BITS;
-				//dstBlendBits = pStage2->stateBits & GLS_DSTBLEND_BITS;
-
-				if (srcBlendBits == GLS_SRCBLEND_DST_COLOR)
-				{
-					tint = qfalse;
-					break;
-				}
-			}
-			
-			if (!((tr.sunShadows || r_forceSun->integer) && tess.shader->sort <= SS_OPAQUE 
-				&& !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) && tess.xstages[0]->glslShaderGroup == tr.lightallShader))
-			{
-				tint = qfalse;
-			}
-
-			if (tint)
+			if ((backEnd.refdef.colorScale != 1.0f) && !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL))
 			{
 				// use VectorScale to only scale first three values, not alpha
 				VectorScale(baseColor, backEnd.refdef.colorScale, baseColor);
@@ -1372,6 +1349,12 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 
 			GLSL_SetUniformInt(sp, UNIFORM_TEXTURE1ENV, 0);
 		}
+
+		//
+		// testing cube map
+		//
+		if (!(tr.viewParms.flags & VPF_NOCUBEMAPS) && input->cubemapIndex && r_cubeMapping->integer)
+			GL_BindToTMU( tr.cubemaps[input->cubemapIndex - 1], TB_CUBEMAP);
 
 		//
 		// draw

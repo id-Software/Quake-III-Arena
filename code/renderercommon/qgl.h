@@ -721,6 +721,11 @@ extern void (APIENTRY * qglDrawBuffersARB)(GLsizei n, const GLenum *bufs);
 #define GL_DEPTH_CLAMP				      0x864F
 #endif
 
+#ifndef GL_ARB_seamless_cube_map
+#define GL_ARB_seamless_cube_map
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS               0x884F
+#endif
+
 #if defined(WIN32)
 // WGL_ARB_create_context
 #ifndef WGL_ARB_create_context

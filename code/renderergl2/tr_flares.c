@@ -370,7 +370,7 @@ void RB_RenderFlare( flare_t *f ) {
 	iColor[1] = color[1] * fogFactors[1];
 	iColor[2] = color[2] * fogFactors[2];
 	
-	RB_BeginSurface( tr.flareShader, f->fogNum );
+	RB_BeginSurface( tr.flareShader, f->fogNum, 0 );
 
 	// FIXME: use quadstamp?
 	tess.xyz[tess.numVertexes][0] = f->windowX - size;

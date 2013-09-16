@@ -1607,7 +1607,7 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 	R_RotateForViewer();
 
 	R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted, &pshadowed );
-	RB_BeginSurface( shader, fogNum );
+	RB_BeginSurface( shader, fogNum, drawSurf->cubemapIndex);
 	rb_surfaceTable[ *drawSurf->surface ]( drawSurf->surface );
 
 	assert( tess.numVertexes < 128 );
@@ -1724,6 +1724,9 @@ qboolean R_MirrorViewBySurface (drawSurf_t *drawSurf, int entityNum) {
 		newParms.pvsOrigin, &newParms.isMirror ) ) {
 		return qfalse;		// bad portal, no portalentity
 	}
+
+	if (newParms.isMirror)
+		newParms.flags |= VPF_NOVIEWMODEL;
 
 	R_MirrorPoint (oldParms.or.origin, &surface, &camera, newParms.or.origin );
 
@@ -1844,7 +1847,7 @@ R_AddDrawSurf
 =================
 */
 void R_AddDrawSurf( surfaceType_t *surface, shader_t *shader, 
-				   int fogIndex, int dlightMap, int pshadowMap ) {
+				   int fogIndex, int dlightMap, int pshadowMap, int cubemap ) {
 	int			index;
 
 	// instead of checking for overflow, we just mask the index
@@ -1855,6 +1858,7 @@ void R_AddDrawSurf( surfaceType_t *surface, shader_t *shader,
 	tr.refdef.drawSurfs[index].sort = (shader->sortedIndex << QSORT_SHADERNUM_SHIFT) 
 		| tr.shiftedEntityNum | ( fogIndex << QSORT_FOGNUM_SHIFT ) 
 		| ((int)pshadowMap << QSORT_PSHADOW_SHIFT) | (int)dlightMap;
+	tr.refdef.drawSurfs[index].cubemapIndex = cubemap;
 	tr.refdef.drawSurfs[index].surface = surface;
 	tr.refdef.numDrawSurfs++;
 }
@@ -1958,8 +1962,7 @@ static void R_AddEntitySurface (int entityNum)
 	// we don't want the hacked weapon position showing in 
 	// mirrors, because the true body position will already be drawn
 	//
-	if ( (ent->e.renderfx & RF_FIRST_PERSON) && (tr.viewParms.isPortal 
-	      || (tr.viewParms.flags & (VPF_SHADOWMAP | VPF_DEPTHSHADOW))) ) {
+	if ( (ent->e.renderfx & RF_FIRST_PERSON) && (tr.viewParms.flags & VPF_NOVIEWMODEL)) {
 		return;
 	}
 
@@ -1979,7 +1982,7 @@ static void R_AddEntitySurface (int entityNum)
 			return;
 		}
 		shader = R_GetShaderByHandle( ent->e.customShader );
-		R_AddDrawSurf( &entitySurface, shader, R_SpriteFogNum( ent ), 0, 0 );
+		R_AddDrawSurf( &entitySurface, shader, R_SpriteFogNum( ent ), 0, 0, 0 /*cubeMap*/ );
 		break;
 
 	case RT_MODEL:
@@ -1988,7 +1991,7 @@ static void R_AddEntitySurface (int entityNum)
 
 		tr.currentModel = R_GetModelByHandle( ent->e.hModel );
 		if (!tr.currentModel) {
-			R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0, 0 );
+			R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0, 0, 0 /*cubeMap*/  );
 		} else {
 			switch ( tr.currentModel->type ) {
 			case MOD_MESH:
@@ -2010,7 +2013,7 @@ static void R_AddEntitySurface (int entityNum)
 				if ( (ent->e.renderfx & RF_THIRD_PERSON) && !tr.viewParms.isPortal) {
 					break;
 				}
-				R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0, 0 );
+				R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0, 0, 0 );
 				break;
 			default:
 				ri.Error( ERR_DROP, "R_AddEntitySurfaces: Bad modeltype" );
@@ -2186,7 +2189,7 @@ void R_RenderDlightCubemaps(const refdef_t *fd)
 		shadowParms.fovX = 90;
 		shadowParms.fovY = 90;
 
-		shadowParms.flags = VPF_SHADOWMAP | VPF_DEPTHSHADOW;
+		shadowParms.flags = VPF_SHADOWMAP | VPF_DEPTHSHADOW | VPF_NOVIEWMODEL;
 		shadowParms.zFar = tr.refdef.dlights[i].radius;
 
 		VectorCopy( tr.refdef.dlights[i].origin, shadowParms.or.origin );
@@ -2490,7 +2493,7 @@ void R_RenderPshadowMaps(const refdef_t *fd)
 		if (glRefConfig.framebufferObject)
 			shadowParms.targetFbo = tr.pshadowFbos[i];
 
-		shadowParms.flags = VPF_SHADOWMAP | VPF_DEPTHSHADOW;
+		shadowParms.flags = VPF_SHADOWMAP | VPF_DEPTHSHADOW | VPF_NOVIEWMODEL;
 		shadowParms.zFar = shadow->lightRadius;
 
 		VectorCopy(shadow->lightOrigin, shadowParms.or.origin);
@@ -2835,7 +2838,7 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 		if (glRefConfig.framebufferObject)
 			shadowParms.targetFbo = tr.sunShadowFbo[level];
 
-		shadowParms.flags = VPF_DEPTHSHADOW | VPF_DEPTHCLAMP | VPF_ORTHOGRAPHIC;
+		shadowParms.flags = VPF_DEPTHSHADOW | VPF_DEPTHCLAMP | VPF_ORTHOGRAPHIC | VPF_NOVIEWMODEL;
 		shadowParms.zFar = lightviewBounds[1][0];
 
 		VectorCopy(lightOrigin, shadowParms.or.origin);
@@ -2872,5 +2875,132 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 		}
 
 		Matrix16Multiply(tr.viewParms.projectionMatrix, tr.viewParms.world.modelMatrix, tr.refdef.sunShadowMvp[level]);
+	}
+}
+
+void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
+{
+	refdef_t refdef;
+	viewParms_t	parms;
+	float oldColorScale = tr.refdef.colorScale;
+
+	memset( &refdef, 0, sizeof( refdef ) );
+	refdef.rdflags = 0;
+	VectorCopy(tr.cubemapOrigins[cubemapIndex], refdef.vieworg);
+
+	switch(cubemapSide)
+	{
+		case 0:
+			// -X
+			VectorSet( refdef.viewaxis[0], -1,  0,  0);
+			VectorSet( refdef.viewaxis[1],  0,  0, -1);
+			VectorSet( refdef.viewaxis[2],  0,  1,  0);
+			break;
+		case 1: 
+			// +X
+			VectorSet( refdef.viewaxis[0],  1,  0,  0);
+			VectorSet( refdef.viewaxis[1],  0,  0,  1);
+			VectorSet( refdef.viewaxis[2],  0,  1,  0);
+			break;
+		case 2: 
+			// -Y
+			VectorSet( refdef.viewaxis[0],  0, -1,  0);
+			VectorSet( refdef.viewaxis[1],  1,  0,  0);
+			VectorSet( refdef.viewaxis[2],  0,  0, -1);
+			break;
+		case 3: 
+			// +Y
+			VectorSet( refdef.viewaxis[0],  0,  1,  0);
+			VectorSet( refdef.viewaxis[1],  1,  0,  0);
+			VectorSet( refdef.viewaxis[2],  0,  0,  1);
+			break;
+		case 4:
+			// -Z
+			VectorSet( refdef.viewaxis[0],  0,  0, -1);
+			VectorSet( refdef.viewaxis[1],  1,  0,  0);
+			VectorSet( refdef.viewaxis[2],  0,  1,  0);
+			break;
+		case 5:
+			// +Z
+			VectorSet( refdef.viewaxis[0],  0,  0,  1);
+			VectorSet( refdef.viewaxis[1], -1,  0,  0);
+			VectorSet( refdef.viewaxis[2],  0,  1,  0);
+			break;
+	}
+
+	refdef.fov_x = 90;
+	refdef.fov_y = 90;
+
+	refdef.x = 0;
+	refdef.y = 0;
+	refdef.width = tr.renderCubeFbo->width;
+	refdef.height = tr.renderCubeFbo->height;
+
+	refdef.time = 0;
+
+	if (!subscene)
+	{
+		RE_BeginScene(&refdef);
+
+		// FIXME: sun shadows aren't rendered correctly in cubemaps
+		// fix involves changing r_FBufScale to fit smaller cubemap image size, or rendering cubemap to framebuffer first
+		if(0) //(glRefConfig.framebufferObject && (r_forceSun->integer || tr.sunShadows))
+		{
+			R_RenderSunShadowMaps(&refdef, 0);
+			R_RenderSunShadowMaps(&refdef, 1);
+			R_RenderSunShadowMaps(&refdef, 2);
+		}
+	}
+
+	{
+		vec3_t ambient, directed, lightDir;
+		R_LightForPoint(tr.refdef.vieworg, ambient, directed, lightDir);
+		tr.refdef.colorScale = 766.0f / (directed[0] + directed[1] + directed[2] + 1.0f);
+		if (directed[0] + directed[1] + directed[2] == 0)
+		{
+			ri.Printf(PRINT_ALL, "cubemap %d (%f, %f, %f) is outside the lightgrid!\n", cubemapIndex, tr.refdef.vieworg[0], tr.refdef.vieworg[1], tr.refdef.vieworg[2]);
+		}
+	}
+
+	Com_Memset( &parms, 0, sizeof( parms ) );
+
+	parms.viewportX = 0;
+	parms.viewportY = 0;
+	parms.viewportWidth = tr.renderCubeFbo->width;
+	parms.viewportHeight = tr.renderCubeFbo->height;
+	parms.isPortal = qfalse;
+	parms.isMirror = qtrue;
+	parms.flags =  VPF_NOVIEWMODEL | VPF_NOCUBEMAPS;
+
+	parms.fovX = 90;
+	parms.fovY = 90;
+
+	VectorCopy( refdef.vieworg, parms.or.origin );
+	VectorCopy( refdef.viewaxis[0], parms.or.axis[0] );
+	VectorCopy( refdef.viewaxis[1], parms.or.axis[1] );
+	VectorCopy( refdef.viewaxis[2], parms.or.axis[2] );
+
+	VectorCopy( refdef.vieworg, parms.pvsOrigin );
+
+	// FIXME: sun shadows aren't rendered correctly in cubemaps
+	// fix involves changing r_FBufScale to fit smaller cubemap image size, or rendering cubemap to framebuffer first
+	if (0) //(r_depthPrepass->value && ((r_forceSun->integer) || tr.sunShadows))
+	{
+		parms.flags = VPF_USESUNLIGHT;
+	}
+
+	parms.targetFbo = tr.renderCubeFbo;
+	parms.targetFboLayer = cubemapSide;
+	parms.targetFboCubemapIndex = cubemapIndex;
+
+	R_RenderView(&parms);
+
+	if (subscene)
+	{
+		tr.refdef.colorScale = oldColorScale;
+	}
+	else
+	{
+		RE_EndScene();
 	}
 }

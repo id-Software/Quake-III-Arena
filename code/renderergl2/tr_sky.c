@@ -449,7 +449,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 		
 		color[0] = 
 		color[1] = 
-		color[2] = tr.identityLight;
+		color[2] = tr.identityLight * backEnd.refdef.colorScale;
 		color[3] = 1.0f;
 		GLSL_SetUniformVec4(sp, UNIFORM_BASECOLOR, color);
 
@@ -826,7 +826,7 @@ void RB_DrawSun( float scale, shader_t *shader ) {
 	// farthest depth range
 	qglDepthRange( 1.0, 1.0 );
 
-	RB_BeginSurface( shader, 0 );
+	RB_BeginSurface( shader, 0, 0 );
 
 	RB_AddQuadStamp(origin, vec1, vec2, colorWhite);
 

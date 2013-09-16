@@ -288,6 +288,7 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 	int				cull;
 	int				lod;
 	int				fogNum;
+	int             cubemapIndex;
 	qboolean		personalModel;
 
 	// don't add third_person objects if not in a portal
@@ -344,6 +345,8 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 	//
 	fogNum = R_ComputeFogNum( model, ent );
 
+	cubemapIndex = R_CubemapForPoint(ent->e.origin);
+
 	//
 	// draw all surfaces
 	//
@@ -387,7 +390,7 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 		{
 			srfVBOMDVMesh_t *vboSurface = &model->vboSurfaces[i];
 
-			R_AddDrawSurf((void *)vboSurface, shader, fogNum, qfalse, qfalse );
+			R_AddDrawSurf((void *)vboSurface, shader, fogNum, qfalse, qfalse, cubemapIndex );
 		}
 
 		surface++;
