@@ -285,8 +285,8 @@ void main()
 
 #if defined(USE_LIGHTMAP)
 	vec4 lightSample = texture2D(u_LightMap, var_LightTex).rgba;
-  #if defined(RGBE_LIGHTMAP)
-	lightSample.rgb *= exp2(lightSample.a * 255.0 - 128.0);
+  #if defined(RGBM_LIGHTMAP)
+	lightSample.rgb *= 32.0 * lightSample.a;
   #endif
 	vec3 lightColor = lightSample.rgb;
 #elif defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)

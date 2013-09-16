@@ -908,7 +908,7 @@ void GLSL_InitGPUShaders(void)
 			Q_strcat(extradefines, 1024, "#define USE_LIGHTMAP\n");
 
 		if (r_hdr->integer && !(glRefConfig.textureFloat && glRefConfig.halfFloatPixel))
-			Q_strcat(extradefines, 1024, "#define RGBE_LIGHTMAP\n");
+			Q_strcat(extradefines, 1024, "#define RGBM_LIGHTMAP\n");
 
 		if (!GLSL_InitGPUShader(&tr.genericShader[i], "generic", attribs, qtrue, extradefines, qtrue, fallbackShader_generic_vp, fallbackShader_generic_fp))
 		{
@@ -1037,7 +1037,7 @@ void GLSL_InitGPUShaders(void)
 		}
 
 		if (r_hdr->integer && !(glRefConfig.textureFloat && glRefConfig.halfFloatPixel))
-			Q_strcat(extradefines, 1024, "#define RGBE_LIGHTMAP\n");
+			Q_strcat(extradefines, 1024, "#define RGBM_LIGHTMAP\n");
 
 		if (i & LIGHTDEF_LIGHTTYPE_MASK)
 		{
