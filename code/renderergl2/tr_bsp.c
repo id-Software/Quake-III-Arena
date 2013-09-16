@@ -150,22 +150,18 @@ void ColorToRGBM(const vec3_t color, unsigned char rgbm[4])
 
 	VectorScale(color, 1.0f / 32.0f, sample);
 
-	maxComponent = sample[0];
-	if(sample[1] > maxComponent)
-		maxComponent = sample[1];
-	if(sample[2] > maxComponent)
-		maxComponent = sample[2];
-	if(0.000001f > maxComponent)
-		maxComponent = 0.000001f;
-	if(maxComponent > 1.0f)
-		maxComponent = 1.0f;
+	maxComponent = MAX(sample[0], sample[1]);
+	maxComponent = MAX(maxComponent, sample[2]);
+	maxComponent = CLAMP(maxComponent, 1.0f/255.0f, 1.0f);
 
-	VectorScale(sample, 1.0f / maxComponent, sample);
+	rgbm[3] = (unsigned char) ceil(maxComponent * 255.0f);
+	maxComponent = 255.0f / rgbm[3];
+
+	VectorScale(sample, maxComponent, sample);
 
 	rgbm[0] = (unsigned char) (sample[0] * 255);
 	rgbm[1] = (unsigned char) (sample[1] * 255);
 	rgbm[2] = (unsigned char) (sample[2] * 255);
-	rgbm[3] = (unsigned char) (maxComponent * 255);
 }
 
 void ColorToRGBA16F(const vec3_t color, unsigned short rgba16f[4])
