@@ -910,8 +910,8 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 			else if(!Q_stricmp(token, "specularMap"))
 			{
 				stage->type = ST_SPECULARMAP;
-				stage->materialInfo[0] = 0.04f;
-				stage->materialInfo[1] = 256.0f;
+				stage->materialInfo[0] = 1.0f;
+				stage->materialInfo[1] = 1.0f;
 			}
 			else
 			{
@@ -937,12 +937,35 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 		//
 		else if (!Q_stricmp(token, "specularexponent"))
 		{
+			float exponent;
+
 			token = COM_ParseExt(text, qfalse);
 			if ( token[0] == 0 )
 			{
 				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for specular exponent in shader '%s'\n", shader.name );
 				continue;
 			}
+
+			exponent = atof( token );
+
+			// Change shininess to gloss
+			// FIXME: assumes max exponent of 8192 and min of 1, must change here if altered in lightall_fp.glsl
+			exponent = CLAMP(exponent, 1.0, 8192.0);
+
+			stage->materialInfo[1] = log(exponent) / log(8192.0);
+		}
+		//
+		// gloss <value>
+		//
+		else if (!Q_stricmp(token, "gloss"))
+		{
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for gloss in shader '%s'\n", shader.name );
+				continue;
+			}
+
 			stage->materialInfo[1] = atof( token );
 		}
 		//
@@ -1926,7 +1949,7 @@ static void ComputeVertexAttribs(void)
 			shader.vertexAttribs |= ATTR_NORMAL;
 
 #ifdef USE_VERT_TANGENT_SPACE
-			if (pStage->glslShaderIndex & LIGHTDEF_USE_NORMALMAP)
+			if ((pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK) && !(r_normalMapping->integer == 0 && r_specularMapping->integer == 0))
 			{
 				shader.vertexAttribs |= ATTR_BITANGENT | ATTR_TANGENT;
 			}
@@ -2200,7 +2223,6 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 		{
 			//ri.Printf(PRINT_ALL, ", normalmap %s", normal->bundle[0].image[0]->imgName);
 			diffuse->bundle[TB_NORMALMAP] = normal->bundle[0];
-			defs |= LIGHTDEF_USE_NORMALMAP;
 			if (parallax && r_parallaxMapping->integer)
 				defs |= LIGHTDEF_USE_PARALLAXMAP;
 		}
@@ -2218,12 +2240,21 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 			if (normalImg)
 			{
 				diffuse->bundle[TB_NORMALMAP] = diffuse->bundle[0];
+				diffuse->bundle[TB_NORMALMAP].numImageAnimations = 0;
 				diffuse->bundle[TB_NORMALMAP].image[0] = normalImg;
 
-				defs |= LIGHTDEF_USE_NORMALMAP;
 				if (parallax && r_parallaxMapping->integer)
 					defs |= LIGHTDEF_USE_PARALLAXMAP;
 			}
+		}
+
+		if (!diffuse->bundle[TB_NORMALMAP].image[0])
+		{
+			// use 0x80 image, shader will interpret as (0,0,1)
+			diffuse->bundle[TB_NORMALMAP] = diffuse->bundle[0];
+			diffuse->bundle[TB_NORMALMAP].numImageAnimations = 0;
+			diffuse->bundle[TB_NORMALMAP].image[0] = tr.greyImage;
+			//ri.Printf(PRINT_ALL, ", normalmap %s", diffuse->bundle[TB_NORMALMAP].image[0]->imgName);
 		}
 	}
 
@@ -2235,7 +2266,18 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 			diffuse->bundle[TB_SPECULARMAP] = specular->bundle[0];
 			diffuse->materialInfo[0] = specular->materialInfo[0];
 			diffuse->materialInfo[1] = specular->materialInfo[1];
-			defs |= LIGHTDEF_USE_SPECULARMAP;
+		}
+		else if (lightmap || useLightVector || useLightVertex)
+		{
+			// use a white image, materialinfo will do the rest
+			diffuse->bundle[TB_SPECULARMAP] = diffuse->bundle[0];
+			diffuse->bundle[TB_SPECULARMAP].numImageAnimations = 0;
+			diffuse->bundle[TB_SPECULARMAP].image[0] = tr.whiteImage;
+			if (!diffuse->materialInfo[0])
+				diffuse->materialInfo[0] = r_baseSpecular->value;
+			if (!diffuse->materialInfo[1])
+				diffuse->materialInfo[1] = r_baseGloss->value;
+			//ri.Printf(PRINT_ALL, ", specularmap %s", diffuse->bundle[TB_SPECULARMAP].image[0]->imgName);
 		}
 	}
 
@@ -2538,6 +2580,22 @@ static qboolean CollapseStagesToGLSL(void)
 			}
 		}
 	}
+
+	// convert any remaining lightingdiffuse stages to a lighting pass
+	for (i = 0; i < MAX_SHADER_STAGES; i++)
+	{
+		shaderStage_t *pStage = &stages[i];
+
+		if (!pStage->active)
+			continue;
+
+		if (pStage->rgbGen == CGEN_LIGHTING_DIFFUSE)
+		{
+			pStage->glslShaderGroup = tr.lightallShader;
+			pStage->glslShaderIndex = LIGHTDEF_USE_LIGHT_VECTOR;
+		}
+	}
+
 
 	return numStages;
 }

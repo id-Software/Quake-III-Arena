@@ -1805,6 +1805,14 @@ static int BSPSurfaceCompare(const void *a, const void *b)
 	else if(aa->fogIndex > bb->fogIndex)
 		return 1;
 
+	// by cubemapIndex
+	if(aa->cubemapIndex < bb->cubemapIndex)
+		return -1;
+
+	else if(aa->cubemapIndex > bb->cubemapIndex)
+		return 1;
+
+
 	return 0;
 }
 
@@ -2814,6 +2822,191 @@ qboolean R_GetEntityToken( char *buffer, int size ) {
 	}
 }
 
+#ifndef MAX_SPAWN_VARS
+#define MAX_SPAWN_VARS 64
+#endif
+
+// derived from G_ParseSpawnVars() in g_spawn.c
+qboolean R_ParseSpawnVars( char *spawnVarChars, int maxSpawnVarChars, int *numSpawnVars, char *spawnVars[MAX_SPAWN_VARS][2] )
+{
+	char		keyname[MAX_TOKEN_CHARS];
+	char		com_token[MAX_TOKEN_CHARS];
+	int			numSpawnVarChars = 0;
+
+	*numSpawnVars = 0;
+
+	// parse the opening brace
+	if ( !R_GetEntityToken( com_token, sizeof( com_token ) ) ) {
+		// end of spawn string
+		return qfalse;
+	}
+	if ( com_token[0] != '{' ) {
+		ri.Printf( PRINT_ALL, "R_ParseSpawnVars: found %s when expecting {",com_token );
+	}
+
+	// go through all the key / value pairs
+	while ( 1 ) {	
+		int keyLength, tokenLength;
+
+		// parse key
+		if ( !R_GetEntityToken( keyname, sizeof( keyname ) ) ) {
+			ri.Printf( PRINT_ALL, "R_ParseSpawnVars: EOF without closing brace" );
+		}
+
+		if ( keyname[0] == '}' ) {
+			break;
+		}
+		
+		// parse value	
+		if ( !R_GetEntityToken( com_token, sizeof( com_token ) ) ) {
+			ri.Printf( PRINT_ALL, "R_ParseSpawnVars: EOF without closing brace" );
+			break;
+		}
+
+		if ( com_token[0] == '}' ) {
+			ri.Printf( PRINT_ALL, "R_ParseSpawnVars: closing brace without data" );
+			break;
+		}
+
+		if ( *numSpawnVars == MAX_SPAWN_VARS ) {
+			ri.Printf( PRINT_ALL, "R_ParseSpawnVars: MAX_SPAWN_VARS" );
+			break;
+		}
+
+		keyLength = strlen(keyname) + 1;
+		tokenLength = strlen(com_token) + 1;
+
+		if (numSpawnVarChars + keyLength + tokenLength > maxSpawnVarChars)
+		{
+			ri.Printf( PRINT_ALL, "R_ParseSpawnVars: MAX_SPAWN_VAR_CHARS" );
+			break;
+		}
+
+		strcpy(spawnVarChars + numSpawnVarChars, keyname);
+		spawnVars[ *numSpawnVars ][0] = spawnVarChars + numSpawnVarChars;
+		numSpawnVarChars += keyLength;
+
+		strcpy(spawnVarChars + numSpawnVarChars, com_token);
+		spawnVars[ *numSpawnVars ][1] = spawnVarChars + numSpawnVarChars;
+		numSpawnVarChars += tokenLength;
+
+		(*numSpawnVars)++;
+	}
+
+	return qtrue;
+}
+
+void R_LoadCubemapEntities(char *cubemapEntityName)
+{
+	char spawnVarChars[2048];
+	int numSpawnVars;
+	char *spawnVars[MAX_SPAWN_VARS][2];
+	int numCubemaps = 0;
+
+	// count cubemaps
+	numCubemaps = 0;
+	while(R_ParseSpawnVars(spawnVarChars, sizeof(spawnVarChars), &numSpawnVars, spawnVars))
+	{
+		int i;
+
+		for (i = 0; i < numSpawnVars; i++)
+		{
+			if (!Q_stricmp(spawnVars[i][0], "classname") && !Q_stricmp(spawnVars[i][1], cubemapEntityName))
+				numCubemaps++;
+		}
+	}
+
+	if (!numCubemaps)
+		return;
+
+	tr.numCubemaps = numCubemaps;
+	tr.cubemapOrigins = ri.Hunk_Alloc( tr.numCubemaps * sizeof(*tr.cubemapOrigins), h_low);
+	tr.cubemaps = ri.Hunk_Alloc( tr.numCubemaps * sizeof(*tr.cubemaps), h_low);
+
+	numCubemaps = 0;
+	while(R_ParseSpawnVars(spawnVarChars, sizeof(spawnVarChars), &numSpawnVars, spawnVars))
+	{
+		int i;
+		qboolean isCubemap = qfalse;
+		qboolean positionSet = qfalse;
+		vec3_t origin;
+
+		for (i = 0; i < numSpawnVars; i++)
+		{
+			if (!Q_stricmp(spawnVars[i][0], "classname") && !Q_stricmp(spawnVars[i][1], cubemapEntityName))
+				isCubemap = qtrue;
+
+			if (!Q_stricmp(spawnVars[i][0], "origin"))
+			{
+				sscanf(spawnVars[i][1], "%f %f %f", &origin[0], &origin[1], &origin[2]);
+				positionSet = qtrue;
+			}
+		}
+
+		if (isCubemap && positionSet)
+		{
+			//ri.Printf(PRINT_ALL, "cubemap at %f %f %f\n", origin[0], origin[1], origin[2]);
+			VectorCopy(origin, tr.cubemapOrigins[numCubemaps]);
+			numCubemaps++;
+		}
+	}
+}
+
+void R_AssignCubemapsToWorldSurfaces(void)
+{
+	world_t	*w;
+	int i;
+
+	w = &s_worldData;
+
+	for (i = 0; i < w->numsurfaces; i++)
+	{
+		msurface_t *surf = &w->surfaces[i];
+		vec3_t surfOrigin;
+
+		if (surf->cullinfo.type & CULLINFO_SPHERE)
+		{
+			VectorCopy(surf->cullinfo.localOrigin, surfOrigin);
+		}
+		else if (surf->cullinfo.type & CULLINFO_BOX)
+		{
+			surfOrigin[0] = (surf->cullinfo.bounds[0][0] + surf->cullinfo.bounds[1][0]) * 0.5f;
+			surfOrigin[1] = (surf->cullinfo.bounds[0][1] + surf->cullinfo.bounds[1][1]) * 0.5f;
+			surfOrigin[2] = (surf->cullinfo.bounds[0][2] + surf->cullinfo.bounds[1][2]) * 0.5f;
+		}
+		else
+		{
+			//ri.Printf(PRINT_ALL, "surface %d has no cubemap\n", i);
+			continue;
+		}
+
+		surf->cubemapIndex = R_CubemapForPoint(surfOrigin);
+		//ri.Printf(PRINT_ALL, "surface %d has cubemap %d\n", i, surf->cubemapIndex);
+	}
+}
+
+
+void R_RenderAllCubemaps(void)
+{
+	int i, j;
+
+	for (i = 0; i < tr.numCubemaps; i++)
+	{
+		tr.cubemaps[i] = R_CreateImage(va("*cubeMap%d", i), NULL, CUBE_MAP_SIZE, CUBE_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_CUBEMAP, GL_RGBA8);
+	}
+	
+	for (i = 0; i < tr.numCubemaps; i++)
+	{
+		for (j = 0; j < 6; j++)
+		{
+			RE_ClearScene();
+			R_RenderCubemapSide(i, j, qfalse);
+			R_IssuePendingRenderCommands();
+			R_InitNextFrame();
+		}
+	}
+}
+
 
 /*
 =================
@@ -2866,6 +3059,7 @@ void R_MergeLeafSurfaces(void)
 			msurface_t *surf1;
 			shader_t *shader1;
 			int fogIndex1;
+			int cubemapIndex1;
 			int surfNum1;
 
 			surfNum1 = *(s_worldData.marksurfaces + leaf->firstmarksurface + j);
@@ -2890,6 +3084,7 @@ void R_MergeLeafSurfaces(void)
 				continue;
 
 			fogIndex1 = surf1->fogIndex;
+			cubemapIndex1 = surf1->cubemapIndex;
 
 			s_worldData.surfacesViewCount[surfNum1] = surfNum1;
 
@@ -2898,6 +3093,7 @@ void R_MergeLeafSurfaces(void)
 				msurface_t *surf2;
 				shader_t *shader2;
 				int fogIndex2;
+				int cubemapIndex2;
 				int surfNum2;
 
 				surfNum2 = *(s_worldData.marksurfaces + leaf->firstmarksurface + k);
@@ -2918,6 +3114,11 @@ void R_MergeLeafSurfaces(void)
 				fogIndex2 = surf2->fogIndex;
 
 				if (fogIndex1 != fogIndex2)
+					continue;
+
+				cubemapIndex2 = surf2->cubemapIndex;
+
+				if (cubemapIndex1 != cubemapIndex2)
 					continue;
 
 				s_worldData.surfacesViewCount[surfNum2] = surfNum1;
@@ -3153,6 +3354,7 @@ void R_MergeLeafSurfaces(void)
 
 		vboSurf->shader = surf1->shader;
 		vboSurf->fogIndex = surf1->fogIndex;
+		vboSurf->cubemapIndex = surf1->cubemapIndex;
 
 		VectorCopy(bounds[0], vboSurf->bounds[0]);
 		VectorCopy(bounds[1], vboSurf->bounds[1]);
@@ -3163,6 +3365,7 @@ void R_MergeLeafSurfaces(void)
 		mergedSurf->cullinfo.type = CULLINFO_BOX;
 		mergedSurf->data          = (surfaceType_t *)vboSurf;
 		mergedSurf->fogIndex      = surf1->fogIndex;
+		mergedSurf->cubemapIndex  = surf1->cubemapIndex;
 		mergedSurf->shader        = surf1->shader;
 
 		// redirect view surfaces to this surf
@@ -3539,6 +3742,22 @@ void RE_LoadWorldMap( const char *name ) {
 		ri.Free(primaryLightGrid);
 	}
 
+	// load cubemaps
+	if (r_cubeMapping->integer)
+	{
+		R_LoadCubemapEntities("misc_cubemap");
+		if (!tr.numCubemaps)
+		{
+			// use deathmatch spawn points as cubemaps
+			R_LoadCubemapEntities("info_player_deathmatch");
+		}
+
+		if (tr.numCubemaps)
+		{
+			R_AssignCubemapsToWorldSurfaces();
+		}
+	}
+
 	// create static VBOS from the world
 	R_CreateWorldVBO();
 	if (r_mergeLeafSurfaces->integer)
@@ -3554,6 +3773,12 @@ void RE_LoadWorldMap( const char *name ) {
 	// make sure the VBO glState entries are safe
 	R_BindNullVBO();
 	R_BindNullIBO();
+
+	// Render all cubemaps
+	if (r_cubeMapping->integer && tr.numCubemaps)
+	{
+		R_RenderAllCubemaps();
+	}
 
     ri.FS_FreeFile( buffer.v );
 }

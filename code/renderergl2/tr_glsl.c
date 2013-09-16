@@ -71,6 +71,7 @@ static uniformInfo_t uniformsInfo[] =
 
 	{ "u_TextureMap", GLSL_INT },
 	{ "u_LevelsMap",  GLSL_INT },
+	{ "u_CubeMap",    GLSL_INT },
 
 	{ "u_ScreenImageMap", GLSL_INT },
 	{ "u_ScreenDepthMap", GLSL_INT },
@@ -997,28 +998,23 @@ void GLSL_InitGPUShaders(void)
 	for (i = 0; i < LIGHTDEF_COUNT; i++)
 	{
 		// skip impossible combos
-		if ((i & LIGHTDEF_USE_NORMALMAP) && !r_normalMapping->integer)
-			continue;
-
 		if ((i & LIGHTDEF_USE_PARALLAXMAP) && !r_parallaxMapping->integer)
-			continue;
-
-		if ((i & LIGHTDEF_USE_SPECULARMAP) && !r_specularMapping->integer)
 			continue;
 
 		if ((i & LIGHTDEF_USE_DELUXEMAP) && !r_deluxeMapping->integer)
 			continue;
 
+		if ((i & LIGHTDEF_USE_CUBEMAP) && !r_cubeMapping->integer)
+			continue;
+
 		if (!((i & LIGHTDEF_LIGHTTYPE_MASK) == LIGHTDEF_USE_LIGHTMAP) && (i & LIGHTDEF_USE_DELUXEMAP))
 			continue;
 
-		if (!(i & LIGHTDEF_USE_NORMALMAP) && (i & LIGHTDEF_USE_PARALLAXMAP))
-			continue;
-
-		//if (!((i & LIGHTDEF_LIGHTTYPE_MASK) == LIGHTDEF_USE_LIGHT_VECTOR))
 		if (!(i & LIGHTDEF_LIGHTTYPE_MASK))
 		{
 			if (i & LIGHTDEF_USE_SHADOWMAP)
+				continue;
+			if (i & LIGHTDEF_USE_CUBEMAP)
 				continue;
 		}
 
@@ -1026,8 +1022,11 @@ void GLSL_InitGPUShaders(void)
 
 		extradefines[0] = '\0';
 
-		if (r_normalAmbient->value > 0.003f)
-			Q_strcat(extradefines, 1024, va("#define r_normalAmbient %f\n", r_normalAmbient->value));
+		if (r_deluxeSpecular->value > 0.000001f)
+			Q_strcat(extradefines, 1024, va("#define r_deluxeSpecular %f\n", r_deluxeSpecular->value));
+
+		if (r_specularIsMetallic->value)
+			Q_strcat(extradefines, 1024, va("#define SPECULAR_IS_METALLIC\n"));
 
 		if (r_dlightMode->integer >= 2)
 			Q_strcat(extradefines, 1024, "#define USE_SHADOWMAP\n");
@@ -1065,7 +1064,7 @@ void GLSL_InitGPUShaders(void)
 			}
 		}
 
-		if ((i & LIGHTDEF_USE_NORMALMAP) && r_normalMapping->integer)
+		if (r_normalMapping->integer)
 		{
 			Q_strcat(extradefines, 1024, "#define USE_NORMALMAP\n");
 
@@ -1081,7 +1080,7 @@ void GLSL_InitGPUShaders(void)
 #endif
 		}
 
-		if ((i & LIGHTDEF_USE_SPECULARMAP) && r_specularMapping->integer)
+		if (r_specularMapping->integer)
 		{
 			Q_strcat(extradefines, 1024, "#define USE_SPECULARMAP\n");
 
@@ -1089,19 +1088,23 @@ void GLSL_InitGPUShaders(void)
 			{
 				case 1:
 				default:
-					Q_strcat(extradefines, 1024, "#define USE_TRIACE\n");
-					break;
-
-				case 2:
 					Q_strcat(extradefines, 1024, "#define USE_BLINN\n");
 					break;
 
+				case 2:
+					Q_strcat(extradefines, 1024, "#define USE_BLINN_FRESNEL\n");
+					break;
+
 				case 3:
-					Q_strcat(extradefines, 1024, "#define USE_COOK_TORRANCE\n");
+					Q_strcat(extradefines, 1024, "#define USE_MCAULEY\n");
 					break;
 
 				case 4:
-					Q_strcat(extradefines, 1024, "#define USE_TORRANCE_SPARROW\n");
+					Q_strcat(extradefines, 1024, "#define USE_GOTANDA\n");
+					break;
+
+				case 5:
+					Q_strcat(extradefines, 1024, "#define USE_LAZAROV\n");
 					break;
 			}
 		}
@@ -1111,6 +1114,9 @@ void GLSL_InitGPUShaders(void)
 
 		if ((i & LIGHTDEF_USE_PARALLAXMAP) && !(i & LIGHTDEF_ENTITY) && r_parallaxMapping->integer)
 			Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP\n");
+
+		if ((i & LIGHTDEF_USE_CUBEMAP))
+			Q_strcat(extradefines, 1024, "#define USE_CUBEMAP\n");
 
 		if (i & LIGHTDEF_USE_SHADOWMAP)
 		{
@@ -1134,7 +1140,7 @@ void GLSL_InitGPUShaders(void)
 			attribs |= ATTR_POSITION2 | ATTR_NORMAL2;
 
 #ifdef USE_VERT_TANGENT_SPACE
-			if (i & LIGHTDEF_USE_NORMALMAP && r_normalMapping->integer)
+			if (r_normalMapping->integer)
 			{
 				attribs |= ATTR_TANGENT2 | ATTR_BITANGENT2;
 			}
@@ -1155,6 +1161,7 @@ void GLSL_InitGPUShaders(void)
 		GLSL_SetUniformInt(&tr.lightallShader[i], UNIFORM_DELUXEMAP,   TB_DELUXEMAP);
 		GLSL_SetUniformInt(&tr.lightallShader[i], UNIFORM_SPECULARMAP, TB_SPECULARMAP);
 		GLSL_SetUniformInt(&tr.lightallShader[i], UNIFORM_SHADOWMAP,   TB_SHADOWMAP);
+		GLSL_SetUniformInt(&tr.lightallShader[i], UNIFORM_CUBEMAP,     TB_CUBEMAP);
 		qglUseProgramObjectARB(0);
 
 		GLSL_FinishGPUShader(&tr.lightallShader[i]);
@@ -1360,6 +1367,26 @@ void GLSL_InitGPUShaders(void)
 
 		numEtcShaders++;
 	}
+
+#if 0
+	attribs = ATTR_POSITION | ATTR_TEXCOORD;
+	extradefines[0] = '\0';
+
+	if (!GLSL_InitGPUShader(&tr.testcubeShader, "testcube", attribs, qtrue, extradefines, qtrue, NULL, NULL))
+	{
+		ri.Error(ERR_FATAL, "Could not load testcube shader!");
+	}
+
+	GLSL_InitUniforms(&tr.testcubeShader);
+
+	qglUseProgramObjectARB(tr.testcubeShader.program);
+	GLSL_SetUniformInt(&tr.testcubeShader, UNIFORM_TEXTUREMAP, TB_COLORMAP);
+	qglUseProgramObjectARB(0);
+
+	GLSL_FinishGPUShader(&tr.testcubeShader);
+
+	numEtcShaders++;
+#endif
 
 
 	endTime = ri.Milliseconds();
