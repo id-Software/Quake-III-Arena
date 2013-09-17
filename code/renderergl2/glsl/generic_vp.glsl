@@ -194,16 +194,13 @@ float CalcFog(vec4 position)
 	float s = dot(position, u_FogDistance) * 8.0;
 	float t = dot(position, u_FogDepth);
 
-	if (t < 1.0)
-	{
-		t = step(step(0.0, -u_FogEyeT), t);
-	}
-	else
-	{
-		t /= t - min(u_FogEyeT, 0.0);
-	}
+	bool eyeOutside = u_FogEyeT < 0.0;
+	float t2 = float(t >= float(eyeOutside));
 
-	return s * t;
+	if (eyeOutside)
+		t2 *= t / (t - u_FogEyeT);
+
+	return s * t2;
 }
 #endif
 
