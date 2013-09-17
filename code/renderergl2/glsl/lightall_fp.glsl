@@ -261,6 +261,30 @@ vec3 CalcSpecular(vec3 specular, float NH, float NL, float NE, float EH, float s
 	return vec3(0.0);
 }
 
+
+float CalcLightAttenuation(vec3 dir, float sqrRadius)
+{
+	// point light at >0 radius, directional otherwise
+	float point = float(sqrRadius > 0.0);
+
+	// inverse square light
+	float attenuation = sqrRadius / dot(dir, dir);
+
+	// zero light at radius, approximating q3 style
+	// also don't attenuate directional light
+	attenuation = (0.5 * attenuation - 1.5) * point + 1.0;
+	
+	// clamp attenuation
+	#if defined(NO_LIGHT_CLAMP)
+	attenuation *= float(attenuation > 0.0);
+	#else
+	attenuation = clamp(attenuation, 0.0, 1.0);
+	#endif
+	
+	return attenuation;
+}
+
+
 void main()
 {
 	vec3 L, N, E, H;
@@ -290,30 +314,12 @@ void main()
   #endif
 	vec3 lightColor = lightSample.rgb;
 #elif defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
-	// inverse square light
-	float attenuation = u_LightRadius * u_LightRadius / dot(L, L);
-	
-	// zero light at radius, approximating q3 style
-	attenuation = 0.5 * attenuation - 0.5;
-	//attenuation = 0.0697168 * attenuation;
-	//attenuation *= step(0.294117, attenuation);
-	
-	// clamp attenuation
-	#if defined(NO_LIGHT_CLAMP)
-	attenuation *= step(0.0, attenuation);
-	#else
-	attenuation = clamp(attenuation, 0.0, 1.0);
-	#endif
-	
-	// don't attenuate directional light
-	attenuation = (attenuation - 1.0) * var_LightDir.w + 1.0;
-
-	vec3 lightColor   = u_DirectedLight * attenuation;
+	vec3 lightColor   = u_DirectedLight * CalcLightAttenuation(L, u_LightRadius * u_LightRadius);
 	vec3 ambientColor = u_AmbientLight;
 #elif defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
 	vec3 lightColor = var_lightColor;
 #endif
-	
+
 	vec2 texCoords = var_DiffuseTex;
 
 #if defined(USE_PARALLAXMAP)
@@ -360,9 +366,9 @@ void main()
 
 	// surfaces not facing the light are always shadowed
 	#if defined(USE_TANGENT_SPACE_LIGHT)
-	shadowValue *= step(0.0, var_PrimaryLightDir.z);
+	shadowValue *= float(var_PrimaryLightDir.z > 0.0);
 	#else
-	shadowValue *= step(0.0, dot(var_Normal, var_PrimaryLightDir));
+	shadowValue *= float(dot(var_Normal, var_PrimaryLightDir) > 0.0);
 	#endif
   
     #if defined(SHADOWMAP_MODULATE)
@@ -488,11 +494,13 @@ void main()
 	reflectance  = CalcDiffuse(diffuse.rgb, N, L, E, NE, NL, shininess);
 	reflectance += CalcSpecular(specular.rgb, NH, NL, NE, EH, shininess);
 
+	lightColor = u_PrimaryLightColor; // * CalcLightAttenuation(L, u_PrimaryLightRadius * u_PrimaryLightRadius);
+	
     #if defined(USE_SHADOWMAP)
-	reflectance *= shadowValue;
+	lightColor *= shadowValue;
     #endif
 
-	gl_FragColor.rgb += u_PrimaryLightColor * reflectance * NL;
+	gl_FragColor.rgb += lightColor * reflectance * NL;
   #endif
   
   #if defined(USE_LINEAR_LIGHT)

@@ -130,6 +130,29 @@ vec2 ModTexCoords(vec2 st, vec3 position, vec4 texMatrix, vec4 offTurb)
 #endif
 
 
+float CalcLightAttenuation(vec3 dir, float sqrRadius)
+{
+	// point light at >0 radius, directional otherwise
+	float point = float(sqrRadius > 0.0);
+
+	// inverse square light
+	float attenuation = sqrRadius / dot(dir, dir);
+
+	// zero light at radius, approximating q3 style
+	// also don't attenuate directional light
+	attenuation = (0.5 * attenuation - 1.5) * point + 1.0;
+	
+	// clamp attenuation
+	#if defined(NO_LIGHT_CLAMP)
+	attenuation *= float(attenuation > 0.0);
+	#else
+	attenuation = clamp(attenuation, 0.0, 1.0);
+	#endif
+	
+	return attenuation;
+}
+
+
 void main()
 {
 #if defined(USE_VERTEX_ANIMATION)
@@ -187,24 +210,7 @@ void main()
 #endif
 
 #if defined(USE_LIGHT_VECTOR) && defined(USE_FAST_LIGHT)
-	// inverse square light
-	float attenuation = u_LightRadius * u_LightRadius / dot(L, L);
-	
-	// zero light at radius, approximating q3 style
-	attenuation = 0.5 * attenuation - 0.5;
-	//attenuation = 0.0697168 * attenuation;
-	//attenuation *= step(0.294117, attenuation);
-	
-	// clamp attenuation
-	#if defined(NO_LIGHT_CLAMP)
-	attenuation *= step(0.0, attenuation);
-	#else
-	attenuation = clamp(attenuation, 0.0, 1.0);
-	#endif
-	
-	// don't attenuate directional light
-	attenuation = (attenuation - 1.0) * u_LightOrigin.w + 1.0;
-	
+	float attenuation = CalcLightAttenuation(L, u_LightRadius * u_LightRadius);
 	float NL = clamp(dot(normal, normalize(L)), 0.0, 1.0);
 
 	var_Color.rgb *= u_DirectedLight * attenuation * NL + u_AmbientLight;

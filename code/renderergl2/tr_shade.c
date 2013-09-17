@@ -1211,7 +1211,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			vec[3] = 0.0f;
 			GLSL_SetUniformVec4(sp, UNIFORM_LIGHTORIGIN, vec);
 
-			GLSL_SetUniformFloat(sp, UNIFORM_LIGHTRADIUS, 999999.0f);
+			GLSL_SetUniformFloat(sp, UNIFORM_LIGHTRADIUS, 0.0f);
 		}
 
 		if (pStage->alphaGen == AGEN_PORTAL)
