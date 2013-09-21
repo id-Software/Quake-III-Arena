@@ -439,7 +439,6 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 			}
 		}
 
-		SDL_SetWindowTitle( SDL_window, CLIENT_WINDOW_TITLE );
 		SDL_SetWindowIcon( SDL_window, icon );
 
 		if( ( SDL_glContext = SDL_GL_CreateContext( SDL_window ) ) == NULL )
