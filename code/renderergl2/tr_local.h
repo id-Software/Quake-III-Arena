@@ -1915,6 +1915,7 @@ extern  cvar_t  *r_ext_framebuffer_object;
 extern  cvar_t  *r_ext_texture_float;
 extern  cvar_t  *r_arb_half_float_pixel;
 extern  cvar_t  *r_ext_framebuffer_multisample;
+extern  cvar_t  *r_arb_seamless_cube_map;
 
 extern	cvar_t	*r_nobind;						// turns off binding to appropriate textures
 extern	cvar_t	*r_singleShader;				// make most world faces use default shader

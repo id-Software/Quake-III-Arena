@@ -701,8 +701,10 @@ void GLimp_InitExtraExtensions()
 	glRefConfig.seamlessCubeMap = qfalse;
 	if( GLimp_HaveExtension( extension ) )
 	{
-		glRefConfig.seamlessCubeMap = qtrue;
-		ri.Printf(PRINT_ALL, result[1], extension);
+		if (r_arb_seamless_cube_map->integer)
+			glRefConfig.seamlessCubeMap = qtrue;
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.seamlessCubeMap], extension);
 	}
 	else
 	{
