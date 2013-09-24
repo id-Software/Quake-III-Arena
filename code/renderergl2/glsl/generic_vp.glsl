@@ -93,7 +93,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 	}
 	else if (u_DeformGen == DGEN_WAVE_TRIANGLE)
 	{
-		func = abs(fract(value + 0.75) - 0.5) * 4.0 - 1.0;
+		func = 1.0 - abs(4.0 * fract(value + 0.25) - 2.0);
 	}
 	else if (u_DeformGen == DGEN_WAVE_SAWTOOTH)
 	{
@@ -163,25 +163,20 @@ vec4 CalcColor(vec3 position, vec3 normal)
 		color.rgb = clamp(u_DirectedLight * incoming + u_AmbientLight, 0.0, 1.0);
 	}
 	
-	vec3 toView = u_ViewOrigin - position;
-	vec3 viewer = normalize(u_ViewOrigin - position);
+	vec3 viewer = u_ViewOrigin - position;
 
 	if (u_AlphaGen == AGEN_LIGHTING_SPECULAR)
 	{
-		vec3 lightDir = normalize(vec3(-960.0, -1980.0, 96.0) - position.xyz);
-		vec3 halfangle = normalize(lightDir + viewer);
+		vec3 lightDir = normalize(vec3(-960.0, 1980.0, 96.0) - position.xyz);
+		vec3 reflected = -reflect(lightDir, normal);
 		
-		color.a = pow(max(dot(normal, halfangle), 0.0), 8.0);
+		color.a = clamp(dot(reflected, normalize(viewer)), 0.0, 1.0);
+		color.a *= color.a;
+		color.a *= color.a;
 	}
 	else if (u_AlphaGen == AGEN_PORTAL)
 	{
-		float alpha = length(toView) / u_PortalRange;
-
-		color.a = clamp(alpha, 0.0, 1.0);
-	}
-	else if (u_AlphaGen == AGEN_FRESNEL)
-	{
-		color.a = 0.10 + 0.90 * pow(1.0 - dot(normal, viewer), 5);
+		color.a = clamp(length(viewer) / u_PortalRange, 0.0, 1.0);
 	}
 	
 	return color;
@@ -194,13 +189,13 @@ float CalcFog(vec4 position)
 	float s = dot(position, u_FogDistance) * 8.0;
 	float t = dot(position, u_FogDepth);
 
-	bool eyeOutside = u_FogEyeT < 0.0;
-	float t2 = float(t >= float(eyeOutside));
+	float eyeOutside = step(0.0, -u_FogEyeT);
+	float fogged = step(eyeOutside, t);
+		
+	t = max(t, 1e-6);
+	t *= fogged / (t - u_FogEyeT * eyeOutside);
 
-	if (eyeOutside)
-		t2 *= t / (t - u_FogEyeT);
-
-	return s * t2;
+	return s * t;
 }
 #endif
 

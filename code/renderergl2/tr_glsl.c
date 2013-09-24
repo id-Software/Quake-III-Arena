@@ -294,11 +294,9 @@ static void GLSL_GetShaderHeader( GLenum shaderType, const GLcharARB *extra, cha
 								"#define alphaGen_t\n"
 								"#define AGEN_LIGHTING_SPECULAR %i\n"
 								"#define AGEN_PORTAL %i\n"
-								"#define AGEN_FRESNEL %i\n"
 								"#endif\n",
 								AGEN_LIGHTING_SPECULAR,
-								AGEN_PORTAL,
-								AGEN_FRESNEL));
+								AGEN_PORTAL));
 
 	Q_strcat(dest, size,
 							 va("#ifndef texenv_t\n"
@@ -1829,7 +1827,6 @@ shaderProgram_t *GLSL_GetGenericShaderProgram(int stage)
 	{
 		case AGEN_LIGHTING_SPECULAR:
 		case AGEN_PORTAL:
-		case AGEN_FRESNEL:
 			shaderAttribs |= GENERICDEF_USE_RGBAGEN;
 			break;
 		default:

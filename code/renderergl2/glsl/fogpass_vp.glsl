@@ -85,13 +85,13 @@ float CalcFog(vec4 position)
 	float s = dot(position, u_FogDistance) * 8.0;
 	float t = dot(position, u_FogDepth);
 
-	bool eyeOutside = u_FogEyeT < 0.0;
-	float t2 = float(t >= float(eyeOutside));
+	float eyeOutside = step(0.0, -u_FogEyeT);
+	float fogged = step(eyeOutside, t);
+		
+	t = max(t, 1e-6);
+	t *= fogged / (t - u_FogEyeT * eyeOutside);
 
-	if (eyeOutside)
-		t2 *= t / (t - u_FogEyeT);
-
-	return s * t2;
+	return s * t;
 }
 
 void main()
