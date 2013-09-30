@@ -807,9 +807,15 @@ static void IN_ProcessEvents( void )
 
 			case SDL_MOUSEWHEEL:
 				if( e.wheel.y > 0 )
+				{
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELUP, qtrue, 0, NULL );
+					Com_QueueEvent( 0, SE_KEY, K_MWHEELUP, qfalse, 0, NULL );
+				}
 				else
+				{
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qtrue, 0, NULL );
+					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qfalse, 0, NULL );
+				}
 				break;
 
 			case SDL_QUIT:
@@ -836,6 +842,7 @@ static void IN_ProcessEvents( void )
 						break;
 
 					case SDL_WINDOWEVENT_MINIMIZED:    Cvar_SetValue( "com_minimized", 1 ); break;
+					case SDL_WINDOWEVENT_RESTORED:
 					case SDL_WINDOWEVENT_MAXIMIZED:    Cvar_SetValue( "com_minimized", 0 ); break;
 					case SDL_WINDOWEVENT_FOCUS_LOST:   Cvar_SetValue( "com_unfocused", 1 ); break;
 					case SDL_WINDOWEVENT_FOCUS_GAINED: Cvar_SetValue( "com_unfocused", 0 ); break;
