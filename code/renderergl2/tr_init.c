@@ -110,6 +110,7 @@ cvar_t  *r_cameraExposure;
 cvar_t  *r_softOverbright;
 
 cvar_t  *r_hdr;
+cvar_t  *r_floatLightmap;
 cvar_t  *r_postProcess;
 
 cvar_t  *r_toneMap;
@@ -1170,6 +1171,7 @@ void R_Register( void )
 	r_softOverbright = ri.Cvar_Get( "r_softOverbright", "1", CVAR_ARCHIVE | CVAR_LATCH );
 
 	r_hdr = ri.Cvar_Get( "r_hdr", "1", CVAR_ARCHIVE | CVAR_LATCH );
+	r_floatLightmap = ri.Cvar_Get( "r_floatLightmap", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_postProcess = ri.Cvar_Get( "r_postProcess", "1", CVAR_ARCHIVE );
 
 	r_toneMap = ri.Cvar_Get( "r_toneMap", "1", CVAR_ARCHIVE | CVAR_LATCH );
