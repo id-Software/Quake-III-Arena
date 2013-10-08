@@ -952,16 +952,6 @@ void GL_SetDefaultState( void )
 	qglDisable( GL_CULL_FACE );
 	qglDisable( GL_BLEND );
 
-	qglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-	qglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-	qglClearDepth( 1.0 );
-
-	qglDrawBuffer( GL_FRONT );
-	qglClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT );
-
-	qglDrawBuffer( GL_BACK );
-	qglClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT );
-
 	if (glRefConfig.seamlessCubeMap)
 		qglEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
