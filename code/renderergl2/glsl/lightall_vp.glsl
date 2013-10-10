@@ -22,6 +22,7 @@ attribute vec3 attr_LightDirection;
 
 #if defined(USE_TCGEN) || defined(USE_NORMALMAP) || defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 uniform vec3   u_ViewOrigin;
+uniform vec3   u_LocalViewOrigin;
 #endif
 
 #if defined(USE_TCGEN)
@@ -94,7 +95,7 @@ vec2 GenTexCoords(int TCGen, vec3 position, vec3 normal, vec3 TCGenVector0, vec3
 	}
 	else if (TCGen == TCGEN_ENVIRONMENT_MAPPED)
 	{
-		vec3 viewer = normalize(u_ViewOrigin - position);
+		vec3 viewer = normalize(u_LocalViewOrigin - position);
 		tex = -reflect(viewer, normal).yz * vec2(0.5, -0.5) + 0.5;
 	}
 	else if (TCGen == TCGEN_VECTOR)

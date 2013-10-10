@@ -403,8 +403,11 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	((byte *)&ent->ambientLightInt)[3] = 0xff;
 	
 	// transform the direction to local space
-	// no need to do this if using lightentity glsl shader
 	VectorNormalize( lightDir );
+	ent->modelLightDir[0] = DotProduct( lightDir, ent->e.axis[0] );
+	ent->modelLightDir[1] = DotProduct( lightDir, ent->e.axis[1] );
+	ent->modelLightDir[2] = DotProduct( lightDir, ent->e.axis[2] );
+
 	VectorCopy(lightDir, ent->lightDir);
 }
 
