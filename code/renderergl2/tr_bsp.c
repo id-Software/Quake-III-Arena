@@ -1831,10 +1831,10 @@ static void CopyVert(const srfVert_t * in, srfVert_t * out)
 
 /*
 ===============
-R_CreateWorldVBO
+R_CreateWorldVBOs
 ===============
 */
-static void R_CreateWorldVBO(void)
+static void R_CreateWorldVBOs(void)
 {
 	int             i, j, k;
 
@@ -1844,73 +1844,32 @@ static void R_CreateWorldVBO(void)
 	int             numTriangles;
 	srfTriangle_t  *triangles;
 
-    int             numSurfaces;
-	msurface_t   *surface;
+    int             numSortedSurfaces, numSurfaces;
+	msurface_t   *surface, **firstSurf, **lastSurf, **currSurf;
 	msurface_t  **surfacesSorted;
+
+	VBO_t *vbo;
+	IBO_t *ibo;
 
 	int             startTime, endTime;
 
 	startTime = ri.Milliseconds();
 
-	numVerts = 0;
-	numTriangles = 0;
-	numSurfaces = 0;
-	for(k = 0, surface = &s_worldData.surfaces[0]; k < s_worldData.numsurfaces /* s_worldData.numWorldSurfaces */; k++, surface++)
+	// count surfaces
+	numSortedSurfaces = 0;
+	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
-		if(*surface->data == SF_FACE)
+		if(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES)
 		{
-			srfSurfaceFace_t *face = (srfSurfaceFace_t *) surface->data;
-
-			if(face->numVerts)
-				numVerts += face->numVerts;
-
-			if(face->numTriangles)
-				numTriangles += face->numTriangles;
-
-			numSurfaces++;
-		}
-		else if(*surface->data == SF_GRID)
-		{
-			srfGridMesh_t  *grid = (srfGridMesh_t *) surface->data;
-
-			if(grid->numVerts)
-				numVerts += grid->numVerts;
-
-			if(grid->numTriangles)
-				numTriangles += grid->numTriangles;
-
-			numSurfaces++;
-		}
-		else if(*surface->data == SF_TRIANGLES)
-		{
-			srfTriangles_t *tri = (srfTriangles_t *) surface->data;
-
-			if(tri->numVerts)
-				numVerts += tri->numVerts;
-
-			if(tri->numTriangles)
-				numTriangles += tri->numTriangles;
-
-			numSurfaces++;
+			numSortedSurfaces++;
 		}
 	}
 
-	if(!numVerts || !numTriangles)
-		return;
-
-	ri.Printf(PRINT_ALL, "...calculating world VBO ( %i verts %i tris )\n", numVerts, numTriangles);
-
-	// create arrays
-
-	verts = ri.Hunk_AllocateTempMemory(numVerts * sizeof(srfVert_t));
-
-	triangles = ri.Hunk_AllocateTempMemory(numTriangles * sizeof(srfTriangle_t));
-
 	// presort surfaces
-	surfacesSorted = ri.Malloc(numSurfaces * sizeof(*surfacesSorted));
+	surfacesSorted = ri.Malloc(numSortedSurfaces * sizeof(*surfacesSorted));
 
 	j = 0;
-	for(k = 0, surface = &s_worldData.surfaces[0]; k < s_worldData.numsurfaces; k++, surface++)
+	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
 		if(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES)
 		{
@@ -1918,211 +1877,276 @@ static void R_CreateWorldVBO(void)
 		}
 	}
 
-	qsort(surfacesSorted, numSurfaces, sizeof(*surfacesSorted), BSPSurfaceCompare);
+	qsort(surfacesSorted, numSortedSurfaces, sizeof(*surfacesSorted), BSPSurfaceCompare);
 
-	// set up triangle indices
-	numVerts = 0;
-	numTriangles = 0;
-	for(k = 0, surface = surfacesSorted[k]; k < numSurfaces; k++, surface = surfacesSorted[k])
+	k = 0;
+	for(firstSurf = lastSurf = surfacesSorted; firstSurf < &surfacesSorted[numSortedSurfaces]; firstSurf = lastSurf)
 	{
-		if(*surface->data == SF_FACE)
+		while(lastSurf < &surfacesSorted[numSortedSurfaces] && (*lastSurf)->shader->sortedIndex == (*firstSurf)->shader->sortedIndex)
+			lastSurf++;
+
+		numVerts = 0;
+		numTriangles = 0;
+		numSurfaces = 0;
+		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
-
-			srf->firstIndex = numTriangles * 3;
-
-			if(srf->numTriangles)
+			surface = *currSurf;
+			if(*surface->data == SF_FACE)
 			{
-				srfTriangle_t  *tri;
+				srfSurfaceFace_t *face = (srfSurfaceFace_t *) surface->data;
 
-				srf->minIndex = numVerts + srf->triangles->indexes[0];
-				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+				if(face->numVerts)
+					numVerts += face->numVerts;
 
-				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
+				if(face->numTriangles)
+					numTriangles += face->numTriangles;
+
+				numSurfaces++;
+			}
+			else if(*surface->data == SF_GRID)
+			{
+				srfGridMesh_t  *grid = (srfGridMesh_t *) surface->data;
+
+				if(grid->numVerts)
+					numVerts += grid->numVerts;
+
+				if(grid->numTriangles)
+					numTriangles += grid->numTriangles;
+
+				numSurfaces++;
+			}
+			else if(*surface->data == SF_TRIANGLES)
+			{
+				srfTriangles_t *tri = (srfTriangles_t *) surface->data;
+
+				if(tri->numVerts)
+					numVerts += tri->numVerts;
+
+				if(tri->numTriangles)
+					numTriangles += tri->numTriangles;
+
+				numSurfaces++;
+			}
+		}
+
+		if(!numVerts || !numTriangles)
+			continue;
+
+		ri.Printf(PRINT_ALL, "...calculating world VBO %d ( %i verts %i tris )\n", k, numVerts, numTriangles);
+
+		// create arrays
+		verts = ri.Hunk_AllocateTempMemory(numVerts * sizeof(srfVert_t));
+		triangles = ri.Hunk_AllocateTempMemory(numTriangles * sizeof(srfTriangle_t));
+
+		// set up triangle indices
+		numVerts = 0;
+		numTriangles = 0;
+		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
+		{
+			surface = *currSurf;
+			if(*surface->data == SF_FACE)
+			{
+				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+
+				srf->firstIndex = numTriangles * 3;
+
+				if(srf->numTriangles)
 				{
-					for(j = 0; j < 3; j++)
+					srfTriangle_t  *tri;
+
+					srf->minIndex = numVerts + srf->triangles->indexes[0];
+					srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
+					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 					{
-						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						for(j = 0; j < 3; j++)
+						{
+							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						}
 					}
+
+					numTriangles += srf->numTriangles;
 				}
 
-				numTriangles += srf->numTriangles;
+				if(srf->numVerts)
+					numVerts += srf->numVerts;
 			}
-
-			if(srf->numVerts)
-				numVerts += srf->numVerts;
-		}
-		else if(*surface->data == SF_GRID)
-		{
-			srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
-
-			srf->firstIndex = numTriangles * 3;
-
-			if(srf->numTriangles)
+			else if(*surface->data == SF_GRID)
 			{
-				srfTriangle_t  *tri;
+				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
 
-				srf->minIndex = numVerts + srf->triangles->indexes[0];
-				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+				srf->firstIndex = numTriangles * 3;
 
-				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
+				if(srf->numTriangles)
 				{
-					for(j = 0; j < 3; j++)
+					srfTriangle_t  *tri;
+
+					srf->minIndex = numVerts + srf->triangles->indexes[0];
+					srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
+					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 					{
-						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						for(j = 0; j < 3; j++)
+						{
+							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						}
 					}
+
+					numTriangles += srf->numTriangles;
 				}
 
-				numTriangles += srf->numTriangles;
+				if(srf->numVerts)
+					numVerts += srf->numVerts;
 			}
-
-			if(srf->numVerts)
-				numVerts += srf->numVerts;
-		}
-		else if(*surface->data == SF_TRIANGLES)
-		{
-			srfTriangles_t *srf = (srfTriangles_t *) surface->data;
-
-			srf->firstIndex = numTriangles * 3;
-
-			if(srf->numTriangles)
+			else if(*surface->data == SF_TRIANGLES)
 			{
-				srfTriangle_t  *tri;
+				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
 
-				srf->minIndex = numVerts + srf->triangles->indexes[0];
-				srf->maxIndex = numVerts + srf->triangles->indexes[0];
+				srf->firstIndex = numTriangles * 3;
 
-				for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
+				if(srf->numTriangles)
 				{
-					for(j = 0; j < 3; j++)
+					srfTriangle_t  *tri;
+
+					srf->minIndex = numVerts + srf->triangles->indexes[0];
+					srf->maxIndex = numVerts + srf->triangles->indexes[0];
+
+					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
 					{
-						triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-						srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-						srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						for(j = 0; j < 3; j++)
+						{
+							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
+							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+						}
 					}
+
+					numTriangles += srf->numTriangles;
 				}
 
-				numTriangles += srf->numTriangles;
+				if(srf->numVerts)
+					numVerts += srf->numVerts;
 			}
-
-			if(srf->numVerts)
-				numVerts += srf->numVerts;
 		}
-	}
 
-	// build vertices
-	numVerts = 0;
-	for(k = 0, surface = surfacesSorted[k]; k < numSurfaces; k++, surface = surfacesSorted[k])
-	{
-		if(*surface->data == SF_FACE)
+		// build vertices
+		numVerts = 0;
+		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
-
-			srf->firstVert = numVerts;
-
-			if(srf->numVerts)
+			surface = *currSurf;
+			if(*surface->data == SF_FACE)
 			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					CopyVert(&srf->verts[i], &verts[numVerts + i]);
-				}
+				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
 
-				numVerts += srf->numVerts;
+				srf->firstVert = numVerts;
+
+				if(srf->numVerts)
+				{
+					for(i = 0; i < srf->numVerts; i++)
+					{
+						CopyVert(&srf->verts[i], &verts[numVerts + i]);
+					}
+
+					numVerts += srf->numVerts;
+				}
+			}
+			else if(*surface->data == SF_GRID)
+			{
+				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+
+				srf->firstVert = numVerts;
+
+				if(srf->numVerts)
+				{
+					for(i = 0; i < srf->numVerts; i++)
+					{
+						CopyVert(&srf->verts[i], &verts[numVerts + i]);
+					}
+
+					numVerts += srf->numVerts;
+				}
+			}
+			else if(*surface->data == SF_TRIANGLES)
+			{
+				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
+
+				srf->firstVert = numVerts;
+
+				if(srf->numVerts)
+				{
+					for(i = 0; i < srf->numVerts; i++)
+					{
+						CopyVert(&srf->verts[i], &verts[numVerts + i]);
+					}
+
+					numVerts += srf->numVerts;
+				}
 			}
 		}
-		else if(*surface->data == SF_GRID)
-		{
-			srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
-
-			srf->firstVert = numVerts;
-
-			if(srf->numVerts)
-			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					CopyVert(&srf->verts[i], &verts[numVerts + i]);
-				}
-
-				numVerts += srf->numVerts;
-			}
-		}
-		else if(*surface->data == SF_TRIANGLES)
-		{
-			srfTriangles_t *srf = (srfTriangles_t *) surface->data;
-
-			srf->firstVert = numVerts;
-
-			if(srf->numVerts)
-			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					CopyVert(&srf->verts[i], &verts[numVerts + i]);
-				}
-
-				numVerts += srf->numVerts;
-			}
-		}
-	}
 
 #ifdef USE_VERT_TANGENT_SPACE
-	s_worldData.vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", 0), numVerts, verts,
-								   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD | ATTR_TANGENT | ATTR_BITANGENT |
-								   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
+		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,
+									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD | ATTR_TANGENT | ATTR_BITANGENT |
+									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
 #else
-	s_worldData.vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", 0), numVerts, verts,
-								   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD |
-								   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
+		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,
+									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD |
+									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
 #endif
 
-	s_worldData.ibo = R_CreateIBO2(va("staticBspModel0_IBO %i", 0), numTriangles, triangles, VBO_USAGE_STATIC);
+		ibo = R_CreateIBO2(va("staticBspModel0_IBO %i", k), numTriangles, triangles, VBO_USAGE_STATIC);
 
-	endTime = ri.Milliseconds();
-	ri.Printf(PRINT_ALL, "world VBO calculation time = %5.2f seconds\n", (endTime - startTime) / 1000.0);
-
-	// point triangle surfaces to world VBO
-	for(k = 0, surface = surfacesSorted[k]; k < numSurfaces; k++, surface = surfacesSorted[k])
-	{
-		if(*surface->data == SF_FACE)
+		// point triangle surfaces to VBO
+		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
-
-			if( srf->numVerts && srf->numTriangles)
+			surface = *currSurf;
+			if(*surface->data == SF_FACE)
 			{
-				srf->vbo = s_worldData.vbo;
-				srf->ibo = s_worldData.ibo;
+				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+
+				if( srf->numVerts && srf->numTriangles)
+				{
+					srf->vbo = vbo;
+					srf->ibo = ibo;
+				}
+			}
+			else if(*surface->data == SF_GRID)
+			{
+				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+
+				if( srf->numVerts && srf->numTriangles)
+				{
+					srf->vbo = vbo;
+					srf->ibo = ibo;
+				}
+			}
+			else if(*surface->data == SF_TRIANGLES)
+			{
+				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
+
+				if( srf->numVerts && srf->numTriangles)
+				{
+					srf->vbo = vbo;
+					srf->ibo = ibo;
+				}
 			}
 		}
-		else if(*surface->data == SF_GRID)
-		{
-			srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
 
-			if( srf->numVerts && srf->numTriangles)
-			{
-				srf->vbo = s_worldData.vbo;
-				srf->ibo = s_worldData.ibo;
-			}
-		}
-		else if(*surface->data == SF_TRIANGLES)
-		{
-			srfTriangles_t *srf = (srfTriangles_t *) surface->data;
+		ri.Hunk_FreeTempMemory(triangles);
+		ri.Hunk_FreeTempMemory(verts);
 
-			if( srf->numVerts && srf->numTriangles)
-			{
-				srf->vbo = s_worldData.vbo;
-				srf->ibo = s_worldData.ibo;
-			}
-		}
+		k++;
+
 	}
-
 
 	ri.Free(surfacesSorted);
 
-	ri.Hunk_FreeTempMemory(triangles);
-	ri.Hunk_FreeTempMemory(verts);
+	endTime = ri.Milliseconds();
+	ri.Printf(PRINT_ALL, "world VBOs calculation time = %5.2f seconds\n", (endTime - startTime) / 1000.0);
 }
 
 /*
@@ -3006,6 +3030,7 @@ void R_MergeLeafSurfaces(void)
 	int mergedSurfIndex;
 	int numMergedSurfaces;
 	int numUnmergedSurfaces;
+	VBO_t *vbo;
 	IBO_t *ibo;
 
 	msurface_t *mergedSurf;
@@ -3024,14 +3049,6 @@ void R_MergeLeafSurfaces(void)
 	{
 		s_worldData.surfacesViewCount[i] = -1;
 	}
-
-	// create ibo
-	ibo = tr.ibos[tr.numIBOs++] = ri.Hunk_Alloc(sizeof(*ibo), h_low);
-	memset(ibo, 0, sizeof(*ibo));
-	Q_strncpyz(ibo->name, "staticWorldMesh_IBO_mergedSurfs", sizeof(ibo->name));
-
-	// allocate more than we need
-	iboIndexes = outIboIndexes = ri.Malloc(s_worldData.ibo->indexesSize);
 
 	// mark matching surfaces
 	for (i = 0; i < s_worldData.numnodes - s_worldData.numDecisionNodes; i++)
@@ -3166,6 +3183,9 @@ void R_MergeLeafSurfaces(void)
 		s_worldData.viewSurfaces[i] = s_worldData.marksurfaces[i];
 	}
 
+	// need to be synched here
+	R_IssuePendingRenderCommands();
+
 	// actually merge surfaces
 	numIboIndexes = 0;
 	mergedSurfIndex = 0;
@@ -3185,8 +3205,28 @@ void R_MergeLeafSurfaces(void)
 
 		if (s_worldData.surfacesViewCount[i] != i)
 			continue;
-
+		
 		surf1 = s_worldData.surfaces + i;
+
+		// retrieve vbo
+		switch(*surf1->data)
+		{
+			case SF_FACE:
+				vbo = ((srfSurfaceFace_t *)(surf1->data))->vbo;
+				break;
+
+			case SF_GRID:
+				vbo = ((srfGridMesh_t *)(surf1->data))->vbo;
+				break;
+
+			case SF_TRIANGLES:
+				vbo = ((srfTriangles_t *)(surf1->data))->vbo;
+				break;
+
+			default:
+				vbo = NULL;
+				break;
+		}
 
 		// count verts, indexes, and surfaces
 		numSurfsToMerge = 0;
@@ -3244,6 +3284,15 @@ void R_MergeLeafSurfaces(void)
 		{
 			continue;
 		}
+
+		// create ibo
+		ibo = tr.ibos[tr.numIBOs] = ri.Hunk_Alloc(sizeof(*ibo), h_low);
+		memset(ibo, 0, sizeof(*ibo));
+		Q_strncpyz(ibo->name, va("staticWorldMesh_IBO_mergedSurfs%i", tr.numIBOs++), sizeof(ibo->name));
+		numIboIndexes = 0;
+
+		// allocate indexes
+		iboIndexes = outIboIndexes = ri.Malloc(numTriangles * 3 * sizeof(*outIboIndexes));
 
 		// Merge surfaces (indexes) and calculate bounds
 		ClearBounds(bounds[0], bounds[1]);
@@ -3320,7 +3369,7 @@ void R_MergeLeafSurfaces(void)
 		memset(vboSurf, 0, sizeof(*vboSurf));
 		vboSurf->surfaceType = SF_VBO_MESH;
 
-		vboSurf->vbo = s_worldData.vbo;
+		vboSurf->vbo = vbo;
 		vboSurf->ibo = ibo;
 
 		vboSurf->numIndexes = numTriangles * 3;
@@ -3352,6 +3401,17 @@ void R_MergeLeafSurfaces(void)
 		mergedSurf->cubemapIndex  = surf1->cubemapIndex;
 		mergedSurf->shader        = surf1->shader;
 
+		// finish up the ibo
+		qglGenBuffersARB(1, &ibo->indexesVBO);
+
+		R_BindIBO(ibo);
+		qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, numIboIndexes * sizeof(*iboIndexes), iboIndexes, GL_STATIC_DRAW_ARB);
+		R_BindNullIBO();
+
+		GL_CheckErrors();
+
+		ri.Free(iboIndexes);
+
 		// redirect view surfaces to this surf
 		for (j = 0; j < numWorldSurfaces; j++)
 		{
@@ -3371,21 +3431,6 @@ void R_MergeLeafSurfaces(void)
 		mergedSurfIndex++;
 		mergedSurf++;
 	}
-
-	// finish up the ibo
-	R_IssuePendingRenderCommands();
-
-	qglGenBuffersARB(1, &ibo->indexesVBO);
-
-	R_BindIBO(ibo);
-
-	qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, numIboIndexes * sizeof(*iboIndexes), iboIndexes, GL_STATIC_DRAW_ARB);
-
-	R_BindNullIBO();
-
-	GL_CheckErrors();
-
-	ri.Free(iboIndexes);
 
 	endTime = ri.Milliseconds();
 
@@ -3743,7 +3788,7 @@ void RE_LoadWorldMap( const char *name ) {
 	}
 
 	// create static VBOS from the world
-	R_CreateWorldVBO();
+	R_CreateWorldVBOs();
 	if (r_mergeLeafSurfaces->integer)
 	{
 		R_MergeLeafSurfaces();
