@@ -221,14 +221,22 @@ extern float EvalWaveForm( const waveForm_t *wf );
 extern float EvalWaveFormClamped( const waveForm_t *wf );
 
 
-static void ComputeTexMatrix( shaderStage_t *pStage, int bundleNum, float *outmatrix)
+static void ComputeTexMods( shaderStage_t *pStage, int bundleNum, float *outMatrix, float *outOffTurb)
 {
 	int tm;
-	float matrix[16], currentmatrix[16];
+	float matrix[6], currentmatrix[6];
 	textureBundle_t *bundle = &pStage->bundle[bundleNum];
 
-	Matrix16Identity(outmatrix);
-	Matrix16Identity(currentmatrix);
+	matrix[0] = 1.0f; matrix[2] = 0.0f; matrix[4] = 0.0f;
+	matrix[1] = 0.0f; matrix[3] = 1.0f; matrix[5] = 0.0f;
+
+	currentmatrix[0] = 1.0f; currentmatrix[2] = 0.0f; currentmatrix[4] = 0.0f;
+	currentmatrix[1] = 0.0f; currentmatrix[3] = 1.0f; currentmatrix[5] = 0.0f;
+
+	outMatrix[0] = 1.0f; outMatrix[2] = 0.0f;
+	outMatrix[1] = 0.0f; outMatrix[3] = 1.0f;
+
+	outOffTurb[0] = 0.0f; outOffTurb[1] = 0.0f; outOffTurb[2] = 0.0f; outOffTurb[3] = 0.0f;
 
 	for ( tm = 0; tm < bundle->numTexMods ; tm++ ) {
 		switch ( bundle->texMods[tm].type )
@@ -239,57 +247,71 @@ static void ComputeTexMatrix( shaderStage_t *pStage, int bundleNum, float *outma
 			break;
 
 		case TMOD_TURBULENT:
-			RB_CalcTurbulentTexMatrix( &bundle->texMods[tm].wave, 
-									 matrix );
-			outmatrix[12] = matrix[12];
-			outmatrix[13] = matrix[13];
-			Matrix16Copy(outmatrix, currentmatrix);
+			RB_CalcTurbulentFactors(&bundle->texMods[tm].wave, &outOffTurb[2], &outOffTurb[3]);
 			break;
 
 		case TMOD_ENTITY_TRANSLATE:
-			RB_CalcScrollTexMatrix( backEnd.currentEntity->e.shaderTexCoord,
-								 matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
+			RB_CalcScrollTexMatrix( backEnd.currentEntity->e.shaderTexCoord, matrix );
 			break;
 
 		case TMOD_SCROLL:
 			RB_CalcScrollTexMatrix( bundle->texMods[tm].scroll,
 									 matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
 			break;
 
 		case TMOD_SCALE:
 			RB_CalcScaleTexMatrix( bundle->texMods[tm].scale,
 								  matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
 			break;
 		
 		case TMOD_STRETCH:
 			RB_CalcStretchTexMatrix( &bundle->texMods[tm].wave, 
 								   matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
 			break;
 
 		case TMOD_TRANSFORM:
 			RB_CalcTransformTexMatrix( &bundle->texMods[tm],
 									 matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
 			break;
 
 		case TMOD_ROTATE:
 			RB_CalcRotateTexMatrix( bundle->texMods[tm].rotateSpeed,
 									matrix );
-			Matrix16Multiply(matrix, currentmatrix, outmatrix);
-			Matrix16Copy(outmatrix, currentmatrix);
 			break;
 
 		default:
 			ri.Error( ERR_DROP, "ERROR: unknown texmod '%d' in shader '%s'", bundle->texMods[tm].type, tess.shader->name );
+			break;
+		}
+
+		switch ( bundle->texMods[tm].type )
+		{	
+		case TMOD_NONE:
+		case TMOD_TURBULENT:
+		default:
+			break;
+
+		case TMOD_ENTITY_TRANSLATE:
+		case TMOD_SCROLL:
+		case TMOD_SCALE:
+		case TMOD_STRETCH:
+		case TMOD_TRANSFORM:
+		case TMOD_ROTATE:
+			outMatrix[0] = matrix[0] * currentmatrix[0] + matrix[2] * currentmatrix[1];
+			outMatrix[1] = matrix[1] * currentmatrix[0] + matrix[3] * currentmatrix[1];
+
+			outMatrix[2] = matrix[0] * currentmatrix[2] + matrix[2] * currentmatrix[3];
+			outMatrix[3] = matrix[1] * currentmatrix[2] + matrix[3] * currentmatrix[3];
+
+			outOffTurb[0] = matrix[0] * currentmatrix[4] + matrix[2] * currentmatrix[5] + matrix[4];
+			outOffTurb[1] = matrix[1] * currentmatrix[4] + matrix[3] * currentmatrix[5] + matrix[5];
+
+			currentmatrix[0] = outMatrix[0];
+			currentmatrix[1] = outMatrix[1];
+			currentmatrix[2] = outMatrix[2];
+			currentmatrix[3] = outMatrix[3];
+			currentmatrix[4] = outOffTurb[0];
+			currentmatrix[5] = outOffTurb[1];
 			break;
 		}
 	}
@@ -692,7 +714,8 @@ static void ForwardDlight( void ) {
 		dlight_t	*dl;
 		shaderProgram_t *sp;
 		vec4_t vector;
-		matrix_t matrix;
+		vec4_t texMatrix;
+		vec4_t texOffTurb;
 
 		if ( !( tess.dlightBits & ( 1 << l ) ) ) {
 			continue;	// this surface definately doesn't have any of this light
@@ -795,13 +818,9 @@ static void ForwardDlight( void ) {
 			GL_SelectTexture(0);
 		}
 
-		ComputeTexMatrix( pStage, TB_DIFFUSEMAP, matrix );
-		
-		VectorSet4(vector, matrix[0], matrix[1], matrix[4], matrix[5]);
-		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, vector);
-
-		VectorSet4(vector, matrix[8], matrix[9], matrix[12], matrix[13]);
-		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, vector);
+		ComputeTexMods( pStage, TB_DIFFUSEMAP, texMatrix, texOffTurb );
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, texMatrix);
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, texOffTurb);
 
 		GLSL_SetUniformInt(sp, UNIFORM_TCGEN0, pStage->bundle[0].tcGen);
 
@@ -926,7 +945,7 @@ static void RB_FogPass( void ) {
 		if (deformGen != DGEN_NONE)
 			index |= FOGDEF_USE_DEFORM_VERTEXES;
 
-		if (glState.vertexAttribsInterpolation)
+		if (glState.vertexAnimation)
 			index |= FOGDEF_USE_VERTEX_ANIMATION;
 		
 		sp = &tr.fogShader[index];
@@ -983,7 +1002,7 @@ static unsigned int RB_CalcShaderVertexAttribs( shaderCommands_t *input )
 {
 	unsigned int vertexAttribs = input->shader->vertexAttribs;
 
-	if(glState.vertexAttribsInterpolation > 0.0f)
+	if(glState.vertexAnimation)
 	{
 		vertexAttribs |= ATTR_POSITION2;
 		if (vertexAttribs & ATTR_NORMAL)
@@ -1002,7 +1021,6 @@ static unsigned int RB_CalcShaderVertexAttribs( shaderCommands_t *input )
 static void RB_IterateStagesGeneric( shaderCommands_t *input )
 {
 	int stage;
-	matrix_t matrix;
 	
 	vec4_t fogDistanceVector, fogDepthVector = {0, 0, 0, 0};
 	float eyeT = 0;
@@ -1018,6 +1036,8 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 	{
 		shaderStage_t *pStage = input->xstages[stage];
 		shaderProgram_t *sp;
+		vec4_t texMatrix;
+		vec4_t texOffTurb;
 
 		if ( !pStage )
 		{
@@ -1051,7 +1071,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 					shaderAttribs |= GENERICDEF_USE_DEFORM_VERTEXES;
 				}
 
-				if (glState.vertexAttribsInterpolation > 0.0f && backEnd.currentEntity && backEnd.currentEntity != &tr.worldEntity)
+				if (glState.vertexAnimation)
 				{
 					shaderAttribs |= GENERICDEF_USE_VERTEX_ANIMATION;
 				}
@@ -1174,16 +1194,9 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			GLSL_SetUniformVec4(sp, UNIFORM_FOGCOLORMASK, fogColorMask);
 		}
 
-		ComputeTexMatrix( pStage, TB_DIFFUSEMAP, matrix );
-
-		{
-			vec4_t vector;
-			VectorSet4(vector, matrix[0], matrix[1], matrix[4], matrix[5]);
-			GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, vector);
-
-			VectorSet4(vector, matrix[8], matrix[9], matrix[12], matrix[13]);
-			GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, vector);
-		}
+		ComputeTexMods( pStage, TB_DIFFUSEMAP, texMatrix, texOffTurb );
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXMATRIX, texMatrix);
+		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, texOffTurb);
 
 		GLSL_SetUniformInt(sp, UNIFORM_TCGEN0, pStage->bundle[0].tcGen);
 		if (pStage->bundle[0].tcGen == TCGEN_VECTOR)
@@ -1228,8 +1241,6 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			{
 				for (i = 0; i < NUM_TEXTURE_BUNDLES; i++)
 				{
-					image_t *img;
-
 					if (pStage->bundle[i].image[0])
 					{
 						switch(i)
@@ -1258,8 +1269,6 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			{
 				for (i = 0; i < NUM_TEXTURE_BUNDLES; i++)
 				{
-					image_t *img;
-
 					if (pStage->bundle[i].image[0])
 					{
 						switch(i)

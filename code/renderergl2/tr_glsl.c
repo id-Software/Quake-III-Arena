@@ -1696,7 +1696,7 @@ void GLSL_VertexAttribPointers(uint32_t attribBits)
 	// position/normal/tangent/bitangent are always set in case of animation
 	oldFrame = glState.vertexAttribsOldFrame;
 	newFrame = glState.vertexAttribsNewFrame;
-	animated = (oldFrame != newFrame) && (glState.vertexAttribsInterpolation > 0.0f);
+	animated = glState.vertexAnimation;
 	
 	if((attribBits & ATTR_POSITION) && (!(glState.vertexAttribPointersSet & ATTR_POSITION) || animated))
 	{
@@ -1845,7 +1845,7 @@ shaderProgram_t *GLSL_GetGenericShaderProgram(int stage)
 		shaderAttribs |= GENERICDEF_USE_DEFORM_VERTEXES;
 	}
 
-	if (glState.vertexAttribsInterpolation > 0.0f && backEnd.currentEntity && backEnd.currentEntity != &tr.worldEntity)
+	if (glState.vertexAnimation)
 	{
 		shaderAttribs |= GENERICDEF_USE_VERTEX_ANIMATION;
 	}

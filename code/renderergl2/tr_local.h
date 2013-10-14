@@ -1566,6 +1566,7 @@ typedef struct {
 	uint32_t        vertexAttribsNewFrame;
 	uint32_t        vertexAttribsOldFrame;
 	float           vertexAttribsInterpolation;
+	qboolean        vertexAnimation;
 	shaderProgram_t *currentProgram;
 	FBO_t          *currentFBO;
 	VBO_t          *currentVBO;
@@ -2514,7 +2515,7 @@ void	RB_CalcTransformTexCoords( const texModInfo_t *tmi, float *dstTexCoords );
 void	RB_CalcScaleTexMatrix( const float scale[2], float *matrix );
 void	RB_CalcScrollTexMatrix( const float scrollSpeed[2], float *matrix );
 void	RB_CalcRotateTexMatrix( float degsPerSecond, float *matrix );
-void RB_CalcTurbulentTexMatrix( const waveForm_t *wf, matrix_t matrix );
+void RB_CalcTurbulentFactors( const waveForm_t *wf, float *amplitude, float *now );
 void	RB_CalcTransformTexMatrix( const texModInfo_t *tmi, float *matrix  );
 void	RB_CalcStretchTexMatrix( const waveForm_t *wf, float *matrix );
 

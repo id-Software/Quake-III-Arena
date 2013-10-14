@@ -2336,6 +2336,7 @@ static qboolean CollapseStagesToGLSL(void)
 				case TCGEN_TEXTURE:
 				case TCGEN_LIGHTMAP:
 				case TCGEN_ENVIRONMENT_MAPPED:
+				case TCGEN_VECTOR:
 					break;
 				default:
 					skip = qtrue;
@@ -2529,6 +2530,7 @@ static qboolean CollapseStagesToGLSL(void)
 				pStage->bundle[TB_LIGHTMAP] = pStage->bundle[TB_DIFFUSEMAP];
 				pStage->bundle[TB_DIFFUSEMAP].image[0] = tr.whiteImage;
 				pStage->bundle[TB_DIFFUSEMAP].isLightmap = qfalse;
+				pStage->bundle[TB_DIFFUSEMAP].tcGen = TCGEN_TEXTURE;
 			}
 		}
 	}

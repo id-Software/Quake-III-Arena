@@ -1621,11 +1621,12 @@ void RB_SurfaceVBOMDVMesh(srfVBOMDVMesh_t * surface)
 
 	glState.vertexAttribsOldFrame = refEnt->oldframe;
 	glState.vertexAttribsNewFrame = refEnt->frame;
+	glState.vertexAnimation = qtrue;
 
 	RB_EndSurface();
 
 	// So we don't lerp surfaces that shouldn't be lerped
-	glState.vertexAttribsInterpolation = 0;
+	glState.vertexAnimation = qfalse;
 }
 
 static void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
