@@ -494,99 +494,6 @@ qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 
 /*
 =================
-R_FindSurfaceTriangleWithEdge
-
-Recoded from Q2E
-=================
-*/
-static int R_FindSurfaceTriangleWithEdge(int numTriangles, srfTriangle_t * triangles, int start, int end, int ignore)
-{
-	srfTriangle_t  *tri;
-	int             count, match;
-	int             i;
-
-	count = 0;
-	match = -1;
-
-	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
-	{
-		if((tri->indexes[0] == start && tri->indexes[1] == end) ||
-		   (tri->indexes[1] == start && tri->indexes[2] == end) || (tri->indexes[2] == start && tri->indexes[0] == end))
-		{
-			if(i != ignore)
-			{
-				match = i;
-			}
-
-			count++;
-		}
-		else if((tri->indexes[1] == start && tri->indexes[0] == end) ||
-				(tri->indexes[2] == start && tri->indexes[1] == end) || (tri->indexes[0] == start && tri->indexes[2] == end))
-		{
-			count++;
-		}
-	}
-
-	// detect edges shared by three triangles and make them seams
-	if(count > 2)
-	{
-		match = -1;
-	}
-
-	return match;
-}
-
-
-/*
-=================
-R_CalcSurfaceTriangleNeighbors
-
-Recoded from Q2E
-=================
-*/
-void R_CalcSurfaceTriangleNeighbors(int numTriangles, srfTriangle_t * triangles)
-{
-	int             i;
-	srfTriangle_t  *tri;
-
-	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
-	{
-		tri->neighbors[0] = R_FindSurfaceTriangleWithEdge(numTriangles, triangles, tri->indexes[1], tri->indexes[0], i);
-		tri->neighbors[1] = R_FindSurfaceTriangleWithEdge(numTriangles, triangles, tri->indexes[2], tri->indexes[1], i);
-		tri->neighbors[2] = R_FindSurfaceTriangleWithEdge(numTriangles, triangles, tri->indexes[0], tri->indexes[2], i);
-	}
-}
-
-/*
-=================
-R_CalcSurfaceTrianglePlanes
-=================
-*/
-void R_CalcSurfaceTrianglePlanes(int numTriangles, srfTriangle_t * triangles, srfVert_t * verts)
-{
-	int             i;
-	srfTriangle_t  *tri;
-
-	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
-	{
-		float          *v1, *v2, *v3;
-		vec3_t          d1, d2;
-
-		v1 = verts[tri->indexes[0]].xyz;
-		v2 = verts[tri->indexes[1]].xyz;
-		v3 = verts[tri->indexes[2]].xyz;
-
-		VectorSubtract(v2, v1, d1);
-		VectorSubtract(v3, v1, d2);
-
-		CrossProduct(d2, d1, tri->plane);
-		tri->plane[3] = DotProduct(tri->plane, v1);
-	}
-}
-
-
-/*
-=================
 R_CullLocalBox
 
 Returns CULL_IN, CULL_CLIP, or CULL_OUT
@@ -1365,7 +1272,7 @@ R_PlaneForSurface
 =============
 */
 void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane) {
-	srfTriangles_t	*tri;
+	srfBspSurface_t	*tri;
 	srfPoly_t		*poly;
 	srfVert_t		*v1, *v2, *v3;
 	vec4_t			plane4;
@@ -1377,10 +1284,10 @@ void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane) {
 	}
 	switch (*surfType) {
 	case SF_FACE:
-		*plane = ((srfSurfaceFace_t *)surfType)->plane;
+		*plane = ((srfBspSurface_t *)surfType)->cullPlane;
 		return;
 	case SF_TRIANGLES:
-		tri = (srfTriangles_t *)surfType;
+		tri = (srfBspSurface_t *)surfType;
 		v1 = tri->verts + tri->triangles[0].indexes[0];
 		v2 = tri->verts + tri->triangles[0].indexes[1];
 		v3 = tri->verts + tri->triangles[0].indexes[2];

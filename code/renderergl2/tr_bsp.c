@@ -652,7 +652,7 @@ ParseFace
 */
 static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf, int *indexes  ) {
 	int			i, j;
-	srfSurfaceFace_t	*cv;
+	srfBspSurface_t	*cv;
 	srfTriangle_t  *tri;
 	int			numVerts, numTriangles, badTriangles;
 	int realLightmapNum;
@@ -767,12 +767,12 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 
 	// take the plane information from the lightmap vector
 	for ( i = 0 ; i < 3 ; i++ ) {
-		cv->plane.normal[i] = LittleFloat( ds->lightmapVecs[2][i] );
+		cv->cullPlane.normal[i] = LittleFloat( ds->lightmapVecs[2][i] );
 	}
-	cv->plane.dist = DotProduct( cv->verts[0].xyz, cv->plane.normal );
-	SetPlaneSignbits( &cv->plane );
-	cv->plane.type = PlaneTypeForNormal( cv->plane.normal );
-	surf->cullinfo.plane = cv->plane;
+	cv->cullPlane.dist = DotProduct( cv->verts[0].xyz, cv->cullPlane.normal );
+	SetPlaneSignbits( &cv->cullPlane );
+	cv->cullPlane.type = PlaneTypeForNormal( cv->cullPlane.normal );
+	surf->cullinfo.plane = cv->cullPlane;
 
 	surf->data = (surfaceType_t *)cv;
 
@@ -800,7 +800,7 @@ ParseMesh
 ===============
 */
 static void ParseMesh ( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf ) {
-	srfGridMesh_t	*grid;
+	srfBspSurface_t	*grid;
 	int				i, j;
 	int				width, height, numPoints;
 	srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE];
@@ -903,7 +903,7 @@ ParseTriSurf
 ===============
 */
 static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf, int *indexes ) {
-	srfTriangles_t *cv;
+	srfBspSurface_t *cv;
 	srfTriangle_t  *tri;
 	int             i, j;
 	int             numVerts, numTriangles, badTriangles;
@@ -1065,7 +1065,7 @@ R_MergedWidthPoints
 returns true if there are grid points merged on a width edge
 =================
 */
-int R_MergedWidthPoints(srfGridMesh_t *grid, int offset) {
+int R_MergedWidthPoints(srfBspSurface_t *grid, int offset) {
 	int i, j;
 
 	for (i = 1; i < grid->width-1; i++) {
@@ -1086,7 +1086,7 @@ R_MergedHeightPoints
 returns true if there are grid points merged on a height edge
 =================
 */
-int R_MergedHeightPoints(srfGridMesh_t *grid, int offset) {
+int R_MergedHeightPoints(srfBspSurface_t *grid, int offset) {
 	int i, j;
 
 	for (i = 1; i < grid->height-1; i++) {
@@ -1109,13 +1109,13 @@ NOTE: never sync LoD through grid edges with merged points!
 FIXME: write generalized version that also avoids cracks between a patch and one that meets half way?
 =================
 */
-void R_FixSharedVertexLodError_r( int start, srfGridMesh_t *grid1 ) {
+void R_FixSharedVertexLodError_r( int start, srfBspSurface_t *grid1 ) {
 	int j, k, l, m, n, offset1, offset2, touch;
-	srfGridMesh_t *grid2;
+	srfBspSurface_t *grid2;
 
 	for ( j = start; j < s_worldData.numsurfaces; j++ ) {
 		//
-		grid2 = (srfGridMesh_t *) s_worldData.surfaces[j].data;
+		grid2 = (srfBspSurface_t *) s_worldData.surfaces[j].data;
 		// if this surface is not a grid
 		if ( grid2->surfaceType != SF_GRID ) continue;
 		// if the LOD errors are already fixed for this patch
@@ -1223,11 +1223,11 @@ If this is not the case this function will still do its job but won't fix the hi
 */
 void R_FixSharedVertexLodError( void ) {
 	int i;
-	srfGridMesh_t *grid1;
+	srfBspSurface_t *grid1;
 
 	for ( i = 0; i < s_worldData.numsurfaces; i++ ) {
 		//
-		grid1 = (srfGridMesh_t *) s_worldData.surfaces[i].data;
+		grid1 = (srfBspSurface_t *) s_worldData.surfaces[i].data;
 		// if this surface is not a grid
 		if ( grid1->surfaceType != SF_GRID )
 			continue;
@@ -1249,11 +1249,11 @@ R_StitchPatches
 */
 int R_StitchPatches( int grid1num, int grid2num ) {
 	float *v1, *v2;
-	srfGridMesh_t *grid1, *grid2;
+	srfBspSurface_t *grid1, *grid2;
 	int k, l, m, n, offset1, offset2, row, column;
 
-	grid1 = (srfGridMesh_t *) s_worldData.surfaces[grid1num].data;
-	grid2 = (srfGridMesh_t *) s_worldData.surfaces[grid2num].data;
+	grid1 = (srfBspSurface_t *) s_worldData.surfaces[grid1num].data;
+	grid2 = (srfBspSurface_t *) s_worldData.surfaces[grid2num].data;
 	for (n = 0; n < 2; n++) {
 		//
 		if (n) offset1 = (grid1->height-1) * grid1->width;
@@ -1664,13 +1664,13 @@ might still appear at that side.
 */
 int R_TryStitchingPatch( int grid1num ) {
 	int j, numstitches;
-	srfGridMesh_t *grid1, *grid2;
+	srfBspSurface_t *grid1, *grid2;
 
 	numstitches = 0;
-	grid1 = (srfGridMesh_t *) s_worldData.surfaces[grid1num].data;
+	grid1 = (srfBspSurface_t *) s_worldData.surfaces[grid1num].data;
 	for ( j = 0; j < s_worldData.numsurfaces; j++ ) {
 		//
-		grid2 = (srfGridMesh_t *) s_worldData.surfaces[j].data;
+		grid2 = (srfBspSurface_t *) s_worldData.surfaces[j].data;
 		// if this surface is not a grid
 		if ( grid2->surfaceType != SF_GRID ) continue;
 		// grids in the same LOD group should have the exact same lod radius
@@ -1695,7 +1695,7 @@ R_StitchAllPatches
 */
 void R_StitchAllPatches( void ) {
 	int i, stitched, numstitches;
-	srfGridMesh_t *grid1;
+	srfBspSurface_t *grid1;
 
 	numstitches = 0;
 	do
@@ -1703,7 +1703,7 @@ void R_StitchAllPatches( void ) {
 		stitched = qfalse;
 		for ( i = 0; i < s_worldData.numsurfaces; i++ ) {
 			//
-			grid1 = (srfGridMesh_t *) s_worldData.surfaces[i].data;
+			grid1 = (srfBspSurface_t *) s_worldData.surfaces[i].data;
 			// if this surface is not a grid
 			if ( grid1->surfaceType != SF_GRID )
 				continue;
@@ -1728,11 +1728,11 @@ R_MovePatchSurfacesToHunk
 */
 void R_MovePatchSurfacesToHunk(void) {
 	int i, size;
-	srfGridMesh_t *grid, *hunkgrid;
+	srfBspSurface_t *grid, *hunkgrid;
 
 	for ( i = 0; i < s_worldData.numsurfaces; i++ ) {
 		//
-		grid = (srfGridMesh_t *) s_worldData.surfaces[i].data;
+		grid = (srfBspSurface_t *) s_worldData.surfaces[i].data;
 		// if this surface is not a grid
 		if ( grid->surfaceType != SF_GRID )
 			continue;
@@ -1890,42 +1890,24 @@ static void R_CreateWorldVBOs(void)
 		numSurfaces = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			surface = *currSurf;
-			if(*surface->data == SF_FACE)
+			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+
+			switch (bspSurf->surfaceType)
 			{
-				srfSurfaceFace_t *face = (srfSurfaceFace_t *) surface->data;
+				case SF_FACE:
+				case SF_GRID:
+				case SF_TRIANGLES:
+					if(bspSurf->numVerts)
+						numVerts += bspSurf->numVerts;
 
-				if(face->numVerts)
-					numVerts += face->numVerts;
+					if(bspSurf->numTriangles)
+						numTriangles += bspSurf->numTriangles;
 
-				if(face->numTriangles)
-					numTriangles += face->numTriangles;
+					numSurfaces++;
+					break;
 
-				numSurfaces++;
-			}
-			else if(*surface->data == SF_GRID)
-			{
-				srfGridMesh_t  *grid = (srfGridMesh_t *) surface->data;
-
-				if(grid->numVerts)
-					numVerts += grid->numVerts;
-
-				if(grid->numTriangles)
-					numTriangles += grid->numTriangles;
-
-				numSurfaces++;
-			}
-			else if(*surface->data == SF_TRIANGLES)
-			{
-				srfTriangles_t *tri = (srfTriangles_t *) surface->data;
-
-				if(tri->numVerts)
-					numVerts += tri->numVerts;
-
-				if(tri->numTriangles)
-					numTriangles += tri->numTriangles;
-
-				numSurfaces++;
+				default:
+					break;
 			}
 		}
 
@@ -1943,93 +1925,42 @@ static void R_CreateWorldVBOs(void)
 		numTriangles = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			surface = *currSurf;
-			if(*surface->data == SF_FACE)
+			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+
+			switch (bspSurf->surfaceType)
 			{
-				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+				case SF_FACE:
+				case SF_GRID:
+				case SF_TRIANGLES:
+					bspSurf->firstIndex = numTriangles * 3;
 
-				srf->firstIndex = numTriangles * 3;
-
-				if(srf->numTriangles)
-				{
-					srfTriangle_t  *tri;
-
-					srf->minIndex = numVerts + srf->triangles->indexes[0];
-					srf->maxIndex = numVerts + srf->triangles->indexes[0];
-
-					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
+					if(bspSurf->numTriangles)
 					{
-						for(j = 0; j < 3; j++)
+						srfTriangle_t  *tri;
+
+						bspSurf->minIndex = numVerts + bspSurf->triangles->indexes[0];
+						bspSurf->maxIndex = numVerts + bspSurf->triangles->indexes[0];
+
+						for(i = 0, tri = bspSurf->triangles; i < bspSurf->numTriangles; i++, tri++)
 						{
-							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
+							for(j = 0; j < 3; j++)
+							{
+								triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+								bspSurf->minIndex = MIN(bspSurf->minIndex, numVerts + tri->indexes[j]);
+								bspSurf->maxIndex = MAX(bspSurf->maxIndex, numVerts + tri->indexes[j]);
+							}
 						}
+
+						numTriangles += bspSurf->numTriangles;
 					}
 
-					numTriangles += srf->numTriangles;
-				}
+					if(bspSurf->numVerts)
+						numVerts += bspSurf->numVerts;
 
-				if(srf->numVerts)
-					numVerts += srf->numVerts;
-			}
-			else if(*surface->data == SF_GRID)
-			{
-				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+					break;
 
-				srf->firstIndex = numTriangles * 3;
-
-				if(srf->numTriangles)
-				{
-					srfTriangle_t  *tri;
-
-					srf->minIndex = numVerts + srf->triangles->indexes[0];
-					srf->maxIndex = numVerts + srf->triangles->indexes[0];
-
-					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
-					{
-						for(j = 0; j < 3; j++)
-						{
-							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
-						}
-					}
-
-					numTriangles += srf->numTriangles;
-				}
-
-				if(srf->numVerts)
-					numVerts += srf->numVerts;
-			}
-			else if(*surface->data == SF_TRIANGLES)
-			{
-				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
-
-				srf->firstIndex = numTriangles * 3;
-
-				if(srf->numTriangles)
-				{
-					srfTriangle_t  *tri;
-
-					srf->minIndex = numVerts + srf->triangles->indexes[0];
-					srf->maxIndex = numVerts + srf->triangles->indexes[0];
-
-					for(i = 0, tri = srf->triangles; i < srf->numTriangles; i++, tri++)
-					{
-						for(j = 0; j < 3; j++)
-						{
-							triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-							srf->minIndex = MIN(srf->minIndex, numVerts + tri->indexes[j]);
-							srf->maxIndex = MAX(srf->maxIndex, numVerts + tri->indexes[j]);
-						}
-					}
-
-					numTriangles += srf->numTriangles;
-				}
-
-				if(srf->numVerts)
-					numVerts += srf->numVerts;
+				default:
+					break;
 			}
 		}
 
@@ -2037,54 +1968,29 @@ static void R_CreateWorldVBOs(void)
 		numVerts = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			surface = *currSurf;
-			if(*surface->data == SF_FACE)
+			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+
+			switch (bspSurf->surfaceType)
 			{
-				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+				case SF_FACE:
+				case SF_GRID:
+				case SF_TRIANGLES:
+					bspSurf->firstVert = numVerts;
 
-				srf->firstVert = numVerts;
-
-				if(srf->numVerts)
-				{
-					for(i = 0; i < srf->numVerts; i++)
+					if(bspSurf->numVerts)
 					{
-						CopyVert(&srf->verts[i], &verts[numVerts + i]);
+						for(i = 0; i < bspSurf->numVerts; i++)
+						{
+							CopyVert(&bspSurf->verts[i], &verts[numVerts + i]);
+						}
+
+						numVerts += bspSurf->numVerts;
 					}
 
-					numVerts += srf->numVerts;
-				}
-			}
-			else if(*surface->data == SF_GRID)
-			{
-				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+					break;
 
-				srf->firstVert = numVerts;
-
-				if(srf->numVerts)
-				{
-					for(i = 0; i < srf->numVerts; i++)
-					{
-						CopyVert(&srf->verts[i], &verts[numVerts + i]);
-					}
-
-					numVerts += srf->numVerts;
-				}
-			}
-			else if(*surface->data == SF_TRIANGLES)
-			{
-				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
-
-				srf->firstVert = numVerts;
-
-				if(srf->numVerts)
-				{
-					for(i = 0; i < srf->numVerts; i++)
-					{
-						CopyVert(&srf->verts[i], &verts[numVerts + i]);
-					}
-
-					numVerts += srf->numVerts;
-				}
+				default:
+					break;
 			}
 		}
 
@@ -2103,36 +2009,23 @@ static void R_CreateWorldVBOs(void)
 		// point triangle surfaces to VBO
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
-			surface = *currSurf;
-			if(*surface->data == SF_FACE)
-			{
-				srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
-				if( srf->numVerts && srf->numTriangles)
-				{
-					srf->vbo = vbo;
-					srf->ibo = ibo;
-				}
-			}
-			else if(*surface->data == SF_GRID)
+			switch (bspSurf->surfaceType)
 			{
-				srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+				case SF_FACE:
+				case SF_GRID:
+				case SF_TRIANGLES:
+					if( bspSurf->numVerts && bspSurf->numTriangles)
+					{
+						bspSurf->vbo = vbo;
+						bspSurf->ibo = ibo;
+					}
 
-				if( srf->numVerts && srf->numTriangles)
-				{
-					srf->vbo = vbo;
-					srf->ibo = ibo;
-				}
-			}
-			else if(*surface->data == SF_TRIANGLES)
-			{
-				srfTriangles_t *srf = (srfTriangles_t *) surface->data;
+					break;
 
-				if( srf->numVerts && srf->numTriangles)
-				{
-					srf->vbo = vbo;
-					srf->ibo = ibo;
-				}
+				default:
+					break;
 			}
 		}
 
@@ -2220,10 +2113,10 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 				// FIXME: do this
 				break;
 			case MST_TRIANGLE_SOUP:
-				out->data = ri.Hunk_Alloc( sizeof(srfTriangles_t), h_low);
+				out->data = ri.Hunk_Alloc( sizeof(srfBspSurface_t), h_low);
 				break;
 			case MST_PLANAR:
-				out->data = ri.Hunk_Alloc( sizeof(srfSurfaceFace_t), h_low);
+				out->data = ri.Hunk_Alloc( sizeof(srfBspSurface_t), h_low);
 				break;
 			case MST_FLARE:
 				out->data = ri.Hunk_Alloc( sizeof(srfFlare_t), h_low);
@@ -2240,13 +2133,13 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 		case MST_PATCH:
 			ParseMesh ( in, dv, hdrVertColors, out );
 			{
-				srfGridMesh_t *surface = (srfGridMesh_t *)out->data;
+				srfBspSurface_t *surface = (srfBspSurface_t *)out->data;
 
 				out->cullinfo.type = CULLINFO_BOX | CULLINFO_SPHERE;
-				VectorCopy(surface->meshBounds[0], out->cullinfo.bounds[0]);
-				VectorCopy(surface->meshBounds[1], out->cullinfo.bounds[1]);
-				VectorCopy(surface->localOrigin, out->cullinfo.localOrigin);
-				out->cullinfo.radius = surface->meshRadius;
+				VectorCopy(surface->cullBounds[0], out->cullinfo.bounds[0]);
+				VectorCopy(surface->cullBounds[1], out->cullinfo.bounds[1]);
+				VectorCopy(surface->cullOrigin, out->cullinfo.localOrigin);
+				out->cullinfo.radius = surface->cullRadius;
 			}
 			numMeshes++;
 			break;
@@ -3201,7 +3094,7 @@ void R_MergeLeafSurfaces(void)
 		int numVerts;
 		int firstIndex;
 
-		srfVBOMesh_t *vboSurf;
+		srfBspSurface_t *vboSurf;
 
 		if (s_worldData.surfacesViewCount[i] != i)
 			continue;
@@ -3212,15 +3105,9 @@ void R_MergeLeafSurfaces(void)
 		switch(*surf1->data)
 		{
 			case SF_FACE:
-				vbo = ((srfSurfaceFace_t *)(surf1->data))->vbo;
-				break;
-
 			case SF_GRID:
-				vbo = ((srfGridMesh_t *)(surf1->data))->vbo;
-				break;
-
 			case SF_TRIANGLES:
-				vbo = ((srfTriangles_t *)(surf1->data))->vbo;
+				vbo = ((srfBspSurface_t *)(surf1->data))->vbo;
 				break;
 
 			default:
@@ -3235,42 +3122,21 @@ void R_MergeLeafSurfaces(void)
 		for (j = 0; j < numWorldSurfaces; j++)
 		{
 			msurface_t *surf2;
+			srfBspSurface_t *bspSurf;
 
 			if (s_worldData.surfacesViewCount[j] != i)
 				continue;
 
 			surf2 = s_worldData.surfaces + j;
 
-			switch(*surf2->data)
+			bspSurf = (srfBspSurface_t *) surf2->data;
+			switch(bspSurf->surfaceType)
 			{
 				case SF_FACE:
-					{
-						srfSurfaceFace_t *face;
-
-						face = (srfSurfaceFace_t *) surf2->data;
-						numTriangles += face->numTriangles;
-						numVerts += face->numVerts;
-					}
-					break;
-
 				case SF_GRID:
-					{
-						srfGridMesh_t *grid;
-
-						grid = (srfGridMesh_t *) surf2->data;
-						numTriangles += grid->numTriangles;
-						numVerts += grid->numVerts;
-					}
-					break;
-
 				case SF_TRIANGLES:
-					{
-						srfTriangles_t *tris;
-
-						tris = (srfTriangles_t *) surf2->data;
-						numTriangles += tris->numTriangles;
-						numVerts += tris->numVerts;
-					}
+					numTriangles += bspSurf->numTriangles;
+					numVerts += bspSurf->numVerts;
 					break;
 
 				default:
@@ -3300,6 +3166,7 @@ void R_MergeLeafSurfaces(void)
 		for (j = 0; j < numWorldSurfaces; j++)
 		{
 			msurface_t *surf2;
+			srfBspSurface_t *bspSurf;
 
 			if (s_worldData.surfacesViewCount[j] != i)
 				continue;
@@ -3309,53 +3176,18 @@ void R_MergeLeafSurfaces(void)
 			AddPointToBounds(surf2->cullinfo.bounds[0], bounds[0], bounds[1]);
 			AddPointToBounds(surf2->cullinfo.bounds[1], bounds[0], bounds[1]);
 
-			switch(*surf2->data)
+			bspSurf = (srfBspSurface_t *) surf2->data;
+			switch(bspSurf->surfaceType)
 			{
 				case SF_FACE:
-					{
-						srfSurfaceFace_t *face;
-
-						face = (srfSurfaceFace_t *) surf2->data;
-
-						for (k = 0; k < face->numTriangles; k++)
-						{
-							*outIboIndexes++ = face->triangles[k].indexes[0] + face->firstVert;
-							*outIboIndexes++ = face->triangles[k].indexes[1] + face->firstVert;
-							*outIboIndexes++ = face->triangles[k].indexes[2] + face->firstVert;
-							numIboIndexes += 3;
-						}
-					}
-					break;
-
 				case SF_GRID:
-					{
-						srfGridMesh_t *grid;
-
-						grid = (srfGridMesh_t *) surf2->data;
-
-						for (k = 0; k < grid->numTriangles; k++)
-						{
-							*outIboIndexes++ = grid->triangles[k].indexes[0] + grid->firstVert;
-							*outIboIndexes++ = grid->triangles[k].indexes[1] + grid->firstVert;
-							*outIboIndexes++ = grid->triangles[k].indexes[2] + grid->firstVert;
-							numIboIndexes += 3;
-						}
-					}
-					break;
-
 				case SF_TRIANGLES:
+					for (k = 0; k < bspSurf->numTriangles; k++)
 					{
-						srfTriangles_t *tris;
-
-						tris = (srfTriangles_t *) surf2->data;
-
-						for (k = 0; k < tris->numTriangles; k++)
-						{
-							*outIboIndexes++ = tris->triangles[k].indexes[0] + tris->firstVert;
-							*outIboIndexes++ = tris->triangles[k].indexes[1] + tris->firstVert;
-							*outIboIndexes++ = tris->triangles[k].indexes[2] + tris->firstVert;
-							numIboIndexes += 3;
-						}
+						*outIboIndexes++ = bspSurf->triangles[k].indexes[0] + bspSurf->firstVert;
+						*outIboIndexes++ = bspSurf->triangles[k].indexes[1] + bspSurf->firstVert;
+						*outIboIndexes++ = bspSurf->triangles[k].indexes[2] + bspSurf->firstVert;
+						numIboIndexes += 3;
 					}
 					break;
 
@@ -3372,7 +3204,7 @@ void R_MergeLeafSurfaces(void)
 		vboSurf->vbo = vbo;
 		vboSurf->ibo = ibo;
 
-		vboSurf->numIndexes = numTriangles * 3;
+		vboSurf->numTriangles = numTriangles;
 		vboSurf->numVerts = numVerts;
 		vboSurf->firstIndex = firstIndex;
 
@@ -3385,12 +3217,8 @@ void R_MergeLeafSurfaces(void)
 			vboSurf->maxIndex = MAX(vboSurf->maxIndex, *(iboIndexes + firstIndex + j));
 		}
 
-		vboSurf->shader = surf1->shader;
-		vboSurf->fogIndex = surf1->fogIndex;
-		vboSurf->cubemapIndex = surf1->cubemapIndex;
-
-		VectorCopy(bounds[0], vboSurf->bounds[0]);
-		VectorCopy(bounds[1], vboSurf->bounds[1]);
+		VectorCopy(bounds[0], vboSurf->cullBounds[0]);
+		VectorCopy(bounds[1], vboSurf->cullBounds[1]);
 
 		VectorCopy(bounds[0], mergedSurf->cullinfo.bounds[0]);
 		VectorCopy(bounds[1], mergedSurf->cullinfo.bounds[1]);
@@ -3452,41 +3280,20 @@ void R_CalcVertexLightDirs( void )
 
 	for(k = 0, surface = &s_worldData.surfaces[0]; k < s_worldData.numsurfaces /* s_worldData.numWorldSurfaces */; k++, surface++)
 	{
-		if(*surface->data == SF_FACE)
-		{
-			srfSurfaceFace_t *srf = (srfSurfaceFace_t *) surface->data;
+		srfBspSurface_t *bspSurf = (srfBspSurface_t *) surface->data;
 
-			if(srf->numVerts)
-			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					R_LightDirForPoint( srf->verts[i].xyz, srf->verts[i].lightdir, srf->verts[i].normal, &s_worldData );
-				}
-			}
-		}
-		else if(*surface->data == SF_GRID)
+		switch(bspSurf->surfaceType)
 		{
-			srfGridMesh_t  *srf = (srfGridMesh_t *) surface->data;
+			case SF_FACE:
+			case SF_GRID:
+			case SF_TRIANGLES:
+				for(i = 0; i < bspSurf->numVerts; i++)
+					R_LightDirForPoint( bspSurf->verts[i].xyz, bspSurf->verts[i].lightdir, bspSurf->verts[i].normal, &s_worldData );
 
-			if(srf->numVerts)
-			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					R_LightDirForPoint( srf->verts[i].xyz, srf->verts[i].lightdir, srf->verts[i].normal, &s_worldData );
-				}
-			}
-		}
-		else if(*surface->data == SF_TRIANGLES)
-		{
-			srfTriangles_t *srf = (srfTriangles_t *) surface->data;
+				break;
 
-			if(srf->numVerts)
-			{
-				for(i = 0; i < srf->numVerts; i++)
-				{
-					R_LightDirForPoint( srf->verts[i].xyz, srf->verts[i].lightdir, srf->verts[i].normal, &s_worldData );
-				}
-			}
+			default:
+				break;
 		}
 	}
 }

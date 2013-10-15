@@ -208,16 +208,18 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 		}
 	}
 
-	if ( *surf->data == SF_FACE ) {
-		((srfSurfaceFace_t *)surf->data)->dlightBits = dlightBits;
-	} else if ( *surf->data == SF_GRID ) {
-		((srfGridMesh_t *)surf->data)->dlightBits    = dlightBits;
-	} else if ( *surf->data == SF_TRIANGLES ) {
-		((srfTriangles_t *)surf->data)->dlightBits   = dlightBits;
-	} else if ( *surf->data == SF_VBO_MESH ) {
-		((srfVBOMesh_t *)surf->data)->dlightBits     = dlightBits;
-	} else {
-		dlightBits = 0;
+	switch(*surf->data)
+	{
+		case SF_FACE:
+		case SF_GRID:
+		case SF_TRIANGLES:
+		case SF_VBO_MESH:
+			((srfBspSurface_t *)surf->data)->dlightBits = dlightBits;
+			break;
+
+		default:
+			dlightBits = 0;
+			break;
 	}
 
 	if ( dlightBits ) {
@@ -292,16 +294,18 @@ static int R_PshadowSurface( msurface_t *surf, int pshadowBits ) {
 		}
 	}
 
-	if ( *surf->data == SF_FACE ) {
-		((srfSurfaceFace_t *)surf->data)->pshadowBits = pshadowBits;
-	} else if ( *surf->data == SF_GRID ) {
-		((srfGridMesh_t *)surf->data)->pshadowBits    = pshadowBits;
-	} else if ( *surf->data == SF_TRIANGLES ) {
-		((srfTriangles_t *)surf->data)->pshadowBits   = pshadowBits;
-	} else if ( *surf->data == SF_VBO_MESH ) {
-		((srfVBOMesh_t *)surf->data)->pshadowBits     = pshadowBits;
-	} else {
-		pshadowBits = 0;
+	switch(*surf->data)
+	{
+		case SF_FACE:
+		case SF_GRID:
+		case SF_TRIANGLES:
+		case SF_VBO_MESH:
+			((srfBspSurface_t *)surf->data)->pshadowBits = pshadowBits;
+			break;
+
+		default:
+			pshadowBits = 0;
+			break;
 	}
 
 	if ( pshadowBits ) {

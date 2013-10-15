@@ -94,12 +94,17 @@ void R_DlightBmodel( bmodel_t *bmodel ) {
 	for ( i = 0 ; i < bmodel->numSurfaces ; i++ ) {
 		surf = tr.world->surfaces + bmodel->firstSurface + i;
 
-		if ( *surf->data == SF_FACE ) {
-			((srfSurfaceFace_t *)surf->data)->dlightBits = mask;
-		} else if ( *surf->data == SF_GRID ) {
-			((srfGridMesh_t *)surf->data)->dlightBits = mask;
-		} else if ( *surf->data == SF_TRIANGLES ) {
-			((srfTriangles_t *)surf->data)->dlightBits = mask;
+		switch(*surf->data)
+		{
+			case SF_FACE:
+			case SF_GRID:
+			case SF_TRIANGLES:
+			case SF_VBO_MESH:
+				((srfBspSurface_t *)surf->data)->dlightBits = mask;
+				break;
+
+			default:
+				break;
 		}
 	}
 }
