@@ -297,11 +297,15 @@ IN_GobbleMotionEvents
 static void IN_GobbleMotionEvents( void )
 {
 	SDL_Event dummy[ 1 ];
+	int val = 0;
 
 	// Gobble any mouse motion events
 	SDL_PumpEvents( );
-	while( SDL_PeepEvents( dummy, 1, SDL_GETEVENT,
-		SDL_MOUSEMOTION, SDL_MOUSEMOTION ) ) { }
+	while( ( val = SDL_PeepEvents( dummy, 1, SDL_GETEVENT,
+		SDL_MOUSEMOTION, SDL_MOUSEMOTION ) ) > 0 ) { }
+
+	if ( val < 0 )
+		Com_Printf( "IN_GobbleMotionEvents failed: %s\n", SDL_GetError( ) );
 }
 
 /*
@@ -484,6 +488,9 @@ IN_ShutdownJoystick
 */
 static void IN_ShutdownJoystick( void )
 {
+	if ( !SDL_WasInit( SDL_INIT_JOYSTICK ) )
+		return;
+
 	if (stick)
 	{
 		SDL_JoystickClose(stick);
