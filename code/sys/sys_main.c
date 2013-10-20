@@ -613,7 +613,7 @@ int main( int argc, char **argv )
 	// Set the initial time base
 	Sys_Milliseconds( );
 
-#if MACOS_X
+#ifdef MACOS_X
 	// This is passed if we are launched by double-clicking
 	if ( argc >= 2 && Q_strncmp ( argv[1], "-psn", 4 ) == 0 )
 		argc = 1;
