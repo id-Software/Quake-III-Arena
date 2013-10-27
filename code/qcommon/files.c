@@ -1628,9 +1628,11 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 	}
 
 	if (fsh[f].streamed) {
+		int r;
 		fsh[f].streamed = qfalse;
-		FS_Seek( f, offset, origin );
+		r = FS_Seek( f, offset, origin );
 		fsh[f].streamed = qtrue;
+		return r;
 	}
 
 	if (fsh[f].zipFile == qtrue) {
