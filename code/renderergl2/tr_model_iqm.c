@@ -206,6 +206,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		return qfalse;
 	}
 
+	blendIndexesType = blendWeightsType = IQM_UBYTE;
+
 	// check and swap vertex arrays
 	if( IQM_CheckRange( header, header->ofs_vertexarrays,
 			    header->num_vertexarrays,
@@ -1059,7 +1061,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 		for ( numWeights = 0; numWeights < 4; numWeights++ ) {
 			if ( data->blendWeightsType == IQM_FLOAT )
 				blendWeights[numWeights] = data->blendWeights.f[4*vtx + numWeights];
-			else // IQM_BYTE
+			else
 				blendWeights[numWeights] = (float)data->blendWeights.b[4*vtx + numWeights] / 255.0f;
 
 			if ( blendWeights[numWeights] <= 0 )
