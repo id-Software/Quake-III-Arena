@@ -25,6 +25,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	LL(x) x=LittleLong(x)
 
+// 3x4 identity matrix
+static float identityMatrix[12] = {
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0
+};
+
 static qboolean IQM_CheckRange( iqmHeader_t *header, int offset,
 				int count,int size ) {
 	// return true if the range specified by offset, count and size
@@ -343,7 +350,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 		}
 	}
 
-	if( header->num_poses != header->num_joints ) {
+	if( header->num_poses != header->num_joints && header->num_poses != 0 ) {
+		ri.Printf(PRINT_WARNING, "R_LoadIQM: %s has %d poses and %d joints, must have the same number or 0 poses\n",
+			  mod_name, header->num_poses, header->num_joints );
 		return qfalse;
 	}
 
@@ -379,7 +388,10 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			joint_names += strlen( (char *)header + header->ofs_text +
 						   joint->name ) + 1;
 		}
+	}
 
+	if ( header->num_poses )
+	{
 		// check and swap poses
 		if( IQM_CheckRange( header, header->ofs_poses,
 					header->num_poses, sizeof(iqmPose_t) ) ) {
@@ -438,7 +450,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	size = sizeof(iqmData_t);
 	size += header->num_meshes * sizeof( srfIQModel_t );
 	size += header->num_joints * 12 * sizeof( float ); // joint mats
-	size += header->num_joints * header->num_frames * 12 * sizeof( float ); // pose mats
+	size += header->num_poses * header->num_frames * 12 * sizeof( float ); // pose mats
 	if(header->ofs_bounds)
 		size += header->num_frames * 6 * sizeof(float);	// model bounds
 	size += header->num_vertexes * 3 * sizeof(float);	// positions
@@ -462,16 +474,17 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->num_frames   = header->num_frames;
 	iqmData->num_surfaces = header->num_meshes;
 	iqmData->num_joints   = header->num_joints;
+	iqmData->num_poses   = header->num_poses;
 	iqmData->surfaces     = (srfIQModel_t *)(iqmData + 1);
 	iqmData->jointMats    = (float *) (iqmData->surfaces + iqmData->num_surfaces);
 	iqmData->poseMats     = iqmData->jointMats + 12 * header->num_joints;
 	if(header->ofs_bounds)
 	{
-		iqmData->bounds       = iqmData->poseMats + 12 * header->num_joints * header->num_frames;
+		iqmData->bounds       = iqmData->poseMats + 12 * header->num_poses * header->num_frames;
 		iqmData->positions    = iqmData->bounds + 6 * header->num_frames;
 	}
 	else
-		iqmData->positions    = iqmData->poseMats + 12 * header->num_joints * header->num_frames;
+		iqmData->positions    = iqmData->poseMats + 12 * header->num_poses * header->num_frames;
 	iqmData->texcoords    = iqmData->positions + 3 * header->num_vertexes;
 	iqmData->normals      = iqmData->texcoords + 2 * header->num_vertexes;
 	iqmData->tangents     = iqmData->normals + 3 * header->num_vertexes;
@@ -483,7 +496,10 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->names        = (char *)(iqmData->triangles + 3 * header->num_triangles);
 
 	if ( header->num_joints == 0 )
-		iqmData->jointMats = iqmData->poseMats = NULL;
+		iqmData->jointMats = NULL;
+
+	if ( header->num_poses == 0 )
+		iqmData->poseMats = NULL;
 
 	// calculate joint matrices and their inverses
 	// joint inverses are needed only until the pose matrices are calculated
@@ -892,9 +908,21 @@ static void ComputePoseMats( iqmData_t *data, int frame, int oldframe,
 	int	*joint = data->jointParents;
 	int	i;
 
-	if ( oldframe == frame ) {
-		mat1 = data->poseMats + 12 * data->num_joints * frame;
+	if ( data->num_poses == 0 ) {
 		for( i = 0; i < data->num_joints; i++, joint++ ) {
+			if( *joint >= 0 ) {
+				Matrix34Multiply( mat + 12 * *joint,
+						  identityMatrix, mat + 12*i );
+			} else {
+				Com_Memcpy( mat + 12*i, identityMatrix, 12 * sizeof(float) );
+			}
+		}
+		return;
+	}
+
+	if ( oldframe == frame ) {
+		mat1 = data->poseMats + 12 * data->num_poses * frame;
+		for( i = 0; i < data->num_poses; i++, joint++ ) {
 			if( *joint >= 0 ) {
 				Matrix34Multiply( mat + 12 * *joint,
 						  mat1 + 12*i, mat + 12*i );
@@ -903,10 +931,10 @@ static void ComputePoseMats( iqmData_t *data, int frame, int oldframe,
 			}
 		}
 	} else  {
-		mat1 = data->poseMats + 12 * data->num_joints * frame;
-		mat2 = data->poseMats + 12 * data->num_joints * oldframe;
+		mat1 = data->poseMats + 12 * data->num_poses * frame;
+		mat2 = data->poseMats + 12 * data->num_poses * oldframe;
 		
-		for( i = 0; i < data->num_joints; i++, joint++ ) {
+		for( i = 0; i < data->num_poses; i++, joint++ ) {
 			if( *joint >= 0 ) {
 				float tmpMat[12];
 				InterpolateMatrix( mat1 + 12*i, mat2 + 12*i,
@@ -974,7 +1002,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	outColor = &tess.vertexColors[tess.numVertexes];
 
 	// compute interpolated joint matrices
-	if ( data->num_joints > 0 ) {
+	if ( data->num_poses > 0 ) {
 		ComputePoseMats( data, frame, oldframe, backlerp, jointMats );
 	}
 
@@ -986,12 +1014,9 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 		float	nrmMat[9];
 		int	vtx = i + surf->first_vertex;
 
-		if ( data->num_joints == 0 || data->blendWeights[4*vtx] <= 0 ) {
+		if ( data->num_poses == 0 || data->blendWeights[4*vtx] <= 0 ) {
 			// no blend joint, use identity matrix.
-			for( j = 0; j < 3; j++ ) {
-				for( k = 0; k < 4; k++ )
-					vtxMat[4*j+k] = ( k == j ) ? 1 : 0;
-			}
+			Com_Memcpy( vtxMat, identityMatrix, 12 * sizeof (float) );
 		} else {
 			// compute the vertex matrix by blending the up to
 			// four blend weights
