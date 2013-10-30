@@ -150,6 +150,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData_t		*iqmData;
 	srfIQModel_t		*surface;
 	char			meshName[MAX_QPATH];
+	byte			blendIndexesType, blendWeightsType;
 
 	if( filesize < sizeof(iqmHeader_t) ) {
 		return qfalse;
@@ -271,11 +272,20 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			}
 			break;
 		case IQM_BLENDINDEXES:
+			if( (vertexarray->format != IQM_INT &&
+				 vertexarray->format != IQM_UBYTE) ||
+				vertexarray->size != 4 ) {
+				return qfalse;
+			}
+			blendIndexesType = vertexarray->format;
+			break;
 		case IQM_BLENDWEIGHTS:
-			if( vertexarray->format != IQM_UBYTE ||
+			if( (vertexarray->format != IQM_FLOAT &&
+				 vertexarray->format != IQM_UBYTE) ||
 			    vertexarray->size != 4 ) {
 				return qfalse;
 			}
+			blendWeightsType = vertexarray->format;
 			break;
 		case IQM_COLOR:
 			if( vertexarray->format != IQM_UBYTE ||
@@ -458,11 +468,17 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	size += header->num_vertexes * 3 * sizeof(float);	// normals
 	size += header->num_vertexes * 4 * sizeof(float);	// tangents
 	size += header->num_vertexes * 4 * sizeof(byte);	// blendIndexes
-	size += header->num_vertexes * 4 * sizeof(byte);	// blendWeights
 	size += header->num_vertexes * 4 * sizeof(byte);	// colors
 	size += header->num_joints * sizeof(int);		// parents
 	size += header->num_triangles * 3 * sizeof(int);	// triangles
 	size += joint_names;					// joint names
+
+	// blendWeights
+	if (blendWeightsType == IQM_FLOAT) {
+		size += header->num_vertexes * 4 * sizeof(float);
+	} else {
+		size += header->num_vertexes * 4 * sizeof(byte);
+	}
 
 	mod->type = MOD_IQM;
 	iqmData = (iqmData_t *)ri.Hunk_Alloc( size, h_low );
@@ -475,6 +491,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->num_surfaces = header->num_meshes;
 	iqmData->num_joints   = header->num_joints;
 	iqmData->num_poses   = header->num_poses;
+	iqmData->blendWeightsType = blendWeightsType;
 	iqmData->surfaces     = (srfIQModel_t *)(iqmData + 1);
 	iqmData->jointMats    = (float *) (iqmData->surfaces + iqmData->num_surfaces);
 	iqmData->poseMats     = iqmData->jointMats + 12 * header->num_joints;
@@ -489,8 +506,15 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmData->normals      = iqmData->texcoords + 2 * header->num_vertexes;
 	iqmData->tangents     = iqmData->normals + 3 * header->num_vertexes;
 	iqmData->blendIndexes = (byte *)(iqmData->tangents + 4 * header->num_vertexes);
-	iqmData->blendWeights = iqmData->blendIndexes + 4 * header->num_vertexes;
-	iqmData->colors       = iqmData->blendWeights + 4 * header->num_vertexes;
+
+	if(blendWeightsType == IQM_FLOAT) {
+		iqmData->blendWeights.f = (float *)(iqmData->blendIndexes + 4 * header->num_vertexes);
+		iqmData->colors		= (byte *)(iqmData->blendWeights.f + 4 * header->num_vertexes);
+	} else {
+		iqmData->blendWeights.b = iqmData->blendIndexes + 4 * header->num_vertexes;
+		iqmData->colors		= iqmData->blendWeights.b + 4 * header->num_vertexes;
+	}
+
 	iqmData->jointParents = (int *)(iqmData->colors + 4 * header->num_vertexes);
 	iqmData->triangles    = iqmData->jointParents + header->num_joints;
 	iqmData->names        = (char *)(iqmData->triangles + 3 * header->num_triangles);
@@ -636,14 +660,28 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 				    n * sizeof(float) );
 			break;
 		case IQM_BLENDINDEXES:
-			Com_Memcpy( iqmData->blendIndexes,
-				    (byte *)header + vertexarray->offset,
-				    n * sizeof(byte) );
+			if( blendIndexesType == IQM_INT ) {
+				int *data = (int*)((byte*)header + vertexarray->offset);
+				for ( j = 0; j < n; j++ ) {
+					iqmData->blendIndexes[j] = (byte)LittleLong( data[j] );
+				}
+			} else {
+				Com_Memcpy( iqmData->blendIndexes,
+						(byte *)header + vertexarray->offset,
+						n * sizeof(byte) );
+			}
 			break;
 		case IQM_BLENDWEIGHTS:
-			Com_Memcpy( iqmData->blendWeights,
-				    (byte *)header + vertexarray->offset,
-				    n * sizeof(byte) );
+			if( blendWeightsType == IQM_FLOAT ) {
+				float *data = (float*)((byte*)header + vertexarray->offset);
+				for ( j = 0; j < n; j++ ) {
+					iqmData->blendWeights.f[j] = LittleFloat( data[j] );
+				}
+			} else {
+				Com_Memcpy( iqmData->blendWeights.b,
+						(byte *)header + vertexarray->offset,
+						n * sizeof(byte) );
+			}
 			break;
 		case IQM_COLOR:
 			Com_Memcpy( iqmData->colors,
@@ -1013,25 +1051,31 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 		float	vtxMat[12];
 		float	nrmMat[9];
 		int	vtx = i + surf->first_vertex;
+		float	blendWeights[4];
+		int		numWeights;
 
-		if ( data->num_poses == 0 || data->blendWeights[4*vtx] <= 0 ) {
+		for ( numWeights = 0; numWeights < 4; numWeights++ ) {
+			if ( data->blendWeightsType == IQM_FLOAT )
+				blendWeights[numWeights] = data->blendWeights.f[4*vtx + numWeights];
+			else // IQM_BYTE
+				blendWeights[numWeights] = (float)data->blendWeights.b[4*vtx + numWeights] / 255.0f;
+
+			if ( blendWeights[numWeights] <= 0 )
+				break;
+		}
+
+		if ( data->num_poses == 0 || numWeights == 0 ) {
 			// no blend joint, use identity matrix.
 			Com_Memcpy( vtxMat, identityMatrix, 12 * sizeof (float) );
 		} else {
 			// compute the vertex matrix by blending the up to
 			// four blend weights
-			for( k = 0; k < 12; k++ )
-				vtxMat[k] = data->blendWeights[4*vtx]
-					* jointMats[12*data->blendIndexes[4*vtx] + k];
-			for( j = 1; j < 4; j++ ) {
-				if( data->blendWeights[4*vtx + j] <= 0 )
-					break;
-				for( k = 0; k < 12; k++ )
-					vtxMat[k] += data->blendWeights[4*vtx + j]
-						* jointMats[12*data->blendIndexes[4*vtx + j] + k];
+			Com_Memset( vtxMat, 0, 12 * sizeof (float) );
+			for( j = 0; j < numWeights; j++ ) {
+				for( k = 0; k < 12; k++ ) {
+					vtxMat[k] += blendWeights[j] * jointMats[12*data->blendIndexes[4*vtx + j] + k];
+				}
 			}
-			for( k = 0; k < 12; k++ )
-				vtxMat[k] *= 1.0f / 255.0f;
 		}
 
 		// compute the normal matrix as transpose of the adjoint
