@@ -663,7 +663,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			if( blendIndexesType == IQM_INT ) {
 				int *data = (int*)((byte*)header + vertexarray->offset);
 				for ( j = 0; j < n; j++ ) {
-					iqmData->blendIndexes[j] = (byte)LittleLong( data[j] );
+					iqmData->blendIndexes[j] = (byte)data[j];
 				}
 			} else {
 				Com_Memcpy( iqmData->blendIndexes,
@@ -673,10 +673,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			break;
 		case IQM_BLENDWEIGHTS:
 			if( blendWeightsType == IQM_FLOAT ) {
-				float *data = (float*)((byte*)header + vertexarray->offset);
-				for ( j = 0; j < n; j++ ) {
-					iqmData->blendWeights.f[j] = LittleFloat( data[j] );
-				}
+				Com_Memcpy( iqmData->blendWeights.f,
+						(byte *)header + vertexarray->offset,
+						n * sizeof(float) );
 			} else {
 				Com_Memcpy( iqmData->blendWeights.b,
 						(byte *)header + vertexarray->offset,
