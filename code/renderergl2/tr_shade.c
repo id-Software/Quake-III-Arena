@@ -1325,12 +1325,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			//
 			// set state
 			//
-			if ( pStage->bundle[0].vertexLightmap && ( (r_vertexLight->integer && !r_uiFullScreen->integer) || glConfig.hardwareType == GLHW_PERMEDIA2 ) && r_lightmap->integer )
-			{
-				GL_BindToTMU( tr.whiteImage, 0 );
-			}
-			else 
-				R_BindAnimatedImageToTMU( &pStage->bundle[0], 0 );
+			R_BindAnimatedImageToTMU( &pStage->bundle[0], 0 );
 
 			GLSL_SetUniformInt(sp, UNIFORM_TEXTURE1ENV, 0);
 		}
@@ -1354,7 +1349,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		}
 
 		// allow skipping out to show just lightmaps during development
-		if ( r_lightmap->integer && ( pStage->bundle[0].isLightmap || pStage->bundle[1].isLightmap || pStage->bundle[0].vertexLightmap ) )
+		if ( r_lightmap->integer && ( pStage->bundle[0].isLightmap || pStage->bundle[1].isLightmap ) )
 		{
 			break;
 		}
