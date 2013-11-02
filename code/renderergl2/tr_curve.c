@@ -25,14 +25,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /*
 
 This file does all of the processing necessary to turn a raw grid of points
-read from the map file into a srfGridMesh_t ready for rendering.
+read from the map file into a srfBspSurface_t ready for rendering.
 
 The level of detail solution is direction independent, based only on subdivided
 distance from the true curve.
 
 Only a single entry point:
 
-srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
+srfBspSurface_t *R_SubdividePatchToGrid( int width, int height,
 								srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] ) {
 
 */
@@ -329,8 +329,6 @@ static int MakeMeshTriangles(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE
 		}
 	}
 
-	R_CalcSurfaceTriangleNeighbors(numTriangles, triangles);
-
 	// FIXME: use more elegant way
 	for(i = 0; i < width; i++)
 	{
@@ -340,8 +338,6 @@ static int MakeMeshTriangles(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE
 			*dv = ctrl[j][i];
 		}
 	}
-
-	R_CalcSurfaceTrianglePlanes(numTriangles, triangles, ctrl2);
 
 	return numTriangles;
 }
@@ -420,13 +416,13 @@ static void PutPointsOnCurve( srfVert_t	ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE],
 R_CreateSurfaceGridMesh
 =================
 */
-srfGridMesh_t *R_CreateSurfaceGridMesh(int width, int height,
+srfBspSurface_t *R_CreateSurfaceGridMesh(int width, int height,
 								srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], float errorTable[2][MAX_GRID_SIZE],
 								int numTriangles, srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2]) {
 	int i, j, size;
 	srfVert_t	*vert;
 	vec3_t		tmpVec;
-	srfGridMesh_t *grid;
+	srfBspSurface_t *grid;
 
 	// copy the results out to a grid
 	size = (width * height - 1) * sizeof( srfVert_t ) + sizeof( *grid );
@@ -468,23 +464,23 @@ srfGridMesh_t *R_CreateSurfaceGridMesh(int width, int height,
 	grid->width = width;
 	grid->height = height;
 	grid->surfaceType = SF_GRID;
-	ClearBounds( grid->meshBounds[0], grid->meshBounds[1] );
+	ClearBounds( grid->cullBounds[0], grid->cullBounds[1] );
 	for ( i = 0 ; i < width ; i++ ) {
 		for ( j = 0 ; j < height ; j++ ) {
 			vert = &grid->verts[j*width+i];
 			*vert = ctrl[j][i];
-			AddPointToBounds( vert->xyz, grid->meshBounds[0], grid->meshBounds[1] );
+			AddPointToBounds( vert->xyz, grid->cullBounds[0], grid->cullBounds[1] );
 		}
 	}
 
 	// compute local origin and bounds
-	VectorAdd( grid->meshBounds[0], grid->meshBounds[1], grid->localOrigin );
-	VectorScale( grid->localOrigin, 0.5f, grid->localOrigin );
-	VectorSubtract( grid->meshBounds[0], grid->localOrigin, tmpVec );
-	grid->meshRadius = VectorLength( tmpVec );
+	VectorAdd( grid->cullBounds[0], grid->cullBounds[1], grid->cullOrigin );
+	VectorScale( grid->cullOrigin, 0.5f, grid->cullOrigin );
+	VectorSubtract( grid->cullBounds[0], grid->cullOrigin, tmpVec );
+	grid->cullRadius = VectorLength( tmpVec );
 
-	VectorCopy( grid->localOrigin, grid->lodOrigin );
-	grid->lodRadius = grid->meshRadius;
+	VectorCopy( grid->cullOrigin, grid->lodOrigin );
+	grid->lodRadius = grid->cullRadius;
 	//
 	return grid;
 }
@@ -494,7 +490,7 @@ srfGridMesh_t *R_CreateSurfaceGridMesh(int width, int height,
 R_FreeSurfaceGridMesh
 =================
 */
-void R_FreeSurfaceGridMesh( srfGridMesh_t *grid ) {
+void R_FreeSurfaceGridMesh( srfBspSurface_t *grid ) {
 	ri.Free(grid->widthLodError);
 	ri.Free(grid->heightLodError);
 	ri.Free(grid->triangles);
@@ -507,7 +503,7 @@ void R_FreeSurfaceGridMesh( srfGridMesh_t *grid ) {
 R_SubdividePatchToGrid
 =================
 */
-srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
+srfBspSurface_t *R_SubdividePatchToGrid( int width, int height,
 								srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] ) {
 	int			i, j, k, l;
 	srfVert_t_cleared( prev );
@@ -690,7 +686,7 @@ srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
 R_GridInsertColumn
 ===============
 */
-srfGridMesh_t *R_GridInsertColumn( srfGridMesh_t *grid, int column, int row, vec3_t point, float loderror ) {
+srfBspSurface_t *R_GridInsertColumn( srfBspSurface_t *grid, int column, int row, vec3_t point, float loderror ) {
 	int i, j;
 	int width, height, oldwidth;
 	srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE];
@@ -750,7 +746,7 @@ srfGridMesh_t *R_GridInsertColumn( srfGridMesh_t *grid, int column, int row, vec
 R_GridInsertRow
 ===============
 */
-srfGridMesh_t *R_GridInsertRow( srfGridMesh_t *grid, int row, int column, vec3_t point, float loderror ) {
+srfBspSurface_t *R_GridInsertRow( srfBspSurface_t *grid, int row, int column, vec3_t point, float loderror ) {
 	int i, j;
 	int width, height, oldheight;
 	srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE];

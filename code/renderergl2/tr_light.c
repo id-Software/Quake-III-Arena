@@ -94,12 +94,17 @@ void R_DlightBmodel( bmodel_t *bmodel ) {
 	for ( i = 0 ; i < bmodel->numSurfaces ; i++ ) {
 		surf = tr.world->surfaces + bmodel->firstSurface + i;
 
-		if ( *surf->data == SF_FACE ) {
-			((srfSurfaceFace_t *)surf->data)->dlightBits = mask;
-		} else if ( *surf->data == SF_GRID ) {
-			((srfGridMesh_t *)surf->data)->dlightBits = mask;
-		} else if ( *surf->data == SF_TRIANGLES ) {
-			((srfTriangles_t *)surf->data)->dlightBits = mask;
+		switch(*surf->data)
+		{
+			case SF_FACE:
+			case SF_GRID:
+			case SF_TRIANGLES:
+			case SF_VBO_MESH:
+				((srfBspSurface_t *)surf->data)->dlightBits = mask;
+				break;
+
+			default:
+				break;
 		}
 	}
 }
@@ -403,8 +408,11 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	((byte *)&ent->ambientLightInt)[3] = 0xff;
 	
 	// transform the direction to local space
-	// no need to do this if using lightentity glsl shader
 	VectorNormalize( lightDir );
+	ent->modelLightDir[0] = DotProduct( lightDir, ent->e.axis[0] );
+	ent->modelLightDir[1] = DotProduct( lightDir, ent->e.axis[1] );
+	ent->modelLightDir[2] = DotProduct( lightDir, ent->e.axis[2] );
+
 	VectorCopy(lightDir, ent->lightDir);
 }
 

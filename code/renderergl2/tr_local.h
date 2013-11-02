@@ -47,10 +47,6 @@ typedef unsigned int glIndex_t;
 #define SHADERNUM_BITS	14
 #define MAX_SHADERS		(1<<SHADERNUM_BITS)
 
-//#define MAX_SHADER_STATES 2048
-#define MAX_STATES_PER_SHADER 32
-#define MAX_STATE_NAME 32
-
 #define	MAX_FBOS      64
 #define MAX_VISCOUNTS 5
 #define MAX_VBOS      4096
@@ -84,7 +80,8 @@ typedef struct {
 	qboolean	needDlights;	// true for bmodels that touch a dlight
 	qboolean	lightingCalculated;
 	qboolean	mirrored;		// mirrored matrix, needs reversed culling
-	vec3_t		lightDir;		// normalized direction towards light
+	vec3_t		lightDir;		// normalized direction towards light, in world space
+	vec3_t      modelLightDir;  // normalized direction towards light, in model space
 	vec3_t		ambientLight;	// color normalized to 0-255
 	int			ambientLightInt;	// 32 bit rgba packed
 	vec3_t		directedLight;
@@ -241,7 +238,6 @@ typedef enum {
 	AGEN_WAVEFORM,
 	AGEN_PORTAL,
 	AGEN_CONST,
-	AGEN_FRESNEL
 } alphaGen_t;
 
 typedef enum {
@@ -354,7 +350,6 @@ typedef struct {
 
 	int				videoMapHandle;
 	qboolean		isLightmap;
-	qboolean		vertexLightmap;
 	qboolean		isVideoMap;
 } textureBundle_t;
 
@@ -486,15 +481,7 @@ typedef struct shader_s {
   float clampTime;                                  // time this shader is clamped to
   float timeOffset;                                 // current time offset for this shader
 
-  int numStates;                                    // if non-zero this is a state shader
-  struct shader_s *currentShader;                   // current state if this is a state shader
-  struct shader_s *parentShader;                    // current state if this is a state shader
-  int currentState;                                 // current state index for cycle purposes
-  long expireTime;                                  // time in milliseconds this expires
-
   struct shader_s *remappedShader;                  // current shader this one is remapped too
-
-  int shaderStates[MAX_STATES_PER_SHADER];          // index to valid shader states
 
 	struct	shader_s	*next;
 } shader_t;
@@ -521,14 +508,6 @@ static ID_INLINE qboolean ShaderRequiresCPUDeforms(const shader_t * shader)
 
 	return qfalse;
 }
-
-typedef struct shaderState_s {
-  char shaderName[MAX_QPATH];     // name of shader this state belongs to
-  char name[MAX_STATE_NAME];      // name of this state
-  char stateShader[MAX_QPATH];    // shader this name invokes
-  int cycleTime;                  // time this cycle lasts, <= 0 is forever
-  shader_t *shader;
-} shaderState_t;
 
 enum
 {
@@ -765,6 +744,7 @@ typedef enum
 	UNIFORM_LIGHTUP,
 	UNIFORM_LIGHTRIGHT,
 	UNIFORM_LIGHTORIGIN,
+	UNIFORM_MODELLIGHTDIR,
 	UNIFORM_LIGHTRADIUS,
 	UNIFORM_AMBIENTLIGHT,
 	UNIFORM_DIRECTEDLIGHT,
@@ -785,6 +765,7 @@ typedef enum
 
 	UNIFORM_VIEWINFO, // znear, zfar, width/2, height/2
 	UNIFORM_VIEWORIGIN,
+	UNIFORM_LOCALVIEWORIGIN,
 	UNIFORM_VIEWFORWARD,
 	UNIFORM_VIEWLEFT,
 	UNIFORM_VIEWUP,
@@ -1026,13 +1007,10 @@ typedef struct
 {
 	int             indexes[3];
 	int             neighbors[3];
-	vec4_t          plane;
-	qboolean        facingLight;
-	qboolean        degenerated;
 } srfTriangle_t;
 
-
-typedef struct srfGridMesh_s
+// srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VBO_MESH
+typedef struct srfBspSurface_s
 {
 	surfaceType_t   surfaceType;
 
@@ -1041,9 +1019,30 @@ typedef struct srfGridMesh_s
 	int             pshadowBits;
 
 	// culling information
-	vec3_t			meshBounds[2];
-	vec3_t			localOrigin;
-	float			meshRadius;
+	vec3_t			cullBounds[2];
+	vec3_t			cullOrigin;
+	float			cullRadius;
+	cplane_t        cullPlane;
+
+	// triangle definitions
+	int             numTriangles;
+	srfTriangle_t  *triangles;
+
+	// vertexes
+	int             numVerts;
+	srfVert_t      *verts;
+
+	// BSP VBO offsets
+	int             firstVert;
+	int             firstIndex;
+	glIndex_t       minIndex;
+	glIndex_t       maxIndex;
+
+	// static render data
+	VBO_t          *vbo;
+	IBO_t          *ibo;
+	
+	// SF_GRID specific variables after here
 
 	// lod information, which may be different
 	// than the culling information to allow for
@@ -1057,85 +1056,7 @@ typedef struct srfGridMesh_s
 	int				width, height;
 	float			*widthLodError;
 	float			*heightLodError;
-
-	int             numTriangles;
-	srfTriangle_t  *triangles;
-
-	int             numVerts;
-	srfVert_t      *verts;
-
-	// BSP VBO offsets
-	int             firstVert;
-	int             firstIndex;
-	glIndex_t       minIndex;
-	glIndex_t       maxIndex;
-
-	// static render data
-	VBO_t          *vbo;		// points to bsp model VBO
-	IBO_t          *ibo;
-} srfGridMesh_t;
-
-
-typedef struct
-{
-	surfaceType_t   surfaceType;
-
-	// dynamic lighting information
-	int			dlightBits;
-	int         pshadowBits;
-
-	// culling information
-	cplane_t        plane;
-//	vec3_t          bounds[2];
-
-	// triangle definitions
-	int             numTriangles;
-	srfTriangle_t  *triangles;
-
-	int             numVerts;
-	srfVert_t      *verts;
-
-	// BSP VBO offsets
-	int             firstVert;
-	int             firstIndex;
-	glIndex_t       minIndex;
-	glIndex_t       maxIndex;
-
-	// static render data
-	VBO_t          *vbo;		// points to bsp model VBO
-	IBO_t          *ibo;
-} srfSurfaceFace_t;
-
-
-// misc_models in maps are turned into direct geometry by xmap
-typedef struct
-{
-	surfaceType_t   surfaceType;
-
-	// dynamic lighting information
-	int			dlightBits;
-	int         pshadowBits;
-
-	// culling information
-//	vec3_t          bounds[2];
-
-	// triangle definitions
-	int             numTriangles;
-	srfTriangle_t  *triangles;
-
-	int             numVerts;
-	srfVert_t      *verts;
-
-	// BSP VBO offsets
-	int             firstVert;
-	int             firstIndex;
-	glIndex_t       minIndex;
-	glIndex_t       maxIndex;
-
-	// static render data
-	VBO_t          *vbo;		// points to bsp model VBO
-	IBO_t          *ibo;
-} srfTriangles_t;
+} srfBspSurface_t;
 
 // inter-quake-model
 typedef struct {
@@ -1144,6 +1065,7 @@ typedef struct {
 	int		num_frames;
 	int		num_surfaces;
 	int		num_joints;
+	int		num_poses;
 	struct srfIQModel_s	*surfaces;
 
 	float		*positions;
@@ -1151,9 +1073,17 @@ typedef struct {
 	float		*normals;
 	float		*tangents;
 	byte		*blendIndexes;
-	byte		*blendWeights;
+	union {
+		float	*f;
+		byte	*b;
+	} blendWeights;
 	byte		*colors;
 	int		*triangles;
+
+	// depending upon the exporter, blend indices and weights might be int/float
+	// as opposed to the recommended byte/byte, for example Noesis exports
+	// int/float whereas the official IQM tool exports byte/byte
+	byte blendWeightsType; // IQM_UBYTE or IQM_FLOAT
 
 	int		*jointParents;
 	float		*jointMats;
@@ -1171,33 +1101,6 @@ typedef struct srfIQModel_s {
 	int		first_vertex, num_vertexes;
 	int		first_triangle, num_triangles;
 } srfIQModel_t;
-
-typedef struct srfVBOMesh_s
-{
-	surfaceType_t   surfaceType;
-
-	struct shader_s *shader;	// FIXME move this to somewhere else
-	int				fogIndex;
-	int             cubemapIndex;
-
-	// dynamic lighting information
-	int			dlightBits;
-	int         pshadowBits;
-
-	// culling information
-	vec3_t          bounds[2];
-
-	// backEnd stats
-	int             numIndexes;
-	int             numVerts;
-	int				firstIndex;
-	glIndex_t       minIndex;
-	glIndex_t       maxIndex;
-
-	// static render data
-	VBO_t          *vbo;
-	IBO_t          *ibo;
-} srfVBOMesh_t;
 
 typedef struct srfVBOMDVMesh_s
 {
@@ -1331,9 +1234,6 @@ typedef struct {
 	int			numnodes;		// includes leafs
 	int			numDecisionNodes;
 	mnode_t		*nodes;
-
-	VBO_t          *vbo;
-	IBO_t          *ibo;
 
 	int         numWorldSurfaces;
 
@@ -1564,6 +1464,7 @@ typedef struct {
 	uint32_t        vertexAttribsNewFrame;
 	uint32_t        vertexAttribsOldFrame;
 	float           vertexAttribsInterpolation;
+	qboolean        vertexAnimation;
 	shaderProgram_t *currentProgram;
 	FBO_t          *currentFBO;
 	VBO_t          *currentVBO;
@@ -1916,6 +1817,7 @@ extern  cvar_t  *r_ext_framebuffer_object;
 extern  cvar_t  *r_ext_texture_float;
 extern  cvar_t  *r_arb_half_float_pixel;
 extern  cvar_t  *r_ext_framebuffer_multisample;
+extern  cvar_t  *r_arb_seamless_cube_map;
 
 extern	cvar_t	*r_nobind;						// turns off binding to appropriate textures
 extern	cvar_t	*r_singleShader;				// make most world faces use default shader
@@ -1959,6 +1861,7 @@ extern  cvar_t  *r_mergeLeafSurfaces;
 extern  cvar_t  *r_softOverbright;
 
 extern  cvar_t  *r_hdr;
+extern  cvar_t  *r_floatLightmap;
 extern  cvar_t  *r_postProcess;
 
 extern  cvar_t  *r_toneMap;
@@ -2053,8 +1956,6 @@ void R_AddDrawSurf( surfaceType_t *surface, shader_t *shader,
 void R_CalcTangentSpace(vec3_t tangent, vec3_t bitangent, vec3_t normal,
                         const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec2_t t0, const vec2_t t1, const vec2_t t2);
 qboolean R_CalcTangentVectors(srfVert_t * dv[3]);
-void R_CalcSurfaceTriangleNeighbors(int numTriangles, srfTriangle_t * triangles);
-void R_CalcSurfaceTrianglePlanes(int numTriangles, srfTriangle_t * triangles, srfVert_t * verts);
 
 #define	CULL_IN		0		// completely unclipped
 #define	CULL_CLIP	1		// clipped by one or more planes
@@ -2349,11 +2250,11 @@ CURVE TESSELATION
 
 #define PATCH_STITCHING
 
-srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
+srfBspSurface_t *R_SubdividePatchToGrid( int width, int height,
 								srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] );
-srfGridMesh_t *R_GridInsertColumn( srfGridMesh_t *grid, int column, int row, vec3_t point, float loderror );
-srfGridMesh_t *R_GridInsertRow( srfGridMesh_t *grid, int row, int column, vec3_t point, float loderror );
-void R_FreeSurfaceGridMesh( srfGridMesh_t *grid );
+srfBspSurface_t *R_GridInsertColumn( srfBspSurface_t *grid, int column, int row, vec3_t point, float loderror );
+srfBspSurface_t *R_GridInsertRow( srfBspSurface_t *grid, int row, int column, vec3_t point, float loderror );
+void R_FreeSurfaceGridMesh( srfBspSurface_t *grid );
 
 /*
 ============================================================
@@ -2500,35 +2401,18 @@ void	R_TransformClipToWindow( const vec4_t clip, const viewParms_t *view, vec4_t
 
 void	RB_DeformTessGeometry( void );
 
-void	RB_CalcEnvironmentTexCoords( float *dstTexCoords );
 void	RB_CalcFogTexCoords( float *dstTexCoords );
-void	RB_CalcScrollTexCoords( const float scroll[2], float *dstTexCoords );
-void	RB_CalcRotateTexCoords( float rotSpeed, float *dstTexCoords );
-void	RB_CalcScaleTexCoords( const float scale[2], float *dstTexCoords );
-void	RB_CalcTurbulentTexCoords( const waveForm_t *wf, float *dstTexCoords );
-void	RB_CalcTransformTexCoords( const texModInfo_t *tmi, float *dstTexCoords );
 
 void	RB_CalcScaleTexMatrix( const float scale[2], float *matrix );
 void	RB_CalcScrollTexMatrix( const float scrollSpeed[2], float *matrix );
 void	RB_CalcRotateTexMatrix( float degsPerSecond, float *matrix );
-void RB_CalcTurbulentTexMatrix( const waveForm_t *wf, matrix_t matrix );
+void RB_CalcTurbulentFactors( const waveForm_t *wf, float *amplitude, float *now );
 void	RB_CalcTransformTexMatrix( const texModInfo_t *tmi, float *matrix  );
 void	RB_CalcStretchTexMatrix( const waveForm_t *wf, float *matrix );
 
 void	RB_CalcModulateColorsByFog( unsigned char *dstColors );
-void	RB_CalcModulateAlphasByFog( unsigned char *dstColors );
-void	RB_CalcModulateRGBAsByFog( unsigned char *dstColors );
-void	RB_CalcWaveAlpha( const waveForm_t *wf, unsigned char *dstColors );
 float	RB_CalcWaveAlphaSingle( const waveForm_t *wf );
-void	RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors );
 float	RB_CalcWaveColorSingle( const waveForm_t *wf );
-void	RB_CalcAlphaFromEntity( unsigned char *dstColors );
-void	RB_CalcAlphaFromOneMinusEntity( unsigned char *dstColors );
-void	RB_CalcStretchTexCoords( const waveForm_t *wf, float *texCoords );
-void	RB_CalcColorFromEntity( unsigned char *dstColors );
-void	RB_CalcColorFromOneMinusEntity( unsigned char *dstColors );
-void	RB_CalcSpecularAlpha( unsigned char *alphas );
-void	RB_CalcDiffuseColor( unsigned char *colors );
 
 /*
 =============================================================

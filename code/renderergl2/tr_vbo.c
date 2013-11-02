@@ -608,6 +608,7 @@ void R_BindVBO(VBO_t * vbo)
 		glState.vertexAttribsInterpolation = 0;
 		glState.vertexAttribsOldFrame = 0;
 		glState.vertexAttribsNewFrame = 0;
+		glState.vertexAnimation = qfalse;
 
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo->vertexesVBO);
 
@@ -856,6 +857,9 @@ void RB_UpdateVBOs(unsigned int attribBits)
 	{
 		R_BindVBO(tess.vbo);
 
+		// orphan old buffer so we don't stall on it
+		qglBufferDataARB(GL_ARRAY_BUFFER_ARB, tess.vbo->vertexesSize, NULL, GL_DYNAMIC_DRAW_ARB);
+
 		if(attribBits & ATTR_BITS)
 		{
 			if(attribBits & ATTR_POSITION)
@@ -922,6 +926,9 @@ void RB_UpdateVBOs(unsigned int attribBits)
 	if(tess.numIndexes > 0 && tess.numIndexes <= SHADER_MAX_INDEXES)
 	{
 		R_BindIBO(tess.ibo);
+
+		// orphan old buffer so we don't stall on it
+		qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, tess.ibo->indexesSize, NULL, GL_DYNAMIC_DRAW_ARB);
 
 		qglBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0, tess.numIndexes * sizeof(tess.indexes[0]), tess.indexes);
 	}

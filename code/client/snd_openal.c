@@ -208,6 +208,11 @@ static sfxHandle_t S_AL_BufferFind(const char *filename)
 		return 0;
 	}
 
+	if ( filename[0] == '*' ) {
+		Com_Printf( S_COLOR_YELLOW "WARNING: Tried to load player sound directly: %s\n", filename );
+		return 0;
+	}
+
 	for(i = 0; i < numSfx; i++)
 	{
 		if(!Q_stricmp(knownSfx[i].filename, filename))
@@ -323,10 +328,6 @@ static void S_AL_BufferLoad(sfxHandle_t sfx, qboolean cache)
 
 	// Nothing?
 	if(curSfx->filename[0] == '\0')
-		return;
-
-	// Player SFX
-	if(curSfx->filename[0] == '*')
 		return;
 
 	// Already done?

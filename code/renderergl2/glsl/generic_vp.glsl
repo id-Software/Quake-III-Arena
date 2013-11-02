@@ -17,7 +17,7 @@ uniform vec4   u_DiffuseTexMatrix;
 uniform vec4   u_DiffuseTexOffTurb;
 
 #if defined(USE_TCGEN) || defined(USE_RGBAGEN)
-uniform vec3   u_ViewOrigin;
+uniform vec3   u_LocalViewOrigin;
 #endif
 
 #if defined(USE_TCGEN)
@@ -48,7 +48,7 @@ uniform int    u_ColorGen;
 uniform int    u_AlphaGen;
 uniform vec3   u_AmbientLight;
 uniform vec3   u_DirectedLight;
-uniform vec4   u_LightOrigin;
+uniform vec3   u_ModelLightDir;
 uniform float  u_PortalRange;
 #endif
 
@@ -93,7 +93,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 	}
 	else if (u_DeformGen == DGEN_WAVE_TRIANGLE)
 	{
-		func = abs(fract(value + 0.75) - 0.5) * 4.0 - 1.0;
+		func = 1.0 - abs(4.0 * fract(value + 0.25) - 2.0);
 	}
 	else if (u_DeformGen == DGEN_WAVE_SAWTOOTH)
 	{
@@ -123,7 +123,7 @@ vec2 GenTexCoords(int TCGen, vec3 position, vec3 normal, vec3 TCGenVector0, vec3
 	}
 	else if (TCGen == TCGEN_ENVIRONMENT_MAPPED)
 	{
-		vec3 viewer = normalize(u_ViewOrigin - position);
+		vec3 viewer = normalize(u_LocalViewOrigin - position);
 		tex = -reflect(viewer, normal).yz * vec2(0.5, -0.5) + 0.5;
 	}
 	else if (TCGen == TCGEN_VECTOR)
@@ -158,30 +158,25 @@ vec4 CalcColor(vec3 position, vec3 normal)
 	
 	if (u_ColorGen == CGEN_LIGHTING_DIFFUSE)
 	{
-		float incoming = clamp(dot(normal, u_LightOrigin.xyz), 0.0, 1.0);
+		float incoming = clamp(dot(normal, u_ModelLightDir), 0.0, 1.0);
 
 		color.rgb = clamp(u_DirectedLight * incoming + u_AmbientLight, 0.0, 1.0);
 	}
 	
-	vec3 toView = u_ViewOrigin - position;
-	vec3 viewer = normalize(u_ViewOrigin - position);
+	vec3 viewer = u_LocalViewOrigin - position;
 
 	if (u_AlphaGen == AGEN_LIGHTING_SPECULAR)
 	{
-		vec3 lightDir = normalize(vec3(-960.0, -1980.0, 96.0) - position.xyz);
-		vec3 halfangle = normalize(lightDir + viewer);
+		vec3 lightDir = normalize(vec3(-960.0, 1980.0, 96.0) - position.xyz);
+		vec3 reflected = -reflect(lightDir, normal);
 		
-		color.a = pow(max(dot(normal, halfangle), 0.0), 8.0);
+		color.a = clamp(dot(reflected, normalize(viewer)), 0.0, 1.0);
+		color.a *= color.a;
+		color.a *= color.a;
 	}
 	else if (u_AlphaGen == AGEN_PORTAL)
 	{
-		float alpha = length(toView) / u_PortalRange;
-
-		color.a = clamp(alpha, 0.0, 1.0);
-	}
-	else if (u_AlphaGen == AGEN_FRESNEL)
-	{
-		color.a = 0.10 + 0.90 * pow(1.0 - dot(normal, viewer), 5);
+		color.a = clamp(length(viewer) / u_PortalRange, 0.0, 1.0);
 	}
 	
 	return color;
@@ -194,14 +189,11 @@ float CalcFog(vec4 position)
 	float s = dot(position, u_FogDistance) * 8.0;
 	float t = dot(position, u_FogDepth);
 
-	if (t < 1.0)
-	{
-		t = step(step(0.0, -u_FogEyeT), t);
-	}
-	else
-	{
-		t /= t - min(u_FogEyeT, 0.0);
-	}
+	float eyeOutside = step(0.0, -u_FogEyeT);
+	float fogged = step(eyeOutside, t);
+		
+	t = max(t, 1e-6);
+	t *= fogged / (t - u_FogEyeT * eyeOutside);
 
 	return s * t;
 }

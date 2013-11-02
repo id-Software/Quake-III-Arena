@@ -2303,6 +2303,9 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 		qglTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pic);
 		qglTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pic);
 
+		if (image->flags & IMGFLAG_MIPMAP)
+			qglGenerateMipmapEXT(GL_TEXTURE_CUBE_MAP);
+
 		image->uploadWidth = width;
 		image->uploadHeight = height;
 	}
