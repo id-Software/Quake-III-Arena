@@ -680,12 +680,10 @@ enum
 	LIGHTDEF_LIGHTTYPE_MASK      = 0x0003,
 	LIGHTDEF_ENTITY              = 0x0004,
 	LIGHTDEF_USE_TCGEN_AND_TCMOD = 0x0008,
-	LIGHTDEF_USE_DELUXEMAP       = 0x0010,
-	LIGHTDEF_USE_PARALLAXMAP     = 0x0020,
-	LIGHTDEF_USE_SHADOWMAP       = 0x0040,
-	LIGHTDEF_USE_CUBEMAP         = 0x0080,
-	LIGHTDEF_ALL                 = 0x00FF,
-	LIGHTDEF_COUNT               = 0x0100
+	LIGHTDEF_USE_PARALLAXMAP     = 0x0010,
+	LIGHTDEF_USE_SHADOWMAP       = 0x0020,
+	LIGHTDEF_ALL                 = 0x003F,
+	LIGHTDEF_COUNT               = 0x0040
 };
 
 enum
@@ -721,6 +719,8 @@ typedef enum
 	UNIFORM_SHADOWMVP,
 	UNIFORM_SHADOWMVP2,
 	UNIFORM_SHADOWMVP3,
+
+	UNIFORM_ENABLETEXTURES,
 
 	UNIFORM_DIFFUSETEXMATRIX,
 	UNIFORM_DIFFUSETEXOFFTURB,
@@ -1609,7 +1609,6 @@ typedef struct {
 	image_t					*fogImage;
 	image_t					*dlightImage;	// inverse-quare highlight for projective adding
 	image_t					*flareImage;
-	image_t					*greyImage;			    // full of 0x80
 	image_t					*whiteImage;			// full of 0xff
 	image_t					*identityLightImage;	// full of tr.identityLightByte
 

@@ -2875,9 +2875,6 @@ void R_CreateBuiltinImages( void ) {
 	Com_Memset( data, 255, sizeof( data ) );
 	tr.whiteImage = R_CreateImage("*white", (byte *)data, 8, 8, IMGTYPE_COLORALPHA, IMGFLAG_NONE, 0);
 
-	Com_Memset( data, 128, sizeof( data ) );
-	tr.greyImage = R_CreateImage("*grey", (byte *)data, 8, 8, IMGTYPE_COLORALPHA, IMGFLAG_NONE, GL_RGBA8);
-
 	if (r_dlightMode->integer >= 2)
 	{
 		for( x = 0; x < MAX_DLIGHTS; x++)

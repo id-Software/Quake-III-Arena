@@ -20,15 +20,19 @@ attribute vec3 attr_Bitangent2;
 attribute vec3 attr_LightDirection;
 #endif
 
-#if defined(USE_TCGEN) || defined(USE_NORMALMAP) || defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+#if defined(USE_DELUXEMAP)
+uniform vec4   u_EnableTextures; // x = normal, y = deluxe, z = specular, w = cube
+#endif
+
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 uniform vec3   u_ViewOrigin;
-uniform vec3   u_LocalViewOrigin;
 #endif
 
 #if defined(USE_TCGEN)
 uniform int    u_TCGen0;
 uniform vec3   u_TCGen0Vector0;
 uniform vec3   u_TCGen0Vector1;
+uniform vec3   u_LocalViewOrigin;
 #endif
 
 #if defined(USE_TCMOD)
@@ -51,8 +55,8 @@ uniform float  u_VertexLerp;
 #if defined(USE_LIGHT_VECTOR)
 uniform vec4   u_LightOrigin;
 uniform float  u_LightRadius;
-uniform vec3   u_DirectedLight;
   #if defined(USE_FAST_LIGHT)
+uniform vec3   u_DirectedLight;
 uniform vec3   u_AmbientLight;
   #endif
 #endif
@@ -66,7 +70,7 @@ varying vec4   var_TexCoords;
 
 varying vec4   var_Color;
 
-#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 varying vec4   var_Normal;
 varying vec4   var_Tangent;
 varying vec4   var_Bitangent;
@@ -76,7 +80,7 @@ varying vec4   var_Bitangent;
 varying vec3   var_LightColor;
 #endif
 
-#if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 varying vec4   var_LightDir;
 #endif
 
@@ -150,7 +154,7 @@ float CalcLightAttenuation(vec3 dir, float sqrRadius)
 void main()
 {
 #if defined(USE_VERTEX_ANIMATION)
-	vec3 position  = mix(attr_Position, attr_Position2, u_VertexLerp);
+	vec3 position  =           mix(attr_Position,  attr_Position2,  u_VertexLerp);
 	vec3 normal    = normalize(mix(attr_Normal,    attr_Normal2,    u_VertexLerp));
 	vec3 tangent   = normalize(mix(attr_Tangent,   attr_Tangent2,   u_VertexLerp));
 	vec3 bitangent = normalize(mix(attr_Bitangent, attr_Bitangent2, u_VertexLerp));
@@ -184,7 +188,7 @@ void main()
 
 #if defined(USE_LIGHT_VECTOR)
 	vec3 L = u_LightOrigin.xyz - (position * u_LightOrigin.w);
-#elif defined(USE_LIGHT) && !defined(USE_DELUXEMAP)
+#elif defined(USE_LIGHT) 
 	vec3 L = attr_LightDirection;
   #if defined(USE_MODELMATRIX)
 	L = (u_ModelMatrix * vec4(L, 0.0)).xyz;
@@ -213,15 +217,18 @@ void main()
 	var_PrimaryLightDir.w = u_PrimaryLightRadius * u_PrimaryLightRadius;
 #endif
 
-#if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
   #if defined(USE_LIGHT_VECTOR)
 	var_LightDir = vec4(L, u_LightRadius * u_LightRadius);
   #else
 	var_LightDir = vec4(L, 0.0);
   #endif
+  #if defined(USE_DELUXEMAP)
+    var_LightDir *= 1.0 - u_EnableTextures.y;
+  #endif
 #endif
 
-#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 viewDir = u_ViewOrigin - position;
 #endif
 
@@ -232,16 +239,16 @@ void main()
 	var_PrimaryLightDir.xyz = var_PrimaryLightDir.xyz * tangentToWorld;
   #endif
   
-  #if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
+  #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	var_LightDir.xyz = var_LightDir.xyz * tangentToWorld;
   #endif
 
-  #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+  #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	viewDir = viewDir * tangentToWorld;
   #endif
 #endif
 
-#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	// store view direction in tangent space to save on varyings
 	var_Normal    = vec4(normal,    viewDir.x);
 	var_Tangent   = vec4(tangent,   viewDir.y);

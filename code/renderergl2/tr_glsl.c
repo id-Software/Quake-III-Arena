@@ -84,6 +84,8 @@ static uniformInfo_t uniformsInfo[] =
 	{ "u_ShadowMvp2", GLSL_MAT16 },
 	{ "u_ShadowMvp3", GLSL_MAT16 },
 
+	{ "u_EnableTextures", GLSL_VEC4 },
+
 	{ "u_DiffuseTexMatrix",  GLSL_VEC4 },
 	{ "u_DiffuseTexOffTurb", GLSL_VEC4 },
 	{ "u_Texture1Env",       GLSL_INT },
@@ -997,26 +999,18 @@ void GLSL_InitGPUShaders(void)
 
 	for (i = 0; i < LIGHTDEF_COUNT; i++)
 	{
+		int lightType = i & LIGHTDEF_LIGHTTYPE_MASK;
+		qboolean fastLight = !(r_normalMapping->integer || r_specularMapping->integer);
+
 		// skip impossible combos
 		if ((i & LIGHTDEF_USE_PARALLAXMAP) && !r_parallaxMapping->integer)
 			continue;
 
-		if ((i & LIGHTDEF_USE_DELUXEMAP) && !r_deluxeMapping->integer)
+		if (!lightType && (i & LIGHTDEF_USE_PARALLAXMAP))
 			continue;
 
-		if ((i & LIGHTDEF_USE_CUBEMAP) && !r_cubeMapping->integer)
+		if (!lightType && (i & LIGHTDEF_USE_SHADOWMAP))
 			continue;
-
-		if (!((i & LIGHTDEF_LIGHTTYPE_MASK) == LIGHTDEF_USE_LIGHTMAP) && (i & LIGHTDEF_USE_DELUXEMAP))
-			continue;
-
-		if (!(i & LIGHTDEF_LIGHTTYPE_MASK))
-		{
-			if (i & LIGHTDEF_USE_SHADOWMAP)
-				continue;
-			if (i & LIGHTDEF_USE_CUBEMAP)
-				continue;
-		}
 
 		attribs = ATTR_POSITION | ATTR_TEXCOORD | ATTR_COLOR | ATTR_NORMAL;
 
@@ -1026,30 +1020,30 @@ void GLSL_InitGPUShaders(void)
 			Q_strcat(extradefines, 1024, va("#define r_deluxeSpecular %f\n", r_deluxeSpecular->value));
 
 		if (r_specularIsMetallic->value)
-			Q_strcat(extradefines, 1024, va("#define SPECULAR_IS_METALLIC\n"));
+			Q_strcat(extradefines, 1024, "#define SPECULAR_IS_METALLIC\n");
 
 		if (r_dlightMode->integer >= 2)
 			Q_strcat(extradefines, 1024, "#define USE_SHADOWMAP\n");
 
 		if (1)
-		{
 			Q_strcat(extradefines, 1024, "#define SWIZZLE_NORMALMAP\n");
-		}
 
 		if (r_hdr->integer && !(glRefConfig.textureFloat && glRefConfig.halfFloatPixel && r_floatLightmap->integer))
 			Q_strcat(extradefines, 1024, "#define RGBM_LIGHTMAP\n");
 
-		if (i & LIGHTDEF_LIGHTTYPE_MASK)
+		if (lightType)
 		{
 			Q_strcat(extradefines, 1024, "#define USE_LIGHT\n");
 
-			if (r_normalMapping->integer == 0 && r_specularMapping->integer == 0)
+			if (fastLight)
 				Q_strcat(extradefines, 1024, "#define USE_FAST_LIGHT\n");
 
-			switch (i & LIGHTDEF_LIGHTTYPE_MASK)
+			switch (lightType)
 			{
 				case LIGHTDEF_USE_LIGHTMAP:
 					Q_strcat(extradefines, 1024, "#define USE_LIGHTMAP\n");
+					if (r_deluxeMapping->integer && !fastLight)
+						Q_strcat(extradefines, 1024, "#define USE_DELUXEMAP\n");
 					attribs |= ATTR_LIGHTCOORD | ATTR_LIGHTDIRECTION;
 					break;
 				case LIGHTDEF_USE_LIGHT_VECTOR:
@@ -1062,61 +1056,58 @@ void GLSL_InitGPUShaders(void)
 				default:
 					break;
 			}
-		}
 
-		if (r_normalMapping->integer)
-		{
-			Q_strcat(extradefines, 1024, "#define USE_NORMALMAP\n");
+			if (r_normalMapping->integer)
+			{
+				Q_strcat(extradefines, 1024, "#define USE_NORMALMAP\n");
 
-			if (r_normalMapping->integer == 2)
-				Q_strcat(extradefines, 1024, "#define USE_OREN_NAYAR\n");
+				if (r_normalMapping->integer == 2)
+					Q_strcat(extradefines, 1024, "#define USE_OREN_NAYAR\n");
 
-			if (r_normalMapping->integer == 3)
-				Q_strcat(extradefines, 1024, "#define USE_TRIACE_OREN_NAYAR\n");
+				if (r_normalMapping->integer == 3)
+					Q_strcat(extradefines, 1024, "#define USE_TRIACE_OREN_NAYAR\n");
 
 #ifdef USE_VERT_TANGENT_SPACE
-			Q_strcat(extradefines, 1024, "#define USE_VERT_TANGENT_SPACE\n");
-			attribs |= ATTR_TANGENT | ATTR_BITANGENT;
+				Q_strcat(extradefines, 1024, "#define USE_VERT_TANGENT_SPACE\n");
+				attribs |= ATTR_TANGENT | ATTR_BITANGENT;
 #endif
-		}
 
-		if (r_specularMapping->integer)
-		{
-			Q_strcat(extradefines, 1024, "#define USE_SPECULARMAP\n");
-
-			switch (r_specularMapping->integer)
-			{
-				case 1:
-				default:
-					Q_strcat(extradefines, 1024, "#define USE_BLINN\n");
-					break;
-
-				case 2:
-					Q_strcat(extradefines, 1024, "#define USE_BLINN_FRESNEL\n");
-					break;
-
-				case 3:
-					Q_strcat(extradefines, 1024, "#define USE_MCAULEY\n");
-					break;
-
-				case 4:
-					Q_strcat(extradefines, 1024, "#define USE_GOTANDA\n");
-					break;
-
-				case 5:
-					Q_strcat(extradefines, 1024, "#define USE_LAZAROV\n");
-					break;
+				if ((i & LIGHTDEF_USE_PARALLAXMAP) && !(i & LIGHTDEF_ENTITY) && r_parallaxMapping->integer)
+					Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP\n");
 			}
+
+			if (r_specularMapping->integer)
+			{
+				Q_strcat(extradefines, 1024, "#define USE_SPECULARMAP\n");
+
+				switch (r_specularMapping->integer)
+				{
+					case 1:
+					default:
+						Q_strcat(extradefines, 1024, "#define USE_BLINN\n");
+						break;
+
+					case 2:
+						Q_strcat(extradefines, 1024, "#define USE_BLINN_FRESNEL\n");
+						break;
+
+					case 3:
+						Q_strcat(extradefines, 1024, "#define USE_MCAULEY\n");
+						break;
+
+					case 4:
+						Q_strcat(extradefines, 1024, "#define USE_GOTANDA\n");
+						break;
+
+					case 5:
+						Q_strcat(extradefines, 1024, "#define USE_LAZAROV\n");
+						break;
+				}
+			}
+
+			if (r_cubeMapping->integer)
+				Q_strcat(extradefines, 1024, "#define USE_CUBEMAP\n");
 		}
-
-		if ((i & LIGHTDEF_USE_DELUXEMAP) && r_deluxeMapping->integer)
-			Q_strcat(extradefines, 1024, "#define USE_DELUXEMAP\n");
-
-		if ((i & LIGHTDEF_USE_PARALLAXMAP) && !(i & LIGHTDEF_ENTITY) && r_parallaxMapping->integer)
-			Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP\n");
-
-		if ((i & LIGHTDEF_USE_CUBEMAP))
-			Q_strcat(extradefines, 1024, "#define USE_CUBEMAP\n");
 
 		if (i & LIGHTDEF_USE_SHADOWMAP)
 		{

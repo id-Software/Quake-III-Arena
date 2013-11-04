@@ -24,6 +24,10 @@ uniform sampler2D u_ShadowMap;
 uniform samplerCube u_CubeMap;
 #endif
 
+#if defined(USE_NORMALMAP) || defined(USE_DELUXEMAP) || defined(USE_SPECULARMAP) || defined(USE_CUBEMAP)
+uniform vec4      u_EnableTextures; // x = normal, y = deluxe, z = specular, w = cube
+#endif
+
 #if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
 uniform vec3      u_DirectedLight;
 uniform vec3      u_AmbientLight;
@@ -52,7 +56,7 @@ varying vec4      var_Bitangent;
 varying vec3      var_LightColor;
 #endif
 
-#if defined(USE_LIGHT) && !defined(USE_DELUXEMAP) && !defined(USE_FAST_LIGHT)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 varying vec4      var_LightDir;
 #endif
 
@@ -304,6 +308,7 @@ void main()
   #if defined(USE_TANGENT_SPACE_LIGHT)
 	L = L * tangentToWorld;
   #endif
+    L = L * u_EnableTextures.y + var_LightDir.xyz;
 #elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	L = var_LightDir.xyz;
 #endif
@@ -352,6 +357,7 @@ void main()
     #else
 	N.xy = 2.0 * texture2D(u_NormalMap, texCoords).rg - vec2(1.0);
     #endif
+	N.xy *= u_EnableTextures.x;
 	N.z = sqrt(1.0 - clamp(dot(N.xy, N.xy), 0.0, 1.0));
     #if !defined(USE_TANGENT_SPACE_LIGHT)
     N = normalize(tangentToWorld * N);
@@ -412,6 +418,7 @@ void main()
 
   #if defined(USE_SPECULARMAP)
 	vec4 specular = texture2D(u_SpecularMap, texCoords);
+	specular = mix(vec4(1.0), specular, u_EnableTextures.z);
     #if defined(USE_GAMMA2_TEXTURES)
 	specular.rgb *= specular.rgb;
     #endif
@@ -470,7 +477,7 @@ void main()
 	R = tangentToWorld * R;
 	#endif
 
-    vec3 cubeLightColor = textureCubeLod(u_CubeMap, R, 7.0 - gloss * 7.0).rgb;
+    vec3 cubeLightColor = textureCubeLod(u_CubeMap, R, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
 
 	#if defined(USE_LIGHTMAP)
 	cubeLightColor *= lightSample.rgb;
@@ -480,7 +487,7 @@ void main()
 	cubeLightColor *= lightColor * NL + ambientColor;
 	#endif
 	
-	//gl_FragColor.rgb += diffuse.rgb * textureCubeLod(u_CubeMap, N, 7.0).rgb;
+	//gl_FragColor.rgb += diffuse.rgb * textureCubeLod(u_CubeMap, N, 7.0).rgb * u_EnableTextures.w;
 	gl_FragColor.rgb += cubeLightColor * reflectance;
   #endif
 
