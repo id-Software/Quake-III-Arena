@@ -443,7 +443,7 @@ static void ProjectDlightTexture( void ) {
 }
 
 
-static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t vertColor )
+static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t vertColor, int blend )
 {
 	baseColor[0] = 
 	baseColor[1] =
@@ -599,6 +599,23 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 			baseColor[3] = 1.0f;
 			vertColor[3] = 0.0f;
 			break;
+	}
+
+	// multiply color by overbrightbits if this isn't a blend
+	if (r_softOverbright->integer && tr.overbrightBits 
+	 && !((blend & GLS_SRCBLEND_BITS) == GLS_SRCBLEND_DST_COLOR)
+	 && !((blend & GLS_SRCBLEND_BITS) == GLS_SRCBLEND_ONE_MINUS_DST_COLOR)
+	 && !((blend & GLS_DSTBLEND_BITS) == GLS_DSTBLEND_SRC_COLOR)
+	 && !((blend & GLS_DSTBLEND_BITS) == GLS_DSTBLEND_ONE_MINUS_SRC_COLOR))
+	{
+		float scale = 1 << tr.overbrightBits;
+
+		baseColor[0] *= scale;
+		baseColor[1] *= scale;
+		baseColor[2] *= scale;
+		vertColor[0] *= scale;
+		vertColor[1] *= scale;
+		vertColor[2] *= scale;
 	}
 
 	// FIXME: find some way to implement this.
@@ -769,7 +786,7 @@ static void ForwardDlight( void ) {
 			vec4_t baseColor;
 			vec4_t vertColor;
 
-			ComputeShaderColors(pStage, baseColor, vertColor);
+			ComputeShaderColors(pStage, baseColor, vertColor, GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE);
 
 			GLSL_SetUniformVec4(sp, UNIFORM_BASECOLOR, baseColor);
 			GLSL_SetUniformVec4(sp, UNIFORM_VERTCOLOR, vertColor);
@@ -1141,7 +1158,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			vec4_t baseColor;
 			vec4_t vertColor;
 
-			ComputeShaderColors(pStage, baseColor, vertColor);
+			ComputeShaderColors(pStage, baseColor, vertColor, pStage->stateBits);
 
 			if ((backEnd.refdef.colorScale != 1.0f) && !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL))
 			{
