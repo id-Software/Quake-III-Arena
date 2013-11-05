@@ -332,8 +332,8 @@ void main()
 #endif
 
 #if defined(USE_DELUXEMAP)
-	L = (2.0 * texture2D(u_DeluxeMap, var_TexCoords.zw).xyz - vec3(1.0));
-    L = L * u_EnableTextures.y + var_LightDir.xyz;
+	L = texture2D(u_DeluxeMap, var_TexCoords.zw).xyz - vec3(0.5);
+	L = L * u_EnableTextures.y + var_LightDir.xyz;
 #elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	L = var_LightDir.xyz;
 #endif
@@ -378,12 +378,12 @@ void main()
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
   #if defined(USE_NORMALMAP)
     #if defined(SWIZZLE_NORMALMAP)
-	N.xy = 2.0 * texture2D(u_NormalMap, texCoords).ag - vec2(1.0);
+	N.xy = texture2D(u_NormalMap, texCoords).ag - vec2(0.5);
     #else
-	N.xy = 2.0 * texture2D(u_NormalMap, texCoords).rg - vec2(1.0);
+	N.xy = texture2D(u_NormalMap, texCoords).rg - vec2(0.5);
     #endif
 	N.xy *= u_EnableTextures.x;
-	N.z = sqrt(1.0 - clamp(dot(N.xy, N.xy), 0.0, 1.0));
+	N.z = sqrt(0.25 - dot(N.xy, N.xy));
     N = normalize(tangentToWorld * N);
   #else
     N = normalize(var_Normal.xyz);
