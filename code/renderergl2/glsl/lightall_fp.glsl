@@ -46,10 +46,15 @@ varying vec4      var_TexCoords;
 
 varying vec4      var_Color;
 
-#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
-varying vec4      var_Normal;
-varying vec4      var_Tangent;
-varying vec4      var_Bitangent;
+#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
+  #if defined(USE_VERT_TANGENT_SPACE)
+varying vec4   var_Normal;
+varying vec4   var_Tangent;
+varying vec4   var_Bitangent;
+  #else
+varying vec3   var_Normal;
+varying vec3   var_ViewDir;
+  #endif
 #endif
 
 #if defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
@@ -293,6 +298,25 @@ float CalcLightAttenuation(vec3 dir, float sqrRadius)
 	return attenuation;
 }
 
+// from http://www.thetenthplanet.de/archives/1180
+mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
+{
+    // get edge vectors of the pixel triangle
+    vec3 dp1 = dFdx( p );
+    vec3 dp2 = dFdy( p );
+    vec2 duv1 = dFdx( uv );
+    vec2 duv2 = dFdy( uv );
+ 
+    // solve the linear system
+    vec3 dp2perp = cross( dp2, N );
+    vec3 dp1perp = cross( N, dp1 );
+    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+ 
+    // construct a scale-invariant frame 
+    float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
+    return mat3( T * invmax, B * invmax, N );
+}
 
 void main()
 {
@@ -300,21 +324,26 @@ void main()
 	float NL, NH, NE, EH;
 	
 #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+  #if defined(USE_VERT_TANGENT_SPACE)
 	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, var_Normal.xyz);
+  #else
+	mat3 tangentToWorld = cotangent_frame(var_Normal, -var_ViewDir, var_TexCoords.xy);
+  #endif
 #endif
 
 #if defined(USE_DELUXEMAP)
 	L = (2.0 * texture2D(u_DeluxeMap, var_TexCoords.zw).xyz - vec3(1.0));
-  #if defined(USE_TANGENT_SPACE_LIGHT)
-	L = L * tangentToWorld;
-  #endif
     L = L * u_EnableTextures.y + var_LightDir.xyz;
 #elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	L = var_LightDir.xyz;
 #endif
 
 #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)) || defined(USE_PARALLAXMAP)
+  #if defined(USE_VERT_TANGENT_SPACE)
 	E = normalize(vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w));
+  #else
+    E = normalize(var_ViewDir);
+  #endif
 #endif
 
 #if defined(USE_LIGHTMAP)
@@ -333,11 +362,7 @@ void main()
 	vec2 texCoords = var_TexCoords.xy;
 
 #if defined(USE_PARALLAXMAP)
-  #if defined(USE_TANGENT_SPACE_LIGHT)
-	vec3 offsetDir = E;
-  #else
-	vec3 offsetDir = E * tangentToWorld;
-  #endif
+	vec3 offsetDir = normalize(E * tangentToWorld);
 
 	offsetDir.xy *= -0.05 / offsetDir.z;
 
@@ -359,11 +384,7 @@ void main()
     #endif
 	N.xy *= u_EnableTextures.x;
 	N.z = sqrt(1.0 - clamp(dot(N.xy, N.xy), 0.0, 1.0));
-    #if !defined(USE_TANGENT_SPACE_LIGHT)
     N = normalize(tangentToWorld * N);
-    #endif
-  #elif defined(USE_TANGENT_SPACE_LIGHT)
-	N = vec3(0.0, 0.0, 1.0);
   #else
     N = normalize(var_Normal.xyz);
   #endif
@@ -375,11 +396,7 @@ void main()
 	float shadowValue = texture2D(u_ShadowMap, shadowTex).r;
 
 	// surfaces not facing the light are always shadowed
-	#if defined(USE_TANGENT_SPACE_LIGHT)
-	shadowValue *= step(0.0, var_PrimaryLightDir.z);
-	#else
 	shadowValue *= step(0.0, dot(var_Normal.xyz, var_PrimaryLightDir.xyz));
-	#endif
   
     #if defined(SHADOWMAP_MODULATE)
 	//vec3 shadowColor = min(u_PrimaryLightAmbient, lightColor);
@@ -395,12 +412,7 @@ void main()
 
   #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
 	vec3 ambientColor = lightColor;
-	
-	#if defined(USE_TANGENT_SPACE_LIGHT)
-	float surfNL = L.z;
-	#else
 	float surfNL = clamp(dot(var_Normal.xyz, L), 0.0, 1.0);
-	#endif
 
 	// Scale the incoming light to compensate for the baked-in light angle
 	// attenuation.
@@ -418,7 +430,7 @@ void main()
 
   #if defined(USE_SPECULARMAP)
 	vec4 specular = texture2D(u_SpecularMap, texCoords);
-	specular = mix(vec4(1.0), specular, u_EnableTextures.z);
+	specular = (specular - vec4(1.0)) * u_EnableTextures.z + vec4(1.0);
     #if defined(USE_GAMMA2_TEXTURES)
 	specular.rgb *= specular.rgb;
     #endif
@@ -473,9 +485,6 @@ void main()
 	reflectance = EnvironmentBRDF(gloss, NE, specular.rgb);
 
 	vec3 R = reflect(E, N);
-	#if defined(USE_TANGENT_SPACE_LIGHT)
-	R = tangentToWorld * R;
-	#endif
 
     vec3 cubeLightColor = textureCubeLod(u_CubeMap, R, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
 
