@@ -1851,6 +1851,9 @@ static void R_CreateWorldVBOs(void)
 	VBO_t *vbo;
 	IBO_t *ibo;
 
+	int maxVboSize = 4 * 1024 * 1024;
+	int maxIboSize = 4 * 1024 * 1024;
+
 	int             startTime, endTime;
 
 	startTime = ri.Milliseconds();
@@ -1859,10 +1862,21 @@ static void R_CreateWorldVBOs(void)
 	numSortedSurfaces = 0;
 	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
-		if(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES)
-		{
-			numSortedSurfaces++;
-		}
+		shader_t *shader = surface->shader;
+
+		if (shader->isPortal)
+			continue;
+
+		if (shader->isSky)
+			continue;
+
+		if (ShaderRequiresCPUDeforms(shader))
+			continue;
+
+		if (!(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES))
+			continue;
+
+		numSortedSurfaces++;
 	}
 
 	// presort surfaces
@@ -1871,19 +1885,66 @@ static void R_CreateWorldVBOs(void)
 	j = 0;
 	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
-		if(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES)
-		{
-			surfacesSorted[j++] = surface;
-		}
+		shader_t *shader = surface->shader;
+
+		if (shader->isPortal)
+			continue;
+
+		if (shader->isSky)
+			continue;
+
+		if (ShaderRequiresCPUDeforms(shader))
+			continue;
+
+		if (!(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES))
+			continue;
+
+		surfacesSorted[j++] = surface;
 	}
 
 	qsort(surfacesSorted, numSortedSurfaces, sizeof(*surfacesSorted), BSPSurfaceCompare);
 
 	k = 0;
-	for(firstSurf = lastSurf = surfacesSorted; firstSurf < &surfacesSorted[numSortedSurfaces]; firstSurf = lastSurf)
+	for(firstSurf = lastSurf = currSurf = surfacesSorted; firstSurf < &surfacesSorted[numSortedSurfaces]; firstSurf = currSurf = lastSurf)
 	{
-		while(lastSurf < &surfacesSorted[numSortedSurfaces] && (*lastSurf)->shader->sortedIndex == (*firstSurf)->shader->sortedIndex)
-			lastSurf++;
+		int currVboSize, currIboSize;
+
+		currVboSize = currIboSize = 0;
+		while (currVboSize < maxVboSize && currIboSize < maxIboSize && lastSurf < &surfacesSorted[numSortedSurfaces])
+		{
+			int addVboSize, addIboSize, currShaderIndex;
+
+			addVboSize = addIboSize = 0;
+			currShaderIndex = (*currSurf)->shader->sortedIndex;
+			while(currSurf < &surfacesSorted[numSortedSurfaces] && (*currSurf)->shader->sortedIndex == currShaderIndex)
+			{
+				srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+
+				switch (bspSurf->surfaceType)
+				{
+					case SF_FACE:
+					case SF_GRID:
+					case SF_TRIANGLES:
+						addVboSize += bspSurf->numVerts * sizeof(srfVert_t);
+						addIboSize += bspSurf->numTriangles * 3 *sizeof(glIndex_t);
+						break;
+
+					default:
+						break;
+				}
+
+				currSurf++;
+			}
+
+			if ((currVboSize != 0 && addVboSize + currVboSize > maxVboSize)
+			 || (currIboSize != 0 && addIboSize + currIboSize > maxIboSize))
+				break;
+
+			lastSurf = currSurf;
+
+			currVboSize += addVboSize;
+			currIboSize += addIboSize;
+		}
 
 		numVerts = 0;
 		numTriangles = 0;
@@ -1897,12 +1958,8 @@ static void R_CreateWorldVBOs(void)
 				case SF_FACE:
 				case SF_GRID:
 				case SF_TRIANGLES:
-					if(bspSurf->numVerts)
-						numVerts += bspSurf->numVerts;
-
-					if(bspSurf->numTriangles)
-						numTriangles += bspSurf->numTriangles;
-
+					numVerts += bspSurf->numVerts;
+					numTriangles += bspSurf->numTriangles;
 					numSurfaces++;
 					break;
 
