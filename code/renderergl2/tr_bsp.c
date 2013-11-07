@@ -1862,6 +1862,7 @@ static void R_CreateWorldVBOs(void)
 	numSortedSurfaces = 0;
 	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
+		srfBspSurface_t *bspSurf;
 		shader_t *shader = surface->shader;
 
 		if (shader->isPortal)
@@ -1873,7 +1874,13 @@ static void R_CreateWorldVBOs(void)
 		if (ShaderRequiresCPUDeforms(shader))
 			continue;
 
+		// check for this now so we can use srfBspSurface_t* universally in the rest of the function
 		if (!(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES))
+			continue;
+
+		bspSurf = (srfBspSurface_t *) surface->data;
+
+		if (!bspSurf->numTriangles || !bspSurf->numVerts)
 			continue;
 
 		numSortedSurfaces++;
@@ -1885,6 +1892,7 @@ static void R_CreateWorldVBOs(void)
 	j = 0;
 	for(surface = &s_worldData.surfaces[0]; surface < &s_worldData.surfaces[s_worldData.numsurfaces]; surface++)
 	{
+		srfBspSurface_t *bspSurf;
 		shader_t *shader = surface->shader;
 
 		if (shader->isPortal)
@@ -1896,7 +1904,13 @@ static void R_CreateWorldVBOs(void)
 		if (ShaderRequiresCPUDeforms(shader))
 			continue;
 
+		// check for this now so we can use srfBspSurface_t* universally in the rest of the function
 		if (!(*surface->data == SF_FACE || *surface->data == SF_GRID || *surface->data == SF_TRIANGLES))
+			continue;
+
+		bspSurf = (srfBspSurface_t *) surface->data;
+
+		if (!bspSurf->numTriangles || !bspSurf->numVerts)
 			continue;
 
 		surfacesSorted[j++] = surface;
@@ -1905,35 +1919,27 @@ static void R_CreateWorldVBOs(void)
 	qsort(surfacesSorted, numSortedSurfaces, sizeof(*surfacesSorted), BSPSurfaceCompare);
 
 	k = 0;
-	for(firstSurf = lastSurf = currSurf = surfacesSorted; firstSurf < &surfacesSorted[numSortedSurfaces]; firstSurf = currSurf = lastSurf)
+	for(firstSurf = lastSurf = surfacesSorted; firstSurf < &surfacesSorted[numSortedSurfaces]; firstSurf = lastSurf)
 	{
 		int currVboSize, currIboSize;
 
+		// Find range of surfaces to merge by:
+		// - Collecting a number of surfaces which fit under maxVboSize/maxIboSize, or
+		// - All the surfaces with a single shader which go over maxVboSize/maxIboSize
 		currVboSize = currIboSize = 0;
 		while (currVboSize < maxVboSize && currIboSize < maxIboSize && lastSurf < &surfacesSorted[numSortedSurfaces])
 		{
 			int addVboSize, addIboSize, currShaderIndex;
 
 			addVboSize = addIboSize = 0;
-			currShaderIndex = (*currSurf)->shader->sortedIndex;
-			while(currSurf < &surfacesSorted[numSortedSurfaces] && (*currSurf)->shader->sortedIndex == currShaderIndex)
+			currShaderIndex = (*lastSurf)->shader->sortedIndex;
+
+			for(currSurf = lastSurf; currSurf < &surfacesSorted[numSortedSurfaces] && (*currSurf)->shader->sortedIndex == currShaderIndex; currSurf++)
 			{
 				srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
-				switch (bspSurf->surfaceType)
-				{
-					case SF_FACE:
-					case SF_GRID:
-					case SF_TRIANGLES:
-						addVboSize += bspSurf->numVerts * sizeof(srfVert_t);
-						addIboSize += bspSurf->numTriangles * 3 *sizeof(glIndex_t);
-						break;
-
-					default:
-						break;
-				}
-
-				currSurf++;
+				addVboSize += bspSurf->numVerts * sizeof(srfVert_t);
+				addIboSize += bspSurf->numTriangles * 3 * sizeof(glIndex_t);
 			}
 
 			if ((currVboSize != 0 && addVboSize + currVboSize > maxVboSize)
@@ -1946,6 +1952,7 @@ static void R_CreateWorldVBOs(void)
 			currIboSize += addIboSize;
 		}
 
+		// count verts/triangles/surfaces
 		numVerts = 0;
 		numTriangles = 0;
 		numSurfaces = 0;
@@ -1953,23 +1960,10 @@ static void R_CreateWorldVBOs(void)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
-			switch (bspSurf->surfaceType)
-			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					numVerts += bspSurf->numVerts;
-					numTriangles += bspSurf->numTriangles;
-					numSurfaces++;
-					break;
-
-				default:
-					break;
-			}
+			numVerts += bspSurf->numVerts;
+			numTriangles += bspSurf->numTriangles;
+			numSurfaces++;
 		}
-
-		if(!numVerts || !numTriangles)
-			continue;
 
 		ri.Printf(PRINT_ALL, "...calculating world VBO %d ( %i verts %i tris )\n", k, numVerts, numTriangles);
 
@@ -1977,78 +1971,37 @@ static void R_CreateWorldVBOs(void)
 		verts = ri.Hunk_AllocateTempMemory(numVerts * sizeof(srfVert_t));
 		triangles = ri.Hunk_AllocateTempMemory(numTriangles * sizeof(srfTriangle_t));
 
-		// set up triangle indices
+		// set up triangle indices and copy vertices
 		numVerts = 0;
 		numTriangles = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+			srfTriangle_t  *tri;
 
-			switch (bspSurf->surfaceType)
+			bspSurf->firstIndex = numTriangles * 3;
+			bspSurf->minIndex = numVerts + bspSurf->triangles->indexes[0];
+			bspSurf->maxIndex = numVerts + bspSurf->triangles->indexes[0];
+
+			for(i = 0, tri = bspSurf->triangles; i < bspSurf->numTriangles; i++, tri++)
 			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					bspSurf->firstIndex = numTriangles * 3;
-
-					if(bspSurf->numTriangles)
-					{
-						srfTriangle_t  *tri;
-
-						bspSurf->minIndex = numVerts + bspSurf->triangles->indexes[0];
-						bspSurf->maxIndex = numVerts + bspSurf->triangles->indexes[0];
-
-						for(i = 0, tri = bspSurf->triangles; i < bspSurf->numTriangles; i++, tri++)
-						{
-							for(j = 0; j < 3; j++)
-							{
-								triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-								bspSurf->minIndex = MIN(bspSurf->minIndex, numVerts + tri->indexes[j]);
-								bspSurf->maxIndex = MAX(bspSurf->maxIndex, numVerts + tri->indexes[j]);
-							}
-						}
-
-						numTriangles += bspSurf->numTriangles;
-					}
-
-					if(bspSurf->numVerts)
-						numVerts += bspSurf->numVerts;
-
-					break;
-
-				default:
-					break;
+				for(j = 0; j < 3; j++)
+				{
+					triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
+					bspSurf->minIndex = MIN(bspSurf->minIndex, numVerts + tri->indexes[j]);
+					bspSurf->maxIndex = MAX(bspSurf->maxIndex, numVerts + tri->indexes[j]);
+				}
 			}
-		}
 
-		// build vertices
-		numVerts = 0;
-		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
-		{
-			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
+			bspSurf->firstVert = numVerts;
 
-			switch (bspSurf->surfaceType)
+			for(i = 0; i < bspSurf->numVerts; i++)
 			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					bspSurf->firstVert = numVerts;
-
-					if(bspSurf->numVerts)
-					{
-						for(i = 0; i < bspSurf->numVerts; i++)
-						{
-							CopyVert(&bspSurf->verts[i], &verts[numVerts + i]);
-						}
-
-						numVerts += bspSurf->numVerts;
-					}
-
-					break;
-
-				default:
-					break;
+				CopyVert(&bspSurf->verts[i], &verts[numVerts + i]);
 			}
+
+			numTriangles += bspSurf->numTriangles;
+			numVerts += bspSurf->numVerts;
 		}
 
 #ifdef USE_VERT_TANGENT_SPACE
@@ -2068,29 +2021,14 @@ static void R_CreateWorldVBOs(void)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
-			switch (bspSurf->surfaceType)
-			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					if( bspSurf->numVerts && bspSurf->numTriangles)
-					{
-						bspSurf->vbo = vbo;
-						bspSurf->ibo = ibo;
-					}
-
-					break;
-
-				default:
-					break;
-			}
+			bspSurf->vbo = vbo;
+			bspSurf->ibo = ibo;
 		}
 
 		ri.Hunk_FreeTempMemory(triangles);
 		ri.Hunk_FreeTempMemory(verts);
 
 		k++;
-
 	}
 
 	ri.Free(surfacesSorted);
@@ -3159,24 +3097,13 @@ void R_MergeLeafSurfaces(void)
 		surf1 = s_worldData.surfaces + i;
 
 		// retrieve vbo
-		switch(*surf1->data)
-		{
-			case SF_FACE:
-			case SF_GRID:
-			case SF_TRIANGLES:
-				vbo = ((srfBspSurface_t *)(surf1->data))->vbo;
-				break;
-
-			default:
-				vbo = NULL;
-				break;
-		}
+		vbo = ((srfBspSurface_t *)(surf1->data))->vbo;
 
 		// count verts, indexes, and surfaces
 		numSurfsToMerge = 0;
 		numTriangles = 0;
 		numVerts = 0;
-		for (j = 0; j < numWorldSurfaces; j++)
+		for (j = i; j < numWorldSurfaces; j++)
 		{
 			msurface_t *surf2;
 			srfBspSurface_t *bspSurf;
@@ -3187,19 +3114,8 @@ void R_MergeLeafSurfaces(void)
 			surf2 = s_worldData.surfaces + j;
 
 			bspSurf = (srfBspSurface_t *) surf2->data;
-			switch(bspSurf->surfaceType)
-			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					numTriangles += bspSurf->numTriangles;
-					numVerts += bspSurf->numVerts;
-					break;
-
-				default:
-					break;
-			}
-
+			numTriangles += bspSurf->numTriangles;
+			numVerts += bspSurf->numVerts;
 			numSurfsToMerge++;
 		}
 
@@ -3220,7 +3136,7 @@ void R_MergeLeafSurfaces(void)
 		// Merge surfaces (indexes) and calculate bounds
 		ClearBounds(bounds[0], bounds[1]);
 		firstIndex = numIboIndexes;
-		for (j = 0; j < numWorldSurfaces; j++)
+		for (j = i; j < numWorldSurfaces; j++)
 		{
 			msurface_t *surf2;
 			srfBspSurface_t *bspSurf;
@@ -3234,24 +3150,14 @@ void R_MergeLeafSurfaces(void)
 			AddPointToBounds(surf2->cullinfo.bounds[1], bounds[0], bounds[1]);
 
 			bspSurf = (srfBspSurface_t *) surf2->data;
-			switch(bspSurf->surfaceType)
+			for (k = 0; k < bspSurf->numTriangles; k++)
 			{
-				case SF_FACE:
-				case SF_GRID:
-				case SF_TRIANGLES:
-					for (k = 0; k < bspSurf->numTriangles; k++)
-					{
-						*outIboIndexes++ = bspSurf->triangles[k].indexes[0] + bspSurf->firstVert;
-						*outIboIndexes++ = bspSurf->triangles[k].indexes[1] + bspSurf->firstVert;
-						*outIboIndexes++ = bspSurf->triangles[k].indexes[2] + bspSurf->firstVert;
-						numIboIndexes += 3;
-					}
-					break;
-
-				// never happens, but silences a compile warning
-				default:
-					break;
+				*outIboIndexes++ = bspSurf->triangles[k].indexes[0] + bspSurf->firstVert;
+				*outIboIndexes++ = bspSurf->triangles[k].indexes[1] + bspSurf->firstVert;
+				*outIboIndexes++ = bspSurf->triangles[k].indexes[2] + bspSurf->firstVert;
+				numIboIndexes += 3;
 			}
+			break;
 		}
 
 		vboSurf = ri.Hunk_Alloc(sizeof(*vboSurf), h_low);
@@ -3268,7 +3174,7 @@ void R_MergeLeafSurfaces(void)
 		vboSurf->minIndex = *(iboIndexes + firstIndex);
 		vboSurf->maxIndex = *(iboIndexes + firstIndex);
 
-		for (j = 1; j < numTriangles * 3; j++)
+		for (j = 0; j < numTriangles * 3; j++)
 		{
 			vboSurf->minIndex = MIN(vboSurf->minIndex, *(iboIndexes + firstIndex + j));
 			vboSurf->maxIndex = MAX(vboSurf->maxIndex, *(iboIndexes + firstIndex + j));
