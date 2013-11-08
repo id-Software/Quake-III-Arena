@@ -1288,9 +1288,9 @@ void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane) {
 		return;
 	case SF_TRIANGLES:
 		tri = (srfBspSurface_t *)surfType;
-		v1 = tri->verts + tri->triangles[0].indexes[0];
-		v2 = tri->verts + tri->triangles[0].indexes[1];
-		v3 = tri->verts + tri->triangles[0].indexes[2];
+		v1 = tri->verts + tri->indexes[0];
+		v2 = tri->verts + tri->indexes[1];
+		v3 = tri->verts + tri->indexes[2];
 		PlaneFromPoints( plane4, v1->xyz, v2->xyz, v3->xyz );
 		VectorCopy( plane4, plane->normal ); 
 		plane->dist = plane4[3];

@@ -501,7 +501,7 @@ IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, v
 R_CreateIBO2
 ============
 */
-IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t * triangles, vboUsage_t usage)
+IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes, vboUsage_t usage)
 {
 	IBO_t          *ibo;
 	int             i, j;
@@ -510,7 +510,7 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 	int             indexesSize;
 	int             indexesOfs;
 
-	srfTriangle_t  *tri;
+	glIndex_t	   *tri;
 	glIndex_t       index;
 	int				glUsage;
 
@@ -529,7 +529,7 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 			return NULL;
 	}
 
-	if(!numTriangles)
+	if(!numIndexes)
 		return NULL;
 
 	if(strlen(name) >= MAX_QPATH)
@@ -548,15 +548,15 @@ IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t *
 
 	Q_strncpyz(ibo->name, name, sizeof(ibo->name));
 
-	indexesSize = numTriangles * 3 * sizeof(int);
+	indexesSize = numIndexes * sizeof(glIndex_t);
 	indexes = ri.Hunk_AllocateTempMemory(indexesSize);
 	indexesOfs = 0;
 
-	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
+	for(i = 0, tri = inIndexes; i < numIndexes; i += 3, tri += 3)
 	{
 		for(j = 0; j < 3; j++)
 		{
-			index = tri->indexes[j];
+			index = tri[j];
 			memcpy(indexes + indexesOfs, &index, sizeof(glIndex_t));
 			indexesOfs += sizeof(glIndex_t);
 		}

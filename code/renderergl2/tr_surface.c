@@ -311,30 +311,28 @@ static void RB_SurfacePolychain( srfPoly_t *p ) {
 	tess.numVertexes = numv;
 }
 
-static void RB_SurfaceVertsAndTris( int numVerts, srfVert_t *verts, int numTriangles, srfTriangle_t *triangles, int dlightBits, int pshadowBits)
+static void RB_SurfaceVertsAndIndexes( int numVerts, srfVert_t *verts, int numIndexes, glIndex_t *indexes, int dlightBits, int pshadowBits)
 {
 	int             i;
-	srfTriangle_t  *tri;
+	glIndex_t      *inIndex;
 	srfVert_t      *dv;
 	float          *xyz, *normal, *texCoords, *lightCoords, *lightdir;
 #ifdef USE_VERT_TANGENT_SPACE
 	float          *tangent, *bitangent;
 #endif
-	glIndex_t      *index;
+	glIndex_t      *outIndex;
 	float          *color;
 
 	RB_CheckVBOandIBO(tess.vbo, tess.ibo);
 
-	RB_CHECKOVERFLOW( numVerts, numTriangles * 3 );
+	RB_CHECKOVERFLOW( numVerts, numIndexes );
 
-	tri = triangles;
-	index = &tess.indexes[ tess.numIndexes ];
-	for ( i = 0 ; i < numTriangles ; i++, tri++ ) {
-		*index++ = tess.numVertexes + tri->indexes[0];
-		*index++ = tess.numVertexes + tri->indexes[1];
-		*index++ = tess.numVertexes + tri->indexes[2];
+	inIndex = indexes;
+	outIndex = &tess.indexes[ tess.numIndexes ];
+	for ( i = 0 ; i < numIndexes ; i++ ) {
+		*outIndex++ = tess.numVertexes + *inIndex++;
 	}
-	tess.numIndexes += numTriangles * 3;
+	tess.numIndexes += numIndexes;
 
 	if ( tess.shader->vertexAttribs & ATTR_POSITION )
 	{
@@ -523,14 +521,14 @@ RB_SurfaceTriangles
 =============
 */
 static void RB_SurfaceTriangles( srfBspSurface_t *srf ) {
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
-			srf->triangles, srf->dlightBits, srf->pshadowBits);
+	RB_SurfaceVertsAndIndexes(srf->numVerts, srf->verts, srf->numIndexes,
+			srf->indexes, srf->dlightBits, srf->pshadowBits);
 }
 
 
@@ -1201,9 +1199,7 @@ RB_SurfaceMesh
 static void RB_SurfaceMesh(mdvSurface_t *surface) {
 	int				j;
 	float			backlerp;
-	srfTriangle_t 	*triangles;
 	mdvSt_t			*texCoords;
-	int				indexes;
 	int				Bob, Doug;
 	int				numVerts;
 
@@ -1213,20 +1209,16 @@ static void RB_SurfaceMesh(mdvSurface_t *surface) {
 		backlerp = backEnd.currentEntity->e.backlerp;
 	}
 
-	RB_CHECKOVERFLOW( surface->numVerts, surface->numTriangles*3 );
+	RB_CHECKOVERFLOW( surface->numVerts, surface->numIndexes );
 
 	LerpMeshVertexes (surface, backlerp);
 
-	triangles = surface->triangles;
-	indexes = surface->numTriangles * 3;
 	Bob = tess.numIndexes;
 	Doug = tess.numVertexes;
-	for (j = 0 ; j < surface->numTriangles ; j++) {
-		tess.indexes[Bob + j*3 + 0] = Doug + triangles[j].indexes[0];
-		tess.indexes[Bob + j*3 + 1] = Doug + triangles[j].indexes[1];
-		tess.indexes[Bob + j*3 + 2] = Doug + triangles[j].indexes[2];
+	for (j = 0 ; j < surface->numIndexes ; j++) {
+		tess.indexes[Bob + j] = Doug + surface->indexes[j];
 	}
-	tess.numIndexes += indexes;
+	tess.numIndexes += surface->numIndexes;
 
 	texCoords = surface->st;
 
@@ -1248,14 +1240,14 @@ RB_SurfaceFace
 ==============
 */
 static void RB_SurfaceFace( srfBspSurface_t *srf ) {
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
-			srf->triangles, srf->dlightBits, srf->pshadowBits);
+	RB_SurfaceVertsAndIndexes(srf->numVerts, srf->verts, srf->numIndexes,
+			srf->indexes, srf->dlightBits, srf->pshadowBits);
 }
 
 
@@ -1317,7 +1309,7 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 	int     pshadowBits;
 	//int		*vDlightBits;
 
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
@@ -1576,7 +1568,7 @@ static void RB_SurfaceFlare(srfFlare_t *surf)
 
 static void RB_SurfaceVBOMesh(srfBspSurface_t * srf)
 {
-	RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex,
+	RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex,
 			srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qfalse );
 }
 

@@ -1003,12 +1003,6 @@ typedef struct
 #define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0, 0}}
 #endif
 
-typedef struct
-{
-	int             indexes[3];
-	int             neighbors[3];
-} srfTriangle_t;
-
 // srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VBO_MESH
 typedef struct srfBspSurface_s
 {
@@ -1024,9 +1018,9 @@ typedef struct srfBspSurface_s
 	float			cullRadius;
 	cplane_t        cullPlane;
 
-	// triangle definitions
-	int             numTriangles;
-	srfTriangle_t  *triangles;
+	// indexes
+	int             numIndexes;
+	glIndex_t      *indexes;
 
 	// vertexes
 	int             numVerts;
@@ -1326,8 +1320,8 @@ typedef struct mdvSurface_s
 	mdvVertex_t    *verts;
 	mdvSt_t        *st;
 
-	int             numTriangles;
-	srfTriangle_t  *triangles;
+	int             numIndexes;
+	glIndex_t      *indexes;
 
 	struct mdvModel_s *model;
 } mdvSurface_t;
@@ -2275,7 +2269,7 @@ VBO_t          *R_CreateVBO(const char *name, byte * vertexes, int vertexesSize,
 VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vertexes, uint32_t stateBits, vboUsage_t usage);
 
 IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, vboUsage_t usage);
-IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t * triangles, vboUsage_t usage);
+IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes, vboUsage_t usage);
 
 void            R_BindVBO(VBO_t * vbo);
 void            R_BindNullVBO(void);

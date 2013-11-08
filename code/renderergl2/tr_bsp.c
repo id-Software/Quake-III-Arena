@@ -653,8 +653,8 @@ ParseFace
 static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf, int *indexes  ) {
 	int			i, j;
 	srfBspSurface_t	*cv;
-	srfTriangle_t  *tri;
-	int			numVerts, numTriangles, badTriangles;
+	glIndex_t  *tri;
+	int			numVerts, numIndexes, badTriangles;
 	int realLightmapNum;
 
 	realLightmapNum = LittleLong( ds->lightmapNum );
@@ -675,14 +675,14 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 		surf->shader = tr.defaultShader;
 	}
 
-	numTriangles = LittleLong(ds->numIndexes) / 3;
+	numIndexes = LittleLong(ds->numIndexes);
 
 	//cv = ri.Hunk_Alloc(sizeof(*cv), h_low);
 	cv = (void *)surf->data;
 	cv->surfaceType = SF_FACE;
 
-	cv->numTriangles = numTriangles;
-	cv->triangles = ri.Hunk_Alloc(numTriangles * sizeof(cv->triangles[0]), h_low);
+	cv->numIndexes = numIndexes;
+	cv->indexes = ri.Hunk_Alloc(numIndexes * sizeof(cv->indexes[0]), h_low);
 
 	cv->numVerts = numVerts;
 	cv->verts = ri.Hunk_Alloc(numVerts * sizeof(cv->verts[0]), h_low);
@@ -740,29 +740,29 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 	// copy triangles
 	badTriangles = 0;
 	indexes += LittleLong(ds->firstIndex);
-	for(i = 0, tri = cv->triangles; i < numTriangles; i++, tri++)
+	for(i = 0, tri = cv->indexes; i < numIndexes; i += 3, tri += 3)
 	{
 		for(j = 0; j < 3; j++)
 		{
-			tri->indexes[j] = LittleLong(indexes[i * 3 + j]);
+			tri[j] = LittleLong(indexes[i + j]);
 
-			if(tri->indexes[j] < 0 || tri->indexes[j] >= numVerts)
+			if(tri[j] < 0 || tri[j] >= numVerts)
 			{
 				ri.Error(ERR_DROP, "Bad index in face surface");
 			}
 		}
 
-		if ((tri->indexes[0] == tri->indexes[1]) || (tri->indexes[1] == tri->indexes[2]) || (tri->indexes[0] == tri->indexes[2]))
+		if ((tri[0] == tri[1]) || (tri[1] == tri[2]) || (tri[0] == tri[2]))
 		{
-			tri--;
+			tri -= 3;
 			badTriangles++;
 		}
 	}
 
 	if (badTriangles)
 	{
-		ri.Printf(PRINT_WARNING, "Face has bad triangles, originally shader %s %d tris %d verts, now %d tris\n", surf->shader->name, numTriangles, numVerts, numTriangles - badTriangles);
-		cv->numTriangles -= badTriangles;
+		ri.Printf(PRINT_WARNING, "Face has bad triangles, originally shader %s %d tris %d verts, now %d tris\n", surf->shader->name, numIndexes / 3, numVerts, numIndexes / 3 - badTriangles);
+		cv->numIndexes -= badTriangles * 3;
 	}
 
 	// take the plane information from the lightmap vector
@@ -781,11 +781,11 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 	{
 		srfVert_t      *dv[3];
 
-		for(i = 0, tri = cv->triangles; i < numTriangles; i++, tri++)
+		for(i = 0, tri = cv->indexes; i < numIndexes; i += 3, tri += 3)
 		{
-			dv[0] = &cv->verts[tri->indexes[0]];
-			dv[1] = &cv->verts[tri->indexes[1]];
-			dv[2] = &cv->verts[tri->indexes[2]];
+			dv[0] = &cv->verts[tri[0]];
+			dv[1] = &cv->verts[tri[1]];
+			dv[2] = &cv->verts[tri[2]];
 
 			R_CalcTangentVectors(dv);
 		}
@@ -904,9 +904,9 @@ ParseTriSurf
 */
 static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf, int *indexes ) {
 	srfBspSurface_t *cv;
-	srfTriangle_t  *tri;
+	glIndex_t  *tri;
 	int             i, j;
-	int             numVerts, numTriangles, badTriangles;
+	int             numVerts, numIndexes, badTriangles;
 
 	// get fog volume
 	surf->fogIndex = LittleLong( ds->fogNum ) + 1;
@@ -918,14 +918,14 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	}
 
 	numVerts = LittleLong(ds->numVerts);
-	numTriangles = LittleLong(ds->numIndexes) / 3;
+	numIndexes = LittleLong(ds->numIndexes);
 
 	//cv = ri.Hunk_Alloc(sizeof(*cv), h_low);
 	cv = (void *)surf->data;
 	cv->surfaceType = SF_TRIANGLES;
 
-	cv->numTriangles = numTriangles;
-	cv->triangles = ri.Hunk_Alloc(numTriangles * sizeof(cv->triangles[0]), h_low);
+	cv->numIndexes = numIndexes;
+	cv->indexes = ri.Hunk_Alloc(numIndexes * sizeof(cv->indexes[0]), h_low);
 
 	cv->numVerts = numVerts;
 	cv->verts = ri.Hunk_Alloc(numVerts * sizeof(cv->verts[0]), h_low);
@@ -984,29 +984,29 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	// copy triangles
 	badTriangles = 0;
 	indexes += LittleLong(ds->firstIndex);
-	for(i = 0, tri = cv->triangles; i < numTriangles; i++, tri++)
+	for(i = 0, tri = cv->indexes; i < numIndexes; i += 3, tri += 3)
 	{
 		for(j = 0; j < 3; j++)
 		{
-			tri->indexes[j] = LittleLong(indexes[i * 3 + j]);
+			tri[j] = LittleLong(indexes[i + j]);
 
-			if(tri->indexes[j] < 0 || tri->indexes[j] >= numVerts)
+			if(tri[j] < 0 || tri[j] >= numVerts)
 			{
 				ri.Error(ERR_DROP, "Bad index in face surface");
 			}
 		}
 
-		if ((tri->indexes[0] == tri->indexes[1]) || (tri->indexes[1] == tri->indexes[2]) || (tri->indexes[0] == tri->indexes[2]))
+		if ((tri[0] == tri[1]) || (tri[1] == tri[2]) || (tri[0] == tri[2]))
 		{
-			tri--;
+			tri -= 3;
 			badTriangles++;
 		}
 	}
 
 	if (badTriangles)
 	{
-		ri.Printf(PRINT_WARNING, "Trisurf has bad triangles, originally shader %s %d tris %d verts, now %d tris\n", surf->shader->name, numTriangles, numVerts, numTriangles - badTriangles);
-		cv->numTriangles -= badTriangles;
+		ri.Printf(PRINT_WARNING, "Trisurf has bad triangles, originally shader %s %d tris %d verts, now %d tris\n", surf->shader->name, numIndexes / 3, numVerts, numIndexes / 3 - badTriangles);
+		cv->numIndexes -= badTriangles * 3;
 	}
 
 #ifdef USE_VERT_TANGENT_SPACE
@@ -1014,11 +1014,11 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	{
 		srfVert_t      *dv[3];
 
-		for(i = 0, tri = cv->triangles; i < numTriangles; i++, tri++)
+		for(i = 0, tri = cv->indexes; i < numIndexes; i += 3, tri += 3)
 		{
-			dv[0] = &cv->verts[tri->indexes[0]];
-			dv[1] = &cv->verts[tri->indexes[1]];
-			dv[2] = &cv->verts[tri->indexes[2]];
+			dv[0] = &cv->verts[tri[0]];
+			dv[1] = &cv->verts[tri[1]];
+			dv[2] = &cv->verts[tri[2]];
 
 			R_CalcTangentVectors(dv);
 		}
@@ -1747,9 +1747,9 @@ void R_MovePatchSurfacesToHunk(void) {
 		hunkgrid->heightLodError = ri.Hunk_Alloc( grid->height * 4, h_low );
 		Com_Memcpy( hunkgrid->heightLodError, grid->heightLodError, grid->height * 4 );
 
-		hunkgrid->numTriangles = grid->numTriangles;
-		hunkgrid->triangles = ri.Hunk_Alloc(grid->numTriangles * sizeof(srfTriangle_t), h_low);
-		Com_Memcpy(hunkgrid->triangles, grid->triangles, grid->numTriangles * sizeof(srfTriangle_t));
+		hunkgrid->numIndexes = grid->numIndexes;
+		hunkgrid->indexes = ri.Hunk_Alloc(grid->numIndexes * sizeof(glIndex_t), h_low);
+		Com_Memcpy(hunkgrid->indexes, grid->indexes, grid->numIndexes * sizeof(glIndex_t));
 
 		hunkgrid->numVerts = grid->numVerts;
 		hunkgrid->verts = ri.Hunk_Alloc(grid->numVerts * sizeof(srfVert_t), h_low);
@@ -1841,8 +1841,8 @@ static void R_CreateWorldVBOs(void)
 	int             numVerts;
 	srfVert_t      *verts;
 
-	int             numTriangles;
-	srfTriangle_t  *triangles;
+	int             numIndexes;
+	glIndex_t      *indexes;
 
     int             numSortedSurfaces, numSurfaces;
 	msurface_t   *surface, **firstSurf, **lastSurf, **currSurf;
@@ -1880,7 +1880,7 @@ static void R_CreateWorldVBOs(void)
 
 		bspSurf = (srfBspSurface_t *) surface->data;
 
-		if (!bspSurf->numTriangles || !bspSurf->numVerts)
+		if (!bspSurf->numIndexes || !bspSurf->numVerts)
 			continue;
 
 		numSortedSurfaces++;
@@ -1910,7 +1910,7 @@ static void R_CreateWorldVBOs(void)
 
 		bspSurf = (srfBspSurface_t *) surface->data;
 
-		if (!bspSurf->numTriangles || !bspSurf->numVerts)
+		if (!bspSurf->numIndexes || !bspSurf->numVerts)
 			continue;
 
 		surfacesSorted[j++] = surface;
@@ -1939,7 +1939,7 @@ static void R_CreateWorldVBOs(void)
 				srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
 				addVboSize += bspSurf->numVerts * sizeof(srfVert_t);
-				addIboSize += bspSurf->numTriangles * 3 * sizeof(glIndex_t);
+				addIboSize += bspSurf->numIndexes * sizeof(glIndex_t);
 			}
 
 			if ((currVboSize != 0 && addVboSize + currVboSize > maxVboSize)
@@ -1952,56 +1952,50 @@ static void R_CreateWorldVBOs(void)
 			currIboSize += addIboSize;
 		}
 
-		// count verts/triangles/surfaces
+		// count verts/indexes/surfaces
 		numVerts = 0;
-		numTriangles = 0;
+		numIndexes = 0;
 		numSurfaces = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
 			numVerts += bspSurf->numVerts;
-			numTriangles += bspSurf->numTriangles;
+			numIndexes += bspSurf->numIndexes;
 			numSurfaces++;
 		}
 
-		ri.Printf(PRINT_ALL, "...calculating world VBO %d ( %i verts %i tris )\n", k, numVerts, numTriangles);
+		ri.Printf(PRINT_ALL, "...calculating world VBO %d ( %i verts %i tris )\n", k, numVerts, numIndexes / 3);
 
 		// create arrays
 		verts = ri.Hunk_AllocateTempMemory(numVerts * sizeof(srfVert_t));
-		triangles = ri.Hunk_AllocateTempMemory(numTriangles * sizeof(srfTriangle_t));
+		indexes = ri.Hunk_AllocateTempMemory(numIndexes * sizeof(glIndex_t));
 
-		// set up triangle indices and copy vertices
+		// set up indices and copy vertices
 		numVerts = 0;
-		numTriangles = 0;
+		numIndexes = 0;
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
-			srfTriangle_t  *tri;
+			glIndex_t *surfIndex;
 
-			bspSurf->firstIndex = numTriangles * 3;
-			bspSurf->minIndex = numVerts + bspSurf->triangles->indexes[0];
-			bspSurf->maxIndex = numVerts + bspSurf->triangles->indexes[0];
+			bspSurf->firstIndex = numIndexes;
+			bspSurf->minIndex = numVerts + bspSurf->indexes[0];
+			bspSurf->maxIndex = numVerts + bspSurf->indexes[0];
 
-			for(i = 0, tri = bspSurf->triangles; i < bspSurf->numTriangles; i++, tri++)
+			for(i = 0, surfIndex = bspSurf->indexes; i < bspSurf->numIndexes; i++, surfIndex++)
 			{
-				for(j = 0; j < 3; j++)
-				{
-					triangles[numTriangles + i].indexes[j] = numVerts + tri->indexes[j];
-					bspSurf->minIndex = MIN(bspSurf->minIndex, numVerts + tri->indexes[j]);
-					bspSurf->maxIndex = MAX(bspSurf->maxIndex, numVerts + tri->indexes[j]);
-				}
+				indexes[numIndexes++] = numVerts + *surfIndex;
+				bspSurf->minIndex = MIN(bspSurf->minIndex, numVerts + *surfIndex);
+				bspSurf->maxIndex = MAX(bspSurf->maxIndex, numVerts + *surfIndex);
 			}
 
 			bspSurf->firstVert = numVerts;
 
 			for(i = 0; i < bspSurf->numVerts; i++)
 			{
-				CopyVert(&bspSurf->verts[i], &verts[numVerts + i]);
+				CopyVert(&bspSurf->verts[i], &verts[numVerts++]);
 			}
-
-			numTriangles += bspSurf->numTriangles;
-			numVerts += bspSurf->numVerts;
 		}
 
 #ifdef USE_VERT_TANGENT_SPACE
@@ -2014,9 +2008,9 @@ static void R_CreateWorldVBOs(void)
 									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
 #endif
 
-		ibo = R_CreateIBO2(va("staticBspModel0_IBO %i", k), numTriangles, triangles, VBO_USAGE_STATIC);
+		ibo = R_CreateIBO2(va("staticBspModel0_IBO %i", k), numIndexes, indexes, VBO_USAGE_STATIC);
 
-		// point triangle surfaces to VBO
+		// point bsp surfaces to VBO
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
@@ -2025,7 +2019,7 @@ static void R_CreateWorldVBOs(void)
 			bspSurf->ibo = ibo;
 		}
 
-		ri.Hunk_FreeTempMemory(triangles);
+		ri.Hunk_FreeTempMemory(indexes);
 		ri.Hunk_FreeTempMemory(verts);
 
 		k++;
@@ -2099,7 +2093,7 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 
 	// Two passes, allocate surfaces first, then load them full of data
 	// This ensures surfaces are close together to reduce L2 cache misses when using VBOs,
-	// which don't actually use the verts and tris
+	// which don't actually use the verts and indexes
 	in = (void *)(fileBase + surfs->fileofs);
 	out = s_worldData.surfaces;
 	for ( i = 0 ; i < count ; i++, in++, out++ ) {
@@ -3085,7 +3079,7 @@ void R_MergeLeafSurfaces(void)
 		vec3_t bounds[2];
 
 		int numSurfsToMerge;
-		int numTriangles;
+		int numIndexes;
 		int numVerts;
 		int firstIndex;
 
@@ -3101,7 +3095,7 @@ void R_MergeLeafSurfaces(void)
 
 		// count verts, indexes, and surfaces
 		numSurfsToMerge = 0;
-		numTriangles = 0;
+		numIndexes = 0;
 		numVerts = 0;
 		for (j = i; j < numWorldSurfaces; j++)
 		{
@@ -3114,12 +3108,12 @@ void R_MergeLeafSurfaces(void)
 			surf2 = s_worldData.surfaces + j;
 
 			bspSurf = (srfBspSurface_t *) surf2->data;
-			numTriangles += bspSurf->numTriangles;
+			numIndexes += bspSurf->numIndexes;
 			numVerts += bspSurf->numVerts;
 			numSurfsToMerge++;
 		}
 
-		if (numVerts == 0 || numTriangles == 0 || numSurfsToMerge < 2)
+		if (numVerts == 0 || numIndexes == 0 || numSurfsToMerge < 2)
 		{
 			continue;
 		}
@@ -3131,7 +3125,7 @@ void R_MergeLeafSurfaces(void)
 		numIboIndexes = 0;
 
 		// allocate indexes
-		iboIndexes = outIboIndexes = ri.Malloc(numTriangles * 3 * sizeof(*outIboIndexes));
+		iboIndexes = outIboIndexes = ri.Malloc(numIndexes * sizeof(*outIboIndexes));
 
 		// Merge surfaces (indexes) and calculate bounds
 		ClearBounds(bounds[0], bounds[1]);
@@ -3150,12 +3144,10 @@ void R_MergeLeafSurfaces(void)
 			AddPointToBounds(surf2->cullinfo.bounds[1], bounds[0], bounds[1]);
 
 			bspSurf = (srfBspSurface_t *) surf2->data;
-			for (k = 0; k < bspSurf->numTriangles; k++)
+			for (k = 0; k < bspSurf->numIndexes; k++)
 			{
-				*outIboIndexes++ = bspSurf->triangles[k].indexes[0] + bspSurf->firstVert;
-				*outIboIndexes++ = bspSurf->triangles[k].indexes[1] + bspSurf->firstVert;
-				*outIboIndexes++ = bspSurf->triangles[k].indexes[2] + bspSurf->firstVert;
-				numIboIndexes += 3;
+				*outIboIndexes++ = bspSurf->indexes[k] + bspSurf->firstVert;
+				numIboIndexes++;
 			}
 			break;
 		}
@@ -3167,14 +3159,14 @@ void R_MergeLeafSurfaces(void)
 		vboSurf->vbo = vbo;
 		vboSurf->ibo = ibo;
 
-		vboSurf->numTriangles = numTriangles;
+		vboSurf->numIndexes = numIndexes;
 		vboSurf->numVerts = numVerts;
 		vboSurf->firstIndex = firstIndex;
 
 		vboSurf->minIndex = *(iboIndexes + firstIndex);
 		vboSurf->maxIndex = *(iboIndexes + firstIndex);
 
-		for (j = 0; j < numTriangles * 3; j++)
+		for (j = 0; j < numIndexes; j++)
 		{
 			vboSurf->minIndex = MIN(vboSurf->minIndex, *(iboIndexes + firstIndex + j));
 			vboSurf->maxIndex = MAX(vboSurf->maxIndex, *(iboIndexes + firstIndex + j));

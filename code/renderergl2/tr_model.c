@@ -394,7 +394,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 	mdvFrame_t     *frame;
 	mdvSurface_t   *surf;//, *surface;
 	int            *shaderIndex;
-	srfTriangle_t  *tri;
+	glIndex_t	   *tri;
 	mdvVertex_t    *v;
 	mdvSt_t        *st;
 	mdvTag_t       *tag;
@@ -551,15 +551,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 		}
 
 		// swap all the triangles
-		surf->numTriangles = md3Surf->numTriangles;
-		surf->triangles = tri = ri.Hunk_Alloc(sizeof(*tri) * md3Surf->numTriangles, h_low);
+		surf->numIndexes = md3Surf->numTriangles * 3;
+		surf->indexes = tri = ri.Hunk_Alloc(sizeof(*tri) * 3 * md3Surf->numTriangles, h_low);
 
 		md3Tri = (md3Triangle_t *) ((byte *) md3Surf + md3Surf->ofsTriangles);
-		for(j = 0; j < md3Surf->numTriangles; j++, tri++, md3Tri++)
+		for(j = 0; j < md3Surf->numTriangles; j++, tri += 3, md3Tri++)
 		{
-			tri->indexes[0] = LittleLong(md3Tri->indexes[0]);
-			tri->indexes[1] = LittleLong(md3Tri->indexes[1]);
-			tri->indexes[2] = LittleLong(md3Tri->indexes[2]);
+			tri[0] = LittleLong(md3Tri->indexes[0]);
+			tri[1] = LittleLong(md3Tri->indexes[1]);
+			tri[2] = LittleLong(md3Tri->indexes[2]);
 		}
 
 		// swap all the XyzNormals
@@ -623,15 +623,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 			for(f = 0; f < mdvModel->numFrames; f++)
 			{
-				for(j = 0, tri = surf->triangles; j < surf->numTriangles; j++, tri++)
+				for(j = 0, tri = surf->indexes; j < surf->numIndexes; j += 3, tri += 3)
 				{
-					v0 = surf->verts[surf->numVerts * f + tri->indexes[0]].xyz;
-					v1 = surf->verts[surf->numVerts * f + tri->indexes[1]].xyz;
-					v2 = surf->verts[surf->numVerts * f + tri->indexes[2]].xyz;
+					v0 = surf->verts[surf->numVerts * f + tri[0]].xyz;
+					v1 = surf->verts[surf->numVerts * f + tri[1]].xyz;
+					v2 = surf->verts[surf->numVerts * f + tri[2]].xyz;
 
-					t0 = surf->st[tri->indexes[0]].st;
-					t1 = surf->st[tri->indexes[1]].st;
-					t2 = surf->st[tri->indexes[2]].st;
+					t0 = surf->st[tri[0]].st;
+					t1 = surf->st[tri[1]].st;
+					t2 = surf->st[tri[2]].st;
 
 					if (!r_recalcMD3Normals->integer)
 						VectorCopy(v->normal, normal);
@@ -649,15 +649,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					{
 						float          *v;
 
-						v = surf->verts[surf->numVerts * f + tri->indexes[k]].tangent;
+						v = surf->verts[surf->numVerts * f + tri[k]].tangent;
 						VectorAdd(v, tangent, v);
 
-						v = surf->verts[surf->numVerts * f + tri->indexes[k]].bitangent;
+						v = surf->verts[surf->numVerts * f + tri[k]].bitangent;
 						VectorAdd(v, bitangent, v);
 
 						if (r_recalcMD3Normals->integer)
 						{
-							v = surf->verts[surf->numVerts * f + tri->indexes[k]].normal;
+							v = surf->verts[surf->numVerts * f + tri[k]].normal;
 							VectorAdd(v, normal, v);
 						}
 					}
@@ -753,7 +753,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vboSurf->surfaceType = SF_VBO_MDVMESH;
 			vboSurf->mdvModel = mdvModel;
 			vboSurf->mdvSurface = surf;
-			vboSurf->numIndexes = surf->numTriangles * 3;
+			vboSurf->numIndexes = surf->numIndexes;
 			vboSurf->numVerts = surf->numVerts;
 			
 			vboSurf->minIndex = 0;
@@ -782,7 +782,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 			ri.Free(data);
 
-			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numTriangles, surf->triangles, VBO_USAGE_STATIC);
+			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numIndexes, surf->indexes, VBO_USAGE_STATIC);
 		}
 	}
 
