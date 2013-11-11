@@ -746,7 +746,7 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 		{
 			tri[j] = LittleLong(indexes[i + j]);
 
-			if(tri[j] < 0 || tri[j] >= numVerts)
+			if(tri[j] >= numVerts)
 			{
 				ri.Error(ERR_DROP, "Bad index in face surface");
 			}
@@ -990,7 +990,7 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 		{
 			tri[j] = LittleLong(indexes[i + j]);
 
-			if(tri[j] < 0 || tri[j] >= numVerts)
+			if(tri[j] >= numVerts)
 			{
 				ri.Error(ERR_DROP, "Bad index in face surface");
 			}
