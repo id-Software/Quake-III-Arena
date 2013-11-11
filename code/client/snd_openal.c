@@ -1830,6 +1830,13 @@ void S_AL_RawSamples(int stream, int samples, int rate, int width, int channels,
         	// Volume
         	S_AL_Gain (streamSources[stream], volume * s_volume->value * s_alGain->value);
         }
+
+	// Start stream
+	if(!streamPlaying[stream])
+	{
+		qalSourcePlay( streamSources[stream] );
+		streamPlaying[stream] = qtrue;
+	}
 }
 
 /*
