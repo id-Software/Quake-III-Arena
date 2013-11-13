@@ -247,8 +247,7 @@ static void MakeMeshTangentVectors(int width, int height, srfVert_t ctrl[MAX_GRI
 			dv[0] = &ctrl2[j * width + i];
 			dv[1] = &ctrl[j][i];
 
-			VectorCopy(dv[0]->tangent, dv[1]->tangent);
-			VectorCopy(dv[0]->bitangent, dv[1]->bitangent);
+			VectorCopy4(dv[0]->tangent, dv[1]->tangent);
 		}
 	}
 }

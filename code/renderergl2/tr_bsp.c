@@ -1810,11 +1810,13 @@ static void CopyVert(const srfVert_t * in, srfVert_t * out)
 		out->xyz[j]       = in->xyz[j];
 #ifdef USE_VERT_TANGENT_SPACE
 		out->tangent[j]   = in->tangent[j];
-		out->bitangent[j] = in->bitangent[j];
+		//out->bitangent[j] = in->bitangent[j];
 #endif
 		out->normal[j]    = in->normal[j];
 		out->lightdir[j]  = in->lightdir[j];
 	}
+
+	out->tangent[3] = in->tangent[3];
 
 	for(j = 0; j < 2; j++)
 	{
@@ -2000,7 +2002,7 @@ static void R_CreateWorldVBOs(void)
 
 #ifdef USE_VERT_TANGENT_SPACE
 		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,
-									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD | ATTR_TANGENT | ATTR_BITANGENT |
+									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD | ATTR_TANGENT |
 									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
 #else
 		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,

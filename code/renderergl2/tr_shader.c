@@ -1947,7 +1947,7 @@ static void ComputeVertexAttribs(void)
 #ifdef USE_VERT_TANGENT_SPACE
 			if ((pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK) && !(r_normalMapping->integer == 0 && r_specularMapping->integer == 0))
 			{
-				shader.vertexAttribs |= ATTR_BITANGENT | ATTR_TANGENT;
+				shader.vertexAttribs |= ATTR_TANGENT;
 			}
 #endif
 

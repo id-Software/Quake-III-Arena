@@ -7,8 +7,7 @@ attribute vec4 attr_Color;
 attribute vec3 attr_Position;
 attribute vec3 attr_Normal;
 #if defined(USE_VERT_TANGENT_SPACE)
-attribute vec3 attr_Tangent;
-attribute vec3 attr_Bitangent;
+attribute vec4 attr_Tangent;
 #endif
 
 #if defined(USE_VERTEX_ANIMATION)
@@ -163,19 +162,22 @@ float CalcLightAttenuation(vec3 dir, float sqrRadius)
 void main()
 {
 #if defined(USE_VERTEX_ANIMATION)
-	vec3 position  =           mix(attr_Position,  attr_Position2,  u_VertexLerp);
-	vec3 normal    = normalize(mix(attr_Normal,    attr_Normal2,    u_VertexLerp));
-  #if defined(USE_VERT_TANGENT_SPACE)
-	vec3 tangent   = normalize(mix(attr_Tangent,   attr_Tangent2,   u_VertexLerp));
-	vec3 bitangent = normalize(mix(attr_Bitangent, attr_Bitangent2, u_VertexLerp));
+	vec3 position  = mix(attr_Position,  attr_Position2,  u_VertexLerp);
+	vec3 normal    = normalize(mix(attr_Normal,    attr_Normal2,    u_VertexLerp) * 2.0 - vec3(1.0));
+  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+	vec3 tangent   = normalize(mix(attr_Tangent.xyz,   attr_Tangent2.xyz,   u_VertexLerp) * 2.0 - vec3(1.0));
   #endif
 #else
 	vec3 position  = attr_Position;
-	vec3 normal    = attr_Normal;
-  #if defined(USE_VERT_TANGENT_SPACE)
-	vec3 tangent   = attr_Tangent;
-	vec3 bitangent = attr_Bitangent;
+	vec3 normal    = attr_Normal    * 2.0 - vec3(1.0);
+  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+	vec3 tangent   = attr_Tangent.xyz * 2.0 - vec3(1.0);
   #endif
+#endif
+
+#if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+  vec3 bitangent = cross(normal, tangent);
+  bitangent *= attr_Tangent.w * 2.0 - 1.0;
 #endif
 
 #if defined(USE_TCGEN)

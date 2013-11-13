@@ -116,7 +116,7 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 	vec3_t	offset;
 	float	scale;
 	float	*xyz = ( float * ) tess.xyz;
-	float	*normal = ( float * ) tess.normal;
+	uint8_t	*normal = ( uint8_t * ) tess.normal;
 	float	*table;
 
 	if ( ds->deformationWave.frequency == 0 )
@@ -125,7 +125,9 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 
 		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 )
 		{
-			VectorScale( normal, scale, offset );
+			offset[0] = (normal[0] / 127.5f - 1.0f) * scale;
+			offset[1] = (normal[1] / 127.5f - 1.0f) * scale;
+			offset[2] = (normal[2] / 127.5f - 1.0f) * scale;
 			
 			xyz[0] += offset[0];
 			xyz[1] += offset[1];
@@ -145,7 +147,9 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 				ds->deformationWave.phase + off,
 				ds->deformationWave.frequency );
 
-			VectorScale( normal, scale, offset );
+			offset[0] = (normal[0] / 127.5f - 1.0f) * scale;
+			offset[1] = (normal[1] / 127.5f - 1.0f) * scale;
+			offset[2] = (normal[2] / 127.5f - 1.0f) * scale;
 			
 			xyz[0] += offset[0];
 			xyz[1] += offset[1];
@@ -165,25 +169,35 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 	int i;
 	float	scale;
 	float	*xyz = ( float * ) tess.xyz;
-	float	*normal = ( float * ) tess.normal;
+	uint8_t *normal = ( uint8_t * ) tess.normal;
 
 	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 ) {
+		vec3_t fNormal;
+
+		fNormal[0] = normal[0] / 127.5f - 1.0f;
+		fNormal[1] = normal[1] / 127.5f - 1.0f;
+		fNormal[2] = normal[2] / 127.5f - 1.0f;
+
 		scale = 0.98f;
 		scale = R_NoiseGet4f( xyz[0] * scale, xyz[1] * scale, xyz[2] * scale,
 			tess.shaderTime * ds->deformationWave.frequency );
-		normal[ 0 ] += ds->deformationWave.amplitude * scale;
+		fNormal[ 0 ] += ds->deformationWave.amplitude * scale;
 
 		scale = 0.98f;
 		scale = R_NoiseGet4f( 100 + xyz[0] * scale, xyz[1] * scale, xyz[2] * scale,
 			tess.shaderTime * ds->deformationWave.frequency );
-		normal[ 1 ] += ds->deformationWave.amplitude * scale;
+		fNormal[ 1 ] += ds->deformationWave.amplitude * scale;
 
 		scale = 0.98f;
 		scale = R_NoiseGet4f( 200 + xyz[0] * scale, xyz[1] * scale, xyz[2] * scale,
 			tess.shaderTime * ds->deformationWave.frequency );
-		normal[ 2 ] += ds->deformationWave.amplitude * scale;
+		fNormal[ 2 ] += ds->deformationWave.amplitude * scale;
 
-		VectorNormalizeFast( normal );
+		VectorNormalizeFast( fNormal );
+
+		normal[0] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
+		normal[1] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
+		normal[2] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
 	}
 }
 
@@ -197,7 +211,7 @@ void RB_CalcBulgeVertexes( deformStage_t *ds ) {
 	int i;
 	const float *st = ( const float * ) tess.texCoords[0];
 	float		*xyz = ( float * ) tess.xyz;
-	float		*normal = ( float * ) tess.normal;
+	uint8_t		*normal = ( uint8_t * ) tess.normal;
 	float		now;
 
 	now = backEnd.refdef.time * ds->bulgeSpeed * 0.001f;
@@ -210,9 +224,9 @@ void RB_CalcBulgeVertexes( deformStage_t *ds ) {
 
 		scale = tr.sinTable[ off & FUNCTABLE_MASK ] * ds->bulgeHeight;
 			
-		xyz[0] += normal[0] * scale;
-		xyz[1] += normal[1] * scale;
-		xyz[2] += normal[2] * scale;
+		xyz[0] += (normal[0] / 127.5f - 1.0f) * scale;
+		xyz[1] += (normal[1] / 127.5f - 1.0f) * scale;
+		xyz[2] += (normal[2] / 127.5f - 1.0f) * scale;
 	}
 }
 
@@ -262,11 +276,17 @@ void DeformText( const char *text ) {
 	float	color[4];
 	float	bottom, top;
 	vec3_t	mid;
+	vec3_t fNormal;
 
 	height[0] = 0;
 	height[1] = 0;
 	height[2] = -1;
-	CrossProduct( tess.normal[0], height, width );
+		
+	fNormal[0] = tess.normal[0][0] / 127.5f - 1.0f;
+	fNormal[1] = tess.normal[0][1] / 127.5f - 1.0f;
+	fNormal[2] = tess.normal[0][2] / 127.5f - 1.0f;
+
+	CrossProduct( fNormal, height, width );
 
 	// find the midpoint of the box
 	VectorClear( mid );
