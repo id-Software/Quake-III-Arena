@@ -394,7 +394,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 	mdvFrame_t     *frame;
 	mdvSurface_t   *surf;//, *surface;
 	int            *shaderIndex;
-	srfTriangle_t  *tri;
+	glIndex_t	   *tri;
 	mdvVertex_t    *v;
 	mdvSt_t        *st;
 	mdvTag_t       *tag;
@@ -551,15 +551,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 		}
 
 		// swap all the triangles
-		surf->numTriangles = md3Surf->numTriangles;
-		surf->triangles = tri = ri.Hunk_Alloc(sizeof(*tri) * md3Surf->numTriangles, h_low);
+		surf->numIndexes = md3Surf->numTriangles * 3;
+		surf->indexes = tri = ri.Hunk_Alloc(sizeof(*tri) * 3 * md3Surf->numTriangles, h_low);
 
 		md3Tri = (md3Triangle_t *) ((byte *) md3Surf + md3Surf->ofsTriangles);
-		for(j = 0; j < md3Surf->numTriangles; j++, tri++, md3Tri++)
+		for(j = 0; j < md3Surf->numTriangles; j++, tri += 3, md3Tri++)
 		{
-			tri->indexes[0] = LittleLong(md3Tri->indexes[0]);
-			tri->indexes[1] = LittleLong(md3Tri->indexes[1]);
-			tri->indexes[2] = LittleLong(md3Tri->indexes[2]);
+			tri[0] = LittleLong(md3Tri->indexes[0]);
+			tri[1] = LittleLong(md3Tri->indexes[1]);
+			tri[2] = LittleLong(md3Tri->indexes[2]);
 		}
 
 		// swap all the XyzNormals
@@ -623,15 +623,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 			for(f = 0; f < mdvModel->numFrames; f++)
 			{
-				for(j = 0, tri = surf->triangles; j < surf->numTriangles; j++, tri++)
+				for(j = 0, tri = surf->indexes; j < surf->numIndexes; j += 3, tri += 3)
 				{
-					v0 = surf->verts[surf->numVerts * f + tri->indexes[0]].xyz;
-					v1 = surf->verts[surf->numVerts * f + tri->indexes[1]].xyz;
-					v2 = surf->verts[surf->numVerts * f + tri->indexes[2]].xyz;
+					v0 = surf->verts[surf->numVerts * f + tri[0]].xyz;
+					v1 = surf->verts[surf->numVerts * f + tri[1]].xyz;
+					v2 = surf->verts[surf->numVerts * f + tri[2]].xyz;
 
-					t0 = surf->st[tri->indexes[0]].st;
-					t1 = surf->st[tri->indexes[1]].st;
-					t2 = surf->st[tri->indexes[2]].st;
+					t0 = surf->st[tri[0]].st;
+					t1 = surf->st[tri[1]].st;
+					t2 = surf->st[tri[2]].st;
 
 					if (!r_recalcMD3Normals->integer)
 						VectorCopy(v->normal, normal);
@@ -649,15 +649,15 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					{
 						float          *v;
 
-						v = surf->verts[surf->numVerts * f + tri->indexes[k]].tangent;
+						v = surf->verts[surf->numVerts * f + tri[k]].tangent;
 						VectorAdd(v, tangent, v);
 
-						v = surf->verts[surf->numVerts * f + tri->indexes[k]].bitangent;
+						v = surf->verts[surf->numVerts * f + tri[k]].bitangent;
 						VectorAdd(v, bitangent, v);
 
 						if (r_recalcMD3Normals->integer)
 						{
-							v = surf->verts[surf->numVerts * f + tri->indexes[k]].normal;
+							v = surf->verts[surf->numVerts * f + tri[k]].normal;
 							VectorAdd(v, normal, v);
 						}
 					}
@@ -689,11 +689,10 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 		for (i = 0; i < mdvModel->numSurfaces; i++, vboSurf++, surf++)
 		{
 			vec3_t *verts;
-			vec3_t *normals;
 			vec2_t *texcoords;
+			uint8_t *normals;
 #ifdef USE_VERT_TANGENT_SPACE
-			vec3_t *tangents;
-			vec3_t *bitangents;
+			uint8_t *tangents;
 #endif
 
 			byte *data;
@@ -701,7 +700,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 			int ofs_xyz, ofs_normal, ofs_st;
 #ifdef USE_VERT_TANGENT_SPACE
-			int ofs_tangent, ofs_bitangent;
+			int ofs_tangent;
 #endif
 
 			dataSize = 0;
@@ -710,14 +709,11 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*verts);
 
 			ofs_normal = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*normals);
+			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*normals) * 4;
 
 #ifdef USE_VERT_TANGENT_SPACE
 			ofs_tangent = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*tangents);
-
-			ofs_bitangent = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*bitangents);
+			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*tangents) * 4;
 #endif
 
 			ofs_st = dataSize;
@@ -729,18 +725,25 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			normals =    (void *)(data + ofs_normal);
 #ifdef USE_VERT_TANGENT_SPACE
 			tangents =   (void *)(data + ofs_tangent);
-			bitangents = (void *)(data + ofs_bitangent);
 #endif
 			texcoords =  (void *)(data + ofs_st);
 		
 			v = surf->verts;
 			for ( j = 0; j < surf->numVerts * mdvModel->numFrames ; j++, v++ )
 			{
+				vec3_t nxt;
+
+				CrossProduct(v->normal, v->tangent, nxt);
 				VectorCopy(v->xyz,       verts[j]);
-				VectorCopy(v->normal,    normals[j]);
+				normals[j*4+0] = (uint8_t)(v->normal[0] * 127.5f + 128.0f);
+				normals[j*4+1] = (uint8_t)(v->normal[1] * 127.5f + 128.0f);
+				normals[j*4+2] = (uint8_t)(v->normal[2] * 127.5f + 128.0f);
+				normals[j*4+3] = 0;
 #ifdef USE_VERT_TANGENT_SPACE
-				VectorCopy(v->tangent,   tangents[j]);
-				VectorCopy(v->bitangent, bitangents[j]);
+				tangents[j*4+0] = (uint8_t)(v->tangent[0] * 127.5f + 128.0f);
+				tangents[j*4+1] = (uint8_t)(v->tangent[1] * 127.5f + 128.0f);
+				tangents[j*4+2] = (uint8_t)(v->tangent[2] * 127.5f + 128.0f);
+				tangents[j*4+3] = (DotProduct(nxt, v->bitangent) < 0.0f) ? 0 : 255;
 #endif
 			}
 
@@ -753,7 +756,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vboSurf->surfaceType = SF_VBO_MDVMESH;
 			vboSurf->mdvModel = mdvModel;
 			vboSurf->mdvSurface = surf;
-			vboSurf->numIndexes = surf->numTriangles * 3;
+			vboSurf->numIndexes = surf->numIndexes;
 			vboSurf->numVerts = surf->numVerts;
 			
 			vboSurf->minIndex = 0;
@@ -765,24 +768,22 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vboSurf->vbo->ofs_normal    = ofs_normal;
 #ifdef USE_VERT_TANGENT_SPACE
 			vboSurf->vbo->ofs_tangent   = ofs_tangent;
-			vboSurf->vbo->ofs_bitangent = ofs_bitangent;
 #endif
 			vboSurf->vbo->ofs_st        = ofs_st;
 
 			vboSurf->vbo->stride_xyz       = sizeof(*verts);
-			vboSurf->vbo->stride_normal    = sizeof(*normals);
+			vboSurf->vbo->stride_normal    = sizeof(*normals) * 4;
 #ifdef USE_VERT_TANGENT_SPACE
-			vboSurf->vbo->stride_tangent   = sizeof(*tangents);
-			vboSurf->vbo->stride_bitangent = sizeof(*bitangents);
+			vboSurf->vbo->stride_tangent   = sizeof(*tangents) * 4;
 #endif
 			vboSurf->vbo->stride_st        = sizeof(*st);
 
 			vboSurf->vbo->size_xyz    = sizeof(*verts) * surf->numVerts;
-			vboSurf->vbo->size_normal = sizeof(*normals) * surf->numVerts;
+			vboSurf->vbo->size_normal = sizeof(*normals) * surf->numVerts * 4;
 
 			ri.Free(data);
 
-			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numTriangles, surf->triangles, VBO_USAGE_STATIC);
+			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numIndexes, surf->indexes, VBO_USAGE_STATIC);
 		}
 	}
 

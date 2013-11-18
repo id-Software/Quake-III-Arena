@@ -157,11 +157,8 @@ int S_OGG_Callback_seek(void *datasource, ogg_int64_t offset, int whence)
  
 		case SEEK_END :
 		{
-			// Quake 3 seems to have trouble with FS_SEEK_END 
-			// so we use the file length and FS_SEEK_SET
-
 			// set the file position in the actual file with the Q3 function
-			retVal = FS_Seek(stream->file, (long) stream->length + (long) offset, FS_SEEK_SET);
+			retVal = FS_Seek(stream->file, (long) offset, FS_SEEK_END);
 
 			// something has gone wrong, so we return here
 			if(retVal < 0)

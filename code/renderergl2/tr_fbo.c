@@ -526,22 +526,6 @@ void FBO_Init(void)
 		R_CheckFBO(tr.targetLevelsFbo);
 	}
 
-	if (r_softOverbright->integer)
-	{
-		//tr.screenScratchFbo = FBO_Create("_screenscratch", width, height);
-		tr.screenScratchFbo = FBO_Create("_screenscratch", tr.screenScratchImage->width, tr.screenScratchImage->height);
-		FBO_Bind(tr.screenScratchFbo);
-		
-		//FBO_CreateBuffer(tr.screenScratchFbo, format, 0, 0);
-		FBO_AttachTextureImage(tr.screenScratchImage, 0);
-
-		// FIXME: hack: share zbuffer between render fbo and pre-screen fbo
-		//FBO_CreateBuffer(tr.screenScratchFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-		R_AttachFBOTextureDepth(tr.renderDepthImage->texnum);
-
-		R_CheckFBO(tr.screenScratchFbo);
-	}
-
 	for (i = 0; i < 2; i++)
 	{
 		tr.quarterFbo[i] = FBO_Create(va("_quarter%d", i), tr.quarterImage[i]->width, tr.quarterImage[i]->height);

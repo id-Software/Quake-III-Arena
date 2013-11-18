@@ -124,10 +124,25 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, float color[4], 
 	// constant normal all the way around
 	VectorSubtract( vec3_origin, backEnd.viewParms.or.axis[0], normal );
 
-	VectorCopy(normal, tess.normal[ndx]);
-	VectorCopy(normal, tess.normal[ndx+1]);
-	VectorCopy(normal, tess.normal[ndx+2]);
-	VectorCopy(normal, tess.normal[ndx+3]);
+	tess.normal[ndx][0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+	tess.normal[ndx][1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+	tess.normal[ndx][2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+	tess.normal[ndx][3] = 0;
+
+	tess.normal[ndx+1][0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+	tess.normal[ndx+1][1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+	tess.normal[ndx+1][2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+	tess.normal[ndx+1][3] = 0;
+
+	tess.normal[ndx+2][0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+	tess.normal[ndx+2][1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+	tess.normal[ndx+2][2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+	tess.normal[ndx+2][3] = 0;
+
+	tess.normal[ndx+3][0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+	tess.normal[ndx+3][1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+	tess.normal[ndx+3][2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+	tess.normal[ndx+3][3] = 0;
 	
 	// standard square texture coordinates
 	VectorSet2(tess.texCoords[ndx  ][0], s1, t1);
@@ -311,30 +326,29 @@ static void RB_SurfacePolychain( srfPoly_t *p ) {
 	tess.numVertexes = numv;
 }
 
-static void RB_SurfaceVertsAndTris( int numVerts, srfVert_t *verts, int numTriangles, srfTriangle_t *triangles, int dlightBits, int pshadowBits)
+static void RB_SurfaceVertsAndIndexes( int numVerts, srfVert_t *verts, int numIndexes, glIndex_t *indexes, int dlightBits, int pshadowBits)
 {
 	int             i;
-	srfTriangle_t  *tri;
+	glIndex_t      *inIndex;
 	srfVert_t      *dv;
-	float          *xyz, *normal, *texCoords, *lightCoords, *lightdir;
+	float          *xyz, *texCoords, *lightCoords, *lightdir;
+	uint8_t        *normal;
 #ifdef USE_VERT_TANGENT_SPACE
-	float          *tangent, *bitangent;
+	uint8_t        *tangent;
 #endif
-	glIndex_t      *index;
+	glIndex_t      *outIndex;
 	float          *color;
 
 	RB_CheckVBOandIBO(tess.vbo, tess.ibo);
 
-	RB_CHECKOVERFLOW( numVerts, numTriangles * 3 );
+	RB_CHECKOVERFLOW( numVerts, numIndexes );
 
-	tri = triangles;
-	index = &tess.indexes[ tess.numIndexes ];
-	for ( i = 0 ; i < numTriangles ; i++, tri++ ) {
-		*index++ = tess.numVertexes + tri->indexes[0];
-		*index++ = tess.numVertexes + tri->indexes[1];
-		*index++ = tess.numVertexes + tri->indexes[2];
+	inIndex = indexes;
+	outIndex = &tess.indexes[ tess.numIndexes ];
+	for ( i = 0 ; i < numIndexes ; i++ ) {
+		*outIndex++ = tess.numVertexes + *inIndex++;
 	}
-	tess.numIndexes += numTriangles * 3;
+	tess.numIndexes += numIndexes;
 
 	if ( tess.shader->vertexAttribs & ATTR_POSITION )
 	{
@@ -349,7 +363,12 @@ static void RB_SurfaceVertsAndTris( int numVerts, srfVert_t *verts, int numTrian
 		dv = verts;
 		normal = tess.normal[ tess.numVertexes ];
 		for ( i = 0 ; i < numVerts ; i++, dv++, normal+=4 )
-			VectorCopy(dv->normal, normal);
+		{
+			normal[0] = (uint8_t)(dv->normal[0] * 127.5f + 128.0f);
+			normal[1] = (uint8_t)(dv->normal[1] * 127.5f + 128.0f);
+			normal[2] = (uint8_t)(dv->normal[2] * 127.5f + 128.0f);
+			normal[3] = 0;
+		}
 	}
 
 #ifdef USE_VERT_TANGENT_SPACE
@@ -358,15 +377,12 @@ static void RB_SurfaceVertsAndTris( int numVerts, srfVert_t *verts, int numTrian
 		dv = verts;
 		tangent = tess.tangent[ tess.numVertexes ];
 		for ( i = 0 ; i < numVerts ; i++, dv++, tangent+=4 )
-			VectorCopy(dv->tangent, tangent);
-	}
-
-	if ( tess.shader->vertexAttribs & ATTR_BITANGENT )
-	{
-		dv = verts;
-		bitangent = tess.bitangent[ tess.numVertexes ];
-		for ( i = 0 ; i < numVerts ; i++, dv++, bitangent+=4 )
-			VectorCopy(dv->bitangent, bitangent);
+		{
+			tangent[0] = (uint8_t)(dv->tangent[0] * 127.5f + 128.0f);
+			tangent[1] = (uint8_t)(dv->tangent[1] * 127.5f + 128.0f);
+			tangent[2] = (uint8_t)(dv->tangent[2] * 127.5f + 128.0f);
+			tangent[3] = (uint8_t)(dv->tangent[3] * 127.5f + 128.0f);
+		}
 	}
 #endif
 
@@ -437,8 +453,8 @@ static qboolean RB_SurfaceVbo(VBO_t *vbo, IBO_t *ibo, int numVerts, int numIndex
 	// merge this into any existing multidraw primitives
 	mergeForward = -1;
 	mergeBack = -1;
-	firstIndexOffset = BUFFER_OFFSET(firstIndex * sizeof(GL_INDEX_TYPE));
-	lastIndexOffset  = BUFFER_OFFSET((firstIndex + numIndexes) * sizeof(GL_INDEX_TYPE));
+	firstIndexOffset = BUFFER_OFFSET(firstIndex * sizeof(glIndex_t));
+	lastIndexOffset  = BUFFER_OFFSET((firstIndex + numIndexes) * sizeof(glIndex_t));
 
 	if (r_mergeMultidraws->integer)
 	{
@@ -523,14 +539,14 @@ RB_SurfaceTriangles
 =============
 */
 static void RB_SurfaceTriangles( srfBspSurface_t *srf ) {
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
-			srf->triangles, srf->dlightBits, srf->pshadowBits);
+	RB_SurfaceVertsAndIndexes(srf->numVerts, srf->verts, srf->numIndexes,
+			srf->indexes, srf->dlightBits, srf->pshadowBits);
 }
 
 
@@ -1129,7 +1145,8 @@ static void LerpMeshVertexes_scalar(mdvSurface_t *surf, float backlerp)
     	VectorArrayNormalize((vec4_t *)tess.normal[tess.numVertexes], numVerts);
    	}
 #endif
-	float *outXyz, *outNormal;
+	float *outXyz;
+	uint8_t *outNormal;
 	mdvVertex_t *newVerts;
 	int		vertNum;
 
@@ -1146,8 +1163,16 @@ static void LerpMeshVertexes_scalar(mdvSurface_t *surf, float backlerp)
 
 		for (vertNum=0 ; vertNum < surf->numVerts ; vertNum++)
 		{
+			vec3_t normal;
+
 			VectorCopy(newVerts->xyz,    outXyz);
-			VectorCopy(newVerts->normal, outNormal);
+			VectorCopy(newVerts->normal, normal);
+
+			outNormal[0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+			outNormal[1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+			outNormal[2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+			outNormal[3] = 0;
+
 			newVerts++;
 			outXyz += 4;
 			outNormal += 4;
@@ -1165,15 +1190,22 @@ static void LerpMeshVertexes_scalar(mdvSurface_t *surf, float backlerp)
 
 		for (vertNum=0 ; vertNum < surf->numVerts ; vertNum++)
 		{
+			vec3_t normal;
+
 			VectorLerp(newVerts->xyz,    oldVerts->xyz,    backlerp, outXyz);
-			VectorLerp(newVerts->normal, oldVerts->normal, backlerp, outNormal);
-			//VectorNormalize(outNormal);
+			VectorLerp(newVerts->normal, oldVerts->normal, backlerp, normal);
+			VectorNormalize(normal);
+
+			outNormal[0] = (uint8_t)(normal[0] * 127.5f + 128.0f);
+			outNormal[1] = (uint8_t)(normal[1] * 127.5f + 128.0f);
+			outNormal[2] = (uint8_t)(normal[2] * 127.5f + 128.0f);
+			outNormal[3] = 0;
+
 			newVerts++;
 			oldVerts++;
 			outXyz += 4;
 			outNormal += 4;
 		}
-		VectorArrayNormalize((vec4_t *)tess.normal[tess.numVertexes], surf->numVerts);
 	}
 
 }
@@ -1201,9 +1233,7 @@ RB_SurfaceMesh
 static void RB_SurfaceMesh(mdvSurface_t *surface) {
 	int				j;
 	float			backlerp;
-	srfTriangle_t 	*triangles;
 	mdvSt_t			*texCoords;
-	int				indexes;
 	int				Bob, Doug;
 	int				numVerts;
 
@@ -1213,20 +1243,16 @@ static void RB_SurfaceMesh(mdvSurface_t *surface) {
 		backlerp = backEnd.currentEntity->e.backlerp;
 	}
 
-	RB_CHECKOVERFLOW( surface->numVerts, surface->numTriangles*3 );
+	RB_CHECKOVERFLOW( surface->numVerts, surface->numIndexes );
 
 	LerpMeshVertexes (surface, backlerp);
 
-	triangles = surface->triangles;
-	indexes = surface->numTriangles * 3;
 	Bob = tess.numIndexes;
 	Doug = tess.numVertexes;
-	for (j = 0 ; j < surface->numTriangles ; j++) {
-		tess.indexes[Bob + j*3 + 0] = Doug + triangles[j].indexes[0];
-		tess.indexes[Bob + j*3 + 1] = Doug + triangles[j].indexes[1];
-		tess.indexes[Bob + j*3 + 2] = Doug + triangles[j].indexes[2];
+	for (j = 0 ; j < surface->numIndexes ; j++) {
+		tess.indexes[Bob + j] = Doug + surface->indexes[j];
 	}
-	tess.numIndexes += indexes;
+	tess.numIndexes += surface->numIndexes;
 
 	texCoords = surface->st;
 
@@ -1248,14 +1274,14 @@ RB_SurfaceFace
 ==============
 */
 static void RB_SurfaceFace( srfBspSurface_t *srf ) {
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
 	}
 
-	RB_SurfaceVertsAndTris(srf->numVerts, srf->verts, srf->numTriangles,
-			srf->triangles, srf->dlightBits, srf->pshadowBits);
+	RB_SurfaceVertsAndIndexes(srf->numVerts, srf->verts, srf->numIndexes,
+			srf->indexes, srf->dlightBits, srf->pshadowBits);
 }
 
 
@@ -1300,9 +1326,9 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 	int		i, j;
 	float	*xyz;
 	float	*texCoords, *lightCoords;
-	float	*normal;
+	uint8_t *normal;
 #ifdef USE_VERT_TANGENT_SPACE
-	float   *tangent, *bitangent;
+	uint8_t *tangent;
 #endif
 	float   *color, *lightdir;
 	srfVert_t	*dv;
@@ -1317,7 +1343,7 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 	int     pshadowBits;
 	//int		*vDlightBits;
 
-	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3,
+	if( RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes,
 				srf->firstIndex, srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qtrue ) )
 	{
 		return;
@@ -1390,7 +1416,6 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 		normal = tess.normal[numVertexes];
 #ifdef USE_VERT_TANGENT_SPACE
 		tangent = tess.tangent[numVertexes];
-		bitangent = tess.bitangent[numVertexes];
 #endif
 		texCoords = tess.texCoords[numVertexes][0];
 		lightCoords = tess.texCoords[numVertexes][1];
@@ -1411,21 +1436,21 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 
 				if ( tess.shader->vertexAttribs & ATTR_NORMAL )
 				{
-					VectorCopy(dv->normal, normal);
+					normal[0] = (uint8_t)(dv->normal[0] * 127.5f + 128.0f);
+					normal[1] = (uint8_t)(dv->normal[1] * 127.5f + 128.0f);
+					normal[2] = (uint8_t)(dv->normal[2] * 127.5f + 128.0f);
+					normal[3] = 0;
 					normal += 4;
 				}
 
 #ifdef USE_VERT_TANGENT_SPACE
 				if ( tess.shader->vertexAttribs & ATTR_TANGENT )
 				{
-					VectorCopy(dv->tangent, tangent);
+					tangent[0] = (uint8_t)(dv->tangent[0] * 127.5f + 128.0f);
+					tangent[1] = (uint8_t)(dv->tangent[1] * 127.5f + 128.0f);
+					tangent[2] = (uint8_t)(dv->tangent[2] * 127.5f + 128.0f);
+					tangent[3] = (uint8_t)(dv->tangent[3] * 127.5f + 128.0f);	
 					tangent += 4;
-				}
-
-				if ( tess.shader->vertexAttribs & ATTR_BITANGENT )
-				{
-					VectorCopy(dv->bitangent, bitangent);
-					bitangent += 4;
 				}
 #endif
 				if ( tess.shader->vertexAttribs & ATTR_TEXCOORD )
@@ -1576,7 +1601,7 @@ static void RB_SurfaceFlare(srfFlare_t *surf)
 
 static void RB_SurfaceVBOMesh(srfBspSurface_t * srf)
 {
-	RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numTriangles * 3, srf->firstIndex,
+	RB_SurfaceVbo (srf->vbo, srf->ibo, srf->numVerts, srf->numIndexes, srf->firstIndex,
 			srf->minIndex, srf->maxIndex, srf->dlightBits, srf->pshadowBits, qfalse );
 }
 

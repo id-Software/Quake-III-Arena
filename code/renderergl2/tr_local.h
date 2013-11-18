@@ -116,7 +116,6 @@ typedef struct VBO_s
 	uint32_t        ofs_lightdir;
 #ifdef USE_VERT_TANGENT_SPACE
 	uint32_t        ofs_tangent;
-	uint32_t        ofs_bitangent;
 #endif
 	uint32_t        stride_xyz;
 	uint32_t        stride_normal;
@@ -126,7 +125,6 @@ typedef struct VBO_s
 	uint32_t        stride_lightdir;
 #ifdef USE_VERT_TANGENT_SPACE
 	uint32_t        stride_tangent;
-	uint32_t        stride_bitangent;
 #endif
 	uint32_t        size_xyz;
 	uint32_t        size_normal;
@@ -515,19 +513,17 @@ enum
 	ATTR_INDEX_TEXCOORD0      = 1,
 	ATTR_INDEX_TEXCOORD1      = 2,
 	ATTR_INDEX_TANGENT        = 3,
-	ATTR_INDEX_BITANGENT      = 4,
-	ATTR_INDEX_NORMAL         = 5,
-	ATTR_INDEX_COLOR          = 6,
-	ATTR_INDEX_PAINTCOLOR     = 7,
-	ATTR_INDEX_LIGHTDIRECTION = 8,
-	ATTR_INDEX_BONE_INDEXES   = 9,
-	ATTR_INDEX_BONE_WEIGHTS   = 10,
+	ATTR_INDEX_NORMAL         = 4,
+	ATTR_INDEX_COLOR          = 5,
+	ATTR_INDEX_PAINTCOLOR     = 6,
+	ATTR_INDEX_LIGHTDIRECTION = 7,
+	ATTR_INDEX_BONE_INDEXES   = 8,
+	ATTR_INDEX_BONE_WEIGHTS   = 9,
 
 	// GPU vertex animations
-	ATTR_INDEX_POSITION2      = 11,
-	ATTR_INDEX_TANGENT2       = 12,
-	ATTR_INDEX_BITANGENT2     = 13,
-	ATTR_INDEX_NORMAL2        = 14
+	ATTR_INDEX_POSITION2      = 10,
+	ATTR_INDEX_TANGENT2       = 11,
+	ATTR_INDEX_NORMAL2        = 12
 };
 
 enum
@@ -613,26 +609,23 @@ enum
 	ATTR_TEXCOORD =       0x0002,
 	ATTR_LIGHTCOORD =     0x0004,
 	ATTR_TANGENT =        0x0008,
-	ATTR_BITANGENT =      0x0010,
-	ATTR_NORMAL =         0x0020,
-	ATTR_COLOR =          0x0040,
-	ATTR_PAINTCOLOR =     0x0080,
-	ATTR_LIGHTDIRECTION = 0x0100,
-	ATTR_BONE_INDEXES =   0x0200,
-	ATTR_BONE_WEIGHTS =   0x0400,
+	ATTR_NORMAL =         0x0010,
+	ATTR_COLOR =          0x0020,
+	ATTR_PAINTCOLOR =     0x0040,
+	ATTR_LIGHTDIRECTION = 0x0080,
+	ATTR_BONE_INDEXES =   0x0100,
+	ATTR_BONE_WEIGHTS =   0x0200,
 
 	// for .md3 interpolation
-	ATTR_POSITION2 =      0x0800,
-	ATTR_TANGENT2 =       0x1000,
-	ATTR_BITANGENT2 =     0x2000,
-	ATTR_NORMAL2 =        0x4000,
+	ATTR_POSITION2 =      0x0400,
+	ATTR_TANGENT2 =       0x0800,
+	ATTR_NORMAL2 =        0x1000,
 
 	ATTR_DEFAULT = ATTR_POSITION,
 	ATTR_BITS =	ATTR_POSITION |
 				ATTR_TEXCOORD |
 				ATTR_LIGHTCOORD |
 				ATTR_TANGENT |
-				ATTR_BITANGENT |
 				ATTR_NORMAL |
 				ATTR_COLOR |
 				ATTR_PAINTCOLOR |
@@ -641,7 +634,6 @@ enum
 				ATTR_BONE_WEIGHTS |
 				ATTR_POSITION2 |
 				ATTR_TANGENT2 |
-				ATTR_BITANGENT2 |
 				ATTR_NORMAL2
 };
 
@@ -680,12 +672,10 @@ enum
 	LIGHTDEF_LIGHTTYPE_MASK      = 0x0003,
 	LIGHTDEF_ENTITY              = 0x0004,
 	LIGHTDEF_USE_TCGEN_AND_TCMOD = 0x0008,
-	LIGHTDEF_USE_DELUXEMAP       = 0x0010,
-	LIGHTDEF_USE_PARALLAXMAP     = 0x0020,
-	LIGHTDEF_USE_SHADOWMAP       = 0x0040,
-	LIGHTDEF_USE_CUBEMAP         = 0x0080,
-	LIGHTDEF_ALL                 = 0x00FF,
-	LIGHTDEF_COUNT               = 0x0100
+	LIGHTDEF_USE_PARALLAXMAP     = 0x0010,
+	LIGHTDEF_USE_SHADOWMAP       = 0x0020,
+	LIGHTDEF_ALL                 = 0x003F,
+	LIGHTDEF_COUNT               = 0x0040
 };
 
 enum
@@ -721,6 +711,8 @@ typedef enum
 	UNIFORM_SHADOWMVP,
 	UNIFORM_SHADOWMVP2,
 	UNIFORM_SHADOWMVP3,
+
+	UNIFORM_ENABLETEXTURES,
 
 	UNIFORM_DIFFUSETEXMATRIX,
 	UNIFORM_DIFFUSETEXOFFTURB,
@@ -986,8 +978,7 @@ typedef struct
 	vec2_t          lightmap;
 	vec3_t          normal;
 #ifdef USE_VERT_TANGENT_SPACE
-	vec3_t          tangent;
-	vec3_t          bitangent;
+	vec4_t          tangent;
 #endif
 	vec3_t          lightdir;
 	vec4_t			vertexColors;
@@ -998,16 +989,10 @@ typedef struct
 } srfVert_t;
 
 #ifdef USE_VERT_TANGENT_SPACE
-#define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0, 0}}
+#define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0}, {0, 0, 0, 0}}
 #else
 #define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0, 0}}
 #endif
-
-typedef struct
-{
-	int             indexes[3];
-	int             neighbors[3];
-} srfTriangle_t;
 
 // srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VBO_MESH
 typedef struct srfBspSurface_s
@@ -1024,9 +1009,9 @@ typedef struct srfBspSurface_s
 	float			cullRadius;
 	cplane_t        cullPlane;
 
-	// triangle definitions
-	int             numTriangles;
-	srfTriangle_t  *triangles;
+	// indexes
+	int             numIndexes;
+	glIndex_t      *indexes;
 
 	// vertexes
 	int             numVerts;
@@ -1326,8 +1311,8 @@ typedef struct mdvSurface_s
 	mdvVertex_t    *verts;
 	mdvSt_t        *st;
 
-	int             numTriangles;
-	srfTriangle_t  *triangles;
+	int             numIndexes;
+	glIndex_t      *indexes;
 
 	struct mdvModel_s *model;
 } mdvSurface_t;
@@ -1609,7 +1594,6 @@ typedef struct {
 	image_t					*fogImage;
 	image_t					*dlightImage;	// inverse-quare highlight for projective adding
 	image_t					*flareImage;
-	image_t					*greyImage;			    // full of 0x80
 	image_t					*whiteImage;			// full of 0xff
 	image_t					*identityLightImage;	// full of tr.identityLightByte
 
@@ -1621,7 +1605,6 @@ typedef struct {
 	image_t					*renderDepthImage;
 	image_t					*pshadowMaps[MAX_DRAWN_PSHADOWS];
 	image_t					*textureScratchImage[2];
-	image_t					*screenScratchImage;
 	image_t                 *quarterImage[2];
 	image_t					*calcLevelsImage;
 	image_t					*targetLevelsImage;
@@ -1640,7 +1623,6 @@ typedef struct {
 	FBO_t					*depthFbo;
 	FBO_t					*pshadowFbos[MAX_DRAWN_PSHADOWS];
 	FBO_t					*textureScratchFbo[2];
-	FBO_t					*screenScratchFbo;
 	FBO_t                   *quarterFbo[2];
 	FBO_t					*calcLevelsFbo;
 	FBO_t					*targetLevelsFbo;
@@ -2104,10 +2086,9 @@ typedef struct shaderCommands_s
 {
 	glIndex_t	indexes[SHADER_MAX_INDEXES] QALIGN(16);
 	vec4_t		xyz[SHADER_MAX_VERTEXES] QALIGN(16);
-	vec4_t		normal[SHADER_MAX_VERTEXES] QALIGN(16);
+	uint8_t		normal[SHADER_MAX_VERTEXES][4] QALIGN(16);
 #ifdef USE_VERT_TANGENT_SPACE
-	vec4_t		tangent[SHADER_MAX_VERTEXES] QALIGN(16);
-	vec4_t		bitangent[SHADER_MAX_VERTEXES] QALIGN(16);
+	uint8_t		tangent[SHADER_MAX_VERTEXES][4] QALIGN(16);
 #endif
 	vec2_t		texCoords[SHADER_MAX_VERTEXES][2] QALIGN(16);
 	vec4_t		vertexColors[SHADER_MAX_VERTEXES] QALIGN(16);
@@ -2279,7 +2260,7 @@ VBO_t          *R_CreateVBO(const char *name, byte * vertexes, int vertexesSize,
 VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vertexes, uint32_t stateBits, vboUsage_t usage);
 
 IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, vboUsage_t usage);
-IBO_t          *R_CreateIBO2(const char *name, int numTriangles, srfTriangle_t * triangles, vboUsage_t usage);
+IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes, vboUsage_t usage);
 
 void            R_BindVBO(VBO_t * vbo);
 void            R_BindNullVBO(void);

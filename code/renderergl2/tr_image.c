@@ -2875,9 +2875,6 @@ void R_CreateBuiltinImages( void ) {
 	Com_Memset( data, 255, sizeof( data ) );
 	tr.whiteImage = R_CreateImage("*white", (byte *)data, 8, 8, IMGTYPE_COLORALPHA, IMGFLAG_NONE, 0);
 
-	Com_Memset( data, 128, sizeof( data ) );
-	tr.greyImage = R_CreateImage("*grey", (byte *)data, 8, 8, IMGTYPE_COLORALPHA, IMGFLAG_NONE, GL_RGBA8);
-
 	if (r_dlightMode->integer >= 2)
 	{
 		for( x = 0; x < MAX_DLIGHTS; x++)
@@ -2933,9 +2930,6 @@ void R_CreateBuiltinImages( void ) {
 
 		if (r_drawSunRays->integer)
 			tr.sunRaysImage = R_CreateImage("*sunRays", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, rgbFormat);
-
-		if (r_softOverbright->integer)
-			tr.screenScratchImage = R_CreateImage("*screenScratch", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, rgbFormat);
 
 		if (glRefConfig.framebufferObject)
 		{

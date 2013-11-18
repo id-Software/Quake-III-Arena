@@ -1,8 +1,8 @@
-attribute vec4 attr_Position;
+attribute vec3 attr_Position;
 attribute vec3 attr_Normal;
 
 #if defined(USE_VERTEX_ANIMATION)
-attribute vec4 attr_Position2;
+attribute vec3 attr_Position2;
 attribute vec3 attr_Normal2;
 #endif
 
@@ -167,7 +167,7 @@ vec4 CalcColor(vec3 position, vec3 normal)
 
 	if (u_AlphaGen == AGEN_LIGHTING_SPECULAR)
 	{
-		vec3 lightDir = normalize(vec3(-960.0, 1980.0, 96.0) - position.xyz);
+		vec3 lightDir = normalize(vec3(-960.0, 1980.0, 96.0) - position);
 		vec3 reflected = -reflect(lightDir, normal);
 		
 		color.a = clamp(dot(reflected, normalize(viewer)), 0.0, 1.0);
@@ -184,10 +184,10 @@ vec4 CalcColor(vec3 position, vec3 normal)
 #endif
 
 #if defined(USE_FOG)
-float CalcFog(vec4 position)
+float CalcFog(vec3 position)
 {
-	float s = dot(position, u_FogDistance) * 8.0;
-	float t = dot(position, u_FogDepth);
+	float s = (dot(position, u_FogDistance.xyz) + u_FogDistance.w) * 8.0;
+	float t = dot(position, u_FogDepth.xyz) + u_FogDepth.w;
 
 	float eyeOutside = step(0.0, -u_FogEyeT);
 	float fogged = step(eyeOutside, t);
@@ -202,27 +202,27 @@ float CalcFog(vec4 position)
 void main()
 {
 #if defined(USE_VERTEX_ANIMATION)
-	vec4 position = mix(attr_Position, attr_Position2, u_VertexLerp);
-	vec3 normal = normalize(mix(attr_Normal, attr_Normal2, u_VertexLerp));
+	vec3 position  = mix(attr_Position,  attr_Position2,  u_VertexLerp);
+	vec3 normal    = normalize(mix(attr_Normal,    attr_Normal2,    u_VertexLerp) * 2.0 - vec3(1.0));
 #else
-	vec4 position = attr_Position;
-	vec3 normal = attr_Normal;
+	vec3 position  = attr_Position;
+	vec3 normal    = attr_Normal * 2.0 - vec3(1.0);
 #endif
 
 #if defined(USE_DEFORM_VERTEXES)
-	position.xyz = DeformPosition(position.xyz, normal, attr_TexCoord0.st);
+	position = DeformPosition(position, normal, attr_TexCoord0.st);
 #endif
 
-	gl_Position = u_ModelViewProjectionMatrix * position;
+	gl_Position = u_ModelViewProjectionMatrix * vec4(position, 1.0);
 
 #if defined(USE_TCGEN)
-	vec2 tex = GenTexCoords(u_TCGen0, position.xyz, normal, u_TCGen0Vector0, u_TCGen0Vector1);
+	vec2 tex = GenTexCoords(u_TCGen0, position, normal, u_TCGen0Vector0, u_TCGen0Vector1);
 #else
 	vec2 tex = attr_TexCoord0.st;
 #endif
 
 #if defined(USE_TCMOD)
-	var_DiffuseTex = ModTexCoords(tex, position.xyz, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
+	var_DiffuseTex = ModTexCoords(tex, position, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
 #else
     var_DiffuseTex = tex;
 #endif
@@ -232,7 +232,7 @@ void main()
 #endif
 
 #if defined(USE_RGBAGEN)
-	var_Color = CalcColor(position.xyz, normal);
+	var_Color = CalcColor(position, normal);
 #else
 	var_Color = u_VertColor * attr_Color + u_BaseColor;
 #endif

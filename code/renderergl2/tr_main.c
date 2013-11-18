@@ -454,6 +454,8 @@ qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 	/* do each vertex */
 	for(i = 0; i < 3; i++)
 	{
+		vec3_t bitangent, nxt;
+
 		// calculate s tangent vector
 		s = dv[i]->st[0] + 10.0f;
 		t = dv[i]->st[1];
@@ -475,12 +477,16 @@ qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 		bary[1] = ((dv[2]->st[0] - s) * (dv[0]->st[1] - t) - (dv[0]->st[0] - s) * (dv[2]->st[1] - t)) / bb;
 		bary[2] = ((dv[0]->st[0] - s) * (dv[1]->st[1] - t) - (dv[1]->st[0] - s) * (dv[0]->st[1] - t)) / bb;
 
-		dv[i]->bitangent[0] = bary[0] * dv[0]->xyz[0] + bary[1] * dv[1]->xyz[0] + bary[2] * dv[2]->xyz[0];
-		dv[i]->bitangent[1] = bary[0] * dv[0]->xyz[1] + bary[1] * dv[1]->xyz[1] + bary[2] * dv[2]->xyz[1];
-		dv[i]->bitangent[2] = bary[0] * dv[0]->xyz[2] + bary[1] * dv[1]->xyz[2] + bary[2] * dv[2]->xyz[2];
+		bitangent[0] = bary[0] * dv[0]->xyz[0] + bary[1] * dv[1]->xyz[0] + bary[2] * dv[2]->xyz[0];
+		bitangent[1] = bary[0] * dv[0]->xyz[1] + bary[1] * dv[1]->xyz[1] + bary[2] * dv[2]->xyz[1];
+		bitangent[2] = bary[0] * dv[0]->xyz[2] + bary[1] * dv[1]->xyz[2] + bary[2] * dv[2]->xyz[2];
 
-		VectorSubtract(dv[i]->bitangent, dv[i]->xyz, dv[i]->bitangent);
-		VectorNormalize(dv[i]->bitangent);
+		VectorSubtract(bitangent, dv[i]->xyz, bitangent);
+		VectorNormalize(bitangent);
+
+		// store bitangent handedness
+		CrossProduct(dv[i]->normal, dv[i]->tangent, nxt);
+		dv[i]->tangent[3] = (DotProduct(nxt, bitangent) < 0.0f) ? -1.0f : 1.0f;
 
 		// debug code
 		//% Sys_FPrintf( SYS_VRB, "%d S: (%f %f %f) T: (%f %f %f)\n", i,
@@ -1288,9 +1294,9 @@ void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane) {
 		return;
 	case SF_TRIANGLES:
 		tri = (srfBspSurface_t *)surfType;
-		v1 = tri->verts + tri->triangles[0].indexes[0];
-		v2 = tri->verts + tri->triangles[0].indexes[1];
-		v3 = tri->verts + tri->triangles[0].indexes[2];
+		v1 = tri->verts + tri->indexes[0];
+		v2 = tri->verts + tri->indexes[1];
+		v3 = tri->verts + tri->indexes[2];
 		PlaneFromPoints( plane4, v1->xyz, v2->xyz, v3->xyz );
 		VectorCopy( plane4, plane->normal ); 
 		plane->dist = plane4[3];
@@ -1556,7 +1562,8 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 
 	for ( i = 0; i < tess.numIndexes; i += 3 )
 	{
-		vec3_t normal;
+		vec3_t normal, tNormal;
+
 		float len;
 
 		VectorSubtract( tess.xyz[tess.indexes[i]], tr.viewParms.or.origin, normal );
@@ -1567,7 +1574,11 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 			shortest = len;
 		}
 
-		if ( DotProduct( normal, tess.normal[tess.indexes[i]] ) >= 0 )
+		tNormal[0] = tess.normal[tess.indexes[i]][0] / 127.5f - 1.0f;
+		tNormal[1] = tess.normal[tess.indexes[i]][1] / 127.5f - 1.0f;
+		tNormal[2] = tess.normal[tess.indexes[i]][2] / 127.5f - 1.0f;
+
+		if ( DotProduct( normal, tNormal ) >= 0 )
 		{
 			numTriangles--;
 		}

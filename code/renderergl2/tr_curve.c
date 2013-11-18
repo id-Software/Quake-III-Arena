@@ -213,13 +213,13 @@ static	int	neighbors[8][2] = {
 }
 
 #ifdef USE_VERT_TANGENT_SPACE
-static void MakeMeshTangentVectors(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], int numTriangles,
-								   srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2])
+static void MakeMeshTangentVectors(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], int numIndexes,
+								   glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3])
 {
 	int             i, j;
 	srfVert_t      *dv[3];
 	static srfVert_t       ctrl2[MAX_GRID_SIZE * MAX_GRID_SIZE];
-	srfTriangle_t  *tri;
+	glIndex_t  *tri;
 
 	// FIXME: use more elegant way
 	for(i = 0; i < width; i++)
@@ -231,52 +231,14 @@ static void MakeMeshTangentVectors(int width, int height, srfVert_t ctrl[MAX_GRI
 		}
 	}
 
-	for(i = 0, tri = triangles; i < numTriangles; i++, tri++)
+	for(i = 0, tri = indexes; i < numIndexes; i += 3, tri += 3)
 	{
-		dv[0] = &ctrl2[tri->indexes[0]];
-		dv[1] = &ctrl2[tri->indexes[1]];
-		dv[2] = &ctrl2[tri->indexes[2]];
+		dv[0] = &ctrl2[tri[0]];
+		dv[1] = &ctrl2[tri[1]];
+		dv[2] = &ctrl2[tri[2]];
 
 		R_CalcTangentVectors(dv);
 	}
-
-#if 0
-	for(i = 0; i < (width * height); i++)
-	{
-		dv0 = &ctrl2[i];
-
-		VectorNormalize(dv0->normal);
-#if 0
-		VectorNormalize(dv0->tangent);
-		VectorNormalize(dv0->bitangent);
-#else
-		d = DotProduct(dv0->tangent, dv0->normal);
-		VectorMA(dv0->tangent, -d, dv0->normal, dv0->tangent);
-		VectorNormalize(dv0->tangent);
-
-		d = DotProduct(dv0->bitangent, dv0->normal);
-		VectorMA(dv0->bitangent, -d, dv0->normal, dv0->bitangent);
-		VectorNormalize(dv0->bitangent);
-#endif
-	}
-#endif
-
-
-#if 0
-	// do another extra smoothing for normals to avoid flat shading
-	for(i = 0; i < (width * height); i++)
-	{
-		for(j = 0; j < (width * height); j++)
-		{
-			if(R_CompareVert(&ctrl2[i], &ctrl2[j], qfalse))
-			{
-				VectorAdd(ctrl2[i].normal, ctrl2[j].normal, ctrl2[i].normal);
-			}
-		}
-
-		VectorNormalize(ctrl2[i].normal);
-	}
-#endif
 
 	for(i = 0; i < width; i++)
 	{
@@ -285,26 +247,25 @@ static void MakeMeshTangentVectors(int width, int height, srfVert_t ctrl[MAX_GRI
 			dv[0] = &ctrl2[j * width + i];
 			dv[1] = &ctrl[j][i];
 
-			VectorCopy(dv[0]->tangent, dv[1]->tangent);
-			VectorCopy(dv[0]->bitangent, dv[1]->bitangent);
+			VectorCopy4(dv[0]->tangent, dv[1]->tangent);
 		}
 	}
 }
 #endif
 
 
-static int MakeMeshTriangles(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE],
-							 srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2])
+static int MakeMeshIndexes(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE],
+							 glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3])
 {
 	int             i, j;
-	int             numTriangles;
+	int             numIndexes;
 	int             w, h;
 	srfVert_t      *dv;
 	static srfVert_t       ctrl2[MAX_GRID_SIZE * MAX_GRID_SIZE];
 
 	h = height - 1;
 	w = width - 1;
-	numTriangles = 0;
+	numIndexes = 0;
 	for(i = 0; i < h; i++)
 	{
 		for(j = 0; j < w; j++)
@@ -317,15 +278,13 @@ static int MakeMeshTriangles(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE
 			v3 = v2 + width;
 			v4 = v3 + 1;
 
-			triangles[numTriangles].indexes[0] = v2;
-			triangles[numTriangles].indexes[1] = v3;
-			triangles[numTriangles].indexes[2] = v1;
-			numTriangles++;
+			indexes[numIndexes++] = v2;
+			indexes[numIndexes++] = v3;
+			indexes[numIndexes++] = v1;
 
-			triangles[numTriangles].indexes[0] = v1;
-			triangles[numTriangles].indexes[1] = v3;
-			triangles[numTriangles].indexes[2] = v4;
-			numTriangles++;
+			indexes[numIndexes++] = v1;
+			indexes[numIndexes++] = v3;
+			indexes[numIndexes++] = v4;
 		}
 	}
 
@@ -339,7 +298,7 @@ static int MakeMeshTriangles(int width, int height, srfVert_t ctrl[MAX_GRID_SIZE
 		}
 	}
 
-	return numTriangles;
+	return numIndexes;
 }
 
 
@@ -418,7 +377,7 @@ R_CreateSurfaceGridMesh
 */
 srfBspSurface_t *R_CreateSurfaceGridMesh(int width, int height,
 								srfVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], float errorTable[2][MAX_GRID_SIZE],
-								int numTriangles, srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2]) {
+								int numIndexes, glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3]) {
 	int i, j, size;
 	srfVert_t	*vert;
 	vec3_t		tmpVec;
@@ -437,9 +396,9 @@ srfBspSurface_t *R_CreateSurfaceGridMesh(int width, int height,
 	grid->heightLodError = /*ri.Hunk_Alloc*/ ri.Malloc( height * 4 );
 	Com_Memcpy( grid->heightLodError, errorTable[1], height * 4 );
 
-	grid->numTriangles = numTriangles;
-	grid->triangles = ri.Malloc(grid->numTriangles * sizeof(srfTriangle_t));
-	Com_Memcpy(grid->triangles, triangles, numTriangles * sizeof(srfTriangle_t));
+	grid->numIndexes = numIndexes;
+	grid->indexes = ri.Malloc(grid->numIndexes * sizeof(glIndex_t));
+	Com_Memcpy(grid->indexes, indexes, numIndexes * sizeof(glIndex_t));
 
 	grid->numVerts = (width * height);
 	grid->verts = ri.Malloc(grid->numVerts * sizeof(srfVert_t));
@@ -453,9 +412,9 @@ srfBspSurface_t *R_CreateSurfaceGridMesh(int width, int height,
 	grid->heightLodError = ri.Hunk_Alloc( height * 4 );
 	Com_Memcpy( grid->heightLodError, errorTable[1], height * 4 );
 
-	grid->numTriangles = numTriangles;
-	grid->triangles = ri.Hunk_Alloc(grid->numTriangles * sizeof(srfTriangle_t), h_low);
-	Com_Memcpy(grid->triangles, triangles, numTriangles * sizeof(srfTriangle_t));
+	grid->numIndexes = numIndexes;
+	grid->indexes = ri.Hunk_Alloc(grid->numIndexes * sizeof(glIndex_t), h_low);
+	Com_Memcpy(grid->indexes, indexes, numIndexes * sizeof(glIndex_t));
 
 	grid->numVerts = (width * height);
 	grid->verts = ri.Hunk_Alloc(grid->numVerts * sizeof(srfVert_t), h_low);
@@ -493,7 +452,7 @@ R_FreeSurfaceGridMesh
 void R_FreeSurfaceGridMesh( srfBspSurface_t *grid ) {
 	ri.Free(grid->widthLodError);
 	ri.Free(grid->heightLodError);
-	ri.Free(grid->triangles);
+	ri.Free(grid->indexes);
 	ri.Free(grid->verts);
 	ri.Free(grid);
 }
@@ -514,8 +473,8 @@ srfBspSurface_t *R_SubdividePatchToGrid( int width, int height,
 	int			t;
 	srfVert_t	ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE];
 	float		errorTable[2][MAX_GRID_SIZE];
-	int			numTriangles;
-	static srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2];
+	int			numIndexes;
+	static glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3];
 	int consecutiveComplete;
 
 	for ( i = 0 ; i < width ; i++ ) {
@@ -669,16 +628,16 @@ srfBspSurface_t *R_SubdividePatchToGrid( int width, int height,
 	}
 #endif
 
-	// calculate triangles
-	numTriangles = MakeMeshTriangles(width, height, ctrl, triangles);
+	// calculate indexes
+	numIndexes = MakeMeshIndexes(width, height, ctrl, indexes);
 
 	// calculate normals
 	MakeMeshNormals( width, height, ctrl );
 #ifdef USE_VERT_TANGENT_SPACE
-	MakeMeshTangentVectors(width, height, ctrl, numTriangles, triangles);
+	MakeMeshTangentVectors(width, height, ctrl, numIndexes, indexes);
 #endif
 
-	return R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numTriangles, triangles);
+	return R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numIndexes, indexes);
 }
 
 /*
@@ -693,8 +652,8 @@ srfBspSurface_t *R_GridInsertColumn( srfBspSurface_t *grid, int column, int row,
 	float errorTable[2][MAX_GRID_SIZE];
 	float lodRadius;
 	vec3_t lodOrigin;
-	int    numTriangles;
-	static srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2];
+	int    numIndexes;
+	static glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3];
 
 	oldwidth = 0;
 	width = grid->width + 1;
@@ -724,8 +683,8 @@ srfBspSurface_t *R_GridInsertColumn( srfBspSurface_t *grid, int column, int row,
 	// put all the aproximating points on the curve
 	//PutPointsOnCurve( ctrl, width, height );
 
-	// calculate triangles
-	numTriangles = MakeMeshTriangles(width, height, ctrl, triangles);
+	// calculate indexes
+	numIndexes = MakeMeshIndexes(width, height, ctrl, indexes);
 
 	// calculate normals
 	MakeMeshNormals( width, height, ctrl );
@@ -735,7 +694,7 @@ srfBspSurface_t *R_GridInsertColumn( srfBspSurface_t *grid, int column, int row,
 	// free the old grid
 	R_FreeSurfaceGridMesh(grid);
 	// create a new grid
-	grid = R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numTriangles, triangles);
+	grid = R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numIndexes, indexes);
 	grid->lodRadius = lodRadius;
 	VectorCopy(lodOrigin, grid->lodOrigin);
 	return grid;
@@ -753,8 +712,8 @@ srfBspSurface_t *R_GridInsertRow( srfBspSurface_t *grid, int row, int column, ve
 	float errorTable[2][MAX_GRID_SIZE];
 	float lodRadius;
 	vec3_t lodOrigin;
-	int             numTriangles;
-	static srfTriangle_t triangles[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2];
+	int             numIndexes;
+	static glIndex_t indexes[(MAX_GRID_SIZE-1)*(MAX_GRID_SIZE-1)*2*3];
 
 	oldheight = 0;
 	width = grid->width;
@@ -784,8 +743,8 @@ srfBspSurface_t *R_GridInsertRow( srfBspSurface_t *grid, int row, int column, ve
 	// put all the aproximating points on the curve
 	//PutPointsOnCurve( ctrl, width, height );
 
-	// calculate triangles
-	numTriangles = MakeMeshTriangles(width, height, ctrl, triangles);
+	// calculate indexes
+	numIndexes = MakeMeshIndexes(width, height, ctrl, indexes);
 
 	// calculate normals
 	MakeMeshNormals( width, height, ctrl );
@@ -795,7 +754,7 @@ srfBspSurface_t *R_GridInsertRow( srfBspSurface_t *grid, int row, int column, ve
 	// free the old grid
 	R_FreeSurfaceGridMesh(grid);
 	// create a new grid
-	grid = R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numTriangles, triangles);
+	grid = R_CreateSurfaceGridMesh(width, height, ctrl, errorTable, numIndexes, indexes);
 	grid->lodRadius = lodRadius;
 	VectorCopy(lodOrigin, grid->lodOrigin);
 	return grid;
