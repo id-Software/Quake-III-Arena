@@ -24,22 +24,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __TR_EXTRAMATH_H__
 #define __TR_EXTRAMATH_H__
 
-typedef vec_t matrix_t[16];
-typedef int vec2i_t[2];
-typedef int vec3i_t[3];
-typedef int vec4i_t[4];
+typedef vec_t mat4_t[16];
+typedef int ivec2_t[2];
+typedef int ivec3_t[3];
+typedef int ivec4_t[4];
 
-void Matrix16Zero( matrix_t out );
-void Matrix16Identity( matrix_t out );
-void Matrix16Copy( const matrix_t in, matrix_t out );
-void Matrix16Multiply( const matrix_t in1, const matrix_t in2, matrix_t out );
-void Matrix16Transform( const matrix_t in1, const vec4_t in2, vec4_t out );
-qboolean Matrix16Compare(const matrix_t a, const matrix_t b);
-void Matrix16Dump( const matrix_t in );
-void Matrix16Translation( vec3_t vec, matrix_t out );
-void Matrix16Ortho( float left, float right, float bottom, float top, float znear, float zfar, matrix_t out );
-void Matrix16View(vec3_t axes[3], vec3_t origin, matrix_t out);
-void Matrix16SimpleInverse( const matrix_t in, matrix_t out);
+void Mat4Zero( mat4_t out );
+void Mat4Identity( mat4_t out );
+void Mat4Copy( const mat4_t in, mat4_t out );
+void Mat4Multiply( const mat4_t in1, const mat4_t in2, mat4_t out );
+void Mat4Transform( const mat4_t in1, const vec4_t in2, vec4_t out );
+qboolean Mat4Compare(const mat4_t a, const mat4_t b);
+void Mat4Dump( const mat4_t in );
+void Mat4Translation( vec3_t vec, mat4_t out );
+void Mat4Ortho( float left, float right, float bottom, float top, float znear, float zfar, mat4_t out );
+void Mat4View(vec3_t axes[3], vec3_t origin, mat4_t out);
+void Mat4SimpleInverse( const mat4_t in, mat4_t out);
 
 #define VectorCopy2(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1])
 #define VectorSet2(v,x,y)       ((v)[0]=(x),(v)[1]=(y));

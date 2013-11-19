@@ -22,9 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 
-void RB_ToneMap(FBO_t *hdrFbo, vec4i_t hdrBox, FBO_t *ldrFbo, vec4i_t ldrBox, int autoExposure)
+void RB_ToneMap(FBO_t *hdrFbo, ivec4_t hdrBox, FBO_t *ldrFbo, ivec4_t ldrBox, int autoExposure)
 {
-	vec4i_t srcBox, dstBox;
+	ivec4_t srcBox, dstBox;
 	vec4_t color;
 	static int lastFrameCount = 0;
 
@@ -103,9 +103,9 @@ Blurs a part of one framebuffer to another.
 Framebuffers can be identical. 
 =============
 */
-void RB_BokehBlur(FBO_t *src, vec4i_t srcBox, FBO_t *dst, vec4i_t dstBox, float blur)
+void RB_BokehBlur(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, float blur)
 {
-//	vec4i_t srcBox, dstBox;
+//	ivec4_t srcBox, dstBox;
 	vec4_t color;
 	
 	blur *= 10.0f;
@@ -118,7 +118,7 @@ void RB_BokehBlur(FBO_t *src, vec4i_t srcBox, FBO_t *dst, vec4i_t dstBox, float 
 		// bokeh blur
 		if (blur > 0.0f)
 		{
-			vec4i_t quarterBox;
+			ivec4_t quarterBox;
 
 			quarterBox[0] = 0;
 			quarterBox[1] = tr.quarterFbo[0]->height;
@@ -226,7 +226,7 @@ void RB_BokehBlur(FBO_t *src, vec4i_t srcBox, FBO_t *dst, vec4i_t dstBox, float 
 
 static void RB_RadialBlur(FBO_t *srcFbo, FBO_t *dstFbo, int passes, float stretch, float x, float y, float w, float h, float xcenter, float ycenter, float alpha)
 {
-	vec4i_t srcBox, dstBox;
+	ivec4_t srcBox, dstBox;
 	vec4_t color;
 	const float inc = 1.f / passes;
 	const float mul = powf(stretch, inc);
@@ -308,7 +308,7 @@ static qboolean RB_UpdateSunFlareVis(void)
 	return sampleCount > 0;
 }
 
-void RB_SunRays(FBO_t *srcFbo, vec4i_t srcBox, FBO_t *dstFbo, vec4i_t dstBox)
+void RB_SunRays(FBO_t *srcFbo, ivec4_t srcBox, FBO_t *dstFbo, ivec4_t dstBox)
 {
 	vec4_t color;
 	float dot;
@@ -316,7 +316,7 @@ void RB_SunRays(FBO_t *srcFbo, vec4i_t srcBox, FBO_t *dstFbo, vec4i_t dstBox)
 	qboolean colorize = qtrue;
 
 //	float w, h, w2, h2;
-	matrix_t mvp;
+	mat4_t mvp;
 	vec4_t pos, hpos;
 
 	dot = DotProduct(tr.sunDirection, backEnd.viewParms.or.axis[0]);
@@ -329,11 +329,11 @@ void RB_SunRays(FBO_t *srcFbo, vec4i_t srcBox, FBO_t *dstFbo, vec4i_t dstBox)
 	// From RB_DrawSun()
 	{
 		float dist;
-		matrix_t trans, model, mvp;
+		mat4_t trans, model, mvp;
 
-		Matrix16Translation( backEnd.viewParms.or.origin, trans );
-		Matrix16Multiply( backEnd.viewParms.world.modelMatrix, trans, model );
-		Matrix16Multiply(backEnd.viewParms.projectionMatrix, model, mvp);
+		Mat4Translation( backEnd.viewParms.or.origin, trans );
+		Mat4Multiply( backEnd.viewParms.world.modelMatrix, trans, model );
+		Mat4Multiply(backEnd.viewParms.projectionMatrix, model, mvp);
 
 		dist = backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
 
@@ -341,8 +341,8 @@ void RB_SunRays(FBO_t *srcFbo, vec4i_t srcBox, FBO_t *dstFbo, vec4i_t dstBox)
 	}
 
 	// project sun point
-	//Matrix16Multiply(backEnd.viewParms.projectionMatrix, backEnd.viewParms.world.modelMatrix, mvp);
-	Matrix16Transform(mvp, pos, hpos);
+	//Mat4Multiply(backEnd.viewParms.projectionMatrix, backEnd.viewParms.world.modelMatrix, mvp);
+	Mat4Transform(mvp, pos, hpos);
 
 	// transform to UV coords
 	hpos[3] = 0.5f / hpos[3];
@@ -354,7 +354,7 @@ void RB_SunRays(FBO_t *srcFbo, vec4i_t srcBox, FBO_t *dstFbo, vec4i_t dstBox)
 	{
 		float mul = 1.f;
 		vec2_t texScale;
-		vec4i_t rayBox, quarterBox;
+		ivec4_t rayBox, quarterBox;
 
 		texScale[0] = 
 		texScale[1] = 1.0f;
@@ -441,7 +441,7 @@ static void RB_BlurAxis(FBO_t *srcFbo, FBO_t *dstFbo, float strength, qboolean h
 	ymul *= strength;
 
 	{
-		vec4i_t srcBox, dstBox;
+		ivec4_t srcBox, dstBox;
 		vec4_t color;
 		vec2_t texScale;
 
@@ -490,7 +490,7 @@ void RB_GaussianBlur(float blur)
 		return;
 
 	{
-		vec4i_t srcBox, dstBox;
+		ivec4_t srcBox, dstBox;
 		vec4_t color;
 		vec2_t texScale;
 
