@@ -371,17 +371,17 @@ void GL_State( unsigned long stateBits )
 }
 
 
-void GL_SetProjectionMatrix(matrix_t matrix)
+void GL_SetProjectionMatrix(mat4_t matrix)
 {
-	Matrix16Copy(matrix, glState.projection);
-	Matrix16Multiply(glState.projection, glState.modelview, glState.modelviewProjection);	
+	Mat4Copy(matrix, glState.projection);
+	Mat4Multiply(glState.projection, glState.modelview, glState.modelviewProjection);	
 }
 
 
-void GL_SetModelviewMatrix(matrix_t matrix)
+void GL_SetModelviewMatrix(mat4_t matrix)
 {
-	Matrix16Copy(matrix, glState.modelview);
-	Matrix16Multiply(glState.projection, glState.modelview, glState.modelviewProjection);	
+	Mat4Copy(matrix, glState.modelview);
+	Mat4Multiply(glState.projection, glState.modelview, glState.modelviewProjection);	
 }
 
 
@@ -765,7 +765,7 @@ RB_SetGL2D
 ================
 */
 void	RB_SetGL2D (void) {
-	matrix_t matrix;
+	mat4_t matrix;
 	int width, height;
 
 	if (backEnd.projection2D && backEnd.last2DFBO == glState.currentFBO)
@@ -789,9 +789,9 @@ void	RB_SetGL2D (void) {
 	qglViewport( 0, 0, width, height );
 	qglScissor( 0, 0, width, height );
 
-	Matrix16Ortho(0, width, height, 0, 0, 1, matrix);
+	Mat4Ortho(0, width, height, 0, 0, 1, matrix);
 	GL_SetProjectionMatrix(matrix);
-	Matrix16Identity(matrix);
+	Mat4Identity(matrix);
 	GL_SetModelviewMatrix(matrix);
 
 	GL_State( GLS_DEPTHTEST_DISABLE |
@@ -881,7 +881,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 
 	GLSL_BindProgram(&tr.textureColorShader);
 	
-	GLSL_SetUniformMatrix16(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMat4(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 	GLSL_SetUniformVec4(&tr.textureColorShader, UNIFORM_COLOR, colorWhite);
 
 	RB_InstantQuad2(quadVerts, texCoords);
@@ -1122,9 +1122,9 @@ const void	*RB_DrawSurfs( const void *data ) {
 			GL_BindToTMU(tr.sunShadowDepthImage[1], TB_SHADOWMAP2);
 			GL_BindToTMU(tr.sunShadowDepthImage[2], TB_SHADOWMAP3);
 
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP,  backEnd.refdef.sunShadowMvp[0]);
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP2, backEnd.refdef.sunShadowMvp[1]);
-			GLSL_SetUniformMatrix16(&tr.shadowmaskShader, UNIFORM_SHADOWMVP3, backEnd.refdef.sunShadowMvp[2]);
+			GLSL_SetUniformMat4(&tr.shadowmaskShader, UNIFORM_SHADOWMVP,  backEnd.refdef.sunShadowMvp[0]);
+			GLSL_SetUniformMat4(&tr.shadowmaskShader, UNIFORM_SHADOWMVP2, backEnd.refdef.sunShadowMvp[1]);
+			GLSL_SetUniformMat4(&tr.shadowmaskShader, UNIFORM_SHADOWMVP3, backEnd.refdef.sunShadowMvp[2]);
 			
 			GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWORIGIN,  backEnd.refdef.vieworg);
 			{
@@ -1578,7 +1578,7 @@ const void *RB_PostProcess(const void *data)
 {
 	const postProcessCommand_t *cmd = data;
 	FBO_t *srcFbo;
-	vec4i_t srcBox, dstBox;
+	ivec4_t srcBox, dstBox;
 	qboolean autoExposure;
 
 	// finish any 2D drawing if needed
@@ -1664,7 +1664,7 @@ const void *RB_PostProcess(const void *data)
 
 	if (0)
 	{
-		vec4i_t dstBox;
+		ivec4_t dstBox;
 		VectorSet4(dstBox, 0, 0, 128, 128);
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[0], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 		VectorSet4(dstBox, 128, 0, 128, 128);
@@ -1675,7 +1675,7 @@ const void *RB_PostProcess(const void *data)
 
 	if (0)
 	{
-		vec4i_t dstBox;
+		ivec4_t dstBox;
 		VectorSet4(dstBox, 256, glConfig.vidHeight - 256, 256, 256);
 		FBO_BlitFromTexture(tr.renderDepthImage, NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 		VectorSet4(dstBox, 512, glConfig.vidHeight - 256, 256, 256);
@@ -1684,7 +1684,7 @@ const void *RB_PostProcess(const void *data)
 
 	if (0)
 	{
-		vec4i_t dstBox;
+		ivec4_t dstBox;
 		VectorSet4(dstBox, 256, glConfig.vidHeight - 256, 256, 256);
 		FBO_BlitFromTexture(tr.sunRaysImage, NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 	}
@@ -1692,7 +1692,7 @@ const void *RB_PostProcess(const void *data)
 #if 0
 	if (r_cubeMapping->integer && tr.numCubemaps)
 	{
-		vec4i_t dstBox;
+		ivec4_t dstBox;
 		int cubemapIndex = R_CubemapForPoint( backEnd.viewParms.or.origin );
 
 		if (cubemapIndex)

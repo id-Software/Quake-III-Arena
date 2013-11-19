@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Some matrix helper functions
 // FIXME: do these already exist in ioq3 and I don't know about them?
 
-void Matrix16Zero( matrix_t out )
+void Mat4Zero( mat4_t out )
 {
 	out[ 0] = 0.0f; out[ 4] = 0.0f; out[ 8] = 0.0f; out[12] = 0.0f;
 	out[ 1] = 0.0f; out[ 5] = 0.0f; out[ 9] = 0.0f; out[13] = 0.0f;
@@ -34,7 +34,7 @@ void Matrix16Zero( matrix_t out )
 	out[ 3] = 0.0f; out[ 7] = 0.0f; out[11] = 0.0f; out[15] = 0.0f;
 }
 
-void Matrix16Identity( matrix_t out )
+void Mat4Identity( mat4_t out )
 {
 	out[ 0] = 1.0f; out[ 4] = 0.0f; out[ 8] = 0.0f; out[12] = 0.0f;
 	out[ 1] = 0.0f; out[ 5] = 1.0f; out[ 9] = 0.0f; out[13] = 0.0f;
@@ -42,7 +42,7 @@ void Matrix16Identity( matrix_t out )
 	out[ 3] = 0.0f; out[ 7] = 0.0f; out[11] = 0.0f; out[15] = 1.0f;
 }
 
-void Matrix16Copy( const matrix_t in, matrix_t out )
+void Mat4Copy( const mat4_t in, mat4_t out )
 {
 	out[ 0] = in[ 0]; out[ 4] = in[ 4]; out[ 8] = in[ 8]; out[12] = in[12]; 
 	out[ 1] = in[ 1]; out[ 5] = in[ 5]; out[ 9] = in[ 9]; out[13] = in[13]; 
@@ -50,7 +50,7 @@ void Matrix16Copy( const matrix_t in, matrix_t out )
 	out[ 3] = in[ 3]; out[ 7] = in[ 7]; out[11] = in[11]; out[15] = in[15]; 
 }
 
-void Matrix16Multiply( const matrix_t in1, const matrix_t in2, matrix_t out )
+void Mat4Multiply( const mat4_t in1, const mat4_t in2, mat4_t out )
 {
 	out[ 0] = in1[ 0] * in2[ 0] + in1[ 4] * in2[ 1] + in1[ 8] * in2[ 2] + in1[12] * in2[ 3];
 	out[ 1] = in1[ 1] * in2[ 0] + in1[ 5] * in2[ 1] + in1[ 9] * in2[ 2] + in1[13] * in2[ 3];
@@ -73,7 +73,7 @@ void Matrix16Multiply( const matrix_t in1, const matrix_t in2, matrix_t out )
 	out[15] = in1[ 3] * in2[12] + in1[ 7] * in2[13] + in1[11] * in2[14] + in1[15] * in2[15];
 }
 
-void Matrix16Transform( const matrix_t in1, const vec4_t in2, vec4_t out )
+void Mat4Transform( const mat4_t in1, const vec4_t in2, vec4_t out )
 {
 	out[ 0] = in1[ 0] * in2[ 0] + in1[ 4] * in2[ 1] + in1[ 8] * in2[ 2] + in1[12] * in2[ 3];
 	out[ 1] = in1[ 1] * in2[ 0] + in1[ 5] * in2[ 1] + in1[ 9] * in2[ 2] + in1[13] * in2[ 3];
@@ -81,7 +81,7 @@ void Matrix16Transform( const matrix_t in1, const vec4_t in2, vec4_t out )
 	out[ 3] = in1[ 3] * in2[ 0] + in1[ 7] * in2[ 1] + in1[11] * in2[ 2] + in1[15] * in2[ 3];
 }
 
-qboolean Matrix16Compare( const matrix_t a, const matrix_t b )
+qboolean Mat4Compare( const mat4_t a, const mat4_t b )
 {
 	return !(a[ 0] != b[ 0] || a[ 4] != b[ 4] || a[ 8] != b[ 8] || a[12] != b[12] ||
              a[ 1] != b[ 1] || a[ 5] != b[ 5] || a[ 9] != b[ 9] || a[13] != b[13] ||
@@ -89,7 +89,7 @@ qboolean Matrix16Compare( const matrix_t a, const matrix_t b )
 		     a[ 3] != b[ 3] || a[ 7] != b[ 7] || a[11] != b[11] || a[15] != b[15]);
 }
 
-void Matrix16Dump( const matrix_t in )
+void Mat4Dump( const mat4_t in )
 {
 	ri.Printf(PRINT_ALL, "%3.5f %3.5f %3.5f %3.5f\n", in[ 0], in[ 4], in[ 8], in[12]);
 	ri.Printf(PRINT_ALL, "%3.5f %3.5f %3.5f %3.5f\n", in[ 1], in[ 5], in[ 9], in[13]);
@@ -97,7 +97,7 @@ void Matrix16Dump( const matrix_t in )
 	ri.Printf(PRINT_ALL, "%3.5f %3.5f %3.5f %3.5f\n", in[ 3], in[ 7], in[11], in[15]);
 }
 
-void Matrix16Translation( vec3_t vec, matrix_t out )
+void Mat4Translation( vec3_t vec, mat4_t out )
 {
 	out[ 0] = 1.0f; out[ 4] = 0.0f; out[ 8] = 0.0f; out[12] = vec[0];
 	out[ 1] = 0.0f; out[ 5] = 1.0f; out[ 9] = 0.0f; out[13] = vec[1];
@@ -105,7 +105,7 @@ void Matrix16Translation( vec3_t vec, matrix_t out )
 	out[ 3] = 0.0f; out[ 7] = 0.0f; out[11] = 0.0f; out[15] = 1.0f;
 }
 
-void Matrix16Ortho( float left, float right, float bottom, float top, float znear, float zfar, matrix_t out )
+void Mat4Ortho( float left, float right, float bottom, float top, float znear, float zfar, mat4_t out )
 {
 	out[ 0] = 2.0f / (right - left); out[ 4] = 0.0f;                  out[ 8] = 0.0f;                  out[12] = -(right + left) / (right - left);
 	out[ 1] = 0.0f;                  out[ 5] = 2.0f / (top - bottom); out[ 9] = 0.0f;                  out[13] = -(top + bottom) / (top - bottom);
@@ -113,7 +113,7 @@ void Matrix16Ortho( float left, float right, float bottom, float top, float znea
 	out[ 3] = 0.0f;                  out[ 7] = 0.0f;                  out[11] = 0.0f;                  out[15] = 1.0f;
 }
 
-void Matrix16View(vec3_t axes[3], vec3_t origin, matrix_t out)
+void Mat4View(vec3_t axes[3], vec3_t origin, mat4_t out)
 {
 	out[0]  = axes[0][0];
 	out[1]  = axes[1][0];
@@ -136,7 +136,7 @@ void Matrix16View(vec3_t axes[3], vec3_t origin, matrix_t out)
 	out[15] = 1;
 }
 
-void Matrix16SimpleInverse( const matrix_t in, matrix_t out)
+void Mat4SimpleInverse( const mat4_t in, mat4_t out)
 {
 	vec3_t v;
 	float invSqrLen;
