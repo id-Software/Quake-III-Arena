@@ -1373,6 +1373,32 @@ void S_Base_StopBackgroundTrack( void ) {
 
 /*
 ======================
+S_OpenBackgroundStream
+======================
+*/
+static void S_OpenBackgroundStream( const char *filename ) {
+	// close the background track, but DON'T reset s_rawend
+	// if restarting the same back ground track
+	if(s_backgroundStream)
+	{
+		S_CodecCloseStream(s_backgroundStream);
+		s_backgroundStream = NULL;
+	}
+
+	// Open stream
+	s_backgroundStream = S_CodecOpenStream(filename);
+	if(!s_backgroundStream) {
+		Com_Printf( S_COLOR_YELLOW "WARNING: couldn't open music file %s\n", filename );
+		return;
+	}
+
+	if(s_backgroundStream->info.channels != 2 || s_backgroundStream->info.rate != 22050) {
+		Com_Printf(S_COLOR_YELLOW "WARNING: music file %s is not 22k stereo\n", filename );
+	}
+}
+
+/*
+======================
 S_StartBackgroundTrack
 ======================
 */
@@ -1397,24 +1423,7 @@ void S_Base_StartBackgroundTrack( const char *intro, const char *loop ){
 		Q_strncpyz( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
 	}
 
-	// close the background track, but DON'T reset s_rawend
-	// if restarting the same back ground track
-	if(s_backgroundStream)
-	{
-		S_CodecCloseStream(s_backgroundStream);
-		s_backgroundStream = NULL;
-	}
-
-	// Open stream
-	s_backgroundStream = S_CodecOpenStream(intro);
-	if(!s_backgroundStream) {
-		Com_Printf( S_COLOR_YELLOW "WARNING: couldn't open music file %s\n", intro );
-		return;
-	}
-
-	if(s_backgroundStream->info.channels != 2 || s_backgroundStream->info.rate != 22050) {
-		Com_Printf(S_COLOR_YELLOW "WARNING: music file %s is not 22k stereo\n", intro );
-	}
+	S_OpenBackgroundStream( intro );
 }
 
 /*
@@ -1477,9 +1486,7 @@ void S_UpdateBackgroundTrack( void ) {
 			// loop
 			if(s_backgroundLoop[0])
 			{
-				S_CodecCloseStream(s_backgroundStream);
-				s_backgroundStream = NULL;
-				S_Base_StartBackgroundTrack( s_backgroundLoop, s_backgroundLoop );
+				S_OpenBackgroundStream( s_backgroundLoop );
 				if(!s_backgroundStream)
 					return;
 			}
