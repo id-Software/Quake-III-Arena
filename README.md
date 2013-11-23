@@ -741,3 +741,6 @@ Significant contributions from
   Vincent S. Cojot <vincent at cojot dot name>
   optical <alex@rigbo.se>
   Aaron Gyes <floam@aaron.gy>
+  
+  
+  [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f88af076b5015c62b699968f6772c3a5 "githalytics.com")](http://githalytics.com/ioquake/ioq3)
