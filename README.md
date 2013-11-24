@@ -605,6 +605,8 @@ binary. Just run make with the option BUILD_STANDALONE=1. Don't forget to edit
 the PRODUCT_NAME and subsequent #defines in qcommon/q_shared.h with
 information appropriate for your project.
 
+## Standalone game licensing
+
 While a lot of work has been put into ioquake3 that you can benefit from free
 of charge, it does not mean that you have no obligations to fulfill. Please be
 aware that as soon as you start distributing your game with an engine based on
@@ -629,6 +631,7 @@ maps) created by yourself are your property and can be sold like every other
 game you find in stores.
 
 ## Network protocols
+
 There are now two cvars that give you some degree of freedom over the reported
 protocol versions between clients and servers: "com_protocol" and
 "com_legacyprotocol".
@@ -658,6 +661,7 @@ game you can still enable it in q_shared.h by defining
 LEGACY_PROTOCOL.
 
 ## cl_guid Support
+
 cl_guid is a cvar which is part of the client's USERINFO string.  Its value
 is a 32 character string made up of [a-f] and [0-9] characters.  This
 value is pseudo-unique for every player.  Id's Quake 3 Arena client also
@@ -677,6 +681,7 @@ your mod's game code:
   2. granting some weak admin rights to players without requiring passwords
 
 ## PNG support
+
 ioquake3 supports the use of PNG (Portable Network Graphic) images as
 textures. It should be noted that the use of such images in a map will
 result in missing placeholder textures where the map is used with the id
