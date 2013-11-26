@@ -1454,9 +1454,9 @@ typedef struct {
 	FBO_t          *currentFBO;
 	VBO_t          *currentVBO;
 	IBO_t          *currentIBO;
-	matrix_t        modelview;
-	matrix_t        projection;
-	matrix_t		modelviewProjection;
+	mat4_t        modelview;
+	mat4_t        projection;
+	mat4_t		modelviewProjection;
 } glstate_t;
 
 typedef enum {
@@ -1964,8 +1964,8 @@ void	GL_TextureMode( const char *string );
 void	GL_CheckErrs( char *file, int line );
 #define GL_CheckErrors(...) GL_CheckErrs(__FILE__, __LINE__)
 void	GL_State( unsigned long stateVector );
-void    GL_SetProjectionMatrix(matrix_t matrix);
-void    GL_SetModelviewMatrix(matrix_t matrix);
+void    GL_SetProjectionMatrix(mat4_t matrix);
+void    GL_SetModelviewMatrix(mat4_t matrix);
 void	GL_TexEnv( int env );
 void	GL_Cull( int cullType );
 
@@ -2296,7 +2296,7 @@ void GLSL_SetUniformFloat5(shaderProgram_t *program, int uniformNum, const vec5_
 void GLSL_SetUniformVec2(shaderProgram_t *program, int uniformNum, const vec2_t v);
 void GLSL_SetUniformVec3(shaderProgram_t *program, int uniformNum, const vec3_t v);
 void GLSL_SetUniformVec4(shaderProgram_t *program, int uniformNum, const vec4_t v);
-void GLSL_SetUniformMatrix16(shaderProgram_t *program, int uniformNum, const matrix_t matrix);
+void GLSL_SetUniformMat4(shaderProgram_t *program, int uniformNum, const mat4_t matrix);
 
 shaderProgram_t *GLSL_GetGenericShaderProgram(int stage);
 

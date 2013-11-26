@@ -243,7 +243,7 @@ void RB_InstantQuad(vec4_t quadVerts[4])
 
 	GLSL_BindProgram(&tr.textureColorShader);
 	
-	GLSL_SetUniformMatrix16(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMat4(&tr.textureColorShader, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 	GLSL_SetUniformVec4(&tr.textureColorShader, UNIFORM_COLOR, colorWhite);
 
 	RB_InstantQuad2(quadVerts, texCoords);
@@ -630,7 +630,7 @@ static void RB_SurfaceBeam( void )
 	GLSL_VertexAttribsState(ATTR_POSITION);
 	GLSL_BindProgram(sp);
 		
-	GLSL_SetUniformMatrix16(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
+	GLSL_SetUniformMat4(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
 					
 	GLSL_SetUniformVec4(sp, UNIFORM_COLOR, colorRed);
 
@@ -856,6 +856,7 @@ static void RB_SurfaceLightningBolt( void ) {
 	}
 }
 
+#if 0
 /*
 ** VectorArrayNormalize
 *
@@ -911,12 +912,14 @@ static void VectorArrayNormalize(vec4_t *normals, unsigned int count)
 #endif
 
 }
+#endif
 
 
 
 /*
 ** LerpMeshVertexes
 */
+#if 0
 #if idppc_altivec
 static void LerpMeshVertexes_altivec(md3Surface_t *surf, float backlerp)
 {
@@ -1045,6 +1048,7 @@ static void LerpMeshVertexes_altivec(md3Surface_t *surf, float backlerp)
     	VectorArrayNormalize((vec4_t *)tess.normal[tess.numVertexes], numVerts);
    	}
 }
+#endif
 #endif
 
 static void LerpMeshVertexes_scalar(mdvSurface_t *surf, float backlerp)

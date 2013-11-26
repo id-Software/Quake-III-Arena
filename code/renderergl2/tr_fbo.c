@@ -386,7 +386,7 @@ void FBO_Init(void)
 	hdrFormat = GL_RGBA8;
 	if (r_hdr->integer && glRefConfig.framebufferObject && glRefConfig.textureFloat)
 	{
-		hdrFormat = GL_RGB16F_ARB;
+		hdrFormat = GL_RGBA16F_ARB;
 	}
 
 	qglGetIntegerv(GL_MAX_SAMPLES_EXT, &multisample);
@@ -651,16 +651,16 @@ void R_FBOList_f(void)
 // FIXME
 extern void RB_SetGL2D (void);
 
-void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexScale, FBO_t *dst, vec4i_t inDstBox, struct shaderProgram_s *shaderProgram, vec4_t inColor, int blend)
+void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexScale, FBO_t *dst, ivec4_t inDstBox, struct shaderProgram_s *shaderProgram, vec4_t inColor, int blend)
 {
-	vec4i_t dstBox, srcBox;
+	ivec4_t dstBox, srcBox;
 	vec2_t srcTexScale;
 	vec4_t color;
 	vec4_t quadVerts[4];
 	vec2_t texCoords[4];
 	vec2_t invTexRes;
 	FBO_t *oldFbo = glState.currentFBO;
-	matrix_t projection;
+	mat4_t projection;
 	int width, height;
 
 	if (!src)
@@ -741,7 +741,7 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 	qglViewport( 0, 0, width, height );
 	qglScissor( 0, 0, width, height );
 
-	Matrix16Ortho(0, width, height, 0, 0, 1, projection);
+	Mat4Ortho(0, width, height, 0, 0, 1, projection);
 
 	qglDisable( GL_CULL_FACE );
 
@@ -764,7 +764,7 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 
 	GLSL_BindProgram(shaderProgram);
 	
-	GLSL_SetUniformMatrix16(shaderProgram, UNIFORM_MODELVIEWPROJECTIONMATRIX, projection);
+	GLSL_SetUniformMat4(shaderProgram, UNIFORM_MODELVIEWPROJECTIONMATRIX, projection);
 	GLSL_SetUniformVec4(shaderProgram, UNIFORM_COLOR, color);
 	GLSL_SetUniformVec2(shaderProgram, UNIFORM_INVTEXRES, invTexRes);
 	GLSL_SetUniformVec2(shaderProgram, UNIFORM_AUTOEXPOSUREMINMAX, tr.refdef.autoExposureMinMax);
@@ -775,9 +775,9 @@ void FBO_BlitFromTexture(struct image_s *src, vec4i_t inSrcBox, vec2_t inSrcTexS
 	FBO_Bind(oldFbo);
 }
 
-void FBO_Blit(FBO_t *src, vec4i_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, vec4i_t dstBox, struct shaderProgram_s *shaderProgram, vec4_t color, int blend)
+void FBO_Blit(FBO_t *src, ivec4_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, ivec4_t dstBox, struct shaderProgram_s *shaderProgram, vec4_t color, int blend)
 {
-	vec4i_t srcBox;
+	ivec4_t srcBox;
 
 	if (!src)
 	{
@@ -801,9 +801,9 @@ void FBO_Blit(FBO_t *src, vec4i_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, vec4
 	FBO_BlitFromTexture(src->colorImage[0], srcBox, srcTexScale, dst, dstBox, shaderProgram, color, blend | GLS_DEPTHTEST_DISABLE);
 }
 
-void FBO_FastBlit(FBO_t *src, vec4i_t srcBox, FBO_t *dst, vec4i_t dstBox, int buffers, int filter)
+void FBO_FastBlit(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, int buffers, int filter)
 {
-	vec4i_t srcBoxFinal, dstBoxFinal;
+	ivec4_t srcBoxFinal, dstBoxFinal;
 	GLuint srcFb, dstFb;
 
 	if (!glRefConfig.framebufferBlit)
