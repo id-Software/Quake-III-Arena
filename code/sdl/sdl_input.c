@@ -729,6 +729,9 @@ static void IN_ProcessEvents( void )
 				if( ( key = IN_TranslateSDLToQ3Key( &e.key.keysym, qtrue ) ) )
 					Com_QueueEvent( 0, SE_KEY, key, qtrue, 0, NULL );
 
+				if( key == K_BACKSPACE )
+					Com_QueueEvent( 0, SE_CHAR, CTRL('h'), 0, 0, NULL );
+
 				lastKeyDown = key;
 				break;
 
