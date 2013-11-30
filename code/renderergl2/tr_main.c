@@ -1915,9 +1915,6 @@ static void R_AddEntitySurface (int entityNum)
 			case MOD_MESH:
 				R_AddMD3Surfaces( ent );
 				break;
-			case MOD_MD4:
-				R_AddAnimSurfaces( ent );
-				break;
 			case MOD_MDR:
 				R_MDRAddAnimSurfaces( ent );
 				break;
@@ -2204,12 +2201,6 @@ void R_RenderPshadowMaps(const refdef_t *fd)
 				}
 				break;
 
-				case MOD_MD4:
-				{
-					// FIXME: actually calculate the radius and bounds, this is a horrible hack
-					radius = r_pshadowDist->value / 2.0f;
-				}
-				break;
 				case MOD_MDR:
 				{
 					// FIXME: never actually tested this
