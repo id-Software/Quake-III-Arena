@@ -73,7 +73,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 
 	if (u_DeformGen == DGEN_BULGE)
 	{
-		phase *= M_PI * 0.25 * st.x;
+		phase *= st.x;
 	}
 	else // if (u_DeformGen <= DGEN_WAVE_INVERSE_SAWTOOTH)
 	{
