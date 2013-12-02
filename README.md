@@ -314,6 +314,9 @@ The defaults for these variables differ depending on the target platform.
                             all bots even if someone is named "allbots")
 
   tell <client num> <msg> - send message to a single client (new to server)
+
+  cvar_modified [filter]  - list modified cvars, can filter results (such as "r*"
+                            for renderer cvars) like cvarlist which lists all cvars
 ```
 
 

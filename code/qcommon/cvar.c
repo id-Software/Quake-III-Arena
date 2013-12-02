@@ -1018,6 +1018,90 @@ void Cvar_List_f( void ) {
 
 /*
 ============
+Cvar_ListModified_f
+============
+*/
+void Cvar_ListModified_f( void ) {
+	cvar_t	*var;
+	int		totalModified;
+	char	*value;
+	char	*match;
+
+	if ( Cmd_Argc() > 1 ) {
+		match = Cmd_Argv( 1 );
+	} else {
+		match = NULL;
+	}
+
+	totalModified = 0;
+	for (var = cvar_vars ; var ; var = var->next)
+	{
+		if ( !var->name || !var->modificationCount )
+			continue;
+
+		value = var->latchedString ? var->latchedString : var->string;
+		if ( !strcmp( value, var->resetString ) )
+			continue;
+
+		totalModified++;
+
+		if (match && !Com_Filter(match, var->name, qfalse))
+			continue;
+
+		if (var->flags & CVAR_SERVERINFO) {
+			Com_Printf("S");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_SYSTEMINFO) {
+			Com_Printf("s");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_USERINFO) {
+			Com_Printf("U");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_ROM) {
+			Com_Printf("R");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_INIT) {
+			Com_Printf("I");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_ARCHIVE) {
+			Com_Printf("A");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_LATCH) {
+			Com_Printf("L");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_CHEAT) {
+			Com_Printf("C");
+		} else {
+			Com_Printf(" ");
+		}
+		if (var->flags & CVAR_USER_CREATED) {
+			Com_Printf("?");
+		} else {
+			Com_Printf(" ");
+		}
+
+		Com_Printf (" %s \"%s\", default \"%s\"\n", var->name, value, var->resetString);
+	}
+
+	Com_Printf ("\n%i total modified cvars\n", totalModified);
+}
+
+/*
+============
 Cvar_Unset
 
 Unsets a cvar
@@ -1319,5 +1403,6 @@ void Cvar_Init (void)
 	Cmd_SetCommandCompletionFunc("unset", Cvar_CompleteCvarName);
 
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
+	Cmd_AddCommand ("cvar_modified", Cvar_ListModified_f);
 	Cmd_AddCommand ("cvar_restart", Cvar_Restart_f);
 }
