@@ -1574,9 +1574,7 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 			shortest = len;
 		}
 
-		tNormal[0] = tess.normal[tess.indexes[i]][0] / 127.5f - 1.0f;
-		tNormal[1] = tess.normal[tess.indexes[i]][1] / 127.5f - 1.0f;
-		tNormal[2] = tess.normal[tess.indexes[i]][2] / 127.5f - 1.0f;
+		R_VboUnpackNormal(tNormal, tess.normal[tess.indexes[i]]);
 
 		if ( DotProduct( normal, tNormal ) >= 0 )
 		{

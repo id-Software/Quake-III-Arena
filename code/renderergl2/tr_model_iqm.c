@@ -1024,7 +1024,10 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	int		i;
 
 	vec4_t		*outXYZ;
-	uint8_t		*outNormal;
+	uint32_t	*outNormal;
+#ifdef USE_VERT_TANGENT_SPACE
+	uint32_t	*outTangent;
+#endif
 	vec2_t		(*outTexCoord)[2];
 	vec4_t	*outColor;
 
@@ -1039,7 +1042,10 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	RB_CHECKOVERFLOW( surf->num_vertexes, surf->num_triangles * 3 );
 
 	outXYZ = &tess.xyz[tess.numVertexes];
-	outNormal = &tess.normal[tess.numVertexes][0];
+	outNormal = &tess.normal[tess.numVertexes];
+#ifdef USE_VERT_TANGENT_SPACE
+	outTangent = &tess.tangent[tess.numVertexes];
+#endif
 	outTexCoord = &tess.texCoords[tess.numVertexes];
 	outColor = &tess.vertexColors[tess.numVertexes];
 
@@ -1050,7 +1056,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 
 	// transform vertexes and fill other data
 	for( i = 0; i < surf->num_vertexes;
-	     i++, outXYZ++, outNormal+=4, outTexCoord++, outColor++ ) {
+	     i++, outXYZ++, outNormal++, outTexCoord++, outColor++ ) {
 		int	j, k;
 		float	vtxMat[12];
 		float	nrmMat[9];
@@ -1116,22 +1122,25 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 			vtxMat[11];
 		(*outXYZ)[3] = 1.0f;
 
-		(outNormal)[0] = (uint8_t)((
-			nrmMat[ 0] * data->normals[3*vtx+0] +
-			nrmMat[ 1] * data->normals[3*vtx+1] +
-			nrmMat[ 2] * data->normals[3*vtx+2]
-			)* 127.5f + 128.0f);
-		(outNormal)[1] = (uint8_t)((
-			nrmMat[ 3] * data->normals[3*vtx+0] +
-			nrmMat[ 4] * data->normals[3*vtx+1] +
-			nrmMat[ 5] * data->normals[3*vtx+2]
-			)* 127.5f + 128.0f);
-		(outNormal)[2] = (uint8_t)((
-			nrmMat[ 6] * data->normals[3*vtx+0] +
-			nrmMat[ 7] * data->normals[3*vtx+1] +
-			nrmMat[ 8] * data->normals[3*vtx+2]
-			)* 127.5f + 128.0f);
-		(outNormal)[3] = 0;
+		{
+			vec3_t normal;
+			vec4_t tangent;
+
+			normal[0] = DotProduct(&nrmMat[0], &data->normals[3*vtx]);
+			normal[1] = DotProduct(&nrmMat[3], &data->normals[3*vtx]);
+			normal[2] = DotProduct(&nrmMat[6], &data->normals[3*vtx]);
+
+			*outNormal = R_VboPackNormal(normal);
+
+#ifdef USE_VERT_TANGENT_SPACE
+			tangent[0] = DotProduct(&nrmMat[0], &data->tangents[4*vtx]);
+			tangent[1] = DotProduct(&nrmMat[3], &data->tangents[4*vtx]);
+			tangent[2] = DotProduct(&nrmMat[6], &data->tangents[4*vtx]);
+			tangent[3] = data->tangents[4*vtx+3];
+
+			*outTangent++ = R_VboPackTangent(tangent);
+#endif
+		}
 
 		(*outColor)[0] = data->colors[4*vtx+0] / 255.0f;
 		(*outColor)[1] = data->colors[4*vtx+1] / 255.0f;

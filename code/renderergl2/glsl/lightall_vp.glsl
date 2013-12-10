@@ -206,7 +206,7 @@ void main()
 #if defined(USE_LIGHT_VECTOR)
 	vec3 L = u_LightOrigin.xyz - (position * u_LightOrigin.w);
 #elif defined(USE_LIGHT) 
-	vec3 L = attr_LightDirection;
+	vec3 L = attr_LightDirection * 2.0 - vec3(1.0);
   #if defined(USE_MODELMATRIX)
 	L = (u_ModelMatrix * vec4(L, 0.0)).xyz;
   #endif
