@@ -44,7 +44,7 @@ typedef struct voipServerPacket_s
 	int len;
 	int sender;
 	int flags;
-	byte data[1024];
+	byte data[4000];
 } voipServerPacket_t;
 #endif
 
@@ -299,6 +299,7 @@ extern	int serverBansCount;
 
 #ifdef USE_VOIP
 extern	cvar_t	*sv_voip;
+extern	cvar_t	*sv_voipProtocol;
 #endif
 
 

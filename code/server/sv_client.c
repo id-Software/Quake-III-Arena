@@ -1459,8 +1459,8 @@ void SV_UserinfoChanged( client_t *cl ) {
 	else
 #endif
 	{
-		val = Info_ValueForKey(cl->userinfo, "cl_voip");
-		cl->hasVoip = atoi(val);
+		val = Info_ValueForKey(cl->userinfo, "cl_voipProtocol");
+		cl->hasVoip = !Q_stricmp( val, "opus" );
 	}
 #endif
 
@@ -1794,7 +1794,7 @@ static qboolean SV_ShouldIgnoreVoipSender(const client_t *cl)
 }
 
 static
-void SV_UserVoip(client_t *cl, msg_t *msg)
+void SV_UserVoip(client_t *cl, msg_t *msg, qboolean ignoreData)
 {
 	int sender, generation, sequence, frames, packetsize;
 	uint8_t recips[(MAX_CLIENTS + 7) / 8];
@@ -1829,12 +1829,12 @@ void SV_UserVoip(client_t *cl, msg_t *msg)
 
 	MSG_ReadData(msg, encoded, packetsize);
 
-	if (SV_ShouldIgnoreVoipSender(cl))
+	if (ignoreData || SV_ShouldIgnoreVoipSender(cl))
 		return;   // Blacklisted, disabled, etc.
 
 	// !!! FIXME: see if we read past end of msg...
 
-	// !!! FIXME: reject if not speex narrowband codec.
+	// !!! FIXME: reject if not opus data.
 	// !!! FIXME: decide if this is bogus data?
 
 	// decide who needs this VoIP packet sent to them...
@@ -1983,10 +1983,18 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		}
 	} while ( 1 );
 
-	// read optional voip data
-	if ( c == clc_voip ) {
+	// skip legacy speex voip data
+	if ( c == clc_voipSpeex ) {
 #ifdef USE_VOIP
-		SV_UserVoip( cl, msg );
+		SV_UserVoip( cl, msg, qtrue );
+		c = MSG_ReadByte( msg );
+#endif
+	}
+
+	// read optional voip data
+	if ( c == clc_voipOpus ) {
+#ifdef USE_VOIP
+		SV_UserVoip( cl, msg, qfalse );
 		c = MSG_ReadByte( msg );
 #endif
 	}

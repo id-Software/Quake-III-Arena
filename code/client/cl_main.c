@@ -44,6 +44,7 @@ cvar_t	*cl_voipSendTarget;
 cvar_t	*cl_voipGainDuringCapture;
 cvar_t	*cl_voipCaptureMult;
 cvar_t	*cl_voipShowMeter;
+cvar_t	*cl_voipProtocol;
 cvar_t	*cl_voip;
 #endif
 
@@ -250,8 +251,8 @@ void CL_Voip_f( void )
 
 	if (clc.state != CA_ACTIVE)
 		reason = "Not connected to a server";
-	else if (!clc.speexInitialized)
-		reason = "Speex not initialized";
+	else if (!clc.voipCodecInitialized)
+		reason = "Voip codec not initialized";
 	else if (!clc.voipEnabled)
 		reason = "Server doesn't support VoIP";
 	else if (!clc.demoplaying && (Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER || Cvar_VariableValue("ui_singlePlayerActive")))
@@ -306,6 +307,8 @@ void CL_VoipNewGeneration(void)
 		clc.voipOutgoingGeneration = 1;
 	clc.voipPower = 0.0f;
 	clc.voipOutgoingSequence = 0;
+
+	opus_encoder_ctl(clc.opusEncoder, OPUS_RESET_STATE);
 }
 
 /*
@@ -394,7 +397,7 @@ void CL_VoipParseTargets(void)
 ===============
 CL_CaptureVoip
 
-Record more audio from the hardware if required and encode it into Speex
+Record more audio from the hardware if required and encode it into Opus
  data for later transmission.
 ===============
 */
@@ -424,11 +427,12 @@ void CL_CaptureVoip(void)
 			Com_Printf("Until then, VoIP is disabled.\n");
 			Cvar_Set("cl_voip", "0");
 		}
+		Cvar_Set("cl_voipProtocol", cl_voip->integer ? "opus" : "");
 		cl_voip->modified = qfalse;
 		cl_rate->modified = qfalse;
 	}
 
-	if (!clc.speexInitialized)
+	if (!clc.voipCodecInitialized)
 		return;  // just in case this gets called at a bad time.
 
 	if (clc.voipOutgoingDataSize > 0)
@@ -481,80 +485,67 @@ void CL_CaptureVoip(void)
 
 	if ((cl_voipSend->integer) || (finalFrame)) { // user wants to capture audio?
 		int samples = S_AvailableCaptureSamples();
-		const int mult = (finalFrame) ? 1 : 4; // 4 == 80ms of audio.
+		const int packetSamples = (finalFrame) ? VOIP_MAX_FRAME_SAMPLES : VOIP_MAX_PACKET_SAMPLES;
 
 		// enough data buffered in audio hardware to process yet?
-		if (samples >= (clc.speexFrameSize * mult)) {
-			// audio capture is always MONO16 (and that's what speex wants!).
-			//  2048 will cover 12 uncompressed frames in narrowband mode.
-			static int16_t sampbuffer[2048];
+		if (samples >= packetSamples) {
+			// audio capture is always MONO16.
+			static int16_t sampbuffer[VOIP_MAX_PACKET_SAMPLES];
 			float voipPower = 0.0f;
-			int speexFrames = 0;
-			int wpos = 0;
-			int pos = 0;
+			int voipFrames;
+			int i, bytes;
 
-			if (samples > (clc.speexFrameSize * 4))
-				samples = (clc.speexFrameSize * 4);
+			if (samples > VOIP_MAX_PACKET_SAMPLES)
+				samples = VOIP_MAX_PACKET_SAMPLES;
 
 			// !!! FIXME: maybe separate recording from encoding, so voipPower
 			// !!! FIXME:  updates faster than 4Hz?
 
-			samples -= samples % clc.speexFrameSize;
+			samples -= samples % VOIP_MAX_FRAME_SAMPLES;
+			if (samples != 120 && samples != 240 && samples != 480 && samples != 960 && samples != 1920 && samples != 2880 ) {
+				Com_Printf("Voip: bad number of samples %d\n", samples);
+				return;
+			}
+			voipFrames = samples / VOIP_MAX_FRAME_SAMPLES;
+
 			S_Capture(samples, (byte *) sampbuffer);  // grab from audio card.
 
-			// this will probably generate multiple speex packets each time.
-			while (samples > 0) {
-				int16_t *sampptr = &sampbuffer[pos];
-				int i, bytes;
+			// check the "power" of this packet...
+			for (i = 0; i < samples; i++) {
+				const float flsamp = (float) sampbuffer[i];
+				const float s = fabs(flsamp);
+				voipPower += s * s;
+				sampbuffer[i] = (int16_t) ((flsamp) * audioMult);
+			}
 
-				// preprocess samples to remove noise...
-				speex_preprocess_run(clc.speexPreprocessor, sampptr);
-
-				// check the "power" of this packet...
-				for (i = 0; i < clc.speexFrameSize; i++) {
-					const float flsamp = (float) sampptr[i];
-					const float s = fabs(flsamp);
-					voipPower += s * s;
-					sampptr[i] = (int16_t) ((flsamp) * audioMult);
-				}
-
-				// encode raw audio samples into Speex data...
-				speex_bits_reset(&clc.speexEncoderBits);
-				speex_encode_int(clc.speexEncoder, sampptr,
-				                 &clc.speexEncoderBits);
-				bytes = speex_bits_write(&clc.speexEncoderBits,
-				                         (char *) &clc.voipOutgoingData[wpos+1],
-				                         sizeof (clc.voipOutgoingData) - (wpos+1));
-				assert((bytes > 0) && (bytes < 256));
-				clc.voipOutgoingData[wpos] = (byte) bytes;
-				wpos += bytes + 1;
-
-				// look at the data for the next packet...
-				pos += clc.speexFrameSize;
-				samples -= clc.speexFrameSize;
-				speexFrames++;
+			// encode raw audio samples into Opus data...
+			bytes = opus_encode(clc.opusEncoder, sampbuffer, samples,
+									(unsigned char *) clc.voipOutgoingData,
+									sizeof (clc.voipOutgoingData));
+			if ( bytes <= 0 ) {
+				Com_DPrintf("VoIP: Error encoding %d samples\n", samples);
+				bytes = 0;
 			}
 
 			clc.voipPower = (voipPower / (32768.0f * 32768.0f *
-			                 ((float) (clc.speexFrameSize * speexFrames)))) *
-			                 100.0f;
+			                 ((float) samples))) * 100.0f;
 
 			if ((useVad) && (clc.voipPower < cl_voipVADThreshold->value)) {
 				CL_VoipNewGeneration();  // no "talk" for at least 1/4 second.
 			} else {
-				clc.voipOutgoingDataSize = wpos;
-				clc.voipOutgoingDataFrames = speexFrames;
+				clc.voipOutgoingDataSize = bytes;
+				clc.voipOutgoingDataFrames = voipFrames;
 
 				Com_DPrintf("VoIP: Send %d frames, %d bytes, %f power\n",
-				            speexFrames, wpos, clc.voipPower);
+				            voipFrames, bytes, clc.voipPower);
 
 				#if 0
 				static FILE *encio = NULL;
 				if (encio == NULL) encio = fopen("voip-outgoing-encoded.bin", "wb");
-				if (encio != NULL) { fwrite(clc.voipOutgoingData, wpos, 1, encio); fflush(encio); }
+				if (encio != NULL) { fwrite(clc.voipOutgoingData, bytes, 1, encio); fflush(encio); }
 				static FILE *decio = NULL;
 				if (decio == NULL) decio = fopen("voip-outgoing-decoded.bin", "wb");
-				if (decio != NULL) { fwrite(sampbuffer, speexFrames * clc.speexFrameSize * 2, 1, decio); fflush(decio); }
+				if (decio != NULL) { fwrite(sampbuffer, voipFrames * VOIP_MAX_FRAME_SAMPLES * 2, 1, decio); fflush(decio); }
 				#endif
 			}
 		}
@@ -1420,14 +1411,11 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		cl_voipUseVAD->integer = tmp;
 	}
 
-	if (clc.speexInitialized) {
+	if (clc.voipCodecInitialized) {
 		int i;
-		speex_bits_destroy(&clc.speexEncoderBits);
-		speex_encoder_destroy(clc.speexEncoder);
-		speex_preprocess_state_destroy(clc.speexPreprocessor);
+		opus_encoder_destroy(clc.opusEncoder);
 		for (i = 0; i < MAX_CLIENTS; i++) {
-			speex_bits_destroy(&clc.speexDecoderBits[i]);
-			speex_decoder_destroy(clc.speexDecoder[i]);
+			opus_decoder_destroy(clc.opusDecoder[i]);
 		}
 	}
 	Cmd_RemoveCommand ("voip");
@@ -3653,9 +3641,9 @@ void CL_Init( void ) {
 	cl_voipVADThreshold = Cvar_Get ("cl_voipVADThreshold", "0.25", CVAR_ARCHIVE);
 	cl_voipShowMeter = Cvar_Get ("cl_voipShowMeter", "1", CVAR_ARCHIVE);
 
-	// This is a protocol version number.
-	cl_voip = Cvar_Get ("cl_voip", "1", CVAR_USERINFO | CVAR_ARCHIVE);
+	cl_voip = Cvar_Get ("cl_voip", "1", CVAR_ARCHIVE);
 	Cvar_CheckRange( cl_voip, 0, 1, qtrue );
+	cl_voipProtocol = Cvar_Get ("cl_voipProtocol", cl_voip->integer ? "opus" : "", CVAR_USERINFO | CVAR_ROM);
 #endif
 
 
