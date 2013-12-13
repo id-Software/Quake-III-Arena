@@ -14,8 +14,7 @@ attribute vec4 attr_Tangent;
 attribute vec3 attr_Position2;
 attribute vec3 attr_Normal2;
   #if defined(USE_VERT_TANGENT_SPACE)
-attribute vec3 attr_Tangent2;
-attribute vec3 attr_Bitangent2;
+attribute vec4 attr_Tangent2;
   #endif
 #endif
 
@@ -108,13 +107,15 @@ vec2 GenTexCoords(int TCGen, vec3 position, vec3 normal, vec3 TCGenVector0, vec3
 	else if (TCGen == TCGEN_ENVIRONMENT_MAPPED)
 	{
 		vec3 viewer = normalize(u_LocalViewOrigin - position);
-		tex = -reflect(viewer, normal).yz * vec2(0.5, -0.5) + 0.5;
+		vec2 ref = reflect(viewer, normal).yz;
+		tex.s = ref.x * -0.5 + 0.5;
+		tex.t = ref.y *  0.5 + 0.5;
 	}
 	else if (TCGen == TCGEN_VECTOR)
 	{
 		tex = vec2(dot(position, TCGenVector0), dot(position, TCGenVector1));
 	}
-	
+
 	return tex;
 }
 #endif
@@ -123,38 +124,33 @@ vec2 GenTexCoords(int TCGen, vec3 position, vec3 normal, vec3 TCGenVector0, vec3
 vec2 ModTexCoords(vec2 st, vec3 position, vec4 texMatrix, vec4 offTurb)
 {
 	float amplitude = offTurb.z;
-	float phase = offTurb.w;
-	vec2 st2 = vec2(dot(st, texMatrix.xz), dot(st, texMatrix.yw)) + offTurb.xy;
+	float phase = offTurb.w * 2.0 * M_PI;
+	vec2 st2;
+	st2.x = st.x * texMatrix.x + (st.y * texMatrix.z + offTurb.x);
+	st2.y = st.x * texMatrix.y + (st.y * texMatrix.w + offTurb.y);
 
-	vec3 offsetPos = position / 1024.0;
-	offsetPos.x += offsetPos.z;
-	
-	vec2 texOffset = sin((offsetPos.xy + vec2(phase)) * 2.0 * M_PI);
-	
+	vec2 offsetPos = vec2(position.x + position.z, position.y);
+
+	vec2 texOffset = sin(offsetPos * (2.0 * M_PI / 1024.0) + vec2(phase));
+
 	return st2 + texOffset * amplitude;	
 }
 #endif
 
 
-float CalcLightAttenuation(vec3 dir, float sqrRadius)
+float CalcLightAttenuation(float point, float normDist)
 {
-	// point light at >0 radius, directional otherwise
-	float point = float(sqrRadius > 0.0);
-
-	// inverse square light
-	float attenuation = sqrRadius / dot(dir, dir);
-
-	// zero light at radius, approximating q3 style
+	// zero light at 1.0, approximating q3 style
 	// also don't attenuate directional light
-	attenuation = (0.5 * attenuation - 1.5) * point + 1.0;
-	
+	float attenuation = (0.5 * normDist - 1.5) * point + 1.0;
+
 	// clamp attenuation
 	#if defined(NO_LIGHT_CLAMP)
 	attenuation = max(attenuation, 0.0);
 	#else
 	attenuation = clamp(attenuation, 0.0, 1.0);
 	#endif
-	
+
 	return attenuation;
 }
 
@@ -162,22 +158,22 @@ float CalcLightAttenuation(vec3 dir, float sqrRadius)
 void main()
 {
 #if defined(USE_VERTEX_ANIMATION)
-	vec3 position  = mix(attr_Position,  attr_Position2,  u_VertexLerp);
-	vec3 normal    = normalize(mix(attr_Normal,    attr_Normal2,    u_VertexLerp) * 2.0 - vec3(1.0));
+	vec3 position  = mix(attr_Position,    attr_Position2,    u_VertexLerp);
+	vec3 normal    = mix(attr_Normal,      attr_Normal2,      u_VertexLerp);
   #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 tangent   = normalize(mix(attr_Tangent.xyz,   attr_Tangent2.xyz,   u_VertexLerp) * 2.0 - vec3(1.0));
+	vec3 tangent   = mix(attr_Tangent.xyz, attr_Tangent2.xyz, u_VertexLerp);
   #endif
 #else
 	vec3 position  = attr_Position;
-	vec3 normal    = attr_Normal    * 2.0 - vec3(1.0);
+	vec3 normal    = attr_Normal;
   #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 tangent   = attr_Tangent.xyz * 2.0 - vec3(1.0);
+	vec3 tangent   = attr_Tangent.xyz;
   #endif
 #endif
 
+	normal  = normal  * 2.0 - vec3(1.0);
 #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-  vec3 bitangent = cross(normal, tangent);
-  bitangent *= attr_Tangent.w * 2.0 - 1.0;
+	tangent = tangent * 2.0 - vec3(1.0);
 #endif
 
 #if defined(USE_TCGEN)
@@ -195,17 +191,20 @@ void main()
 	gl_Position = u_ModelViewProjectionMatrix * vec4(position, 1.0);
 
 #if defined(USE_MODELMATRIX)
-	position  = (u_ModelMatrix * vec4(position,  1.0)).xyz;
-	normal    = (u_ModelMatrix * vec4(normal,    0.0)).xyz;
-  #if defined(USE_VERT_TANGENT_SPACE)
-	tangent   = (u_ModelMatrix * vec4(tangent,   0.0)).xyz;
-	bitangent = (u_ModelMatrix * vec4(bitangent, 0.0)).xyz;
+	position  = (u_ModelMatrix * vec4(position, 1.0)).xyz;
+	normal    = (u_ModelMatrix * vec4(normal,   0.0)).xyz;
+  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+	tangent   = (u_ModelMatrix * vec4(tangent,  0.0)).xyz;
   #endif
+#endif
+
+#if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+	vec3 bitangent = cross(normal, tangent) * (attr_Tangent.w * 2.0 - 1.0);
 #endif
 
 #if defined(USE_LIGHT_VECTOR)
 	vec3 L = u_LightOrigin.xyz - (position * u_LightOrigin.w);
-#elif defined(USE_LIGHT) 
+#elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 L = attr_LightDirection * 2.0 - vec3(1.0);
   #if defined(USE_MODELMATRIX)
 	L = (u_ModelMatrix * vec4(L, 0.0)).xyz;
@@ -215,7 +214,7 @@ void main()
 #if defined(USE_LIGHTMAP)
 	var_TexCoords.zw = attr_TexCoord1.st;
 #endif
-	
+
 	var_Color = u_VertColor * attr_Color + u_BaseColor;
 #if defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
 	var_LightColor = var_Color.rgb;
@@ -223,10 +222,11 @@ void main()
 #endif
 
 #if defined(USE_LIGHT_VECTOR) && defined(USE_FAST_LIGHT)
-	float attenuation = CalcLightAttenuation(L, u_LightRadius * u_LightRadius);
-	float NL = clamp(dot(normal, normalize(L)), 0.0, 1.0);
+	float sqrLightDist = dot(L, L);
+	float attenuation = CalcLightAttenuation(u_LightOrigin.w, u_LightRadius * u_LightRadius / sqrLightDist);
+	float NL = clamp(dot(normalize(normal), L) / sqrt(sqrLightDist), 0.0, 1.0);
 
-	var_Color.rgb *= u_DirectedLight * attenuation * NL + u_AmbientLight;
+	var_Color.rgb *= u_DirectedLight * (attenuation * NL) + u_AmbientLight;
 #endif
 
 #if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
@@ -241,15 +241,12 @@ void main()
 	var_LightDir = vec4(L, 0.0);
   #endif
   #if defined(USE_DELUXEMAP)
-    var_LightDir *= 1.0 - u_EnableTextures.y;
+	var_LightDir -= u_EnableTextures.y * var_LightDir;
   #endif
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 viewDir = u_ViewOrigin - position;
-#endif
-
-#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
   #if defined(USE_VERT_TANGENT_SPACE)
 	// store view direction in tangent space to save on varyings
 	var_Normal    = vec4(normal,    viewDir.x);

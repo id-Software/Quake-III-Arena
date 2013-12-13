@@ -37,6 +37,8 @@ void main()
 	{
 		color = color2;
 	}
+	
+	//color = color * (u_Texture1Env.xxxx + color2 * u_Texture1Env.z) + color2 * u_Texture1Env.y;
 #endif
 
 	gl_FragColor = color * var_Color;
