@@ -234,12 +234,20 @@ static void S_PaintChannelFrom16_altivec( channel_t *ch, const sfx_t *sc, int co
 	portable_samplepair_t	*samp;
 	sndBuffer				*chunk;
 	short					*samples;
-	float					ooff, fdata, fdiv, fleftvol, frightvol;
+	float					ooff, fdata[2], fdiv, fleftvol, frightvol;
 
 	samp = &paintbuffer[ bufferOffset ];
 
 	if (ch->doppler) {
 		sampleOffset = sampleOffset*ch->oldDopplerScale;
+	}
+
+	if ( sc->soundChannels == 2 ) {
+		sampleOffset *= sc->soundChannels;
+
+		if ( sampleOffset & 1 ) {
+			sampleOffset &= ~1;
+		}
 	}
 
 	chunk = sc->soundData;
@@ -274,6 +282,10 @@ static void S_PaintChannelFrom16_altivec( channel_t *ch, const sfx_t *sc, int co
 			while(i < count && (((unsigned long)&samp[i] & 0x1f) || ((count-i) < 8) || ((SND_CHUNK_SIZE - sampleOffset) < 8))) {
 				data  = samples[sampleOffset++];
 				samp[i].left += (data * leftvol)>>8;
+
+				if ( sc->soundChannels == 2 ) {
+					data = samples[sampleOffset++];
+				}
 				samp[i].right += (data * rightvol)>>8;
 	
 				if (sampleOffset == SND_CHUNK_SIZE) {
@@ -373,10 +385,10 @@ static void S_PaintChannelFrom16_altivec( channel_t *ch, const sfx_t *sc, int co
 		for ( i=0 ; i<count ; i++ ) {
 
 			aoff = ooff;
-			ooff = ooff + ch->dopplerScale;
+			ooff = ooff + ch->dopplerScale * sc->soundChannels;
 			boff = ooff;
-			fdata = 0;
-			for (j=aoff; j<boff; j++) {
+			fdata[0] = fdata[1] = 0;
+			for (j=aoff; j<boff; j += sc->soundChannels) {
 				if (j == SND_CHUNK_SIZE) {
 					chunk = chunk->next;
 					if (!chunk) {
@@ -385,11 +397,17 @@ static void S_PaintChannelFrom16_altivec( channel_t *ch, const sfx_t *sc, int co
 					samples = chunk->sndChunk;
 					ooff -= SND_CHUNK_SIZE;
 				}
-				fdata  += samples[j&(SND_CHUNK_SIZE-1)];
+				if ( sc->soundChannels == 2 ) {
+					fdata[0] += samples[j&(SND_CHUNK_SIZE-1)];
+					fdata[1] += samples[(j+1)&(SND_CHUNK_SIZE-1)];
+				} else {
+					fdata[0] += samples[j&(SND_CHUNK_SIZE-1)];
+					fdata[1] += samples[j&(SND_CHUNK_SIZE-1)];
+				}
 			}
-			fdiv = 256 * (boff-aoff);
-			samp[i].left += (fdata * fleftvol)/fdiv;
-			samp[i].right += (fdata * frightvol)/fdiv;
+			fdiv = 256 * (boff-aoff) / sc->soundChannels;
+			samp[i].left += (fdata[0] * fleftvol)/fdiv;
+			samp[i].right += (fdata[1] * frightvol)/fdiv;
 		}
 	}
 }
@@ -402,12 +420,20 @@ static void S_PaintChannelFrom16_scalar( channel_t *ch, const sfx_t *sc, int cou
 	portable_samplepair_t	*samp;
 	sndBuffer				*chunk;
 	short					*samples;
-	float					ooff, fdata, fdiv, fleftvol, frightvol;
+	float					ooff, fdata[2], fdiv, fleftvol, frightvol;
 
 	samp = &paintbuffer[ bufferOffset ];
 
 	if (ch->doppler) {
 		sampleOffset = sampleOffset*ch->oldDopplerScale;
+	}
+
+	if ( sc->soundChannels == 2 ) {
+		sampleOffset *= sc->soundChannels;
+
+		if ( sampleOffset & 1 ) {
+			sampleOffset &= ~1;
+		}
 	}
 
 	chunk = sc->soundData;
@@ -426,6 +452,10 @@ static void S_PaintChannelFrom16_scalar( channel_t *ch, const sfx_t *sc, int cou
 		for ( i=0 ; i<count ; i++ ) {
 			data  = samples[sampleOffset++];
 			samp[i].left += (data * leftvol)>>8;
+
+			if ( sc->soundChannels == 2 ) {
+				data = samples[sampleOffset++];
+			}
 			samp[i].right += (data * rightvol)>>8;
 
 			if (sampleOffset == SND_CHUNK_SIZE) {
@@ -447,10 +477,10 @@ static void S_PaintChannelFrom16_scalar( channel_t *ch, const sfx_t *sc, int cou
 		for ( i=0 ; i<count ; i++ ) {
 
 			aoff = ooff;
-			ooff = ooff + ch->dopplerScale;
+			ooff = ooff + ch->dopplerScale * sc->soundChannels;
 			boff = ooff;
-			fdata = 0;
-			for (j=aoff; j<boff; j++) {
+			fdata[0] = fdata[1] = 0;
+			for (j=aoff; j<boff; j += sc->soundChannels) {
 				if (j == SND_CHUNK_SIZE) {
 					chunk = chunk->next;
 					if (!chunk) {
@@ -459,11 +489,17 @@ static void S_PaintChannelFrom16_scalar( channel_t *ch, const sfx_t *sc, int cou
 					samples = chunk->sndChunk;
 					ooff -= SND_CHUNK_SIZE;
 				}
-				fdata  += samples[j&(SND_CHUNK_SIZE-1)];
+				if ( sc->soundChannels == 2 ) {
+					fdata[0] += samples[j&(SND_CHUNK_SIZE-1)];
+					fdata[1] += samples[(j+1)&(SND_CHUNK_SIZE-1)];
+				} else {
+					fdata[0] += samples[j&(SND_CHUNK_SIZE-1)];
+					fdata[1] += samples[j&(SND_CHUNK_SIZE-1)];
+				}
 			}
-			fdiv = 256 * (boff-aoff);
-			samp[i].left += (fdata * fleftvol)/fdiv;
-			samp[i].right += (fdata * frightvol)/fdiv;
+			fdiv = 256 * (boff-aoff) / sc->soundChannels;
+			samp[i].left += (fdata[0] * fleftvol)/fdiv;
+			samp[i].right += (fdata[1] * frightvol)/fdiv;
 		}
 	}
 }
