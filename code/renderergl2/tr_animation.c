@@ -411,7 +411,7 @@ void RB_MDRSurfaceAnim( mdrSurface_t *surface )
 		tess.xyz[baseVertex + j][1] = tempVert[1];
 		tess.xyz[baseVertex + j][2] = tempVert[2];
 
-		tess.normal[baseVertex + j] = R_VboPackTangent(tempNormal);
+		tess.normal[baseVertex + j] = R_VboPackNormal(tempNormal);
 
 		tess.texCoords[baseVertex + j][0][0] = v->texCoords[0];
 		tess.texCoords[baseVertex + j][0][1] = v->texCoords[1];
