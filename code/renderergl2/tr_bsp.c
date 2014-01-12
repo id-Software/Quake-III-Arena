@@ -471,7 +471,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 				image[j*4+2] = buf_p[j*3+2];
 
 				// make 0,0,0 into 127,127,127
-				if ((image[j*4+0] == 0) && (image[j*4+0] == 0) && (image[j*4+2] == 0))
+				if ((image[j*4+0] == 0) && (image[j*4+1] == 0) && (image[j*4+2] == 0))
 				{
 					image[j*4+0] =
 					image[j*4+1] =
