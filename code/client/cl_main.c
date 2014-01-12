@@ -670,7 +670,7 @@ void CL_StopRecord_f( void ) {
 CL_DemoFilename
 ================== 
 */  
-void CL_DemoFilename( int number, char *fileName ) {
+void CL_DemoFilename( int number, char *fileName, int fileNameSize ) {
 	int		a,b,c,d;
 
 	if(number < 0 || number > 9999)
@@ -684,7 +684,7 @@ void CL_DemoFilename( int number, char *fileName ) {
 	number -= c*10;
 	d = number;
 
-	Com_sprintf( fileName, MAX_OSPATH, "demo%i%i%i%i"
+	Com_sprintf( fileName, fileNameSize, "demo%i%i%i%i"
 		, a, b, c, d );
 }
 
@@ -744,7 +744,7 @@ void CL_Record_f( void ) {
 
 		// scan for a free demo name
 		for ( number = 0 ; number <= 9999 ; number++ ) {
-			CL_DemoFilename( number, demoName );
+			CL_DemoFilename( number, demoName, sizeof( demoName ) );
 #ifdef LEGACY_PROTOCOL
 			if(clc.compat)
 				Com_sprintf(name, sizeof(name), "demos/%s.%s%d", demoName, DEMOEXT, com_legacyprotocol->integer);
