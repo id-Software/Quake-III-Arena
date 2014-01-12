@@ -1,5 +1,3 @@
-#version 120
-
 uniform sampler2D u_DiffuseMap;
 uniform vec4      u_Color;
 
