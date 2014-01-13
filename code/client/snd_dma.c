@@ -1424,11 +1424,7 @@ void S_Base_StartBackgroundTrack( const char *intro, const char *loop ){
 		return;
 	}
 
-	if( !loop ) {
-		s_backgroundLoop[0] = 0;
-	} else {
-		Q_strncpyz( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
-	}
+	Q_strncpyz( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
 
 	S_OpenBackgroundStream( intro );
 }
