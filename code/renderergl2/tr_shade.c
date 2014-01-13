@@ -1241,7 +1241,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			int i;
 			vec4_t enableTextures;
 
-			if ((backEnd.viewParms.flags & VPF_USESUNLIGHT) && (pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK))
+			if (r_sunlightMode->integer && (backEnd.viewParms.flags & VPF_USESUNLIGHT) && (pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK))
 			{
 				GL_BindToTMU(tr.screenShadowImage, TB_SHADOWMAP);
 				GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTAMBIENT, backEnd.refdef.sunAmbCol);
@@ -1552,8 +1552,8 @@ void RB_StageIteratorGeneric( void )
 	//
 	// pshadows!
 	//
-	if (glRefConfig.framebufferObject && tess.pshadowBits && tess.shader->sort <= SS_OPAQUE
-		&& !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) ) {
+	if (glRefConfig.framebufferObject && r_shadows->integer == 4 && tess.pshadowBits
+		&& tess.shader->sort <= SS_OPAQUE && !(tess.shader->surfaceFlags & (SURF_NODLIGHT | SURF_SKY) ) ) {
 		ProjectPshadowVBOGLSL();
 	}
 
