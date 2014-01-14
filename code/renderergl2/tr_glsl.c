@@ -1647,7 +1647,10 @@ void GLSL_VertexAttribPointers(uint32_t attribBits)
 	}
 
 	// don't just call LogComment, or we will get a call to va() every frame!
-	GLimp_LogComment(va("--- GL_VertexAttribPointers( %s ) ---\n", vbo->name));
+	if(r_logFile->integer)
+	{
+		GLimp_LogComment(va("--- GL_VertexAttribPointers( %s ) ---\n", vbo->name));
+	}
 
 	// position/normal/tangent are always set in case of animation
 	oldFrame = glState.vertexAttribsOldFrame;
