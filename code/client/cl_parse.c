@@ -785,7 +785,7 @@ void CL_ParseVoip ( msg_t *msg, qboolean ignoreData ) {
 		// tell opus that we're missing frames...
 		for (i = 0; i < seqdiff; i++) {
 			assert((written + VOIP_MAX_PACKET_SAMPLES) * 2 < sizeof (decoded));
-			numSamples = opus_decode(clc.opusDecoder[sender], NULL, VOIP_MAX_PACKET_SAMPLES * 2, decoded + written, sizeof (decoded) - written, 0);
+			numSamples = opus_decode(clc.opusDecoder[sender], NULL, 0, decoded + written, VOIP_MAX_PACKET_SAMPLES, 0);
 			if ( numSamples <= 0 ) {
 				Com_DPrintf("VoIP: Error decoding frame %d from client #%d\n", i, sender);
 				continue;
@@ -794,7 +794,7 @@ void CL_ParseVoip ( msg_t *msg, qboolean ignoreData ) {
 		}
 	}
 
-	numSamples = opus_decode(clc.opusDecoder[sender], encoded, packetsize, decoded + written, sizeof (decoded) - written, 0);
+	numSamples = opus_decode(clc.opusDecoder[sender], encoded, packetsize, decoded + written, ARRAY_LEN(decoded) - written, 0);
 
 	if ( numSamples <= 0 ) {
 		Com_DPrintf("VoIP: Error decoding voip data from client #%d\n", sender);
