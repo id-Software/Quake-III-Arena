@@ -344,6 +344,8 @@ static void DoRailCore( const vec3_t start, const vec3_t end, const vec3_t up, f
 	int			vbase;
 	float		t = len / 256.0f;
 
+	RB_CHECKOVERFLOW( 4, 6 );
+
 	vbase = tess.numVertexes;
 
 	spanWidth2 = -spanWidth;
