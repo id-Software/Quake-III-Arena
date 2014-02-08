@@ -995,7 +995,6 @@ endif
 ifeq ($(USE_CODEC_VORBIS),1)
   CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
   NEED_OGG=1
-  NEED_VORBIS=1
 endif
 
 ifeq ($(USE_CODEC_OPUS),1)
@@ -1020,7 +1019,7 @@ ifeq ($(NEED_OGG),1)
   endif
 endif
 
-ifeq ($(NEED_VORBIS),1)
+ifeq ($(USE_CODEC_VORBIS),1)
   ifeq ($(USE_INTERNAL_VORBIS),1)
     CLIENT_CFLAGS += -I$(VORBISDIR)/include -I$(VORBISDIR)/lib
 
@@ -1994,7 +1993,7 @@ Q3OBJ += \
 endif
 endif
 
-ifeq ($(NEED_VORBIS),1)
+ifeq ($(USE_CODEC_VORBIS),1)
 ifeq ($(USE_INTERNAL_VORBIS),1)
 Q3OBJ += \
   $(B)/client/vorbis/analysis.o \
