@@ -32,10 +32,22 @@
 # include <opusfile.h>
 
 typedef struct OggOpusLink OggOpusLink;
+
 # if defined(OP_FIXED_POINT)
+
 typedef opus_int16 op_sample;
+
 # else
+
 typedef float      op_sample;
+
+/*We're using this define to test for libopus 1.1 or later until libopus
+   provides a better mechanism.*/
+#  if defined(OPUS_GET_EXPERT_FRAME_DURATION_REQUEST)
+/*Enable soft clipping prevention in 16-bit decodes.*/
+#   define OP_SOFT_CLIP (1)
+#  endif
+
 # endif
 
 # if OP_GNUC_PREREQ(4,2)
@@ -80,8 +92,10 @@ void op_fatal_impl(const char *_str,const char *_file,int _line);
 #  define OP_ALWAYS_TRUE(_cond) ((void)(_cond))
 # endif
 
-# define OP_INT64_MAX ((ogg_int64_t)0x7FFFFFFFFFFFFFFFLL)
+# define OP_INT64_MAX (2*(((ogg_int64_t)1<<62)-1)|1)
 # define OP_INT64_MIN (-OP_INT64_MAX-1)
+# define OP_INT32_MAX (2*(((ogg_int32_t)1<<30)-1)|1)
+# define OP_INT32_MIN (-OP_INT32_MAX-1)
 
 # define OP_MIN(_a,_b)        ((_a)<(_b)?(_a):(_b))
 # define OP_MAX(_a,_b)        ((_a)>(_b)?(_a):(_b))
@@ -90,7 +104,7 @@ void op_fatal_impl(const char *_str,const char *_file,int _line);
 /*Advance a file offset by the given amount, clamping against OP_INT64_MAX.
   This is used to advance a known offset by things like OP_CHUNK_SIZE or
    OP_PAGE_SIZE_MAX, while making sure to avoid signed overflow.
-  It assumes that both _offset and _amount are positive.*/
+  It assumes that both _offset and _amount are non-negative.*/
 #define OP_ADV_OFFSET(_offset,_amount) \
  (OP_MIN(_offset,OP_INT64_MAX-(_amount))+(_amount))
 
@@ -189,6 +203,10 @@ struct OggOpusFile{
   int                op_count;
   /*Central working state for the packet-to-PCM decoder.*/
   OpusMSDecoder     *od;
+  /*The application-provided packet decode callback.*/
+  op_decode_cb_func  decode_cb;
+  /*The application-provided packet decode callback context.*/
+  void              *decode_cb_ctx;
   /*The stream count used to initialize the decoder.*/
   int                od_stream_count;
   /*The coupled stream count used to initialize the decoder.*/
@@ -203,12 +221,26 @@ struct OggOpusFile{
   int                od_buffer_pos;
   /*The number of valid samples in the decoded buffer.*/
   int                od_buffer_size;
-  /*Internal state for dithering float->short output.*/
+  /*The type of gain offset to apply.
+    One of OP_HEADER_GAIN, OP_TRACK_GAIN, or OP_ABSOLUTE_GAIN.*/
+  int                gain_type;
+  /*The offset to apply to the gain.*/
+  opus_int32         gain_offset_q8;
+  /*Internal state for soft clipping and dithering float->short output.*/
 #if !defined(OP_FIXED_POINT)
+# if defined(OP_SOFT_CLIP)
+  float              clip_state[OP_NCHANNELS_MAX];
+# endif
   float              dither_a[OP_NCHANNELS_MAX*4];
   float              dither_b[OP_NCHANNELS_MAX*4];
-  int                dither_mute;
   opus_uint32        dither_seed;
+  int                dither_mute;
+  int                dither_disabled;
+  /*The number of channels represented by the internal state.
+    This gets set to 0 whenever anything that would prevent state propagation
+     occurs (switching between the float/short APIs, or between the
+     stereo/multistream APIs).*/
+  int                state_channel_count;
 #endif
 };
 
