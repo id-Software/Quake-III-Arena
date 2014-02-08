@@ -710,4 +710,19 @@ void GLimp_InitExtraExtensions()
 	{
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
+
+	// GL_ARB_vertex_type_2_10_10_10_rev
+	extension = "GL_ARB_vertex_type_2_10_10_10_rev";
+	glRefConfig.packedNormalDataType = GL_UNSIGNED_BYTE;
+	if( GLimp_HaveExtension( extension ) )
+	{
+		if (r_arb_vertex_type_2_10_10_10_rev->integer)
+			glRefConfig.packedNormalDataType = GL_UNSIGNED_INT_2_10_10_10_REV;
+
+		ri.Printf(PRINT_ALL, result[r_arb_vertex_type_2_10_10_10_rev->integer ? 1 : 0], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
 }

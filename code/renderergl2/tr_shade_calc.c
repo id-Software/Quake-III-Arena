@@ -116,29 +116,27 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 	vec3_t	offset;
 	float	scale;
 	float	*xyz = ( float * ) tess.xyz;
-	uint8_t	*normal = ( uint8_t * ) tess.normal;
+	uint32_t	*normal = tess.normal;
 	float	*table;
 
 	if ( ds->deformationWave.frequency == 0 )
 	{
 		scale = EvalWaveForm( &ds->deformationWave );
 
-		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 )
+		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal++ )
 		{
-			offset[0] = (normal[0] / 127.5f - 1.0f) * scale;
-			offset[1] = (normal[1] / 127.5f - 1.0f) * scale;
-			offset[2] = (normal[2] / 127.5f - 1.0f) * scale;
+			R_VboUnpackNormal(offset, *normal);
 			
-			xyz[0] += offset[0];
-			xyz[1] += offset[1];
-			xyz[2] += offset[2];
+			xyz[0] += offset[0] * scale;
+			xyz[1] += offset[1] * scale;
+			xyz[2] += offset[2] * scale;
 		}
 	}
 	else
 	{
 		table = TableForFunc( ds->deformationWave.func );
 
-		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 )
+		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal++ )
 		{
 			float off = ( xyz[0] + xyz[1] + xyz[2] ) * ds->deformationSpread;
 
@@ -147,13 +145,11 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 				ds->deformationWave.phase + off,
 				ds->deformationWave.frequency );
 
-			offset[0] = (normal[0] / 127.5f - 1.0f) * scale;
-			offset[1] = (normal[1] / 127.5f - 1.0f) * scale;
-			offset[2] = (normal[2] / 127.5f - 1.0f) * scale;
-			
-			xyz[0] += offset[0];
-			xyz[1] += offset[1];
-			xyz[2] += offset[2];
+			R_VboUnpackNormal(offset, *normal);
+
+			xyz[0] += offset[0] * scale;
+			xyz[1] += offset[1] * scale;
+			xyz[2] += offset[2] * scale;
 		}
 	}
 }
@@ -169,14 +165,12 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 	int i;
 	float	scale;
 	float	*xyz = ( float * ) tess.xyz;
-	uint8_t *normal = ( uint8_t * ) tess.normal;
+	uint32_t *normal = tess.normal;
 
-	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal += 4 ) {
+	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal++ ) {
 		vec3_t fNormal;
 
-		fNormal[0] = normal[0] / 127.5f - 1.0f;
-		fNormal[1] = normal[1] / 127.5f - 1.0f;
-		fNormal[2] = normal[2] / 127.5f - 1.0f;
+		R_VboUnpackNormal(fNormal, *normal);
 
 		scale = 0.98f;
 		scale = R_NoiseGet4f( xyz[0] * scale, xyz[1] * scale, xyz[2] * scale,
@@ -195,9 +189,7 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 
 		VectorNormalizeFast( fNormal );
 
-		normal[0] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
-		normal[1] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
-		normal[2] = (uint8_t)(fNormal[0] * 127.5f + 128.0f);
+		*normal = R_VboPackNormal(fNormal);
 	}
 }
 
@@ -211,22 +203,25 @@ void RB_CalcBulgeVertexes( deformStage_t *ds ) {
 	int i;
 	const float *st = ( const float * ) tess.texCoords[0];
 	float		*xyz = ( float * ) tess.xyz;
-	uint8_t		*normal = ( uint8_t * ) tess.normal;
+	uint32_t		*normal = tess.normal;
 	float		now;
 
 	now = backEnd.refdef.time * ds->bulgeSpeed * 0.001f;
 
-	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, st += 4, normal += 4 ) {
+	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, st += 4, normal++ ) {
 		int		off;
 		float scale;
+		vec3_t fNormal;
+
+		R_VboUnpackNormal(fNormal, *normal);
 
 		off = (float)( FUNCTABLE_SIZE / (M_PI*2) ) * ( st[0] * ds->bulgeWidth + now );
 
 		scale = tr.sinTable[ off & FUNCTABLE_MASK ] * ds->bulgeHeight;
 			
-		xyz[0] += (normal[0] / 127.5f - 1.0f) * scale;
-		xyz[1] += (normal[1] / 127.5f - 1.0f) * scale;
-		xyz[2] += (normal[2] / 127.5f - 1.0f) * scale;
+		xyz[0] += fNormal[0] * scale;
+		xyz[1] += fNormal[1] * scale;
+		xyz[2] += fNormal[2] * scale;
 	}
 }
 
@@ -281,11 +276,8 @@ void DeformText( const char *text ) {
 	height[0] = 0;
 	height[1] = 0;
 	height[2] = -1;
-		
-	fNormal[0] = tess.normal[0][0] / 127.5f - 1.0f;
-	fNormal[1] = tess.normal[0][1] / 127.5f - 1.0f;
-	fNormal[2] = tess.normal[0][2] / 127.5f - 1.0f;
 
+	R_VboUnpackNormal(fNormal, tess.normal[0]);
 	CrossProduct( fNormal, height, width );
 
 	// find the midpoint of the box

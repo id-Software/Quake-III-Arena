@@ -3,7 +3,7 @@
 uniform sampler2D u_DiffuseMap;
 uniform vec4      u_Color;
 
-varying vec2         var_Tex1;
+varying vec2      var_Tex1;
 
 
 void main()

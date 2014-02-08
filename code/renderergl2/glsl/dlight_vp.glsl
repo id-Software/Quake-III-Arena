@@ -1,4 +1,4 @@
-attribute vec4 attr_Position;
+attribute vec3 attr_Position;
 attribute vec4 attr_TexCoord0;
 attribute vec3 attr_Normal;
 
@@ -32,7 +32,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 
 	if (u_DeformGen == DGEN_BULGE)
 	{
-		phase *= M_PI * 0.25 * st.x;
+		phase *= st.x;
 	}
 	else // if (u_DeformGen <= DGEN_WAVE_INVERSE_SAWTOOTH)
 	{
@@ -48,7 +48,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 	}
 	else if (u_DeformGen == DGEN_WAVE_SQUARE)
 	{
-		func = sign(sin(value * 2.0 * M_PI));
+		func = sign(0.5 - fract(value));
 	}
 	else if (u_DeformGen == DGEN_WAVE_TRIANGLE)
 	{
@@ -62,7 +62,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 	{
 		func = (1.0 - fract(value));
 	}
-	else if (u_DeformGen == DGEN_BULGE)
+	else // if (u_DeformGen == DGEN_BULGE)
 	{
 		func = sin(value);
 	}
@@ -73,16 +73,16 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 
 void main()
 {
-	vec4 position = attr_Position;
-	vec3 normal = attr_Normal;
+	vec3 position = attr_Position;
+	vec3 normal = attr_Normal * 2.0 - vec3(1.0);
 
 #if defined(USE_DEFORM_VERTEXES)
-	position.xyz = DeformPosition(position.xyz, normal, attr_TexCoord0.st);
+	position = DeformPosition(position, normal, attr_TexCoord0.st);
 #endif
 
-	gl_Position = u_ModelViewProjectionMatrix * position;
+	gl_Position = u_ModelViewProjectionMatrix * vec4(position, 1.0);
 		
-	vec3 dist = u_DlightInfo.xyz - position.xyz;	
+	vec3 dist = u_DlightInfo.xyz - position;
 
 	var_Tex1 = dist.xy * u_DlightInfo.a + vec2(0.5);
 	float dlightmod = step(0.0, dot(dist, normal));

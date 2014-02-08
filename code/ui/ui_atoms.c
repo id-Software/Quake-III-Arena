@@ -351,6 +351,7 @@ qboolean UI_ConsoleCommand( int realTime ) {
 
 	if ( Q_stricmp (cmd, "ui_test") == 0 ) {
 		UI_ShowPostGame(qtrue);
+		return qtrue;
 	}
 
 	if ( Q_stricmp (cmd, "ui_report") == 0 ) {

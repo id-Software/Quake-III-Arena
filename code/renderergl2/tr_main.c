@@ -1574,9 +1574,7 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 			shortest = len;
 		}
 
-		tNormal[0] = tess.normal[tess.indexes[i]][0] / 127.5f - 1.0f;
-		tNormal[1] = tess.normal[tess.indexes[i]][1] / 127.5f - 1.0f;
-		tNormal[2] = tess.normal[tess.indexes[i]][2] / 127.5f - 1.0f;
+		R_VboUnpackNormal(tNormal, tess.normal[tess.indexes[i]]);
 
 		if ( DotProduct( normal, tNormal ) >= 0 )
 		{
@@ -1915,9 +1913,6 @@ static void R_AddEntitySurface (int entityNum)
 			case MOD_MESH:
 				R_AddMD3Surfaces( ent );
 				break;
-			case MOD_MD4:
-				R_AddAnimSurfaces( ent );
-				break;
 			case MOD_MDR:
 				R_MDRAddAnimSurfaces( ent );
 				break;
@@ -2204,12 +2199,6 @@ void R_RenderPshadowMaps(const refdef_t *fd)
 				}
 				break;
 
-				case MOD_MD4:
-				{
-					// FIXME: actually calculate the radius and bounds, this is a horrible hack
-					radius = r_pshadowDist->value / 2.0f;
-				}
-				break;
 				case MOD_MDR:
 				{
 					// FIXME: never actually tested this
@@ -2862,7 +2851,7 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 
 		// FIXME: sun shadows aren't rendered correctly in cubemaps
 		// fix involves changing r_FBufScale to fit smaller cubemap image size, or rendering cubemap to framebuffer first
-		if(0) //(glRefConfig.framebufferObject && (r_forceSun->integer || tr.sunShadows))
+		if(0) //(glRefConfig.framebufferObject && r_sunlightMode->integer && (r_forceSun->integer || tr.sunShadows))
 		{
 			R_RenderSunShadowMaps(&refdef, 0);
 			R_RenderSunShadowMaps(&refdef, 1);

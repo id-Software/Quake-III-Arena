@@ -783,4 +783,4 @@ Significant contributions from
   * Aaron Gyes <floam@aaron.gy>
 
 
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f88af076b5015c62b699968f6772c3a5 "githalytics.com")](http://githalytics.com/ioquake/ioq3)
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/6d196bd663b47049a25dcb8caef95949 "githalytics.com")](http://githalytics.com/ioquake/ioq3)

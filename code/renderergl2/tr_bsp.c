@@ -128,17 +128,34 @@ static	void R_ColorShiftLightingBytes( byte in[4], byte out[4] ) {
 
 /*
 ===============
-R_ColorShiftLightingBytes
+R_ColorShiftLightingFloats
 
 ===============
 */
 static void R_ColorShiftLightingFloats(float in[4], float out[4], float scale )
 {
+	float	r, g, b;
+
 	scale *= pow(2.0f, r_mapOverBrightBits->integer - tr.overbrightBits);
 
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
+	r = in[0] * scale;
+	g = in[1] * scale;
+	b = in[2] * scale;
+
+	// normalize by color instead of saturating to white
+	if ( !r_hdr->integer && ( r > 1 || g > 1 || b > 1 ) ) {
+		float	max;
+
+		max = r > g ? r : g;
+		max = max > b ? max : b;
+		r = r / max;
+		g = g / max;
+		b = b / max;
+	}
+
+	out[0] = r;
+	out[1] = g;
+	out[2] = b;
 	out[3] = in[3];
 }
 
@@ -471,7 +488,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 				image[j*4+2] = buf_p[j*3+2];
 
 				// make 0,0,0 into 127,127,127
-				if ((image[j*4+0] == 0) && (image[j*4+0] == 0) && (image[j*4+2] == 0))
+				if ((image[j*4+0] == 0) && (image[j*4+1] == 0) && (image[j*4+2] == 0))
 				{
 					image[j*4+0] =
 					image[j*4+1] =

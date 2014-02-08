@@ -52,7 +52,7 @@ void Mat4SimpleInverse( const mat4_t in, mat4_t out);
 #define VectorCopy5(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3],(b)[4]=(a)[4])
 
 #define OffsetByteToFloat(a)    ((float)(a) * 1.0f/127.5f - 1.0f)
-#define FloatToOffsetByte(a)    (byte)(((a) + 1.0f) * 127.5f)
+#define FloatToOffsetByte(a)    (byte)((a) * 127.5f + 128.0f)
 #define ByteToFloat(a)          ((float)(a) * 1.0f/255.0f)
 #define FloatToByte(a)          (byte)((a) * 255.0f)
 

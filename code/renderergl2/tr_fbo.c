@@ -465,34 +465,48 @@ void FBO_Init(void)
 	}
 
 	// FIXME: Don't use separate color/depth buffers for a shadow buffer
-	for( i = 0; i < MAX_DRAWN_PSHADOWS; i++)
+	if (MAX_DRAWN_PSHADOWS && tr.pshadowMaps[0])
 	{
-		tr.pshadowFbos[i] = FBO_Create(va("_shadowmap%d", i), tr.pshadowMaps[i]->width, tr.pshadowMaps[i]->height);
-		FBO_Bind(tr.pshadowFbos[i]);
+		for( i = 0; i < MAX_DRAWN_PSHADOWS; i++)
+		{
+			tr.pshadowFbos[i] = FBO_Create(va("_shadowmap%d", i), tr.pshadowMaps[i]->width, tr.pshadowMaps[i]->height);
+			FBO_Bind(tr.pshadowFbos[i]);
 
-		//FBO_CreateBuffer(tr.pshadowFbos[i], GL_RGBA8, 0, 0);
-		FBO_AttachTextureImage(tr.pshadowMaps[i], 0);
+			//FBO_CreateBuffer(tr.pshadowFbos[i], GL_RGBA8, 0, 0);
+			FBO_AttachTextureImage(tr.pshadowMaps[i], 0);
 
-		FBO_CreateBuffer(tr.pshadowFbos[i], GL_DEPTH_COMPONENT24_ARB, 0, 0);
-		//R_AttachFBOTextureDepth(tr.textureDepthImage->texnum);
+			FBO_CreateBuffer(tr.pshadowFbos[i], GL_DEPTH_COMPONENT24_ARB, 0, 0);
+			//R_AttachFBOTextureDepth(tr.textureDepthImage->texnum);
 
-		R_CheckFBO(tr.pshadowFbos[i]);
+			R_CheckFBO(tr.pshadowFbos[i]);
+		}
 	}
 
-	for ( i = 0; i < 3; i++)
+	if (tr.sunShadowDepthImage[0])
 	{
-		tr.sunShadowFbo[i] = FBO_Create("_sunshadowmap", tr.sunShadowDepthImage[i]->width, tr.sunShadowDepthImage[i]->height);
-		FBO_Bind(tr.sunShadowFbo[i]);
+		for ( i = 0; i < 3; i++)
+		{
+			tr.sunShadowFbo[i] = FBO_Create("_sunshadowmap", tr.sunShadowDepthImage[i]->width, tr.sunShadowDepthImage[i]->height);
+			FBO_Bind(tr.sunShadowFbo[i]);
 
-		//FBO_CreateBuffer(tr.sunShadowFbo[i], GL_RGBA8, 0, 0);
-		//FBO_AttachTextureImage(tr.sunShadowImage, 0);
-		qglDrawBuffer(GL_NONE);
-		qglReadBuffer(GL_NONE);
+			//FBO_CreateBuffer(tr.sunShadowFbo[i], GL_RGBA8, 0, 0);
+			//FBO_AttachTextureImage(tr.sunShadowImage, 0);
+			qglDrawBuffer(GL_NONE);
+			qglReadBuffer(GL_NONE);
 
-		//FBO_CreateBuffer(tr.sunShadowFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-		R_AttachFBOTextureDepth(tr.sunShadowDepthImage[i]->texnum);
+			//FBO_CreateBuffer(tr.sunShadowFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
+			R_AttachFBOTextureDepth(tr.sunShadowDepthImage[i]->texnum);
 
-		R_CheckFBO(tr.sunShadowFbo[i]);
+			R_CheckFBO(tr.sunShadowFbo[i]);
+
+		}
+
+		tr.screenShadowFbo = FBO_Create("_screenshadow", tr.screenShadowImage->width, tr.screenShadowImage->height);
+		FBO_Bind(tr.screenShadowFbo);
+
+		FBO_AttachTextureImage(tr.screenShadowImage, 0);
+
+		R_CheckFBO(tr.screenShadowFbo);
 	}
 
 	for (i = 0; i < 2; i++)
@@ -537,15 +551,6 @@ void FBO_Init(void)
 		R_CheckFBO(tr.quarterFbo[i]);
 	}
 
-	{
-		tr.screenShadowFbo = FBO_Create("_screenshadow", tr.screenShadowImage->width, tr.screenShadowImage->height);
-		FBO_Bind(tr.screenShadowFbo);
-		
-		FBO_AttachTextureImage(tr.screenShadowImage, 0);
-
-		R_CheckFBO(tr.screenShadowFbo);
-	}
-
 	if (r_ssao->integer)
 	{
 		tr.hdrDepthFbo = FBO_Create("_hdrDepth", tr.hdrDepthImage->width, tr.hdrDepthImage->height);
@@ -563,6 +568,7 @@ void FBO_Init(void)
 		R_CheckFBO(tr.screenSsaoFbo);
 	}
 
+	if (tr.renderCubeImage)
 	{
 		tr.renderCubeFbo = FBO_Create("_renderCubeFbo", tr.renderCubeImage->width, tr.renderCubeImage->height);
 		FBO_Bind(tr.renderCubeFbo);
