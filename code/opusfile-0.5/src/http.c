@@ -9,6 +9,10 @@
  * by the Xiph.Org Foundation and contributors http://www.xiph.org/ *
  *                                                                  *
  ********************************************************************/
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "internal.h"
 #include <ctype.h>
 #include <errno.h>
@@ -40,7 +44,8 @@
   RFC 6066: Transport Layer Security (TLS) Extensions: Extension Definitions
   RFC 6125: Representation and Verification of Domain-Based Application Service
    Identity within Internet Public Key Infrastructure Using X.509 (PKIX)
-   Certificates in the Context of Transport Layer Security (TLS)*/
+   Certificates in the Context of Transport Layer Security (TLS)
+  RFC 6555: Happy Eyeballs: Success with Dual-Stack Hosts*/
 
 typedef struct OpusParsedURL   OpusParsedURL;
 typedef struct OpusStringBuf   OpusStringBuf;
@@ -56,7 +61,7 @@ static char *op_string_range_dup(const char *_start,const char *_end){
   if(OP_UNLIKELY(len>=INT_MAX))return NULL;
   ret=(char *)_ogg_malloc(sizeof(*ret)*(len+1));
   if(OP_LIKELY(ret!=NULL)){
-    memcpy(ret,_start,sizeof(*ret)*(len));
+    ret=(char *)memcpy(ret,_start,sizeof(*ret)*(len));
     ret[len]='\0';
   }
   return ret;
@@ -205,18 +210,144 @@ static const char *op_parse_file_url(const char *_src){
 }
 
 #if defined(OP_ENABLE_HTTP)
-# include <sys/ioctl.h>
-# include <sys/types.h>
-# include <sys/socket.h>
+# if defined(_WIN32)
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#  include <openssl/ssl.h>
+#  include "winerrno.h"
+
+typedef SOCKET op_sock;
+
+#  define OP_INVALID_SOCKET (INVALID_SOCKET)
+
+/*Vista and later support WSAPoll(), but we don't want to rely on that.
+  Instead we re-implement it badly using select().
+  Unfortunately, they define a conflicting struct pollfd, so we only define our
+   own if it looks like that one has not already been defined.*/
+#  if !defined(POLLIN)
+/*Equivalent to POLLIN.*/
+#   define POLLRDNORM (0x0100)
+/*Priority band data can be read.*/
+#   define POLLRDBAND (0x0200)
+/*There is data to read.*/
+#   define POLLIN     (POLLRDNORM|POLLRDBAND)
+/* There is urgent data to read.*/
+#   define POLLPRI    (0x0400)
+/*Equivalent to POLLOUT.*/
+#   define POLLWRNORM (0x0010)
+/*Writing now will not block.*/
+#   define POLLOUT    (POLLWRNORM)
+/*Priority data may be written.*/
+#   define POLLWRBAND (0x0020)
+/*Error condition (output only).*/
+#   define POLLERR    (0x0001)
+/*Hang up (output only).*/
+#   define POLLHUP    (0x0002)
+/*Invalid request: fd not open (output only).*/
+#   define POLLNVAL   (0x0004)
+
+struct pollfd{
+  /*File descriptor.*/
+  op_sock fd;
+  /*Requested events.*/
+  short   events;
+  /*Returned events.*/
+  short   revents;
+};
+#  endif
+
+/*But Winsock never defines nfds_t (it's simply hard-coded to ULONG).*/
+typedef unsigned long nfds_t;
+
+/*The usage of FD_SET() below is O(N^2).
+  This is okay because select() is limited to 64 sockets in Winsock, anyway.
+  In practice, we only ever call it with one or two sockets.*/
+static int op_poll_win32(struct pollfd *_fds,nfds_t _nfds,int _timeout){
+  struct timeval tv;
+  fd_set         ifds;
+  fd_set         ofds;
+  fd_set         efds;
+  nfds_t         i;
+  int            ret;
+  FD_ZERO(&ifds);
+  FD_ZERO(&ofds);
+  FD_ZERO(&efds);
+  for(i=0;i<_nfds;i++){
+    _fds[i].revents=0;
+    if(_fds[i].events&POLLIN)FD_SET(_fds[i].fd,&ifds);
+    if(_fds[i].events&POLLOUT)FD_SET(_fds[i].fd,&ofds);
+    FD_SET(_fds[i].fd,&efds);
+  }
+  if(_timeout>=0){
+    tv.tv_sec=_timeout/1000;
+    tv.tv_usec=(_timeout%1000)*1000;
+  }
+  ret=select(-1,&ifds,&ofds,&efds,_timeout<0?NULL:&tv);
+  if(ret>0){
+    for(i=0;i<_nfds;i++){
+      if(FD_ISSET(_fds[i].fd,&ifds))_fds[i].revents|=POLLIN;
+      if(FD_ISSET(_fds[i].fd,&ofds))_fds[i].revents|=POLLOUT;
+      /*This isn't correct: there are several different things that might have
+         happened to a fd in efds, but I don't know a good way to distinguish
+         them without more context from the caller.
+        It's okay, because we don't actually check any of these bits, we just
+         need _some_ bit set.*/
+      if(FD_ISSET(_fds[i].fd,&efds))_fds[i].revents|=POLLHUP;
+    }
+  }
+  return ret;
+}
+
+/*We define op_errno() to make it clear that it's not an l-value like normal
+   errno is.*/
+#  define op_errno() (WSAGetLastError()?WSAGetLastError()-WSABASEERR:0)
+#  define op_reset_errno() (WSASetLastError(0))
+
+/*The remaining functions don't get an op_ prefix even though they only
+   operate on sockets, because we don't use non-socket I/O here, and this
+   minimizes the changes needed to deal with Winsock.*/
+#  define close(_fd) closesocket(_fd)
+/*This relies on sizeof(u_long)==sizeof(int), which is always true on both
+   Win32 and Win64.*/
+#  define ioctl(_fd,_req,_arg) ioctlsocket(_fd,_req,(u_long *)(_arg))
+#  define getsockopt(_fd,_level,_name,_val,_len) \
+ getsockopt(_fd,_level,_name,(char *)(_val),_len)
+#  define setsockopt(_fd,_level,_name,_val,_len) \
+ setsockopt(_fd,_level,_name,(const char *)(_val),_len)
+#  define poll(_fds,_nfds,_timeout) op_poll_win32(_fds,_nfds,_timeout)
+
+#  if defined(_MSC_VER)
+typedef ptrdiff_t ssize_t;
+#  endif
+
+/*Load certificates from the built-in certificate store.*/
+int SSL_CTX_set_default_verify_paths_win32(SSL_CTX *_ssl_ctx);
+#  define SSL_CTX_set_default_verify_paths \
+ SSL_CTX_set_default_verify_paths_win32
+
+# else
+/*Normal Berkeley sockets.*/
+#  include <sys/ioctl.h>
+#  include <sys/types.h>
+#  include <sys/socket.h>
+#  include <arpa/inet.h>
+#  include <netinet/in.h>
+#  include <netinet/tcp.h>
+#  include <fcntl.h>
+#  include <netdb.h>
+#  include <poll.h>
+#  include <unistd.h>
+#  include <openssl/ssl.h>
+
+typedef int op_sock;
+
+#  define OP_INVALID_SOCKET (-1)
+
+#  define op_errno() (errno)
+#  define op_reset_errno() (errno=0)
+
+# endif
 # include <sys/timeb.h>
-# include <arpa/inet.h>
-# include <netinet/in.h>
-# include <netinet/tcp.h>
-# include <fcntl.h>
-# include <netdb.h>
-# include <poll.h>
-# include <unistd.h>
-# include <openssl/ssl.h>
 # include <openssl/x509v3.h>
 
 /*The maximum number of simultaneous connections.
@@ -227,6 +358,11 @@ static const char *op_parse_file_url(const char *_src){
   The others are kept around mainly to avoid slow-starting a new connection
    when seeking, and time out rapidly.*/
 # define OP_NCONNS_MAX (4)
+
+/*The amount of time before we attempt to re-resolve the host.
+  This is 10 minutes, as recommended in RFC 6555 for expiring cached connection
+   results for dual-stack hosts.*/
+# define OP_RESOLVE_CACHE_TIMEOUT_MS (10*60*(opus_int32)1000)
 
 /*The number of redirections at which we give up.
   The value here is the current default in Firefox.
@@ -486,6 +622,8 @@ static void op_sb_clear(OpusStringBuf *_sb){
   _ogg_free(_sb->buf);
 }
 
+/*Make sure we have room for at least _capacity characters (plus 1 more for the
+   terminating NUL).*/
 static int op_sb_ensure_capacity(OpusStringBuf *_sb,int _capacity){
   char *buf;
   int   cbuf;
@@ -503,6 +641,8 @@ static int op_sb_ensure_capacity(OpusStringBuf *_sb,int _capacity){
   return 0;
 }
 
+/*Increase the capacity of the buffer, but not to more than _max_size
+   characters (plus 1 more for the terminating NUL).*/
 static int op_sb_grow(OpusStringBuf *_sb,int _max_size){
   char *buf;
   int   cbuf;
@@ -581,27 +721,33 @@ static struct addrinfo *op_resolve(const char *_host,unsigned _port){
   char             service[6];
   memset(&hints,0,sizeof(hints));
   hints.ai_socktype=SOCK_STREAM;
+#if !defined(_WIN32)
   hints.ai_flags=AI_NUMERICSERV;
+#endif
   OP_ASSERT(_port<=65535U);
   sprintf(service,"%u",_port);
   if(OP_LIKELY(!getaddrinfo(_host,service,&hints,&addrs)))return addrs;
   return NULL;
 }
 
-static int op_sock_set_nonblocking(int _fd,int _nonblocking){
+static int op_sock_set_nonblocking(op_sock _fd,int _nonblocking){
+#if !defined(_WIN32)
   int flags;
   flags=fcntl(_fd,F_GETFL);
   if(OP_UNLIKELY(flags<0))return flags;
   if(_nonblocking)flags|=O_NONBLOCK;
   else flags&=~O_NONBLOCK;
   return fcntl(_fd,F_SETFL,flags);
+#else
+  return ioctl(_fd,FIONBIO,&_nonblocking);
+#endif
 }
 
 /*Disable/enable write coalescing if we can.
   We always send whole requests at once and always parse the response headers
    before sending another one, so normally write coalescing just causes added
    delay.*/
-static void op_sock_set_tcp_nodelay(int _fd,int _nodelay){
+static void op_sock_set_tcp_nodelay(op_sock _fd,int _nodelay){
 # if defined(TCP_NODELAY)&&(defined(IPPROTO_TCP)||defined(SOL_TCP))
 #  if defined(IPPROTO_TCP)
 #   define OP_SO_LEVEL IPPROTO_TCP
@@ -614,6 +760,14 @@ static void op_sock_set_tcp_nodelay(int _fd,int _nodelay){
    &_nodelay,sizeof(_nodelay)));
 # endif
 }
+
+#if defined(_WIN32)
+static void op_init_winsock(){
+  static LONG    count;
+  static WSADATA wsadata;
+  if(InterlockedIncrement(&count)==1)WSAStartup(0x0202,&wsadata);
+}
+#endif
 
 /*A single physical connection to an HTTP server.
   We may have several of these open at once.*/
@@ -640,7 +794,7 @@ struct OpusHTTPConn{
   /*The estimated throughput of this connection, in bytes/s.*/
   opus_int64    read_rate;
   /*The socket we're reading from.*/
-  int           fd;
+  op_sock       fd;
   /*The number of remaining requests we are allowed on this connection.*/
   int           nrequests_left;
   /*The chunk size to use for pipelining requests.*/
@@ -651,13 +805,13 @@ static void op_http_conn_init(OpusHTTPConn *_conn){
   _conn->next_pos=-1;
   _conn->ssl_conn=NULL;
   _conn->next=NULL;
-  _conn->fd=-1;
+  _conn->fd=OP_INVALID_SOCKET;
 }
 
 static void op_http_conn_clear(OpusHTTPConn *_conn){
   if(_conn->ssl_conn!=NULL)SSL_free(_conn->ssl_conn);
   /*SSL frees the BIO for us.*/
-  if(_conn->fd>=0)close(_conn->fd);
+  if(_conn->fd!=OP_INVALID_SOCKET)close(_conn->fd);
 }
 
 /*The global stream state.*/
@@ -683,6 +837,8 @@ struct OpusHTTPStream{
     struct sockaddr_in  v4;
     struct sockaddr_in6 v6;
   }                addr;
+  /*The last time we re-resolved the host.*/
+  struct timeb     resolve_time;
   /*A buffer used to build HTTP requests.*/
   OpusStringBuf    request;
   /*A buffer used to build proxy CONNECT requests.*/
@@ -694,6 +850,10 @@ struct OpusHTTPStream{
   opus_int64       content_length;
   /*The position indicator used when no connection is active.*/
   opus_int64       pos;
+  /*The host we actually connected to.*/
+  char            *connect_host;
+  /*The port we actually connected to.*/
+  unsigned         connect_port;
   /*The connection we're currently reading from.
     This can be -1 if no connection is active.*/
   int              cur_conni;
@@ -713,7 +873,7 @@ struct OpusHTTPStream{
 
 static void op_http_stream_init(OpusHTTPStream *_stream){
   OpusHTTPConn **pnext;
-  int ci;
+  int            ci;
   pnext=&_stream->free_head;
   for(ci=0;ci<OP_NCONNS_MAX;ci++){
     op_http_conn_init(_stream->conns+ci);
@@ -727,6 +887,7 @@ static void op_http_stream_init(OpusHTTPStream *_stream){
   op_sb_init(&_stream->request);
   op_sb_init(&_stream->proxy_connect);
   op_sb_init(&_stream->response);
+  _stream->connect_host=NULL;
   _stream->seekable=0;
 }
 
@@ -744,19 +905,13 @@ static void op_http_conn_close(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
     However, we will not wait if this would block (it's not worth the savings
      from session resumption to do so).
     Clients (that's us) MAY resume a TLS session that ended with an incomplete
-     close, according to RFC 2818, so that's no reason to make sure the server
-     shut things down gracefully.
-    It also says "client implementations MUST treat any premature closes as
-     errors and the data received as potentially truncated," but libopusfile
-     treats errors and potentially truncated data in unseekable streams just
-     like a normal EOF.
-    We warn about this in the docs, and give some suggestions if you truly want
-     to avoid truncation attacks.*/
+     close, according to RFC 2818, so there's no reason to make sure the server
+     shut things down gracefully.*/
   if(_gracefully&&_conn->ssl_conn!=NULL)SSL_shutdown(_conn->ssl_conn);
   op_http_conn_clear(_conn);
   _conn->next_pos=-1;
   _conn->ssl_conn=NULL;
-  _conn->fd=-1;
+  _conn->fd=OP_INVALID_SOCKET;
   OP_ASSERT(*_pnext==_conn);
   *_pnext=_conn->next;
   _conn->next=_stream->free_head;
@@ -772,6 +927,7 @@ static void op_http_stream_clear(OpusHTTPStream *_stream){
   op_sb_clear(&_stream->response);
   op_sb_clear(&_stream->proxy_connect);
   op_sb_clear(&_stream->request);
+  if(_stream->connect_host!=_stream->url.host)_ogg_free(_stream->connect_host);
   op_parsed_url_clear(&_stream->url);
 }
 
@@ -802,14 +958,14 @@ static int op_http_conn_write_fully(OpusHTTPConn *_conn,
     }
     else{
       ssize_t ret;
-      errno=0;
-      ret=write(fd.fd,_buf,_buf_size);
+      op_reset_errno();
+      ret=send(fd.fd,_buf,_buf_size,0);
       if(ret>0){
         _buf+=ret;
         _buf_size-=ret;
         continue;
       }
-      err=errno;
+      err=op_errno();
       if(err!=EAGAIN&&err!=EWOULDBLOCK)return OP_FALSE;
       fd.events=POLLOUT;
     }
@@ -839,11 +995,11 @@ static int op_http_conn_estimate_available(OpusHTTPConn *_conn){
 static opus_int32 op_time_diff_ms(const struct timeb *_end,
  const struct timeb *_start){
   opus_int64 dtime;
-  dtime=_end->time-_start->time;
+  dtime=_end->time-(opus_int64)_start->time;
   OP_ASSERT(_end->millitm<1000);
   OP_ASSERT(_start->millitm<1000);
-  if(OP_UNLIKELY(dtime>(0x7FFFFFFF-1000)/1000))return 0x7FFFFFFF;
-  if(OP_UNLIKELY(dtime<(-0x7FFFFFFF+999)/1000))return -0x7FFFFFFF-1;
+  if(OP_UNLIKELY(dtime>(OP_INT32_MAX-1000)/1000))return OP_INT32_MAX;
+  if(OP_UNLIKELY(dtime<(OP_INT32_MIN+1000)/1000))return OP_INT32_MIN;
   return (opus_int32)dtime*1000+_end->millitm-_start->millitm;
 }
 
@@ -855,7 +1011,7 @@ static void op_http_conn_read_rate_update(OpusHTTPConn *_conn){
   opus_int64   read_rate;
   read_delta_bytes=_conn->read_bytes;
   if(read_delta_bytes<=0)return;
-  OP_ALWAYS_TRUE(!ftime(&read_time));
+  ftime(&read_time);
   read_delta_ms=op_time_diff_ms(&read_time,&_conn->read_time);
   read_rate=_conn->read_rate;
   read_delta_ms=OP_MAX(read_delta_ms,1);
@@ -881,6 +1037,9 @@ static int op_http_conn_read(OpusHTTPConn *_conn,
   fd.fd=_conn->fd;
   ssl_conn=_conn->ssl_conn;
   nread=nread_unblocked=0;
+  /*RFC 2818 says "client implementations MUST treat any premature closes as
+     errors and the data received as potentially truncated," so we make very
+     sure to report read errors upwards.*/
   do{
     int err;
     if(ssl_conn!=NULL){
@@ -912,8 +1071,8 @@ static int op_http_conn_read(OpusHTTPConn *_conn,
     }
     else{
       ssize_t ret;
-      errno=0;
-      ret=read(fd.fd,_buf+nread,_buf_size-nread);
+      op_reset_errno();
+      ret=recv(fd.fd,_buf+nread,_buf_size-nread,0);
       OP_ASSERT(ret<=_buf_size-nread);
       if(ret>0){
         /*Read some data.
@@ -925,7 +1084,7 @@ static int op_http_conn_read(OpusHTTPConn *_conn,
       /*If we already read some data or the connection was closed, return
          right now.*/
       if(ret==0||nread>0)break;
-      err=errno;
+      err=op_errno();
       if(err!=EAGAIN&&err!=EWOULDBLOCK)return OP_EREAD;
       fd.events=POLLIN;
     }
@@ -944,8 +1103,7 @@ static int op_http_conn_read(OpusHTTPConn *_conn,
 /*Tries to look at the pending data for a connection without consuming it.
   [out] _buf: Returns the data at which we're peeking.
   _buf_size:  The size of the buffer.*/
-static int op_http_conn_peek(OpusHTTPConn *_conn,
- char *_buf,int _buf_size){
+static int op_http_conn_peek(OpusHTTPConn *_conn,char *_buf,int _buf_size){
   struct pollfd   fd;
   SSL            *ssl_conn;
   int             ret;
@@ -964,11 +1122,11 @@ static int op_http_conn_peek(OpusHTTPConn *_conn,
       else return 0;
     }
     else{
-      errno=0;
+      op_reset_errno();
       ret=(int)recv(fd.fd,_buf,_buf_size,MSG_PEEK);
       /*Either saw some data or the connection was closed.*/
       if(ret>=0)return ret;
-      err=errno;
+      err=op_errno();
       if(err!=EAGAIN&&err!=EWOULDBLOCK)return 0;
       fd.events=POLLIN;
     }
@@ -1192,24 +1350,22 @@ static int op_http_get_next_header(char **_header,char **_cdr,char **_s){
 static opus_int64 op_http_parse_nonnegative_int64(const char **_next,
  const char *_cdr){
   const char *next;
-  opus_int64  content_length;
+  opus_int64  ret;
   int         i;
   next=_cdr+strspn(_cdr,OP_HTTP_DIGIT);
   *_next=next;
   if(OP_UNLIKELY(next<=_cdr))return OP_FALSE;
   while(*_cdr=='0')_cdr++;
   if(OP_UNLIKELY(next-_cdr>19))return OP_EIMPL;
-  content_length=0;
+  ret=0;
   for(i=0;i<next-_cdr;i++){
     int digit;
     digit=_cdr[i]-'0';
     /*Check for overflow.*/
-    if(OP_UNLIKELY(content_length>(OP_INT64_MAX-9)/10+(digit<=7))){
-      return OP_EIMPL;
-    }
-    content_length=content_length*10+digit;
+    if(OP_UNLIKELY(ret>(OP_INT64_MAX-9)/10+(digit<=7)))return OP_EIMPL;
+    ret=ret*10+digit;
   }
-  return content_length;
+  return ret;
 }
 
 static opus_int64 op_http_parse_content_length(const char *_cdr){
@@ -1295,7 +1451,7 @@ static int op_http_parse_connection(char *_cdr){
 typedef int (*op_ssl_step_func)(SSL *_ssl_conn);
 
 /*Try to run an SSL function to completion (blocking if necessary).*/
-static int op_do_ssl_step(SSL *_ssl_conn,int _fd,op_ssl_step_func _step){
+static int op_do_ssl_step(SSL *_ssl_conn,op_sock _fd,op_ssl_step_func _step){
   struct pollfd fd;
   fd.fd=_fd;
   for(;;){
@@ -1389,8 +1545,8 @@ static BIO_METHOD op_bio_retry_method={
 
 /*Establish a CONNECT tunnel and pipeline the start of the TLS handshake for
    proxying https URL requests.*/
-int op_http_conn_establish_tunnel(OpusHTTPStream *_stream,
- OpusHTTPConn *_conn,int _fd,SSL *_ssl_conn,BIO *_ssl_bio){
+static int op_http_conn_establish_tunnel(OpusHTTPStream *_stream,
+ OpusHTTPConn *_conn,op_sock _fd,SSL *_ssl_conn,BIO *_ssl_bio){
   BIO  *retry_bio;
   char *status_code;
   char *next;
@@ -1507,8 +1663,7 @@ static struct addrinfo *op_inet_pton(const char *_host){
 /*Verify the server's hostname matches the certificate they presented using
    the procedure from Section 6 of RFC 6125.
   Return: 0 if the certificate doesn't match, and a non-zero value if it does.*/
-static int op_http_verify_hostname(OpusHTTPStream *_stream,
- SSL *_ssl_conn){
+static int op_http_verify_hostname(OpusHTTPStream *_stream,SSL *_ssl_conn){
   X509                   *peer_cert;
   STACK_OF(GENERAL_NAME) *san_names;
   char                   *host;
@@ -1576,7 +1731,7 @@ static int op_http_verify_hostname(OpusHTTPStream *_stream,
        equivalent) of a URI or deriving the application service type from the
        scheme of a URI) ..."
       We don't have a way to check (without relying on DNS records, which might
-       be subverted), if this address is fully-qualified.
+       be subverted) if this address is fully-qualified.
       This is particularly problematic when using a CONNECT tunnel, as it is
        the server that does DNS lookup, not us.
       However, we are certain that if the hostname has no '.', it is definitely
@@ -1659,8 +1814,8 @@ static int op_http_verify_hostname(OpusHTTPStream *_stream,
 }
 
 /*Perform the TLS handshake on a new connection.*/
-int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
- int _fd,SSL *_ssl_conn){
+static int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
+ op_sock _fd,SSL *_ssl_conn){
   SSL_SESSION *ssl_session;
   BIO         *ssl_bio;
   int          skip_certificate_check;
@@ -1724,9 +1879,10 @@ int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
           OP_FALSE If the connection failed and there were no more addresses
                     left to try.
                     *_addr will be set to NULL in this case.*/
-static int op_sock_connect_next(int _fd,
- struct addrinfo **_addr,int _ai_family){
-  struct addrinfo *addr;
+static int op_sock_connect_next(op_sock _fd,
+ const struct addrinfo **_addr,int _ai_family){
+  const struct addrinfo *addr;
+  int                    err;
   addr=*_addr;
   for(;;){
     /*Move to the next address of the requested type.*/
@@ -1735,7 +1891,9 @@ static int op_sock_connect_next(int _fd,
     /*No more: failure.*/
     if(addr==NULL)return OP_FALSE;
     if(connect(_fd,addr->ai_addr,addr->ai_addrlen)>=0)return 1;
-    if(OP_LIKELY(errno==EINPROGRESS))return 0;
+    err=op_errno();
+    /*Winsock will set WSAEWOULDBLOCK.*/
+    if(OP_LIKELY(err==EINPROGRESS||err==EWOULDBLOCK))return 0;
     addr=addr->ai_next;
   }
 }
@@ -1743,36 +1901,30 @@ static int op_sock_connect_next(int _fd,
 /*The number of address families to try connecting to simultaneously.*/
 # define OP_NPROTOS (2)
 
-static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
- struct addrinfo *_addrs,struct timeb *_start_time){
-  struct addrinfo *addr;
-  struct addrinfo *addrs[OP_NPROTOS];
-  struct pollfd    fds[OP_NPROTOS];
-  int              ai_family;
-  int              nprotos;
-  int              ret;
-  int              pi;
-  int              pj;
+static int op_http_connect_impl(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
+ const struct addrinfo *_addrs,struct timeb *_start_time){
+  const struct addrinfo *addr;
+  const struct addrinfo *addrs[OP_NPROTOS];
+  struct pollfd          fds[OP_NPROTOS];
+  int                    ai_family;
+  int                    nprotos;
+  int                    ret;
+  int                    pi;
+  int                    pj;
   for(pi=0;pi<OP_NPROTOS;pi++)addrs[pi]=NULL;
-  addr=_addrs;
   /*Try connecting via both IPv4 and IPv6 simultaneously, and keep the first
-     one that succeeds.*/
-  for(;addr!=NULL;addr=addr->ai_next){
-    /*Give IPv6 a slight edge by putting it first in the list.*/
-    if(addr->ai_family==AF_INET6){
+     one that succeeds.
+    Start by finding the first address from each family.
+    We order the first connection attempts in the same order the address
+     families were returned in the DNS records in accordance with RFC 6555.*/
+  for(addr=_addrs,nprotos=0;addr!=NULL&&nprotos<OP_NPROTOS;addr=addr->ai_next){
+    if(addr->ai_family==AF_INET6||addr->ai_family==AF_INET){
       OP_ASSERT(addr->ai_addrlen<=sizeof(struct sockaddr_in6));
-      if(addrs[0]==NULL)addrs[0]=addr;
-    }
-    else if(addr->ai_family==AF_INET){
       OP_ASSERT(addr->ai_addrlen<=sizeof(struct sockaddr_in));
-      if(addrs[1]==NULL)addrs[1]=addr;
-    }
-  }
-  /*Consolidate the list of addresses.*/
-  for(pi=nprotos=0;pi<OP_NPROTOS;pi++){
-    if(addrs[pi]!=NULL){
-      addrs[nprotos]=addrs[pi];
-      nprotos++;
+      /*If we've seen this address family before, skip this address for now.*/
+      for(pi=0;pi<nprotos;pi++)if(addrs[pi]->ai_family==addr->ai_family)break;
+      if(pi<nprotos)continue;
+      addrs[nprotos++]=addr;
     }
   }
   /*Pop the connection off the free list and put it on the LRU list.*/
@@ -1780,16 +1932,21 @@ static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
   _stream->free_head=_conn->next;
   _conn->next=_stream->lru_head;
   _stream->lru_head=_conn;
-  OP_ALWAYS_TRUE(!ftime(_start_time));
+  ftime(_start_time);
   *&_conn->read_time=*_start_time;
   _conn->read_bytes=0;
   _conn->read_rate=0;
-  /*Try to start a connection to each protocol.*/
+  /*Try to start a connection to each protocol.
+    RFC 6555 says it is RECOMMENDED that connection attempts be paced
+     150...250 ms apart "to balance human factors against network load", but
+     that "stateful algorithms" (that's us) "are expected to be more
+     aggressive".
+    We are definitely more aggressive: we don't pace at all.*/
   for(pi=0;pi<nprotos;pi++){
     ai_family=addrs[pi]->ai_family;
     fds[pi].fd=socket(ai_family,SOCK_STREAM,addrs[pi]->ai_protocol);
     fds[pi].events=POLLOUT;
-    if(OP_LIKELY(fds[pi].fd>=0)){
+    if(OP_LIKELY(fds[pi].fd!=OP_INVALID_SOCKET)){
       if(OP_LIKELY(op_sock_set_nonblocking(fds[pi].fd,1)>=0)){
         ret=op_sock_connect_next(fds[pi].fd,addrs+pi,ai_family);
         if(OP_UNLIKELY(ret>0)){
@@ -1820,7 +1977,7 @@ static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
       /*Some platforms will return the pending error in &err and return 0.
         Others will put it in errno and return -1.*/
       ret=getsockopt(fds[pi].fd,SOL_SOCKET,SO_ERROR,&err,&errlen);
-      if(ret<0)err=errno;
+      if(ret<0)err=op_errno();
       /*Success!*/
       if(err==0||err==EISCONN)break;
       /*Move on to the next address for this protocol.*/
@@ -1862,7 +2019,7 @@ static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
       SSL_free(ssl_conn);
     }
     close(fds[pi].fd);
-    _conn->fd=-1;
+    _conn->fd=OP_INVALID_SOCKET;
     return OP_FALSE;
   }
   /*Just a normal non-SSL connection.*/
@@ -1874,6 +2031,29 @@ static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
      before sending another one.*/
   op_sock_set_tcp_nodelay(fds[pi].fd,1);
   return 0;
+}
+
+static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
+ const struct addrinfo *_addrs,struct timeb *_start_time){
+  struct timeb     resolve_time;
+  struct addrinfo *new_addrs;
+  int              ret;
+  /*Re-resolve the host if we need to (RFC 6555 says we MUST do so
+     occasionally).*/
+  new_addrs=NULL;
+  ftime(&resolve_time);
+  if(_addrs!=&_stream->addr_info||op_time_diff_ms(&resolve_time,
+   &_stream->resolve_time)>=OP_RESOLVE_CACHE_TIMEOUT_MS){
+    new_addrs=op_resolve(_stream->connect_host,_stream->connect_port);
+    if(OP_LIKELY(new_addrs!=NULL)){
+      _addrs=new_addrs;
+      *&_stream->resolve_time=*&resolve_time;
+    }
+    else if(OP_LIKELY(_addrs==NULL))return OP_FALSE;
+  }
+  ret=op_http_connect_impl(_stream,_conn,_addrs,_start_time);
+  if(new_addrs!=NULL)freeaddrinfo(new_addrs);
+  return ret;
 }
 
 # define OP_BASE64_LENGTH(_len) (((_len)+2)/3*4)
@@ -1897,15 +2077,15 @@ static char *op_base64_encode(char *_dst,const char *_src,int _len){
     s1=_src[3*i+1];
     s2=_src[3*i+2];
     _dst[4*i+0]=BASE64_TABLE[s0>>2];
-    _dst[4*i+1]=BASE64_TABLE[s0&3<<4|s1>>4];
-    _dst[4*i+2]=BASE64_TABLE[s1&15<<2|s2>>6];
+    _dst[4*i+1]=BASE64_TABLE[(s0&3)<<4|s1>>4];
+    _dst[4*i+2]=BASE64_TABLE[(s1&15)<<2|s2>>6];
     _dst[4*i+3]=BASE64_TABLE[s2&63];
   }
   _len-=3*i;
   if(_len==1){
     s0=_src[3*i+0];
     _dst[4*i+0]=BASE64_TABLE[s0>>2];
-    _dst[4*i+1]=BASE64_TABLE[s0&3<<4];
+    _dst[4*i+1]=BASE64_TABLE[(s0&3)<<4];
     _dst[4*i+2]='=';
     _dst[4*i+3]='=';
     i++;
@@ -1914,8 +2094,8 @@ static char *op_base64_encode(char *_dst,const char *_src,int _len){
     s0=_src[3*i+0];
     s1=_src[3*i+1];
     _dst[4*i+0]=BASE64_TABLE[s0>>2];
-    _dst[4*i+1]=BASE64_TABLE[s0&3<<4|s1>>4];
-    _dst[4*i+2]=BASE64_TABLE[s1&15<<2];
+    _dst[4*i+1]=BASE64_TABLE[(s0&3)<<4|s1>>4];
+    _dst[4*i+2]=BASE64_TABLE[(s1&15)<<2];
     _dst[4*i+3]='=';
     i++;
   }
@@ -1990,50 +2170,33 @@ static int op_http_allow_pipelining(const char *_server){
 
 static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
  int _skip_certificate_check,const char *_proxy_host,unsigned _proxy_port,
- const char *_proxy_user,const char *_proxy_pass){
+ const char *_proxy_user,const char *_proxy_pass,OpusServerInfo *_info){
   struct addrinfo *addrs;
-  const char      *last_host;
-  unsigned         last_port;
   int              nredirs;
   int              ret;
-  if(_proxy_host!=NULL&&OP_UNLIKELY(_proxy_port>65535U))return OP_EINVAL;
-  last_host=NULL;
-  /*We shouldn't have to initialize last_port, but gcc is too dumb to figure
-     out that last_host!=NULL implies we've already taken one trip through the
-     loop.*/
-  last_port=0;
+#if defined(_WIN32)
+  op_init_winsock();
+#endif
   ret=op_parse_url(&_stream->url,_url);
   if(OP_UNLIKELY(ret<0))return ret;
+  if(_proxy_host!=NULL){
+    if(OP_UNLIKELY(_proxy_port>65535U))return OP_EINVAL;
+    _stream->connect_host=op_string_dup(_proxy_host);
+    _stream->connect_port=_proxy_port;
+  }
+  else{
+    _stream->connect_host=_stream->url.host;
+    _stream->connect_port=_stream->url.port;
+  }
+  addrs=NULL;
   for(nredirs=0;nredirs<OP_REDIRECT_LIMIT;nredirs++){
-    struct timeb  start_time;
-    struct timeb  end_time;
-    char         *next;
-    char         *status_code;
-    const char   *host;
-    unsigned      port;
-    int           minor_version_pos;
-    int           v1_1_compat;
-    if(_proxy_host==NULL){
-      host=_stream->url.host;
-      port=_stream->url.port;
-    }
-    else{
-      host=_proxy_host;
-      port=_proxy_port;
-    }
-    /*If connecting to the same place as last time, don't re-resolve it.*/
-    addrs=NULL;
-    if(last_host!=NULL){
-      if(strcmp(last_host,host)==0&&last_port==port)addrs=&_stream->addr_info;
-      else if(_stream->ssl_session!=NULL){
-        /*Forget any cached SSL session from the last host.*/
-        SSL_SESSION_free(_stream->ssl_session);
-        _stream->ssl_session=NULL;
-      }
-      if(last_host!=_proxy_host)_ogg_free((void *)last_host);
-    }
-    last_host=host;
-    last_port=port;
+    OpusParsedURL  next_url;
+    struct timeb   start_time;
+    struct timeb   end_time;
+    char          *next;
+    char          *status_code;
+    int            minor_version_pos;
+    int            v1_1_compat;
     /*Initialize the SSL library if necessary.*/
     if(OP_URL_IS_SSL(&_stream->url)&&_stream->ssl_ctx==NULL){
       SSL_CTX *ssl_ctx;
@@ -2069,6 +2232,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
       if(_proxy_host!=NULL){
         /*We need to establish a CONNECT tunnel to handle https proxying.
           Build the request we'll send to do so.*/
+        _stream->proxy_connect.nbuf=0;
         ret=op_sb_append(&_stream->proxy_connect,"CONNECT ",8);
         ret|=op_sb_append_string(&_stream->proxy_connect,_stream->url.host);
         ret|=op_sb_append_port(&_stream->proxy_connect,_stream->url.port);
@@ -2096,12 +2260,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
       }
     }
     /*Actually make the connection.*/
-    if(addrs!=&_stream->addr_info){
-      addrs=op_resolve(host,port);
-      if(OP_UNLIKELY(addrs==NULL))return OP_FALSE;
-    }
     ret=op_http_connect(_stream,_stream->conns+0,addrs,&start_time);
-    if(addrs!=&_stream->addr_info)freeaddrinfo(addrs);
     if(OP_UNLIKELY(ret<0))return ret;
     /*Build the request to send.*/
     _stream->request.nbuf=0;
@@ -2162,20 +2321,22 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
     if(OP_UNLIKELY(ret<0))return ret;
     ret=op_http_conn_read_response(_stream->conns+0,&_stream->response);
     if(OP_UNLIKELY(ret<0))return ret;
-    OP_ALWAYS_TRUE(!ftime(&end_time));
+    ftime(&end_time);
     next=op_http_parse_status_line(&v1_1_compat,&status_code,
      _stream->response.buf);
     if(OP_UNLIKELY(next==NULL))return OP_FALSE;
     if(status_code[0]=='2'){
       opus_int64 content_length;
       opus_int64 range_length;
-      int        pipeline;
+      int        pipeline_supported;
+      int        pipeline_disabled;
       /*We only understand 20x codes.*/
       if(status_code[1]!='0')return OP_FALSE;
       content_length=-1;
       range_length=-1;
-      /*Pipelining is disabled by default.*/
-      pipeline=0;
+      /*Pipelining must be explicitly enabled.*/
+      pipeline_supported=0;
+      pipeline_disabled=0;
       for(;;){
         char *header;
         char *cdr;
@@ -2200,7 +2361,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
           ret=op_http_parse_content_range(&range_first,&range_last,
            &range_length,cdr);
           if(OP_UNLIKELY(ret<0))return ret;
-          /*"A response with satus code 206 (Partial Content) MUST NOTE
+          /*"A response with satus code 206 (Partial Content) MUST NOT
              include a Content-Range field with a byte-range-resp-spec of
              '*'."*/
           if(status_code[2]=='6'
@@ -2233,9 +2394,9 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
              error out and reconnect, adding lots of latency.*/
           ret=op_http_parse_connection(cdr);
           if(OP_UNLIKELY(ret<0))return ret;
-          pipeline-=ret;
+          pipeline_disabled|=ret;
         }
-        else if(strcmp(header,"server")){
+        else if(strcmp(header,"server")==0){
           /*If we got a Server response header, and it wasn't from a known-bad
              server, enable pipelining, as long as it's at least HTTP/1.1.
             According to RFC 2145, the server is supposed to respond with the
@@ -2243,7 +2404,51 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
              suspected that we incorrectly implement the HTTP specification.
             So it should send back at least HTTP/1.1, despite our HTTP/1.0
              request.*/
-          pipeline+=v1_1_compat&&op_http_allow_pipelining(cdr);
+          pipeline_supported=v1_1_compat;
+          if(v1_1_compat)pipeline_disabled|=!op_http_allow_pipelining(cdr);
+          if(_info!=NULL&&_info->server==NULL)_info->server=op_string_dup(cdr);
+        }
+        /*Collect station information headers if the caller requested it.
+          If there's more than one copy of a header, the first one wins.*/
+        else if(_info!=NULL){
+          if(strcmp(header,"content-type")==0){
+            if(_info->content_type==NULL){
+              _info->content_type=op_string_dup(cdr);
+            }
+          }
+          else if(header[0]=='i'&&header[1]=='c'
+           &&(header[2]=='e'||header[2]=='y')&&header[3]=='-'){
+            if(strcmp(header+4,"name")==0){
+              if(_info->name==NULL)_info->name=op_string_dup(cdr);
+            }
+            else if(strcmp(header+4,"description")==0){
+              if(_info->description==NULL)_info->description=op_string_dup(cdr);
+            }
+            else if(strcmp(header+4,"genre")==0){
+              if(_info->genre==NULL)_info->genre=op_string_dup(cdr);
+            }
+            else if(strcmp(header+4,"url")==0){
+              if(_info->url==NULL)_info->url=op_string_dup(cdr);
+            }
+            else if(strcmp(header,"icy-br")==0
+             ||strcmp(header,"ice-bitrate")==0){
+              if(_info->bitrate_kbps<0){
+                opus_int64 bitrate_kbps;
+                /*Just re-using this function to parse a random unsigned
+                   integer field.*/
+                bitrate_kbps=op_http_parse_content_length(cdr);
+                if(bitrate_kbps>=0&&bitrate_kbps<=OP_INT32_MAX){
+                  _info->bitrate_kbps=(opus_int32)bitrate_kbps;
+                }
+              }
+            }
+            else if(strcmp(header,"icy-pub")==0
+             ||strcmp(header,"ice-public")==0){
+              if(_info->is_public<0&&(cdr[0]=='0'||cdr[0]=='1')&&cdr[1]=='\0'){
+                _info->is_public=cdr[0]-'0';
+              }
+            }
+          }
         }
       }
       switch(status_code[2]){
@@ -2278,15 +2483,16 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
         default:return OP_FALSE;
       }
       _stream->content_length=content_length;
-      _stream->pipeline=pipeline>0;
+      _stream->pipeline=pipeline_supported&&!pipeline_disabled;
       /*Pipelining requires HTTP/1.1 persistent connections.*/
-      if(pipeline)_stream->request.buf[minor_version_pos]='1';
+      if(_stream->pipeline)_stream->request.buf[minor_version_pos]='1';
       _stream->conns[0].pos=0;
       _stream->conns[0].end_pos=_stream->seekable?content_length:-1;
       _stream->conns[0].chunk_size=-1;
       _stream->cur_conni=0;
       _stream->connect_rate=op_time_diff_ms(&end_time,&start_time);
       _stream->connect_rate=OP_MAX(_stream->connect_rate,1);
+      if(_info!=NULL)_info->is_ssl=OP_URL_IS_SSL(&_stream->url);
       /*The URL has been successfully opened.*/
       return 0;
     }
@@ -2306,7 +2512,9 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
       /*302 Found*/
       case '2':
       /*307 Temporary Redirect*/
-      case '7':break;
+      case '7':
+      /*308 Permanent Redirect (defined by draft-reschke-http-status-308-07).*/
+      case '8':break;
       /*305 Use Proxy: "The Location field gives the URI of the proxy."
         TODO: This shouldn't actually be that hard to do.*/
       case '5':return OP_EIMPL;
@@ -2314,7 +2522,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
          originally requested resource."
         304 Not Modified: "The 304 response MUST NOT contain a message-body."
         306 (Unused)
-        308...309 are not yet defined, so we don't know how to handle them.*/
+        309 is not yet defined, so we don't know how to handle it.*/
       default:return OP_FALSE;
     }
     _url=NULL;
@@ -2327,15 +2535,33 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
       if(strcmp(header,"location")==0&&OP_LIKELY(_url==NULL))_url=cdr;
     }
     if(OP_UNLIKELY(_url==NULL))return OP_FALSE;
-    /*Don't free last_host if it came from the last URL.*/
-    if(last_host!=_proxy_host)_stream->url.host=NULL;
-    op_parsed_url_clear(&_stream->url);
-    ret=op_parse_url(&_stream->url,_url);
-    if(OP_UNLIKELY(ret<0)){
-      if(ret==OP_EINVAL)ret=OP_FALSE;
-      if(last_host!=_proxy_host)_ogg_free((void *)last_host);
-      return ret;
+    ret=op_parse_url(&next_url,_url);
+    if(OP_UNLIKELY(ret<0))return ret;
+    if(_proxy_host==NULL||_stream->ssl_session!=NULL){
+      if(strcmp(_stream->url.host,next_url.host)==0
+       &&_stream->url.port==next_url.port){
+        /*Try to skip re-resolve when connecting to the same host.*/
+        addrs=&_stream->addr_info;
+      }
+      else{
+        if(_stream->ssl_session!=NULL){
+          /*Forget any cached SSL session from the last host.*/
+          SSL_SESSION_free(_stream->ssl_session);
+          _stream->ssl_session=NULL;
+        }
+      }
     }
+    if(_proxy_host==NULL){
+      OP_ASSERT(_stream->connect_host==_stream->url.host);
+      _stream->connect_host=next_url.host;
+      _stream->connect_port=next_url.port;
+    }
+    /*Always try to skip re-resolve for proxy connections.*/
+    else addrs=&_stream->addr_info;
+    op_parsed_url_clear(&_stream->url);
+    *&_stream->url=*&next_url;
+    /*TODO: On servers/proxies that support pipelining, we might be able to
+       re-use this connection.*/
     op_http_conn_close(_stream,_stream->conns+0,&_stream->lru_head,1);
   }
   /*Redirection limit reached.*/
@@ -2500,7 +2726,7 @@ static int op_http_conn_handle_response(OpusHTTPStream *_stream,
 }
 
 /*Open a new connection that will start reading at byte offset _pos.
-  _pos:        The byte offset to start readiny from.
+  _pos:        The byte offset to start reading from.
   _chunk_size: The number of bytes to ask for in the initial request, or -1 to
                 request the rest of the resource.
                This may be more bytes than remain, in which case it will be
@@ -2518,7 +2744,7 @@ static int op_http_conn_open_pos(OpusHTTPStream *_stream,
   if(OP_UNLIKELY(ret<0))return ret;
   ret=op_http_conn_handle_response(_stream,_conn);
   if(OP_UNLIKELY(ret!=0))return OP_FALSE;
-  OP_ALWAYS_TRUE(!ftime(&end_time));
+  ftime(&end_time);
   _stream->cur_conni=_conn-_stream->conns;
   OP_ASSERT(_stream->cur_conni>=0&&_stream->cur_conni<OP_NCONNS_MAX);
   /*The connection has been successfully opened.
@@ -2611,7 +2837,7 @@ static int op_http_conn_read_body(OpusHTTPStream *_stream,
           /*Unless there's a bug, we should be able to convert
              (next_pos,next_end) into valid (_pos,_chunk_size) parameters.*/
           OP_ASSERT(next_end<0
-           ||next_end-next_pos>=0&&next_end-next_pos<=0x7FFFFFFF);
+           ||next_end-next_pos>=0&&next_end-next_pos<=OP_INT32_MAX);
           ret=op_http_conn_open_pos(_stream,_conn,next_pos,
            next_end<0?-1:(opus_int32)(next_end-next_pos));
           if(OP_UNLIKELY(ret<0))return OP_EREAD;
@@ -2811,7 +3037,7 @@ static int op_http_stream_seek(void *_stream,opus_int64 _offset,int _whence){
     op_http_conn_read_rate_update(stream->conns+ci);
     *&seek_time=*&stream->conns[ci].read_time;
   }
-  else OP_ALWAYS_TRUE(!ftime(&seek_time));
+  else ftime(&seek_time);
   /*If we seeked past the end of the stream, just disable the active
      connection.*/
   if(pos>=content_length){
@@ -2979,12 +3205,33 @@ static const OpusFileCallbacks OP_HTTP_CALLBACKS={
 };
 #endif
 
+void opus_server_info_init(OpusServerInfo *_info){
+  _info->name=NULL;
+  _info->description=NULL;
+  _info->genre=NULL;
+  _info->url=NULL;
+  _info->server=NULL;
+  _info->content_type=NULL;
+  _info->bitrate_kbps=-1;
+  _info->is_public=-1;
+  _info->is_ssl=0;
+}
+
+void opus_server_info_clear(OpusServerInfo *_info){
+  _ogg_free(_info->content_type);
+  _ogg_free(_info->server);
+  _ogg_free(_info->url);
+  _ogg_free(_info->genre);
+  _ogg_free(_info->description);
+  _ogg_free(_info->name);
+}
+
 /*The actual URL stream creation function.
   This one isn't extensible like the application-level interface, but because
    it isn't public, we're free to change it in the future.*/
 static void *op_url_stream_create_impl(OpusFileCallbacks *_cb,const char *_url,
  int _skip_certificate_check,const char *_proxy_host,unsigned _proxy_port,
- const char *_proxy_user,const char *_proxy_pass){
+ const char *_proxy_user,const char *_proxy_pass,OpusServerInfo *_info){
   const char *path;
   /*Check to see if this is a valid file: URL.*/
   path=op_parse_file_url(_url);
@@ -3006,7 +3253,7 @@ static void *op_url_stream_create_impl(OpusFileCallbacks *_cb,const char *_url,
     if(OP_UNLIKELY(stream==NULL))return NULL;
     op_http_stream_init(stream);
     ret=op_http_stream_open(stream,_url,_skip_certificate_check,
-     _proxy_host,_proxy_port,_proxy_user,_proxy_pass);
+     _proxy_host,_proxy_port,_proxy_user,_proxy_pass,_info);
     if(OP_UNLIKELY(ret<0)){
       op_http_stream_clear(stream);
       _ogg_free(stream);
@@ -3021,22 +3268,25 @@ static void *op_url_stream_create_impl(OpusFileCallbacks *_cb,const char *_url,
   (void)_proxy_port;
   (void)_proxy_user;
   (void)_proxy_pass;
+  (void)_info;
   return NULL;
 #endif
 }
 
 void *op_url_stream_vcreate(OpusFileCallbacks *_cb,
  const char *_url,va_list _ap){
-  int         skip_certificate_check;
-  const char *proxy_host;
-  opus_int32  proxy_port;
-  const char *proxy_user;
-  const char *proxy_pass;
+  int             skip_certificate_check;
+  const char     *proxy_host;
+  opus_int32      proxy_port;
+  const char     *proxy_user;
+  const char     *proxy_pass;
+  OpusServerInfo *pinfo;
   skip_certificate_check=0;
   proxy_host=NULL;
   proxy_port=8080;
   proxy_user=NULL;
   proxy_pass=NULL;
+  pinfo=NULL;
   for(;;){
     ptrdiff_t request;
     request=va_arg(_ap,char *)-(char *)NULL;
@@ -3059,17 +3309,83 @@ void *op_url_stream_vcreate(OpusFileCallbacks *_cb,
       case OP_HTTP_PROXY_PASS_REQUEST:{
         proxy_pass=va_arg(_ap,const char *);
       }break;
+      case OP_GET_SERVER_INFO_REQUEST:{
+        pinfo=va_arg(_ap,OpusServerInfo *);
+      }break;
       /*Some unknown option.*/
       default:return NULL;
     }
   }
+  /*If the caller has requested server information, proxy it to a local copy to
+     simplify error handling.*/
+  if(pinfo!=NULL){
+    OpusServerInfo  info;
+    void           *ret;
+    opus_server_info_init(&info);
+    ret=op_url_stream_create_impl(_cb,_url,skip_certificate_check,
+     proxy_host,proxy_port,proxy_user,proxy_pass,&info);
+    if(ret!=NULL)*pinfo=*&info;
+    else opus_server_info_clear(&info);
+    return ret;
+  }
   return op_url_stream_create_impl(_cb,_url,skip_certificate_check,
-   proxy_host,proxy_port,proxy_user,proxy_pass);
+   proxy_host,proxy_port,proxy_user,proxy_pass,NULL);
 }
 
 void *op_url_stream_create(OpusFileCallbacks *_cb,
  const char *_url,...){
-  va_list ap;
+  va_list  ap;
+  void    *ret;
   va_start(ap,_url);
-  return op_url_stream_vcreate(_cb,_url,ap);
+  ret=op_url_stream_vcreate(_cb,_url,ap);
+  va_end(ap);
+  return ret;
+}
+
+/*Convenience routines to open/test URLs in a single step.*/
+
+OggOpusFile *op_vopen_url(const char *_url,int *_error,va_list _ap){
+  OpusFileCallbacks  cb;
+  OggOpusFile       *of;
+  void              *source;
+  source=op_url_stream_vcreate(&cb,_url,_ap);
+  if(OP_UNLIKELY(source==NULL)){
+    if(_error!=NULL)*_error=OP_EFAULT;
+    return NULL;
+  }
+  of=op_open_callbacks(source,&cb,NULL,0,_error);
+  if(OP_UNLIKELY(of==NULL))(*cb.close)(source);
+  return of;
+}
+
+OggOpusFile *op_open_url(const char *_url,int *_error,...){
+  OggOpusFile *ret;
+  va_list      ap;
+  va_start(ap,_error);
+  ret=op_vopen_url(_url,_error,ap);
+  va_end(ap);
+  return ret;
+}
+
+OggOpusFile *op_vtest_url(const char *_url,int *_error,va_list _ap){
+  OpusFileCallbacks  cb;
+  OggOpusFile       *of;
+  void              *source;
+  source=op_url_stream_vcreate(&cb,_url,_ap);
+  if(OP_UNLIKELY(source==NULL)){
+    if(_error!=NULL)*_error=OP_EFAULT;
+    return NULL;
+  }
+  of=op_test_callbacks(source,&cb,NULL,0,_error);
+  if(OP_UNLIKELY(of==NULL))(*cb.close)(source);
+  return of;
+}
+
+OggOpusFile *op_test_url(const char *_url,int *_error,...){
+  OggOpusFile *ret;
+  va_list      ap;
+  va_start(ap,_error);
+  ret=op_vtest_url(_url,_error,ap);
+  va_end(ap);
+  return ret;
 }
