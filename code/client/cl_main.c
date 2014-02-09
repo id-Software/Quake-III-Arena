@@ -1457,6 +1457,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	
 	// Remove pure paks
 	FS_PureServerSetLoadedPaks("", "");
+	FS_PureServerSetReferencedPaks( "", "" );
 	
 	CL_ClearState ();
 
