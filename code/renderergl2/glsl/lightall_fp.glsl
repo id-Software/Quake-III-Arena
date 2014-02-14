@@ -346,7 +346,7 @@ void main()
 	vec4 lightSample = texture2D(u_LightMap, var_TexCoords.zw);
 	vec3 lightColor = lightSample.rgb;
   #if defined(RGBM_LIGHTMAP)
-	lightColor *= 32.0 * lightSample.a;
+	lightColor *= lightSample.a;
   #endif
 #elif defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
 	vec3 lightColor   = u_DirectedLight * CalcLightAttenuation(float(var_LightDir.w > 0.0), var_LightDir.w / sqrLightDist);
