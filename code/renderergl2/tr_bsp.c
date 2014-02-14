@@ -165,6 +165,8 @@ void ColorToRGBM(const vec3_t color, unsigned char rgbm[4])
 	vec3_t          sample;
 	float			maxComponent;
 
+	VectorCopy(color, sample);
+
 	maxComponent = MAX(sample[0], sample[1]);
 	maxComponent = MAX(maxComponent, sample[2]);
 	maxComponent = CLAMP(maxComponent, 1.0f/255.0f, 1.0f);
