@@ -21,7 +21,7 @@ void main()
 #if defined(USE_LIGHTMAP)
 	vec4 color2 = texture2D(u_LightMap, var_LightTex);
   #if defined(RGBM_LIGHTMAP)
-	color2.rgb *= 32.0 * color2.a;
+	color2.rgb *= color2.a;
 	color2.a = 1.0;
   #endif
 

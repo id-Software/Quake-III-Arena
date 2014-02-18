@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: easy.h,v 1.13 2004/11/09 14:02:58 giva Exp $
  ***************************************************************************/
 #ifdef  __cplusplus
 extern "C" {
@@ -54,8 +53,8 @@ CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
  *
  * Creates a new curl session handle with the same options set for the handle
  * passed in. Duplicating a handle could only be a matter of cloning data and
- * options, internal state info and things like persistant connections cannot
- * be transfered. It is useful in multithreaded applications when you can run
+ * options, internal state info and things like persistent connections cannot
+ * be transferred. It is useful in multithreaded applications when you can run
  * curl_easy_duphandle() for each new thread to avoid a series of identical
  * curl_easy_setopt() invokes in every thread.
  */
@@ -73,6 +72,28 @@ CURL_EXTERN CURL* curl_easy_duphandle(CURL *curl);
  * cookies.
  */
 CURL_EXTERN void curl_easy_reset(CURL *curl);
+
+/*
+ * NAME curl_easy_recv()
+ *
+ * DESCRIPTION
+ *
+ * Receives data from the connected socket. Use after successful
+ * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ */
+CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
+                                    size_t *n);
+
+/*
+ * NAME curl_easy_send()
+ *
+ * DESCRIPTION
+ *
+ * Sends data over the connected socket. Use after successful
+ * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ */
+CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
+                                    size_t buflen, size_t *n);
 
 #ifdef  __cplusplus
 }
