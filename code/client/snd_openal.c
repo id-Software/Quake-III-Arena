@@ -2309,7 +2309,7 @@ void S_AL_Update( void )
 	}
 	if(s_alDopplerSpeed->modified)
 	{
-		qalDopplerVelocity(s_alDopplerSpeed->value);
+		qalSpeedOfSound(s_alDopplerSpeed->value);
 		s_alDopplerSpeed->modified = qfalse;
 	}
 
@@ -2623,7 +2623,7 @@ qboolean S_AL_Init( soundInterface_t *si )
 	// Set up OpenAL parameters (doppler, etc)
 	qalDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 	qalDopplerFactor( s_alDopplerFactor->value );
-	qalDopplerVelocity( s_alDopplerSpeed->value );
+	qalSpeedOfSound( s_alDopplerSpeed->value );
 
 #ifdef USE_VOIP
 	// !!! FIXME: some of these alcCaptureOpenDevice() values should be cvars.
