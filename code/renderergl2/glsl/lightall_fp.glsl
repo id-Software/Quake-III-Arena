@@ -167,7 +167,7 @@ vec3 EnvironmentBRDF(float gloss, float NE, vec3 specular)
 	return clamp( a0 + specular * ( a1 - a0 ), 0.0, 1.0 );
   #elif 0
 	// from http://seblagarde.wordpress.com/2011/08/17/hello-world/
-	return mix(specular.rgb, max(specular.rgb, vec3(gloss)), CalcFresnel(NE));
+	return specular + CalcFresnel(NE) * clamp(vec3(gloss) - specular, 0.0, 1.0);
   #else
 	// from http://advances.realtimerendering.com/s2011/Lazarov-Physically-Based-Lighting-in-Black-Ops%20%28Siggraph%202011%20Advances%20in%20Real-Time%20Rendering%20Course%29.pptx
 	return mix(specular.rgb, vec3(1.0), CalcFresnel(NE) / (4.0 - 3.0 * gloss));
@@ -379,7 +379,7 @@ void main()
 	N.xy = texture2D(u_NormalMap, texCoords).rg - vec2(0.5);
     #endif
 	N.xy *= u_EnableTextures.x;
-	N.z = sqrt((0.25 - N.x * N.x) - N.y * N.y);
+	N.z = sqrt(clamp((0.25 - N.x * N.x) - N.y * N.y, 0.0, 1.0));
 	N = tangentToWorld * N;
   #else
 	N = var_Normal.xyz;
@@ -473,7 +473,21 @@ void main()
   #endif
 
 	gl_FragColor.rgb  = lightColor   * reflectance * NL;
+
+#if 0
+	vec3 aSpecular = EnvironmentBRDF(gloss, NE, specular.rgb);
+
+	// do ambient as two hemisphere lights, one straight up one straight down
+	float hemiDiffuseUp    = N.z * 0.5 + 0.5;
+	float hemiDiffuseDown  = 1.0 - hemiDiffuseUp;
+	float hemiSpecularUp   = mix(hemiDiffuseUp, float(N.z >= 0.0), gloss);
+	float hemiSpecularDown = 1.0 - hemiSpecularUp;
+
+	gl_FragColor.rgb += ambientColor * 0.75 * (diffuse.rgb * hemiDiffuseUp   + aSpecular * hemiSpecularUp);
+	gl_FragColor.rgb += ambientColor * 0.25 * (diffuse.rgb * hemiDiffuseDown + aSpecular * hemiSpecularDown);
+#else
 	gl_FragColor.rgb += ambientColor * (diffuse.rgb + specular.rgb);
+#endif
 
   #if defined(USE_CUBEMAP)
 	reflectance = EnvironmentBRDF(gloss, NE, specular.rgb);
