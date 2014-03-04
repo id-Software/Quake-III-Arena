@@ -25,7 +25,8 @@ uniform samplerCube u_CubeMap;
 #endif
 
 #if defined(USE_NORMALMAP) || defined(USE_DELUXEMAP) || defined(USE_SPECULARMAP) || defined(USE_CUBEMAP)
-uniform vec4      u_EnableTextures; // x = normal, y = deluxe, z = specular, w = cube
+// y = deluxe, w = cube
+uniform vec4      u_EnableTextures; 
 #endif
 
 #if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
@@ -39,7 +40,8 @@ uniform vec3  u_PrimaryLightAmbient;
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-uniform vec2      u_MaterialInfo;
+uniform vec4      u_NormalScale;
+uniform vec4      u_SpecularScale;
 #endif
 
 varying vec4      var_TexCoords;
@@ -360,7 +362,7 @@ void main()
 #if defined(USE_PARALLAXMAP)
 	vec3 offsetDir = normalize(E * tangentToWorld);
 
-	offsetDir.xy *= -0.05 / offsetDir.z;
+	offsetDir.xy *= -u_NormalScale.a / offsetDir.z;
 
 	texCoords += offsetDir.xy * RayIntersectDisplaceMap(texCoords, offsetDir.xy, u_NormalMap);
 #endif
@@ -378,7 +380,7 @@ void main()
     #else
 	N.xy = texture2D(u_NormalMap, texCoords).rg - vec2(0.5);
     #endif
-	N.xy *= u_EnableTextures.x;
+	N.xy *= u_NormalScale.xy;
 	N.z = sqrt(clamp((0.25 - N.x * N.x) - N.y * N.y, 0.0, 1.0));
 	N = tangentToWorld * N;
   #else
@@ -425,15 +427,16 @@ void main()
 	NL = clamp(dot(N, L), 0.0, 1.0);
 	NE = clamp(dot(N, E), 0.0, 1.0);
 
-	vec4 specular = vec4(1.0);
   #if defined(USE_SPECULARMAP)
-	specular += texture2D(u_SpecularMap, texCoords) * u_EnableTextures.z - u_EnableTextures.zzzz;
+	vec4 specular = texture2D(u_SpecularMap, texCoords);
     #if defined(USE_GAMMA2_TEXTURES)
 	specular.rgb *= specular.rgb;
     #endif
+  #else
+	vec4 specular = vec4(1.0);
   #endif
 
-	specular *= u_MaterialInfo.xxxy;
+	specular *= u_SpecularScale;
 
 	float gloss = specular.a;
 	float shininess = exp2(gloss * 13.0);

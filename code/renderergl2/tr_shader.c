@@ -911,6 +911,7 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 			else if(!Q_stricmp(token, "normalMap") || !Q_stricmp(token, "bumpMap"))
 			{
 				stage->type = ST_NORMALMAP;
+				VectorSet4(stage->normalScale, r_baseNormalX->value, r_baseNormalY->value, 1.0f, r_baseParallax->value);
 			}
 			else if(!Q_stricmp(token, "normalParallaxMap") || !Q_stricmp(token, "bumpParallaxMap"))
 			{
@@ -918,12 +919,12 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 					stage->type = ST_NORMALPARALLAXMAP;
 				else
 					stage->type = ST_NORMALMAP;
+				VectorSet4(stage->normalScale, r_baseNormalX->value, r_baseNormalY->value, 1.0f, r_baseParallax->value);
 			}
 			else if(!Q_stricmp(token, "specularMap"))
 			{
 				stage->type = ST_SPECULARMAP;
-				stage->materialInfo[0] = 1.0f;
-				stage->materialInfo[1] = 1.0f;
+				VectorSet4(stage->specularScale, 1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else
 			{
@@ -942,7 +943,9 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for specular reflectance in shader '%s'\n", shader.name );
 				continue;
 			}
-			stage->materialInfo[0] = atof( token );
+			stage->specularScale[0] = 
+			stage->specularScale[1] = 
+			stage->specularScale[2] = atof( token );
 		}
 		//
 		// specularExponent <value>
@@ -964,7 +967,7 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 			// FIXME: assumes max exponent of 8192 and min of 1, must change here if altered in lightall_fp.glsl
 			exponent = CLAMP(exponent, 1.0, 8192.0);
 
-			stage->materialInfo[1] = log(exponent) / log(8192.0);
+			stage->specularScale[3] = log(exponent) / log(8192.0);
 		}
 		//
 		// gloss <value>
@@ -978,7 +981,103 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 				continue;
 			}
 
-			stage->materialInfo[1] = atof( token );
+			stage->specularScale[3] = atof( token );
+		}
+		//
+		// parallaxDepth <value>
+		//
+		else if (!Q_stricmp(token, "parallaxdepth"))
+		{
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for parallaxDepth in shader '%s'\n", shader.name );
+				continue;
+			}
+
+			stage->normalScale[3] = atof( token );
+		}
+		//
+		// normalScale <xy>
+		// or normalScale <x> <y>
+		// or normalScale <x> <y> <height>
+		//
+		else if (!Q_stricmp(token, "normalscale"))
+		{
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for normalScale in shader '%s'\n", shader.name );
+				continue;
+			}
+
+			stage->normalScale[0] = atof( token );
+
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				// one value, applies to X/Y
+				stage->normalScale[1] = stage->normalScale[0];
+				continue;
+			}
+
+			stage->normalScale[1] = atof( token );
+
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				// two values, no height
+				continue;
+			}
+
+			stage->normalScale[3] = atof( token );
+		}
+		//
+		// specularScale <rgb> <gloss>
+		// or specularScale <r> <g> <b>
+		// or specularScale <r> <g> <b> <gloss>
+		//
+		else if (!Q_stricmp(token, "specularscale"))
+		{
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for specularScale in shader '%s'\n", shader.name );
+				continue;
+			}
+
+			stage->specularScale[0] = atof( token );
+
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for specularScale in shader '%s'\n", shader.name );
+				continue;
+			}
+
+			stage->specularScale[1] = atof( token );
+
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				// two values, rgb then gloss
+				stage->specularScale[3] = stage->specularScale[1];
+				stage->specularScale[1] =
+				stage->specularScale[2] = stage->specularScale[0];
+				continue;
+			}
+
+			stage->specularScale[2] = atof( token );
+
+			token = COM_ParseExt(text, qfalse);
+			if ( token[0] == 0 )
+			{
+				// three values, rgb
+				continue;
+			}
+
+			stage->specularScale[2] = atof( token );
+
 		}
 		//
 		// rgbGen
@@ -2231,6 +2330,8 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 			diffuse->bundle[TB_NORMALMAP] = normal->bundle[0];
 			if (parallax && r_parallaxMapping->integer)
 				defs |= LIGHTDEF_USE_PARALLAXMAP;
+
+			VectorCopy4(normal->normalScale, diffuse->normalScale);
 		}
 		else if ((lightmap || useLightVector || useLightVertex) && (diffuseImg = diffuse->bundle[TB_DIFFUSEMAP].image[0]))
 		{
@@ -2251,6 +2352,8 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 
 				if (parallax && r_parallaxMapping->integer)
 					defs |= LIGHTDEF_USE_PARALLAXMAP;
+
+				VectorSet4(diffuse->normalScale, r_baseNormalX->value, r_baseNormalY->value, 1.0f, r_baseParallax->value);
 			}
 		}
 	}
@@ -2261,8 +2364,7 @@ static void CollapseStagesToLightall(shaderStage_t *diffuse,
 		{
 			//ri.Printf(PRINT_ALL, ", specularmap %s", specular->bundle[0].image[0]->imgName);
 			diffuse->bundle[TB_SPECULARMAP] = specular->bundle[0];
-			diffuse->materialInfo[0] = specular->materialInfo[0];
-			diffuse->materialInfo[1] = specular->materialInfo[1];
+			VectorCopy4(specular->specularScale, diffuse->specularScale);
 		}
 	}
 
@@ -2565,29 +2667,6 @@ static qboolean CollapseStagesToGLSL(void)
 				if (pStage->bundle[0].tcGen != TCGEN_TEXTURE || pStage->bundle[0].numTexMods != 0)
 					pStage->glslShaderIndex |= LIGHTDEF_USE_TCGEN_AND_TCMOD;
 			}
-		}
-	}
-
-	// insert default material info if needed
-	for (i = 0; i < MAX_SHADER_STAGES; i++)
-	{
-		shaderStage_t *pStage = &stages[i];
-
-		if (!pStage->active)
-			continue;
-
-		if (pStage->glslShaderGroup != tr.lightallShader)
-			continue;
-
-		if ((pStage->glslShaderIndex & LIGHTDEF_LIGHTTYPE_MASK) == 0)
-			continue;
-
-		if (!pStage->bundle[TB_SPECULARMAP].image[0] && r_specularMapping->integer)
-		{
-			if (!pStage->materialInfo[0])
-				pStage->materialInfo[0] = r_baseSpecular->value;
-			if (!pStage->materialInfo[1])
-				pStage->materialInfo[1] = r_baseGloss->value;
 		}
 	}
 
@@ -3216,6 +3295,13 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 	shader.lightmapIndex = lightmapIndex;
 	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
 		stages[i].bundle[0].texMods = texMods[i];
+
+		// default normal/specular
+		VectorSet4(stages[i].normalScale, 0.0f, 0.0f, 0.0f, 0.0f);
+		stages[i].specularScale[0] = 
+		stages[i].specularScale[1] =
+		stages[i].specularScale[2] = r_baseSpecular->value;
+		stages[i].specularScale[3] = r_baseGloss->value;
 	}
 
 	//

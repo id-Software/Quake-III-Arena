@@ -400,7 +400,10 @@ typedef struct {
 	stageType_t     type;
 	struct shaderProgram_s *glslShaderGroup;
 	int glslShaderIndex;
-	vec2_t materialInfo;
+
+	vec4_t normalScale;
+	vec4_t specularScale;
+
 } shaderStage_t;
 
 struct shaderCommands_s;
@@ -676,7 +679,8 @@ typedef enum
 
 	UNIFORM_TIME,
 	UNIFORM_VERTEXLERP,
-	UNIFORM_MATERIALINFO,
+	UNIFORM_NORMALSCALE,
+	UNIFORM_SPECULARSCALE,
 
 	UNIFORM_VIEWINFO, // znear, zfar, width/2, height/2
 	UNIFORM_VIEWORIGIN,
@@ -1794,6 +1798,9 @@ extern  cvar_t  *r_parallaxMapping;
 extern  cvar_t  *r_cubeMapping;
 extern  cvar_t  *r_deluxeSpecular;
 extern  cvar_t  *r_specularIsMetallic;
+extern  cvar_t  *r_baseNormalX;
+extern  cvar_t  *r_baseNormalY;
+extern  cvar_t  *r_baseParallax;
 extern  cvar_t  *r_baseSpecular;
 extern  cvar_t  *r_baseGloss;
 extern  cvar_t  *r_dlightMode;

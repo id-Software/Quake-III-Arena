@@ -811,7 +811,8 @@ static void ForwardDlight( void ) {
 
 		GLSL_SetUniformFloat(sp, UNIFORM_LIGHTRADIUS, radius);
 
-		GLSL_SetUniformVec2(sp, UNIFORM_MATERIALINFO, pStage->materialInfo);
+		GLSL_SetUniformVec4(sp, UNIFORM_NORMALSCALE, pStage->normalScale);
+		GLSL_SetUniformVec4(sp, UNIFORM_SPECULARSCALE, pStage->specularScale);
 		
 		// include GLS_DEPTHFUNC_EQUAL so alpha tested surfaces don't add light
 		// where they aren't rendered
@@ -822,11 +823,36 @@ static void ForwardDlight( void ) {
 		if (pStage->bundle[TB_DIFFUSEMAP].image[0])
 			R_BindAnimatedImageToTMU( &pStage->bundle[TB_DIFFUSEMAP], TB_DIFFUSEMAP);
 
+		// bind textures that are sampled and used in the glsl shader, and
+		// bind whiteImage to textures that are sampled but zeroed in the glsl shader
+		//
+		// alternatives:
+		//  - use the last bound texture
+		//     -> costs more to sample a higher res texture then throw out the result
+		//  - disable texture sampling in glsl shader with #ifdefs, as before
+		//     -> increases the number of shaders that must be compiled
+		//
+
 		if (pStage->bundle[TB_NORMALMAP].image[0])
+		{
 			R_BindAnimatedImageToTMU( &pStage->bundle[TB_NORMALMAP], TB_NORMALMAP);
+		}
+		else if (r_normalMapping->integer)
+			GL_BindToTMU( tr.whiteImage, TB_NORMALMAP );
 
 		if (pStage->bundle[TB_SPECULARMAP].image[0])
+		{
 			R_BindAnimatedImageToTMU( &pStage->bundle[TB_SPECULARMAP], TB_SPECULARMAP);
+		}
+		else if (r_specularMapping->integer)
+			GL_BindToTMU( tr.whiteImage, TB_SPECULARMAP );
+
+		{
+			vec4_t enableTextures;
+
+			VectorSet4(enableTextures, 0.0f, 0.0f, 0.0f, 0.0f);
+			GLSL_SetUniformVec4(sp, UNIFORM_ENABLETEXTURES, enableTextures);
+		}
 
 		if (r_dlightMode->integer >= 2)
 		{
@@ -1222,7 +1248,8 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 
 		GLSL_SetUniformMat4(sp, UNIFORM_MODELMATRIX, backEnd.or.transformMatrix);
 
-		GLSL_SetUniformVec2(sp, UNIFORM_MATERIALINFO, pStage->materialInfo);
+		GLSL_SetUniformVec4(sp, UNIFORM_NORMALSCALE, pStage->normalScale);
+		GLSL_SetUniformVec4(sp, UNIFORM_SPECULARSCALE, pStage->specularScale);
 
 		//GLSL_SetUniformFloat(sp, UNIFORM_MAPLIGHTSCALE, backEnd.refdef.mapLightScale);
 
