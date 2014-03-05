@@ -3447,6 +3447,13 @@ qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_
 	shader.lightmapIndex = lightmapIndex;
 	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
 		stages[i].bundle[0].texMods = texMods[i];
+
+		// default normal/specular
+		VectorSet4(stages[i].normalScale, 0.0f, 0.0f, 0.0f, 0.0f);
+		stages[i].specularScale[0] = 
+		stages[i].specularScale[1] =
+		stages[i].specularScale[2] = r_baseSpecular->value;
+		stages[i].specularScale[3] = r_baseGloss->value;
 	}
 
 	//
