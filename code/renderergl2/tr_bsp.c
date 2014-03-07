@@ -143,7 +143,7 @@ static void R_ColorShiftLightingFloats(float in[4], float out[4], float scale )
 	b = in[2] * scale;
 
 	// normalize by color instead of saturating to white
-	if ( !r_hdr->integer && ( r > 1 || g > 1 || b > 1 ) ) {
+	if ( r > 1 || g > 1 || b > 1 ) {
 		float	max;
 
 		max = r > g ? r : g;
