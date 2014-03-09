@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -115,7 +115,7 @@ extern DECLSPEC SDL_JoystickGUID SDLCALL SDL_JoystickGetGUID(SDL_Joystick * joys
  *  Return a string representation for this guid. pszGUID must point to at least 33 bytes
  *  (32 for the string plus a NULL terminator).
  */
-extern DECLSPEC void SDL_JoystickGetGUIDString(SDL_JoystickGUID guid, char *pszGUID, int cbGUID);
+extern DECLSPEC void SDLCALL SDL_JoystickGetGUIDString(SDL_JoystickGUID guid, char *pszGUID, int cbGUID);
 
 /**
  *  convert a string into a joystick formatted guid
@@ -187,7 +187,7 @@ extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick * joystick,
 /**
  *  \name Hat positions
  */
-/*@{*/
+/* @{ */
 #define SDL_HAT_CENTERED    0x00
 #define SDL_HAT_UP      0x01
 #define SDL_HAT_RIGHT       0x02
@@ -197,7 +197,7 @@ extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick * joystick,
 #define SDL_HAT_RIGHTDOWN   (SDL_HAT_RIGHT|SDL_HAT_DOWN)
 #define SDL_HAT_LEFTUP      (SDL_HAT_LEFT|SDL_HAT_UP)
 #define SDL_HAT_LEFTDOWN    (SDL_HAT_LEFT|SDL_HAT_DOWN)
-/*@}*/
+/* @} */
 
 /**
  *  Get the current state of a POV hat on a joystick.

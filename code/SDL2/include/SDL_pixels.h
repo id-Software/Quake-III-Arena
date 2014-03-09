@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,6 +28,8 @@
 #ifndef _SDL_pixels_h
 #define _SDL_pixels_h
 
+#include "SDL_stdinc.h"
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -39,10 +41,10 @@ extern "C" {
  *
  *  These define alpha as the opacity of a surface.
  */
-/*@{*/
+/* @{ */
 #define SDL_ALPHA_OPAQUE 255
 #define SDL_ALPHA_TRANSPARENT 0
-/*@}*/
+/* @} */
 
 /** Pixel type. */
 enum

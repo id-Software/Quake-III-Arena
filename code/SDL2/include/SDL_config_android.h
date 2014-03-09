@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -81,12 +81,13 @@
 #define HAVE_STRNCMP    1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRNCASECMP 1
-#define HAVE_SSCANF 1
-#define HAVE_SNPRINTF   1
+#define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF  1
 #define HAVE_M_PI   1
 #define HAVE_ATAN   1
 #define HAVE_ATAN2  1
+#define HAVE_ACOS  1
+#define HAVE_ASIN  1
 #define HAVE_CEIL   1
 #define HAVE_COPYSIGN   1
 #define HAVE_COS    1
@@ -129,10 +130,15 @@
 
 /* Enable OpenGL ES */
 #define SDL_VIDEO_OPENGL_ES 1
+#define SDL_VIDEO_OPENGL_ES2 1
+#define SDL_VIDEO_OPENGL_EGL 1
 #define SDL_VIDEO_RENDER_OGL_ES 1
 #define SDL_VIDEO_RENDER_OGL_ES2    1
 
 /* Enable system power support */
 #define SDL_POWER_ANDROID 1
+
+/* !!! FIXME: what does Android do for filesystem stuff? */
+#define SDL_FILESYSTEM_DUMMY   1
 
 #endif /* _SDL_config_android_h */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -94,14 +94,14 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 extern "C" {
 #endif
 
-/*
+/**
  *  This is called by the real SDL main function to let the rest of the
  *  library know that initialization was done properly.
  *
  *  Calling this yourself without knowing what you're doing can cause
  *  crashes and hard to diagnose problems with your application.
  */
-extern DECLSPEC void SDL_SetMainReady(void);
+extern DECLSPEC void SDLCALL SDL_SetMainReady(void);
 
 #ifdef __WIN32__
 

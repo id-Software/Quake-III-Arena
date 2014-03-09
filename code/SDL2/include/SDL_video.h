@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -107,7 +107,8 @@ typedef enum
     SDL_WINDOW_INPUT_FOCUS = 0x00000200,        /**< window has input focus */
     SDL_WINDOW_MOUSE_FOCUS = 0x00000400,        /**< window has mouse focus */
     SDL_WINDOW_FULLSCREEN_DESKTOP = ( SDL_WINDOW_FULLSCREEN | 0x00001000 ),
-    SDL_WINDOW_FOREIGN = 0x00000800             /**< window not created by SDL */
+    SDL_WINDOW_FOREIGN = 0x00000800,            /**< window not created by SDL */
+    SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000       /**< window should be created in high-DPI mode if supported */
 } SDL_WindowFlags;
 
 /**
@@ -186,14 +187,15 @@ typedef enum
     SDL_GL_CONTEXT_EGL,
     SDL_GL_CONTEXT_FLAGS,
     SDL_GL_CONTEXT_PROFILE_MASK,
-    SDL_GL_SHARE_WITH_CURRENT_CONTEXT
+    SDL_GL_SHARE_WITH_CURRENT_CONTEXT,
+    SDL_GL_FRAMEBUFFER_SRGB_CAPABLE
 } SDL_GLattr;
 
 typedef enum
 {
     SDL_GL_CONTEXT_PROFILE_CORE           = 0x0001,
     SDL_GL_CONTEXT_PROFILE_COMPATIBILITY  = 0x0002,
-    SDL_GL_CONTEXT_PROFILE_ES             = 0x0004
+    SDL_GL_CONTEXT_PROFILE_ES             = 0x0004 /* GLX_CONTEXT_ES2_PROFILE_BIT_EXT */
 } SDL_GLprofile;
 
 typedef enum
@@ -393,10 +395,11 @@ extern DECLSPEC Uint32 SDLCALL SDL_GetWindowPixelFormat(SDL_Window * window);
  *  \param w     The width of the window.
  *  \param h     The height of the window.
  *  \param flags The flags for the window, a mask of any of the following:
- *               ::SDL_WINDOW_FULLSCREEN, ::SDL_WINDOW_OPENGL,
- *               ::SDL_WINDOW_HIDDEN,     ::SDL_WINDOW_BORDERLESS,
- *               ::SDL_WINDOW_RESIZABLE,  ::SDL_WINDOW_MAXIMIZED,
- *               ::SDL_WINDOW_MINIMIZED,  ::SDL_WINDOW_INPUT_GRABBED.
+ *               ::SDL_WINDOW_FULLSCREEN,    ::SDL_WINDOW_OPENGL,
+ *               ::SDL_WINDOW_HIDDEN,        ::SDL_WINDOW_BORDERLESS,
+ *               ::SDL_WINDOW_RESIZABLE,     ::SDL_WINDOW_MAXIMIZED,
+ *               ::SDL_WINDOW_MINIMIZED,     ::SDL_WINDOW_INPUT_GRABBED,
+ *               ::SDL_WINDOW_ALLOW_HIGHDPI.
  *
  *  \return The id of the window created, or zero if window creation failed.
  *
@@ -821,7 +824,7 @@ extern DECLSPEC void SDLCALL SDL_DisableScreenSaver(void);
 /**
  *  \name OpenGL support functions
  */
-/*@{*/
+/* @{ */
 
 /**
  *  \brief Dynamically load an OpenGL library.
@@ -863,6 +866,11 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GL_ExtensionSupported(const char
                                                            *extension);
 
 /**
+ *  \brief Reset all previously set OpenGL context attributes to their default values
+ */
+extern DECLSPEC void SDLCALL SDL_GL_ResetAttributes(void);
+
+/**
  *  \brief Set an OpenGL window attribute before window creation.
  */
 extern DECLSPEC int SDLCALL SDL_GL_SetAttribute(SDL_GLattr attr, int value);
@@ -898,6 +906,24 @@ extern DECLSPEC SDL_Window* SDLCALL SDL_GL_GetCurrentWindow(void);
  *  \brief Get the currently active OpenGL context.
  */
 extern DECLSPEC SDL_GLContext SDLCALL SDL_GL_GetCurrentContext(void);
+
+/**
+ *  \brief Get the size of a window's underlying drawable (for use with glViewport).
+ *
+ *  \param window   Window from which the drawable size should be queried
+ *  \param w        Pointer to variable for storing the width, may be NULL
+ *  \param h        Pointer to variable for storing the height, may be NULL
+ *
+ * This may differ from SDL_GetWindowSize if we're rendering to a high-DPI
+ * drawable, i.e. the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a
+ * platform with high-DPI support (Apple calls this "Retina"), and not disabled
+ * by the SDL_HINT_VIDEO_HIGHDPI_DISABLED hint.
+ *
+ *  \sa SDL_GetWindowSize()
+ *  \sa SDL_CreateWindow()
+ */
+extern DECLSPEC void SDLCALL SDL_GL_GetDrawableSize(SDL_Window * window, int *w,
+                                                    int *h);
 
 /**
  *  \brief Set the swap interval for the current OpenGL context.
@@ -939,7 +965,7 @@ extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_Window * window);
  */
 extern DECLSPEC void SDLCALL SDL_GL_DeleteContext(SDL_GLContext context);
 
-/*@}*//*OpenGL support functions*/
+/* @} *//* OpenGL support functions */
 
 
 /* Ends C function definitions when using C++ */

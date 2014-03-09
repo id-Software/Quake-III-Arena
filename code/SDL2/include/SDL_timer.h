@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -43,6 +43,17 @@ extern "C" {
  * \note This value wraps if the program runs for more than ~49 days.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_GetTicks(void);
+
+/**
+ * \brief Compare SDL ticks values, and return true if A has passed B
+ *
+ * e.g. if you want to wait 100 ms, you could do this:
+ *  Uint32 timeout = SDL_GetTicks() + 100;
+ *  while (!SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
+ *      ... do work until timeout has elapsed
+ *  }
+ */
+#define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
 
 /**
  * \brief Get the current value of the high resolution counter

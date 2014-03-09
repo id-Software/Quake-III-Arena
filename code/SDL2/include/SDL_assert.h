@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -86,8 +86,14 @@ This also solves the problem of...
 disable assertions.
 */
 
+#ifdef _MSC_VER  /* stupid /W4 warnings. */
+#define SDL_NULL_WHILE_LOOP_CONDITION (-1 == __LINE__)
+#else
+#define SDL_NULL_WHILE_LOOP_CONDITION (0)
+#endif
+
 #define SDL_disabled_assert(condition) \
-    do { (void) sizeof ((condition)); } while (0)
+    do { (void) sizeof ((condition)); } while (SDL_NULL_WHILE_LOOP_CONDITION)
 
 typedef enum
 {
@@ -114,7 +120,16 @@ typedef struct SDL_assert_data
 /* Never call this directly. Use the SDL_assert* macros. */
 extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
                                                              const char *,
-                                                             const char *, int);
+                                                             const char *, int)
+#if defined(__clang__)
+#if __has_feature(attribute_analyzer_noreturn)
+/* this tells Clang's static analysis that we're a custom assert function,
+   and that the analyzer should assume the condition was always true past this
+   SDL_assert test. */
+   __attribute__((analyzer_noreturn))
+#endif
+#endif
+;
 
 /* the do {} while(0) avoids dangling else problems:
     if (x) SDL_assert(y); else blah();
@@ -140,7 +155,7 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
             } \
             break; /* not retrying. */ \
         } \
-    } while (0)
+    } while (SDL_NULL_WHILE_LOOP_CONDITION)
 
 #endif  /* enabled assertions support code */
 
@@ -164,6 +179,9 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
 #else
 #   error Unknown assertion level.
 #endif
+
+/* this assertion is never disabled at any level. */
+#define SDL_assert_always(condition) SDL_enabled_assert(condition)
 
 
 typedef SDL_assert_state (SDLCALL *SDL_AssertionHandler)(
@@ -192,6 +210,35 @@ typedef SDL_assert_state (SDLCALL *SDL_AssertionHandler)(
 extern DECLSPEC void SDLCALL SDL_SetAssertionHandler(
                                             SDL_AssertionHandler handler,
                                             void *userdata);
+
+/**
+ *  \brief Get the default assertion handler.
+ *
+ *  This returns the function pointer that is called by default when an
+ *   assertion is triggered. This is an internal function provided by SDL,
+ *   that is used for assertions when SDL_SetAssertionHandler() hasn't been
+ *   used to provide a different function.
+ *
+ *  \return The default SDL_AssertionHandler that is called when an assert triggers.
+ */
+extern DECLSPEC SDL_AssertionHandler SDLCALL SDL_GetDefaultAssertionHandler(void);
+
+/**
+ *  \brief Get the current assertion handler.
+ *
+ *  This returns the function pointer that is called when an assertion is
+ *   triggered. This is either the value last passed to
+ *   SDL_SetAssertionHandler(), or if no application-specified function is
+ *   set, is equivalent to calling SDL_GetDefaultAssertionHandler().
+ *
+ *   \param puserdata Pointer to a void*, which will store the "userdata"
+ *                    pointer that was passed to SDL_SetAssertionHandler().
+ *                    This value will always be NULL for the default handler.
+ *                    If you don't care about this data, it is safe to pass
+ *                    a NULL pointer to this function to ignore it.
+ *  \return The SDL_AssertionHandler that is called when an assert triggers.
+ */
+extern DECLSPEC SDL_AssertionHandler SDLCALL SDL_GetAssertionHandler(void **puserdata);
 
 /**
  *  \brief Get a list of all assertion failures.

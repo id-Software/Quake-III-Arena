@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,7 +29,9 @@
  */
 
 /* Add any platform that doesn't build using the configure system. */
-#if defined(__WIN32__)
+#ifdef USING_PREMAKE_CONFIG_H
+#include "SDL_config_premake.h"
+#elif defined(__WIN32__)
 #include "SDL_config_windows.h"
 #elif defined(__MACOSX__)
 #include "SDL_config_macosx.h"

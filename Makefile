@@ -621,19 +621,19 @@ ifeq ($(PLATFORM),mingw32)
                       $(LIBSDIR)/win32/libSDL2.dll.a
     RENDERER_LIBS += $(LIBSDIR)/win32/libSDL2main.a \
                       $(LIBSDIR)/win32/libSDL2.dll.a
-    SDLDLL=libSDL2.dll
+    SDLDLL=SDL2.dll
     else
-    CLIENT_LIBS += $(LIBSDIR)/win64/libSDL2main.a \
-                      $(LIBSDIR)/win64/libSDL2.dll.a
-    RENDERER_LIBS += $(LIBSDIR)/win64/libSDL2main.a \
-                      $(LIBSDIR)/win64/libSDL2.dll.a
-    SDLDLL=libSDL2.dll
+    CLIENT_LIBS += $(LIBSDIR)/win64/libSDL264main.a \
+                      $(LIBSDIR)/win64/libSDL264.dll.a
+    RENDERER_LIBS += $(LIBSDIR)/win64/libSDL264main.a \
+                      $(LIBSDIR)/win64/libSDL264.dll.a
+    SDLDLL=SDL264.dll
     endif
   else
     CLIENT_CFLAGS += $(SDL_CFLAGS)
     CLIENT_LIBS += $(SDL_LIBS)
     RENDERER_LIBS += $(SDL_LIBS)
-    SDLDLL=libSDL2.dll
+    SDLDLL=SDL2.dll
   endif
 
 else # ifeq mingw32

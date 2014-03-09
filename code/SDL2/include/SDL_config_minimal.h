@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -74,5 +74,8 @@ typedef unsigned long uintptr_t;
 
 /* Enable the dummy video driver (src/video/dummy/\*.c) */
 #define SDL_VIDEO_DRIVER_DUMMY  1
+
+/* Enable the dummy filesystem driver (src/filesystem/dummy/\*.c) */
+#define SDL_FILESYSTEM_DUMMY  1
 
 #endif /* _SDL_config_minimal_h */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -81,8 +81,7 @@
 #define HAVE_STRNCMP 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRNCASECMP 1
-#define HAVE_SSCANF 1
-#define HAVE_SNPRINTF 1
+#define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF 1
 #define HAVE_M_PI 1
 #define HAVE_CEIL 1
@@ -114,6 +113,7 @@
 #define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP 1
 
 #define SDL_TIMER_UNIX 1
+#define SDL_FILESYSTEM_UNIX 1
 
 #define SDL_VIDEO_DRIVER_DUMMY 1
 #define SDL_VIDEO_DRIVER_X11 1
