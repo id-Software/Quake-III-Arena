@@ -18,6 +18,10 @@ uniform vec4   u_ViewInfo; // zfar / znear, zfar
 varying vec2   var_DepthTex;
 varying vec3   var_ViewDir;
 
+// depth is GL_DEPTH_COMPONENT24
+// so the maximum error is 1.0 / 2^24
+#define DEPTH_MAX_ERROR 0.000000059604644775390625
+
 // Input: It uses texture coords as the random number seed.
 // Output: Random number: [0,1), that is between 0.0 and 0.999999... inclusive.
 // Author: Michael Pohoreski
@@ -39,7 +43,7 @@ float PCF(const sampler2D shadowmap, const vec2 st, const float dist)
 {
 	float mult;
 	float scale = 2.0 / r_shadowMapSize;
-		
+
 #if defined(USE_SHADOW_FILTER)
 	float r = random(var_DepthTex.xy);
 	float sinr = sin(r) * scale;
@@ -71,6 +75,7 @@ float PCF(const sampler2D shadowmap, const vec2 st, const float dist)
 float getLinearDepth(sampler2D depthMap, vec2 tex, float zFarDivZNear)
 {
 		float sampleZDivW = texture2D(depthMap, tex).r;
+		sampleZDivW -= DEPTH_MAX_ERROR;
 		return 1.0 / mix(zFarDivZNear, 1.0, sampleZDivW);
 }
 
@@ -81,7 +86,7 @@ void main()
 	float depth = getLinearDepth(u_ScreenDepthMap, var_DepthTex, u_ViewInfo.x);
 	float sampleZ = u_ViewInfo.y * depth;
 
-	vec4 biasPos = vec4(u_ViewOrigin + var_ViewDir * depth * 0.99, 1.0);
+	vec4 biasPos = vec4(u_ViewOrigin + var_ViewDir * (depth - 0.5 / u_ViewInfo.x), 1.0);
 	
 	vec4 shadowpos = u_ShadowMvp * biasPos;
 	

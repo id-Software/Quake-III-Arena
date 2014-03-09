@@ -688,7 +688,7 @@ void trap_BotSaveGoalFuzzyLogic(int goalstate, char *filename) {
 }
 
 void trap_BotMutateGoalFuzzyLogic(int goalstate, float range) {
-	syscall( BOTLIB_AI_MUTATE_GOAL_FUZZY_LOGIC, goalstate, range );
+	syscall( BOTLIB_AI_MUTATE_GOAL_FUZZY_LOGIC, goalstate, PASSFLOAT(range) );
 }
 
 int trap_BotAllocGoalState(int state) {

@@ -25,7 +25,8 @@ uniform samplerCube u_CubeMap;
 #endif
 
 #if defined(USE_NORMALMAP) || defined(USE_DELUXEMAP) || defined(USE_SPECULARMAP) || defined(USE_CUBEMAP)
-uniform vec4      u_EnableTextures; // x = normal, y = deluxe, z = specular, w = cube
+// y = deluxe, w = cube
+uniform vec4      u_EnableTextures; 
 #endif
 
 #if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
@@ -39,7 +40,8 @@ uniform vec3  u_PrimaryLightAmbient;
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-uniform vec2      u_MaterialInfo;
+uniform vec4      u_NormalScale;
+uniform vec4      u_SpecularScale;
 #endif
 
 varying vec4      var_TexCoords;
@@ -167,7 +169,7 @@ vec3 EnvironmentBRDF(float gloss, float NE, vec3 specular)
 	return clamp( a0 + specular * ( a1 - a0 ), 0.0, 1.0 );
   #elif 0
 	// from http://seblagarde.wordpress.com/2011/08/17/hello-world/
-	return mix(specular.rgb, max(specular.rgb, vec3(gloss)), CalcFresnel(NE));
+	return specular + CalcFresnel(NE) * clamp(vec3(gloss) - specular, 0.0, 1.0);
   #else
 	// from http://advances.realtimerendering.com/s2011/Lazarov-Physically-Based-Lighting-in-Black-Ops%20%28Siggraph%202011%20Advances%20in%20Real-Time%20Rendering%20Course%29.pptx
 	return mix(specular.rgb, vec3(1.0), CalcFresnel(NE) / (4.0 - 3.0 * gloss));
@@ -360,7 +362,7 @@ void main()
 #if defined(USE_PARALLAXMAP)
 	vec3 offsetDir = normalize(E * tangentToWorld);
 
-	offsetDir.xy *= -0.05 / offsetDir.z;
+	offsetDir.xy *= -u_NormalScale.a / offsetDir.z;
 
 	texCoords += offsetDir.xy * RayIntersectDisplaceMap(texCoords, offsetDir.xy, u_NormalMap);
 #endif
@@ -378,8 +380,8 @@ void main()
     #else
 	N.xy = texture2D(u_NormalMap, texCoords).rg - vec2(0.5);
     #endif
-	N.xy *= u_EnableTextures.x;
-	N.z = sqrt((0.25 - N.x * N.x) - N.y * N.y);
+	N.xy *= u_NormalScale.xy;
+	N.z = sqrt(clamp((0.25 - N.x * N.x) - N.y * N.y, 0.0, 1.0));
 	N = tangentToWorld * N;
   #else
 	N = var_Normal.xyz;
@@ -425,15 +427,16 @@ void main()
 	NL = clamp(dot(N, L), 0.0, 1.0);
 	NE = clamp(dot(N, E), 0.0, 1.0);
 
-	vec4 specular = vec4(1.0);
   #if defined(USE_SPECULARMAP)
-	specular += texture2D(u_SpecularMap, texCoords) * u_EnableTextures.z - u_EnableTextures.zzzz;
+	vec4 specular = texture2D(u_SpecularMap, texCoords);
     #if defined(USE_GAMMA2_TEXTURES)
 	specular.rgb *= specular.rgb;
     #endif
+  #else
+	vec4 specular = vec4(1.0);
   #endif
 
-	specular *= u_MaterialInfo.xxxy;
+	specular *= u_SpecularScale;
 
 	float gloss = specular.a;
 	float shininess = exp2(gloss * 13.0);
@@ -473,7 +476,21 @@ void main()
   #endif
 
 	gl_FragColor.rgb  = lightColor   * reflectance * NL;
+
+#if 0
+	vec3 aSpecular = EnvironmentBRDF(gloss, NE, specular.rgb);
+
+	// do ambient as two hemisphere lights, one straight up one straight down
+	float hemiDiffuseUp    = N.z * 0.5 + 0.5;
+	float hemiDiffuseDown  = 1.0 - hemiDiffuseUp;
+	float hemiSpecularUp   = mix(hemiDiffuseUp, float(N.z >= 0.0), gloss);
+	float hemiSpecularDown = 1.0 - hemiSpecularUp;
+
+	gl_FragColor.rgb += ambientColor * 0.75 * (diffuse.rgb * hemiDiffuseUp   + aSpecular * hemiSpecularUp);
+	gl_FragColor.rgb += ambientColor * 0.25 * (diffuse.rgb * hemiDiffuseDown + aSpecular * hemiSpecularDown);
+#else
 	gl_FragColor.rgb += ambientColor * (diffuse.rgb + specular.rgb);
+#endif
 
   #if defined(USE_CUBEMAP)
 	reflectance = EnvironmentBRDF(gloss, NE, specular.rgb);

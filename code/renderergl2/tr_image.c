@@ -3013,37 +3013,14 @@ void R_SetColorMappings( void ) {
 	int		i, j;
 	float	g;
 	int		inf;
-	int		shift;
 
 	// setup the overbright lighting
 	tr.overbrightBits = r_overBrightBits->integer;
-	if ( !glConfig.deviceSupportsGamma ) {
-		tr.overbrightBits = 0;		// need hardware gamma for overbright
-	}
 
-	// never overbright in windowed mode without soft overbright
-	if ( !glConfig.isFullscreen && !r_softOverbright->integer ) 
-	{
-		tr.overbrightBits = 0;
-	}
-
-	// never overbright with tonemapping
-	if ( r_toneMap->integer && r_hdr->integer )
-	{
-		tr.overbrightBits = 0;
-	}
-
-	// allow 2 overbright bits in 24 bit, but only 1 in 16 bit
-	if ( glConfig.colorBits > 16 ) {
-		if ( tr.overbrightBits > 2 ) {
-			tr.overbrightBits = 2;
-		}
-	} else {
-		if ( tr.overbrightBits > 1 ) {
-			tr.overbrightBits = 1;
-		}
-	}
-	if ( tr.overbrightBits < 0 ) {
+	// allow 2 overbright bits
+	if ( tr.overbrightBits > 2 ) {
+		tr.overbrightBits = 2;
+	} else if ( tr.overbrightBits < 0 ) {
 		tr.overbrightBits = 0;
 	}
 
@@ -3063,14 +3040,6 @@ void R_SetColorMappings( void ) {
 
 	g = r_gamma->value;
 
-	shift = tr.overbrightBits;
-
-	// no shift with soft overbright
-	if (r_softOverbright->integer)
-	{
-		shift = 0;
-	}
-
 	for ( i = 0; i < 256; i++ ) {
 		int i2;
 
@@ -3088,7 +3057,7 @@ void R_SetColorMappings( void ) {
 		} else {
 			inf = 255 * pow ( i2/255.0f, 1.0f / g ) + 0.5f;
 		}
-		inf <<= shift;
+
 		if (inf < 0) {
 			inf = 0;
 		}
