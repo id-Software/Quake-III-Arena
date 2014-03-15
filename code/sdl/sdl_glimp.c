@@ -462,6 +462,12 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 
 	SDL_FreeSurface( icon );
 
+	if( !SDL_window )
+	{
+		ri.Printf( PRINT_ALL, "Couldn't get a visual\n" );
+		return RSERR_INVALID_MODE;
+	}
+
 	GLimp_DetectAvailableModes();
 
 	glstring = (char *) qglGetString (GL_RENDERER);
