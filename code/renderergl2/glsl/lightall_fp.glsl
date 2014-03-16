@@ -44,6 +44,12 @@ uniform vec4      u_NormalScale;
 uniform vec4      u_SpecularScale;
 #endif
 
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+#if defined(USE_CUBEMAP)
+uniform vec4      u_CubeMapInfo;
+#endif
+#endif
+
 varying vec4      var_TexCoords;
 
 varying vec4      var_Color;
@@ -323,19 +329,20 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 
 void main()
 {
+	vec3 viewDir;
 	vec3 L, N, E, H;
 	float NL, NH, NE, EH;
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
   #if defined(USE_VERT_TANGENT_SPACE)
 	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, var_Normal.xyz);
-	E = vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w);
+	viewDir = vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w);
   #else
 	mat3 tangentToWorld = cotangent_frame(var_Normal, -var_ViewDir, var_TexCoords.xy);
-	E = var_ViewDir;
+	viewDir = var_ViewDir;
   #endif
 
-	E = normalize(E);
+	E = normalize(viewDir);
 
 	L = var_LightDir.xyz;
   #if defined(USE_DELUXEMAP)
@@ -496,6 +503,10 @@ void main()
 	reflectance = EnvironmentBRDF(gloss, NE, specular.rgb);
 
 	vec3 R = reflect(E, N);
+
+	// parallax corrected cubemap (cheaper trick)
+	// from http://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
+	R += u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
 
