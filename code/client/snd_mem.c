@@ -81,7 +81,7 @@ void SND_setup(void) {
 
 	cv = Cvar_Get( "com_soundMegs", DEF_COMSOUNDMEGS, CVAR_LATCH | CVAR_ARCHIVE );
 
-	scs = (cv->integer*1536*dma.speed/22050.0f);
+	scs = (cv->integer*1536);
 
 	buffer = malloc(scs*sizeof(sndBuffer) );
 	// allocate the stack based hunk allocator
