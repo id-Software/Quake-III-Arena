@@ -731,6 +731,8 @@ static void IN_ProcessEvents( void )
 
 				if( key == K_BACKSPACE )
 					Com_QueueEvent( 0, SE_CHAR, CTRL('h'), 0, 0, NULL );
+				else if( keys[K_CTRL].down && key >= 'a' && key <= 'z' )
+					Com_QueueEvent( 0, SE_CHAR, CTRL(key), 0, 0, NULL );
 
 				lastKeyDown = key;
 				break;
