@@ -1181,8 +1181,6 @@ typedef struct {
 	int			clusterBytes;
 	const byte	*vis;			// may be passed in by CM_LoadMap to save space
 
-	byte		*novis;			// clusterBytes of 0xff
-
 	char		*entityString;
 	char		*entityParsePoint;
 } world_t;
