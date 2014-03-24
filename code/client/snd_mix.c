@@ -711,6 +711,10 @@ void S_PaintChannels( int endtime ) {
 			ltime = s_paintedtime;
 			sc = ch->thesfx;
 
+			if (sc->soundData==NULL || sc->soundLength==0) {
+				continue;
+			}
+
 			sampleOffset = ltime - ch->startSample;
 			count = end - ltime;
 			if ( sampleOffset + count > sc->soundLength ) {

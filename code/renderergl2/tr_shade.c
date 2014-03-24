@@ -1378,7 +1378,20 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		// testing cube map
 		//
 		if (!(tr.viewParms.flags & VPF_NOCUBEMAPS) && input->cubemapIndex && r_cubeMapping->integer)
+		{
+			vec4_t vec;
+
 			GL_BindToTMU( tr.cubemaps[input->cubemapIndex - 1], TB_CUBEMAP);
+
+			vec[0] = tr.cubemapOrigins[input->cubemapIndex - 1][0] - backEnd.viewParms.or.origin[0];
+			vec[1] = tr.cubemapOrigins[input->cubemapIndex - 1][1] - backEnd.viewParms.or.origin[1];
+			vec[2] = tr.cubemapOrigins[input->cubemapIndex - 1][2] - backEnd.viewParms.or.origin[2];
+			vec[3] = 1.0f;
+
+			VectorScale4(vec, 1.0f / 1000.0f, vec);
+
+			GLSL_SetUniformVec4(sp, UNIFORM_CUBEMAPINFO, vec);
+		}
 
 		//
 		// draw
