@@ -2008,7 +2008,6 @@ Upload32
 
 ===============
 */
-extern qboolean charSet;
 static void Upload32( byte *data, int width, int height, imgType_t type, imgFlags_t flags,
 	qboolean lightMap, GLenum internalFormat, int *pUploadWidth, int *pUploadHeight)
 {
