@@ -623,9 +623,9 @@ ifeq ($(PLATFORM),mingw32)
                       $(LIBSDIR)/win32/libSDL.dll.a
     SDLDLL=SDL.dll
     else
-    CLIENT_LIBS += $(LIBSDIR)/win64/libSDLmain.a \
+    CLIENT_LIBS += $(LIBSDIR)/win64/libSDL64main.a \
                       $(LIBSDIR)/win64/libSDL64.dll.a
-    RENDERER_LIBS += $(LIBSDIR)/win64/libSDLmain.a \
+    RENDERER_LIBS += $(LIBSDIR)/win64/libSDL64main.a \
                       $(LIBSDIR)/win64/libSDL64.dll.a
     SDLDLL=SDL64.dll
     endif
