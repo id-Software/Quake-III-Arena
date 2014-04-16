@@ -1857,61 +1857,6 @@ static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean light
 				}
 			}
 		}
-
-		if (glRefConfig.textureSrgb && (flags & IMGFLAG_SRGB))
-		{
-			switch(internalFormat)
-			{
-				case GL_RGB:
-					internalFormat = GL_SRGB_EXT;
-					break;
-
-				case GL_RGB4:
-				case GL_RGB5:
-				case GL_RGB8:
-					internalFormat = GL_SRGB8_EXT;
-					break;
-
-				case GL_RGBA:
-					internalFormat = GL_SRGB_ALPHA_EXT;
-					break;
-
-				case GL_RGBA4:
-				case GL_RGBA8:
-					internalFormat = GL_SRGB8_ALPHA8_EXT;
-					break;
-
-				case GL_LUMINANCE:
-					internalFormat = GL_SLUMINANCE_EXT;
-					break;
-
-				case GL_LUMINANCE8:
-				case GL_LUMINANCE16:
-					internalFormat = GL_SLUMINANCE8_EXT;
-					break;
-
-				case GL_LUMINANCE_ALPHA:
-					internalFormat = GL_SLUMINANCE_ALPHA_EXT;
-					break;
-
-				case GL_LUMINANCE8_ALPHA8:
-				case GL_LUMINANCE16_ALPHA16:
-					internalFormat = GL_SLUMINANCE8_ALPHA8_EXT;
-					break;
-
-				case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-					internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-					break;
-
-				case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-					internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-					break;
-
-				case GL_COMPRESSED_RGBA_BPTC_UNORM_ARB:
-					internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
-					break;
-			}
-		}
 	}
 
 	return internalFormat;
@@ -1966,13 +1911,9 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 						R_MipMapNormalHeight( data, data, width, height, qtrue);
 					}
 				}
-				else if (flags & IMGFLAG_SRGB)
-				{
-					R_MipMapsRGB( data, width, height );
-				}
 				else
 				{
-					R_MipMap( data, width, height );
+					R_MipMapsRGB( data, width, height );
 				}
 			}
 			
@@ -2049,26 +1990,6 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 		}
 	}
 
-	// Convert to RGB if sRGB textures aren't supported in hardware
-	if (!glRefConfig.textureSrgb && (flags & IMGFLAG_SRGB))
-	{
-		byte *in = data;
-		int c = width * height;
-		while (c--)
-		{
-			for (i = 0; i < 3; i++)
-			{
-				float x = ByteToFloat(in[i]);
-				x = sRGBtoRGB(x);
-				in[i] = FloatToByte(x);
-			}
-			in += 4;
-		}
-
-		// FIXME: Probably should mark the image as non-sRGB as well
-		flags &= ~IMGFLAG_SRGB;
-	}
-
 	// normals are always swizzled
 	if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 	{
@@ -2107,13 +2028,20 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 		// use the normal mip-mapping function to go down from here
 		while ( width > scaled_width || height > scaled_height ) {
 
-			if (flags & IMGFLAG_SRGB)
+			if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 			{
-				R_MipMapsRGB( (byte *)data, width, height );
+				if (internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
+				{
+					R_MipMapLuminanceAlpha( data, data, width, height );
+				}
+				else
+				{
+					R_MipMapNormalHeight( data, data, width, height, qtrue);
+				}
 			}
 			else
 			{
-				R_MipMap( (byte *)data, width, height );
+				R_MipMapsRGB( data, width, height );
 			}
 
 			width >>= 1;
@@ -2395,13 +2323,20 @@ void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int h
 		// use the normal mip-mapping function to go down from here
 		while ( width > scaled_width || height > scaled_height ) {
 
-			if (image->flags & IMGFLAG_SRGB)
+			if (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT)
 			{
-				R_MipMapsRGB( (byte *)data, width, height );
+				if (image->internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
+				{
+					R_MipMapLuminanceAlpha( data, data, width, height );
+				}
+				else
+				{
+					R_MipMapNormalHeight( data, data, width, height, qtrue);
+				}
 			}
 			else
 			{
-				R_MipMap( (byte *)data, width, height );
+				R_MipMapsRGB( data, width, height );
 			}
 
 			width >>= 1;
@@ -2593,7 +2528,7 @@ image_t	*R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags )
 		int normalWidth, normalHeight;
 		imgFlags_t normalFlags;
 
-		normalFlags = (flags & ~(IMGFLAG_GENNORMALMAP | IMGFLAG_SRGB)) | IMGFLAG_NOLIGHTSCALE;
+		normalFlags = (flags & ~IMGFLAG_GENNORMALMAP) | IMGFLAG_NOLIGHTSCALE;
 
 		COM_StripExtension(name, normalName, MAX_QPATH);
 		Q_strcat(normalName, MAX_QPATH, "_n");
@@ -3040,21 +2975,10 @@ void R_SetColorMappings( void ) {
 	g = r_gamma->value;
 
 	for ( i = 0; i < 256; i++ ) {
-		int i2;
-
-		if (r_srgb->integer)
-		{
-			i2 = 255 * RGBtosRGB(i/255.0f) + 0.5f;
-		}
-		else
-		{
-			i2 = i;
-		}
-
 		if ( g == 1 ) {
-			inf = i2;
+			inf = i;
 		} else {
-			inf = 255 * pow ( i2/255.0f, 1.0f / g ) + 0.5f;
+			inf = 255 * pow ( i/255.0f, 1.0f / g ) + 0.5f;
 		}
 
 		if (inf < 0) {

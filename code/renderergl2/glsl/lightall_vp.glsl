@@ -83,10 +83,6 @@ varying vec3   var_ViewDir;
   #endif
 #endif
 
-#if defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
-varying vec3   var_LightColor;
-#endif
-
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 varying vec4   var_LightDir;
 #endif
@@ -216,10 +212,6 @@ void main()
 #endif
 
 	var_Color = u_VertColor * attr_Color + u_BaseColor;
-#if defined(USE_LIGHT_VERTEX) && !defined(USE_FAST_LIGHT)
-	var_LightColor = var_Color.rgb;
-	var_Color.rgb = vec3(1.0);
-#endif
 
 #if defined(USE_LIGHT_VECTOR) && defined(USE_FAST_LIGHT)
 	float sqrLightDist = dot(L, L);

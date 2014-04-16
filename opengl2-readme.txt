@@ -18,7 +18,7 @@ compatibility with existing Quake 3 mods.
   - Texture upsampling.
   - Advanced materials support.
   - Advanced shading and specular methods.
-  - sRGB support.
+  - Separate material/light/framebuffer/tonemap gamma.
   - LATC and BPTC texture compression support.
   - Screen-space ambient occlusion.
 
@@ -162,13 +162,6 @@ Cvars for HDR and tonemapping:
                                      1.0 - Dimmer.
                                      2.0 - Normal. (default)
                                      3.0 - Brighter.
-
-  r_srgb                         - Treat all input textures as sRGB, and do
-                                   final rendering in a sRGB framebuffer.  Only
-                                   required if assets were created with it in
-                                   mind.
-                                     0 - No. (default)
-                                     1 - Yes.
 
 Cvars for advanced material usage:
   r_normalMapping                - Enable normal mapping for materials that
@@ -317,7 +310,30 @@ Cvars for the sunlight and cascaded shadow maps:
                                      2048 - 2048x2048, extreme.
                                      4096 - 4096x4096, indistinguishable from
                                             2048.
-  
+
+Cvars for adjusting gamma values:
+  r_materialGamma                - Gamma level for material textures.
+                                   (diffuse, specular)
+                                     1.0 - Quake 3, fastest. (default)
+                                     2.0 - More accurate, slower.
+                                     2.2 - Most accurate, slowest.
+
+  r_lightGamma                   - Gamma level for light.
+                                   (lightmap, lightgrid, vertex lights)
+                                     1.0 - Quake 3, fastest. (default)
+                                     2.0 - More accurate, slower.
+                                     2.2 - Most accurate, slowest.
+
+  r_framebufferGamma             - Gamma level for framebuffers.
+                                     1.0 - Quake 3, fastest. (default)
+                                     2.0 - More accurate, slower.
+                                     2.2 - Most accurate, slowest.
+
+  r_tonemapGamma                 - Gamma applied after tonemapping.
+                                     1.0 - Quake 3, fastest. (default)
+                                     2.0 - More accurate, slower.
+                                     2.2 - Most accurate, slowest.
+
 Cvars that you probably don't care about or shouldn't mess with:
   r_mergeMultidraws              - Optimize number of calls to 
                                    glMultiDrawElements().
@@ -597,6 +613,59 @@ This adds a new keyword to sky materials, q3gl2_tonemap.  The syntax is:
   
 Each of these settings corresponds to a matching cvar, so you can view and
 adjust the effect before settling on fixed settings.
+
+
+-------------------------------------------------------------------------------
+  MATERIAL/LIGHT/FRAMEBUFFER/TONEMAP GAMMA
+-------------------------------------------------------------------------------
+
+This adds four cvars, r_materialGamma, r_lightGamma, r_framebufferGamma, and 
+r_tonemapGamma.  These adjust the gamma levels of their corresponding texture
+or color, allowing for more realistic lighting and shading.
+
+These settings are fastest:
+
+    r_materialGamma 1
+    r_lightGamma 1
+    r_framebufferGamma 1
+    r_tonemapGamma 1
+
+This is the same as Quake 3 behaviour, where colors are not adjusted for gamma
+until presentation to the screen.
+
+These settings are more accurate:
+
+    r_materialGamma 2
+    r_lightGamma 2
+    r_framebufferGamma 2
+    r_tonemapGamma 2
+
+This converts diffuse/specular from gamma 2 space to linear space
+(r_materialGamma 2), converts light values similarly (r_lightGamma 2),
+converts those to the gamma 2 of the framebuffer (r_framebufferGamma 2), and
+converts to a monitor gamma of 2 after tonemapping (r_tonemapGamma 2).
+
+These settings are the most accurate:
+
+    r_materialGamma 2.2
+    r_lightGamma 2.2
+    r_framebufferGamma 2.2
+    r_tonemapGamma 2.2
+
+This is the same as the previous, except using a more correct gamma of 2.2,
+which approximates sRGB.
+
+The only issue with these last two examples are that dlights aren't added
+linearly, since they are still performed as a straight add to a non-linear
+framebuffer.  To fix this, these settings are possible:
+
+    r_materialGamma 2.2
+    r_lightGamma 2.2
+    r_framebufferGamma 1.0
+    r_tonemapGamma 2.2
+
+But these cause UI draws to have the wrong gamma, as these are rendered after
+tonemapping.  I recommend the use of the second or third set of settings.
 
 
 -------------------------------------------------------------------------------

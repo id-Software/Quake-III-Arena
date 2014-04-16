@@ -9,10 +9,15 @@ const vec3  LUMINANCE_VECTOR =   vec3(0.2125, 0.7154, 0.0721); //vec3(0.299, 0.5
 
 vec3 GetValues(vec2 offset, vec3 current)
 {
-	vec3 minAvgMax;
-	vec2 tc = var_TexCoords + u_InvTexRes * offset; minAvgMax = texture2D(u_TextureMap, tc).rgb;
+	vec2 tc = var_TexCoords + u_InvTexRes * offset;
+	vec3 minAvgMax = texture2D(u_TextureMap, tc).rgb;
 
 #ifdef FIRST_PASS
+
+  #if defined(r_framebufferGamma)
+	minAvgMax = pow(minAvgMax, vec3(r_framebufferGamma));
+  #endif
+
 	float lumi = max(dot(LUMINANCE_VECTOR, minAvgMax), 0.000001);
 	float loglumi = clamp(log2(lumi), -10.0, 10.0);
 	minAvgMax = vec3(loglumi * 0.05 + 0.5);
