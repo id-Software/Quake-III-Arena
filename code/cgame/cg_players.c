@@ -1774,6 +1774,9 @@ static void CG_PlayerTokens( centity_t *cent, int renderfx ) {
 	refEntity_t	ent;
 	vec3_t		dir, origin;
 	skulltrail_t *trail;
+	if ( cent->currentState.number >= MAX_CLIENTS ) {
+		return;
+	}
 	trail = &cg.skulltrails[cent->currentState.number];
 	tokens = cent->currentState.generic1;
 	if ( !tokens ) {
