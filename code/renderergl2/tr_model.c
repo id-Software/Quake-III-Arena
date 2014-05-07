@@ -1230,7 +1230,7 @@ static mdvTag_t *R_GetTag( mdvModel_t *mod, int frame, const char *_tagName ) {
 	return NULL;
 }
 
-void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, mdvTag_t * dest)
+mdvTag_t *R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, mdvTag_t * dest)
 {
 	int				i, j, k;
 	int				frameSize;
@@ -1263,12 +1263,11 @@ void R_GetAnimTag( mdrHeader_t *mod, int framenum, const char *tagName, mdvTag_t
 			dest->origin[1]=frame->bones[tag->boneIndex].matrix[1][3];
 			dest->origin[2]=frame->bones[tag->boneIndex].matrix[2][3];				
 
-			return;
+			return dest;
 		}
 	}
 
-	AxisClear( dest->axis );
-	VectorClear( dest->origin );
+	return NULL;
 }
 
 /*
@@ -1289,34 +1288,29 @@ int R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFram
 	{
 		if(model->type == MOD_MDR)
 		{
-			start = &start_space;
-			end = &end_space;
-			R_GetAnimTag((mdrHeader_t *) model->modelData, startFrame, tagName, start);
-			R_GetAnimTag((mdrHeader_t *) model->modelData, endFrame, tagName, end);
+			start = R_GetAnimTag((mdrHeader_t *) model->modelData, startFrame, tagName, &start_space);
+			end = R_GetAnimTag((mdrHeader_t *) model->modelData, endFrame, tagName, &end_space);
 		}
 		else if( model->type == MOD_IQM ) {
 			return R_IQMLerpTag( tag, model->modelData,
 					startFrame, endFrame,
 					frac, tagName );
 		} else {
-
-			AxisClear( tag->axis );
-			VectorClear( tag->origin );
-			return qfalse;
-
+			start = end = NULL;
 		}
 	}
 	else
 	{
 		start = R_GetTag( model->mdv[0], startFrame, tagName );
 		end = R_GetTag( model->mdv[0], endFrame, tagName );
-		if ( !start || !end ) {
-			AxisClear( tag->axis );
-			VectorClear( tag->origin );
-			return qfalse;
-		}
 	}
-	
+
+	if ( !start || !end ) {
+		AxisClear( tag->axis );
+		VectorClear( tag->origin );
+		return qfalse;
+	}
+
 	frontLerp = frac;
 	backLerp = 1.0f - frac;
 
