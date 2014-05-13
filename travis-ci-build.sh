@@ -8,6 +8,11 @@ if [ "$CC" = "i686-w64-mingw32-gcc" ]; then
 	export ARCH=x86
 	export CC=
 	haveExternalLibs=0
+elif [ "$CC" = "x86_64-w64-mingw32-gcc" ]; then
+	export PLATFORM=mingw32
+	export ARCH=x86_64
+	export CC=
+	haveExternalLibs=0
 else
 	haveExternalLibs=1
 fi

@@ -3,6 +3,7 @@ compiler:
   - gcc
   - clang
   - i686-w64-mingw32-gcc
+  - x86_64-w64-mingw32-gcc
 
 script: ./travis-ci-build.sh
 
