@@ -208,7 +208,7 @@ static void CON_Show( void )
 	{
 		if( i < qconsole_linelen )
 		{
-			if( Q_IsColorString( qconsole_line + i ) )
+			if( i + 1 < qconsole_linelen && Q_IsColorString( qconsole_line + i ) )
 				attrib = CON_ColorCharToAttrib( *( qconsole_line + i + 1 ) );
 
 			line[ i ].Char.AsciiChar = qconsole_line[ i ];
