@@ -598,15 +598,10 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 #ifdef USE_VERT_TANGENT_SPACE
 		// calc tangent spaces
 		{
-			vec3_t *sdirs, *tdirs;
-
-			sdirs = ri.Malloc(sizeof(*sdirs) * surf->numVerts * mdvModel->numFrames);
-			tdirs = ri.Malloc(sizeof(*tdirs) * surf->numVerts * mdvModel->numFrames);
-
-			for (j = 0; j < (surf->numVerts * mdvModel->numFrames); j++)
+			for(j = 0, v = surf->verts; j < (surf->numVerts * mdvModel->numFrames); j++, v++)
 			{
-				VectorSet(sdirs[j], 0.0f, 0.0f, 0.0f);
-				VectorSet(tdirs[j], 0.0f, 0.0f, 0.0f);
+				VectorClear(v->tangent);
+				VectorClear(v->bitangent);
 			}
 
 			for(f = 0; f < mdvModel->numFrames; f++)
@@ -630,26 +625,28 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					t2 = surf->st[tri[2]].st;
 
 					R_CalcTexDirs(sdir, tdir, v0, v1, v2, t0, t1, t2);
-				
-					VectorAdd(sdir, sdirs[index0], sdirs[index0]);
-					VectorAdd(sdir, sdirs[index1], sdirs[index1]);
-					VectorAdd(sdir, sdirs[index2], sdirs[index2]);
-					VectorAdd(tdir, tdirs[index0], tdirs[index0]);
-					VectorAdd(tdir, tdirs[index1], tdirs[index1]);
-					VectorAdd(tdir, tdirs[index2], tdirs[index2]);
+
+					VectorAdd(sdir, surf->verts[index0].tangent,   surf->verts[index0].tangent);
+					VectorAdd(sdir, surf->verts[index1].tangent,   surf->verts[index1].tangent);
+					VectorAdd(sdir, surf->verts[index2].tangent,   surf->verts[index2].tangent);
+					VectorAdd(tdir, surf->verts[index0].bitangent, surf->verts[index0].bitangent);
+					VectorAdd(tdir, surf->verts[index1].bitangent, surf->verts[index1].bitangent);
+					VectorAdd(tdir, surf->verts[index2].bitangent, surf->verts[index2].bitangent);
 				}
 			}
 
 			for(j = 0, v = surf->verts; j < (surf->numVerts * mdvModel->numFrames); j++, v++)
 			{
-				VectorNormalize(sdirs[j]);
-				VectorNormalize(tdirs[j]);
+				vec3_t sdir, tdir;
 
-				R_CalcTbnFromNormalAndTexDirs(v->tangent, v->bitangent, v->normal, sdirs[j], tdirs[j]);
+				VectorCopy(v->tangent,   sdir);
+				VectorCopy(v->bitangent, tdir);
+
+				VectorNormalize(sdir);
+				VectorNormalize(tdir);
+
+				R_CalcTbnFromNormalAndTexDirs(v->tangent, v->bitangent, v->normal, sdir, tdir);
 			}
-
-			ri.Free(sdirs);
-			ri.Free(tdirs);
 		}
 #endif
 
