@@ -294,13 +294,11 @@ void R_CalcTangentSpaceFast(vec3_t tangent, vec3_t bitangent, vec3_t normal,
 /*
 http://www.terathon.com/code/tangent.html
 */
-void R_CalcTBN(vec3_t tangent, vec3_t bitangent, vec3_t normal,
-						const vec3_t v1, const vec3_t v2, const vec3_t v3, const vec2_t w1, const vec2_t w2, const vec2_t w3)
+void R_CalcTexDirs(vec3_t sdir, vec3_t tdir, const vec3_t v1, const vec3_t v2,
+				   const vec3_t v3, const vec2_t w1, const vec2_t w2, const vec2_t w3)
 {
-	vec3_t          u, v;
 	float			x1, x2, y1, y2, z1, z2;
-	float			s1, s2, t1, t2;
-	float			r, dot;
+	float			s1, s2, t1, t2, r;
 
 	x1 = v2[0] - v1[0];
 	x2 = v3[0] - v1[0];
@@ -316,24 +314,27 @@ void R_CalcTBN(vec3_t tangent, vec3_t bitangent, vec3_t normal,
 
 	r = 1.0f / (s1 * t2 - s2 * t1);
 
-	VectorSet(tangent, (t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
-	VectorSet(bitangent, (s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+	VectorSet(sdir, (t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+	VectorSet(tdir, (s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+}
 
-	// compute the face normal based on vertex points
-	VectorSubtract(v3, v1, u);
-	VectorSubtract(v2, v1, v);
-	CrossProduct(u, v, normal);
-
-	VectorNormalize(normal);
+void R_CalcTbnFromNormalAndTexDirs(vec3_t tangent, vec3_t bitangent, vec3_t normal, vec3_t sdir, vec3_t tdir)
+{
+	vec3_t n_cross_t;
+	vec_t n_dot_t, handedness;
 
 	// Gram-Schmidt orthogonalize
-	//tangent[a] = (t - n * Dot(n, t)).Normalize();
-	dot = DotProduct(normal, tangent);
-	VectorMA(tangent, -dot, normal, tangent);
+	n_dot_t = DotProduct(normal, sdir);
+	VectorMA(sdir, -n_dot_t, normal, tangent);
 	VectorNormalize(tangent);
 
-	// B=NxT
-	//CrossProduct(normal, tangent, bitangent);
+	// Calculate handedness
+	CrossProduct(normal, sdir, n_cross_t);
+	handedness = (DotProduct(n_cross_t, tdir) < 0.0f) ? -1.0f : 1.0f;
+
+	// Calculate bitangent
+	CrossProduct(normal, tangent, bitangent);
+	VectorScale(bitangent, handedness, bitangent);
 }
 
 void R_CalcTBN2(vec3_t tangent, vec3_t bitangent, vec3_t normal,
