@@ -2862,7 +2862,7 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 	{
 		vec3_t ambient, directed, lightDir;
 		R_LightForPoint(tr.refdef.vieworg, ambient, directed, lightDir);
-		tr.refdef.colorScale = 766.0f / (directed[0] + directed[1] + directed[2] + 1.0f);
+		tr.refdef.colorScale = 1.0f; //766.0f / (directed[0] + directed[1] + directed[2] + 1.0f);
 		// only print message for first side
 		if (directed[0] + directed[1] + directed[2] == 0 && cubemapSide == 0)
 		{

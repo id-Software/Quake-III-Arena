@@ -32,6 +32,11 @@ vec3 FilmicTonemap(vec3 x)
 void main()
 {
 	vec4 color = texture2D(u_TextureMap, var_TexCoords) * u_Color;
+
+  #if defined(r_framebufferGamma)
+	color.rgb = pow(color.rgb, vec3(r_framebufferGamma));
+  #endif
+
 	vec3 minAvgMax = texture2D(u_LevelsMap, var_TexCoords).rgb;
 	vec3 logMinAvgMaxLum = clamp(minAvgMax * 20.0 - 10.0, -u_AutoExposureMinMax.y, -u_AutoExposureMinMax.x);
 		
@@ -43,6 +48,10 @@ void main()
 
 	vec3 fWhite = 1.0 / FilmicTonemap(vec3(u_ToneMinAvgMaxLinear.z - u_ToneMinAvgMaxLinear.x));
 	color.rgb = FilmicTonemap(color.rgb) * fWhite;
+	
+  #if defined(r_tonemapGamma)
+	color.rgb = pow(color.rgb, vec3(1.0 / r_tonemapGamma));
+  #endif
 	
 	gl_FragColor = clamp(color, 0.0, 1.0);
 }

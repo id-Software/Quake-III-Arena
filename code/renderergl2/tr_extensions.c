@@ -593,52 +593,6 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
-	// GL_EXT_texture_sRGB
-	extension = "GL_EXT_texture_sRGB";
-	glRefConfig.textureSrgb = qfalse;
-	if (GLimp_HaveExtension(extension))
-	{
-		if (r_srgb->integer)
-			glRefConfig.textureSrgb = qtrue;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.textureSrgb], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_EXT_framebuffer_sRGB
-	extension = "GL_EXT_framebuffer_sRGB";
-	glRefConfig.framebufferSrgb = qfalse;
-	if (GLimp_HaveExtension(extension))
-	{
-		if (r_srgb->integer)
-			glRefConfig.framebufferSrgb = qtrue;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferSrgb], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_EXT_texture_sRGB_decode
-	extension = "GL_EXT_texture_sRGB_decode";
-	glRefConfig.textureSrgbDecode = qfalse;
-	if (GLimp_HaveExtension(extension))
-	{
-		if (r_srgb->integer)
-			glRefConfig.textureSrgbDecode = qtrue;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.textureSrgbDecode], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-
 	glRefConfig.textureCompression = TCR_NONE;
 
 	// GL_EXT_texture_compression_latc
