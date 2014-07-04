@@ -63,7 +63,6 @@ static double originalMouseSpeed = -1.0;
 static cvar_t *in_nograb;
 
 static cvar_t *in_joystick          = NULL;
-static cvar_t *in_joystickDebug     = NULL;
 static cvar_t *in_joystickThreshold = NULL;
 static cvar_t *in_joystickNo        = NULL;
 static cvar_t *in_joystickUseAnalog = NULL;
@@ -1038,7 +1037,6 @@ void IN_Init( void )
 	in_nograb = Cvar_Get( "in_nograb", "0", CVAR_ARCHIVE );
 
 	in_joystick = Cvar_Get( "in_joystick", "0", CVAR_ARCHIVE|CVAR_LATCH );
-	in_joystickDebug = Cvar_Get( "in_joystickDebug", "0", CVAR_TEMP );
 	in_joystickThreshold = Cvar_Get( "joy_threshold", "0.15", CVAR_ARCHIVE );
 
 #ifdef MACOS_X_ACCELERATION_HACK
