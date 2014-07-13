@@ -677,7 +677,7 @@ void Con_DrawSolidConsole( float frac ) {
 
 	// draw the text
 	con.vislines = lines;
-	rows = (lines-SMALLCHAR_WIDTH)/SMALLCHAR_WIDTH;		// rows of text to draw
+	rows = (lines-SMALLCHAR_HEIGHT*2)/SMALLCHAR_HEIGHT;		// rows of text to draw
 
 	y = lines - (SMALLCHAR_HEIGHT*3);
 
