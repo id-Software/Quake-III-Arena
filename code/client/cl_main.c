@@ -1810,6 +1810,50 @@ static void CL_CompleteRcon( char *args, int argNum )
 }
 
 /*
+==================
+CL_CompletePlayerName
+==================
+*/
+static void CL_CompletePlayerName( char *args, int argNum )
+{
+	if( argNum == 2 )
+	{
+		char		names[MAX_CLIENTS][MAX_NAME_LENGTH];
+		char		*namesPtr[MAX_CLIENTS];
+		int			i;
+		int			clientCount;
+		int			nameCount;
+		const char *info;
+		const char *name;
+
+		//configstring
+		info = cl.gameState.stringData + cl.gameState.stringOffsets[CS_SERVERINFO];
+		clientCount = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
+
+		nameCount = 0;
+
+		for( i = 0; i < clientCount; i++ ) {
+			if( i == clc.clientNum )
+				continue;
+
+			info = cl.gameState.stringData + cl.gameState.stringOffsets[CS_PLAYERS+i];
+
+			name = Info_ValueForKey( info, "n" );
+			if( name[0] == '\0' )
+				continue;
+			Q_strncpyz( names[nameCount], name, sizeof(names[nameCount]) );
+			Q_CleanStr( names[nameCount] );
+
+			namesPtr[nameCount] = names[nameCount];
+			nameCount++;
+		}
+		qsort( (void*)namesPtr, nameCount, sizeof( namesPtr[0] ), Com_strCompare );
+
+		Field_CompletePlayerName( namesPtr, nameCount );
+	}
+}
+
+/*
 =====================
 CL_Rcon_f
 
@@ -3407,6 +3451,56 @@ static void CL_GenerateQKey(void)
 	}
 } 
 
+void CL_Sayto_f( void ) {
+	char		*rawname;
+	char		name[MAX_NAME_LENGTH];
+	char		cleanName[MAX_NAME_LENGTH];
+	const char	*info;
+	int			count;
+	int			i;
+	int			clientNum;
+	char		*p;
+
+	if ( Cmd_Argc() < 3 ) {
+		Com_Printf ("sayto <player name> <text>\n");
+		return;
+	}
+
+	rawname = Cmd_Argv(1);
+
+	Com_FieldStringToPlayerName( name, MAX_NAME_LENGTH, rawname );
+
+	info = cl.gameState.stringData + cl.gameState.stringOffsets[CS_SERVERINFO];
+	count = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
+
+	clientNum = -1;
+	for( i = 0; i < count; i++ ) {
+
+		info = cl.gameState.stringData + cl.gameState.stringOffsets[CS_PLAYERS+i];
+		Q_strncpyz( cleanName, Info_ValueForKey( info, "n" ), sizeof(cleanName) );
+		Q_CleanStr( cleanName );
+
+		if ( !Q_stricmp( cleanName, name ) ) {
+			clientNum = i;
+			break;
+		}
+	}
+	if( clientNum <= -1 )
+	{
+		Com_Printf ("No such player name: %s.\n", name);
+		return;
+	}
+
+	p = Cmd_ArgsFrom(2);
+
+	if ( *p == '"' ) {
+		p++;
+		p[strlen(p)-1] = 0;
+	}
+
+	CL_AddReliableCommand(va("tell %i \"%s\"", clientNum, p ), qfalse);
+}
+
 /*
 ====================
 CL_Init
@@ -3609,6 +3703,10 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("model", CL_SetModel_f );
 	Cmd_AddCommand ("video", CL_Video_f );
 	Cmd_AddCommand ("stopvideo", CL_StopVideo_f );
+	if( !com_dedicated->integer ) {
+		Cmd_AddCommand ("sayto", CL_Sayto_f );
+		Cmd_SetCommandCompletionFunc( "sayto", CL_CompletePlayerName );
+	}
 	CL_InitRef();
 
 	SCR_Init ();

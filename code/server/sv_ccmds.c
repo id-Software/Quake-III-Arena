@@ -1305,6 +1305,71 @@ static void SV_ConTell_f(void) {
 
 /*
 ==================
+SV_ConSayto_f
+==================
+*/
+static void SV_ConSayto_f(void) {
+	char		*p;
+	char		text[1024];
+	client_t	*cl;
+	char		*rawname;
+	char		name[MAX_NAME_LENGTH];
+	char		cleanName[MAX_NAME_LENGTH];
+	client_t	*saytocl;
+	int			i;
+
+	// make sure server is running
+	if ( !com_sv_running->integer ) {
+		Com_Printf( "Server is not running.\n" );
+		return;
+	}
+
+	if ( Cmd_Argc() < 3 ) {
+		Com_Printf ("Usage: sayto <player name> <text>\n");
+		return;
+	}
+
+	rawname = Cmd_Argv(1);
+	
+	//allowing special characters in the console 
+	//with hex strings for player names
+	Com_FieldStringToPlayerName( name, MAX_NAME_LENGTH, rawname );
+
+	saytocl = NULL;
+	for ( i=0, cl=svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
+		if ( !cl->state ) {
+			continue;
+		}
+		Q_strncpyz( cleanName, cl->name, sizeof(cleanName) );
+		Q_CleanStr( cleanName );
+
+		if ( !Q_stricmp( cleanName, name ) ) {
+			saytocl = cl;
+			break;
+		}
+	}
+	if( !saytocl )
+	{
+		Com_Printf ("No such player name: %s.\n", name);
+		return;
+	}
+
+	strcpy (text, "console_sayto: ");
+	p = Cmd_ArgsFrom(2);
+
+	if ( *p == '"' ) {
+		p++;
+		p[strlen(p)-1] = 0;
+	}
+
+	strcat(text, p);
+
+	SV_SendServerCommand(saytocl, "chat \"%s\"", text);
+}
+
+
+/*
+==================
 SV_Heartbeat_f
 
 Also called by SV_DropClient, SV_DirectConnect, and SV_SpawnServer
@@ -1409,6 +1474,43 @@ static void SV_CompleteMapName( char *args, int argNum ) {
 
 /*
 ==================
+SV_CompletePlayerName
+==================
+*/
+static void SV_CompletePlayerName( char *args, int argNum ) {
+	if( argNum == 2 ) {
+		char		names[MAX_CLIENTS][MAX_NAME_LENGTH];
+		char		*namesPtr[MAX_CLIENTS];
+		client_t	*cl;
+		int			i;
+		int			nameCount;
+		int			clientCount;
+
+		nameCount = 0;
+		clientCount = sv_maxclients->integer;
+
+		for ( i=0, cl=svs.clients ; i < clientCount; i++,cl++ ) {
+			if ( !cl->state ) {
+				continue;
+			}
+			if( i >= MAX_CLIENTS ) {
+				break;
+			}
+			Q_strncpyz( names[nameCount], cl->name, sizeof(names[nameCount]) );
+			Q_CleanStr( names[nameCount] );
+
+			namesPtr[nameCount] = names[nameCount];
+
+			nameCount++;
+		}
+		qsort( (void*)namesPtr, nameCount, sizeof( namesPtr[0] ), Com_strCompare );
+
+		Field_CompletePlayerName( namesPtr, nameCount );
+	}
+}
+
+/*
+==================
 SV_AddOperatorCommands
 ==================
 */
@@ -1453,6 +1555,8 @@ void SV_AddOperatorCommands( void ) {
 	if( com_dedicated->integer ) {
 		Cmd_AddCommand ("say", SV_ConSay_f);
 		Cmd_AddCommand ("tell", SV_ConTell_f);
+		Cmd_AddCommand ("sayto", SV_ConSayto_f);
+		Cmd_SetCommandCompletionFunc( "sayto", SV_CompletePlayerName );
 	}
 	
 	Cmd_AddCommand("rehashbans", SV_RehashBans_f);
