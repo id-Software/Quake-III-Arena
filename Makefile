@@ -187,12 +187,16 @@ ifndef USE_FREETYPE
 USE_FREETYPE=0
 endif
 
+ifndef USE_INTERNAL_LIBS
+USE_INTERNAL_LIBS=1
+endif
+
 ifndef USE_INTERNAL_SPEEX
-USE_INTERNAL_SPEEX=1
+USE_INTERNAL_SPEEX=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_OGG
-USE_INTERNAL_OGG=1
+USE_INTERNAL_OGG=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_VORBIS
@@ -200,19 +204,19 @@ USE_INTERNAL_VORBIS=1
 endif
 
 ifndef USE_INTERNAL_OPUS
-USE_INTERNAL_OPUS=1
+USE_INTERNAL_OPUS=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_ZLIB
-USE_INTERNAL_ZLIB=1
+USE_INTERNAL_ZLIB=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_JPEG
-USE_INTERNAL_JPEG=1
+USE_INTERNAL_JPEG=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_LOCAL_HEADERS
-USE_LOCAL_HEADERS=1
+USE_LOCAL_HEADERS=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_RENDERER_DLOPEN
@@ -272,7 +276,10 @@ ifneq ($(BUILD_CLIENT),0)
     OPENAL_LIBS=$(shell pkg-config --silence-errors --libs openal)
     SDL_CFLAGS=$(shell pkg-config --silence-errors --cflags sdl|sed 's/-Dmain=SDL_main//')
     SDL_LIBS=$(shell pkg-config --silence-errors --libs sdl)
-    FREETYPE_CFLAGS=$(shell pkg-config --silence-errors --cflags freetype2)
+  else
+    # assume they're in the system default paths (no -I or -L needed)
+    CURL_LIBS=-lcurl
+    OPENAL_LIBS=-lopenal
   endif
   # Use sdl-config if all else fails
   ifeq ($(SDL_CFLAGS),)
@@ -370,22 +377,19 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LIBS += -lopenal
+      CLIENT_LIBS += $(OPENAL_LIBS)
     endif
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
   ifeq ($(USE_MUMBLE),1)
     CLIENT_LIBS += -lrt
-  endif
-
-  ifeq ($(USE_FREETYPE),1)
-    BASE_CFLAGS += $(FREETYPE_CFLAGS)
   endif
 
   ifeq ($(ARCH),x86)
@@ -460,13 +464,10 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
-  endif
-
-  ifeq ($(USE_FREETYPE),1)
-    BASE_CFLAGS += $(FREETYPE_CFLAGS)
   endif
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
@@ -584,7 +585,7 @@ ifeq ($(PLATFORM),mingw32)
   RENDERER_LIBS = -lgdi32 -lole32 -lopengl32
 
   ifeq ($(USE_FREETYPE),1)
-    BASE_CFLAGS += -Ifreetype2
+    FREETYPE_CFLAGS = -Ifreetype2
   endif
 
   ifeq ($(USE_CURL),1)
@@ -670,13 +671,14 @@ ifeq ($(PLATFORM),freebsd)
   # optional features/libraries
   ifeq ($(USE_OPENAL),1)
     ifeq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LIBS += $(THREAD_LIBS) -lopenal
+      CLIENT_LIBS += $(THREAD_LIBS) $(OPENAL_LIBS)
     endif
   endif
 
   ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifeq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
@@ -761,13 +763,13 @@ ifeq ($(PLATFORM),openbsd)
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LIBS += $(THREAD_LIBS) -lopenal
+      CLIENT_LIBS += $(THREAD_LIBS) $(OPENAL_LIBS)
     endif
   endif
 
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
-      CLIENT_LIBS += -lcurl
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 else # ifeq openbsd
@@ -910,10 +912,6 @@ endif
 
 TARGETS =
 
-ifeq ($(USE_FREETYPE),1)
-  BASE_CFLAGS += -DBUILD_FREETYPE
-endif
-
 ifndef FULLBINEXT
   FULLBINEXT=.$(ARCH)$(BINEXT)
 endif
@@ -985,30 +983,37 @@ ifeq ($(USE_CURL),1)
 endif
 
 ifeq ($(USE_CODEC_VORBIS),1)
-  CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+  VORBIS_CFLAGS ?= $(shell pkg-config --silence-errors --cflags vorbisfile vorbis || true)
+  VORBIS_LIBS ?= $(shell pkg-config --silence-errors --libs vorbisfile vorbis || echo -lvorbisfile -lvorbis)
+  CLIENT_CFLAGS += -DUSE_CODEC_VORBIS $(VORBIS_CFLAGS)
+  CLIENT_LIBS += $(VORBIS_LIBS)
   NEED_OGG=1
 endif
 
 ifeq ($(USE_CODEC_OPUS),1)
   CLIENT_CFLAGS += -DUSE_CODEC_OPUS
   ifeq ($(USE_INTERNAL_OPUS),1)
-    CLIENT_CFLAGS += -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DUSE_ALLOCA \
+    OPUS_CFLAGS = -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DUSE_ALLOCA \
       -I$(OPUSDIR)/include -I$(OPUSDIR)/celt -I$(OPUSDIR)/silk \
-      -I$(OPUSDIR)/silk/float
-
-    CLIENT_CFLAGS += -I$(OPUSFILEDIR)/include
+      -I$(OPUSDIR)/silk/float -I$(OPUSFILEDIR)/include
   else
-    CLIENT_LIBS += -lopusfile -lopus
+    OPUS_CFLAGS=$(shell pkg-config --silence-errors --cflags opusfile opus || true)
+    OPUS_LIBS=$(shell pkg-config --silence-errors --libs opusfile opus || echo -lopusfile -lopus)
   endif
+  CLIENT_CFLAGS += $(OPUS_CFLAGS)
+  CLIENT_LIBS += $(OPUS_LIBS)
   NEED_OGG=1
 endif
 
 ifeq ($(NEED_OGG),1)
   ifeq ($(USE_INTERNAL_OGG),1)
-    CLIENT_CFLAGS += -I$(OGGDIR)/include
+    OGG_CFLAGS = -I$(OGGDIR)/include
   else
-    CLIENT_LIBS += -logg
+    OGG_CFLAGS ?= $(shell pkg-config --silence-errors --cflags ogg || true)
+    OGG_LIBS ?= $(shell pkg-config --silence-errors --libs ogg || echo -logg)
   endif
+  CLIENT_CFLAGS += $(OGG_CFLAGS)
+  CLIENT_LIBS += $(OGG_LIBS)
 endif
 
 ifeq ($(USE_CODEC_VORBIS),1)
@@ -1032,28 +1037,43 @@ ifeq ($(USE_VOIP),1)
   CLIENT_CFLAGS += -DUSE_VOIP
   SERVER_CFLAGS += -DUSE_VOIP
   ifeq ($(USE_INTERNAL_SPEEX),1)
-    CLIENT_CFLAGS += -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
+    SPEEX_CFLAGS += -DFLOATING_POINT -DUSE_ALLOCA -I$(SPEEXDIR)/include
   else
-    CLIENT_LIBS += -lspeex -lspeexdsp
+    SPEEX_CFLAGS ?= $(shell pkg-config --silence-errors --cflags speex speexdsp || true)
+    SPEEX_LIBS ?= $(shell pkg-config --silence-errors --libs speex speexdsp || echo -lspeex -lspeexdsp)
   endif
+  CLIENT_CFLAGS += $(SPEEX_CFLAGS)
+  CLIENT_LIBS += $(SPEEX_LIBS)
 endif
 
 ifeq ($(USE_INTERNAL_ZLIB),1)
-  BASE_CFLAGS += -DNO_GZIP
-  BASE_CFLAGS += -I$(ZDIR)
+  ZLIB_CFLAGS = -DNO_GZIP -I$(ZDIR)
 else
-  LIBS += -lz
+  ZLIB_CFLAGS ?= $(shell pkg-config --silence-errors --cflags zlib || true)
+  ZLIB_LIBS ?= $(shell pkg-config --silence-errors --libs zlib || echo -lz)
 endif
+BASE_CFLAGS += $(ZLIB_CFLAGS)
+LIBS += $(ZLIB_LIBS)
 
 ifeq ($(USE_INTERNAL_JPEG),1)
   BASE_CFLAGS += -DUSE_INTERNAL_JPEG
   BASE_CFLAGS += -I$(JPDIR)
 else
-  RENDERER_LIBS += -ljpeg
+  # libjpeg doesn't have pkg-config yet, but let users override with
+  # "make JPEG_CFLAGS=-I/opt/jpeg/include JPEG_LIBS='-L/opt/jpeg/lib -ljpeg'"
+  # if they need to
+  JPEG_CFLAGS ?=
+  JPEG_LIBS ?= -ljpeg
+  BASE_CFLAGS += $(JPEG_CFLAGS)
+  RENDERER_LIBS += $(JPEG_LIBS)
 endif
 
 ifeq ($(USE_FREETYPE),1)
-  RENDERER_LIBS += -lfreetype
+  FREETYPE_CFLAGS ?= $(shell pkg-config --silence-errors --cflags freetype2 || true)
+  FREETYPE_LIBS ?= $(shell pkg-config --silence-errors --libs freetype2 || echo -lfreetype)
+
+  BASE_CFLAGS += -DBUILD_FREETYPE $(FREETYPE_CFLAGS)
+  RENDERER_LIBS += $(FREETYPE_LIBS)
 endif
 
 ifeq ("$(CC)", $(findstring "$(CC)", "clang" "clang++"))
