@@ -200,7 +200,7 @@ USE_INTERNAL_OGG=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_VORBIS
-USE_INTERNAL_VORBIS=1
+USE_INTERNAL_VORBIS=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef USE_INTERNAL_OPUS
@@ -982,14 +982,6 @@ ifeq ($(USE_CURL),1)
   endif
 endif
 
-ifeq ($(USE_CODEC_VORBIS),1)
-  VORBIS_CFLAGS ?= $(shell pkg-config --silence-errors --cflags vorbisfile vorbis || true)
-  VORBIS_LIBS ?= $(shell pkg-config --silence-errors --libs vorbisfile vorbis || echo -lvorbisfile -lvorbis)
-  CLIENT_CFLAGS += -DUSE_CODEC_VORBIS $(VORBIS_CFLAGS)
-  CLIENT_LIBS += $(VORBIS_LIBS)
-  NEED_OGG=1
-endif
-
 ifeq ($(USE_CODEC_OPUS),1)
   CLIENT_CFLAGS += -DUSE_CODEC_OPUS
   ifeq ($(USE_INTERNAL_OPUS),1)
@@ -1005,6 +997,19 @@ ifeq ($(USE_CODEC_OPUS),1)
   NEED_OGG=1
 endif
 
+ifeq ($(USE_CODEC_VORBIS),1)
+  CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+  ifeq ($(USE_INTERNAL_VORBIS),1)
+    CLIENT_CFLAGS += -I$(VORBISDIR)/include -I$(VORBISDIR)/lib
+  else
+    VORBIS_CFLAGS ?= $(shell pkg-config --silence-errors --cflags vorbisfile vorbis || true)
+    VORBIS_LIBS ?= $(shell pkg-config --silence-errors --libs vorbisfile vorbis || echo -lvorbisfile -lvorbis)
+  endif
+  CLIENT_CFLAGS += $(VORBIS_CFLAGS)
+  CLIENT_LIBS += $(VORBIS_LIBS)
+  NEED_OGG=1
+endif
+
 ifeq ($(NEED_OGG),1)
   ifeq ($(USE_INTERNAL_OGG),1)
     OGG_CFLAGS = -I$(OGGDIR)/include
@@ -1014,15 +1019,6 @@ ifeq ($(NEED_OGG),1)
   endif
   CLIENT_CFLAGS += $(OGG_CFLAGS)
   CLIENT_LIBS += $(OGG_LIBS)
-endif
-
-ifeq ($(USE_CODEC_VORBIS),1)
-  ifeq ($(USE_INTERNAL_VORBIS),1)
-    CLIENT_CFLAGS += -I$(VORBISDIR)/include -I$(VORBISDIR)/lib
-
-  else
-    CLIENT_LIBS += -lvorbisfile -lvorbis
-  endif
 endif
 
 ifeq ($(USE_RENDERER_DLOPEN),1)
