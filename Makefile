@@ -270,22 +270,22 @@ ifneq ($(BUILD_CLIENT),0)
   # set PKG_CONFIG_PATH to influence this, e.g.
   # PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
   ifneq ($(call bin_path, pkg-config),)
-    CURL_CFLAGS=$(shell pkg-config --silence-errors --cflags libcurl)
-    CURL_LIBS=$(shell pkg-config --silence-errors --libs libcurl)
-    OPENAL_CFLAGS=$(shell pkg-config --silence-errors --cflags openal)
-    OPENAL_LIBS=$(shell pkg-config --silence-errors --libs openal)
-    SDL_CFLAGS=$(shell pkg-config --silence-errors --cflags sdl|sed 's/-Dmain=SDL_main//')
-    SDL_LIBS=$(shell pkg-config --silence-errors --libs sdl)
+    CURL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags libcurl)
+    CURL_LIBS ?= $(shell pkg-config --silence-errors --libs libcurl)
+    OPENAL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags openal)
+    OPENAL_LIBS ?= $(shell pkg-config --silence-errors --libs openal)
+    SDL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags sdl|sed 's/-Dmain=SDL_main//')
+    SDL_LIBS ?= $(shell pkg-config --silence-errors --libs sdl)
   else
     # assume they're in the system default paths (no -I or -L needed)
-    CURL_LIBS=-lcurl
-    OPENAL_LIBS=-lopenal
+    CURL_LIBS ?= -lcurl
+    OPENAL_LIBS ?= -lopenal
   endif
   # Use sdl-config if all else fails
   ifeq ($(SDL_CFLAGS),)
     ifneq ($(call bin_path, sdl-config),)
-      SDL_CFLAGS=$(shell sdl-config --cflags)
-      SDL_LIBS=$(shell sdl-config --libs)
+      SDL_CFLAGS ?= $(shell sdl-config --cflags)
+      SDL_LIBS ?= $(shell sdl-config --libs)
     endif
   endif
 endif
