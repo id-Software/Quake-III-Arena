@@ -989,8 +989,8 @@ ifeq ($(USE_CODEC_OPUS),1)
       -I$(OPUSDIR)/include -I$(OPUSDIR)/celt -I$(OPUSDIR)/silk \
       -I$(OPUSDIR)/silk/float -I$(OPUSFILEDIR)/include
   else
-    OPUS_CFLAGS=$(shell pkg-config --silence-errors --cflags opusfile opus || true)
-    OPUS_LIBS=$(shell pkg-config --silence-errors --libs opusfile opus || echo -lopusfile -lopus)
+    OPUS_CFLAGS ?= $(shell pkg-config --silence-errors --cflags opusfile opus || true)
+    OPUS_LIBS ?= $(shell pkg-config --silence-errors --libs opusfile opus || echo -lopusfile -lopus)
   endif
   CLIENT_CFLAGS += $(OPUS_CFLAGS)
   CLIENT_LIBS += $(OPUS_LIBS)
