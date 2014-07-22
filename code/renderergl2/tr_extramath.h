@@ -56,9 +56,6 @@ void Mat4SimpleInverse( const mat4_t in, mat4_t out);
 #define ByteToFloat(a)          ((float)(a) * 1.0f/255.0f)
 #define FloatToByte(a)          (byte)((a) * 255.0f)
 
-#define RGBtosRGB(a)            (((a) < 0.0031308f) ? (12.92f * (a)) : (1.055f * pow((a), 0.41666f) - 0.055f))
-#define sRGBtoRGB(a)            (((a) <= 0.04045f)  ? ((a) / 12.92f) : (pow((((a) + 0.055f) / 1.055f), 2.4)) )
-
 static ID_INLINE int VectorCompare4(const vec4_t v1, const vec4_t v2)
 {
 	if(v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2] || v1[3] != v2[3])
