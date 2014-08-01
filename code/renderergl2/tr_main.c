@@ -2572,14 +2572,16 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 			//splitZFar  = 3072;
 			break;
 	}
-			
-	VectorCopy(fd->vieworg, lightOrigin);
-
+	
+	if (level != 3)
+		VectorCopy(fd->vieworg, lightOrigin);
+	else
+		VectorCopy(tr.world->lightGridOrigin, lightOrigin);
 
 	// Make up a projection
 	VectorScale(lightDir, -1.0f, lightViewAxis[0]);
 
-	if (lightViewIndependentOfCameraView)
+	if (level == 3 || lightViewIndependentOfCameraView)
 	{
 		// Use world up as light view up
 		VectorSet(lightViewAxis[2], 0, 0, 1);
@@ -2599,7 +2601,7 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 	// Check if too close to parallel to light direction
 	if (abs(DotProduct(lightViewAxis[2], lightViewAxis[0])) > 0.9f)
 	{
-		if (lightViewIndependentOfCameraView)
+		if (level == 3 || lightViewIndependentOfCameraView)
 		{
 			// Use world left as light view up
 			VectorSet(lightViewAxis[2], 0, 1, 0);
@@ -2636,56 +2638,117 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 
 		ClearBounds(lightviewBounds[0], lightviewBounds[1]);
 
-		// add view near plane
-		lx = splitZNear * tan(fd->fov_x * M_PI / 360.0f);
-		ly = splitZNear * tan(fd->fov_y * M_PI / 360.0f);
-		VectorMA(fd->vieworg, splitZNear, fd->viewaxis[0], base);
+		if (level != 3)
+		{
+			// add view near plane
+			lx = splitZNear * tan(fd->fov_x * M_PI / 360.0f);
+			ly = splitZNear * tan(fd->fov_y * M_PI / 360.0f);
+			VectorMA(fd->vieworg, splitZNear, fd->viewaxis[0], base);
 
-		VectorMA(base,   lx, fd->viewaxis[1], point);
-		VectorMA(point,  ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,   lx, fd->viewaxis[1], point);
+			VectorMA(point,  ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,  -lx, fd->viewaxis[1], point);
-		VectorMA(point,  ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,  -lx, fd->viewaxis[1], point);
+			VectorMA(point,  ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,   lx, fd->viewaxis[1], point);
-		VectorMA(point, -ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,   lx, fd->viewaxis[1], point);
+			VectorMA(point, -ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,  -lx, fd->viewaxis[1], point);
-		VectorMA(point, -ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
-		
+			VectorMA(base,  -lx, fd->viewaxis[1], point);
+			VectorMA(point, -ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			
 
-		// add view far plane
-		lx = splitZFar * tan(fd->fov_x * M_PI / 360.0f);
-		ly = splitZFar * tan(fd->fov_y * M_PI / 360.0f);
-		VectorMA(fd->vieworg, splitZFar, fd->viewaxis[0], base);
+			// add view far plane
+			lx = splitZFar * tan(fd->fov_x * M_PI / 360.0f);
+			ly = splitZFar * tan(fd->fov_y * M_PI / 360.0f);
+			VectorMA(fd->vieworg, splitZFar, fd->viewaxis[0], base);
 
-		VectorMA(base,   lx, fd->viewaxis[1], point);
-		VectorMA(point,  ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,   lx, fd->viewaxis[1], point);
+			VectorMA(point,  ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,  -lx, fd->viewaxis[1], point);
-		VectorMA(point,  ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,  -lx, fd->viewaxis[1], point);
+			VectorMA(point,  ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,   lx, fd->viewaxis[1], point);
-		VectorMA(point, -ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,   lx, fd->viewaxis[1], point);
+			VectorMA(point, -ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
 
-		VectorMA(base,  -lx, fd->viewaxis[1], point);
-		VectorMA(point, -ly, fd->viewaxis[2], point);
-		Mat4Transform(lightViewMatrix, point, lightViewPoint);
-		AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+			VectorMA(base,  -lx, fd->viewaxis[1], point);
+			VectorMA(point, -ly, fd->viewaxis[2], point);
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+		}
+		else
+		{
+			// use light grid size as level size
+			// FIXME: could be tighter
+			vec3_t bounds;
+
+			bounds[0] = tr.world->lightGridSize[0] * tr.world->lightGridBounds[0];
+			bounds[1] = tr.world->lightGridSize[1] * tr.world->lightGridBounds[1];
+			bounds[2] = tr.world->lightGridSize[2] * tr.world->lightGridBounds[2];
+
+			point[0] = tr.world->lightGridOrigin[0];
+			point[1] = tr.world->lightGridOrigin[1];
+			point[2] = tr.world->lightGridOrigin[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0] + bounds[0];
+			point[1] = tr.world->lightGridOrigin[1];
+			point[2] = tr.world->lightGridOrigin[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0];
+			point[1] = tr.world->lightGridOrigin[1] + bounds[1];
+			point[2] = tr.world->lightGridOrigin[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0] + bounds[0];
+			point[1] = tr.world->lightGridOrigin[1] + bounds[1];
+			point[2] = tr.world->lightGridOrigin[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0];
+			point[1] = tr.world->lightGridOrigin[1];
+			point[2] = tr.world->lightGridOrigin[2] + bounds[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0] + bounds[0];
+			point[1] = tr.world->lightGridOrigin[1];
+			point[2] = tr.world->lightGridOrigin[2] + bounds[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0];
+			point[1] = tr.world->lightGridOrigin[1] + bounds[1];
+			point[2] = tr.world->lightGridOrigin[2] + bounds[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+
+			point[0] = tr.world->lightGridOrigin[0] + bounds[0];
+			point[1] = tr.world->lightGridOrigin[1] + bounds[1];
+			point[2] = tr.world->lightGridOrigin[2] + bounds[2];
+			Mat4Transform(lightViewMatrix, point, lightViewPoint);
+			AddPointToBounds(lightViewPoint, lightviewBounds[0], lightviewBounds[1]);
+		}
 
 		if (!glRefConfig.depthClamp)
 			lightviewBounds[0][0] = lightviewBounds[1][0] - 8192;
@@ -2715,10 +2778,9 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 			VectorScale(lightviewBounds[1], worldUnitsPerTexel, lightviewBounds[1]);
 		}
 
-		//ri.Printf(PRINT_ALL, "znear %f zfar %f\n", lightviewBounds[0][0], lightviewBounds[1][0]);		
-		//ri.Printf(PRINT_ALL, "fovx %f fovy %f xmin %f xmax %f ymin %f ymax %f\n", fd->fov_x, fd->fov_y, xmin, xmax, ymin, ymax);
+		//ri.Printf(PRINT_ALL, "level %d znear %f zfar %f\n", level, lightviewBounds[0][0], lightviewBounds[1][0]);		
+		//ri.Printf(PRINT_ALL, "xmin %f xmax %f ymin %f ymax %f\n", lightviewBounds[0][1], lightviewBounds[1][1], -lightviewBounds[1][2], -lightviewBounds[0][2]);
 	}
-
 
 	{
 		int firstDrawSurf;
@@ -2857,6 +2919,7 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 			R_RenderSunShadowMaps(&refdef, 0);
 			R_RenderSunShadowMaps(&refdef, 1);
 			R_RenderSunShadowMaps(&refdef, 2);
+			R_RenderSunShadowMaps(&refdef, 3);
 		}
 	}
 
