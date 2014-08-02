@@ -82,7 +82,7 @@ float PCF(const sampler2DShadow shadowmap, const vec2 st, const float dist)
     mult *= 0.33333;
   #endif
 #else
-	mult = shadow2D(shadowmap, vec3(st, dist));
+	mult = shadow2D(shadowmap, vec3(st, dist)).r;
 #endif
 
 	return mult;
