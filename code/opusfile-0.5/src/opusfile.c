@@ -1715,7 +1715,7 @@ opus_int64 op_raw_total(const OggOpusFile *_of,int _li){
 
 ogg_int64_t op_pcm_total(const OggOpusFile *_of,int _li){
   OggOpusLink *links;
-  ogg_int64_t  diff;
+  ogg_int64_t  diff=0;
   int          nlinks;
   nlinks=_of->nlinks;
   if(OP_UNLIKELY(_of->ready_state<OP_OPENED)
@@ -2166,7 +2166,7 @@ static int op_pcm_seek_page(OggOpusFile *_of,
  ogg_int64_t _target_gp,int _li){
   const OggOpusLink *link;
   ogg_page           og;
-  ogg_int64_t        pcm_pre_skip;
+  ogg_int64_t        pcm_pre_skip=0;
   ogg_int64_t        pcm_start;
   ogg_int64_t        pcm_end;
   ogg_int64_t        best_gp;
@@ -2239,7 +2239,7 @@ static int op_pcm_seek_page(OggOpusFile *_of,
             }
           }
           else{
-            ogg_int64_t prev_page_gp;
+            ogg_int64_t prev_page_gp=0;
             /*We might get lucky and already have the packet with the target
                buffered.
               Worth checking.

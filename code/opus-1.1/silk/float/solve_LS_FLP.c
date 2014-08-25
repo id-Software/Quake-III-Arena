@@ -163,7 +163,7 @@ static OPUS_INLINE void silk_LDL_FLP(
     opus_int i, j, k, loop_count, err = 1;
     silk_float *ptr1, *ptr2;
     double temp, diag_min_value;
-    silk_float v[ MAX_MATRIX_SIZE ], D[ MAX_MATRIX_SIZE ]; /* temp arrays*/
+    silk_float v[ MAX_MATRIX_SIZE ] = { 0 }, D[ MAX_MATRIX_SIZE ]; /* temp arrays*/
 
     silk_assert( M <= MAX_MATRIX_SIZE );
 
