@@ -44,7 +44,6 @@ static cvar_t *in_mouse             = NULL;
 static cvar_t *in_nograb;
 
 static cvar_t *in_joystick          = NULL;
-static cvar_t *in_joystickDebug     = NULL;
 static cvar_t *in_joystickThreshold = NULL;
 static cvar_t *in_joystickNo        = NULL;
 static cvar_t *in_joystickUseAnalog = NULL;
@@ -507,7 +506,6 @@ IN_JoyMove
 */
 static void IN_JoyMove( void )
 {
-	qboolean joy_pressed[ARRAY_LEN(joy_keys)];
 	unsigned int axes = 0;
 	unsigned int hats = 0;
 	int total = 0;
@@ -517,8 +515,6 @@ static void IN_JoyMove( void )
 		return;
 
 	SDL_JoystickUpdate();
-
-	memset(joy_pressed, '\0', sizeof (joy_pressed));
 
 	// update the ball state.
 	total = SDL_JoystickNumBalls(stick);
@@ -951,7 +947,6 @@ void IN_Init( void *windowData )
 	in_nograb = Cvar_Get( "in_nograb", "0", CVAR_ARCHIVE );
 
 	in_joystick = Cvar_Get( "in_joystick", "0", CVAR_ARCHIVE|CVAR_LATCH );
-	in_joystickDebug = Cvar_Get( "in_joystickDebug", "0", CVAR_TEMP );
 	in_joystickThreshold = Cvar_Get( "joy_threshold", "0.15", CVAR_ARCHIVE );
 
 	SDL_StartTextInput( );

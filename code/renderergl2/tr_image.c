@@ -1272,46 +1272,64 @@ void R_LightScaleTexture (byte *in, int inwidth, int inheight, qboolean only_gam
 	}
 }
 
+
+/*
+================
+R_MipMapsRGB
+
+Operates in place, quartering the size of the texture
+Colors are gamma correct 
+================
+*/
 static void R_MipMapsRGB( byte *in, int inWidth, int inHeight)
 {
-	int			i, j, k;
-	int			outWidth, outHeight;
-	byte		*temp;
+	int x, y, c, stride;
+	const byte *in2;
+	float total;
+	static float downmipSrgbLookup[256];
+	static int downmipSrgbLookupSet = 0;
+	byte *out = in;
 
-	outWidth = inWidth >> 1;
-	outHeight = inHeight >> 1;
-	temp = ri.Hunk_AllocateTempMemory( outWidth * outHeight * 4 );
-
-	for ( i = 0 ; i < outHeight ; i++ ) {
-		byte *outbyte = temp + (  i          * outWidth ) * 4;
-		byte *inbyte1 = in   + (  i * 2      * inWidth  ) * 4;
-		byte *inbyte2 = in   + ( (i * 2 + 1) * inWidth  ) * 4;
-		for ( j = 0 ; j < outWidth ; j++ ) {
-			for ( k = 0 ; k < 3 ; k++ ) {
-				float total, current;
-
-				current = ByteToFloat(inbyte1[0]); total  = sRGBtoRGB(current);
-				current = ByteToFloat(inbyte1[4]); total += sRGBtoRGB(current);
-				current = ByteToFloat(inbyte2[0]); total += sRGBtoRGB(current);
-				current = ByteToFloat(inbyte2[4]); total += sRGBtoRGB(current);
-
-				total *= 0.25f;
-
-				inbyte1++;
-				inbyte2++;
-
-				current = RGBtosRGB(total);
-				*outbyte++ = FloatToByte(current);
-			}
-			*outbyte++ = (inbyte1[0] + inbyte1[4] + inbyte2[0] + inbyte2[4]) >> 2;
-			inbyte1 += 5;
-			inbyte2 += 5;
-		}
+	if (!downmipSrgbLookupSet) {
+		for (x = 0; x < 256; x++)
+			downmipSrgbLookup[x] = powf(x / 255.0f, 2.2f) * 0.25f;
+		downmipSrgbLookupSet = 1;
 	}
 
-	Com_Memcpy( in, temp, outWidth * outHeight * 4 );
-	ri.Hunk_FreeTempMemory( temp );
+	if (inWidth == 1 && inHeight == 1)
+		return;
+
+	if (inWidth == 1 || inHeight == 1) {
+		for (x = (inWidth * inHeight) >> 1; x; x--) {
+			for (c = 3; c; c--, in++) {
+				total  = (downmipSrgbLookup[*(in)] + downmipSrgbLookup[*(in + 4)]) * 2.0f;
+
+				*out++ = (byte)(powf(total, 1.0f / 2.2f) * 255.0f);
+			}
+			*out++ = (*(in) + *(in + 4)) >> 1; in += 5;
+		}
+		
+		return;
+	}
+
+	stride = inWidth * 4;
+	inWidth >>= 1; inHeight >>= 1;
+
+	in2 = in + stride;
+	for (y = inHeight; y; y--, in += stride, in2 += stride) {
+		for (x = inWidth; x; x--) {
+			for (c = 3; c; c--, in++, in2++) {
+				total = downmipSrgbLookup[*(in)]  + downmipSrgbLookup[*(in + 4)]
+				      + downmipSrgbLookup[*(in2)] + downmipSrgbLookup[*(in2 + 4)];
+
+				*out++ = (byte)(powf(total, 1.0f / 2.2f) * 255.0f);
+			}
+
+			*out++ = (*(in) + *(in + 4) + *(in2) + *(in2 + 4)) >> 2; in += 5, in2 += 5;
+		}
+	}
 }
+
 
 static void R_MipMapLuminanceAlpha (const byte *in, byte *out, int width, int height)
 {
@@ -2816,9 +2834,14 @@ void R_CreateBuiltinImages( void ) {
 
 		if (r_sunlightMode->integer)
 		{
-			for ( x = 0; x < 3; x++)
+			for ( x = 0; x < 4; x++)
 			{
 				tr.sunShadowDepthImage[x] = R_CreateImage(va("*sunshadowdepth%i", x), NULL, r_shadowMapSize->integer, r_shadowMapSize->integer, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, GL_DEPTH_COMPONENT24_ARB);
+				GL_Bind(tr.sunShadowDepthImage[x]);
+				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 			}
 
 			tr.screenShadowImage = R_CreateImage("*screenShadow", NULL, width, height, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, GL_RGBA8);
