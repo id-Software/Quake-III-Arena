@@ -5,7 +5,7 @@ Description=This service spawns a ioquake3 dedicated server with sane defaults
 
 [Service]
 User=q3a
-ExecStart=/usr/local/games/ioquake3/ioq3ded.x86_64 +set net_port 27960 +set fs_game cpma +set dedicated 2 +set sv_pure 1 +set com_hunkmegs 128 +exec server.cfg
+ExecStart=/usr/local/games/ioquake3/ioq3ded.x86_64 +set dedicated 2 +set sv_pure 1
 Restart=on-abort
 # there are several options to tweak the server's performance:
 # net_port defines the UDP-port used for connections to the server
