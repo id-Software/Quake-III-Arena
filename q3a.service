@@ -1,0 +1,21 @@
+[Unit]
+Description=This service spawns a ioquake3 dedicated server with sane defaults
+# However, these defaults may not apply to all use cases.
+# See comments below for further details
+
+[Service]
+User=q3a
+ExecStart=/usr/local/games/ioquake3/ioq3ded.x86_64 +set net_port 27960 +set fs_game cpma +set dedicated 2 +set sv_pure 1 +set com_hunkmegs 128 +exec server.cfg
+Restart=on-abort
+# there are several options to tweak the server's performance:
+# net_port defines the UDP-port used for connections to the server
+# fs_game should be the mod you want to play. Not necessary for vanilla-q3/FFA
+# dedicated 0 and 1 are LAN, 1 is Internet
+# sv_pure 1 prevents clients from using their own pk3-files
+# com_hunkmegs defaults to 56, should be 128/192/256 on a modern system(?)
+# rate 25000 defines the rate in which client & server communicate
+# snaps 40 defines gamestate-snapshots client & server exchange in secs
+# cl_maxpackets 125 max amount of FPS being counted on the server-side
+
+[Install]
+WantedBy=multi-user.target
