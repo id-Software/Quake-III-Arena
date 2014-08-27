@@ -487,7 +487,7 @@ ifeq ($(PLATFORM),darwin)
   CLIENT_LIBS += -framework IOKit \
     $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
   RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
-  CLIENT_EXTRA_FILES=$(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+  CLIENT_EXTRA_FILES += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
 
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
