@@ -27,6 +27,9 @@ else
 	echo "build type    : ${BUILD_TYPE}"
 fi
 
+echo "environment   :"
+export
+
 if [ -n "${CPPCHECK}" ]; then
 	if [ ! -f "${CPPCHECK}" ]; then
 		command -v cppcheck >/dev/null
