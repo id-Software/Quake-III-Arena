@@ -269,6 +269,7 @@ static keyNum_t IN_TranslateSDLToQ3Key( SDL_Keysym *keysym, qboolean down )
 			case SDLK_POWER:        key = K_POWER;         break;
 			case SDLK_UNDO:         key = K_UNDO;          break;
 			case SDLK_SCROLLLOCK:   key = K_SCROLLOCK;     break;
+			case SDLK_NUMLOCKCLEAR: key = K_KP_NUMLOCK;    break;
 			case SDLK_CAPSLOCK:     key = K_CAPSLOCK;      break;
 
 			default:
