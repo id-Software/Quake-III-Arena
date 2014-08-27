@@ -41,9 +41,13 @@ if [ -n "${CPPCHECK}" ]; then
 		cppcheck --enable=all --max-configs=1 --xml --xml-version=2 code 2> ${CPPCHECK}
 	fi
 
-	ln -s ${CPPCHECK} cppcheck.xml
+	ln -sf ${CPPCHECK} cppcheck.xml
 fi
 
-make -j${CORES} distclean ${BUILD_TYPE}
+if [ "${CC}" == "clang" ]; then
+	MAKE_PREFIX="scan-build"
+fi
+
+${MAKE_PREFIX} make -j${CORES} distclean ${BUILD_TYPE}
 
 exit $?
