@@ -28,19 +28,17 @@ else
 fi
 
 if [ -n "${CPPCHECK}" ]; then
-	if [ -e "${CPPCHECK}" ]; then
-		# Copy the existing output
-		BASENAME_CPPCHECK=`basename ${CPPCHECK}`
-		cp ${CPPCHECK} ./${BASENAME_CPPCHECK}
-	else
-		CHECK_CPPCHECK=`command -v cppcheck >/dev/null`
+	if [ ! -f "${CPPCHECK}" ]; then
+		command -v cppcheck >/dev/null
 		if [ "$?" != "0" ]; then
 			echo "cppcheck not installed"
 			exit 1
 		fi
 
-		cppcheck --enable=all --max-configs=1 --xml --xml-version=2 ./code 2> ${CPPCHECK}
+		cppcheck --enable=all --max-configs=1 --xml --xml-version=2 code 2> ${CPPCHECK}
 	fi
+
+	ln -s ${CPPCHECK} cppcheck.xml
 fi
 
 make -j${CORES} distclean ${BUILD_TYPE}
