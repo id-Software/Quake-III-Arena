@@ -6,7 +6,7 @@ BUILD_DEFAULT="release"
 
 cd ${MASTER_DIR}
 
-if [ "$OPTIONS" = "all_options" ];
+if [ "${OPTIONS}" == "all_options" ];
 then
 	export USE_CODEC_VORBIS=1
 	export USE_FREETYPE=1
@@ -44,7 +44,8 @@ if [ -n "${CPPCHECK}" ]; then
 	ln -sf ${CPPCHECK} cppcheck.xml
 fi
 
-if [ "${CC}" == "clang" ]; then
+# Bit of a hack; only run scan-build with clang and all options enabled
+if [ "${CC}" == "clang" ] && [ "${OPTIONS}" == "all_options" ]; then
 	MAKE_PREFIX="scan-build"
 fi
 
