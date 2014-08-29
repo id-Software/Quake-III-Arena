@@ -193,7 +193,7 @@ float CalcFog(vec3 position)
 	float t = dot(vec4(position, 1.0), u_FogDepth);
 
 	float eyeOutside = float(u_FogEyeT < 0.0);
-	float fogged = float(t < eyeOutside);
+	float fogged = float(t >= eyeOutside);
 
 	t += 1e-6;
 	t *= fogged / (t - u_FogEyeT * eyeOutside);
