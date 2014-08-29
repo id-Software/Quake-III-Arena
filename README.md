@@ -438,9 +438,6 @@ Note that this cvar MUST be set as a command line parameter.
 ioquake3 clients have different keyboard behaviour compared to the original
 Quake3 clients.
 
-  * "Caps Lock" and "Num Lock" can not be used as normal binds since they
-      do not send a KEYUP event until the key is pressed again.
-
   * SDL > 1.2.9 does not support disabling dead key recognition. In order to
       send dead key characters (e.g. ~, ', `, and ^), you must key a Space (or
       sometimes the same character again) after the character to send it on

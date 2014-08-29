@@ -910,20 +910,6 @@ void IN_Frame( void )
 
 /*
 ===============
-IN_InitKeyLockStates
-===============
-*/
-void IN_InitKeyLockStates( void )
-{
-	const unsigned char *keystate = SDL_GetKeyboardState(NULL);
-
-	keys[K_SCROLLOCK].down = keystate[SDL_SCANCODE_SCROLLLOCK];
-	keys[K_KP_NUMLOCK].down = keystate[SDL_SCANCODE_NUMLOCKCLEAR];
-	keys[K_CAPSLOCK].down = keystate[SDL_SCANCODE_CAPSLOCK];
-}
-
-/*
-===============
 IN_Init
 ===============
 */
@@ -958,8 +944,6 @@ void IN_Init( void *windowData )
 	appState = SDL_GetWindowFlags( SDL_window );
 	Cvar_SetValue( "com_unfocused",	!( appState & SDL_WINDOW_INPUT_FOCUS ) );
 	Cvar_SetValue( "com_minimized", appState & SDL_WINDOW_MINIMIZED );
-
-	IN_InitKeyLockStates( );
 
 	IN_InitJoystick( );
 	Com_DPrintf( "------------------------------------\n" );
