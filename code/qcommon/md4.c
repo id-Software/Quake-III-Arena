@@ -177,12 +177,10 @@ static void mdfour_update(struct mdfour *md, byte *in, int n)
 
 static void mdfour_result(struct mdfour *md, byte *out)
 {
-	m = md;
-
-	copy4(out, m->A);
-	copy4(out+4, m->B);
-	copy4(out+8, m->C);
-	copy4(out+12, m->D);
+	copy4(out, md->A);
+	copy4(out+4, md->B);
+	copy4(out+8, md->C);
+	copy4(out+12, md->D);
 }
 
 static void mdfour(byte *out, byte *in, int n)

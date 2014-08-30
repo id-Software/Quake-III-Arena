@@ -719,6 +719,7 @@ dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *t
 	qboolean                tried[ NUM_DIALOG_PROGRAMS ] = { qfalse };
 	dialogCommandBuilder_t  commands[ NUM_DIALOG_PROGRAMS ] = { NULL };
 	dialogCommandType_t     preferredCommandType = NONE;
+	int                     i;
 
 	commands[ ZENITY ] = &Sys_ZenityCommand;
 	commands[ KDIALOG ] = &Sys_KdialogCommand;
@@ -730,50 +731,37 @@ dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *t
 	else if( !Q_stricmp( session, "kde" ) )
 		preferredCommandType = KDIALOG;
 
-	while( 1 )
+	for( i = NONE + 1; i < NUM_DIALOG_PROGRAMS; i++ )
 	{
-		int i;
+		if( preferredCommandType != NONE && preferredCommandType != i )
+			continue;
 
-		for( i = NONE + 1; i < NUM_DIALOG_PROGRAMS; i++ )
+		if( !tried[ i ] )
 		{
-			if( preferredCommandType != NONE && preferredCommandType != i )
-				continue;
+			int exitCode;
 
-			if( !tried[ i ] )
+			commands[ i ]( type, message, title );
+			exitCode = Sys_Exec( );
+
+			if( exitCode >= 0 )
 			{
-				int exitCode;
-
-				commands[ i ]( type, message, title );
-				exitCode = Sys_Exec( );
-
-				if( exitCode >= 0 )
+				switch( type )
 				{
-					switch( type )
-					{
-						case DT_YES_NO:    return exitCode ? DR_NO : DR_YES;
-						case DT_OK_CANCEL: return exitCode ? DR_CANCEL : DR_OK;
-						default:           return DR_OK;
-					}
-				}
-
-				tried[ i ] = qtrue;
-
-				// The preference failed, so start again in order
-				if( preferredCommandType != NONE )
-				{
-					preferredCommandType = NONE;
-					break;
+					case DT_YES_NO:    return exitCode ? DR_NO : DR_YES;
+					case DT_OK_CANCEL: return exitCode ? DR_CANCEL : DR_OK;
+					default:           return DR_OK;
 				}
 			}
-		}
 
-		for( i = NONE + 1; i < NUM_DIALOG_PROGRAMS; i++ )
-		{
-			if( !tried[ i ] )
-				continue;
-		}
+			tried[ i ] = qtrue;
 
-		break;
+			// The preference failed, so start again in order
+			if( preferredCommandType != NONE )
+			{
+				preferredCommandType = NONE;
+				i = NONE + 1;
+			}
+		}
 	}
 
 	Com_DPrintf( S_COLOR_YELLOW "WARNING: failed to show a dialog\n" );

@@ -1487,7 +1487,7 @@ EasyClientName
 char *EasyClientName(int client, char *buf, int size) {
 	int i;
 	char *str1, *str2, *ptr, c;
-	char name[128];
+	char name[128] = {0};
 
 	ClientName(client, name, sizeof(name));
 	

@@ -2086,9 +2086,12 @@ int PC_EvaluateTokens(source_t *source, token_t *tokens, signed long int *intval
 			//remove the second value if not question mark operator
 			if (o->operator != P_QUESTIONMARK) v = v->next;
 			//
-			if (v->prev) v->prev->next = v->next;
-			else firstvalue = v->next;
-			if (v->next) v->next->prev = v->prev;
+			if (v)
+			{
+				if (v->prev) v->prev->next = v->next;
+				else firstvalue = v->next;
+				if (v->next) v->next->prev = v->prev;
+			}
 			//FreeMemory(v);
 			FreeValue(v);
 		} //end if

@@ -215,7 +215,7 @@ static int opus_decode_frame(OpusDecoder *st, const unsigned char *data,
    VARDECL(opus_val16, pcm_transition_silk);
    int pcm_transition_celt_size;
    VARDECL(opus_val16, pcm_transition_celt);
-   opus_val16 *pcm_transition;
+   opus_val16 *pcm_transition=NULL;
    int redundant_audio_size;
    VARDECL(opus_val16, redundant_audio);
 
