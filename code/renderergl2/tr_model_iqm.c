@@ -144,7 +144,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	unsigned short		*framedata;
 	char			*str;
 	int			i, j;
-	float			jointInvMats[IQM_MAX_JOINTS * 12];
+	float			jointInvMats[IQM_MAX_JOINTS * 12] = {0.0f};
 	float			*mat, *matInv;
 	size_t			size, joint_names;
 	iqmData_t		*iqmData;

@@ -640,7 +640,7 @@ float RB_CalcWaveAlphaSingle( const waveForm_t *wf )
 */
 void RB_CalcModulateColorsByFog( unsigned char *colors ) {
 	int		i;
-	float	texCoords[SHADER_MAX_VERTEXES][2];
+	float	texCoords[SHADER_MAX_VERTEXES][2] = {{0.0f}};
 
 	// calculate texcoords so we can derive density
 	// this is not wasted, because it would only have
