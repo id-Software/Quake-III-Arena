@@ -295,8 +295,6 @@ static void CG_DrawPlayerHead(rectDef_t *rect, qboolean draw2D) {
 			cg.headEndYaw = 180 + 20 * cos( crandom()*M_PI );
 			cg.headEndPitch = 5 * cos( crandom()*M_PI );
 		}
-
-		size = rect->w * 1.25;
 	}
 
 	// if the server was frozen for a while we may have a bad head start time
@@ -510,8 +508,6 @@ static void CG_DrawSelectedPlayerPowerup( rectDef_t *rect, qboolean draw2D ) {
 				item = BG_FindItemForPowerup( j );
 				if (item) {
 				  CG_DrawPic( x, y, rect->w, rect->h, trap_R_RegisterShader( item->icon ) );
-					x += 3;
-					y += 3;
           return;
 				}
 			}

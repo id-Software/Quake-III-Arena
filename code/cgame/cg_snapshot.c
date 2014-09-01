@@ -142,6 +142,7 @@ static void CG_TransitionSnapshot( void ) {
 
 	// if we had a map_restart, set everthing with initial
 	if ( !cg.snap ) {
+		return;
 	}
 
 	// clear the currentValid flag for all entities in the existing snapshot

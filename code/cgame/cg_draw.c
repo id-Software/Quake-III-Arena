@@ -995,7 +995,7 @@ static void CG_DrawUpperRight(stereoFrame_t stereoFrame)
 		y = CG_DrawTimer( y );
 	}
 	if ( cg_drawAttacker.integer ) {
-		y = CG_DrawAttacker( y );
+		CG_DrawAttacker( y );
 	}
 
 }
@@ -1281,7 +1281,7 @@ static void CG_DrawLowerRight( void ) {
 	} 
 
 	y = CG_DrawScores( y );
-	y = CG_DrawPowerups( y );
+	CG_DrawPowerups( y );
 }
 #endif // MISSIONPACK
 
@@ -1334,7 +1334,7 @@ static void CG_DrawLowerLeft( void ) {
 	} 
 
 
-	y = CG_DrawPickupItem( y );
+	CG_DrawPickupItem( y );
 }
 #endif // MISSIONPACK
 
