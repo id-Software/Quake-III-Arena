@@ -21,3 +21,16 @@ before_install:
 
 notifications:
   email: false
+
+env:
+  global:
+    - secure: "a2pGsG/+LS12sD/vgCF912TKBDDiT8PwRTH50eE94trQoHmD+bubIc4mXR9rSuU/NKNPdn6KZlqrVkVuoIanjYaf+rg28VavGMcBrtVO2cI1yjTUxb5Eq/cT20m3KfZCSFw3iWXfiK1CpDkm9Pdrr2Yz99EGZse3Y6jRGJ6giWM="
+
+addons:
+  coverity_scan:
+    project:
+      name: "ioquake/ioq3"
+    description: "Build submitted via Travis CI"
+  build_command_prepend: "make clean"
+  build_command: "make release"
+  branch_pattern: master
