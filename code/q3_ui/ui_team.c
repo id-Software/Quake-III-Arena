@@ -150,7 +150,6 @@ void TeamMain_MenuInit( void ) {
 	s_teammain.spectate.string           = "SPECTATE";
 	s_teammain.spectate.style            = UI_CENTER|UI_SMALLFONT;
 	s_teammain.spectate.color            = colorRed;
-	y += 20;
 
 	trap_GetConfigString(CS_SERVERINFO, info, MAX_INFO_STRING);   
 	gametype = atoi( Info_ValueForKey( info,"g_gametype" ) );

@@ -659,7 +659,7 @@ Returns the next level the player has not won
 */
 int UI_GetCurrentGame( void ) {
 	int		level;
-	int		rank;
+	int		rank = 0;
 	int		skill;
 	const char *info;
 

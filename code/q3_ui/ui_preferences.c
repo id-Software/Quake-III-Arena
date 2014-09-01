@@ -353,7 +353,6 @@ static void Preferences_MenuInit( void ) {
 	s_preferences.allowdownload.generic.x	       = PREFERENCES_X_POS;
 	s_preferences.allowdownload.generic.y	       = y;
 
-	y += BIGCHAR_HEIGHT+2;
 	s_preferences.back.generic.type	    = MTYPE_BITMAP;
 	s_preferences.back.generic.name     = ART_BACK0;
 	s_preferences.back.generic.flags    = QMF_LEFT_JUSTIFY|QMF_PULSEIFFOCUS;

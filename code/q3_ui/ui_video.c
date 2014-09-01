@@ -1138,7 +1138,6 @@ void GraphicsOptions_MenuInit( void )
 	s_graphicsoptions.driverinfo.string           = "Driver Info";
 	s_graphicsoptions.driverinfo.style            = UI_CENTER|UI_SMALLFONT;
 	s_graphicsoptions.driverinfo.color            = color_red;
-	y += BIGCHAR_HEIGHT+2;
 
 	s_graphicsoptions.back.generic.type	    = MTYPE_BITMAP;
 	s_graphicsoptions.back.generic.name     = GRAPHICSOPTIONS_BACK0;
