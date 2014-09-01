@@ -2291,7 +2291,9 @@ A way to force a bus error for development reasons
 =================
 */
 static void Com_Crash_f( void ) {
+#ifndef __clang_analyzer__
 	* ( volatile int * ) 0 = 0x12345678;
+#endif
 }
 
 /*
