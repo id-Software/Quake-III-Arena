@@ -30,7 +30,8 @@ addons:
   coverity_scan:
     project:
       name: "ioquake/ioq3"
-    description: "Build submitted via Travis CI"
-  build_command_prepend: "make clean"
-  build_command: "make release"
-  branch_pattern: master
+      description: "Build submitted via Travis CI"
+    notification_email: quake3-commits@icculus.org
+    build_command_prepend: "make clean"
+    build_command: "make release"
+    branch_pattern: master
