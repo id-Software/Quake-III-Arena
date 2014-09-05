@@ -8,7 +8,7 @@
                    `---------- http://ioquake3.org --------'
 
 The intent of this project is to provide a baseline Quake 3 which may be used
-for further development and baseq3 fun. 
+for further development and baseq3 fun.
 Some of the major features currently implemented are:
 
   * SDL backend
@@ -46,7 +46,7 @@ For *nix
   2. Run 'make'.
 
 For Windows,
-  1. Please refer to the excellent instructions here: 
+  1. Please refer to the excellent instructions here:
      http://wiki.ioquake3.org/Building_ioquake3
 
 For Mac OS X, building a Universal Binary
@@ -101,8 +101,8 @@ Makefile.local:
   USE_VOIP             - enable built-in VoIP support
   USE_INTERNAL_LIBS    - build internal libraries instead of dynamically
                          linking against system libraries; this just sets
-              		       the default for USE_INTERNAL_SPEEX etc.
-		                     and USE_LOCAL_HEADERS
+                         the default for USE_INTERNAL_SPEEX etc.
+                         and USE_LOCAL_HEADERS
   USE_INTERNAL_SPEEX   - build internal speex library instead of dynamically
                          linking against system libspeex
   USE_FREETYPE         - enable FreeType support for rendering fonts
@@ -208,9 +208,9 @@ The defaults for these variables differ depending on the target platform.
   com_maxfpsMinimized               - Maximum frames per second when minimized
   com_busyWait                      - Will use a busy loop to wait for rendering
                                       next frame when set to non-zero value
-  com_pipefile                      - Specify filename to create a named pipe 
+  com_pipefile                      - Specify filename to create a named pipe
                                       through which other processes can control
-                                      the server while it is running. 
+                                      the server while it is running.
                                       Nonfunctional on Windows.
   com_gamename                      - Gamename sent to master server in
                                       getservers[Ext] query and infoResponse
@@ -576,12 +576,12 @@ your own binaries. Instead, you can just use the pre-built binaries on the
 website. Just make sure the game is called with:
 
     +set com_basegame <yournewbase>
-    
+
 in any links/scripts you install for your users to start the game. The
 binary must not detect any original quake3 game pak files. If this
 condition is met, the game will set com_standalone to 1 and is then running
 in stand alone mode.
-  
+
 If you want the engine to use a different directory in your homepath than
 e.g. "Quake3" on Windows or ".q3a" on Linux, then set a new name at startup
 by adding
@@ -716,8 +716,8 @@ directory, this restriction is lifted.
 # Contributing
 
 Please send all patches to bugzilla (https://bugzilla.icculus.org), or join the
-mailing list (http://lists.ioquake.org/listinfo.cgi/ioquake3-ioquake.org) and 
-submit your patch there.  The best case scenario is that you submit your patch 
+mailing list (http://lists.ioquake.org/listinfo.cgi/ioquake3-ioquake.org) and
+submit your patch there.  The best case scenario is that you submit your patch
 to bugzilla, and then post the URL to the mailing list.
 
 The focus for ioq3 is to develop a stable base suitable for further development
