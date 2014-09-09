@@ -236,6 +236,10 @@ static void S_PaintChannelFrom16_altivec( channel_t *ch, const sfx_t *sc, int co
 	short					*samples;
 	float					ooff, fdata[2], fdiv, fleftvol, frightvol;
 
+	if (sc->soundChannels <= 0) {
+		return;
+	}
+
 	samp = &paintbuffer[ bufferOffset ];
 
 	if (ch->doppler) {
