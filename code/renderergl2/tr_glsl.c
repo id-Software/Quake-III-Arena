@@ -253,7 +253,7 @@ static void GLSL_GetShaderHeader( GLenum shaderType, const GLcharARB *extra, cha
 	//       va("#ifndef r_NormalScale\n#define r_NormalScale %f\n#endif\n", r_normalScale->value));
 
 
-	Q_strcat(dest, size, "#ifndef M_PI\n#define M_PI 3.14159265358979323846f\n#endif\n");
+	Q_strcat(dest, size, "#ifndef M_PI\n#define M_PI 3.14159265358979323846\n#endif\n");
 
 	//Q_strcat(dest, size, va("#ifndef MAX_SHADOWMAPS\n#define MAX_SHADOWMAPS %i\n#endif\n", MAX_SHADOWMAPS));
 
@@ -1176,7 +1176,7 @@ void GLSL_InitGPUShaders(void)
 
 		numLightShaders++;
 	}
-	
+
 	attribs = ATTR_POSITION | ATTR_POSITION2 | ATTR_NORMAL | ATTR_NORMAL2 | ATTR_TEXCOORD;
 
 	extradefines[0] = '\0';
@@ -1307,7 +1307,7 @@ void GLSL_InitGPUShaders(void)
 	if (r_shadowCascadeZFar->integer != 0)
 		Q_strcat(extradefines, 1024, "#define USE_SHADOW_CASCADE\n");
 
-	Q_strcat(extradefines, 1024, va("#define r_shadowMapSize %d\n", r_shadowMapSize->integer));
+	Q_strcat(extradefines, 1024, va("#define r_shadowMapSize %f\n", r_shadowMapSize->value));
 	Q_strcat(extradefines, 1024, va("#define r_shadowCascadeZFar %f\n", r_shadowCascadeZFar->value));
 
 
@@ -1504,157 +1504,156 @@ void GLSL_VertexAttribsState(uint32_t stateBits)
 {
 	uint32_t		diff;
 
-	GLSL_VertexAttribPointers(stateBits);
-
 	diff = stateBits ^ glState.vertexAttribsState;
-	if(!diff)
-	{
-		return;
-	}
 
-	if(diff & ATTR_POSITION)
+	if(diff)
 	{
-		if(stateBits & ATTR_POSITION)
+		if(diff & ATTR_POSITION)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_POSITION);
+			if(stateBits & ATTR_POSITION)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_POSITION);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_POSITION )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_POSITION);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_POSITION )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_POSITION);
-		}
-	}
 
-	if(diff & ATTR_TEXCOORD)
-	{
-		if(stateBits & ATTR_TEXCOORD)
+		if(diff & ATTR_TEXCOORD)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD0);
+			if(stateBits & ATTR_TEXCOORD)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD0);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD0);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD0);
-		}
-	}
 
-	if(diff & ATTR_LIGHTCOORD)
-	{
-		if(stateBits & ATTR_LIGHTCOORD)
+		if(diff & ATTR_LIGHTCOORD)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHTCOORD )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD1);
+			if(stateBits & ATTR_LIGHTCOORD)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHTCOORD )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD1);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_LIGHTCOORD )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD1);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_LIGHTCOORD )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD1);
-		}
-	}
 
-	if(diff & ATTR_NORMAL)
-	{
-		if(stateBits & ATTR_NORMAL)
+		if(diff & ATTR_NORMAL)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_NORMAL )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_NORMAL);
+			if(stateBits & ATTR_NORMAL)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_NORMAL )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_NORMAL);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_NORMAL )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_NORMAL);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_NORMAL )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_NORMAL);
-		}
-	}
 
 #ifdef USE_VERT_TANGENT_SPACE
-	if(diff & ATTR_TANGENT)
-	{
-		if(stateBits & ATTR_TANGENT)
+		if(diff & ATTR_TANGENT)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TANGENT )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_TANGENT);
+			if(stateBits & ATTR_TANGENT)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TANGENT )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_TANGENT);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TANGENT )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_TANGENT);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TANGENT )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_TANGENT);
-		}
-	}
 #endif
 
-	if(diff & ATTR_COLOR)
-	{
-		if(stateBits & ATTR_COLOR)
+		if(diff & ATTR_COLOR)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_COLOR )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_COLOR);
+			if(stateBits & ATTR_COLOR)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_COLOR )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_COLOR);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_COLOR )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_COLOR);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_COLOR )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_COLOR);
-		}
-	}
 
-	if(diff & ATTR_LIGHTDIRECTION)
-	{
-		if(stateBits & ATTR_LIGHTDIRECTION)
+		if(diff & ATTR_LIGHTDIRECTION)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHTDIRECTION )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_LIGHTDIRECTION);
+			if(stateBits & ATTR_LIGHTDIRECTION)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHTDIRECTION )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_LIGHTDIRECTION);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_LIGHTDIRECTION )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_LIGHTDIRECTION);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_LIGHTDIRECTION )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_LIGHTDIRECTION);
-		}
-	}
 
-	if(diff & ATTR_POSITION2)
-	{
-		if(stateBits & ATTR_POSITION2)
+		if(diff & ATTR_POSITION2)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION2 )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_POSITION2);
+			if(stateBits & ATTR_POSITION2)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION2 )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_POSITION2);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_POSITION2 )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_POSITION2);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_POSITION2 )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_POSITION2);
-		}
-	}
 
-	if(diff & ATTR_NORMAL2)
-	{
-		if(stateBits & ATTR_NORMAL2)
+		if(diff & ATTR_NORMAL2)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_NORMAL2 )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_NORMAL2);
+			if(stateBits & ATTR_NORMAL2)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_NORMAL2 )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_NORMAL2);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_NORMAL2 )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_NORMAL2);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_NORMAL2 )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_NORMAL2);
-		}
-	}
 
 #ifdef USE_VERT_TANGENT_SPACE
-	if(diff & ATTR_TANGENT2)
-	{
-		if(stateBits & ATTR_TANGENT2)
+		if(diff & ATTR_TANGENT2)
 		{
-			GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TANGENT2 )\n");
-			qglEnableVertexAttribArrayARB(ATTR_INDEX_TANGENT2);
+			if(stateBits & ATTR_TANGENT2)
+			{
+				GLimp_LogComment("qglEnableVertexAttribArrayARB( ATTR_INDEX_TANGENT2 )\n");
+				qglEnableVertexAttribArrayARB(ATTR_INDEX_TANGENT2);
+			}
+			else
+			{
+				GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TANGENT2 )\n");
+				qglDisableVertexAttribArrayARB(ATTR_INDEX_TANGENT2);
+			}
 		}
-		else
-		{
-			GLimp_LogComment("qglDisableVertexAttribArrayARB( ATTR_INDEX_TANGENT2 )\n");
-			qglDisableVertexAttribArrayARB(ATTR_INDEX_TANGENT2);
-		}
-	}
 #endif
+	}
+
+	GLSL_VertexAttribPointers(stateBits);
 
 	glState.vertexAttribsState = stateBits;
 }
