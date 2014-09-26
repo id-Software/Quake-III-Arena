@@ -1729,7 +1729,7 @@ Runs thinking code for this frame if necessary
 =============
 */
 void G_RunThink (gentity_t *ent) {
-	float	thinktime;
+	int	thinktime;
 
 	thinktime = ent->nextthink;
 	if (thinktime <= 0) {
