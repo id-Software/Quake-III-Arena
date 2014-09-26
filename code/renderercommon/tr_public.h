@@ -133,6 +133,7 @@ typedef struct {
 	void	(*Cvar_Set)( const char *name, const char *value );
 	void	(*Cvar_SetValue) (const char *name, float value);
 	void	(*Cvar_CheckRange)( cvar_t *cv, float minVal, float maxVal, qboolean shouldBeIntegral );
+	void	(*Cvar_SetDescription)( cvar_t *cv, const char *description );
 
 	int		(*Cvar_VariableIntegerValue) (const char *var_name);
 
