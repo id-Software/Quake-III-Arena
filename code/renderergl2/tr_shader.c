@@ -2921,6 +2921,33 @@ static void VertexLightingCollapse( void ) {
 }
 
 /*
+===============
+InitShader
+===============
+*/
+static void InitShader( const char *name, int lightmapIndex ) {
+	int i;
+
+	// clear the global shader
+	Com_Memset( &shader, 0, sizeof( shader ) );
+	Com_Memset( &stages, 0, sizeof( stages ) );
+
+	Q_strncpyz( shader.name, name, sizeof( shader.name ) );
+	shader.lightmapIndex = lightmapIndex;
+
+	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
+		stages[i].bundle[0].texMods = texMods[i];
+
+		// default normal/specular
+		VectorSet4(stages[i].normalScale, 0.0f, 0.0f, 0.0f, 0.0f);
+		stages[i].specularScale[0] =
+		stages[i].specularScale[1] =
+		stages[i].specularScale[2] = r_baseSpecular->value;
+		stages[i].specularScale[3] = r_baseGloss->value;
+	}
+}
+
+/*
 =========================
 FinishShader
 
@@ -3240,7 +3267,7 @@ most world construction surfaces.
 */
 shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImage ) {
 	char		strippedName[MAX_QPATH];
-	int			i, hash;
+	int			hash;
 	char		*shaderText;
 	image_t		*image;
 	shader_t	*sh;
@@ -3278,21 +3305,7 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 		}
 	}
 
-	// clear the global shader
-	Com_Memset( &shader, 0, sizeof( shader ) );
-	Com_Memset( &stages, 0, sizeof( stages ) );
-	Q_strncpyz(shader.name, strippedName, sizeof(shader.name));
-	shader.lightmapIndex = lightmapIndex;
-	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
-		stages[i].bundle[0].texMods = texMods[i];
-
-		// default normal/specular
-		VectorSet4(stages[i].normalScale, 0.0f, 0.0f, 0.0f, 0.0f);
-		stages[i].specularScale[0] = 
-		stages[i].specularScale[1] =
-		stages[i].specularScale[2] = r_baseSpecular->value;
-		stages[i].specularScale[3] = r_baseGloss->value;
-	}
+	InitShader( strippedName, lightmapIndex );
 
 	//
 	// attempt to define shader from an explicit parameter file
@@ -3399,7 +3412,7 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 
 
 qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_t *image, qboolean mipRawImage) {
-	int			i, hash;
+	int			hash;
 	shader_t	*sh;
 
 	hash = generateHashValue(name, FILE_HASH_SIZE);
@@ -3427,21 +3440,7 @@ qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_
 		}
 	}
 
-	// clear the global shader
-	Com_Memset( &shader, 0, sizeof( shader ) );
-	Com_Memset( &stages, 0, sizeof( stages ) );
-	Q_strncpyz(shader.name, name, sizeof(shader.name));
-	shader.lightmapIndex = lightmapIndex;
-	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
-		stages[i].bundle[0].texMods = texMods[i];
-
-		// default normal/specular
-		VectorSet4(stages[i].normalScale, 0.0f, 0.0f, 0.0f, 0.0f);
-		stages[i].specularScale[0] = 
-		stages[i].specularScale[1] =
-		stages[i].specularScale[2] = r_baseSpecular->value;
-		stages[i].specularScale[3] = r_baseGloss->value;
-	}
+	InitShader( name, lightmapIndex );
 
 	//
 	// create the default shading commands
@@ -3863,12 +3862,7 @@ static void CreateInternalShaders( void ) {
 	tr.numShaders = 0;
 
 	// init the default shader
-	Com_Memset( &shader, 0, sizeof( shader ) );
-	Com_Memset( &stages, 0, sizeof( stages ) );
-
-	Q_strncpyz( shader.name, "<default>", sizeof( shader.name ) );
-
-	shader.lightmapIndex = LIGHTMAP_NONE;
+	InitShader( "<default>", LIGHTMAP_NONE );
 	stages[0].bundle[0].image[0] = tr.defaultImage;
 	stages[0].active = qtrue;
 	stages[0].stateBits = GLS_DEFAULT;
@@ -3911,12 +3905,7 @@ static void CreateExternalShaders( void ) {
 		else
 			image = tr.dlightImage;
 
-		Com_Memset( &shader, 0, sizeof( shader ) );
-		Com_Memset( &stages, 0, sizeof( stages ) );
-
-		Q_strncpyz( shader.name, "gfx/2d/sunflare", sizeof( shader.name ) );
-
-		shader.lightmapIndex = LIGHTMAP_NONE;
+		InitShader( "gfx/2d/sunflare", LIGHTMAP_NONE );
 		stages[0].bundle[0].image[0] = image;
 		stages[0].active = qtrue;
 		stages[0].stateBits = GLS_DEFAULT;
