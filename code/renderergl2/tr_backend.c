@@ -77,6 +77,9 @@ void GL_SelectTexture( int unit )
 	if (!(unit >= 0 && unit <= 31))
 		ri.Error( ERR_DROP, "GL_SelectTexture: unit = %i", unit );
 
+	if (!qglActiveTextureARB)
+		ri.Error( ERR_DROP, "GL_SelectTexture: multitexture disabled" );
+
 	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
 
 	glState.currenttmu = unit;
@@ -1653,7 +1656,7 @@ const void *RB_PostProcess(const void *data)
 
 	if (srcFbo)
 	{
-		if (r_hdr->integer && (r_toneMap->integer || r_forceToneMap->integer))
+		if (r_hdr->integer && (r_toneMap->integer || r_forceToneMap->integer) && qglActiveTextureARB)
 		{
 			autoExposure = r_autoExposure->integer || r_forceAutoExposure->integer;
 			RB_ToneMap(srcFbo, srcBox, NULL, dstBox, autoExposure);
