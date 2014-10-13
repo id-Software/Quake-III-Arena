@@ -548,7 +548,7 @@ There are currently two ways to use this in your own (and other people's) maps.
         surfaceparm nolightmap
         surfaceparm sky
         q3map_sunExt 240 238 200 100 195 35 3 16
-        q3gl2_sun 240 238 200 50 195 35 3 1.0 0.2
+        q3gl2_sun 240 238 200 50 195 35 1.0 0.2
         q3map_skylight 50 16
         q3map_lightimage $whiteimage
 
@@ -571,7 +571,7 @@ There are currently two ways to use this in your own (and other people's) maps.
         surfaceparm noimpact
         surfaceparm nolightmap
         surfaceparm sky
-        q3gl2_sun 240 238 200 50 195 35 3 0.5 0.2
+        q3gl2_sun 240 238 200 50 195 35 0.5 0.2
         q3map_skylight 50 16
         q3map_lightimage $whiteimage
 
