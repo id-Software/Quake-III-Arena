@@ -203,7 +203,7 @@ void RB_InstantQuad2(vec4_t quadVerts[4], vec2_t texCoords[4])
 	tess.minIndex = 0;
 	tess.maxIndex = 3;
 
-	RB_UpdateVBOs(ATTR_POSITION | ATTR_TEXCOORD);
+	RB_UpdateTessVbo(ATTR_POSITION | ATTR_TEXCOORD);
 
 	GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
 
@@ -601,7 +601,7 @@ static void RB_SurfaceBeam( void )
 	tess.maxIndex = tess.numVertexes;
 
 	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
-	RB_UpdateVBOs(ATTR_POSITION);
+	RB_UpdateTessVbo(ATTR_POSITION);
 	
 	GLSL_VertexAttribsState(ATTR_POSITION);
 	GLSL_BindProgram(sp);

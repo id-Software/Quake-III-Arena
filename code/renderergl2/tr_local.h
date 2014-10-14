@@ -96,11 +96,25 @@ typedef struct {
 	float		transformMatrix[16];
 } orientationr_t;
 
+// Ensure this is >= the ATTR_INDEX_COUNT enum below
+#define VAO_MAX_ATTRIBS 16
+
 typedef enum
 {
 	VBO_USAGE_STATIC,
 	VBO_USAGE_DYNAMIC
 } vboUsage_t;
+
+typedef struct vaoAttrib_s
+{
+	uint32_t enabled;
+	uint32_t count;
+	uint32_t type;
+	uint32_t normalized;
+	uint32_t stride;
+	uint32_t offset;
+}
+vaoAttrib_t;
 
 typedef struct VBO_s
 {
@@ -108,28 +122,10 @@ typedef struct VBO_s
 
 	uint32_t        vertexesVBO;
 	int             vertexesSize;	// amount of memory data allocated for all vertices in bytes
-	uint32_t        ofs_xyz;
-	uint32_t        ofs_normal;
-	uint32_t        ofs_st;
-	uint32_t        ofs_lightmap;
-	uint32_t        ofs_vertexcolor;
-	uint32_t        ofs_lightdir;
-#ifdef USE_VERT_TANGENT_SPACE
-	uint32_t        ofs_tangent;
-#endif
-	uint32_t        stride_xyz;
-	uint32_t        stride_normal;
-	uint32_t        stride_st;
-	uint32_t        stride_lightmap;
-	uint32_t        stride_vertexcolor;
-	uint32_t        stride_lightdir;
-#ifdef USE_VERT_TANGENT_SPACE
-	uint32_t        stride_tangent;
-#endif
+	vaoAttrib_t     attribs[VAO_MAX_ATTRIBS];
+
 	uint32_t        size_xyz;
 	uint32_t        size_normal;
-
-	int             attribs;
 } VBO_t;
 
 typedef struct IBO_s
@@ -514,8 +510,8 @@ static ID_INLINE qboolean ShaderRequiresCPUDeforms(const shader_t * shader)
 enum
 {
 	ATTR_INDEX_POSITION       = 0,
-	ATTR_INDEX_TEXCOORD0      = 1,
-	ATTR_INDEX_TEXCOORD1      = 2,
+	ATTR_INDEX_TEXCOORD       = 1,
+	ATTR_INDEX_LIGHTCOORD     = 2,
 	ATTR_INDEX_TANGENT        = 3,
 	ATTR_INDEX_NORMAL         = 4,
 	ATTR_INDEX_COLOR          = 5,
@@ -527,26 +523,28 @@ enum
 	// GPU vertex animations
 	ATTR_INDEX_POSITION2      = 10,
 	ATTR_INDEX_TANGENT2       = 11,
-	ATTR_INDEX_NORMAL2        = 12
+	ATTR_INDEX_NORMAL2        = 12,
+	
+	ATTR_INDEX_COUNT          = 13
 };
 
 enum
 {
-	ATTR_POSITION =       0x0001,
-	ATTR_TEXCOORD =       0x0002,
-	ATTR_LIGHTCOORD =     0x0004,
-	ATTR_TANGENT =        0x0008,
-	ATTR_NORMAL =         0x0010,
-	ATTR_COLOR =          0x0020,
-	ATTR_PAINTCOLOR =     0x0040,
-	ATTR_LIGHTDIRECTION = 0x0080,
-	ATTR_BONE_INDEXES =   0x0100,
-	ATTR_BONE_WEIGHTS =   0x0200,
+	ATTR_POSITION =       1 << ATTR_INDEX_POSITION,
+	ATTR_TEXCOORD =       1 << ATTR_INDEX_TEXCOORD,
+	ATTR_LIGHTCOORD =     1 << ATTR_INDEX_LIGHTCOORD,
+	ATTR_TANGENT =        1 << ATTR_INDEX_TANGENT,
+	ATTR_NORMAL =         1 << ATTR_INDEX_NORMAL,
+	ATTR_COLOR =          1 << ATTR_INDEX_COLOR,
+	ATTR_PAINTCOLOR =     1 << ATTR_INDEX_PAINTCOLOR,
+	ATTR_LIGHTDIRECTION = 1 << ATTR_INDEX_LIGHTDIRECTION,
+	ATTR_BONE_INDEXES =   1 << ATTR_INDEX_BONE_INDEXES,
+	ATTR_BONE_WEIGHTS =   1 << ATTR_INDEX_BONE_WEIGHTS,
 
 	// for .md3 interpolation
-	ATTR_POSITION2 =      0x0400,
-	ATTR_TANGENT2 =       0x0800,
-	ATTR_NORMAL2 =        0x1000,
+	ATTR_POSITION2 =      1 << ATTR_INDEX_POSITION2,
+	ATTR_TANGENT2 =       1 << ATTR_INDEX_TANGENT2,
+	ATTR_NORMAL2 =        1 << ATTR_INDEX_NORMAL2,
 
 	ATTR_DEFAULT = ATTR_POSITION,
 	ATTR_BITS =	ATTR_POSITION |
@@ -2033,6 +2031,7 @@ typedef struct shaderCommands_s
 	uint32_t    lightdir[SHADER_MAX_VERTEXES] QALIGN(16);
 	//int			vertexDlightBits[SHADER_MAX_VERTEXES] QALIGN(16);
 
+	void *attribPointers[ATTR_INDEX_COUNT];
 	VBO_t       *vbo;
 	IBO_t       *ibo;
 	qboolean    useInternalVBO;
@@ -2201,10 +2200,10 @@ void R_VboUnpackTangent(vec4_t v, uint32_t b);
 void R_VboUnpackNormal(vec3_t v, uint32_t b);
 
 VBO_t          *R_CreateVBO(const char *name, byte * vertexes, int vertexesSize, vboUsage_t usage);
-VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vertexes, uint32_t stateBits, vboUsage_t usage);
+VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vertexes);
 
 IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, vboUsage_t usage);
-IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes, vboUsage_t usage);
+IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes);
 
 void            R_BindVBO(VBO_t * vbo);
 void            R_BindNullVBO(void);
@@ -2216,7 +2215,7 @@ void            R_InitVBOs(void);
 void            R_ShutdownVBOs(void);
 void            R_VBOList_f(void);
 
-void            RB_UpdateVBOs(unsigned int attribBits);
+void            RB_UpdateTessVbo(unsigned int attribBits);
 
 
 /*

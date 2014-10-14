@@ -740,26 +740,65 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 			vboSurf->vbo = R_CreateVBO(va("staticMD3Mesh_VBO '%s'", surf->name), data, dataSize, VBO_USAGE_STATIC);
 
-			vboSurf->vbo->ofs_xyz       = ofs_xyz;
-			vboSurf->vbo->ofs_normal    = ofs_normal;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].enabled = 1;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].enabled = 1;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].enabled = 1;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].enabled = 1;
 #ifdef USE_VERT_TANGENT_SPACE
-			vboSurf->vbo->ofs_tangent   = ofs_tangent;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].enabled = 1;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].enabled = 1;
 #endif
-			vboSurf->vbo->ofs_st        = ofs_st;
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].enabled = 1;
 
-			vboSurf->vbo->stride_xyz       = sizeof(*verts);
-			vboSurf->vbo->stride_normal    = sizeof(*normals);
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].count = 3;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].count = 3;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].count = 4;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].count = 4;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].count = 4;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].count = 4;
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].count = 2;
+
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].type = GL_FLOAT;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].type = GL_FLOAT;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].type = glRefConfig.packedNormalDataType;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].type = glRefConfig.packedNormalDataType;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].type = glRefConfig.packedNormalDataType;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].type = glRefConfig.packedNormalDataType;
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].type = GL_FLOAT;
+
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].normalized = GL_FALSE;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].normalized = GL_FALSE;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].normalized = GL_TRUE;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].normalized = GL_TRUE;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].normalized = GL_TRUE;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].normalized = GL_TRUE;
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].normalized = GL_FALSE;
+
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].offset = ofs_xyz;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].stride = sizeof(*verts);
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].offset = ofs_xyz;
+			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].stride = sizeof(*verts);
+
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].offset = ofs_normal;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].stride = sizeof(*normals);
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].offset = ofs_normal;
+			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].stride = sizeof(*normals);
+
 #ifdef USE_VERT_TANGENT_SPACE
-			vboSurf->vbo->stride_tangent   = sizeof(*tangents);
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].offset = ofs_tangent;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].stride = sizeof(*tangents);
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].offset = ofs_tangent;
+			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].stride = sizeof(*tangents);
 #endif
-			vboSurf->vbo->stride_st        = sizeof(*st);
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].offset = ofs_st;
+			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].stride = sizeof(*st);
 
-			vboSurf->vbo->size_xyz    = sizeof(*verts) * surf->numVerts;
+			vboSurf->vbo->size_xyz    = sizeof(*verts)   * surf->numVerts;
 			vboSurf->vbo->size_normal = sizeof(*normals) * surf->numVerts;
 
 			ri.Free(data);
 
-			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numIndexes, surf->indexes, VBO_USAGE_STATIC);
+			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numIndexes, surf->indexes);
 		}
 	}
 

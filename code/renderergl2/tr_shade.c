@@ -1498,7 +1498,7 @@ void RB_StageIteratorGeneric( void )
 
 	if (tess.useInternalVBO)
 	{
-		RB_UpdateVBOs(vertexAttribs);
+		RB_UpdateTessVbo(vertexAttribs);
 	}
 	else
 	{

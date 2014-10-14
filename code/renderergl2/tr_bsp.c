@@ -2050,17 +2050,8 @@ static void R_CreateWorldVBOs(void)
 			}
 		}
 
-#ifdef USE_VERT_TANGENT_SPACE
-		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,
-									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD | ATTR_TANGENT |
-									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
-#else
-		vbo = R_CreateVBO2(va("staticBspModel0_VBO %i", k), numVerts, verts,
-									   ATTR_POSITION | ATTR_TEXCOORD | ATTR_LIGHTCOORD |
-									   ATTR_NORMAL | ATTR_COLOR | ATTR_LIGHTDIRECTION, VBO_USAGE_STATIC);
-#endif
-
-		ibo = R_CreateIBO2(va("staticBspModel0_IBO %i", k), numIndexes, indexes, VBO_USAGE_STATIC);
+		vbo = R_CreateVBO2(va("staticBspModel%i_VBO", k), numVerts, verts);
+		ibo = R_CreateIBO2(va("staticBspModel%i_IBO", k), numIndexes, indexes);
 
 		// point bsp surfaces to VBO
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
