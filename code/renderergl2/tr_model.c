@@ -656,14 +656,14 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 	}
 
 	{
-		srfVBOMDVMesh_t *vboSurf;
+		srfVaoMdvMesh_t *vaoSurf;
 
-		mdvModel->numVBOSurfaces = mdvModel->numSurfaces;
-		mdvModel->vboSurfaces = ri.Hunk_Alloc(sizeof(*mdvModel->vboSurfaces) * mdvModel->numSurfaces, h_low);
+		mdvModel->numVaoSurfaces = mdvModel->numSurfaces;
+		mdvModel->vaoSurfaces = ri.Hunk_Alloc(sizeof(*mdvModel->vaoSurfaces) * mdvModel->numSurfaces, h_low);
 
-		vboSurf = mdvModel->vboSurfaces;
+		vaoSurf = mdvModel->vaoSurfaces;
 		surf = mdvModel->surfaces;
-		for (i = 0; i < mdvModel->numSurfaces; i++, vboSurf++, surf++)
+		for (i = 0; i < mdvModel->numSurfaces; i++, vaoSurf++, surf++)
 		{
 			vec3_t *verts;
 			vec2_t *texcoords;
@@ -713,13 +713,13 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 
 				VectorCopy(v->xyz,       verts[j]);
 
-				normals[j] = R_VboPackNormal(v->normal);
+				normals[j] = R_VaoPackNormal(v->normal);
 #ifdef USE_VERT_TANGENT_SPACE
 				CrossProduct(v->normal, v->tangent, nxt);
 				VectorCopy(v->tangent, tangent);
 				tangent[3] = (DotProduct(nxt, v->bitangent) < 0.0f) ? -1.0f : 1.0f;
 
-				tangents[j] = R_VboPackTangent(tangent);
+				tangents[j] = R_VaoPackTangent(tangent);
 #endif
 			}
 
@@ -729,76 +729,76 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 				texcoords[j][1] = st->st[1];
 			}
 
-			vboSurf->surfaceType = SF_VBO_MDVMESH;
-			vboSurf->mdvModel = mdvModel;
-			vboSurf->mdvSurface = surf;
-			vboSurf->numIndexes = surf->numIndexes;
-			vboSurf->numVerts = surf->numVerts;
+			vaoSurf->surfaceType = SF_VAO_MDVMESH;
+			vaoSurf->mdvModel = mdvModel;
+			vaoSurf->mdvSurface = surf;
+			vaoSurf->numIndexes = surf->numIndexes;
+			vaoSurf->numVerts = surf->numVerts;
 			
-			vboSurf->minIndex = 0;
-			vboSurf->maxIndex = surf->numVerts;
+			vaoSurf->minIndex = 0;
+			vaoSurf->maxIndex = surf->numVerts;
 
-			vboSurf->vbo = R_CreateVBO(va("staticMD3Mesh_VBO '%s'", surf->name), data, dataSize, VBO_USAGE_STATIC);
+			vaoSurf->vao = R_CreateVao(va("staticMD3Mesh_VAO '%s'", surf->name), data, dataSize, (byte *)surf->indexes, surf->numIndexes * sizeof(*surf->indexes), VAO_USAGE_STATIC);
 
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].enabled = 1;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].enabled = 1;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].enabled = 1;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].enabled = 1;
 #ifdef USE_VERT_TANGENT_SPACE
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].enabled = 1;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].enabled = 1;
 #endif
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].enabled = 1;
 
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].count = 3;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].count = 3;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].count = 4;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].count = 4;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].count = 4;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].count = 4;
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].count = 2;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].count = 3;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].count = 3;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].count = 4;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].count = 4;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].count = 4;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].count = 4;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].count = 2;
 
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].type = GL_FLOAT;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].type = GL_FLOAT;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].type = glRefConfig.packedNormalDataType;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].type = glRefConfig.packedNormalDataType;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].type = glRefConfig.packedNormalDataType;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].type = glRefConfig.packedNormalDataType;
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].type = glRefConfig.packedNormalDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].type = glRefConfig.packedNormalDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].type = glRefConfig.packedNormalDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].type = glRefConfig.packedNormalDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].type = GL_FLOAT;
 
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].normalized = GL_FALSE;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].normalized = GL_FALSE;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].normalized = GL_TRUE;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].normalized = GL_TRUE;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].normalized = GL_TRUE;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].normalized = GL_TRUE;
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].normalized = GL_TRUE;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].normalized = GL_TRUE;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].normalized = GL_TRUE;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].normalized = GL_TRUE;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].normalized = GL_FALSE;
 
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].offset = ofs_xyz;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION  ].stride = sizeof(*verts);
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].offset = ofs_xyz;
-			vboSurf->vbo->attribs[ATTR_INDEX_POSITION2 ].stride = sizeof(*verts);
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].offset = ofs_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].stride = sizeof(*verts);
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].offset = ofs_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].stride = sizeof(*verts);
 
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].offset = ofs_normal;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL    ].stride = sizeof(*normals);
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].offset = ofs_normal;
-			vboSurf->vbo->attribs[ATTR_INDEX_NORMAL2   ].stride = sizeof(*normals);
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].offset = ofs_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].stride = sizeof(*normals);
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].offset = ofs_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].stride = sizeof(*normals);
 
 #ifdef USE_VERT_TANGENT_SPACE
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].offset = ofs_tangent;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT   ].stride = sizeof(*tangents);
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].offset = ofs_tangent;
-			vboSurf->vbo->attribs[ATTR_INDEX_TANGENT2  ].stride = sizeof(*tangents);
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].offset = ofs_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].stride = sizeof(*tangents);
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].offset = ofs_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].stride = sizeof(*tangents);
 #endif
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].offset = ofs_st;
-			vboSurf->vbo->attribs[ATTR_INDEX_TEXCOORD  ].stride = sizeof(*st);
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].offset = ofs_st;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].stride = sizeof(*st);
 
-			vboSurf->vbo->size_xyz    = sizeof(*verts)   * surf->numVerts;
-			vboSurf->vbo->size_normal = sizeof(*normals) * surf->numVerts;
+			vaoSurf->vao->size_xyz    = sizeof(*verts)   * surf->numVerts;
+			vaoSurf->vao->size_normal = sizeof(*normals) * surf->numVerts;
+
+			Vao_SetVertexPointers(vaoSurf->vao);
 
 			ri.Free(data);
-
-			vboSurf->ibo = R_CreateIBO2(va("staticMD3Mesh_IBO %s", surf->name), surf->numIndexes, surf->indexes);
 		}
 	}
 

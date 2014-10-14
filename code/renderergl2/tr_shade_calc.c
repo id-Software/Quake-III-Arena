@@ -125,7 +125,7 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 
 		for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal++ )
 		{
-			R_VboUnpackNormal(offset, *normal);
+			R_VaoUnpackNormal(offset, *normal);
 			
 			xyz[0] += offset[0] * scale;
 			xyz[1] += offset[1] * scale;
@@ -145,7 +145,7 @@ void RB_CalcDeformVertexes( deformStage_t *ds )
 				ds->deformationWave.phase + off,
 				ds->deformationWave.frequency );
 
-			R_VboUnpackNormal(offset, *normal);
+			R_VaoUnpackNormal(offset, *normal);
 
 			xyz[0] += offset[0] * scale;
 			xyz[1] += offset[1] * scale;
@@ -170,7 +170,7 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, normal++ ) {
 		vec3_t fNormal;
 
-		R_VboUnpackNormal(fNormal, *normal);
+		R_VaoUnpackNormal(fNormal, *normal);
 
 		scale = 0.98f;
 		scale = R_NoiseGet4f( xyz[0] * scale, xyz[1] * scale, xyz[2] * scale,
@@ -189,7 +189,7 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 
 		VectorNormalizeFast( fNormal );
 
-		*normal = R_VboPackNormal(fNormal);
+		*normal = R_VaoPackNormal(fNormal);
 	}
 }
 
@@ -213,7 +213,7 @@ void RB_CalcBulgeVertexes( deformStage_t *ds ) {
 		float scale;
 		vec3_t fNormal;
 
-		R_VboUnpackNormal(fNormal, *normal);
+		R_VaoUnpackNormal(fNormal, *normal);
 
 		off = (float)( FUNCTABLE_SIZE / (M_PI*2) ) * ( st[0] * ds->bulgeWidth + now );
 
@@ -277,7 +277,7 @@ void DeformText( const char *text ) {
 	height[1] = 0;
 	height[2] = -1;
 
-	R_VboUnpackNormal(fNormal, tess.normal[0]);
+	R_VaoUnpackNormal(fNormal, tess.normal[0]);
 	CrossProduct( fNormal, height, width );
 
 	// find the midpoint of the box

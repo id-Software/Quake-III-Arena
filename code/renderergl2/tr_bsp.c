@@ -1844,10 +1844,10 @@ static void CopyVert(const srfVert_t * in, srfVert_t * out)
 
 /*
 ===============
-R_CreateWorldVBOs
+R_CreateWorldVaos
 ===============
 */
-static void R_CreateWorldVBOs(void)
+static void R_CreateWorldVaos(void)
 {
 	int             i, j, k;
 
@@ -1861,8 +1861,7 @@ static void R_CreateWorldVBOs(void)
 	msurface_t   *surface, **firstSurf, **lastSurf, **currSurf;
 	msurface_t  **surfacesSorted;
 
-	VBO_t *vbo;
-	IBO_t *ibo;
+	vao_t *vao;
 
 	int maxVboSize = 4 * 1024 * 1024;
 
@@ -1978,7 +1977,7 @@ static void R_CreateWorldVBOs(void)
 	{
 		int currVboSize;
 
-		// Find range of surfaces to place in a vbo/ibo by:
+		// Find range of surfaces to place in a VAO by:
 		// - Collecting a number of surfaces which fit under maxVboSize, or
 		// - All the surfaces with a single shader which go over maxVboSize
 		currVboSize = 0;
@@ -2017,7 +2016,7 @@ static void R_CreateWorldVBOs(void)
 			numSurfaces++;
 		}
 
-		ri.Printf(PRINT_ALL, "...calculating world VBO %d ( %i verts %i tris )\n", k, numVerts, numIndexes / 3);
+		ri.Printf(PRINT_ALL, "...calculating world VAO %d ( %i verts %i tris )\n", k, numVerts, numIndexes / 3);
 
 		// create arrays
 		verts = ri.Hunk_AllocateTempMemory(numVerts * sizeof(srfVert_t));
@@ -2050,16 +2049,14 @@ static void R_CreateWorldVBOs(void)
 			}
 		}
 
-		vbo = R_CreateVBO2(va("staticBspModel%i_VBO", k), numVerts, verts);
-		ibo = R_CreateIBO2(va("staticBspModel%i_IBO", k), numIndexes, indexes);
+		vao = R_CreateVao2(va("staticBspModel%i_VAO", k), numVerts, verts, numIndexes, indexes);
 
-		// point bsp surfaces to VBO
+		// point bsp surfaces to VAO
 		for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 		{
 			srfBspSurface_t *bspSurf = (srfBspSurface_t *) (*currSurf)->data;
 
-			bspSurf->vbo = vbo;
-			bspSurf->ibo = ibo;
+			bspSurf->vao = vao;
 		}
 
 		ri.Hunk_FreeTempMemory(indexes);
@@ -2123,7 +2120,7 @@ static void R_CreateWorldVBOs(void)
 		mergedSurf = s_worldData.mergedSurfaces;
 		for(firstSurf = lastSurf = surfacesSorted; firstSurf < surfacesSorted + numSortedSurfaces; firstSurf = lastSurf)
 		{
-			srfBspSurface_t *bspSurf, *vboSurf;
+			srfBspSurface_t *bspSurf, *vaoSurf;
 
 			for ( lastSurf++ ; lastSurf < surfacesSorted + numSortedSurfaces; lastSurf++)
 			{
@@ -2147,35 +2144,34 @@ static void R_CreateWorldVBOs(void)
 
 			bspSurf = (srfBspSurface_t *)(*firstSurf)->data;
 
-			vboSurf = ri.Hunk_Alloc(sizeof(*vboSurf), h_low);
-			memset(vboSurf, 0, sizeof(*vboSurf));
-			vboSurf->surfaceType = SF_VBO_MESH;
+			vaoSurf = ri.Hunk_Alloc(sizeof(*vaoSurf), h_low);
+			memset(vaoSurf, 0, sizeof(*vaoSurf));
+			vaoSurf->surfaceType = SF_VAO_MESH;
 
-			vboSurf->vbo = bspSurf->vbo;
-			vboSurf->ibo = bspSurf->ibo;
+			vaoSurf->vao = bspSurf->vao;
 
-			vboSurf->firstIndex = bspSurf->firstIndex;
-			vboSurf->minIndex = bspSurf->minIndex;
-			vboSurf->maxIndex = bspSurf->maxIndex;
+			vaoSurf->firstIndex = bspSurf->firstIndex;
+			vaoSurf->minIndex = bspSurf->minIndex;
+			vaoSurf->maxIndex = bspSurf->maxIndex;
 
-			ClearBounds(vboSurf->cullBounds[0], vboSurf->cullBounds[1]);
+			ClearBounds(vaoSurf->cullBounds[0], vaoSurf->cullBounds[1]);
 			for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
 			{
 				srfBspSurface_t *currBspSurf = (srfBspSurface_t *)(*currSurf)->data;
 
-				vboSurf->numVerts   += currBspSurf->numVerts;
-				vboSurf->numIndexes += currBspSurf->numIndexes;
-				vboSurf->minIndex = MIN(vboSurf->minIndex, currBspSurf->minIndex);
-				vboSurf->maxIndex = MAX(vboSurf->maxIndex, currBspSurf->maxIndex);
-				AddPointToBounds((*currSurf)->cullinfo.bounds[0], vboSurf->cullBounds[0], vboSurf->cullBounds[1]);
-				AddPointToBounds((*currSurf)->cullinfo.bounds[1], vboSurf->cullBounds[0], vboSurf->cullBounds[1]);
+				vaoSurf->numVerts   += currBspSurf->numVerts;
+				vaoSurf->numIndexes += currBspSurf->numIndexes;
+				vaoSurf->minIndex = MIN(vaoSurf->minIndex, currBspSurf->minIndex);
+				vaoSurf->maxIndex = MAX(vaoSurf->maxIndex, currBspSurf->maxIndex);
+				AddPointToBounds((*currSurf)->cullinfo.bounds[0], vaoSurf->cullBounds[0], vaoSurf->cullBounds[1]);
+				AddPointToBounds((*currSurf)->cullinfo.bounds[1], vaoSurf->cullBounds[0], vaoSurf->cullBounds[1]);
 			}
 
-			VectorCopy(vboSurf->cullBounds[0], mergedSurf->cullinfo.bounds[0]);
-			VectorCopy(vboSurf->cullBounds[1], mergedSurf->cullinfo.bounds[1]);
+			VectorCopy(vaoSurf->cullBounds[0], mergedSurf->cullinfo.bounds[0]);
+			VectorCopy(vaoSurf->cullBounds[1], mergedSurf->cullinfo.bounds[1]);
 
 			mergedSurf->cullinfo.type =  CULLINFO_BOX;
-			mergedSurf->data          =  (surfaceType_t *)vboSurf;
+			mergedSurf->data          =  (surfaceType_t *)vaoSurf;
 			mergedSurf->fogIndex      =  (*firstSurf)->fogIndex;
 			mergedSurf->cubemapIndex  =  (*firstSurf)->cubemapIndex;
 			mergedSurf->shader        =  (*firstSurf)->shader;
@@ -2206,7 +2202,7 @@ static void R_CreateWorldVBOs(void)
 	ri.Free(surfacesSorted);
 
 	endTime = ri.Milliseconds();
-	ri.Printf(PRINT_ALL, "world VBOs calculation time = %5.2f seconds\n", (endTime - startTime) / 1000.0);
+	ri.Printf(PRINT_ALL, "world VAOs calculation time = %5.2f seconds\n", (endTime - startTime) / 1000.0);
 }
 
 /*
@@ -2270,7 +2266,7 @@ static	void R_LoadSurfaces( lump_t *surfs, lump_t *verts, lump_t *indexLump ) {
 
 
 	// Two passes, allocate surfaces first, then load them full of data
-	// This ensures surfaces are close together to reduce L2 cache misses when using VBOs,
+	// This ensures surfaces are close together to reduce L2 cache misses when using VAOs,
 	// which don't actually use the verts and indexes
 	in = (void *)(fileBase + surfs->fileofs);
 	out = s_worldData.surfaces;
@@ -2393,7 +2389,7 @@ static	void R_LoadSubmodels( lump_t *l ) {
 
 		if(i == 0)
 		{
-			// Add this for limiting VBO surface creation
+			// Add this for limiting VAO surface creation
 			s_worldData.numWorldSurfaces = out->numSurfaces;
 		}
 	}
@@ -3402,17 +3398,16 @@ void RE_LoadWorldMap( const char *name ) {
 		}
 	}
 
-	// create static VBOS from the world
-	R_CreateWorldVBOs();
+	// create static VAOS from the world
+	R_CreateWorldVaos();
 
 	s_worldData.dataSize = (byte *)ri.Hunk_Alloc(0, h_low) - startMarker;
 
 	// only set tr.world now that we know the entire level has loaded properly
 	tr.world = &s_worldData;
 
-	// make sure the VBO glState entries are safe
-	R_BindNullVBO();
-	R_BindNullIBO();
+	// make sure the VAO glState entry is safe
+	R_BindNullVao();
 
 	// Render all cubemaps
 	if (r_cubeMapping->integer && tr.numCubemaps)

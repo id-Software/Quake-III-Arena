@@ -726,6 +726,17 @@ extern void (APIENTRY * qglDrawBuffersARB)(GLsizei n, const GLenum *bufs);
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS               0x884F
 #endif
 
+// GL_ARB_vertex_array_object
+extern void (APIENTRY * qglBindVertexArrayARB)(GLuint array);
+extern void (APIENTRY * qglDeleteVertexArraysARB)(GLsizei n, const GLuint *arrays);
+extern void (APIENTRY * qglGenVertexArraysARB)(GLsizei n, GLuint *arrays);
+extern GLboolean (APIENTRY * qglIsVertexArrayARB)(GLuint array);
+#ifndef GL_ARB_vertex_array_object
+#define GL_ARB_vertex_array_object
+#define GL_VERTEX_ARRAY_BINDING_ARB                0x85B5
+#endif
+
+
 #if defined(WIN32)
 // WGL_ARB_create_context
 #ifndef WGL_ARB_create_context

@@ -1487,50 +1487,40 @@ void GLSL_BindNullProgram(void)
 
 void GLSL_VertexAttribsState(uint32_t stateBits)
 {
-	uint32_t diff = stateBits ^ glState.vertexAttribsState;
-
-	if (diff)
+	int attribIndex;
+	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
 	{
-		int attribIndex;
-		for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
+		uint32_t attribBit = 1 << attribIndex;
+		if (stateBits & attribBit)
 		{
-			uint32_t attribBit = 1 << attribIndex;
-			if(diff & attribBit)
-			{
-				if (stateBits & attribBit)
-				{
-					qglEnableVertexAttribArrayARB(attribIndex);
-				}
-				else
-				{
-					qglDisableVertexAttribArrayARB(attribIndex);
-				}
-			}
+			qglEnableVertexAttribArrayARB(attribIndex);
+		}
+		else
+		{
+			qglDisableVertexAttribArrayARB(attribIndex);
 		}
 	}
 
 	GLSL_VertexAttribPointers(stateBits);
-
-	glState.vertexAttribsState = stateBits;
 }
 
 void GLSL_VertexAttribPointers(uint32_t attribBits)
 {
 	int newFrame, oldFrame;
-	VBO_t *vbo = glState.currentVBO;
+	vao_t *vao = glState.currentVao;
 	int attribIndex;
 	uint32_t extraOffsets[ATTR_INDEX_COUNT];
 
-	if(!vbo)
+	if(!vao)
 	{
-		ri.Error(ERR_FATAL, "GL_VertexAttribPointers: no VBO bound");
+		ri.Error(ERR_FATAL, "GL_VertexAttribPointers: no VAO bound");
 		return;
 	}
 
 	// don't just call LogComment, or we will get a call to va() every frame!
 	if(r_logFile->integer)
 	{
-		GLimp_LogComment(va("--- GL_VertexAttribPointers( %s ) ---\n", vbo->name));
+		GLimp_LogComment(va("--- GL_VertexAttribPointers( %s ) ---\n", vao->name));
 	}
 
 	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
@@ -1541,13 +1531,18 @@ void GLSL_VertexAttribPointers(uint32_t attribBits)
 	newFrame = glState.vertexAttribsNewFrame;
 	if (glState.vertexAnimation)
 	{
-		glState.vertexAttribPointersSet &= ~(ATTR_POSITION | ATTR_POSITION2 | ATTR_NORMAL | ATTR_NORMAL2 | ATTR_TANGENT | ATTR_TANGENT2);
-		extraOffsets[ATTR_INDEX_POSITION]  = newFrame * vbo->size_xyz;
-		extraOffsets[ATTR_INDEX_POSITION2] = oldFrame * vbo->size_xyz;
-		extraOffsets[ATTR_INDEX_NORMAL]    = newFrame * vbo->size_normal;
-		extraOffsets[ATTR_INDEX_NORMAL2]   = oldFrame * vbo->size_normal;
-		extraOffsets[ATTR_INDEX_TANGENT]   = newFrame * vbo->size_normal;
-		extraOffsets[ATTR_INDEX_TANGENT2]  = oldFrame * vbo->size_normal;
+		extraOffsets[ATTR_INDEX_POSITION]  = newFrame * vao->size_xyz;
+		extraOffsets[ATTR_INDEX_POSITION2] = oldFrame * vao->size_xyz;
+		extraOffsets[ATTR_INDEX_NORMAL]    = newFrame * vao->size_normal;
+		extraOffsets[ATTR_INDEX_NORMAL2]   = oldFrame * vao->size_normal;
+		extraOffsets[ATTR_INDEX_TANGENT]   = newFrame * vao->size_normal;
+		extraOffsets[ATTR_INDEX_TANGENT2]  = oldFrame * vao->size_normal;
+	}
+
+	// this may not be bound if we're using VAOs
+	if (glRefConfig.vertexArrayObject)
+	{
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vao->vertexesVBO);
 	}
 
 	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
@@ -1555,13 +1550,12 @@ void GLSL_VertexAttribPointers(uint32_t attribBits)
 		uint32_t attribBit = 1 << attribIndex;
 		vaoAttrib_t *vAtb;
 
-		if (!(attribBits & attribBit) || (glState.vertexAttribPointersSet & attribBit))
+		if (!(attribBits & attribBit))
 			continue;
 
-		vAtb = &vbo->attribs[attribIndex];
+		vAtb = &vao->attribs[attribIndex];
 
 		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + extraOffsets[attribIndex]));
-		glState.vertexAttribPointersSet |= attribBit;
 	}
 }
 

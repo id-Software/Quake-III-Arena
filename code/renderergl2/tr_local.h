@@ -49,8 +49,7 @@ typedef unsigned int glIndex_t;
 
 #define	MAX_FBOS      64
 #define MAX_VISCOUNTS 5
-#define MAX_VBOS      4096
-#define MAX_IBOS      4096
+#define MAX_VAOS      4096
 
 #define MAX_CALC_PSHADOWS    64
 #define MAX_DRAWN_PSHADOWS    16 // do not increase past 32, because bit flags are used on surfaces
@@ -101,9 +100,9 @@ typedef struct {
 
 typedef enum
 {
-	VBO_USAGE_STATIC,
-	VBO_USAGE_DYNAMIC
-} vboUsage_t;
+	VAO_USAGE_STATIC,
+	VAO_USAGE_DYNAMIC
+} vaoUsage_t;
 
 typedef struct vaoAttrib_s
 {
@@ -116,9 +115,11 @@ typedef struct vaoAttrib_s
 }
 vaoAttrib_t;
 
-typedef struct VBO_s
+typedef struct vao_s
 {
 	char            name[MAX_QPATH];
+
+	uint32_t        vao;
 
 	uint32_t        vertexesVBO;
 	int             vertexesSize;	// amount of memory data allocated for all vertices in bytes
@@ -126,16 +127,10 @@ typedef struct VBO_s
 
 	uint32_t        size_xyz;
 	uint32_t        size_normal;
-} VBO_t;
 
-typedef struct IBO_s
-{
-	char            name[MAX_QPATH];
-
-	uint32_t        indexesVBO;
+	uint32_t        indexesIBO;
 	int             indexesSize;	// amount of memory data allocated for all triangles in bytes
-//  uint32_t        ofsIndexes;
-} IBO_t;
+} vao_t;
 
 //===============================================================================
 
@@ -859,8 +854,8 @@ typedef enum {
 	SF_FLARE,
 	SF_ENTITY,				// beams, rails, lightning, etc that can be determined by entity
 	SF_DISPLAY_LIST,
-	SF_VBO_MESH,
-	SF_VBO_MDVMESH,
+	SF_VAO_MESH,
+	SF_VAO_MDVMESH,
 
 	SF_NUM_SURFACE_TYPES,
 	SF_MAX = 0x7fffffff			// ensures that sizeof( surfaceType_t ) == sizeof( int )
@@ -923,7 +918,7 @@ typedef struct
 #define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0, 0}}
 #endif
 
-// srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VBO_MESH
+// srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VAO_MESH
 typedef struct srfBspSurface_s
 {
 	surfaceType_t   surfaceType;
@@ -953,8 +948,7 @@ typedef struct srfBspSurface_s
 	glIndex_t       maxIndex;
 
 	// static render data
-	VBO_t          *vbo;
-	IBO_t          *ibo;
+	vao_t          *vao;
 	
 	// SF_GRID specific variables after here
 
@@ -1016,7 +1010,7 @@ typedef struct srfIQModel_s {
 	int		first_triangle, num_triangles;
 } srfIQModel_t;
 
-typedef struct srfVBOMDVMesh_s
+typedef struct srfVaoMdvMesh_s
 {
 	surfaceType_t   surfaceType;
 
@@ -1030,9 +1024,8 @@ typedef struct srfVBOMDVMesh_s
 	glIndex_t       maxIndex;
 
 	// static render data
-	VBO_t          *vbo;
-	IBO_t          *ibo;
-} srfVBOMDVMesh_t;
+	vao_t          *vao;
+} srfVaoMdvMesh_t;
 
 extern	void (*rb_surfaceTable[SF_NUM_SURFACE_TYPES])(void *);
 
@@ -1256,8 +1249,8 @@ typedef struct mdvModel_s
 	int             numSurfaces;
 	mdvSurface_t   *surfaces;
 
-	int             numVBOSurfaces;
-	srfVBOMDVMesh_t  *vboSurfaces;
+	int             numVaoSurfaces;
+	srfVaoMdvMesh_t  *vaoSurfaces;
 
 	int             numSkins;
 } mdvModel_t;
@@ -1370,16 +1363,13 @@ typedef struct {
 	int			texEnv[2];
 	int			faceCulling;
 	unsigned long	glStateBits;
-	uint32_t		vertexAttribsState;
-	uint32_t		vertexAttribPointersSet;
 	uint32_t        vertexAttribsNewFrame;
 	uint32_t        vertexAttribsOldFrame;
 	float           vertexAttribsInterpolation;
 	qboolean        vertexAnimation;
 	shaderProgram_t *currentProgram;
 	FBO_t          *currentFBO;
-	VBO_t          *currentVBO;
-	IBO_t          *currentIBO;
+	vao_t          *currentVao;
 	mat4_t        modelview;
 	mat4_t        projection;
 	mat4_t		modelviewProjection;
@@ -1428,6 +1418,7 @@ typedef struct {
 	GLenum packedNormalDataType;
 
 	qboolean floatLightmap;
+	qboolean vertexArrayObject;
 } glRefConfig_t;
 
 
@@ -1436,13 +1427,12 @@ typedef struct {
 	int     c_surfBatches;
 	float	c_overDraw;
 	
-	int		c_vboVertexBuffers;
-	int		c_vboIndexBuffers;
-	int		c_vboVertexes;
-	int		c_vboIndexes;
+	int		c_vaoBinds;
+	int		c_vaoVertexes;
+	int		c_vaoIndexes;
 
-	int     c_staticVboDraws;
-	int     c_dynamicVboDraws;
+	int     c_staticVaoDraws;
+	int     c_dynamicVaoDraws;
 
 	int     c_multidraws;
 	int     c_multidrawsMerged;
@@ -1643,11 +1633,8 @@ typedef struct {
 	int						numFBOs;
 	FBO_t					*fbos[MAX_FBOS];
 
-	int						numVBOs;
-	VBO_t					*vbos[MAX_VBOS];
-
-	int						numIBOs;
-	IBO_t					*ibos[MAX_IBOS];
+	int						numVaos;
+	vao_t					*vaos[MAX_VAOS];
 
 	// shader indexes from other modules will be looked up in tr.shaders[]
 	// shader indexes from drawsurfs will be looked up in sortedShaders[]
@@ -1729,6 +1716,7 @@ extern  cvar_t  *r_arb_half_float_pixel;
 extern  cvar_t  *r_ext_framebuffer_multisample;
 extern  cvar_t  *r_arb_seamless_cube_map;
 extern  cvar_t  *r_arb_vertex_type_2_10_10_10_rev;
+extern  cvar_t  *r_arb_vertex_array_object;
 
 extern	cvar_t	*r_nobind;						// turns off binding to appropriate textures
 extern	cvar_t	*r_singleShader;				// make most world faces use default shader
@@ -2032,9 +2020,8 @@ typedef struct shaderCommands_s
 	//int			vertexDlightBits[SHADER_MAX_VERTEXES] QALIGN(16);
 
 	void *attribPointers[ATTR_INDEX_COUNT];
-	VBO_t       *vbo;
-	IBO_t       *ibo;
-	qboolean    useInternalVBO;
+	vao_t       *vao;
+	qboolean    useInternalVao;
 
 	stageVars_t	svars QALIGN(16);
 
@@ -2074,7 +2061,7 @@ void RB_EndSurface(void);
 void RB_CheckOverflow( int verts, int indexes );
 #define RB_CHECKOVERFLOW(v,i) if (tess.numVertexes + (v) >= SHADER_MAX_VERTEXES || tess.numIndexes + (i) >= SHADER_MAX_INDEXES ) {RB_CheckOverflow(v,i);}
 
-void R_DrawElementsVBO( int numIndexes, glIndex_t firstIndex, glIndex_t minIndex, glIndex_t maxIndex );
+void R_DrawElementsVao( int numIndexes, glIndex_t firstIndex, glIndex_t minIndex, glIndex_t maxIndex );
 void RB_StageIteratorGeneric( void );
 void RB_StageIteratorSky( void );
 void RB_StageIteratorVertexLitTexture( void );
@@ -2194,28 +2181,24 @@ VERTEX BUFFER OBJECTS
 ============================================================
 */
 
-uint32_t R_VboPackTangent(vec4_t v);
-uint32_t R_VboPackNormal(vec3_t v);
-void R_VboUnpackTangent(vec4_t v, uint32_t b);
-void R_VboUnpackNormal(vec3_t v, uint32_t b);
+uint32_t R_VaoPackTangent(vec4_t v);
+uint32_t R_VaoPackNormal(vec3_t v);
+void R_VaoUnpackTangent(vec4_t v, uint32_t b);
+void R_VaoUnpackNormal(vec3_t v, uint32_t b);
 
-VBO_t          *R_CreateVBO(const char *name, byte * vertexes, int vertexesSize, vboUsage_t usage);
-VBO_t          *R_CreateVBO2(const char *name, int numVertexes, srfVert_t * vertexes);
+vao_t          *R_CreateVao(const char *name, byte *vertexes, int vertexesSize, byte *indexes, int indexesSize, vaoUsage_t usage);
+vao_t          *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int numIndexes, glIndex_t *inIndexes);
 
-IBO_t          *R_CreateIBO(const char *name, byte * indexes, int indexesSize, vboUsage_t usage);
-IBO_t          *R_CreateIBO2(const char *name, int numIndexes, glIndex_t * inIndexes);
+void            R_BindVao(vao_t *vao);
+void            R_BindNullVao(void);
 
-void            R_BindVBO(VBO_t * vbo);
-void            R_BindNullVBO(void);
+void Vao_SetVertexPointers(vao_t *vao);
 
-void            R_BindIBO(IBO_t * ibo);
-void            R_BindNullIBO(void);
+void            R_InitVaos(void);
+void            R_ShutdownVaos(void);
+void            R_VaoList_f(void);
 
-void            R_InitVBOs(void);
-void            R_ShutdownVBOs(void);
-void            R_VBOList_f(void);
-
-void            RB_UpdateTessVbo(unsigned int attribBits);
+void            RB_UpdateTessVao(unsigned int attribBits);
 
 
 /*
