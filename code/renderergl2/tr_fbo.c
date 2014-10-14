@@ -447,7 +447,6 @@ void FBO_Init(void)
 	if (tr.renderFbo)
 	{
 		FBO_Bind(tr.renderFbo);
-		qglClearColor( 1, 0, 0.5, 1 );
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		FBO_Bind(NULL);
 	}

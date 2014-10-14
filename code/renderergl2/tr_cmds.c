@@ -425,7 +425,6 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 				backEnd.colorMask[1] = GL_FALSE;
 				backEnd.colorMask[2] = GL_FALSE;
 				backEnd.colorMask[3] = GL_FALSE;
-				qglClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 								
 				if (glRefConfig.framebufferObject)
 				{

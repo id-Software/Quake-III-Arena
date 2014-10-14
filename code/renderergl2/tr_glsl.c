@@ -1485,25 +1485,6 @@ void GLSL_BindNullProgram(void)
 }
 
 
-void GLSL_VertexAttribsState(uint32_t stateBits)
-{
-	int attribIndex;
-	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
-	{
-		uint32_t attribBit = 1 << attribIndex;
-		if (stateBits & attribBit)
-		{
-			qglEnableVertexAttribArrayARB(attribIndex);
-		}
-		else
-		{
-			qglDisableVertexAttribArrayARB(attribIndex);
-		}
-	}
-
-	GLSL_VertexAttribPointers(stateBits);
-}
-
 void GLSL_VertexAttribPointers(uint32_t attribBits)
 {
 	int newFrame, oldFrame;

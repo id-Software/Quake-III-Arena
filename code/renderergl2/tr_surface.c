@@ -204,8 +204,6 @@ void RB_InstantQuad2(vec4_t quadVerts[4], vec2_t texCoords[4])
 
 	RB_UpdateTessVao(ATTR_POSITION | ATTR_TEXCOORD);
 
-	GLSL_VertexAttribsState(ATTR_POSITION | ATTR_TEXCOORD);
-
 	R_DrawElementsVao(tess.numIndexes, tess.firstIndex, tess.minIndex, tess.maxIndex);
 
 	tess.numIndexes = 0;
@@ -602,7 +600,6 @@ static void RB_SurfaceBeam( void )
 	// FIXME: A lot of this can probably be removed for speed, and refactored into a more convenient function
 	RB_UpdateTessVao(ATTR_POSITION);
 	
-	GLSL_VertexAttribsState(ATTR_POSITION);
 	GLSL_BindProgram(sp);
 		
 	GLSL_SetUniformMat4(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
@@ -1612,7 +1609,8 @@ void RB_SurfaceVaoMdvMesh(srfVaoMdvMesh_t * surface)
 
 	glState.vertexAttribsOldFrame = refEnt->oldframe;
 	glState.vertexAttribsNewFrame = refEnt->frame;
-	glState.vertexAnimation = qtrue;
+	if (surface->mdvModel->numFrames > 1)
+		glState.vertexAnimation = qtrue;
 
 	RB_EndSurface();
 

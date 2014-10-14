@@ -145,7 +145,6 @@ static void DrawTris (shaderCommands_t *input) {
 		shaderProgram_t *sp = &tr.textureColorShader;
 		vec4_t color;
 
-		GLSL_VertexAttribsState(ATTR_POSITION);
 		GLSL_BindProgram(sp);
 		
 		GLSL_SetUniformMat4(sp, UNIFORM_MODELVIEWPROJECTIONMATRIX, glState.modelviewProjection);
@@ -1537,15 +1536,12 @@ void RB_StageIteratorGeneric( void )
 	if ( input->shader->polygonOffset )
 	{
 		qglEnable( GL_POLYGON_OFFSET_FILL );
-		qglPolygonOffset( r_offsetFactor->value, r_offsetUnits->value );
 	}
 
 	//
 	// Set vertex attribs and pointers
 	//
-	if (tess.useInternalVao)
-		GLSL_VertexAttribsState(vertexAttribs);
-	else if (glState.vertexAnimation)
+	if (glState.vertexAnimation)
 		GLSL_VertexAttribPointers(vertexAttribs & (ATTR_POSITION | ATTR_POSITION2 | ATTR_NORMAL | ATTR_NORMAL2 | ATTR_TANGENT | ATTR_TANGENT2));
 
 	//

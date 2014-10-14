@@ -404,8 +404,7 @@ void R_BindVao(vao_t * vao)
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vao->vertexesVBO);
 			qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vao->indexesIBO);
 
-			if (vao != tess.vao)
-				Vao_SetVertexPointers(vao);
+			Vao_SetVertexPointers(vao);
 		}
 	}
 }

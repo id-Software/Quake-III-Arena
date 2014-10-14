@@ -944,6 +944,7 @@ void GL_SetDefaultState( void )
 	// make sure our GL state vector is set correctly
 	//
 	glState.glStateBits = GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_TRUE;
+	glState.storedGlState = 0;
 
 	glState.currentProgram = 0;
 	qglUseProgramObjectARB(0);
@@ -961,6 +962,11 @@ void GL_SetDefaultState( void )
 
 	if (glRefConfig.seamlessCubeMap)
 		qglEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	// GL_POLYGON_OFFSET_FILL will be glEnable()d when this is used
+	qglPolygonOffset( r_offsetFactor->value, r_offsetUnits->value );
+
+	qglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );	// FIXME: get color of sky
 }
 
 /*
