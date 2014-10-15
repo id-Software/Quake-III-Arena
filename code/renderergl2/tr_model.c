@@ -665,68 +665,122 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 		surf = mdvModel->surfaces;
 		for (i = 0; i < mdvModel->numSurfaces; i++, vaoSurf++, surf++)
 		{
-			vec3_t *verts;
-			vec2_t *texcoords;
-			uint32_t *normals;
-#ifdef USE_VERT_TANGENT_SPACE
-			uint32_t *tangents;
-#endif
+			uint32_t offset_xyz, offset_st, offset_normal, offset_tangent;
+			uint32_t stride_xyz, stride_st, stride_normal, stride_tangent;
+			uint32_t dataSize, dataOfs;
+			uint8_t *data;
 
-			byte *data;
-			int dataSize;
-
-			int ofs_xyz, ofs_normal, ofs_st;
-#ifdef USE_VERT_TANGENT_SPACE
-			int ofs_tangent;
-#endif
-
-			dataSize = 0;
-
-			ofs_xyz = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*verts);
-
-			ofs_normal = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*normals);
-
-#ifdef USE_VERT_TANGENT_SPACE
-			ofs_tangent = dataSize;
-			dataSize += surf->numVerts * mdvModel->numFrames * sizeof(*tangents);
-#endif
-
-			ofs_st = dataSize;
-			dataSize += surf->numVerts * sizeof(*texcoords);
-
-			data = ri.Malloc(dataSize);
-
-			verts =      (void *)(data + ofs_xyz);
-			normals =    (void *)(data + ofs_normal);
-#ifdef USE_VERT_TANGENT_SPACE
-			tangents =   (void *)(data + ofs_tangent);
-#endif
-			texcoords =  (void *)(data + ofs_st);
-		
-			v = surf->verts;
-			for ( j = 0; j < surf->numVerts * mdvModel->numFrames ; j++, v++ )
+			if (mdvModel->numFrames > 1)
 			{
-				vec3_t nxt;
-				vec4_t tangent;
-
-				VectorCopy(v->xyz,       verts[j]);
-
-				normals[j] = R_VaoPackNormal(v->normal);
+				// vertex animation, store texcoords first, then position/normal/tangents
+				offset_st      = 0;
+				offset_xyz     = surf->numVerts * sizeof(vec2_t);
+				offset_normal  = offset_xyz + sizeof(vec3_t);
+				offset_tangent = offset_normal + sizeof(uint32_t);
+				stride_st  = sizeof(vec2_t);
+				stride_xyz = sizeof(vec3_t) + sizeof(uint32_t);
 #ifdef USE_VERT_TANGENT_SPACE
-				CrossProduct(v->normal, v->tangent, nxt);
-				VectorCopy(v->tangent, tangent);
-				tangent[3] = (DotProduct(nxt, v->bitangent) < 0.0f) ? -1.0f : 1.0f;
-
-				tangents[j] = R_VaoPackTangent(tangent);
+				stride_xyz += sizeof(uint32_t);
 #endif
+				stride_normal = stride_tangent = stride_xyz;
+
+				dataSize = offset_xyz + surf->numVerts * mdvModel->numFrames * stride_xyz;
+			}
+			else
+			{
+				// no animation, interleave everything
+				offset_xyz     = 0;
+				offset_st      = offset_xyz + sizeof(vec3_t);
+				offset_normal  = offset_st + sizeof(vec2_t);
+				offset_tangent = offset_normal + sizeof(uint32_t);
+#ifdef USE_VERT_TANGENT_SPACE
+				stride_xyz = offset_tangent + sizeof(uint32_t);
+#else
+				stride_xyz = offset_normal + sizeof(uint32_t);
+#endif
+				stride_st = stride_normal = stride_tangent = stride_xyz;
+
+				dataSize = surf->numVerts * stride_xyz;
 			}
 
-			st = surf->st;
-			for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
-				texcoords[j][0] = st->st[0];
-				texcoords[j][1] = st->st[1];
+
+			data = ri.Malloc(dataSize);
+			dataOfs = 0;
+
+			if (mdvModel->numFrames > 1)
+			{
+				st = surf->st;
+				for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
+					memcpy(data + dataOfs, &st->st, sizeof(st->st));
+					dataOfs += sizeof(st->st);
+				}
+
+				v = surf->verts;
+				for ( j = 0; j < surf->numVerts * mdvModel->numFrames ; j++, v++ )
+				{
+#ifdef USE_VERT_TANGENT_SPACE
+					vec3_t nxt;
+					vec4_t tangent;
+#endif
+					uint32_t *p;
+
+					// xyz
+					memcpy(data + dataOfs, &v->xyz, sizeof(v->xyz));
+					dataOfs += sizeof(v->xyz);
+
+					// normal
+					p = (uint32_t *)(data + dataOfs);
+					*p = R_VaoPackNormal(v->normal);
+					dataOfs += sizeof(uint32_t);
+
+#ifdef USE_VERT_TANGENT_SPACE
+					CrossProduct(v->normal, v->tangent, nxt);
+					VectorCopy(v->tangent, tangent);
+					tangent[3] = (DotProduct(nxt, v->bitangent) < 0.0f) ? -1.0f : 1.0f;
+
+					// tangent
+					p = (uint32_t *)(data + dataOfs);
+					*p = R_VaoPackTangent(tangent);
+					dataOfs += sizeof(uint32_t);
+#endif
+				}
+			}
+			else
+			{
+				v = surf->verts;
+				st = surf->st;
+				for ( j = 0; j < surf->numVerts; j++, v++, st++ )
+				{
+#ifdef USE_VERT_TANGENT_SPACE
+					vec3_t nxt;
+					vec4_t tangent;
+#endif
+					uint32_t *p;
+
+					// xyz
+					memcpy(data + dataOfs, &v->xyz, sizeof(v->xyz));
+					dataOfs += sizeof(v->xyz);
+
+					// st
+					memcpy(data + dataOfs, &st->st, sizeof(st->st));
+					dataOfs += sizeof(st->st);
+
+					// normal
+					p = (uint32_t *)(data + dataOfs);
+					*p = R_VaoPackNormal(v->normal);
+					dataOfs += sizeof(uint32_t);
+
+#ifdef USE_VERT_TANGENT_SPACE
+					CrossProduct(v->normal, v->tangent, nxt);
+					VectorCopy(v->tangent, tangent);
+					tangent[3] = (DotProduct(nxt, v->bitangent) < 0.0f) ? -1.0f : 1.0f;
+
+					// tangent
+					p = (uint32_t *)(data + dataOfs);
+					*p = R_VaoPackTangent(tangent);
+					dataOfs += sizeof(uint32_t);
+#endif
+				}
 			}
 
 			vaoSurf->surfaceType = SF_VAO_MDVMESH;
@@ -774,27 +828,23 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].normalized = GL_TRUE;
 			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].normalized = GL_FALSE;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].offset = ofs_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].stride = sizeof(*verts);
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].offset = ofs_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].stride = sizeof(*verts);
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].offset = offset_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].offset = offset_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].offset = offset_st;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].offset = offset_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].offset = offset_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].offset = offset_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].offset = offset_tangent;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].offset = ofs_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].stride = sizeof(*normals);
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].offset = ofs_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].stride = sizeof(*normals);
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].stride = stride_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].stride = stride_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].stride = stride_st;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].stride = stride_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].stride = stride_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].stride = stride_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].stride = stride_tangent;
 
-#ifdef USE_VERT_TANGENT_SPACE
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].offset = ofs_tangent;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].stride = sizeof(*tangents);
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].offset = ofs_tangent;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].stride = sizeof(*tangents);
-#endif
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].offset = ofs_st;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].stride = sizeof(*st);
-
-			vaoSurf->vao->size_xyz    = sizeof(*verts)   * surf->numVerts;
-			vaoSurf->vao->size_normal = sizeof(*normals) * surf->numVerts;
+			vaoSurf->vao->frameSize = stride_xyz    * surf->numVerts;
 
 			Vao_SetVertexPointers(vaoSurf->vao);
 

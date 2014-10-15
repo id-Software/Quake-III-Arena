@@ -125,8 +125,7 @@ typedef struct vao_s
 	int             vertexesSize;	// amount of memory data allocated for all vertices in bytes
 	vaoAttrib_t     attribs[VAO_MAX_ATTRIBS];
 
-	uint32_t        size_xyz;
-	uint32_t        size_normal;
+	uint32_t        frameSize;      // bytes to skip per frame when doing vertex animation
 
 	uint32_t        indexesIBO;
 	int             indexesSize;	// amount of memory data allocated for all triangles in bytes

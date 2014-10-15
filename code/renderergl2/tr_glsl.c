@@ -1512,12 +1512,12 @@ void GLSL_VertexAttribPointers(uint32_t attribBits)
 	newFrame = glState.vertexAttribsNewFrame;
 	if (glState.vertexAnimation)
 	{
-		extraOffsets[ATTR_INDEX_POSITION]  = newFrame * vao->size_xyz;
-		extraOffsets[ATTR_INDEX_POSITION2] = oldFrame * vao->size_xyz;
-		extraOffsets[ATTR_INDEX_NORMAL]    = newFrame * vao->size_normal;
-		extraOffsets[ATTR_INDEX_NORMAL2]   = oldFrame * vao->size_normal;
-		extraOffsets[ATTR_INDEX_TANGENT]   = newFrame * vao->size_normal;
-		extraOffsets[ATTR_INDEX_TANGENT2]  = oldFrame * vao->size_normal;
+		extraOffsets[ATTR_INDEX_POSITION]  = newFrame * vao->frameSize;
+		extraOffsets[ATTR_INDEX_POSITION2] = oldFrame * vao->frameSize;
+		extraOffsets[ATTR_INDEX_NORMAL]    = newFrame * vao->frameSize;
+		extraOffsets[ATTR_INDEX_NORMAL2]   = oldFrame * vao->frameSize;
+		extraOffsets[ATTR_INDEX_TANGENT]   = newFrame * vao->frameSize;
+		extraOffsets[ATTR_INDEX_TANGENT2]  = oldFrame * vao->frameSize;
 	}
 
 	// this may not be bound if we're using VAOs
