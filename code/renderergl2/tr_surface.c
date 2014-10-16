@@ -441,7 +441,7 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 
 		for (; i < tess.multiDrawPrimitives; i++)
 		{
-			if (tess.multiDrawLastIndex[i] == firstIndexOffset)
+			if (firstIndexOffset == tess.multiDrawFirstIndex[i] + tess.multiDrawNumIndexes[i])
 			{
 				mergeBack = i;
 
@@ -462,7 +462,6 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 	if (mergeBack != -1 && mergeForward == -1)
 	{
 		tess.multiDrawNumIndexes[mergeBack] += numIndexes;
-		tess.multiDrawLastIndex[mergeBack]   = tess.multiDrawFirstIndex[mergeBack] + tess.multiDrawNumIndexes[mergeBack];
 		tess.multiDrawMinIndex[mergeBack] = MIN(tess.multiDrawMinIndex[mergeBack], minIndex);
 		tess.multiDrawMaxIndex[mergeBack] = MAX(tess.multiDrawMaxIndex[mergeBack], maxIndex);
 		backEnd.pc.c_multidrawsMerged++;
@@ -471,7 +470,6 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 	{
 		tess.multiDrawNumIndexes[mergeForward] += numIndexes;
 		tess.multiDrawFirstIndex[mergeForward]  = firstIndexOffset;
-		tess.multiDrawLastIndex[mergeForward]   = tess.multiDrawFirstIndex[mergeForward] + tess.multiDrawNumIndexes[mergeForward];
 		tess.multiDrawMinIndex[mergeForward] = MIN(tess.multiDrawMinIndex[mergeForward], minIndex);
 		tess.multiDrawMaxIndex[mergeForward] = MAX(tess.multiDrawMaxIndex[mergeForward], maxIndex);
 		backEnd.pc.c_multidrawsMerged++;
@@ -479,7 +477,6 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 	else if (mergeBack != -1 && mergeForward != -1)
 	{
 		tess.multiDrawNumIndexes[mergeBack] += numIndexes + tess.multiDrawNumIndexes[mergeForward];
-		tess.multiDrawLastIndex[mergeBack]   = tess.multiDrawFirstIndex[mergeForward] + tess.multiDrawNumIndexes[mergeForward];
 		tess.multiDrawMinIndex[mergeBack] = MIN(tess.multiDrawMinIndex[mergeBack], MIN(tess.multiDrawMinIndex[mergeForward], minIndex));
 		tess.multiDrawMaxIndex[mergeBack] = MAX(tess.multiDrawMaxIndex[mergeBack], MAX(tess.multiDrawMaxIndex[mergeForward], maxIndex));
 		tess.multiDrawPrimitives--;
@@ -488,7 +485,6 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 		{
 			tess.multiDrawNumIndexes[mergeForward] = tess.multiDrawNumIndexes[tess.multiDrawPrimitives];
 			tess.multiDrawFirstIndex[mergeForward] = tess.multiDrawFirstIndex[tess.multiDrawPrimitives];
-			tess.multiDrawLastIndex[mergeForward]  = tess.multiDrawLastIndex[tess.multiDrawPrimitives];
 			tess.multiDrawMinIndex[mergeForward] = tess.multiDrawMinIndex[tess.multiDrawPrimitives];
 			tess.multiDrawMaxIndex[mergeForward] = tess.multiDrawMaxIndex[tess.multiDrawPrimitives];
 		}
@@ -498,7 +494,6 @@ static qboolean RB_SurfaceVao(vao_t *vao, int numVerts, int numIndexes, int firs
 	{
 		tess.multiDrawNumIndexes[tess.multiDrawPrimitives] = numIndexes;
 		tess.multiDrawFirstIndex[tess.multiDrawPrimitives] = firstIndexOffset;
-		tess.multiDrawLastIndex[tess.multiDrawPrimitives] = lastIndexOffset;
 		tess.multiDrawMinIndex[tess.multiDrawPrimitives] = minIndex;
 		tess.multiDrawMaxIndex[tess.multiDrawPrimitives] = maxIndex;
 		tess.multiDrawPrimitives++;

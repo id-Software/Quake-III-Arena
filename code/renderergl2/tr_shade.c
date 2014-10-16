@@ -54,7 +54,7 @@ void R_DrawElementsVao( int numIndexes, glIndex_t firstIndex, glIndex_t minIndex
 static void R_DrawMultiElementsVao( int multiDrawPrimitives, glIndex_t *multiDrawMinIndex, glIndex_t *multiDrawMaxIndex, 
 	GLsizei *multiDrawNumIndexes, glIndex_t **multiDrawFirstIndex)
 {
-	if (glRefConfig.multiDrawArrays)
+	if (glRefConfig.multiDrawArrays && multiDrawPrimitives > 1)
 	{
 		qglMultiDrawElementsEXT(GL_TRIANGLES, multiDrawNumIndexes, GL_INDEX_TYPE, (const GLvoid **)multiDrawFirstIndex, multiDrawPrimitives);
 	}

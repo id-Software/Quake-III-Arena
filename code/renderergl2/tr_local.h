@@ -2005,7 +2005,7 @@ typedef struct stageVars
 	vec2_t		texcoords[NUM_TEXTURE_BUNDLES][SHADER_MAX_VERTEXES];
 } stageVars_t;
 
-#define MAX_MULTIDRAW_PRIMITIVES	16384
+#define MAX_MULTIDRAW_PRIMITIVES	256
 
 typedef struct shaderCommands_s 
 {
@@ -2045,7 +2045,6 @@ typedef struct shaderCommands_s
 	int         multiDrawPrimitives;
 	GLsizei     multiDrawNumIndexes[MAX_MULTIDRAW_PRIMITIVES];
 	glIndex_t  *multiDrawFirstIndex[MAX_MULTIDRAW_PRIMITIVES];
-	glIndex_t  *multiDrawLastIndex[MAX_MULTIDRAW_PRIMITIVES];
 	glIndex_t   multiDrawMinIndex[MAX_MULTIDRAW_PRIMITIVES];
 	glIndex_t   multiDrawMaxIndex[MAX_MULTIDRAW_PRIMITIVES];
 
