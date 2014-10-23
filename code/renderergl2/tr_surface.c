@@ -1589,8 +1589,8 @@ void RB_SurfaceVaoMdvMesh(srfVaoMdvMesh_t * surface)
 
 	tess.useInternalVao = qfalse;
 
-	tess.numIndexes += surface->numIndexes;
-	tess.numVertexes += surface->numVerts;
+	tess.numIndexes = surface->numIndexes;
+	tess.numVertexes = surface->numVerts;
 	tess.minIndex = surface->minIndex;
 	tess.maxIndex = surface->maxIndex;
 
@@ -1599,19 +1599,56 @@ void RB_SurfaceVaoMdvMesh(srfVaoMdvMesh_t * surface)
 
 	refEnt = &backEnd.currentEntity->e;
 
-	if(refEnt->oldframe == refEnt->frame)
-	{
-		glState.vertexAttribsInterpolation = 0;
-	}
-	else
-	{
-		glState.vertexAttribsInterpolation = refEnt->backlerp;
-	}
+	glState.vertexAttribsInterpolation = (refEnt->oldframe == refEnt->frame) ? 0.0f : refEnt->backlerp;
 
-	glState.vertexAttribsOldFrame = refEnt->oldframe;
-	glState.vertexAttribsNewFrame = refEnt->frame;
 	if (surface->mdvModel->numFrames > 1)
+	{
+		int frameOffset, attribIndex;
+		vaoAttrib_t *vAtb;
+
 		glState.vertexAnimation = qtrue;
+
+		if (glRefConfig.vertexArrayObject)
+		{
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, surface->vao->vertexesVBO);
+		}
+
+		frameOffset    = refEnt->frame * surface->vao->frameSize;
+
+		attribIndex = ATTR_INDEX_POSITION;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+		attribIndex = ATTR_INDEX_NORMAL;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+		attribIndex = ATTR_INDEX_TANGENT;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+		frameOffset = refEnt->oldframe * surface->vao->frameSize;
+
+		attribIndex = ATTR_INDEX_POSITION2;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+		attribIndex = ATTR_INDEX_NORMAL2;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+		attribIndex = ATTR_INDEX_TANGENT2;
+		vAtb = &surface->vao->attribs[attribIndex];
+		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + frameOffset));
+
+
+		if (!glRefConfig.vertexArrayObject)
+		{
+			attribIndex = ATTR_INDEX_TEXCOORD;
+			vAtb = &surface->vao->attribs[attribIndex];
+			qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset));
+		}
+	}
 
 	RB_EndSurface();
 

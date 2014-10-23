@@ -1364,10 +1364,9 @@ typedef struct {
 	int         faceCullFront;
 	uint32_t    glStateBits;
 	uint32_t    storedGlState;
-	uint32_t        vertexAttribsNewFrame;
-	uint32_t        vertexAttribsOldFrame;
 	float           vertexAttribsInterpolation;
 	qboolean        vertexAnimation;
+	uint32_t        vertexAttribsEnabled;  // global if no VAOs, tess only otherwise
 	shaderProgram_t *currentProgram;
 	FBO_t          *currentFBO;
 	vao_t          *currentVao;

@@ -949,9 +949,13 @@ void GL_SetDefaultState( void )
 	glState.currentProgram = 0;
 	qglUseProgramObjectARB(0);
 
+	if (glRefConfig.vertexArrayObject)
+		qglBindVertexArrayARB(0);
+
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	glState.currentVao = NULL;
+	glState.vertexAttribsEnabled = 0;
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	qglDepthMask( GL_TRUE );

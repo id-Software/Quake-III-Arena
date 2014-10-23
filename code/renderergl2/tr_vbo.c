@@ -94,24 +94,32 @@ void R_VaoUnpackNormal(vec3_t v, uint32_t b)
 
 void Vao_SetVertexPointers(vao_t *vao)
 {
-	int i;
+	int attribIndex;
 
 	// set vertex pointers
-	for (i = 0; i < ATTR_INDEX_COUNT; i++)
+	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
 	{
-		if (vao->attribs[i].enabled)
+		uint32_t attribBit = 1 << attribIndex;
+		vaoAttrib_t *vAtb = &vao->attribs[attribIndex];
+
+		if (vAtb->enabled)
 		{
-			qglVertexAttribPointerARB((GLuint)i,
-								  (GLint)vao->attribs[i].count,
-								  (GLenum)vao->attribs[i].type, 
-								  (GLboolean)vao->attribs[i].normalized, 
-								  (GLsizei)vao->attribs[i].stride,
-								  BUFFER_OFFSET(vao->attribs[i].offset));
-			qglEnableVertexAttribArrayARB(i);
+			qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset));
+			if (glRefConfig.vertexArrayObject || !(glState.vertexAttribsEnabled & attribBit))
+				qglEnableVertexAttribArrayARB(attribIndex);
+
+			if (!glRefConfig.vertexArrayObject || vao == tess.vao)
+				glState.vertexAttribsEnabled |= attribBit;
 		}
 		else
 		{
-			qglDisableVertexAttribArrayARB(i);
+			// don't disable vertex attribs when using vertex array objects
+			// Vao_SetVertexPointers is only called during init when using VAOs, and vertex attribs start disabled anyway
+			if (!glRefConfig.vertexArrayObject && (glState.vertexAttribsEnabled & attribBit))
+				qglDisableVertexAttribArrayARB(attribIndex);
+
+			if (!glRefConfig.vertexArrayObject || vao == tess.vao)
+				glState.vertexAttribsEnabled &= ~attribBit;
 		}
 	}
 }
@@ -386,8 +394,6 @@ void R_BindVao(vao_t * vao)
 		glState.currentVao = vao;
 
 		glState.vertexAttribsInterpolation = 0;
-		glState.vertexAttribsOldFrame = 0;
-		glState.vertexAttribsNewFrame = 0;
 		glState.vertexAnimation = qfalse;
 		backEnd.pc.c_vaoBinds++;
 
@@ -398,13 +404,19 @@ void R_BindVao(vao_t * vao)
 			// why you no save GL_ELEMENT_ARRAY_BUFFER binding, Intel?
 			if (1)
 				qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vao->indexesIBO);
+
+			// tess VAO always has buffers bound
+			if (vao == tess.vao)
+				qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vao->vertexesVBO);
 		}
 		else
 		{
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vao->vertexesVBO);
 			qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vao->indexesIBO);
 
-			Vao_SetVertexPointers(vao);
+			// tess VAO doesn't have vertex pointers set until data is uploaded
+			if (vao != tess.vao)
+				Vao_SetVertexPointers(vao);
 		}
 	}
 }
@@ -642,13 +654,6 @@ void RB_UpdateTessVao(unsigned int attribBits)
 
 		R_BindVao(tess.vao);
 
-		// these may not be bound if we're using VAOs
-		if (glRefConfig.vertexArrayObject)
-		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, tess.vao->vertexesVBO);
-			qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, tess.vao->indexesIBO);
-		}
-
 		// orphan old vertex buffer so we don't stall on it
 		qglBufferDataARB(GL_ARRAY_BUFFER_ARB, tess.vao->vertexesSize, NULL, GL_DYNAMIC_DRAW_ARB);
 
@@ -666,12 +671,31 @@ void RB_UpdateTessVao(unsigned int attribBits)
 
 		for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
 		{
-			if (attribBits & (1 << attribIndex))
+			uint32_t attribBit = 1 << attribIndex;
+
+			if (attribBits & attribBit)
 			{
 				vaoAttrib_t *vAtb = &tess.vao->attribs[attribIndex];
 
 				// note: tess has a VBO where stride == size
 				qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vAtb->offset, tess.numVertexes * vAtb->stride, tess.attribPointers[attribIndex]);
+
+				if (!glRefConfig.vertexArrayObject)
+					qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset));
+
+				if (!(glState.vertexAttribsEnabled & attribBit))
+				{
+					qglEnableVertexAttribArrayARB(attribIndex);
+					glState.vertexAttribsEnabled |= attribBit;
+				}
+			}
+			else
+			{
+				if ((glState.vertexAttribsEnabled & attribBit))
+				{
+					qglDisableVertexAttribArrayARB(attribIndex);
+					glState.vertexAttribsEnabled &= ~attribBit;
+				}
 			}
 		}
 

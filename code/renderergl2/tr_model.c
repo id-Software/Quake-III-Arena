@@ -711,8 +711,8 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			{
 				st = surf->st;
 				for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
-					memcpy(data + dataOfs, &st->st, sizeof(st->st));
-					dataOfs += sizeof(st->st);
+					memcpy(data + dataOfs, &st->st, sizeof(vec2_t));
+					dataOfs += sizeof(vec2_t);
 				}
 
 				v = surf->verts;
@@ -725,8 +725,8 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					uint32_t *p;
 
 					// xyz
-					memcpy(data + dataOfs, &v->xyz, sizeof(v->xyz));
-					dataOfs += sizeof(v->xyz);
+					memcpy(data + dataOfs, &v->xyz, sizeof(vec3_t));
+					dataOfs += sizeof(vec3_t);
 
 					// normal
 					p = (uint32_t *)(data + dataOfs);
@@ -758,11 +758,11 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					uint32_t *p;
 
 					// xyz
-					memcpy(data + dataOfs, &v->xyz, sizeof(v->xyz));
+					memcpy(data + dataOfs, &v->xyz, sizeof(vec3_t));
 					dataOfs += sizeof(v->xyz);
 
 					// st
-					memcpy(data + dataOfs, &st->st, sizeof(st->st));
+					memcpy(data + dataOfs, &st->st, sizeof(vec2_t));
 					dataOfs += sizeof(st->st);
 
 					// normal
@@ -790,61 +790,50 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vaoSurf->numVerts = surf->numVerts;
 			
 			vaoSurf->minIndex = 0;
-			vaoSurf->maxIndex = surf->numVerts;
+			vaoSurf->maxIndex = surf->numVerts - 1;
 
 			vaoSurf->vao = R_CreateVao(va("staticMD3Mesh_VAO '%s'", surf->name), data, dataSize, (byte *)surf->indexes, surf->numIndexes * sizeof(*surf->indexes), VAO_USAGE_STATIC);
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].enabled = 1;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].enabled = 1;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].enabled = 1;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].enabled = 1;
 #ifdef USE_VERT_TANGENT_SPACE
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].enabled = 1;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].enabled = 1;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].enabled = 1;
 #endif
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].enabled = 1;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].count = 3;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].count = 3;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].count = 4;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].count = 4;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].count = 4;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].count = 4;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].count = 2;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].count = 3;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].count = 2;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].count = 4;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].count = 4;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].type = GL_FLOAT;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].type = GL_FLOAT;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].type = glRefConfig.packedNormalDataType;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].type = glRefConfig.packedNormalDataType;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].type = glRefConfig.packedNormalDataType;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].type = glRefConfig.packedNormalDataType;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].type = GL_FLOAT;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].type = glRefConfig.packedNormalDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].type = glRefConfig.packedNormalDataType;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].normalized = GL_FALSE;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].normalized = GL_FALSE;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].normalized = GL_TRUE;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].normalized = GL_TRUE;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].normalized = GL_TRUE;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].normalized = GL_TRUE;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].normalized = GL_FALSE;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].normalized = GL_TRUE;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].normalized = GL_TRUE;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].offset = offset_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].offset = offset_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].offset = offset_st;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].offset = offset_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].offset = offset_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].offset = offset_tangent;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].offset = offset_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].offset = offset_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].offset = offset_st;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].offset = offset_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].offset = offset_tangent;
 
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION  ].stride = stride_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_POSITION2 ].stride = stride_xyz;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD  ].stride = stride_st;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL    ].stride = stride_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2   ].stride = stride_normal;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT   ].stride = stride_tangent;
-			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2  ].stride = stride_tangent;
+			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].stride = stride_xyz;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].stride = stride_st;
+			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].stride = stride_normal;
+			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].stride = stride_tangent;
 
-			vaoSurf->vao->frameSize = stride_xyz    * surf->numVerts;
+			if (mdvModel->numFrames > 1)
+			{
+				vaoSurf->vao->attribs[ATTR_INDEX_POSITION2] = vaoSurf->vao->attribs[ATTR_INDEX_POSITION];
+				vaoSurf->vao->attribs[ATTR_INDEX_NORMAL2  ] = vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ];
+				vaoSurf->vao->attribs[ATTR_INDEX_TANGENT2 ] = vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ];
+
+				vaoSurf->vao->frameSize = stride_xyz    * surf->numVerts;
+			}
 
 			Vao_SetVertexPointers(vaoSurf->vao);
 

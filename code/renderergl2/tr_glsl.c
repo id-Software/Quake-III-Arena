@@ -1485,62 +1485,6 @@ void GLSL_BindNullProgram(void)
 }
 
 
-void GLSL_VertexAttribPointers(uint32_t attribBits)
-{
-	int newFrame, oldFrame;
-	vao_t *vao = glState.currentVao;
-	int attribIndex;
-	uint32_t extraOffsets[ATTR_INDEX_COUNT];
-
-	if(!vao)
-	{
-		ri.Error(ERR_FATAL, "GL_VertexAttribPointers: no VAO bound");
-		return;
-	}
-
-	// don't just call LogComment, or we will get a call to va() every frame!
-	if(r_logFile->integer)
-	{
-		GLimp_LogComment(va("--- GL_VertexAttribPointers( %s ) ---\n", vao->name));
-	}
-
-	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
-		extraOffsets[attribIndex] = 0;
-
-	// position/normal/tangent are always set in case of animation
-	oldFrame = glState.vertexAttribsOldFrame;
-	newFrame = glState.vertexAttribsNewFrame;
-	if (glState.vertexAnimation)
-	{
-		extraOffsets[ATTR_INDEX_POSITION]  = newFrame * vao->frameSize;
-		extraOffsets[ATTR_INDEX_POSITION2] = oldFrame * vao->frameSize;
-		extraOffsets[ATTR_INDEX_NORMAL]    = newFrame * vao->frameSize;
-		extraOffsets[ATTR_INDEX_NORMAL2]   = oldFrame * vao->frameSize;
-		extraOffsets[ATTR_INDEX_TANGENT]   = newFrame * vao->frameSize;
-		extraOffsets[ATTR_INDEX_TANGENT2]  = oldFrame * vao->frameSize;
-	}
-
-	// this may not be bound if we're using VAOs
-	if (glRefConfig.vertexArrayObject)
-	{
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vao->vertexesVBO);
-	}
-
-	for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
-	{
-		uint32_t attribBit = 1 << attribIndex;
-		vaoAttrib_t *vAtb;
-
-		if (!(attribBits & attribBit))
-			continue;
-
-		vAtb = &vao->attribs[attribIndex];
-
-		qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset + extraOffsets[attribIndex]));
-	}
-}
-
-
 shaderProgram_t *GLSL_GetGenericShaderProgram(int stage)
 {
 	shaderStage_t *pStage = tess.xstages[stage];
