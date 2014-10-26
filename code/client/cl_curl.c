@@ -211,6 +211,8 @@ static size_t CL_cURL_CallbackWrite(void *buffer, size_t size, size_t nmemb,
 
 void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 {
+	CURLMcode result;
+
 	clc.cURLUsed = qtrue;
 	Com_Printf("URL: %s\n", remoteURL);
 	Com_DPrintf("***** CL_cURL_BeginDownload *****\n"
@@ -271,7 +273,11 @@ void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 			"failed");
 		return;
 	}
-	qcurl_multi_add_handle(clc.downloadCURLM, clc.downloadCURL);
+	result = qcurl_multi_add_handle(clc.downloadCURLM, clc.downloadCURL);
+	if(result != CURLM_OK) {
+		Com_Error(ERR_DROP,"CL_cURL_BeginDownload: qcurl_multi_add_handle() failed: %s", qcurl_multi_strerror(result));
+		return;
+	}
 
 	if(!(clc.sv_allowDownload & DLF_NO_DISCONNECT) &&
 		!clc.cURLDisconnected) {
