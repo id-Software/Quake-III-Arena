@@ -169,7 +169,7 @@ Sys_PIDFileName
 */
 static char *Sys_PIDFileName( void )
 {
-	const char *homePath = Sys_DefaultHomePath( );
+	const char *homePath = Cvar_VariableString( "fs_homepath" );
 
 	if( *homePath != '\0' )
 		return va( "%s/%s", homePath, PID_FILENAME );
