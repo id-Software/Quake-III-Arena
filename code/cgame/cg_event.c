@@ -867,6 +867,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		DEBUGNAME("EV_USE_ITEM14");
 		CG_UseItem( cent );
 		break;
+	case EV_USE_ITEM15:
+		DEBUGNAME("EV_USE_ITEM15");
+		CG_UseItem( cent );
+		break;
 
 	//=================================================================
 

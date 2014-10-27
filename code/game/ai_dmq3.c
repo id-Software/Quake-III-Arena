@@ -5009,6 +5009,7 @@ void BotCheckEvents(bot_state_t *bs, entityState_t *state) {
 		case EV_USE_ITEM12:
 		case EV_USE_ITEM13:
 		case EV_USE_ITEM14:
+		case EV_USE_ITEM15:
 			break;
 	}
 }
