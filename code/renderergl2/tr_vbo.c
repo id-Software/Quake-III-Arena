@@ -23,71 +23,126 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tr_local.h"
 
 
+union pack10_u {
+	struct {
+		signed int x:10;
+		signed int y:10;
+		signed int z:10;
+		signed int w:2;
+	} pack;
+	uint32_t i;
+};
+
+union pack8_u {
+	struct {
+		signed int x:8;
+		signed int y:8;
+		signed int z:8;
+		signed int w:8;
+	} pack;
+	uint32_t i;
+};
+
+
 uint32_t R_VaoPackTangent(vec4_t v)
 {
-	if (glRefConfig.packedNormalDataType == GL_UNSIGNED_INT_2_10_10_10_REV)
+	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		return (((uint32_t)(v[3] * 1.5f   + 2.0f  )) << 30)
-		     | (((uint32_t)(v[2] * 511.5f + 512.0f)) << 20)
-		     | (((uint32_t)(v[1] * 511.5f + 512.0f)) << 10)
-		     | (((uint32_t)(v[0] * 511.5f + 512.0f)));
+		union pack10_u num;
+
+		num.pack.x = v[0] * 511.0f;
+		num.pack.y = v[1] * 511.0f;
+		num.pack.z = v[2] * 511.0f;
+		num.pack.w = v[3];
+
+		return num.i;
 	}
 	else
 	{
-		return (((uint32_t)(v[3] * 127.5f + 128.0f)) << 24)
-		     | (((uint32_t)(v[2] * 127.5f + 128.0f)) << 16)
-		     | (((uint32_t)(v[1] * 127.5f + 128.0f)) << 8)
-		     | (((uint32_t)(v[0] * 127.5f + 128.0f)));
+		union pack8_u num;
+
+		num.pack.x = v[0] * 127.0f;
+		num.pack.y = v[1] * 127.0f;
+		num.pack.z = v[2] * 127.0f;
+		num.pack.w = v[3] * 127.0f;
+
+		return num.i;
 	}
 }
 
 uint32_t R_VaoPackNormal(vec3_t v)
 {
-	if (glRefConfig.packedNormalDataType == GL_UNSIGNED_INT_2_10_10_10_REV)
+	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		return (((uint32_t)(v[2] * 511.5f + 512.0f)) << 20)
-		     | (((uint32_t)(v[1] * 511.5f + 512.0f)) << 10)
-		     | (((uint32_t)(v[0] * 511.5f + 512.0f)));
+		union pack10_u num;
+
+		num.pack.x = v[0] * 511.0f;
+		num.pack.y = v[1] * 511.0f;
+		num.pack.z = v[2] * 511.0f;
+		num.pack.w = 0;
+
+		return num.i;
 	}
 	else
 	{
-		return (((uint32_t)(v[2] * 127.5f + 128.0f)) << 16)
-		     | (((uint32_t)(v[1] * 127.5f + 128.0f)) << 8)
-		     | (((uint32_t)(v[0] * 127.5f + 128.0f)));
+		union pack8_u num;
+
+		num.pack.x = v[0] * 127.0f;
+		num.pack.y = v[1] * 127.0f;
+		num.pack.z = v[2] * 127.0f;
+		num.pack.w = 0;
+
+		return num.i;
 	}
 }
 
 void R_VaoUnpackTangent(vec4_t v, uint32_t b)
 {
-	if (glRefConfig.packedNormalDataType == GL_UNSIGNED_INT_2_10_10_10_REV)
+	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		v[0] = ((b)       & 0x3ff) * 1.0f/511.5f - 1.0f;
-		v[1] = ((b >> 10) & 0x3ff) * 1.0f/511.5f - 1.0f;
-		v[2] = ((b >> 20) & 0x3ff) * 1.0f/511.5f - 1.0f;
-		v[3] = ((b >> 30) & 0x3)   * 1.0f/1.5f   - 1.0f;
+		union pack10_u num;
+
+		num.i = b;
+
+		v[0] = num.pack.x / 511.0f;
+		v[1] = num.pack.y / 511.0f;
+		v[2] = num.pack.z / 511.0f;
+		v[3] = num.pack.w; 
 	}
 	else
 	{
-		v[0] = ((b)       & 0xff) * 1.0f/127.5f - 1.0f;
-		v[1] = ((b >> 8)  & 0xff) * 1.0f/127.5f - 1.0f;
-		v[2] = ((b >> 16) & 0xff) * 1.0f/127.5f - 1.0f;
-		v[3] = ((b >> 24) & 0xff) * 1.0f/127.5f - 1.0f;
+		union pack8_u num;
+
+		num.i = b;
+
+		v[0] = num.pack.x / 127.0f;
+		v[1] = num.pack.y / 127.0f;
+		v[2] = num.pack.z / 127.0f;
+		v[3] = num.pack.w / 127.0f; 
 	}
 }
 
 void R_VaoUnpackNormal(vec3_t v, uint32_t b)
 {
-	if (glRefConfig.packedNormalDataType == GL_UNSIGNED_INT_2_10_10_10_REV)
+	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		v[0] = ((b)       & 0x3ff) * 1.0f/511.5f - 1.0f;
-		v[1] = ((b >> 10) & 0x3ff) * 1.0f/511.5f - 1.0f;
-		v[2] = ((b >> 20) & 0x3ff) * 1.0f/511.5f - 1.0f;
+		union pack10_u num;
+
+		num.i = b;
+
+		v[0] = num.pack.x / 511.0f;
+		v[1] = num.pack.y / 511.0f;
+		v[2] = num.pack.z / 511.0f;
 	}
 	else
 	{
-		v[0] = ((b)       & 0xff) * 1.0f/127.5f - 1.0f;
-		v[1] = ((b >> 8)  & 0xff) * 1.0f/127.5f - 1.0f;
-		v[2] = ((b >> 16) & 0xff) * 1.0f/127.5f - 1.0f;
+		union pack8_u num;
+
+		num.i = b;
+
+		v[0] = num.pack.x / 127.0f;
+		v[1] = num.pack.y / 127.0f;
+		v[2] = num.pack.z / 127.0f;
 	}
 }
 
@@ -651,6 +706,7 @@ void RB_UpdateTessVao(unsigned int attribBits)
 	if(tess.numVertexes > 0 && tess.numVertexes <= SHADER_MAX_VERTEXES && tess.numIndexes > 0 && tess.numIndexes <= SHADER_MAX_INDEXES)
 	{
 		int attribIndex;
+		int attribUpload;
 
 		R_BindVao(tess.vao);
 
@@ -661,25 +717,29 @@ void RB_UpdateTessVao(unsigned int attribBits)
 		if(!(attribBits & ATTR_BITS))
 			attribBits = ATTR_BITS;
 
-		if(attribBits & ATTR_TEXCOORD || attribBits & ATTR_LIGHTCOORD)
+		attribUpload = attribBits;
+
+		if((attribUpload & ATTR_TEXCOORD) || (attribUpload & ATTR_LIGHTCOORD))
 		{
 			// these are interleaved, so we update both if either need it
 			// this translates to updating ATTR_TEXCOORD twice as large as it needs
-			attribBits &= ~ATTR_LIGHTCOORD;
-			attribBits |= ATTR_TEXCOORD;
+			attribUpload &= ~ATTR_LIGHTCOORD;
+			attribUpload |= ATTR_TEXCOORD;
 		}
 
 		for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
 		{
 			uint32_t attribBit = 1 << attribIndex;
+			vaoAttrib_t *vAtb = &tess.vao->attribs[attribIndex];
+
+			if (attribUpload & attribBit)
+			{
+				// note: tess has a VBO where stride == size
+				qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vAtb->offset, tess.numVertexes * vAtb->stride, tess.attribPointers[attribIndex]);
+			}
 
 			if (attribBits & attribBit)
 			{
-				vaoAttrib_t *vAtb = &tess.vao->attribs[attribIndex];
-
-				// note: tess has a VBO where stride == size
-				qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vAtb->offset, tess.numVertexes * vAtb->stride, tess.attribPointers[attribIndex]);
-
 				if (!glRefConfig.vertexArrayObject)
 					qglVertexAttribPointerARB(attribIndex, vAtb->count, vAtb->type, vAtb->normalized, vAtb->stride, BUFFER_OFFSET(vAtb->offset));
 

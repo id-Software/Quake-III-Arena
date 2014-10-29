@@ -167,11 +167,6 @@ void main()
   #endif
 #endif
 
-	normal  = normal  * 2.0 - vec3(1.0);
-#if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	tangent = tangent * 2.0 - vec3(1.0);
-#endif
-
 #if defined(USE_TCGEN)
 	vec2 texCoords = GenTexCoords(u_TCGen0, position, normal, u_TCGen0Vector0, u_TCGen0Vector1);
 #else
@@ -195,13 +190,13 @@ void main()
 #endif
 
 #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 bitangent = cross(normal, tangent) * (attr_Tangent.w * 2.0 - 1.0);
+	vec3 bitangent = cross(normal, tangent) * attr_Tangent.w;
 #endif
 
 #if defined(USE_LIGHT_VECTOR)
 	vec3 L = u_LightOrigin.xyz - (position * u_LightOrigin.w);
 #elif defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	vec3 L = attr_LightDirection * 2.0 - vec3(1.0);
+	vec3 L = attr_LightDirection;
   #if defined(USE_MODELMATRIX)
 	L = (u_ModelMatrix * vec4(L, 0.0)).xyz;
   #endif

@@ -102,10 +102,9 @@ void main()
 #if defined(USE_VERTEX_ANIMATION)
 	vec3 position = mix(attr_Position, attr_Position2, u_VertexLerp);
 	vec3 normal   = mix(attr_Normal,   attr_Normal2,   u_VertexLerp);
-	normal = normalize(normal - vec3(0.5));
 #else
 	vec3 position = attr_Position;
-	vec3 normal   = attr_Normal * 2.0 - vec3(1.0);
+	vec3 normal   = attr_Normal;
 #endif
 
 #if defined(USE_DEFORM_VERTEXES)

@@ -80,7 +80,6 @@ void main()
 {
 	vec3 position  = mix(attr_Position, attr_Position2, u_VertexLerp);
 	vec3 normal    = mix(attr_Normal,   attr_Normal2,   u_VertexLerp);
-	normal = normalize(normal - vec3(0.5));
 
 	position = DeformPosition(position, normal, attr_TexCoord0.st);
 

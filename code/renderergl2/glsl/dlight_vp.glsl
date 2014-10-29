@@ -74,7 +74,7 @@ vec3 DeformPosition(const vec3 pos, const vec3 normal, const vec2 st)
 void main()
 {
 	vec3 position = attr_Position;
-	vec3 normal = attr_Normal * 2.0 - vec3(1.0);
+	vec3 normal = attr_Normal;
 
 #if defined(USE_DEFORM_VERTEXES)
 	position = DeformPosition(position, normal, attr_TexCoord0.st);
