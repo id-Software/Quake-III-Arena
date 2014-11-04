@@ -1130,7 +1130,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 			normal[1] = DotProduct(&nrmMat[3], &data->normals[3*vtx]);
 			normal[2] = DotProduct(&nrmMat[6], &data->normals[3*vtx]);
 
-			R_VaoPackNormal((byte *)outNormal++, normal);
+			R_VaoPackNormal((byte *)outNormal, normal);
 
 #ifdef USE_VERT_TANGENT_SPACE
 			tangent[0] = DotProduct(&nrmMat[0], &data->tangents[4*vtx]);
