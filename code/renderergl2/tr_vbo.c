@@ -44,81 +44,122 @@ union pack8_u {
 };
 
 
-uint32_t R_VaoPackTangent(vec4_t v)
+int R_VaoPackTangent(byte *out, vec4_t v)
 {
 	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		union pack10_u num;
+		union pack10_u *num = (union pack10_u *)out;
 
-		num.pack.x = v[0] * 511.0f;
-		num.pack.y = v[1] * 511.0f;
-		num.pack.z = v[2] * 511.0f;
-		num.pack.w = v[3];
-
-		return num.i;
+		num->pack.x = v[0] * 511.0f;
+		num->pack.y = v[1] * 511.0f;
+		num->pack.z = v[2] * 511.0f;
+		num->pack.w = v[3];
 	}
 	else
 	{
-		union pack8_u num;
+		union pack8_u *num = (union pack8_u *)out;
 
-		num.pack.x = v[0] * 127.0f;
-		num.pack.y = v[1] * 127.0f;
-		num.pack.z = v[2] * 127.0f;
-		num.pack.w = v[3] * 127.0f;
-
-		return num.i;
+		num->pack.x = v[0] * 127.0f;
+		num->pack.y = v[1] * 127.0f;
+		num->pack.z = v[2] * 127.0f;
+		num->pack.w = v[3] * 127.0f;
 	}
+
+	return 4;
 }
 
-uint32_t R_VaoPackNormal(vec3_t v)
+int R_VaoPackNormal(byte *out, vec3_t v)
 {
 	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		union pack10_u num;
+		union pack10_u *num = (union pack10_u *)out;
 
-		num.pack.x = v[0] * 511.0f;
-		num.pack.y = v[1] * 511.0f;
-		num.pack.z = v[2] * 511.0f;
-		num.pack.w = 0;
-
-		return num.i;
+		num->pack.x = v[0] * 511.0f;
+		num->pack.y = v[1] * 511.0f;
+		num->pack.z = v[2] * 511.0f;
+		num->pack.w = 0;
 	}
 	else
 	{
-		union pack8_u num;
+		union pack8_u *num = (union pack8_u *)out;
 
-		num.pack.x = v[0] * 127.0f;
-		num.pack.y = v[1] * 127.0f;
-		num.pack.z = v[2] * 127.0f;
-		num.pack.w = 0;
+		num->pack.x = v[0] * 127.0f;
+		num->pack.y = v[1] * 127.0f;
+		num->pack.z = v[2] * 127.0f;
+		num->pack.w = 0;
+	}
 
-		return num.i;
+	return 4;
+}
+
+int R_VaoPackTexCoord(byte *out, vec2_t st)
+{
+	if (glRefConfig.packedTexcoordDataType == GL_HALF_FLOAT)
+	{
+		uint16_t *num = (uint16_t *)out;
+
+		*num++ = FloatToHalf(st[0]);
+		*num++ = FloatToHalf(st[1]);
+
+		return sizeof(*num) * 2;
+	}
+	else
+	{
+		float *num = (float *)out;
+
+		*num++ = st[0];
+		*num++ = st[1];
+
+		return sizeof(*num) * 2;
 	}
 }
+
+int R_VaoPackColors(byte *out, vec4_t color)
+{
+	if (glRefConfig.packedTexcoordDataType == GL_HALF_FLOAT)
+	{
+		uint16_t *num = (uint16_t *)out;
+
+		*num++ = FloatToHalf(color[0]);
+		*num++ = FloatToHalf(color[1]);
+		*num++ = FloatToHalf(color[2]);
+		*num++ = FloatToHalf(color[3]);
+
+		return sizeof(*num) * 4;
+	}
+	else
+	{
+		float *num = (float *)out;
+
+		*num++ = color[0];
+		*num++ = color[1];
+		*num++ = color[2];
+		*num++ = color[3];
+
+		return sizeof(*num) * 4;
+	}
+}
+
 
 void R_VaoUnpackTangent(vec4_t v, uint32_t b)
 {
 	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		union pack10_u num;
+		union pack10_u *num = (union pack10_u *)&b;
 
-		num.i = b;
-
-		v[0] = num.pack.x / 511.0f;
-		v[1] = num.pack.y / 511.0f;
-		v[2] = num.pack.z / 511.0f;
-		v[3] = num.pack.w; 
+		v[0] = num->pack.x / 511.0f;
+		v[1] = num->pack.y / 511.0f;
+		v[2] = num->pack.z / 511.0f;
+		v[3] = num->pack.w; 
 	}
 	else
 	{
-		union pack8_u num;
+		union pack8_u *num = (union pack8_u *)&b;
 
-		num.i = b;
-
-		v[0] = num.pack.x / 127.0f;
-		v[1] = num.pack.y / 127.0f;
-		v[2] = num.pack.z / 127.0f;
-		v[3] = num.pack.w / 127.0f; 
+		v[0] = num->pack.x / 127.0f;
+		v[1] = num->pack.y / 127.0f;
+		v[2] = num->pack.z / 127.0f;
+		v[3] = num->pack.w / 127.0f; 
 	}
 }
 
@@ -126,23 +167,19 @@ void R_VaoUnpackNormal(vec3_t v, uint32_t b)
 {
 	if (glRefConfig.packedNormalDataType == GL_INT_2_10_10_10_REV)
 	{
-		union pack10_u num;
+		union pack10_u *num = (union pack10_u *)&b;
 
-		num.i = b;
-
-		v[0] = num.pack.x / 511.0f;
-		v[1] = num.pack.y / 511.0f;
-		v[2] = num.pack.z / 511.0f;
+		v[0] = num->pack.x / 511.0f;
+		v[1] = num->pack.y / 511.0f;
+		v[2] = num->pack.z / 511.0f;
 	}
 	else
 	{
-		union pack8_u num;
+		union pack8_u *num = (union pack8_u *)&b;
 
-		num.i = b;
-
-		v[0] = num.pack.x / 127.0f;
-		v[1] = num.pack.y / 127.0f;
-		v[2] = num.pack.z / 127.0f;
+		v[0] = num->pack.x / 127.0f;
+		v[1] = num->pack.y / 127.0f;
+		v[2] = num->pack.z / 127.0f;
 	}
 }
 
@@ -312,9 +349,9 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 	vao->attribs[ATTR_INDEX_POSITION      ].type = GL_FLOAT;
 	vao->attribs[ATTR_INDEX_NORMAL        ].type = glRefConfig.packedNormalDataType;
 	vao->attribs[ATTR_INDEX_TANGENT       ].type = glRefConfig.packedNormalDataType;
-	vao->attribs[ATTR_INDEX_TEXCOORD      ].type = GL_FLOAT;
-	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].type = GL_FLOAT;
-	vao->attribs[ATTR_INDEX_COLOR         ].type = GL_FLOAT;
+	vao->attribs[ATTR_INDEX_TEXCOORD      ].type = glRefConfig.packedTexcoordDataType;
+	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].type = glRefConfig.packedTexcoordDataType;
+	vao->attribs[ATTR_INDEX_COLOR         ].type = glRefConfig.packedColorDataType;
 	vao->attribs[ATTR_INDEX_LIGHTDIRECTION].type = glRefConfig.packedNormalDataType;
 
 	vao->attribs[ATTR_INDEX_POSITION      ].normalized = GL_FALSE;
@@ -330,9 +367,9 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 #ifdef USE_VERT_TANGENT_SPACE
 	vao->attribs[ATTR_INDEX_TANGENT       ].offset = dataSize; dataSize += sizeof(uint32_t);
 #endif
-	vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = dataSize; dataSize += sizeof(verts[0].st);
-	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = dataSize; dataSize += sizeof(verts[0].lightmap);
-	vao->attribs[ATTR_INDEX_COLOR         ].offset = dataSize; dataSize += sizeof(verts[0].vertexColors);
+	vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = dataSize; dataSize += glRefConfig.packedTexcoordDataSize;
+	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = dataSize; dataSize += glRefConfig.packedTexcoordDataSize;
+	vao->attribs[ATTR_INDEX_COLOR         ].offset = dataSize; dataSize += glRefConfig.packedColorDataSize;
 	vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = dataSize; dataSize += sizeof(uint32_t);
 
 	vao->attribs[ATTR_INDEX_POSITION      ].stride = dataSize;
@@ -358,40 +395,29 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 
 	for (i = 0; i < numVertexes; i++)
 	{
-		uint32_t *p;
-
 		// xyz
 		memcpy(data + dataOfs, &verts[i].xyz, sizeof(verts[i].xyz));
 		dataOfs += sizeof(verts[i].xyz);
 
 		// normal
-		p = (uint32_t *)(data + dataOfs);
-		*p = R_VaoPackNormal(verts[i].normal);
-		dataOfs += sizeof(uint32_t);
+		dataOfs += R_VaoPackNormal(data + dataOfs, verts[i].normal);
 
 #ifdef USE_VERT_TANGENT_SPACE
 		// tangent
-		p = (uint32_t *)(data + dataOfs);
-		*p = R_VaoPackTangent(verts[i].tangent);
-		dataOfs += sizeof(uint32_t);
+		dataOfs += R_VaoPackTangent(data + dataOfs, verts[i].tangent);
 #endif
 
-		// vertex texcoords
-		memcpy(data + dataOfs, &verts[i].st, sizeof(verts[i].st));
-		dataOfs += sizeof(verts[i].st);
+		// texcoords
+		dataOfs += R_VaoPackTexCoord(data + dataOfs, verts[i].st);
 
-		// feed vertex lightmap texcoords
-		memcpy(data + dataOfs, &verts[i].lightmap, sizeof(verts[i].lightmap));
-		dataOfs += sizeof(verts[i].lightmap);
+		// lightmap texcoords
+		dataOfs += R_VaoPackTexCoord(data + dataOfs, verts[i].lightmap);
 
-		// feed vertex colors
-		memcpy(data + dataOfs, &verts[i].vertexColors, sizeof(verts[i].vertexColors));
-		dataOfs += sizeof(verts[i].vertexColors);
+		// colors
+		dataOfs += R_VaoPackColors(data + dataOfs, verts[i].vertexColors);
 
-		// feed vertex light directions
-		p = (uint32_t *)(data + dataOfs);
-		*p = R_VaoPackNormal(verts[i].lightdir);
-		dataOfs += sizeof(uint32_t);
+		// light directions
+		dataOfs += R_VaoPackNormal(data + dataOfs, verts[i].lightdir);
 	}
 
 	vao->vertexesSize = dataSize;

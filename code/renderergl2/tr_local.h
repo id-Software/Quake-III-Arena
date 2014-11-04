@@ -1416,6 +1416,10 @@ typedef struct {
 	qboolean seamlessCubeMap;
 
 	GLenum packedNormalDataType;
+	GLenum packedTexcoordDataType;
+	GLenum packedColorDataType;
+	int packedTexcoordDataSize;
+	int packedColorDataSize;
 
 	qboolean floatLightmap;
 	qboolean vertexArrayObject;
@@ -1713,6 +1717,7 @@ extern  cvar_t  *r_ext_multi_draw_arrays;
 extern  cvar_t  *r_ext_framebuffer_object;
 extern  cvar_t  *r_ext_texture_float;
 extern  cvar_t  *r_arb_half_float_pixel;
+extern  cvar_t  *r_arb_half_float_vertex;
 extern  cvar_t  *r_ext_framebuffer_multisample;
 extern  cvar_t  *r_arb_seamless_cube_map;
 extern  cvar_t  *r_arb_vertex_type_2_10_10_10_rev;
@@ -2180,8 +2185,10 @@ VERTEX BUFFER OBJECTS
 ============================================================
 */
 
-uint32_t R_VaoPackTangent(vec4_t v);
-uint32_t R_VaoPackNormal(vec3_t v);
+int R_VaoPackTangent(byte *out, vec4_t v);
+int R_VaoPackNormal(byte *out, vec3_t v);
+int R_VaoPackTexCoord(byte *out, vec2_t st);
+int R_VaoPackColors(byte *out, vec4_t color);
 void R_VaoUnpackTangent(vec4_t v, uint32_t b);
 void R_VaoUnpackNormal(vec3_t v, uint32_t b);
 

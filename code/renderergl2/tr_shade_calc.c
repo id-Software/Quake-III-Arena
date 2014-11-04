@@ -189,7 +189,7 @@ void RB_CalcDeformNormals( deformStage_t *ds ) {
 
 		VectorNormalizeFast( fNormal );
 
-		*normal = R_VaoPackNormal(fNormal);
+		R_VaoPackNormal((byte *)normal, fNormal);
 	}
 }
 

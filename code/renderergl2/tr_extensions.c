@@ -709,4 +709,27 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
+	// GL_ARB_half_float_vertex
+	extension = "GL_ARB_half_float_vertex";
+	glRefConfig.packedTexcoordDataType = GL_FLOAT;
+	glRefConfig.packedTexcoordDataSize = sizeof(float) * 2;
+	glRefConfig.packedColorDataType    = GL_FLOAT;
+	glRefConfig.packedColorDataSize    = sizeof(float) * 4;
+	if( GLimp_HaveExtension( extension ) )
+	{
+		if (r_arb_half_float_vertex->integer)
+		{
+			glRefConfig.packedTexcoordDataType = GL_HALF_FLOAT;
+			glRefConfig.packedTexcoordDataSize = sizeof(uint16_t) * 2;
+			glRefConfig.packedColorDataType    = GL_HALF_FLOAT;
+			glRefConfig.packedColorDataSize    = sizeof(uint16_t) * 4;
+		}
+
+		ri.Printf(PRINT_ALL, result[r_arb_half_float_vertex->integer ? 1 : 0], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
+
 }
