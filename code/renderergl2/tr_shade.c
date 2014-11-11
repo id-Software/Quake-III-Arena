@@ -1351,16 +1351,6 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		else if ( pStage->bundle[1].image[0] != 0 )
 		{
 			R_BindAnimatedImageToTMU( &pStage->bundle[0], 0 );
-
-			//
-			// lightmap/secondary pass
-			//
-			if ( r_lightmap->integer ) {
-				GLSL_SetUniformInt(sp, UNIFORM_TEXTURE1ENV, GL_REPLACE);
-			} else {
-				GLSL_SetUniformInt(sp, UNIFORM_TEXTURE1ENV, tess.shader->multitextureEnv);
-			}
-
 			R_BindAnimatedImageToTMU( &pStage->bundle[1], 1 );
 		}
 		else 
@@ -1369,8 +1359,6 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			// set state
 			//
 			R_BindAnimatedImageToTMU( &pStage->bundle[0], 0 );
-
-			GLSL_SetUniformInt(sp, UNIFORM_TEXTURE1ENV, 0);
 		}
 
 		//

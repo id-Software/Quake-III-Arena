@@ -9,7 +9,7 @@ attribute vec3 attr_Normal2;
 attribute vec4 attr_Color;
 attribute vec4 attr_TexCoord0;
 
-#if defined(USE_LIGHTMAP) || defined(USE_TCGEN)
+#if defined(USE_TCGEN)
 attribute vec4 attr_TexCoord1;
 #endif
 
@@ -57,9 +57,6 @@ uniform float  u_VertexLerp;
 #endif
 
 varying vec2   var_DiffuseTex;
-#if defined(USE_LIGHTMAP)
-varying vec2   var_LightTex;
-#endif
 varying vec4   var_Color;
 
 #if defined(USE_DEFORM_VERTEXES)
@@ -228,10 +225,6 @@ void main()
 	var_DiffuseTex = ModTexCoords(tex, position, u_DiffuseTexMatrix, u_DiffuseTexOffTurb);
 #else
     var_DiffuseTex = tex;
-#endif
-
-#if defined(USE_LIGHTMAP)
-	var_LightTex = attr_TexCoord1.st;
 #endif
 
 #if defined(USE_RGBAGEN)
