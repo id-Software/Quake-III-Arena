@@ -1079,7 +1079,11 @@ void GLSL_InitGPUShaders(void)
 #endif
 
 				if ((i & LIGHTDEF_USE_PARALLAXMAP) && !(i & LIGHTDEF_ENTITY) && r_parallaxMapping->integer)
+				{
 					Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP\n");
+					if (r_parallaxMapping->integer > 1)
+						Q_strcat(extradefines, 1024, "#define USE_RELIEFMAP\n");
+				}
 			}
 
 			if (r_specularMapping->integer)

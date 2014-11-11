@@ -100,6 +100,9 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 	// best match found (starts with last position 1.0)
 	float bestDepth = 1.0;
 
+	// texture depth at best depth
+	float texDepth = 0.0;
+
 	// search front to back for first point inside object
 	for(int i = 0; i < linearSearchSteps - 1; ++i)
 	{
@@ -109,11 +112,19 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 		
 		if(bestDepth > 0.996)		// if no depth found yet
 			if(depth >= t)
+			{
 				bestDepth = depth;	// store best depth
+				texDepth = t;
+			}
 	}
 
 	depth = bestDepth;
-	
+
+#if !defined (USE_RELIEFMAP)
+	float prevDepth = depth - size;
+	float prevTexDepth = SampleDepth(normalMap, dp + ds * prevDepth);
+	bestDepth -= size * (prevDepth - prevTexDepth) / (size - texDepth + prevTexDepth);
+#else
 	// recurse around first point (depth) for closest match
 	for(int i = 0; i < binarySearchSteps; ++i)
 	{
@@ -129,6 +140,7 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 
 		depth += size;
 	}
+#endif
 
 	return bestDepth;
 }

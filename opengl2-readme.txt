@@ -187,7 +187,8 @@ Cvars for advanced material usage:
   r_parallaxMapping              - Enable parallax mapping for materials that
                                    support it.
                                      0 - No. (default)
-                                     1 - Yes.
+                                     1 - Use parallax occlusion mapping.
+                                     2 - Use relief mapping. (slower)
 
   r_baseSpecular                 - Set the specular reflectance of materials
                                    which don't include a specular map or
