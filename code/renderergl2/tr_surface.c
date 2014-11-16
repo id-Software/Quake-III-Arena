@@ -1658,12 +1658,6 @@ void RB_SurfaceVaoMdvMesh(srfVaoMdvMesh_t * surface)
 	glState.vertexAnimation = qfalse;
 }
 
-static void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
-	// all apropriate state must be set in RB_BeginSurface
-	// this isn't implemented yet...
-	qglCallList( surf->listNum );
-}
-
 static void RB_SurfaceSkip( void *surf ) {
 }
 
@@ -1680,7 +1674,6 @@ void (*rb_surfaceTable[SF_NUM_SURFACE_TYPES])( void *) = {
 	(void(*)(void*))RB_IQMSurfaceAnim,		// SF_IQM,
 	(void(*)(void*))RB_SurfaceFlare,		// SF_FLARE,
 	(void(*)(void*))RB_SurfaceEntity,		// SF_ENTITY
-	(void(*)(void*))RB_SurfaceDisplayList,		// SF_DISPLAY_LIST
 	(void(*)(void*))RB_SurfaceVaoMesh,	    // SF_VAO_MESH,
 	(void(*)(void*))RB_SurfaceVaoMdvMesh,   // SF_VAO_MDVMESH
 };
