@@ -538,9 +538,6 @@ void RB_BeginDrawingView (void) {
 		backEnd.isHyperspace = qfalse;
 	}
 
-	glState.faceCulling = -1;		// force face culling to set next time
-	glState.faceCullFront = -1;     // same as above
-
 	// we will only draw a sun if there was sky rendered in this view
 	backEnd.skyRenderedThisView = qfalse;
 
