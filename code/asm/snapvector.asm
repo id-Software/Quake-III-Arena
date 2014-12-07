@@ -24,10 +24,9 @@
 ; function prototype:
 ; void qsnapvector(vec3_t vec)
 
+IFNDEF idx64
 .686p
 .xmm
-
-IFNDEF idx64
 .model flat, c
 ENDIF
 
