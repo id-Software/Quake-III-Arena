@@ -621,7 +621,7 @@ Tree cast(Tree p, Type type) {
 			p = simplify(CVP, dst, p, NULL);
 		else {
 			if ((isfunc(src->type) && !isfunc(dst->type))
-			|| (!isfunc(src->type) &&  isfunc(dst->type)))
+			|| (!isnullptr(p) && !isfunc(src->type) && isfunc(dst->type)))
 				warning("conversion from `%t' to `%t' is compiler dependent\n", p->type, type);
 
 			if (src->size != dst->size)
