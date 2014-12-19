@@ -776,7 +776,7 @@ static void IN_ProcessEvents( void )
 						else if( ( *c & 0xF8 ) == 0xF0 ) // 1111 0xxx
 						{
 							utf32 |= ( *c++ & 0x07 ) << 18;
-							utf32 |= ( *c++ & 0x3F ) << 6;
+							utf32 |= ( *c++ & 0x3F ) << 12;
 							utf32 |= ( *c++ & 0x3F ) << 6;
 							utf32 |= ( *c++ & 0x3F );
 						}
