@@ -651,6 +651,11 @@ void StopFollowing( gentity_t *ent ) {
 	ent->client->ps.pm_flags &= ~PMF_FOLLOW;
 	ent->r.svFlags &= ~SVF_BOT;
 	ent->client->ps.clientNum = ent - g_entities;
+
+	// don't use dead view angles
+	if ( ent->client->ps.stats[STAT_HEALTH] <= 0 ) {
+		ent->client->ps.stats[STAT_HEALTH] = 1;
+	}
 }
 
 /*
