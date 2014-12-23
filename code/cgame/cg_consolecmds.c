@@ -358,7 +358,7 @@ static void CG_TauntDeathInsult_f (void ) {
 }
 
 static void CG_TauntGauntlet_f (void ) {
-	trap_SendConsoleCommand("cmd vsay kill_guantlet\n");
+	trap_SendConsoleCommand("cmd vsay kill_gauntlet\n");
 }
 
 static void CG_TaskSuicide_f (void ) {
