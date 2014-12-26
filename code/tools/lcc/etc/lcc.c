@@ -11,7 +11,12 @@ static char rcsid[] = "Id: dummy rcsid";
 #include <assert.h>
 #include <ctype.h>
 #include <signal.h>
+#ifdef WIN32
+#include <process.h> /* getpid() */
+#include <io.h> /* access() */
+#else
 #include <unistd.h>
+#endif
 
 #ifndef TEMPDIR
 #define TEMPDIR "/tmp"
