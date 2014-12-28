@@ -2297,7 +2297,7 @@ CG_DrawProxWarning
 static void CG_DrawProxWarning( void ) {
 	char s [32];
 	int			w;
-  static int proxTime;
+  static float proxTime;
   static int proxCounter;
   static int proxTick;
 
