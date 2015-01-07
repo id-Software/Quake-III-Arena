@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define HOMEPATH_NAME_WIN		"FooBar"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
   #define GAMENAME_FOR_MASTER		"foobar"	// must NOT contain whitespace
+  #define CINEMATICS_LOGO		"foologo.roq"
+  #define CINEMATICS_INTRO		"intro.roq"
 //  #define LEGACY_PROTOCOL	// You probably don't need this for your standalone game
 #else
   #define PRODUCT_NAME			"ioq3"
@@ -45,6 +47,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define HOMEPATH_NAME_WIN		"Quake3"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
   #define GAMENAME_FOR_MASTER		"Quake3Arena"
+  #define CINEMATICS_LOGO		"idlogo.RoQ"
+  #define CINEMATICS_INTRO		"intro.RoQ"
   #define LEGACY_PROTOCOL
 #endif
 
