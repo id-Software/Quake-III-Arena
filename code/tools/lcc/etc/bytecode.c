@@ -52,6 +52,10 @@ int option(char *arg) {
 		cpp[0] = concat(&arg[8], "/q3cpp" BINEXT);
 		include[0] = concat("-I", concat(&arg[8], "/include"));
 		com[0] = concat(&arg[8], "/q3rcc" BINEXT);
+	} else if (strncmp(arg, "-lcppdir=", 9) == 0) {
+		cpp[0] = concat(&arg[9], "/q3cpp" BINEXT);
+	} else if (strncmp(arg, "-lrccdir=", 9) == 0) {
+		com[0] = concat(&arg[9], "/q3rcc" BINEXT);
 	} else if (strcmp(arg, "-p") == 0 || strcmp(arg, "-pg") == 0) {
 		fprintf( stderr, "no profiling supported, %s ignored.\n", arg);
 	} else if (strcmp(arg, "-b") == 0)
