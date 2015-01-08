@@ -146,7 +146,7 @@ void mumble_set_identity(const char* identity)
 	size_t len;
 	if (!lm)
 		return;
-	len = MIN(sizeof(lm->identity), strlen(identity)+1);
+	len = MIN(sizeof(lm->identity)/sizeof(wchar_t), strlen(identity)+1);
 	mbstowcs(lm->identity, identity, len);
 }
 
@@ -164,7 +164,7 @@ void mumble_set_description(const char* description)
 	size_t len;
 	if (!lm)
 		return;
-	len = MIN(sizeof(lm->description), strlen(description)+1);
+	len = MIN(sizeof(lm->description)/sizeof(wchar_t), strlen(description)+1);
 	mbstowcs(lm->description, description, len);
 }
 
