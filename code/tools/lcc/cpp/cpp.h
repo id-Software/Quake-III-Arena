@@ -143,7 +143,7 @@ void	setobjname(char *);
 
 char *basepath( char *fname );
 
-extern	char *outp;
+extern	char *outbufp;
 extern	Token	nltoken;
 extern	Source *cursource;
 extern	char *curtime;
