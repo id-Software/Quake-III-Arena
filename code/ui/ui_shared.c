@@ -609,17 +609,22 @@ void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime, qboo
 void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle) {
   //float bordersize = 0;
   vec4_t color = {0};
-  rectDef_t fillRect = w->rect;
+  rectDef_t fillRect;
 
+  if ( w == NULL ) {
+    return;
+  }
 
   if (debugMode) {
     color[0] = color[1] = color[2] = color[3] = 1;
     DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, 1, color);
   }
 
-  if (w == NULL || (w->style == 0 && w->border == 0)) {
+  if (w->style == 0 && w->border == 0) {
     return;
   }
+
+  fillRect = w->rect;
 
   if (w->border != 0) {
     fillRect.x += w->borderSize;
