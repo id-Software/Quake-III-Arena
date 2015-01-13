@@ -4628,6 +4628,11 @@ static qboolean Character_Parse(char **p) {
     }
 
     if (token[0] == '{') {
+      if (uiInfo.characterCount == MAX_HEADS) {
+        uiInfo.characterCount--;
+        Com_Printf("Too many characters, last character replaced!\n");
+      }
+
       // two tokens per line, character name and sex
       if (!String_Parse(p, &uiInfo.characterList[uiInfo.characterCount].name) || !String_Parse(p, &tempStr)) {
         return qfalse;
@@ -4645,11 +4650,7 @@ static qboolean Character_Parse(char **p) {
 	  }
 
       Com_Printf("Loaded %s character %s.\n", uiInfo.characterList[uiInfo.characterCount].base, uiInfo.characterList[uiInfo.characterCount].name);
-      if (uiInfo.characterCount < MAX_HEADS) {
-        uiInfo.characterCount++;
-      } else {
-        Com_Printf("Too many characters, last character replaced!\n");
-      }
+      uiInfo.characterCount++;
      
       token = COM_ParseExt(p, qtrue);
       if (token[0] != '}') {
@@ -4683,17 +4684,18 @@ static qboolean Alias_Parse(char **p) {
     }
 
     if (token[0] == '{') {
+      if (uiInfo.aliasCount == MAX_ALIASES) {
+        uiInfo.aliasCount--;
+        Com_Printf("Too many aliases, last alias replaced!\n");
+      }
+
       // three tokens per line, character name, bot alias, and preferred action a - all purpose, d - defense, o - offense
       if (!String_Parse(p, &uiInfo.aliasList[uiInfo.aliasCount].name) || !String_Parse(p, &uiInfo.aliasList[uiInfo.aliasCount].ai) || !String_Parse(p, &uiInfo.aliasList[uiInfo.aliasCount].action)) {
         return qfalse;
       }
     
       Com_Printf("Loaded character alias %s using character ai %s.\n", uiInfo.aliasList[uiInfo.aliasCount].name, uiInfo.aliasList[uiInfo.aliasCount].ai);
-      if (uiInfo.aliasCount < MAX_ALIASES) {
-        uiInfo.aliasCount++;
-      } else {
-        Com_Printf("Too many aliases, last alias replaced!\n");
-      }
+      uiInfo.aliasCount++;
      
       token = COM_ParseExt(p, qtrue);
       if (token[0] != '}') {
