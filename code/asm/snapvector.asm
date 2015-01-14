@@ -46,7 +46,6 @@ IFDEF idx64
 ; qsnapvector using SSE
 
   qsnapvectorsse PROC
-    sub rsp, 8
 	movaps xmm1, ssemask		; initialize the mask register
 	movups xmm0, [rcx]			; here is stored our vector. Read 4 values in one go
 	movaps xmm2, xmm0			; keep a copy of the original data
