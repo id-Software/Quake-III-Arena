@@ -2115,7 +2115,7 @@ void S_AL_StartBackgroundTrack( const char *intro, const char *loop )
 		issame = qfalse;
 
 	// Copy the loop over
-	strncpy( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
+	Q_strncpyz( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
 
 	if(!issame)
 	{
