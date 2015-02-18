@@ -3857,7 +3857,7 @@ int AAS_Reachability_Grapple(int area1num, int area2num)
 		//
 		bsptrace = AAS_Trace(start, NULL, NULL, end, 0, CONTENTS_SOLID);
 		//the grapple won't stick to the sky and the grapple point should be near the AAS wall
-		if ((bsptrace.surface.value & SURF_SKY) || (bsptrace.fraction * 500 > 32)) continue;
+		if ((bsptrace.surface.flags & SURF_SKY) || (bsptrace.fraction * 500 > 32)) continue;
 		//trace a full bounding box from the area center on the ground to
 		//the center of the face
 		VectorSubtract(facecenter, areastart, dir);
