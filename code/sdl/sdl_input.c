@@ -849,11 +849,19 @@ static void IN_ProcessEvents( void )
 				{
 					case SDL_WINDOWEVENT_RESIZED:
 						{
-							char width[32], height[32];
-							Com_sprintf( width, sizeof( width ), "%d", e.window.data1 );
-							Com_sprintf( height, sizeof( height ), "%d", e.window.data2 );
-							Cvar_Set( "r_customwidth", width );
-							Cvar_Set( "r_customheight", height );
+							int width, height;
+
+							width = e.window.data1;
+							height = e.window.data2;
+
+							// check if size actually changed
+							if( cls.glconfig.vidWidth == width && cls.glconfig.vidHeight == height )
+							{
+								break;
+							}
+
+							Cvar_SetValue( "r_customwidth", width );
+							Cvar_SetValue( "r_customheight", height );
 							Cvar_Set( "r_mode", "-1" );
 
 							// Wait until user stops dragging for 1 second, so
