@@ -1505,20 +1505,28 @@ void RB_StageIteratorGeneric( void )
 	//
 	// set face culling appropriately
 	//
-	if ((backEnd.viewParms.flags & VPF_DEPTHSHADOW))
+	if (input->shader->cullType == CT_TWO_SIDED)
 	{
-		//GL_Cull( CT_TWO_SIDED );
-		
-		if (input->shader->cullType == CT_TWO_SIDED)
-			GL_Cull( CT_TWO_SIDED );
-		else if (input->shader->cullType == CT_FRONT_SIDED)
-			GL_Cull( CT_BACK_SIDED );
-		else
-			GL_Cull( CT_FRONT_SIDED );
-		
+		GL_Cull( CT_TWO_SIDED );
 	}
 	else
-		GL_Cull( input->shader->cullType );
+	{
+		qboolean cullFront = (input->shader->cullType == CT_FRONT_SIDED);
+
+		if ( backEnd.viewParms.flags & VPF_DEPTHSHADOW )
+			cullFront = !cullFront;
+
+		if ( backEnd.viewParms.isMirror )
+			cullFront = !cullFront;
+
+		if ( backEnd.currentEntity && backEnd.currentEntity->mirrored )
+			cullFront = !cullFront;
+
+		if (cullFront)
+			GL_Cull( CT_FRONT_SIDED );
+		else
+			GL_Cull( CT_BACK_SIDED );
+	}
 
 	// set polygon offset if necessary
 	if ( input->shader->polygonOffset )

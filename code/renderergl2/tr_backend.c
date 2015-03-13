@@ -127,25 +127,12 @@ void GL_Cull( int cullType ) {
 	} 
 	else 
 	{
-		qboolean cullFront;
+		qboolean cullFront = (cullType == CT_FRONT_SIDED);
 
 		if ( glState.faceCulling == CT_TWO_SIDED )
-		{
 			qglEnable( GL_CULL_FACE );
-		}
 
-		cullFront = (cullType == CT_FRONT_SIDED);
-		if ( backEnd.viewParms.isMirror )
-		{
-			cullFront = !cullFront;
-		}
-
-		if ( backEnd.currentEntity && backEnd.currentEntity->mirrored )
-		{
-			cullFront = !cullFront;
-		}
-
-		if (glState.faceCullFront != cullFront)
+		if ( glState.faceCullFront != cullFront )
 			qglCullFace( cullFront ? GL_FRONT : GL_BACK );
 
 		glState.faceCullFront = cullFront;
