@@ -1074,11 +1074,10 @@ ifeq ($(USE_INTERNAL_JPEG),1)
   BASE_CFLAGS += -DUSE_INTERNAL_JPEG
   BASE_CFLAGS += -I$(JPDIR)
 else
-  # libjpeg doesn't have pkg-config yet, but let users override with
-  # "make JPEG_CFLAGS=-I/opt/jpeg/include JPEG_LIBS='-L/opt/jpeg/lib -ljpeg'"
-  # if they need to
-  JPEG_CFLAGS ?=
-  JPEG_LIBS ?= -ljpeg
+  # IJG libjpeg doesn't have pkg-config, but libjpeg-turbo uses libjpeg.pc;
+  # we fall back to hard-coded answers if libjpeg.pc is unavailable
+  JPEG_CFLAGS ?= $(shell pkg-config --silence-errors --cflags libjpeg || true)
+  JPEG_LIBS ?= $(shell pkg-config --silence-errors --libs libjpeg || echo -ljpeg)
   BASE_CFLAGS += $(JPEG_CFLAGS)
   RENDERER_LIBS += $(JPEG_LIBS)
 endif
