@@ -2298,8 +2298,7 @@ static void CG_DrawProxWarning( void ) {
 	char s [32];
 	int			w;
   static int proxTime;
-  static int proxCounter;
-  static int proxTick;
+  int proxTick;
 
 	if( !(cg.snap->ps.eFlags & EF_TICKING ) ) {
     proxTime = 0;
@@ -2307,17 +2306,12 @@ static void CG_DrawProxWarning( void ) {
 	}
 
   if (proxTime == 0) {
-    proxTime = cg.time + 5000;
-    proxCounter = 5;
-    proxTick = 0;
+    proxTime = cg.time;
   }
 
-  if (cg.time > proxTime) {
-    proxTick = proxCounter--;
-    proxTime = cg.time + 1000;
-  }
+  proxTick = 10 - ((cg.time - proxTime) / 1000);
 
-  if (proxTick != 0) {
+  if (proxTick > 0 && proxTick <= 5) {
     Com_sprintf(s, sizeof(s), "INTERNAL COMBUSTION IN: %i", proxTick);
   } else {
     Com_sprintf(s, sizeof(s), "YOU HAVE BEEN MINED");
