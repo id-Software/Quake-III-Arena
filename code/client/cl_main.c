@@ -2301,9 +2301,9 @@ Resend a connect message if the last one has timed out
 =================
 */
 void CL_CheckForResend( void ) {
-	int		port, i;
+	int		port;
 	char	info[MAX_INFO_STRING];
-	char	data[MAX_INFO_STRING];
+	char	data[MAX_INFO_STRING + 10];
 
 	// don't send anything if playing back a demo
 	if ( clc.demoplaying ) {
@@ -2357,19 +2357,8 @@ void CL_CheckForResend( void ) {
 		Info_SetValueForKey( info, "qport", va("%i", port ) );
 		Info_SetValueForKey( info, "challenge", va("%i", clc.challenge ) );
 		
-		strcpy(data, "connect ");
-    // TTimo adding " " around the userinfo string to avoid truncated userinfo on the server
-    //   (Com_TokenizeString tokenizes around spaces)
-    data[8] = '"';
-
-		for(i=0;i<strlen(info);i++) {
-			data[9+i] = info[i];	// + (clc.challenge)&0x3;
-		}
-    data[9+i] = '"';
-		data[10+i] = 0;
-
-    // NOTE TTimo don't forget to set the right data length!
-		NET_OutOfBandData( NS_CLIENT, clc.serverAddress, (byte *) &data[0], i+10 );
+		Com_sprintf( data, sizeof(data), "connect \"%s\"", info );
+		NET_OutOfBandData( NS_CLIENT, clc.serverAddress, (byte *) data, strlen ( data ) );
 		// the most current userinfo has been sent, so watch for any
 		// newer changes to userinfo variables
 		cvar_modifiedFlags &= ~CVAR_USERINFO;
