@@ -2714,7 +2714,7 @@ void R_CreateBuiltinImages( void ) {
 	{
 		for( x = 0; x < MAX_DLIGHTS; x++)
 		{
-			tr.shadowCubemaps[x] = R_CreateImage(va("*shadowcubemap%i", x), (byte *)data, PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_CLAMPTOEDGE | IMGFLAG_CUBEMAP, 0);
+			tr.shadowCubemaps[x] = R_CreateImage(va("*shadowcubemap%i", x), NULL, PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_CLAMPTOEDGE | IMGFLAG_CUBEMAP, 0);
 		}
 	}
 
