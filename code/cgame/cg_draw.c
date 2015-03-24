@@ -1899,6 +1899,8 @@ static void CG_DrawCrosshair(void)
 	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w), 
 		y + cg.refdef.y + 0.5 * (cg.refdef.height - h), 
 		w, h, 0, 0, 1, 1, hShader );
+
+	trap_R_SetColor( NULL );
 }
 
 /*
