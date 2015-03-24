@@ -679,6 +679,11 @@ static float CG_DrawAttacker( float y ) {
 		return y;
 	}
 
+	if ( !cgs.clientinfo[clientNum].infoValid ) {
+		cg.attackerTime = 0;
+		return y;
+	}
+
 	t = cg.time - cg.attackerTime;
 	if ( t > ATTACKER_HEAD_TIME ) {
 		cg.attackerTime = 0;
