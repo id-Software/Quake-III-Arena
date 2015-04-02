@@ -70,6 +70,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define PRODUCT_VERSION "1.36"
 #endif
 
+#ifndef PRODUCT_DATE
+#  define PRODUCT_DATE __DATE__
+#endif
+
 #define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
 
 #define MAX_TEAMNAME		32
