@@ -225,7 +225,7 @@ uint16_t FloatToHalf(float in)
 
 	f32.f = in;
 
-	f16.pack.exponent = CLAMP(f32.pack.exponent - 112, 0, 31);
+	f16.pack.exponent = CLAMP((int)(f32.pack.exponent) - 112, 0, 31);
 	f16.pack.fraction = f32.pack.fraction >> 13;
 	f16.pack.sign     = f32.pack.sign;
 
