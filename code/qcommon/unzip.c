@@ -1,4 +1,10 @@
 /* unzip.c -- IO for uncompress .zip files using zlib
+
+   Modified for Quake III Arena to use the Z_Malloc() memory pool;
+   this means a system copy of minizip is not a suitable replacement.
+
+   Based on minizip:
+
    Version 1.01e, February 12th, 2005
 
    Copyright (C) 1998-2005 Gilles Vollant
