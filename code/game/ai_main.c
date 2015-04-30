@@ -1100,7 +1100,8 @@ void BotWriteSessionData(bot_state_t *bs) {
 			"%i %i %i %i %i %i %i %i"
 			" %f %f %f"
 			" %f %f %f"
-			" %f %f %f",
+			" %f %f %f"
+			" %f",
 		bs->lastgoal_decisionmaker,
 		bs->lastgoal_ltgtype,
 		bs->lastgoal_teammate,
@@ -1117,7 +1118,8 @@ void BotWriteSessionData(bot_state_t *bs) {
 		bs->lastgoal_teamgoal.mins[2],
 		bs->lastgoal_teamgoal.maxs[0],
 		bs->lastgoal_teamgoal.maxs[1],
-		bs->lastgoal_teamgoal.maxs[2]
+		bs->lastgoal_teamgoal.maxs[2],
+		bs->formation_dist
 		);
 
 	var = va( "botsession%i", bs->client );
@@ -1141,7 +1143,8 @@ void BotReadSessionData(bot_state_t *bs) {
 			"%i %i %i %i %i %i %i %i"
 			" %f %f %f"
 			" %f %f %f"
-			" %f %f %f",
+			" %f %f %f"
+			" %f",
 		&bs->lastgoal_decisionmaker,
 		&bs->lastgoal_ltgtype,
 		&bs->lastgoal_teammate,
@@ -1158,7 +1161,8 @@ void BotReadSessionData(bot_state_t *bs) {
 		&bs->lastgoal_teamgoal.mins[2],
 		&bs->lastgoal_teamgoal.maxs[0],
 		&bs->lastgoal_teamgoal.maxs[1],
-		&bs->lastgoal_teamgoal.maxs[2]
+		&bs->lastgoal_teamgoal.maxs[2],
+		&bs->formation_dist
 		);
 }
 
