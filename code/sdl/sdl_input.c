@@ -833,7 +833,7 @@ static void IN_ProcessEvents( void )
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELUP, qtrue, 0, NULL );
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELUP, qfalse, 0, NULL );
 				}
-				else
+				else if( e.wheel.y < 0 )
 				{
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qtrue, 0, NULL );
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qfalse, 0, NULL );
