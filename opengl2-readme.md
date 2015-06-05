@@ -52,7 +52,9 @@ For Win32:
 
 1. Start ioquake3. (ioquake3.x86.exe on Win32)
  
-2. Open the console (default key ~) and type '/cl_renderer opengl2; vid_restart'
+2. Open the console (the default key is tilde ~) and type 
+`/cl_renderer opengl2` and press enter
+`/vid_restart` then press enter again.
 
 3. Enjoy.
 
@@ -62,94 +64,94 @@ For Win32:
 -------------------------------------------------------------------------------
 
 Cvars for simple rendering features:
-  r_ext_compressed_textures       - Automatically compress textures.
+
+* `r_ext_compressed_textures`       - Automatically compress textures.
                                      0 - No texture compression. (default)
                                      1 - DXT/LATC texture compression if
                                          supported.
                                      2 - BPTC texture compression if supported.
 
-  r_ext_framebuffer_multisample  - Multisample Anti-aliasing.
+*  `r_ext_framebuffer_multisample`  - Multisample Anti-aliasing.
                                      0    - None. (default)
                                      1-16 - Some.
                                      17+  - Too much!
 
-  r_ssao                         - Enable screen-space ambient occlusion.
+*  `r_ssao`                         - Enable screen-space ambient occlusion.
                                    Currently eats framerate and has some
                                    visible artifacts.
                                      0 - No. (default)
                                      1 - Yes.
 
 Cvars for HDR and tonemapping:
-  r_hdr                          - Do scene rendering in a framebuffer with
+
+ * `r_hdr`                          - Do scene rendering in a framebuffer with
                                    high dynamic range.  (Less banding, and
                                    exposure changes look much better)
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_cameraExposure               - Cheat.  Alter brightness, in powers of two.
+*  `r_cameraExposure`               - Cheat.  Alter brightness, in powers of two.
                                      -2  - 4x as dark.
                                      0   - Normal. (default)
                                      0.5 - Sqrt(2)x as bright.
                                      2   - 4x as bright.
 
-  r_postProcess                  - Enable post-processing.
+*  `r_postProcess`                  - Enable post-processing.
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_toneMap                      - Enable tone mapping.  Requires 
+*  `r_toneMap`                      - Enable tone mapping.  Requires 
                                    r_hdr and r_postProcess.
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_forceToneMap                 - Cheat.  Override built-in and map tonemap
-                                   settings and use cvars r_forceToneMapAvg,
-                                   r_forceToneMapMin, and r_forceToneMapMax.
+*  `r_forceToneMap`                 - Cheat. Override built-in and map tonemap settings and use cvars r_forceToneMapAvg, r_forceToneMapMin, and r_forceToneMapMax.
                                      0 - No. (default)
                                      1 - Yes.
 
-  r_forceToneMapAvg              - Cheat.  Map average scene luminance to this
+*  `r_forceToneMapAvg`              - Cheat.  Map average scene luminance to this
                                    value, in powers of two.  Requires 
                                    r_forceToneMap.
                                     -2.0 - Dark.
                                     -1.0 - Kinda dark. (default).
                                      2.0 - Too bright.
 
-  r_forceToneMapMin              - Cheat.  After mapping average, luminance
+*  `r_forceToneMapMin`              - Cheat.  After mapping average, luminance
                                    below this level is mapped to black.
                                    Requires r_forceToneMap.
                                     -5    - Not noticeable.
                                     -3.25 - Normal. (default)
                                      0.0  - Too dark.
 
-  r_forceToneMapMin              - Cheat.  After mapping average, luminance
+*  `r_forceToneMapMin`              - Cheat.  After mapping average, luminance
                                    above this level is mapped to white.
                                    Requires r_forceToneMap.
                                     0.0 - Too bright.
                                     1.0 - Normal. (default).
                                     2.0 - Washed out.
 
-  r_autoExposure                 - Do automatic exposure based on scene
+*  `r_autoExposure`                 - Do automatic exposure based on scene
                                    brightness.  Hardcoded to -2 to 2 on maps
                                    that don't specify otherwise.  Requires
                                    r_hdr, r_postprocess, and r_toneMap.
                                      0 - No.
                                      1 - Yes. (default)
                                      
-  r_forceAutoExposure            - Cheat.  Override built-in and map auto
+*  `r_forceAutoExposure`            - Cheat.  Override built-in and map auto
                                    exposure settings and use cvars
                                    r_forceAutoExposureMin and 
                                    r_forceAutoExposureMax.
                                      0 - No. (default)
                                      1 - Yes.
 
-  r_forceAutoExposureMin         - Cheat.  Set minimum exposure to this value,
+*  `r_forceAutoExposureMin`         - Cheat.  Set minimum exposure to this value,
                                    in powers of two.  Requires
                                    r_forceAutoExpsure.
                                     -3.0 - Dimmer.
                                     -2.0 - Normal. (default)
                                     -1.0 - Brighter.
 
-  r_forceAutoExposureMax         - Cheat.  Set maximum exposure to this value,
+*  `r_forceAutoExposureMax`         - Cheat.  Set maximum exposure to this value,
                                    in powers of two.  Requires
                                    r_forceAutoExpsure.
                                      1.0 - Dimmer.
@@ -157,7 +159,8 @@ Cvars for HDR and tonemapping:
                                      3.0 - Brighter.
 
 Cvars for advanced material usage:
-  r_normalMapping                - Enable normal mapping for materials that
+
+*  `r_normalMapping`                - Enable normal mapping for materials that
                                    support it, and also specify advanced 
                                    shading techniques.
                                      0 - No.
@@ -167,7 +170,7 @@ Cvars for advanced material usage:
                                      3 - Yes, and use tri-Ace's Oren-Nayar
                                          reflectance model.
 
-  r_specularMapping              - Enable specular mapping for materials that
+*  `r_specularMapping`              - Enable specular mapping for materials that
                                    support it, and also specify advanced
                                    specular techniques.
                                      0 - No.
@@ -176,7 +179,7 @@ Cvars for advanced material usage:
                                      3 - Yes, and use Cook-Torrance.
                                      4 - Yes, and use Torrance-Sparrow.
 
-  r_deluxeMapping                - Enable deluxe mapping.  (Map is compiled
+*  `r_deluxeMapping`                - Enable deluxe mapping.  (Map is compiled
                                    with light directions.)  Even if the map 
                                    doesn't have deluxe mapping compiled in,
                                    an approximation based on the lightgrid
@@ -184,27 +187,27 @@ Cvars for advanced material usage:
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_parallaxMapping              - Enable parallax mapping for materials that
+*  `r_parallaxMapping`              - Enable parallax mapping for materials that
                                    support it.
                                      0 - No. (default)
                                      1 - Use parallax occlusion mapping.
                                      2 - Use relief mapping. (slower)
 
-  r_baseSpecular                 - Set the specular reflectance of materials
+*  `r_baseSpecular`                 - Set the specular reflectance of materials
                                    which don't include a specular map or
                                    use the specularReflectance keyword.
                                      0    - No.
                                      0.04 - Realistic. (default)
                                      1.0  - Ack.
 
-  r_baseGloss                    - Set the glossiness of materials which don't
+*  `r_baseGloss`                    - Set the glossiness of materials which don't
                                    include a specular map or use the
                                    specularExponent keyword.
                                      0   - Rough.
                                      0.3 - Default.
                                      1.0 - Shiny.
 
-  r_baseNormalX                  - Set the scale of the X values from normal
+*  `r_baseNormalX`                  - Set the scale of the X values from normal
                                    maps when the normalScale keyword is not
                                    used.
                                      -1  - Flip X.
@@ -212,7 +215,7 @@ Cvars for advanced material usage:
                                      1   - Normal X. (default)
                                      2   - Double X.
 
-  r_baseNormalY                  - Set the scale of the Y values from normal
+*  `r_baseNormalY`                  - Set the scale of the Y values from normal
                                    maps when the normalScale keyword is not
                                    used.
                                      -1  - Flip Y.
@@ -220,7 +223,7 @@ Cvars for advanced material usage:
                                      1   - Normal Y. (default)
                                      2   - Double Y.
 
-  r_baseParallax                 - Sets the scale of the parallax effect for
+*  `r_baseParallax`                 - Sets the scale of the parallax effect for
                                    materials when the parallaxDepth keyword
                                    is not used.
                                      0    - No depth.
@@ -229,7 +232,8 @@ Cvars for advanced material usage:
                                      0.1  - Looks broken.
 
 Cvars for image interpolation and generation:
-  r_imageUpsample                - Use interpolation to artifically increase
+
+*  `r_imageUpsample`                - Use interpolation to artifically increase
                                    the resolution of all textures.  Looks good
                                    in certain circumstances.
                                      0 - No. (default)
@@ -237,50 +241,48 @@ Cvars for image interpolation and generation:
                                      2 - 4x size.
                                      3 - 8x size, etc
 
-  r_imageUpsampleMaxSize         - Maximum texture size when upsampling
+*  `r_imageUpsampleMaxSize`         - Maximum texture size when upsampling
                                    textures.
                                      1024 - Default.
                                      2048 - Really nice.
                                      4096 - Really slow.
                                      8192 - Crash.
 
-  r_imageUpsampleType            - Type of interpolation when upsampling
+*  `r_imageUpsampleType`            - Type of interpolation when upsampling
                                    textures.
                                      0 - None. (probably broken)
                                      1 - Bad but fast (default,
                                          FCBI without second derivatives)
                                      2 - Okay but slow (normal FCBI)
 
-  r_genNormalMaps                - Naively generate normal maps for all
+*  `r_genNormalMaps*                - Naively generate normal maps for all
                                    textures.
                                      0 - Don't. (default)
                                      1 - Do.
 
 Cvars for the sunlight and cascaded shadow maps:
-  r_forceSun                     - Cheat. Force sunlight and shadows, using sun
-                                   position from sky material.
+
+*  `r_forceSun`                     - Cheat. Force sunlight and shadows, using sun position from sky material.
                                      0 - Don't. (default)
                                      1 - Do.
                                      2 - Sunrise, sunset.
 
-  r_forceSunMapLightScale        - Cheat. Scale map brightness by this factor
+*  `r_forceSunMapLightScale`        - Cheat. Scale map brightness by this factor
                                    when r_forceSun 1.
                                      1.0 - Default
                                      
-  r_forceSunLightScale           - Cheat. Scale sun brightness by this factor
+*  `r_forceSunLightScale`           - Cheat. Scale sun brightness by this factor
                                    when r_forceSun 1.
                                      1.0 - Default
-                                     
-  r_forceSunAmbientScale         - Cheat. Scale sun ambient brightness by this 
-                                   factor when r_forceSun 1.
-                                     0.5 - Default
 
-  r_sunShadows                   - Enable sunlight and cascaded shadow maps for
+*  `r_forceSunAmbientScale`         - Cheat. Scale sun ambient brightness by this factor when r_forceSun 1. 0.5 - Default
+
+*  `r_sunShadows`                   - Enable sunlight and cascaded shadow maps for
                                    it on maps that support it.
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_sunlightMode                 - Specify the method used to add sunlight to
+*  `r_sunlightMode`                 - Specify the method used to add sunlight to
                                    the scene.
                                      0 - No.
                                      1 - Multiply lit areas by light scale, and
@@ -290,13 +292,13 @@ Cvars for the sunlight and cascaded shadow maps:
                                          and doesn't integrate well with existing
                                          maps.
 
-  r_shadowFilter                 - Enable filtering shadows for a smoother
+*  `r_shadowFilter`                 - Enable filtering shadows for a smoother
                                    look.
                                      0 - No.
                                      1 - Some. (default)
                                      2 - Much.
 
-  r_shadowMapSize                - Size of each cascaded shadow map.
+*  `r_shadowMapSize`                - Size of each cascaded shadow map.
                                      256  - 256x256, ugly, probably shouldn't
                                              go below this.
                                      512  - 512x512, passable.
@@ -306,77 +308,78 @@ Cvars for the sunlight and cascaded shadow maps:
                                             2048.
 
 Cvars that you probably don't care about or shouldn't mess with:
-  r_mergeMultidraws              - Optimize number of calls to 
+
+*  `r_mergeMultidraws`              - Optimize number of calls to 
                                    glMultiDrawElements().
                                      0 - Don't.
                                      1 - Do some. (default)
                                      2 - Do more than necessary (eats CPU).
 
-  r_mergeLeafSurfaces            - Merge surfaces that share common materials
+*  `r_mergeLeafSurfaces`            - Merge surfaces that share common materials
                                    and a common leaf.  Speeds up rendering.
                                      0 - Don't.
                                      1 - Do. (default)
 
-  r_recalcMD3Normals             - Recalculate the normals when loading an MD3.
+*  `r_recalcMD3Normals`             - Recalculate the normals when loading an MD3.
                                    Fixes normal maps in some cases but looks
                                    ugly in others.
                                      0 - Don't. (default)
                                      1 - Do.
 
-  r_depthPrepass                 - Do a depth-only pass before rendering.
+*  `r_depthPrepass`                 - Do a depth-only pass before rendering.
                                    Speeds up rendering in cases where advanced
                                    features are used.  Required for
                                    r_sunShadows.
                                      0 - No.
                                      1 - Yes. (default)
 
-  r_normalAmbient                - Split map light into ambient and directed
+*  `r_normalAmbient`                - Split map light into ambient and directed
                                    portions when doing deluxe mapping.  Not
                                    very useful.
                                      0   - Don't. (default).
                                      0.3 - 30% ambient, 70% directed.
                                      1.0 - 100% ambient.
 
-  r_mergeLightmaps               - Merge the small (128x128) lightmaps into 
+*  `r_mergeLightmaps`               - Merge the small (128x128) lightmaps into 
                                    2 or fewer giant (4096x4096) lightmaps.
                                    Easy speedup.
                                      0 - Don't.
                                      1 - Do. (default)
 
-  r_shadowCascadeZNear           - Near plane for shadow cascade frustums.
+*  `r_shadowCascadeZNear`           - Near plane for shadow cascade frustums.
                                      4 - Default.
 
-  r_shadowCascadeZFar            - Far plane for shadow cascade frustums.
+*  `r_shadowCascadeZFar`            - Far plane for shadow cascade frustums.
                                      3072 - Default.
 
-  r_shadowCascadeZBias           - Z-bias for shadow cascade frustums.
+*  `r_shadowCascadeZBias`           - Z-bias for shadow cascade frustums.
                                      -256 - Default.
 
-  r_materialGamma                - Gamma level for material textures.
+*  `r_materialGamma`                - Gamma level for material textures.
                                    (diffuse, specular)
                                      1.0 - Quake 3, fastest. (default)
 
-  r_lightGamma                   - Gamma level for light.
+*  `r_lightGamma`                   - Gamma level for light.
                                    (lightmap, lightgrid, vertex lights)
                                      1.0 - Quake 3, fastest. (default)
 
-  r_framebufferGamma             - Gamma level for framebuffers.
+*  `r_framebufferGamma`             - Gamma level for framebuffers.
                                      1.0 - Quake 3, fastest. (default)
 
-  r_tonemapGamma                 - Gamma applied after tonemapping.
+*  `r_tonemapGamma`                 - Gamma applied after tonemapping.
                                      1.0 - Quake 3, fastest. (default)
 
 Cvars that have broken bits:
-  r_dlightMode                   - Change how dynamic lights look.
+
+*  `r_dlightMode`                   - Change how dynamic lights look.
                                      0 - Quake 3 style dlights, fake
                                          brightening. (default)
                                      1 - Actual lighting, no shadows.
                                      2 - Light and shadows. (broken)
 
-  r_pshadowDist                  - Virtual camera distance when creating shadow
-                                   maps for projected shadows.  Deprecated.
-                                   
-  cg_shadows                     - Old shadow code.  Deprecated.
+*  `r_pshadowDist`                  - Virtual camera distance when creating shadowmaps for projected shadows.  Deprecated.
+
+*  `cg_shadows`                     - Old shadow code.  Deprecated.
 
 
 -------------------------------------------------------------------------------
