@@ -1670,11 +1670,11 @@ Q3R2OBJ = \
   $(B)/renderergl2/tr_font.o \
   $(B)/renderergl2/tr_glsl.o \
   $(B)/renderergl2/tr_image.o \
-  $(B)/renderergl2/tr_image_png.o \
-  $(B)/renderergl2/tr_image_jpg.o \
   $(B)/renderergl2/tr_image_bmp.o \
-  $(B)/renderergl2/tr_image_tga.o \
+  $(B)/renderergl2/tr_image_jpg.o \
   $(B)/renderergl2/tr_image_pcx.o \
+  $(B)/renderergl2/tr_image_png.o \
+  $(B)/renderergl2/tr_image_tga.o \
   $(B)/renderergl2/tr_init.o \
   $(B)/renderergl2/tr_light.o \
   $(B)/renderergl2/tr_main.o \
@@ -1736,11 +1736,11 @@ Q3ROBJ = \
   $(B)/renderergl1/tr_flares.o \
   $(B)/renderergl1/tr_font.o \
   $(B)/renderergl1/tr_image.o \
-  $(B)/renderergl1/tr_image_png.o \
-  $(B)/renderergl1/tr_image_jpg.o \
   $(B)/renderergl1/tr_image_bmp.o \
-  $(B)/renderergl1/tr_image_tga.o \
+  $(B)/renderergl1/tr_image_jpg.o \
   $(B)/renderergl1/tr_image_pcx.o \
+  $(B)/renderergl1/tr_image_png.o \
+  $(B)/renderergl1/tr_image_tga.o \
   $(B)/renderergl1/tr_init.o \
   $(B)/renderergl1/tr_light.o \
   $(B)/renderergl1/tr_main.o \
