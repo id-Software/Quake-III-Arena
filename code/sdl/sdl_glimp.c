@@ -144,10 +144,10 @@ static void GLimp_DetectAvailableModes(void)
 	}
 
 	numSDLModes = SDL_GetNumDisplayModes( display );
-	modes = SDL_calloc( numSDLModes, sizeof( SDL_Rect ));
+	modes = SDL_calloc( numSDLModes, sizeof( SDL_Rect ) );
 	if ( !modes )
 	{
-		ri.Error( ERR_FATAL, "Out of memory\n" );
+		ri.Error( ERR_FATAL, "Out of memory" );
 	}
 
 	for( i = 0; i < numSDLModes; i++ )
