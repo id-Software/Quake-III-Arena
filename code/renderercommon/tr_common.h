@@ -135,6 +135,20 @@ void R_DoneFreeType( void );
 void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
 
 /*
+=============================================================
+
+IMAGE LOADERS
+
+=============================================================
+*/
+
+void R_LoadBMP( const char *name, byte **pic, int *width, int *height );
+void R_LoadJPG( const char *name, byte **pic, int *width, int *height );
+void R_LoadPCX( const char *name, byte **pic, int *width, int *height );
+void R_LoadPNG( const char *name, byte **pic, int *width, int *height );
+void R_LoadTGA( const char *name, byte **pic, int *width, int *height );
+
+/*
 ====================================================================
 
 IMPLEMENTATION SPECIFIC FUNCTIONS
