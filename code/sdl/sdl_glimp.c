@@ -130,21 +130,21 @@ static void GLimp_DetectAvailableModes(void)
 {
 	int i, j;
 	char buf[ MAX_STRING_CHARS ] = { 0 };
-	size_t numSDLModes;
+	int numSDLModes;
 	SDL_Rect *modes;
 	int numModes = 0;
 
 	int display = SDL_GetWindowDisplayIndex( SDL_window );
+	numSDLModes = SDL_GetNumDisplayModes( display );
 	SDL_DisplayMode windowMode;
 
-	if( SDL_GetWindowDisplayMode( SDL_window, &windowMode ) < 0 )
+	if( SDL_GetWindowDisplayMode( SDL_window, &windowMode ) < 0 || numSDLModes <= 0 )
 	{
 		ri.Printf( PRINT_WARNING, "Couldn't get window display mode, no resolutions detected\n" );
 		return;
 	}
 
-	numSDLModes = SDL_GetNumDisplayModes( display );
-	modes = SDL_calloc( numSDLModes, sizeof( SDL_Rect ) );
+	modes = SDL_calloc( (size_t)numSDLModes, sizeof( SDL_Rect ) );
 	if ( !modes )
 	{
 		ri.Error( ERR_FATAL, "Out of memory" );
