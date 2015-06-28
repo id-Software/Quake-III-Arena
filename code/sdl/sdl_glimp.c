@@ -134,9 +134,9 @@ static void GLimp_DetectAvailableModes(void)
 	SDL_Rect *modes;
 	int numModes = 0;
 
+	SDL_DisplayMode windowMode;
 	int display = SDL_GetWindowDisplayIndex( SDL_window );
 	numSDLModes = SDL_GetNumDisplayModes( display );
-	SDL_DisplayMode windowMode;
 
 	if( SDL_GetWindowDisplayMode( SDL_window, &windowMode ) < 0 || numSDLModes <= 0 )
 	{
