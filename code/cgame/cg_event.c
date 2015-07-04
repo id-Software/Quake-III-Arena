@@ -428,23 +428,28 @@ Returns waterlevel for entity origin
 int CG_WaterLevel(centity_t *cent) {
 	vec3_t point;
 	int contents, sample1, sample2, anim, waterlevel;
+	int viewheight;
 
-	// get waterlevel, accounting for ducking
-	waterlevel = 0;
-	VectorCopy(cent->lerpOrigin, point);
-	point[2] += MINS_Z + 1;
 	anim = cent->currentState.legsAnim & ~ANIM_TOGGLEBIT;
 
 	if (anim == LEGS_WALKCR || anim == LEGS_IDLECR) {
-		point[2] += CROUCH_VIEWHEIGHT;
+		viewheight = CROUCH_VIEWHEIGHT;
 	} else {
-		point[2] += DEFAULT_VIEWHEIGHT;
+		viewheight = DEFAULT_VIEWHEIGHT;
 	}
 
+	//
+	// get waterlevel, accounting for ducking
+	//
+	waterlevel = 0;
+
+	point[0] = cent->lerpOrigin[0];
+	point[1] = cent->lerpOrigin[1];
+	point[2] = cent->lerpOrigin[2] + MINS_Z + 1;
 	contents = CG_PointContents(point, -1);
 
 	if (contents & MASK_WATER) {
-		sample2 = point[2] - MINS_Z;
+		sample2 = viewheight - MINS_Z;
 		sample1 = sample2 / 2;
 		waterlevel = 1;
 		point[2] = cent->lerpOrigin[2] + MINS_Z + sample1;
