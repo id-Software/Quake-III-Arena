@@ -494,7 +494,7 @@ void CG_PainEvent( centity_t *cent, int health ) {
 		snd = "*pain100_1.wav";
 	}
 	// play a gurp sound instead of a normal pain sound
-	if (CG_WaterLevel(cent) >= 1) {
+	if (CG_WaterLevel(cent) == 3) {
 		if (rand()&1) {
 			trap_S_StartSound(NULL, cent->currentState.number, CHAN_VOICE, CG_CustomSound(cent->currentState.number, "sound/player/gurp1.wav"));
 		} else {
@@ -1169,7 +1169,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_DEATH3:
 		DEBUGNAME("EV_DEATHx");
 
-		if (CG_WaterLevel(cent) >= 1) {
+		if (CG_WaterLevel(cent) == 3) {
 			trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*drown.wav"));
 		} else {
 			trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
