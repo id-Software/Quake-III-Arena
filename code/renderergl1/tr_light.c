@@ -151,7 +151,7 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 		frac[i] = v - pos[i];
 		if ( pos[i] < 0 ) {
 			pos[i] = 0;
-		} else if ( pos[i] >= tr.world->lightGridBounds[i] - 1 ) {
+		} else if ( pos[i] > tr.world->lightGridBounds[i] - 1 ) {
 			pos[i] = tr.world->lightGridBounds[i] - 1;
 		}
 	}
