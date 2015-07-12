@@ -203,19 +203,25 @@ static void EmitRexString(byte rex, const char *string)
 
 
 #define MASK_REG(modrm, mask) \
-	EmitString("81"); \
-	EmitString((modrm)); \
-	Emit4((mask))
+	do { \
+		EmitString("81"); \
+		EmitString((modrm)); \
+		Emit4((mask)); \
+	} while(0)
 
 // add bl, bytes
 #define STACK_PUSH(bytes) \
-	EmitString("80 C3"); \
-	Emit1(bytes)
+	do { \
+		EmitString("80 C3"); \
+		Emit1(bytes); \
+	} while(0)
 
 // sub bl, bytes
 #define STACK_POP(bytes) \
-	EmitString("80 EB"); \
-	Emit1(bytes)
+	do { \
+		EmitString("80 EB"); \
+		Emit1(bytes); \
+	} while(0)
 
 static void EmitCommand(ELastCommand command)
 {
