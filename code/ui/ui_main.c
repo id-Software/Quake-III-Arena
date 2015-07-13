@@ -4567,6 +4567,11 @@ static qboolean Team_Parse(char **p) {
     }
 
     if (token[0] == '{') {
+      if (uiInfo.teamCount == MAX_TEAMS) {
+        uiInfo.teamCount--;
+        Com_Printf("Too many teams, last team replaced!\n");
+      }
+
       // seven tokens per line, team name and icon, and 5 team member names
       if (!String_Parse(p, &uiInfo.teamList[uiInfo.teamCount].teamName) || !String_Parse(p, &tempStr)) {
         return qfalse;
@@ -4588,11 +4593,8 @@ static qboolean Team_Parse(char **p) {
 			}
 
       Com_Printf("Loaded team %s with team icon %s.\n", uiInfo.teamList[uiInfo.teamCount].teamName, tempStr);
-      if (uiInfo.teamCount < MAX_TEAMS) {
-        uiInfo.teamCount++;
-      } else {
-        Com_Printf("Too many teams, last team replaced!\n");
-      }
+      uiInfo.teamCount++;
+
       token = COM_ParseExt(p, qtrue);
       if (token[0] != '}') {
         return qfalse;
