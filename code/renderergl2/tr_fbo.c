@@ -47,9 +47,6 @@ qboolean R_CheckFBO(const FBO_t * fbo)
 	// an error occured
 	switch (code)
 	{
-		case GL_FRAMEBUFFER_COMPLETE_EXT:
-			break;
-
 		case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
 			ri.Printf(PRINT_WARNING, "R_CheckFBO: (%s) Unsupported framebuffer format\n", fbo->name);
 			break;
