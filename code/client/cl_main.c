@@ -149,7 +149,6 @@ typedef struct serverStatus_s
 } serverStatus_t;
 
 serverStatus_t cl_serverStatusList[MAX_SERVERSTATUSREQUESTS];
-int serverStatusCount;
 
 #if defined __USEA3D && defined __A3D_GEOM
 	void hA3Dg_ExportRenderGeom (refexport_t *incoming_re);
@@ -3866,11 +3865,7 @@ serverStatus_t *CL_GetServerStatus( netadr_t from ) {
 			oldestTime = cl_serverStatusList[i].startTime;
 		}
 	}
-	if (oldest != -1) {
-		return &cl_serverStatusList[oldest];
-	}
-	serverStatusCount++;
-	return &cl_serverStatusList[serverStatusCount & (MAX_SERVERSTATUSREQUESTS-1)];
+	return &cl_serverStatusList[oldest];
 }
 
 /*
