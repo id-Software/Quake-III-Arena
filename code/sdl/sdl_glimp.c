@@ -487,7 +487,10 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 		qglClear( GL_COLOR_BUFFER_BIT );
 		SDL_GL_SwapWindow( SDL_window );
 
-		SDL_GL_SetSwapInterval( r_swapInterval->integer );
+		if( SDL_GL_SetSwapInterval( r_swapInterval->integer ) == -1 )
+		{
+			ri.Printf( PRINT_DEVELOPER, "SDL_GL_SetSwapInterval failed: %s\n", SDL_GetError( ) );
+		}
 
 		glConfig.colorBits = testColorBits;
 		glConfig.depthBits = testDepthBits;
