@@ -136,6 +136,11 @@ static void GLimp_DetectAvailableModes(void)
 
 	SDL_DisplayMode windowMode;
 	int display = SDL_GetWindowDisplayIndex( SDL_window );
+	if( display < 0 )
+	{
+		ri.Printf( PRINT_WARNING, "Couldn't get window display index, no resolutions detected\n" );
+		return;
+	}
 	numSDLModes = SDL_GetNumDisplayModes( display );
 
 	if( SDL_GetWindowDisplayMode( SDL_window, &windowMode ) < 0 || numSDLModes <= 0 )
