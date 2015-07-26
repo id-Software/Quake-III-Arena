@@ -250,9 +250,15 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 
 	// If a window exists, note its display index
 	if( SDL_window != NULL )
+	{
 		display = SDL_GetWindowDisplayIndex( SDL_window );
+		if( display < 0 )
+		{
+			ri.Printf( PRINT_DEVELOPER, "SDL_GetWindowDisplayIndex() failed: %s\n", SDL_GetError() );
+		}
+	}
 
-	if( SDL_GetDesktopDisplayMode( display, &desktopMode ) == 0 )
+	if( display >= 0 && SDL_GetDesktopDisplayMode( display, &desktopMode ) == 0 )
 	{
 		displayAspect = (float)desktopMode.w / (float)desktopMode.h;
 
