@@ -42,7 +42,7 @@ if [ "$2" != "" ]; then
 	elif [ "$2" == "ppc" ]; then
 		CURRENT_ARCH="ppc"
 	else
-		echo "Invalid architecture: $1"
+		echo "Invalid architecture: $2"
 		echo "Valid architectures are:"
 		echo " x86"
 		echo " x86_64"
