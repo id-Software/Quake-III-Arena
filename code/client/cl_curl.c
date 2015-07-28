@@ -178,8 +178,13 @@ void CL_cURL_Cleanup(void)
 {
 	if(clc.downloadCURLM) {
 		if(clc.downloadCURL) {
-			qcurl_multi_remove_handle(clc.downloadCURLM,
+			CURLMcode result;
+
+			result = qcurl_multi_remove_handle(clc.downloadCURLM,
 				clc.downloadCURL);
+			if(result != CURLM_OK) {
+				Com_DPrintf("qcurl_multi_remove_handle failed: %s\n", qcurl_multi_strerror(result));
+			}
 			qcurl_easy_cleanup(clc.downloadCURL);
 		}
 		qcurl_multi_cleanup(clc.downloadCURLM);
