@@ -214,6 +214,16 @@ static size_t CL_cURL_CallbackWrite(void *buffer, size_t size, size_t nmemb,
 	return size*nmemb;
 }
 
+CURLcode qcurl_easy_setopt_warn(CURL *curl, CURLoption option, va_list args)
+{
+	CURLcode result;
+
+	result = qcurl_easy_setopt(curl, option, args);
+	if(result != CURLE_OK) {
+		Com_DPrintf("qcurl_easy_setopt failed: %s\n", qcurl_easy_strerror(result));
+	}
+}
+
 void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 {
 	CURLMcode result;
@@ -253,23 +263,23 @@ void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 	}
 
 	if(com_developer->integer)
-		qcurl_easy_setopt(clc.downloadCURL, CURLOPT_VERBOSE, 1);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_URL, clc.downloadURL);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_TRANSFERTEXT, 0);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_REFERER, va("ioQ3://%s",
+		qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_VERBOSE, 1);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_URL, clc.downloadURL);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_TRANSFERTEXT, 0);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_REFERER, va("ioQ3://%s",
 		NET_AdrToString(clc.serverAddress)));
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_USERAGENT, va("%s %s",
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_USERAGENT, va("%s %s",
 		Q3_VERSION, qcurl_version()));
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_WRITEFUNCTION,
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_WRITEFUNCTION,
 		CL_cURL_CallbackWrite);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_WRITEDATA, &clc.download);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_NOPROGRESS, 0);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_PROGRESSFUNCTION,
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_WRITEDATA, &clc.download);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_NOPROGRESS, 0);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_PROGRESSFUNCTION,
 		CL_cURL_CallbackProgress);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_PROGRESSDATA, NULL);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_FAILONERROR, 1);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_FOLLOWLOCATION, 1);
-	qcurl_easy_setopt(clc.downloadCURL, CURLOPT_MAXREDIRS, 5);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_PROGRESSDATA, NULL);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_FAILONERROR, 1);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_FOLLOWLOCATION, 1);
+	qcurl_easy_setopt_warn(clc.downloadCURL, CURLOPT_MAXREDIRS, 5);
 	clc.downloadCURLM = qcurl_multi_init();	
 	if(!clc.downloadCURLM) {
 		qcurl_easy_cleanup(clc.downloadCURL);
