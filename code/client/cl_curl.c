@@ -225,6 +225,8 @@ CURLcode qcurl_easy_setopt_warn(CURL *curl, CURLoption option, va_list args)
 	if(result != CURLE_OK) {
 		Com_DPrintf("qcurl_easy_setopt failed: %s\n", qcurl_easy_strerror(result));
 	}
+
+	return result;
 }
 
 void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
