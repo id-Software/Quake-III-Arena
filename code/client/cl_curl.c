@@ -295,6 +295,8 @@ void CL_cURL_BeginDownload( const char *localName, const char *remoteURL )
 	}
 	result = qcurl_multi_add_handle(clc.downloadCURLM, clc.downloadCURL);
 	if(result != CURLM_OK) {
+		qcurl_easy_cleanup(clc.downloadCURL);
+		clc.downloadCURL = NULL;
 		Com_Error(ERR_DROP,"CL_cURL_BeginDownload: qcurl_multi_add_handle() failed: %s", qcurl_multi_strerror(result));
 		return;
 	}
