@@ -177,9 +177,9 @@ void CL_cURL_Shutdown( void )
 void CL_cURL_Cleanup(void)
 {
 	if(clc.downloadCURLM) {
-		if(clc.downloadCURL) {
-			CURLMcode result;
+		CURLMcode result;
 
+		if(clc.downloadCURL) {
 			result = qcurl_multi_remove_handle(clc.downloadCURLM,
 				clc.downloadCURL);
 			if(result != CURLM_OK) {
@@ -187,7 +187,10 @@ void CL_cURL_Cleanup(void)
 			}
 			qcurl_easy_cleanup(clc.downloadCURL);
 		}
-		qcurl_multi_cleanup(clc.downloadCURLM);
+		result = qcurl_multi_cleanup(clc.downloadCURLM);
+		if(result != CURLM_OK) {
+			Com_DPrintf("CL_cURL_Cleanup: qcurl_multi_cleanup failed: %s\n", qcurl_multi_strerror(result));
+		}
 		clc.downloadCURLM = NULL;
 		clc.downloadCURL = NULL;
 	}
