@@ -713,9 +713,6 @@
     <ClInclude Include="..\..\code\game\g_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\ui\keycodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\client\keys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -734,12 +731,6 @@
     <ClInclude Include="..\..\code\qcommon\qfiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\renderer\qgl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\win32\resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\server\server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -752,15 +743,6 @@
     <ClInclude Include="..\..\code\qcommon\surfaceflags.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\renderer\tr_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\renderer\tr_public.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\cgame\tr_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\ui\ui_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -770,44 +752,8 @@
     <ClInclude Include="..\..\code\qcommon\vm_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\win32\win_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\sys\win_resource.h">
       <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jchuff.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jconfig.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jdct.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jdhuff.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jerror.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jinclude.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jmemsys.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jmorecfg.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jpegint.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jpeglib.h">
-      <Filter>jpeg\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\code\jpeg-6b\jversion.h">
-      <Filter>jpeg\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\code\botlib\aasfile.h">
       <Filter>botlib\Header Files</Filter>
@@ -904,6 +850,39 @@
     </ClInclude>
     <ClInclude Include="..\..\code\renderergl1\tr_local.h">
       <Filter>renderergl1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\client\keycodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\sys\sys_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jconfig.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jdct.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jerror.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jinclude.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jmemsys.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jmorecfg.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jpegint.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jpeglib.h">
+      <Filter>jpeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-8c\jversion.h">
+      <Filter>jpeg\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

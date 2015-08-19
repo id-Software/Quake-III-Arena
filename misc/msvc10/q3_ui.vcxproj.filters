@@ -151,15 +151,18 @@
     <ClInclude Include="..\..\code\qcommon\q_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\code\game\bg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="..\..\code\q3_ui\keycodes.h">
-      <Filter>Header Files</Filter>
-    </CustomBuildStep>
     <CustomBuildStep Include="..\..\code\q3_ui\ui_local.h">
       <Filter>Header Files</Filter>
     </CustomBuildStep>
-    <CustomBuildStep Include="..\..\code\q3_ui\ui_public.h">
+    <CustomBuildStep Include="..\..\code\client\keycodes.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\code\ui\ui_public.h">
       <Filter>Header Files</Filter>
     </CustomBuildStep>
   </ItemGroup>

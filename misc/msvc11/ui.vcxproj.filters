@@ -49,19 +49,7 @@
     <CustomBuildStep Include="..\..\code\game\bg_public.h">
       <Filter>Header Files</Filter>
     </CustomBuildStep>
-    <CustomBuildStep Include="..\..\code\ui\keycodes.h">
-      <Filter>Header Files</Filter>
-    </CustomBuildStep>
     <CustomBuildStep Include="..\..\ui\menudef.h">
-      <Filter>Header Files</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="..\..\code\game\q_shared.h">
-      <Filter>Header Files</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="..\..\code\game\surfaceflags.h">
-      <Filter>Header Files</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="..\..\code\cgame\tr_types.h">
       <Filter>Header Files</Filter>
     </CustomBuildStep>
     <CustomBuildStep Include="..\..\code\ui\ui_local.h">
@@ -71,6 +59,15 @@
       <Filter>Header Files</Filter>
     </CustomBuildStep>
     <CustomBuildStep Include="..\..\code\ui\ui_shared.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\code\client\keycodes.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\code\renderercommon\tr_types.h">
+      <Filter>Header Files</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\..\code\qcommon\q_shared.h">
       <Filter>Header Files</Filter>
     </CustomBuildStep>
   </ItemGroup>
