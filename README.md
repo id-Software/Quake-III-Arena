@@ -38,6 +38,8 @@ The original id software readme that accompanied the Q3 source release has been
 renamed to id-readme.txt so as to prevent confusion. Please refer to the
 web-site for updated status.
 
+More documentation is on:
+http://wiki.ioquake3.org/
 
 # Compilation and installation
 
