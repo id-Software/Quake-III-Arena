@@ -327,124 +327,6 @@ The defaults for these variables differ depending on the target platform.
 ```
 
 
-# README for Users
-
-## Using shared libraries instead of qvm
-
-To force Q3 to use shared libraries instead of qvms run it with the following
-parameters: `+set sv_pure 0 +set vm_cgame 0 +set vm_game 0 +set vm_ui 0`
-
-## Using Demo Data Files
-
-Copy demoq3/pak0.pk3 from the demo installer to your baseq3 directory. The
-qvm files in this pak0.pk3 will not work, so you have to use the native
-shared libraries or qvms from this project. To use the new qvms, they must be
-put into a pk3 file. A pk3 file is just a zip file, so any compression tool
-that can create such files will work. The shared libraries should already be
-in the correct place. Use the instructions above to use them.
-
-Please bear in mind that you will not be able to play online using the demo
-data, nor is it something that we like to spend much time maintaining or
-supporting.
-
-## Help! Ioquake3 won't give me an fps of X anymore when setting com_maxfps!
-
-Ioquake3 now uses the select() system call to wait for the rendering of the
-next frame when com_maxfps was hit. This will improve your CPU load
-considerably in these cases. However, not all systems may support a
-granularity for its timing functions that is required to perform this waiting
-correctly. For instance, ioquake3 tells select() to wait 2 milliseconds, but
-really it can only wait for a multiple of 5ms, i.e. 5, 10, 15, 20... ms.
-In this case you can always revert back to the old behaviour by setting the
-cvar com_busyWait to 1.
-
-
-## SDL Keyboard Differences
-
-ioquake3 clients have different keyboard behaviour compared to the original
-Quake3 clients.
-
-  * SDL > 1.2.9 does not support disabling dead key recognition. In order to
-      send dead key characters (e.g. ~, ', `, and ^), you must key a Space (or
-      sometimes the same character again) after the character to send it on
-      many international keyboard layouts.
-
-  * The SDL client supports many more keys than the original Quake3 client.
-      For example the keys: "Windows", "SysReq", "ScrollLock", and "Break".
-      For non-US keyboards, all of the so called "World" keys are now supported
-      as well as F13, F14, F15, and the country-specific mode/meta keys.
-
-On many international layouts the default console toggle keys are also dead
-keys, meaning that dropping the console potentially results in
-unintentionally initiating the keying of a dead key. Furthermore SDL 1.2's
-dead key support is broken by design and Q3 doesn't support non-ASCII text
-entry, so the chances are you won't get the correct character anyway.
-
-If you use such a keyboard layout, you can set the cvar cl_consoleKeys. This
-is a space delimited list of key names that will toggle the console. The key
-names are the usual Q3 names e.g. "~", "`", "c", "BACKSPACE", "PAUSE",
-"WINDOWS" etc. It's also possible to use ASCII characters, by hexadecimal
-number. Some example values for cl_consoleKeys:
-
-    "~ ` 0x7e 0x60"           Toggle on ~ or ` (the default)
-    "WINDOWS"                 Toggle on the Windows key
-    "c"                       Toggle on the c key
-    "0x43"                    Toggle on the C character (Shift-c)
-    "PAUSE F1 PGUP"           Toggle on the Pause, F1 or Page Up keys
-
-Note that when you elect a set of console keys or characters, they cannot
-then be used for binding, nor will they generate characters when entering
-text. Also, in addition to the nominated console keys, Shift-ESC is hard
-coded to always toggle the console.
-
-## QuakeLive mouse acceleration
-(patch and this text written by TTimo from id)
-
-I've been using an experimental mouse acceleration code for a while, and
-decided to make it available to everyone. Don't be too worried if you don't
-understand the explanations below, this is mostly intended for advanced
-players:
-To enable it, set cl_mouseAccelStyle 1 (0 is the default/legacy behavior)
-
-New style is controlled with 3 cvars:
-
-sensitivity
-cl_mouseAccel
-cl_mouseAccelOffset
-
-The old code (cl_mouseAccelStyle 0) can be difficult to calibrate because if
-you have a base sensitivity setup, as soon as you set a non zero acceleration
-your base sensitivity at low speeds will change as well. The other problem
-with style 0 is that you are stuck on a square (power of two) acceleration
-curve.
-
-The new code tries to solve both problems:
-
-Once you setup your sensitivity to feel comfortable and accurate enough for
-low mouse deltas with no acceleration (cl_mouseAccel 0), you can start
-increasing cl_mouseAccel and tweaking cl_mouseAccelOffset to get the
-amplification you want for high deltas with little effect on low mouse deltas.
-
-cl_mouseAccel is a power value. Should be >= 1, 2 will be the same power curve
-as style 0. The higher the value, the faster the amplification grows with the
-mouse delta.
-
-cl_mouseAccelOffset sets how much base mouse delta will be doubled by
-acceleration. The closer to zero you bring it, the more acceleration will
-happen at low speeds. This is also very useful if you are changing to a new
-mouse with higher dpi, if you go from 500 to 1000 dpi, you can divide your
-cl_mouseAccelOffset by two to keep the same overall 'feel' (you will likely
-gain in precision when you do that, but that is not related to mouse
-acceleration).
-
-Mouse acceleration is tricky to configure, and when you do you'll have to
-re-learn your aiming. But you will find that it's very much forth it in the
-long run.
-
-If you try the new acceleration code and start using it, I'd be very
-interested by your feedback.
-
-
 # README for Developers
 
 ## pk3dir
@@ -591,18 +473,13 @@ directory, this restriction is lifted.
 
 # Contributing
 
-Please send all patches to bugzilla (https://bugzilla.icculus.org), or join the
-mailing list (http://lists.ioquake.org/listinfo.cgi/ioquake3-ioquake.org) and
-submit your patch there.  The best case scenario is that you submit your patch
-to bugzilla, and then post the URL to the mailing list.
+Please send all patches to bugzilla (https://bugzilla.icculus.org), or as a GitHub pull request and
+submit your patch there.
 
 The focus for ioq3 is to develop a stable base suitable for further development
-and provide players with the same Quake 3 experience they've had for years. As
-such ioq3 does not have any significant graphical enhancements and none are
-planned at this time. However, improved graphics and sound patches will be
-accepted as long as they are entirely optional, do not require new media and
-are off by default.
+and provide players with the same Quake 3 experience they've had for years.
 
+We do have graphical improvements with the new renderer, but they are off by default.
 
 # Building Official Installers
 
