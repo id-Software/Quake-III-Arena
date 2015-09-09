@@ -217,17 +217,26 @@ static size_t CL_cURL_CallbackWrite(void *buffer, size_t size, size_t nmemb,
 	return size*nmemb;
 }
 
-CURLcode qcurl_easy_setopt_warn(CURL *curl, CURLoption option, ...)
+static CURLcode qcurl_easy_setopt_warn_valist(CURL *curl, CURLoption option, va_list args)
 {
 	CURLcode result;
-	va_list args;
 
-	va_start(args, option);
 	result = qcurl_easy_setopt(curl, option, args);
-	va_end(args);
 	if(result != CURLE_OK) {
 		Com_DPrintf("qcurl_easy_setopt failed: %s\n", qcurl_easy_strerror(result));
 	}
+
+	return result;
+}
+
+CURLcode qcurl_easy_setopt_warn(CURL *curl, CURLoption option, ...)
+{
+	CURLcode result;
+
+	va_list argp;
+	va_start(argp, option);
+	result = qcurl_easy_setopt_warn_valist(curl, option, argp);
+	va_end(argp);
 
 	return result;
 }
