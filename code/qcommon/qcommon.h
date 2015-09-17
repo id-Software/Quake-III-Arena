@@ -1099,6 +1099,7 @@ FILE	*Sys_Mkfifo( const char *ospath );
 char	*Sys_Cwd( void );
 void	Sys_SetDefaultInstallPath(const char *path);
 char	*Sys_DefaultInstallPath(void);
+char	*Sys_SteamPath(void);
 
 #ifdef MACOS_X
 char    *Sys_DefaultAppPath(void);

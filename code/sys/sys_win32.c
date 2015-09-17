@@ -42,6 +42,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
 
+// Used to store the Steam Quake 3 installation path
+static char steamPath[ MAX_OSPATH ] = { 0 };
+
 #ifndef DEDICATED
 static UINT timerResolution = 0;
 #endif
@@ -124,6 +127,37 @@ char *Sys_DefaultHomePath( void )
 
 	FreeLibrary(shfolder);
 	return homePath;
+}
+
+/*
+================
+Sys_SteamPath
+================
+*/
+char *Sys_SteamPath( void )
+{
+	HKEY steamRegKey;
+
+	if (!RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Steam", 0, KEY_QUERY_VALUE, &steamRegKey))
+	{
+		DWORD pathLen = MAX_OSPATH;
+
+		if (RegQueryValueEx(steamRegKey, "SteamPath", NULL, NULL, (LPBYTE)steamPath, &pathLen))
+			if (RegQueryValueEx(steamRegKey, "InstallPath", NULL, NULL, (LPBYTE)steamPath, &pathLen))
+				steamPath[0] = '\0';
+
+		if (steamPath[0])
+		{
+			if (pathLen == MAX_OSPATH)
+				pathLen--;
+
+			steamPath[pathLen] = '\0';
+
+			Q_strcat(steamPath, MAX_OSPATH, "\\SteamApps\\common\\" STEAMPATH_NAME );
+		}
+	}
+
+	return steamPath;
 }
 
 /*
