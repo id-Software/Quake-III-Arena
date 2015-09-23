@@ -89,7 +89,7 @@ Sys_SteamPath
 char *Sys_SteamPath( void )
 {
 	// Disabled since Steam doesn't let you install Quake 3 on Mac/Linux
-#if 0
+#if 0 //#ifdef STEAMPATH_NAME
 	char *p;
 
 	if( ( p = getenv( "HOME" ) ) != NULL )

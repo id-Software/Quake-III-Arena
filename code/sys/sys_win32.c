@@ -136,6 +136,7 @@ Sys_SteamPath
 */
 char *Sys_SteamPath( void )
 {
+#ifdef STEAMPATH_NAME
 	HKEY steamRegKey;
 
 	if (!RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Steam", 0, KEY_QUERY_VALUE, &steamRegKey))
@@ -156,6 +157,7 @@ char *Sys_SteamPath( void )
 			Q_strcat(steamPath, MAX_OSPATH, "\\SteamApps\\common\\" STEAMPATH_NAME );
 		}
 	}
+#endif
 
 	return steamPath;
 }
