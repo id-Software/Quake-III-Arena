@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define HOMEPATH_NAME_WIN			"FooBar"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
 //  #define STEAMPATH_NAME			"Foo Bar"
+//  #define STEAMPATH_APPID         ""
   #define GAMENAME_FOR_MASTER		"foobar"	// must NOT contain whitespace
 //  #define LEGACY_PROTOCOL	// You probably don't need this for your standalone game
 #else
@@ -46,6 +47,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #define HOMEPATH_NAME_WIN			"Quake3"
   #define HOMEPATH_NAME_MACOSX		HOMEPATH_NAME_WIN
   #define STEAMPATH_NAME			"Quake 3 Arena"
+  #define STEAMPATH_APPID			"2200"
   #define GAMENAME_FOR_MASTER		"Quake3Arena"
   #define LEGACY_PROTOCOL
 #endif
