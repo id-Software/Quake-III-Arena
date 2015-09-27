@@ -140,7 +140,6 @@ char *Sys_SteamPath( void )
 	HKEY steamRegKey;
 	DWORD pathLen = MAX_OSPATH;
 	qboolean finishPath = qfalse;
-#endif
 
 #ifdef STEAMPATH_APPID
 	if (!steamPath[0] && !RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App " STEAMPATH_APPID, 0, KEY_QUERY_VALUE, &steamRegKey))
@@ -181,6 +180,7 @@ char *Sys_SteamPath( void )
 		if (finishPath)
 			Q_strcat(steamPath, MAX_OSPATH, "\\SteamApps\\common\\" STEAMPATH_NAME );
 	}
+#endif
 
 	return steamPath;
 }
