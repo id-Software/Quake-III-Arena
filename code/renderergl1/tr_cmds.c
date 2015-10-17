@@ -147,7 +147,7 @@ returns NULL if there is not enough space for important commands
 =============
 */
 void *R_GetCommandBuffer( int bytes ) {
-	return R_GetCommandBufferReserved( bytes, sizeof ( swapBuffersCommand_t ) );
+	return R_GetCommandBufferReserved( bytes, PAD( sizeof( swapBuffersCommand_t ), sizeof(void *) ) );
 }
 
 
