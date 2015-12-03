@@ -160,24 +160,15 @@ Cvars for HDR and tonemapping:
 
 Cvars for advanced material usage:
 
-*  `r_normalMapping`                - Enable normal mapping for materials that
-                                   support it, and also specify advanced 
-                                   shading techniques.
+*  `r_normalMapping`                - Enable normal maps for materials that
+                                   support it.
                                      0 - No.
                                      1 - Yes. (default)
-                                     2 - Yes, and use Oren-Nayar reflectance
-                                         model.
-                                     3 - Yes, and use tri-Ace's Oren-Nayar
-                                         reflectance model.
 
-*  `r_specularMapping`              - Enable specular mapping for materials that
-                                   support it, and also specify advanced
-                                   specular techniques.
+*  `r_specularMapping`              - Enable specular maps for materials that
+                                   support it.
                                      0 - No.
-                                     1 - Yes, and use tri-Ace. (default)
-                                     2 - Yes, and use Blinn-Phong.
-                                     3 - Yes, and use Cook-Torrance.
-                                     4 - Yes, and use Torrance-Sparrow.
+                                     1 - Yes. (default)
 
 *  `r_deluxeMapping`                - Enable deluxe mapping.  (Map is compiled
                                    with light directions.)  Even if the map 
@@ -332,13 +323,6 @@ Cvars that you probably don't care about or shouldn't mess with:
                                    r_sunShadows.
                                      0 - No.
                                      1 - Yes. (default)
-
-*  `r_normalAmbient`                - Split map light into ambient and directed
-                                   portions when doing deluxe mapping.  Not
-                                   very useful.
-                                     0   - Don't. (default).
-                                     0.3 - 30% ambient, 70% directed.
-                                     1.0 - 100% ambient.
 
 *  `r_mergeLightmaps`               - Merge the small (128x128) lightmaps into 
                                    2 or fewer giant (4096x4096) lightmaps.
