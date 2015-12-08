@@ -101,7 +101,11 @@ static	void R_ColorShiftLightingBytes( byte in[4], byte out[4] ) {
 	int		shift, r, g, b;
 
 	// shift the color data based on overbright range
+#if defined(USE_OVERBRIGHT)
 	shift = r_mapOverBrightBits->integer - tr.overbrightBits;
+#else
+	shift = 0;
+#endif
 
 	// shift the data based on overbright range
 	r = in[0] << shift;
@@ -136,7 +140,9 @@ static void R_ColorShiftLightingFloats(float in[4], float out[4], float scale )
 {
 	float	r, g, b;
 
+#if defined(USE_OVERBRIGHT)
 	scale *= pow(2.0f, r_mapOverBrightBits->integer - tr.overbrightBits);
+#endif
 
 	r = in[0] * scale;
 	g = in[1] * scale;
@@ -2755,7 +2761,11 @@ void R_LoadLightGrid( lump_t *l ) {
 
 		if (hdrLightGrid)
 		{
+#if defined(USE_OVERBRIGHT)
 			float lightScale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits);
+#else
+			float lightScale = 1.0f;
+#endif
 
 			//ri.Printf(PRINT_ALL, "found!\n");
 

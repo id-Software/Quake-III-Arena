@@ -58,6 +58,7 @@ typedef unsigned int glIndex_t;
 #define CUBE_MAP_SIZE      (1 << CUBE_MAP_MIPS)
 
 #define USE_VERT_TANGENT_SPACE
+#define USE_OVERBRIGHT
 
 typedef struct dlight_s {
 	vec3_t	origin;

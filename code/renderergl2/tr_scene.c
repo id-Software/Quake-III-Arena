@@ -349,7 +349,11 @@ void RE_BeginScene(const refdef_t *fd)
 		}
 		else
 		{
+#if defined(USE_OVERBRIGHT)
 			float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
+#else
+			float scale = (1 << r_mapOverBrightBits->integer) / 255.0f;
+#endif
 			if (r_forceSun->integer)
 			{
 				VectorScale(tr.sunLight, scale * r_forceSunLightScale->value,   tr.refdef.sunCol);

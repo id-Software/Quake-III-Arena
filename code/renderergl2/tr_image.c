@@ -2855,7 +2855,11 @@ void R_SetColorMappings( void ) {
 	int		inf;
 
 	// setup the overbright lighting
+#if defined(USE_OVERBRIGHT)
 	tr.overbrightBits = r_overBrightBits->integer;
+#else
+	tr.overbrightBits = 0;
+#endif
 
 	// allow 2 overbright bits
 	if ( tr.overbrightBits > 2 ) {
