@@ -60,6 +60,12 @@ typedef unsigned int glIndex_t;
 #define USE_VERT_TANGENT_SPACE
 #define USE_OVERBRIGHT
 
+typedef struct cubemap_s {
+	vec3_t origin;
+	float parallaxRadius;
+	image_t *image;
+} cubemap_t;
+
 typedef struct dlight_s {
 	vec3_t	origin;
 	vec3_t	color;				// range from 0.0 to 1.0, should be color normalized
@@ -1560,8 +1566,7 @@ typedef struct {
 	int		                fatLightmapStep;
 
 	int                     numCubemaps;
-	vec3_t                  *cubemapOrigins;
-	image_t                 **cubemaps;
+	cubemap_t               *cubemaps;
 
 	trRefEntity_t			*currentEntity;
 	trRefEntity_t			worldEntity;		// point currentEntity at this when rendering world

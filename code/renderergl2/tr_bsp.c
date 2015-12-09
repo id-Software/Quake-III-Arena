@@ -2996,16 +2996,17 @@ void R_LoadCubemapEntities(char *cubemapEntityName)
 		return;
 
 	tr.numCubemaps = numCubemaps;
-	tr.cubemapOrigins = ri.Hunk_Alloc( tr.numCubemaps * sizeof(*tr.cubemapOrigins), h_low);
-	tr.cubemaps = ri.Hunk_Alloc( tr.numCubemaps * sizeof(*tr.cubemaps), h_low);
+	tr.cubemaps = ri.Hunk_Alloc(tr.numCubemaps * sizeof(*tr.cubemaps), h_low);
+	memset(tr.cubemaps, 0, tr.numCubemaps * sizeof(*tr.cubemaps));
 
 	numCubemaps = 0;
 	while(R_ParseSpawnVars(spawnVarChars, sizeof(spawnVarChars), &numSpawnVars, spawnVars))
 	{
 		int i;
 		qboolean isCubemap = qfalse;
-		qboolean positionSet = qfalse;
+		qboolean originSet = qfalse;
 		vec3_t origin;
+		float parallaxRadius = 1000.0f;
 
 		for (i = 0; i < numSpawnVars; i++)
 		{
@@ -3015,14 +3016,19 @@ void R_LoadCubemapEntities(char *cubemapEntityName)
 			if (!Q_stricmp(spawnVars[i][0], "origin"))
 			{
 				sscanf(spawnVars[i][1], "%f %f %f", &origin[0], &origin[1], &origin[2]);
-				positionSet = qtrue;
+				originSet = qtrue;
+			}
+			else if (!Q_stricmp(spawnVars[i][0], "radius"))
+			{
+				sscanf(spawnVars[i][1], "%f", &parallaxRadius);
 			}
 		}
 
-		if (isCubemap && positionSet)
+		if (isCubemap && originSet)
 		{
 			//ri.Printf(PRINT_ALL, "cubemap at %f %f %f\n", origin[0], origin[1], origin[2]);
-			VectorCopy(origin, tr.cubemapOrigins[numCubemaps]);
+			VectorCopy(origin, tr.cubemaps[numCubemaps].origin);
+			tr.cubemaps[numCubemaps].parallaxRadius = parallaxRadius;
 			numCubemaps++;
 		}
 	}
@@ -3068,7 +3074,7 @@ void R_RenderAllCubemaps(void)
 
 	for (i = 0; i < tr.numCubemaps; i++)
 	{
-		tr.cubemaps[i] = R_CreateImage(va("*cubeMap%d", i), NULL, CUBE_MAP_SIZE, CUBE_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_CUBEMAP, GL_RGBA8);
+		tr.cubemaps[i].image = R_CreateImage(va("*cubeMap%d", i), NULL, CUBE_MAP_SIZE, CUBE_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_CUBEMAP, GL_RGBA8);
 	}
 	
 	for (i = 0; i < tr.numCubemaps; i++)

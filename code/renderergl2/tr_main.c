@@ -2862,7 +2862,7 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 
 	memset( &refdef, 0, sizeof( refdef ) );
 	refdef.rdflags = 0;
-	VectorCopy(tr.cubemapOrigins[cubemapIndex], refdef.vieworg);
+	VectorCopy(tr.cubemaps[cubemapIndex].origin, refdef.vieworg);
 
 	switch(cubemapSide)
 	{
