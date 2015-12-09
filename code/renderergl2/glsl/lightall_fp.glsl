@@ -382,7 +382,7 @@ void main()
 	vec3 parallax = u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
     #if defined(GLOSS_IS_ROUGHNESS)
-	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, roughness).rgb * u_EnableTextures.w;
+	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 * roughness).rgb * u_EnableTextures.w;
     #else
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
     #endif
