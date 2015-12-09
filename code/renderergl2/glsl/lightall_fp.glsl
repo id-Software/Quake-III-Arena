@@ -150,11 +150,11 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 }
 #endif
 
-vec3 CalcDiffuse(vec3 diffuseAlbedo, float EH, float NH, float r)
+vec3 CalcDiffuse(vec3 diffuseAlbedo, float EH, float NH, float roughness)
 {
 #if defined(USE_BURLEY)
 	// modified from https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
-	float fd90 = -0.5 + EH * EH * r;
+	float fd90 = -0.5 + EH * EH * roughness;
 	float burley = 1.0 + fd90 * 0.04 / NH;
 	burley *= burley;
 	return diffuseAlbedo * burley;
@@ -163,21 +163,21 @@ vec3 CalcDiffuse(vec3 diffuseAlbedo, float EH, float NH, float r)
 #endif
 }
 
-vec3 EnvironmentBRDF(float r, float NE, vec3 specular)
+vec3 EnvironmentBRDF(float roughness, float NE, vec3 specular)
 {
 	// from http://community.arm.com/servlet/JiveServlet/download/96891546-19496/siggraph2015-mmg-renaldas-slides.pdf
-	float v = 1.0 - max(r, NE);
+	float v = 1.0 - max(roughness, NE);
 	v *= v * v;
 	return vec3(v) + specular;
 }
 
-vec3 CalcSpecular(vec3 specular, float NH, float NL, float NE, float EH, float r)
+vec3 CalcSpecular(vec3 specular, float NH, float NL, float NE, float EH, float roughness)
 {
 	// from http://community.arm.com/servlet/JiveServlet/download/96891546-19496/siggraph2015-mmg-renaldas-slides.pdf
-	float rr = r*r;
+	float rr = roughness*roughness;
 	float rrrr = rr*rr;
 	float d = (NH * NH) * (rrrr - 1.0) + 1.0;
-	float v = (EH * EH) * (r + 0.5);
+	float v = (EH * EH) * (roughness + 0.5);
 	return specular * (rrrr / (4.0 * d * d * v));
 }
 
@@ -276,6 +276,11 @@ void main()
 	attenuation  = 1.0;
   #endif
 
+  #if defined(r_lightGamma)
+	lightColor   = pow(lightColor,   vec3(r_lightGamma));
+	ambientColor = pow(ambientColor, vec3(r_lightGamma));
+  #endif
+
   #if defined(USE_NORMALMAP)
     #if defined(SWIZZLE_NORMALMAP)
 	N.xy = texture2D(u_NormalMap, texCoords).ag - vec2(0.5);
@@ -302,11 +307,6 @@ void main()
     #if defined(SHADOWMAP_MODULATE)
 	lightColor *= shadowValue * (1.0 - u_PrimaryLightAmbient.r) + u_PrimaryLightAmbient.r;
     #endif
-  #endif
-
-  #if defined(r_lightGamma)
-	lightColor   = pow(lightColor,   vec3(r_lightGamma));
-	ambientColor = pow(ambientColor, vec3(r_lightGamma));
   #endif
 
   #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
@@ -343,7 +343,11 @@ void main()
   #endif
 
 	float gloss = specular.a;
-	float r = exp2(-3.0 * gloss);
+  #if defined(GLOSS_IS_ROUGHNESS)
+	float roughness = gloss;
+  #else
+	float roughness = exp2(-3.0 * gloss);
+  #endif
 
   #if defined(SPECULAR_IS_METALLIC)
 	// diffuse is actually base color, and green of specular is metallicness
@@ -356,20 +360,20 @@ void main()
 	diffuse.rgb *= vec3(1.0) - specular.rgb;
   #endif
 
-	reflectance  = CalcDiffuse(diffuse.rgb, EH, NH, r);
+	reflectance  = CalcDiffuse(diffuse.rgb, EH, NH, roughness);
   #if defined(USE_SHADOWMAP) && defined(SHADOWMAP_MODULATE)
 	// bit of a hack, with modulated shadowmaps, add specular to sunlight
 	H = normalize(var_PrimaryLightDir.xyz + E);
 	EH = clamp(dot(E, H), 0.0, 1.0);
 	NH = clamp(dot(N, H), 0.0, 1.0);
-	reflectance += shadowValue * CalcSpecular(specular.rgb, NH, NL, NE, EH, r);
+	reflectance += shadowValue * CalcSpecular(specular.rgb, NH, NL, NE, EH, roughness);
   #endif
 
 	gl_FragColor.rgb  = lightColor   * reflectance * (attenuation * NL);
 	gl_FragColor.rgb += ambientColor * (diffuse.rgb + specular.rgb);
 
   #if defined(USE_CUBEMAP)
-	reflectance = EnvironmentBRDF(r, NE, specular.rgb);
+	reflectance = EnvironmentBRDF(roughness, NE, specular.rgb);
 
 	vec3 R = reflect(E, N);
 
@@ -377,7 +381,11 @@ void main()
 	// from http://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 	vec3 parallax = u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
+    #if defined(GLOSS_IS_ROUGHNESS)
+	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, roughness).rgb * u_EnableTextures.w;
+    #else
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
+    #endif
 
 	// normalize cubemap based on lowest mip (~diffuse)
 	// multiplying cubemap values by lighting below depends on either this or the cubemap being normalized at generation
@@ -411,8 +419,8 @@ void main()
 	EH2 = clamp(dot(E, H2), 0.0, 1.0);
 	NH2 = clamp(dot(N, H2), 0.0, 1.0);
 
-	reflectance  = CalcDiffuse(diffuse.rgb, EH2, NH2, r);
-	reflectance += CalcSpecular(specular.rgb, NH2, NL2, NE, EH2, r);
+	reflectance  = CalcDiffuse(diffuse.rgb, EH2, NH2, roughness);
+	reflectance += CalcSpecular(specular.rgb, NH2, NL2, NE, EH2, roughness);
 
 	lightColor = u_PrimaryLightColor * var_Color.rgb;
 
