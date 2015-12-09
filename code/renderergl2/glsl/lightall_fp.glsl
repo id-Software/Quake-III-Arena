@@ -361,13 +361,6 @@ void main()
   #endif
 
 	reflectance  = CalcDiffuse(diffuse.rgb, EH, NH, roughness);
-  #if defined(USE_SHADOWMAP) && defined(SHADOWMAP_MODULATE)
-	// bit of a hack, with modulated shadowmaps, add specular to sunlight
-	H = normalize(var_PrimaryLightDir.xyz + E);
-	EH = clamp(dot(E, H), 0.0, 1.0);
-	NH = clamp(dot(N, H), 0.0, 1.0);
-	reflectance += shadowValue * CalcSpecular(specular.rgb, NH, NL, NE, EH, roughness);
-  #endif
 
 	gl_FragColor.rgb  = lightColor   * reflectance * (attenuation * NL);
 	gl_FragColor.rgb += ambientColor * (diffuse.rgb + specular.rgb);
@@ -403,7 +396,7 @@ void main()
 	gl_FragColor.rgb += cubeLightColor * reflectance;
   #endif
 
-  #if defined(USE_PRIMARY_LIGHT)
+  #if defined(USE_PRIMARY_LIGHT) || defined(SHADOWMAP_MODULATE)
 	vec3 L2, H2;
 	float NL2, EH2, NH2;
 
@@ -419,10 +412,14 @@ void main()
 	EH2 = clamp(dot(E, H2), 0.0, 1.0);
 	NH2 = clamp(dot(N, H2), 0.0, 1.0);
 
-	reflectance  = CalcDiffuse(diffuse.rgb, EH2, NH2, roughness);
-	reflectance += CalcSpecular(specular.rgb, NH2, NL2, NE, EH2, roughness);
+	reflectance  = CalcSpecular(specular.rgb, NH2, NL2, NE, EH2, roughness);
 
-	lightColor = u_PrimaryLightColor * var_Color.rgb;
+	// bit of a hack, with modulated shadowmaps, ignore diffuse
+    #if !defined(SHADOWMAP_MODULATE)
+	reflectance += CalcDiffuse(diffuse.rgb, EH2, NH2, roughness);
+    #endif
+
+	lightColor = u_PrimaryLightColor;
 
     #if defined(r_lightGamma)
 	lightColor = pow(lightColor, vec3(r_lightGamma));

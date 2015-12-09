@@ -335,35 +335,30 @@ void RE_BeginScene(const refdef_t *fd)
 	}
 	else
 	{
+#if defined(USE_OVERBRIGHT)
+		float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
+#else
+		float scale = (1 << r_mapOverBrightBits->integer) / 255.0f;
+#endif
 		tr.refdef.colorScale = r_forceSun->integer ? r_forceSunMapLightScale->value : tr.mapLightScale;
+
+		if (r_forceSun->integer)
+			VectorScale(tr.sunLight, scale * r_forceSunLightScale->value, tr.refdef.sunCol);
+		else
+			VectorScale(tr.sunLight, scale, tr.refdef.sunCol);
 
 		if (r_sunlightMode->integer == 1)
 		{
-			tr.refdef.sunCol[0] =
-			tr.refdef.sunCol[1] =
-			tr.refdef.sunCol[2] = 1.0f;
-
 			tr.refdef.sunAmbCol[0] =
 			tr.refdef.sunAmbCol[1] =
 			tr.refdef.sunAmbCol[2] = r_forceSun->integer ? r_forceSunAmbientScale->value : tr.sunShadowScale;
 		}
 		else
 		{
-#if defined(USE_OVERBRIGHT)
-			float scale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits - 8);
-#else
-			float scale = (1 << r_mapOverBrightBits->integer) / 255.0f;
-#endif
 			if (r_forceSun->integer)
-			{
-				VectorScale(tr.sunLight, scale * r_forceSunLightScale->value,   tr.refdef.sunCol);
 				VectorScale(tr.sunLight, scale * r_forceSunAmbientScale->value, tr.refdef.sunAmbCol);
-			}
 			else
-			{
-				VectorScale(tr.sunLight, scale,                     tr.refdef.sunCol);
 				VectorScale(tr.sunLight, scale * tr.sunShadowScale, tr.refdef.sunAmbCol);
-			}
 		}
 	}
 
