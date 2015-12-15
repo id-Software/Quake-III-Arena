@@ -677,12 +677,12 @@ extern void (APIENTRY * qglRenderbufferStorageMultisampleEXT)(GLenum target, GLs
 #define GL_FRAMEBUFFER_SRGB_EXT                         0x8DB9
 #endif
 
-#ifndef GL_EXT_texture_compression_latc
-#define GL_EXT_texture_compression_latc
-#define GL_COMPRESSED_LUMINANCE_LATC1_EXT                 0x8C70
-#define GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT          0x8C71
-#define GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT           0x8C72
-#define GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT    0x8C73
+#ifndef GL_ARB_texture_compression_rgtc
+#define GL_ARB_texture_compression_rgtc
+#define GL_COMPRESSED_RED_RGTC1                       0x8DBB
+#define GL_COMPRESSED_SIGNED_RED_RGTC1                0x8DBC
+#define GL_COMPRESSED_RG_RGTC2                        0x8DBD
+#define GL_COMPRESSED_SIGNED_RG_RGTC2                 0x8DBE
 #endif
 
 #ifndef GL_ARB_texture_compression_bptc

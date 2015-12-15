@@ -1031,7 +1031,7 @@ void GLSL_InitGPUShaders(void)
 		if (r_dlightMode->integer >= 2)
 			Q_strcat(extradefines, 1024, "#define USE_SHADOWMAP\n");
 
-		if (1)
+		if (glRefConfig.swizzleNormalmap)
 			Q_strcat(extradefines, 1024, "#define SWIZZLE_NORMALMAP\n");
 
 		if (r_hdr->integer && !glRefConfig.floatLightmap)

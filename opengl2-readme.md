@@ -18,7 +18,7 @@ compatibility with existing Quake 3 mods.
   - Texture upsampling.
   - Advanced materials support.
   - Advanced shading and specular methods.
-  - LATC and BPTC texture compression support.
+  - RGTC and BPTC texture compression support.
   - Screen-space ambient occlusion.
 
 
@@ -67,7 +67,7 @@ Cvars for simple rendering features:
 
 * `r_ext_compressed_textures`       - Automatically compress textures.
                                      0 - No texture compression. (default)
-                                     1 - DXT/LATC texture compression if
+                                     1 - DXT/RGTC texture compression if
                                          supported.
                                      2 - BPTC texture compression if supported.
 

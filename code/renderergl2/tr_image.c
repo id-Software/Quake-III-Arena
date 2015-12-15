@@ -176,12 +176,17 @@ void R_ImageList_f( void ) {
 				format = "sBPTC";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
-			case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
-				format = "LATC ";
+			case GL_COMPRESSED_RG_RGTC2:
+				format = "RGTC2";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
-			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 				format = "DXT1 ";
+				// 64 bits per 16 pixels, so 4 bits per pixel
+				estSize /= 2;
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+				format = "DXT1a";
 				// 64 bits per 16 pixels, so 4 bits per pixel
 				estSize /= 2;
 				break;
@@ -1331,41 +1336,6 @@ static void R_MipMapsRGB( byte *in, int inWidth, int inHeight)
 }
 
 
-static void R_MipMapLuminanceAlpha (const byte *in, byte *out, int width, int height)
-{
-	int  i, j, row;
-
-	if ( width == 1 && height == 1 ) {
-		return;
-	}
-
-	row = width * 4;
-	width >>= 1;
-	height >>= 1;
-
-	if ( width == 0 || height == 0 ) {
-		width += height;	// get largest
-		for (i=0 ; i<width ; i++, out+=4, in+=8 ) {
-			out[0] = 
-			out[1] = 
-			out[2] = (in[0] + in[4]) >> 1;
-			out[3] = (in[3] + in[7]) >> 1;
-		}
-		return;
-	}
-
-	for (i=0 ; i<height ; i++, in+=row) {
-		for (j=0 ; j<width ; j++, out+=4, in+=8) {
-			out[0] = 
-			out[1] = 
-			out[2] = (in[0] + in[4] + in[row  ] + in[row+4]) >> 2;
-			out[3] = (in[3] + in[7] + in[row+3] + in[row+7]) >> 2;
-		}
-	}
-
-}
-
-
 static void R_MipMapNormalHeight (const byte *in, byte *out, int width, int height, qboolean swizzle)
 {
 	int		i, j;
@@ -1656,13 +1626,13 @@ static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean light
 
 	if(normalmap)
 	{
-		if ((!RawImage_HasAlpha(data, numPixels) || (type == IMGTYPE_NORMAL)) && !forceNoCompression && (glRefConfig.textureCompression & TCR_LATC))
+		if ((type == IMGTYPE_NORMALHEIGHT) && RawImage_HasAlpha(data, numPixels))
 		{
-			internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
-		}
-		else
-		{
-			if ( !forceNoCompression && glConfig.textureCompression == TC_S3TC_ARB )
+			if (!forceNoCompression && glRefConfig.textureCompression & TCR_BPTC)
+			{
+				internalFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+			}
+			else if (!forceNoCompression && glConfig.textureCompression == TC_S3TC_ARB)
 			{
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			}
@@ -1677,6 +1647,33 @@ static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean light
 			else
 			{
 				internalFormat = GL_RGBA;
+			}
+		}
+		else
+		{
+			if (!forceNoCompression && glRefConfig.textureCompression & TCR_RGTC)
+			{
+				internalFormat = GL_COMPRESSED_RG_RGTC2;
+			}
+			else if (!forceNoCompression && glRefConfig.textureCompression & TCR_BPTC)
+			{
+				internalFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+			}
+			else if (!forceNoCompression && glConfig.textureCompression == TC_S3TC_ARB)
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			}
+			else if (r_texturebits->integer == 16)
+			{
+				internalFormat = GL_RGB5;
+			}
+			else if (r_texturebits->integer == 32)
+			{
+				internalFormat = GL_RGB8;
+			}
+			else
+			{
+				internalFormat = GL_RGB;
 			}
 		}
 	}
@@ -1774,10 +1771,101 @@ static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean light
 	return internalFormat;
 }
 
+static void CompressMonoBlock(byte outdata[8], const byte indata[16])
+{
+	int hi, lo, diff, bias, outbyte, shift, i;
+	byte *p = outdata;
+
+	hi = lo = indata[0];
+	for (i = 1; i < 16; i++)
+	{
+		hi = MAX(indata[i], hi);
+		lo = MIN(indata[i], lo);
+	}
+
+	*p++ = hi;
+	*p++ = lo;
+
+	diff = hi - lo;
+
+	if (diff == 0)
+	{
+		outbyte = (hi == 255) ? 255 : 0;
+
+		for (i = 0; i < 6; i++)
+			*p++ = outbyte;
+
+		return;
+	}
+
+	bias = diff / 2 - lo * 7;
+	outbyte = shift = 0;
+	for (i = 0; i < 16; i++)
+	{
+		const byte fixIndex[8] = { 1, 7, 6, 5, 4, 3, 2, 0 };
+		byte index = fixIndex[(indata[i] * 7 + bias) / diff];
+
+		outbyte |= index << shift;
+		shift += 3;
+		if (shift >= 8)
+		{
+			*p++ = outbyte & 0xff;
+			shift -= 8;
+			outbyte >>= 8;
+		}
+	}
+}
+
+static void RawImage_UploadToRgtc2Texture(byte *data, int width, int height, int mip)
+{
+	int wBlocks, hBlocks, y, x, size;
+	byte *compressedData, *p;
+
+	wBlocks = (width + 3) / 4;
+	hBlocks = (height + 3) / 4;
+	size = wBlocks * hBlocks * 16;
+
+	p = compressedData = ri.Hunk_AllocateTempMemory(size);
+	for (y = 0; y < height; y += 4)
+	{
+		int oh = MIN(4, height - y);
+
+		for (x = 0; x < width; x += 4)
+		{
+			byte workingData[16];
+			int component;
+
+			int ow = MIN(4, width - x);
+
+			for (component = 0; component < 2; component++)
+			{
+				int ox, oy;
+
+				for (oy = 0; oy < oh; oy++)
+					for (ox = 0; ox < ow; ox++)
+						workingData[oy * 4 + ox] = data[((y + oy) * width + x + ox) * 4 + component];
+
+				// dupe data to fill
+				for (oy = 0; oy < 4; oy++)
+					for (ox = (oy < oh) ? ow : 0; ox < 4; ox++)
+						workingData[oy * 4 + ox] = workingData[(oy % oh) * 4 + ox % ow];
+
+				CompressMonoBlock(p, workingData);
+				p += 8;
+			}
+		}
+	}
+
+	qglCompressedTexImage2DARB(GL_TEXTURE_2D, mip, GL_COMPRESSED_RG_RGTC2, width, height, 0, size, compressedData);
+
+	ri.Hunk_FreeTempMemory(compressedData);
+}
+
 
 static void RawImage_UploadTexture( byte *data, int x, int y, int width, int height, GLenum internalFormat, imgType_t type, imgFlags_t flags, qboolean subtexture )
 {
 	int dataFormat, dataType;
+	qboolean rgtc = (internalFormat == GL_COMPRESSED_RG_RGTC2);
 
 	switch(internalFormat)
 	{
@@ -1801,7 +1889,12 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 	if ( subtexture )
 		qglTexSubImage2D( GL_TEXTURE_2D, 0, x, y, width, height, dataFormat, dataType, data );
 	else
-		qglTexImage2D (GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, dataType, data );
+	{
+		if (rgtc)
+			RawImage_UploadToRgtc2Texture(data, width, height, 0);
+		else
+			qglTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, dataType, data);
+	}
 
 	if (flags & IMGFLAG_MIPMAP)
 	{
@@ -1814,14 +1907,7 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 			{
 				if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 				{
-					if (internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
-					{
-						R_MipMapLuminanceAlpha( data, data, width, height );
-					}
-					else
-					{
-						R_MipMapNormalHeight( data, data, width, height, qtrue);
-					}
+					R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
 				}
 				else
 				{
@@ -1848,7 +1934,10 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 			}
 			else
 			{
-				qglTexImage2D (GL_TEXTURE_2D, miplevel, internalFormat, width, height, 0, dataFormat, dataType, data );
+				if (rgtc)
+					RawImage_UploadToRgtc2Texture(data, width, height, miplevel);
+				else
+					qglTexImage2D(GL_TEXTURE_2D, miplevel, internalFormat, width, height, 0, dataFormat, dataType, data);
 			}
 		}
 	}
@@ -1902,23 +1991,9 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 		}
 	}
 
-	// normals are always swizzled
-	if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
+	if (glRefConfig.swizzleNormalmap && (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT))
 	{
 		RawImage_SwizzleRA(data, width, height);
-	}
-
-	// LATC2 is only used for normals
-	if (internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
-	{
-		byte *in = data;
-		int c = width * height;
-		while (c--)
-		{
-			in[0] = in[1];
-			in[2] = in[1];
-			in += 4;
-		}
 	}
 
 	// copy or resample data as appropriate for first MIP level
@@ -1942,14 +2017,7 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 
 			if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 			{
-				if (internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
-				{
-					R_MipMapLuminanceAlpha( data, data, width, height );
-				}
-				else
-				{
-					R_MipMapNormalHeight( data, data, width, height, qtrue);
-				}
+				R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
 			}
 			else
 			{
@@ -2185,25 +2253,10 @@ void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int h
 	int	 scaled_width, scaled_height, scaled_x, scaled_y;
 	byte *data = pic;
 
-	// normals are always swizzled
-	if (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT)
+	if (glRefConfig.swizzleNormalmap && (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT))
 	{
 		RawImage_SwizzleRA(pic, width, height);
 	}
-
-	// LATC2 is only used for normals
-	if (image->internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
-	{
-		byte *in = data;
-		int c = width * height;
-		while (c--)
-		{
-			in[0] = in[1];
-			in[2] = in[1];
-			in += 4;
-		}
-	}
-
 
 	RawImage_ScaleToPower2(&pic, &width, &height, &scaled_width, &scaled_height, image->type, image->flags, &resampledBuffer);
 
@@ -2237,14 +2290,7 @@ void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int h
 
 			if (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT)
 			{
-				if (image->internalFormat == GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT)
-				{
-					R_MipMapLuminanceAlpha( data, data, width, height );
-				}
-				else
-				{
-					R_MipMapNormalHeight( data, data, width, height, qtrue);
-				}
+				R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
 			}
 			else
 			{

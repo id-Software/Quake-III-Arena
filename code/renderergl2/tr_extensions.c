@@ -585,6 +585,22 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
+	// GL_ARB_texture_compression
+	extension = "GL_ARB_texture_compression";
+	glRefConfig.arbTextureCompression = qfalse;
+	if (GLimp_HaveExtension(extension))
+	{
+		qglCompressedTexImage3DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexImage3DARB");
+		qglCompressedTexImage2DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexImage2DARB");
+		qglCompressedTexImage1DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexImage1DARB");
+		qglCompressedTexSubImage3DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexSubImage3DARB");
+		qglCompressedTexSubImage2DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexSubImage2DARB");
+		qglCompressedTexSubImage1DARB = (void *)SDL_GL_GetProcAddress("glCompressedTexSubImage1DARB");
+		qglGetCompressedTexImageARB = (void *)SDL_GL_GetProcAddress("glGetCompressedTexImageARB");
+		glRefConfig.arbTextureCompression = qtrue;
+		ri.Printf(PRINT_ALL, result[glRefConfig.arbTextureCompression], extension);
+	}
+
 	// GL_EXT_framebuffer_multisample
 	extension = "GL_EXT_framebuffer_multisample";
 	glRefConfig.framebufferMultisample = qfalse;
@@ -601,12 +617,12 @@ void GLimp_InitExtraExtensions()
 
 	glRefConfig.textureCompression = TCR_NONE;
 
-	// GL_EXT_texture_compression_latc
-	extension = "GL_EXT_texture_compression_latc";
+	// GL_ARB_texture_compression_rgtc
+	extension = "GL_ARB_texture_compression_rgtc";
 	if (GLimp_HaveExtension(extension))
 	{
-		if (r_ext_compressed_textures->integer)
-			glRefConfig.textureCompression |= TCR_LATC;
+		if (r_ext_compressed_textures->integer && glRefConfig.arbTextureCompression)
+			glRefConfig.textureCompression |= TCR_RGTC;
 
 		ri.Printf(PRINT_ALL, result[r_ext_compressed_textures->integer ? 1 : 0], extension);
 	}
@@ -614,6 +630,8 @@ void GLimp_InitExtraExtensions()
 	{
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
+
+	glRefConfig.swizzleNormalmap = r_ext_compressed_textures->integer && !(glRefConfig.textureCompression & TCR_RGTC);
 
 	// GL_ARB_texture_compression_bptc
 	extension = "GL_ARB_texture_compression_bptc";

@@ -1380,7 +1380,7 @@ typedef enum {
 
 typedef enum {
 	TCR_NONE = 0x0000,
-	TCR_LATC = 0x0001,
+	TCR_RGTC = 0x0001,
 	TCR_BPTC = 0x0002,
 } textureCompressionRef_t;
 
@@ -1404,7 +1404,9 @@ typedef struct {
 	qboolean textureFloat;
 	qboolean halfFloatPixel;
 	qboolean packedDepthStencil;
+	qboolean arbTextureCompression;
 	textureCompressionRef_t textureCompression;
+	qboolean swizzleNormalmap;
 	
 	qboolean framebufferMultisample;
 	qboolean framebufferBlit;
