@@ -1451,7 +1451,7 @@ RawImage_ScaleToPower2
 
 ===============
 */
-static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_height, int *inout_scaled_width, int *inout_scaled_height, imgType_t type, imgFlags_t flags, byte **resampledBuffer)
+static qboolean RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_height, imgType_t type, imgFlags_t flags, byte **resampledBuffer)
 {
 	int width =         *inout_width;
 	int height =        *inout_height;
@@ -1460,6 +1460,7 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 	qboolean picmip = flags & IMGFLAG_PICMIP;
 	qboolean mipmap = flags & IMGFLAG_MIPMAP;
 	qboolean clampToEdge = flags & IMGFLAG_CLAMPTOEDGE;
+	qboolean notScaled;
 
 	//
 	// convert to exact power of 2 sizes
@@ -1506,22 +1507,9 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 		*resampledBuffer = ri.Hunk_AllocateTempMemory( finalwidth * finalheight * 4 );
 
 		if (scaled_width != width || scaled_height != height)
-		{
 			ResampleTexture (*data, width, height, *resampledBuffer, scaled_width, scaled_height);
-		}
 		else
-		{
-			byte *inbyte, *outbyte;
-			int i;
-
-			inbyte = *data;
-			outbyte = *resampledBuffer;
-
-			for (i = width * height * 4; i > 0; i--)
-			{
-				*outbyte++ = *inbyte++;
-			}
-		}
+			Com_Memcpy(*resampledBuffer, *data, width * height * 4);
 
 		if (type == IMGTYPE_COLORALPHA)
 			RGBAtoYCoCgA(*resampledBuffer, *resampledBuffer, scaled_width, scaled_height);
@@ -1535,33 +1523,28 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 		}
 
 		if (type == IMGTYPE_COLORALPHA)
-		{
 			YCoCgAtoRGBA(*resampledBuffer, *resampledBuffer, scaled_width, scaled_height);
-		}
 		else if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
-		{
 			FillInNormalizedZ(*resampledBuffer, *resampledBuffer, scaled_width, scaled_height);
-		}
-
 
 		//endTime = ri.Milliseconds();
 
 		//ri.Printf(PRINT_ALL, "upsampled %dx%d to %dx%d in %dms\n", width, height, scaled_width, scaled_height, endTime - startTime);
 
 		*data = *resampledBuffer;
-		width = scaled_width;
-		height = scaled_height;
 	}
-	else if ( scaled_width != width || scaled_height != height ) {
+	else if ( scaled_width != width || scaled_height != height )
+	{
 		if (data && resampledBuffer)
 		{
 			*resampledBuffer = ri.Hunk_AllocateTempMemory( scaled_width * scaled_height * 4 );
 			ResampleTexture (*data, width, height, *resampledBuffer, scaled_width, scaled_height);
 			*data = *resampledBuffer;
 		}
-		width = scaled_width;
-		height = scaled_height;
 	}
+
+	width  = scaled_width;
+	height = scaled_height;
 
 	//
 	// perform optional picmip operation
@@ -1569,16 +1552,6 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 	if ( picmip ) {
 		scaled_width >>= r_picmip->integer;
 		scaled_height >>= r_picmip->integer;
-	}
-
-	//
-	// clamp to minimum size
-	//
-	if (scaled_width < 1) {
-		scaled_width = 1;
-	}
-	if (scaled_height < 1) {
-		scaled_height = 1;
 	}
 
 	//
@@ -1592,10 +1565,35 @@ static void RawImage_ScaleToPower2( byte **data, int *inout_width, int *inout_he
 		scaled_height >>= 1;
 	}
 
-	*inout_width         = width;
-	*inout_height        = height;
-	*inout_scaled_width  = scaled_width;
-	*inout_scaled_height = scaled_height;
+	//
+	// clamp to minimum size
+	//
+	scaled_width  = MAX(1, scaled_width);
+	scaled_height = MAX(1, scaled_height);
+
+	notScaled = (width == scaled_width) && (height == scaled_height);
+
+	//
+	// rescale texture to new size using existing mipmap functions
+	//
+	if (data)
+	{
+		while (width > scaled_width || height > scaled_height)
+		{
+			if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
+				R_MipMapNormalHeight(*data, *data, width, height, qfalse);
+			else
+				R_MipMapsRGB(*data, width, height);
+
+			width  = MAX(1, width >> 1);
+			height = MAX(1, height >> 1);
+		}
+	}
+
+	*inout_width  = width;
+	*inout_height = height;
+
+	return notScaled;
 }
 
 
@@ -1950,23 +1948,30 @@ Upload32
 
 ===============
 */
-static void Upload32( byte *data, int width, int height, imgType_t type, imgFlags_t flags,
-	qboolean lightMap, GLenum internalFormat, int *pUploadWidth, int *pUploadHeight)
+static void Upload32(byte *data, int x, int y, int width, int height, image_t *image)
 {
-	byte		*scaledBuffer = NULL;
 	byte		*resampledBuffer = NULL;
-	int			scaled_width, scaled_height;
 	int			i, c;
 	byte		*scan;
 
-	RawImage_ScaleToPower2(&data, &width, &height, &scaled_width, &scaled_height, type, flags, &resampledBuffer);
+	imgType_t type = image->type;
+	imgFlags_t flags = image->flags;
+	GLenum internalFormat = image->internalFormat;
+	qboolean subtexture = (x != 0) || (y != 0) || (width != image->width) || (height != image->height);
+	qboolean notScaled = qtrue;
+	qboolean mipmap = !!(flags & IMGFLAG_MIPMAP);
 
-	scaledBuffer = ri.Hunk_AllocateTempMemory( sizeof( unsigned ) * scaled_width * scaled_height );
+	if (!data)
+	{
+		RawImage_ScaleToPower2(NULL, &width, &height, type, flags, NULL);
+		RawImage_UploadTexture(NULL, 0, 0, width, height, internalFormat, type, flags, qfalse);
+		goto done;
+	}
+	else if (!subtexture)
+	{
+		notScaled = RawImage_ScaleToPower2(&data, &width, &height, type, flags, &resampledBuffer);
+	}
 
-	//
-	// scan the texture for each channel's max values
-	// and verify if the alpha channel is being used or not
-	//
 	c = width*height;
 	scan = data;
 	
@@ -1992,100 +1997,28 @@ static void Upload32( byte *data, int width, int height, imgType_t type, imgFlag
 	}
 
 	if (glRefConfig.swizzleNormalmap && (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT))
-	{
 		RawImage_SwizzleRA(data, width, height);
-	}
 
-	// copy or resample data as appropriate for first MIP level
-	if ( ( scaled_width == width ) && 
-		( scaled_height == height ) ) {
-		if (!(flags & IMGFLAG_MIPMAP))
-		{
-			RawImage_UploadTexture( data, 0, 0, scaled_width, scaled_height, internalFormat, type, flags, qfalse );
-			//qglTexImage2D (GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			*pUploadWidth = scaled_width;
-			*pUploadHeight = scaled_height;
+	// This corresponds to what the OpenGL1 renderer does
+	if (!(flags & IMGFLAG_NOLIGHTSCALE) && (!notScaled || mipmap))
+		R_LightScaleTexture(data, width, height, !mipmap);
 
-			goto done;
-		}
-		Com_Memcpy (scaledBuffer, data, width*height*4);
-	}
-	else
+	if (subtexture)
 	{
-		// use the normal mip-mapping function to go down from here
-		while ( width > scaled_width || height > scaled_height ) {
-
-			if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
-			{
-				R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
-			}
-			else
-			{
-				R_MipMapsRGB( data, width, height );
-			}
-
-			width >>= 1;
-			height >>= 1;
-			if ( width < 1 ) {
-				width = 1;
-			}
-			if ( height < 1 ) {
-				height = 1;
-			}
-		}
-		Com_Memcpy( scaledBuffer, data, width * height * 4 );
+		// FIXME: Incorrect if original texture was not a power of 2 texture or picmipped
+		RawImage_UploadTexture(data, x, y, width, height, internalFormat, type, flags, qtrue);
+		GL_CheckErrors();
+		return;
 	}
 
-	if (!(flags & IMGFLAG_NOLIGHTSCALE))
-		R_LightScaleTexture (scaledBuffer, scaled_width, scaled_height, !(flags & IMGFLAG_MIPMAP) );
-
-	*pUploadWidth = scaled_width;
-	*pUploadHeight = scaled_height;
-
-	RawImage_UploadTexture(scaledBuffer, 0, 0, scaled_width, scaled_height, internalFormat, type, flags, qfalse);
+	RawImage_UploadTexture(data, 0, 0, width, height, internalFormat, type, flags, qfalse);
 
 done:
 
-	if (flags & IMGFLAG_MIPMAP)
-	{
-		if ( textureFilterAnisotropic )
-			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-					(GLint)Com_Clamp( 1, maxAnisotropy, r_ext_max_anisotropy->integer ) );
+	image->uploadWidth  = width;
+	image->uploadHeight = height;
 
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-	}
-	else
-	{
-		if ( textureFilterAnisotropic )
-			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
-
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	}
-
-	GL_CheckErrors();
-
-	if ( scaledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( scaledBuffer );
-	if ( resampledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( resampledBuffer );
-}
-
-
-static void EmptyTexture( int width, int height, imgType_t type, imgFlags_t flags,
-	qboolean lightMap, GLenum internalFormat, int *pUploadWidth, int *pUploadHeight )
-{
-	int			scaled_width, scaled_height;
-
-	RawImage_ScaleToPower2(NULL, &width, &height, &scaled_width, &scaled_height, type, flags, NULL);
-
-	*pUploadWidth = scaled_width;
-	*pUploadHeight = scaled_height;
-
-	RawImage_UploadTexture(NULL, 0, 0, scaled_width, scaled_height, internalFormat, type, flags, qfalse);
-
-	if (flags & IMGFLAG_MIPMAP)
+	if (mipmap)
 	{
 		if ( textureFilterAnisotropic )
 			qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
@@ -2120,6 +2053,9 @@ static void EmptyTexture( int width, int height, imgType_t type, imgFlags_t flag
 	}
 
 	GL_CheckErrors();
+
+	if ( resampledBuffer != NULL )
+		ri.Hunk_FreeTempMemory( resampledBuffer );
 }
 
 
@@ -2185,9 +2121,10 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 		GL_SelectTexture( image->TMU );
 	}
 
+	GL_Bind(image);
+
 	if (image->flags & IMGFLAG_CUBEMAP)
 	{
-		GL_Bind(image);
 		qglTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		qglTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		qglTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -2218,20 +2155,7 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 	}
 	else
 	{
-		GL_Bind(image);
-
-		if (pic)
-		{
-			Upload32( pic, image->width, image->height, image->type, image->flags,
-				isLightmap, image->internalFormat, &image->uploadWidth,
-				&image->uploadHeight );
-		}
-		else
-		{
-			EmptyTexture(image->width, image->height, image->type, image->flags,
-				isLightmap, image->internalFormat, &image->uploadWidth,
-				&image->uploadHeight );
-		}
+		Upload32( pic, 0, 0, image->width, image->height, image );
 
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapClampMode );
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapClampMode );
@@ -2248,86 +2172,15 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 
 void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int height )
 {
-	byte *scaledBuffer = NULL;
-	byte *resampledBuffer = NULL;
-	int	 scaled_width, scaled_height, scaled_x, scaled_y;
-	byte *data = pic;
-
-	if (glRefConfig.swizzleNormalmap && (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT))
-	{
-		RawImage_SwizzleRA(pic, width, height);
+	if (qglActiveTextureARB) {
+		GL_SelectTexture(image->TMU);
 	}
 
-	RawImage_ScaleToPower2(&pic, &width, &height, &scaled_width, &scaled_height, image->type, image->flags, &resampledBuffer);
+	GL_Bind(image);
 
-	scaledBuffer = ri.Hunk_AllocateTempMemory( sizeof( unsigned ) * scaled_width * scaled_height );
+	Upload32(pic, x, y, width, height, image);
 
-	if ( qglActiveTextureARB ) {
-		GL_SelectTexture( image->TMU );
-	}
-
-	GL_Bind(image);	
-
-	// copy or resample data as appropriate for first MIP level
-	if ( ( scaled_width == width ) && 
-		( scaled_height == height ) ) {
-		if (!(image->flags & IMGFLAG_MIPMAP))
-		{
-			scaled_x = x * scaled_width / width;
-			scaled_y = y * scaled_height / height;
-			RawImage_UploadTexture( data, scaled_x, scaled_y, scaled_width, scaled_height, image->internalFormat, image->type, image->flags, qtrue );
-			//qglTexSubImage2D( GL_TEXTURE_2D, 0, scaled_x, scaled_y, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, data );
-
-			GL_CheckErrors();
-			goto done;
-		}
-		Com_Memcpy (scaledBuffer, data, width*height*4);
-	}
-	else
-	{
-		// use the normal mip-mapping function to go down from here
-		while ( width > scaled_width || height > scaled_height ) {
-
-			if (image->type == IMGTYPE_NORMAL || image->type == IMGTYPE_NORMALHEIGHT)
-			{
-				R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
-			}
-			else
-			{
-				R_MipMapsRGB( data, width, height );
-			}
-
-			width >>= 1;
-			height >>= 1;
-			x >>= 1;
-			y >>= 1;
-			if ( width < 1 ) {
-				width = 1;
-			}
-			if ( height < 1 ) {
-				height = 1;
-			}
-		}
-		Com_Memcpy( scaledBuffer, data, width * height * 4 );
-	}
-
-	if (!(image->flags & IMGFLAG_NOLIGHTSCALE))
-		R_LightScaleTexture (scaledBuffer, scaled_width, scaled_height, !(image->flags & IMGFLAG_MIPMAP) );
-
-	scaled_x = x * scaled_width / width;
-	scaled_y = y * scaled_height / height;
-	RawImage_UploadTexture( (byte *)data, scaled_x, scaled_y, scaled_width, scaled_height, image->internalFormat, image->type, image->flags, qtrue );
-
-done:
-	
-	GL_SelectTexture( 0 );
-
-	GL_CheckErrors();
-
-	if ( scaledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( scaledBuffer );
-	if ( resampledBuffer != 0 )
-		ri.Hunk_FreeTempMemory( resampledBuffer );
+	GL_SelectTexture(0);
 }
 
 //===================================================================
