@@ -1615,12 +1615,15 @@ static qboolean RawImage_HasAlpha(const byte *scan, int numPixels)
 	return qfalse;
 }
 
-static GLenum RawImage_GetFormat(const byte *data, int numPixels, qboolean lightMap, imgType_t type, imgFlags_t flags)
+static GLenum RawImage_GetFormat(const byte *data, int numPixels, GLenum picFormat, qboolean lightMap, imgType_t type, imgFlags_t flags)
 {
 	int samples = 3;
 	GLenum internalFormat = GL_RGB;
 	qboolean forceNoCompression = (flags & IMGFLAG_NO_COMPRESSION);
 	qboolean normalmap = (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT);
+
+	if (picFormat != GL_RGBA8)
+		return picFormat;
 
 	if(normalmap)
 	{
@@ -1860,10 +1863,66 @@ static void RawImage_UploadToRgtc2Texture(byte *data, int width, int height, int
 }
 
 
-static void RawImage_UploadTexture( byte *data, int x, int y, int width, int height, GLenum internalFormat, imgType_t type, imgFlags_t flags, qboolean subtexture )
+static void RawImage_UploadTexture( byte *data, int x, int y, int width, int height, GLenum picFormat, int numMips, GLenum internalFormat, imgType_t type, imgFlags_t flags, qboolean subtexture )
 {
 	int dataFormat, dataType;
 	qboolean rgtc = (internalFormat == GL_COMPRESSED_RG_RGTC2);
+
+	if (picFormat != GL_RGBA8 && picFormat != GL_SRGB8_ALPHA8_EXT)
+	{
+		int bytesPer4x4Block = 0;
+		int miplevel = 0;
+
+		switch (picFormat)
+		{
+			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_RED_RGTC1:
+			case GL_COMPRESSED_SIGNED_RED_RGTC1:
+				bytesPer4x4Block = 8;
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+			case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+			case GL_COMPRESSED_RG_RGTC2:
+			case GL_COMPRESSED_SIGNED_RG_RGTC2:
+			case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB:
+			case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB:
+			case GL_COMPRESSED_RGBA_BPTC_UNORM_ARB:
+			case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB:
+				bytesPer4x4Block = 16;
+				break;
+			default:
+				ri.Printf(PRINT_ALL, "Unsupported texture format %08x\n", picFormat);
+				return;
+				break;
+		}
+
+		for (miplevel = 0; miplevel < numMips; miplevel++)
+		{
+			int size;
+
+			size = ((width + 3) / 4) * ((height + 3) / 4) * bytesPer4x4Block;
+
+			if (subtexture)
+				qglCompressedTexSubImage2DARB(GL_TEXTURE_2D, miplevel, x, y, width, height, internalFormat, size, data);
+			else
+				qglCompressedTexImage2DARB(GL_TEXTURE_2D, miplevel, internalFormat, width, height, 0, size, data);
+
+			x >>= 1;
+			y >>= 1;
+			x -= x % 4;
+			y -= y % 4;
+
+			width  = MAX(1, width >> 1);
+			height = MAX(1, height >> 1);
+			data += size;
+		}
+
+		return;
+	}
 
 	switch(internalFormat)
 	{
@@ -1948,7 +2007,7 @@ Upload32
 
 ===============
 */
-static void Upload32(byte *data, int x, int y, int width, int height, image_t *image)
+static void Upload32(byte *data, int x, int y, int width, int height, GLenum picFormat, int numMips, image_t *image)
 {
 	byte		*resampledBuffer = NULL;
 	int			i, c;
@@ -1964,11 +2023,16 @@ static void Upload32(byte *data, int x, int y, int width, int height, image_t *i
 	if (!data)
 	{
 		RawImage_ScaleToPower2(NULL, &width, &height, type, flags, NULL);
-		RawImage_UploadTexture(NULL, 0, 0, width, height, internalFormat, type, flags, qfalse);
+		RawImage_UploadTexture(NULL, 0, 0, width, height, GL_RGBA8, 0, internalFormat, type, flags, qfalse);
 		goto done;
 	}
 	else if (!subtexture)
 	{
+		if (picFormat != GL_RGBA8)
+		{
+			RawImage_UploadTexture(data, 0, 0, width, height, picFormat, numMips, internalFormat, type, flags, qfalse);
+			goto done;
+		}
 		notScaled = RawImage_ScaleToPower2(&data, &width, &height, type, flags, &resampledBuffer);
 	}
 
@@ -2006,12 +2070,12 @@ static void Upload32(byte *data, int x, int y, int width, int height, image_t *i
 	if (subtexture)
 	{
 		// FIXME: Incorrect if original texture was not a power of 2 texture or picmipped
-		RawImage_UploadTexture(data, x, y, width, height, internalFormat, type, flags, qtrue);
+		RawImage_UploadTexture(data, x, y, width, height, GL_RGBA8, 0, internalFormat, type, flags, qtrue);
 		GL_CheckErrors();
 		return;
 	}
 
-	RawImage_UploadTexture(data, 0, 0, width, height, internalFormat, type, flags, qfalse);
+	RawImage_UploadTexture(data, 0, 0, width, height, GL_RGBA8, 0, internalFormat, type, flags, qfalse);
 
 done:
 
@@ -2061,12 +2125,12 @@ done:
 
 /*
 ================
-R_CreateImage
+R_CreateImage2
 
 This is the only way any image_t are created
 ================
 */
-image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgType_t type, imgFlags_t flags, int internalFormat ) {
+image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLenum picFormat, int numMips, imgType_t type, imgFlags_t flags, int internalFormat ) {
 	image_t		*image;
 	qboolean	isLightmap = qfalse;
 	long		hash;
@@ -2104,7 +2168,7 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 		if (image->flags & IMGFLAG_CUBEMAP)
 			internalFormat = GL_RGBA8;
 		else
-			internalFormat = RawImage_GetFormat(pic, width * height, isLightmap, image->type, image->flags);
+			internalFormat = RawImage_GetFormat(pic, width * height, picFormat, isLightmap, image->type, image->flags);
 	}
 
 	image->internalFormat = internalFormat;
@@ -2155,7 +2219,7 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 	}
 	else
 	{
-		Upload32( pic, 0, 0, image->width, image->height, image );
+		Upload32( pic, 0, 0, image->width, image->height, picFormat, numMips, image );
 
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapClampMode );
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapClampMode );
@@ -2170,6 +2234,20 @@ image_t *R_CreateImage( const char *name, byte *pic, int width, int height, imgT
 	return image;
 }
 
+
+/*
+================
+R_CreateImage
+
+Wrapper for R_CreateImage2(), for the old parameters.
+================
+*/
+image_t *R_CreateImage(const char *name, byte *pic, int width, int height, imgType_t type, imgFlags_t flags, int internalFormat)
+{
+	return R_CreateImage2(name, pic, width, height, GL_RGBA8, 0, type, flags, internalFormat);
+}
+
+
 void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int height )
 {
 	if (qglActiveTextureARB) {
@@ -2178,12 +2256,15 @@ void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int h
 
 	GL_Bind(image);
 
-	Upload32(pic, x, y, width, height, image);
+	Upload32(pic, x, y, width, height, GL_RGBA8, 0, image);
 
 	GL_SelectTexture(0);
 }
 
 //===================================================================
+
+// Prototype for dds loader function which isn't common to both renderers
+void R_LoadDDS(const char *filename, byte **pic, int *width, int *height, GLenum *picFormat, int *numMips);
 
 typedef struct
 {
@@ -2213,7 +2294,7 @@ Loads any of the supported image types into a cannonical
 32 bit format.
 =================
 */
-void R_LoadImage( const char *name, byte **pic, int *width, int *height )
+void R_LoadImage( const char *name, byte **pic, int *width, int *height, GLenum *picFormat, int *numMips )
 {
 	qboolean orgNameFailed = qfalse;
 	int orgLoader = -1;
@@ -2225,10 +2306,27 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height )
 	*pic = NULL;
 	*width = 0;
 	*height = 0;
+	*picFormat = GL_RGBA8;
+	*numMips = 0;
 
 	Q_strncpyz( localName, name, MAX_QPATH );
 
 	ext = COM_GetExtension( localName );
+
+	// If compressed textures are enabled, try loading a DDS first, it'll load fastest
+	if (r_ext_compressed_textures->integer)
+	{
+		char ddsName[MAX_QPATH];
+
+		COM_StripExtension(name, ddsName, MAX_QPATH);
+		Q_strcat(ddsName, MAX_QPATH, ".dds");
+
+		R_LoadDDS(ddsName, pic, width, height, picFormat, numMips);
+
+		// If loaded, we're done.
+		if (*pic)
+			return;
+	}
 
 	if( *ext )
 	{
@@ -2301,6 +2399,8 @@ image_t	*R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags )
 	image_t	*image;
 	int		width, height;
 	byte	*pic;
+	GLenum  picFormat;
+	int picNumMips;
 	long	hash;
 
 	if (!name) {
@@ -2327,12 +2427,12 @@ image_t	*R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags )
 	//
 	// load the pic from disk
 	//
-	R_LoadImage( name, &pic, &width, &height );
+	R_LoadImage( name, &pic, &width, &height, &picFormat, &picNumMips );
 	if ( pic == NULL ) {
 		return NULL;
 	}
 
-	if (r_normalMapping->integer && !(type == IMGTYPE_NORMAL) && (flags & IMGFLAG_PICMIP) && (flags & IMGFLAG_MIPMAP) && (flags & IMGFLAG_GENNORMALMAP))
+	if (r_normalMapping->integer && (picFormat == GL_RGBA8) && !(type == IMGTYPE_NORMAL) && (flags & IMGFLAG_PICMIP) && (flags & IMGFLAG_MIPMAP) && (flags & IMGFLAG_GENNORMALMAP))
 	{
 		char normalName[MAX_QPATH];
 		image_t *normalImage;
@@ -2435,7 +2535,7 @@ image_t	*R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags )
 		}
 	}
 
-	image = R_CreateImage( ( char * ) name, pic, width, height, type, flags, 0 );
+	image = R_CreateImage2( ( char * ) name, pic, width, height, picFormat, picNumMips, type, flags, 0 );
 	ri.Free( pic );
 	return image;
 }
