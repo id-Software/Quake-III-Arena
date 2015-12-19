@@ -292,13 +292,18 @@ void R_LoadDDS ( const char *filename, byte **pic, int *width, int *height, GLen
 		len -= 4 + sizeof(*ddsHeader);
 	}
 
-	*width = ddsHeader->width;
-	*height = ddsHeader->height;
+	if (width)
+		*width = ddsHeader->width;
+	if (height)
+		*height = ddsHeader->height;
 
-	if (ddsHeader->flags & _DDSFLAGS_MIPMAPCOUNT)
-		*numMips = ddsHeader->numMips;
-	else
-		*numMips = 1;
+	if (numMips)
+	{
+		if (ddsHeader->flags & _DDSFLAGS_MIPMAPCOUNT)
+			*numMips = ddsHeader->numMips;
+		else
+			*numMips = 1;
+	}
 
 	// FIXME: handle cube map
 	//if ((ddsHeader->caps2 & DDSCAPS2_CUBEMAP) == DDSCAPS2_CUBEMAP)
