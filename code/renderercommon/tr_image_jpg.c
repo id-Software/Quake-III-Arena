@@ -61,7 +61,7 @@ static void R_JPGErrorExit(j_common_ptr cinfo)
   
   (*cinfo->err->format_message) (cinfo, buffer);
 
-  ri.Printf(PRINT_ALL, "R_LoadJPG() error: %s", buffer);
+  ri.Printf(PRINT_ALL, "Error: %s", buffer);
 
   /* Return control to the setjmp point */
   longjmp(jerr->setjmp_buffer, 1);
@@ -142,7 +142,7 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
     ri.FS_FreeFile(fbuffer.v);
 
     /* Append the filename to the error for easier debugging */
-    ri.Printf(PRINT_ALL, ", file %s\n", filename);
+    ri.Printf(PRINT_ALL, ", loading file %s\n", filename);
     return;
   }
 
@@ -388,16 +388,28 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
     int image_width, int image_height, byte *image_buffer, int padding)
 {
   struct jpeg_compress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  q_jpeg_error_mgr_t jerr;
   JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
   my_dest_ptr dest;
   int row_stride;		/* physical row width in image buffer */
   size_t outcount;
 
   /* Step 1: allocate and initialize JPEG compression object */
-  cinfo.err = jpeg_std_error(&jerr);
+  cinfo.err = jpeg_std_error(&jerr.pub);
   cinfo.err->error_exit = R_JPGErrorExit;
   cinfo.err->output_message = R_JPGOutputMessage;
+
+  /* Establish the setjmp return context for R_JPGErrorExit to use. */
+  if (setjmp(jerr.setjmp_buffer))
+  {
+    /* If we get here, the JPEG code has signaled an error.
+     * We need to clean up the JPEG object and return.
+     */
+    jpeg_destroy_compress(&cinfo);
+
+    ri.Printf(PRINT_ALL, "\n");
+    return 0;
+  }
 
   /* Now we can initialize the JPEG compression object. */
   jpeg_create_compress(&cinfo);
