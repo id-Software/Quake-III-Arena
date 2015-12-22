@@ -142,6 +142,7 @@ cvar_t  *r_specularMapping;
 cvar_t  *r_deluxeMapping;
 cvar_t  *r_parallaxMapping;
 cvar_t  *r_cubeMapping;
+cvar_t  *r_exportCubemaps;
 cvar_t  *r_specularIsMetallic;
 cvar_t  *r_glossIsRoughness;
 cvar_t  *r_baseNormalX;
@@ -455,6 +456,7 @@ byte *RB_ReadPixels(int x, int y, int width, int height, size_t *offset, int *pa
 	buffer = ri.Hunk_AllocateTempMemory(padwidth * height + *offset + packAlign - 1);
 	
 	bufstart = PADP((intptr_t) buffer + *offset, packAlign);
+
 	qglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, bufstart);
 	
 	*offset = bufstart - buffer;
@@ -1213,6 +1215,7 @@ void R_Register( void )
 	r_deluxeMapping = ri.Cvar_Get( "r_deluxeMapping", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_parallaxMapping = ri.Cvar_Get( "r_parallaxMapping", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_cubeMapping = ri.Cvar_Get( "r_cubeMapping", "0", CVAR_ARCHIVE | CVAR_LATCH );
+	r_exportCubemaps = ri.Cvar_Get("r_exportCubemaps", "0", 0);
 	r_specularIsMetallic = ri.Cvar_Get( "r_specularIsMetallic", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_glossIsRoughness = ri.Cvar_Get("r_glossIsRoughness", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_baseNormalX = ri.Cvar_Get( "r_baseNormalX", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
