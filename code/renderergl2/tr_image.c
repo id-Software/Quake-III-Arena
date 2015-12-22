@@ -1868,7 +1868,7 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 	int dataFormat, dataType;
 	qboolean rgtc = (internalFormat == GL_COMPRESSED_RG_RGTC2);
 
-	if (picFormat != GL_RGBA8 && picFormat != GL_SRGB8_ALPHA8_EXT)
+	if (data && picFormat != GL_RGBA8 && picFormat != GL_SRGB8_ALPHA8_EXT)
 	{
 		int bytesPer4x4Block = 0;
 		int miplevel = 0;
@@ -1876,6 +1876,7 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 		switch (picFormat)
 		{
 			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
 			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
 			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
 			case GL_COMPRESSED_RED_RGTC1:
@@ -1900,11 +1901,26 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 				break;
 		}
 
+		if (flags & IMGFLAG_PICMIP)
+		{
+			for (miplevel = r_picmip->integer; miplevel > 0 && numMips > 1; miplevel--, numMips--)
+			{
+				int size = ((width + 3) / 4) * ((height + 3) / 4) * bytesPer4x4Block;
+
+				x >>= 1;
+				y >>= 1;
+				width = MAX(1, width >> 1);
+				height = MAX(1, height >> 1);
+				data += size;
+			}
+		}
+
+		if (!(flags & IMGFLAG_MIPMAP))
+			numMips = 1;
+
 		for (miplevel = 0; miplevel < numMips; miplevel++)
 		{
-			int size;
-
-			size = ((width + 3) / 4) * ((height + 3) / 4) * bytesPer4x4Block;
+			int size = ((width + 3) / 4) * ((height + 3) / 4) * bytesPer4x4Block;
 
 			if (subtexture)
 				qglCompressedTexSubImage2DARB(GL_TEXTURE_2D, miplevel, x, y, width, height, internalFormat, size, data);
@@ -1913,9 +1929,6 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 
 			x >>= 1;
 			y >>= 1;
-			x -= x % 4;
-			y -= y % 4;
-
 			width  = MAX(1, width >> 1);
 			height = MAX(1, height >> 1);
 			data += size;
@@ -1955,29 +1968,20 @@ static void RawImage_UploadTexture( byte *data, int x, int y, int width, int hei
 
 	if (flags & IMGFLAG_MIPMAP)
 	{
-		int miplevel;
+		int miplevel = 0;
 
-		miplevel = 0;
 		while (width > 1 || height > 1)
 		{
 			if (data)
 			{
 				if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
-				{
 					R_MipMapNormalHeight( data, data, width, height, glRefConfig.swizzleNormalmap );
-				}
 				else
-				{
 					R_MipMapsRGB( data, width, height );
-				}
 			}
 			
-			width >>= 1;
-			height >>= 1;
-			if (width < 1)
-				width = 1;
-			if (height < 1)
-				height = 1;
+			width = MAX(1, width >> 1);
+			height = MAX(1, height >> 1);
 			miplevel++;
 
 			if ( data && r_colorMipLevels->integer )
@@ -2028,7 +2032,7 @@ static void Upload32(byte *data, int x, int y, int width, int height, GLenum pic
 	}
 	else if (!subtexture)
 	{
-		if (picFormat != GL_RGBA8)
+		if (picFormat != GL_RGBA8 && picFormat != GL_SRGB8_ALPHA8_EXT)
 		{
 			RawImage_UploadTexture(data, 0, 0, width, height, picFormat, numMips, internalFormat, type, flags, qfalse);
 			goto done;
