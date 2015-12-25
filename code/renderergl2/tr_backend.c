@@ -1764,7 +1764,7 @@ const void *RB_ExportCubemaps(const void *data)
 	if (cmd)
 	{
 		FBO_t *oldFbo = glState.currentFBO;
-		int sideSize = CUBE_MAP_SIZE * CUBE_MAP_SIZE * 4;
+		int sideSize = r_cubemapSize->integer * r_cubemapSize->integer * 4;
 		byte *cubemapPixels = ri.Malloc(sideSize * 6);
 		int i, j;
 
@@ -1779,12 +1779,12 @@ const void *RB_ExportCubemaps(const void *data)
 			for (j = 0; j < 6; j++)
 			{
 				qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, cubemap->image->texnum, 0);
-				qglReadPixels(0, 0, CUBE_MAP_SIZE, CUBE_MAP_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, p);
+				qglReadPixels(0, 0, r_cubemapSize->integer, r_cubemapSize->integer, GL_RGBA, GL_UNSIGNED_BYTE, p);
 				p += sideSize;
 			}
 
 			Com_sprintf(filename, MAX_QPATH, "cubemaps/%s/%03d.dds", tr.world->baseName, i);
-			R_SaveDDS(filename, cubemapPixels, CUBE_MAP_SIZE, CUBE_MAP_SIZE, 6);
+			R_SaveDDS(filename, cubemapPixels, r_cubemapSize->integer, r_cubemapSize->integer, 6);
 			ri.Printf(PRINT_ALL, "Saved cubemap %d as %s\n", i, filename);
 		}
 
