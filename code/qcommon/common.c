@@ -3585,3 +3585,177 @@ qboolean Com_IsVoipTarget(uint8_t *voipTargets, int voipTargetsSize, int clientN
 
 	return qfalse;
 }
+
+/*
+===============
+Field_CompletePlayerName
+===============
+*/
+static qboolean Field_CompletePlayerNameFinal( qboolean whitespace )
+{
+	int completionOffset;
+
+	if( matchCount == 0 )
+		return qtrue;
+
+	completionOffset = strlen( completionField->buffer ) - strlen( completionString );
+
+	Q_strncpyz( &completionField->buffer[ completionOffset ], shortestMatch,
+		sizeof( completionField->buffer ) - completionOffset );
+
+	completionField->cursor = strlen( completionField->buffer );
+
+	if( matchCount == 1 && whitespace )
+	{
+		Q_strcat( completionField->buffer, sizeof( completionField->buffer ), " " );
+		completionField->cursor++;
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+static void Name_PlayerNameCompletion( const char **names, int nameCount, void(*callback)(const char *s) ) 
+{
+	int i;
+
+	for( i = 0; i < nameCount; i++ ) {
+		callback( names[ i ] );
+	}
+}
+
+qboolean Com_FieldStringToPlayerName( char *name, int length, const char *rawname )
+{
+	char		hex[5];
+	int			i;
+	int			ch;
+
+	if( name == NULL || rawname == NULL )
+		return qfalse;
+
+	if( length <= 0 )
+		return qtrue;
+
+	for( i = 0; *rawname && i + 1 <= length; rawname++, i++ ) {
+		if( *rawname == '\\' ) {
+			Q_strncpyz( hex, rawname + 1, sizeof(hex) );
+			ch = Com_HexStrToInt( hex );
+			if( ch > -1 ) {
+				name[i] = ch;
+				rawname += 4; //hex string length, 0xXX
+			} else {
+				name[i] = *rawname;
+			}
+		} else {
+			name[i] = *rawname;
+		}
+	}
+	name[i] = '\0';
+
+	return qtrue;
+}
+
+qboolean Com_PlayerNameToFieldString( char *str, int length, const char *name )
+{
+	const char *p;
+	int i;
+	int x1, x2;
+
+	if( str == NULL || name == NULL )
+		return qfalse;
+
+	if( length <= 0 )
+		return qtrue;
+
+	*str = '\0';
+	p = name;
+
+	for( i = 0; *p != '\0'; i++, p++ )
+	{
+		if( i + 1 >= length )
+			break;
+
+		if( *p <= ' ' )
+		{
+			if( i + 5 + 1 >= length )
+				break;
+
+			x1 = *p >> 4;
+			x2 = *p & 15;
+
+			str[i+0] = '\\';
+			str[i+1] = '0';
+			str[i+2] = 'x';
+			str[i+3] = x1 > 9 ? x1 - 10 + 'a' : x1 + '0';
+			str[i+4] = x2 > 9 ? x2 - 10 + 'a' : x2 + '0';
+
+			i += 4;
+		} else {
+			str[i] = *p;
+		}		
+	}
+	str[i] = '\0';
+
+	return qtrue;
+}
+
+void Field_CompletePlayerName( char **names, int nameCount )
+{
+	qboolean whitespace;
+
+	matchCount = 0;
+	shortestMatch[ 0 ] = 0;
+
+	if( nameCount <= 0 )
+		return;
+
+	Name_PlayerNameCompletion( names, nameCount, FindMatches );
+
+	if( completionString[0] == '\0' )
+	{
+		Com_PlayerNameToFieldString( shortestMatch, sizeof( shortestMatch ), names[ 0 ] );
+	}
+
+	//allow to tab player names
+	//if full player name switch to next player name
+	if( completionString[0] != '\0'
+		&& Q_stricmp( shortestMatch, completionString ) == 0 
+		&& nameCount > 1 ) 
+	{
+		int i;
+
+		for( i = 0; i < nameCount; i++ ) {
+			if( Q_stricmp( names[ i ], completionString ) == 0 ) 
+			{
+				i++;
+				if( i >= nameCount )
+				{
+					i = 0;
+				}
+
+				Com_PlayerNameToFieldString( shortestMatch, sizeof( shortestMatch ), names[ i ] );
+				break;
+			}
+		}
+	}
+
+	if( matchCount > 1 )
+	{
+		Com_Printf( "]%s\n", completionField->buffer );
+		
+		Name_PlayerNameCompletion( names, nameCount, PrintMatches );
+	}
+
+	whitespace = nameCount == 1? qtrue: qfalse;
+	if( !Field_CompletePlayerNameFinal( whitespace ) )
+	{
+
+	}
+}
+
+int QDECL Com_strCompare( const void *a, const void *b )
+{
+    const char **pa = (const char **)a;
+    const char **pb = (const char **)b;
+    return strcmp( *pa, *pb );
+}
