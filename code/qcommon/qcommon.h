@@ -300,7 +300,8 @@ enum svc_ops_e {
 	svc_EOF,
 
 // new commands, supported only by ioquake3 protocol but not legacy
-	svc_voip,     // not wrapped in USE_VOIP, so this value is reserved.
+	svc_voipSpeex,     // not wrapped in USE_VOIP, so this value is reserved.
+	svc_voipOpus,      //
 };
 
 
@@ -316,7 +317,8 @@ enum clc_ops_e {
 	clc_EOF,
 
 // new commands, supported only by ioquake3 protocol but not legacy
-	clc_voip,   // not wrapped in USE_VOIP, so this value is reserved.
+	clc_voipSpeex,   // not wrapped in USE_VOIP, so this value is reserved.
+	clc_voipOpus,    //
 };
 
 /*

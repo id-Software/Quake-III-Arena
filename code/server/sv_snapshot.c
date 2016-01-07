@@ -547,7 +547,7 @@ static void SV_WriteVoipToClient(client_t *cl, msg_t *msg)
 	        		if (totalbytes > (msg->maxsize - msg->cursize) / 2)
 		        		break;
 
-        			MSG_WriteByte(msg, svc_voip);
+        			MSG_WriteByte(msg, svc_voipOpus);
         			MSG_WriteShort(msg, packet->sender);
 	        		MSG_WriteByte(msg, (byte) packet->generation);
 		        	MSG_WriteLong(msg, packet->sequence);
