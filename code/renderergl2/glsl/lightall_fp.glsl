@@ -363,7 +363,7 @@ void main()
 	reflectance  = CalcDiffuse(diffuse.rgb, EH, NH, roughness);
 
 	gl_FragColor.rgb  = lightColor   * reflectance * (attenuation * NL);
-	gl_FragColor.rgb += ambientColor * (diffuse.rgb + specular.rgb);
+	gl_FragColor.rgb += ambientColor * diffuse.rgb;
 
   #if defined(USE_CUBEMAP)
 	reflectance = EnvironmentBRDF(roughness, NE, specular.rgb);
