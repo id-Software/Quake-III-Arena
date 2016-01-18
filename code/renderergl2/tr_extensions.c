@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "tr_local.h"
+#include "tr_dsa.h"
 
 // GL_EXT_draw_range_elements
 void            (APIENTRY * qglDrawRangeElementsEXT) (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
@@ -183,6 +184,23 @@ void (APIENTRY * qglBindVertexArrayARB)(GLuint array);
 void (APIENTRY * qglDeleteVertexArraysARB)(GLsizei n, const GLuint *arrays);
 void (APIENTRY * qglGenVertexArraysARB)(GLsizei n, GLuint *arrays);
 GLboolean (APIENTRY * qglIsVertexArrayARB)(GLuint array);
+
+// GL_EXT_direct_state_access
+GLvoid (APIENTRY * qglBindMultiTexture)(GLenum texunit, GLenum target, GLuint texture);
+GLvoid (APIENTRY * qglTextureParameterf)(GLuint texture, GLenum target, GLenum pname, GLfloat param);
+GLvoid (APIENTRY * qglTextureParameteri)(GLuint texture, GLenum target, GLenum pname, GLint param);
+GLvoid (APIENTRY * qglTextureImage2D)(GLuint texture, GLenum target, GLint level, GLint internalformat,
+	GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+GLvoid (APIENTRY * qglTextureSubImage2D)(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+	GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
+GLvoid (APIENTRY * qglCopyTextureImage2D)(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+	GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+GLvoid (APIENTRY * qglCompressedTextureImage2D)(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+	GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
+GLvoid (APIENTRY * qglCompressedTextureSubImage2D)(GLuint texture, GLenum target, GLint level,
+	GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format,
+	GLsizei imageSize, const GLvoid *data);
+GLvoid (APIENTRY * qglGenerateTextureMipmap)(GLuint texture, GLenum target);
 
 static qboolean GLimp_HaveExtension(const char *ext)
 {
@@ -750,4 +768,38 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
+	// GL_EXT_direct_state_access
+	extension = "GL_EXT_direct_state_access";
+	qglBindMultiTexture = GLDSA_BindMultiTexture;
+	qglTextureParameterf = GLDSA_TextureParameterf;
+	qglTextureParameteri = GLDSA_TextureParameteri;
+	qglTextureImage2D = GLDSA_TextureImage2D;
+	qglTextureSubImage2D = GLDSA_TextureSubImage2D;
+	qglCopyTextureImage2D = GLDSA_CopyTextureImage2D;
+	qglCompressedTextureImage2D = GLDSA_CompressedTextureImage2D;
+	qglCompressedTextureSubImage2D = GLDSA_CompressedTextureSubImage2D;
+	qglGenerateTextureMipmap = GLDSA_GenerateTextureMipmap;
+	glRefConfig.directStateAccess = qfalse;
+	if (GLimp_HaveExtension(extension))
+	{
+		if (r_ext_direct_state_access->integer)
+		{
+			glRefConfig.directStateAccess = qtrue;
+			qglBindMultiTexture = (void *)SDL_GL_GetProcAddress("glBindMultiTextureEXT");
+			qglTextureParameterf = (void *)SDL_GL_GetProcAddress("glTextureParameterfEXT");
+			qglTextureParameteri = (void *)SDL_GL_GetProcAddress("glTextureParameteriEXT");
+			qglTextureImage2D = (void *)SDL_GL_GetProcAddress("glTextureImage2DEXT");
+			qglTextureSubImage2D = (void *)SDL_GL_GetProcAddress("glTextureSubImage2DEXT");
+			qglCopyTextureImage2D = (void *)SDL_GL_GetProcAddress("glCopyTextureImage2DEXT");
+			qglCompressedTextureImage2D = (void *)SDL_GL_GetProcAddress("glCompressedTextureImage2DEXT");
+			qglCompressedTextureSubImage2D = (void *)SDL_GL_GetProcAddress("glCompressedTextureSubImage2DEXT");
+			qglGenerateTextureMipmap = (void *)SDL_GL_GetProcAddress("glGenerateTextureMipmapEXT");
+		}
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.directStateAccess ? 1 : 0], extension);
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], extension);
+	}
 }

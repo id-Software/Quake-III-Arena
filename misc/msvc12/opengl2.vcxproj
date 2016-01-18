@@ -514,6 +514,7 @@ cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_vp.glsl ..\..
     <ClCompile Include="..\..\code\renderergl2\tr_bsp.c" />
     <ClCompile Include="..\..\code\renderergl2\tr_cmds.c" />
     <ClCompile Include="..\..\code\renderergl2\tr_curve.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_dsa.c" />
     <ClCompile Include="..\..\code\renderergl2\tr_extensions.c" />
     <ClCompile Include="..\..\code\renderergl2\tr_extramath.c" />
     <ClCompile Include="..\..\code\renderergl2\tr_fbo.c" />

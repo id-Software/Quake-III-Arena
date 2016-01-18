@@ -736,6 +736,23 @@ extern GLboolean (APIENTRY * qglIsVertexArrayARB)(GLuint array);
 #define GL_VERTEX_ARRAY_BINDING_ARB                0x85B5
 #endif
 
+// GL_EXT_direct_state_access
+extern GLvoid(APIENTRY * qglBindMultiTexture)(GLenum texunit, GLenum target, GLuint texture);
+extern GLvoid(APIENTRY * qglTextureParameterf)(GLuint texture, GLenum target, GLenum pname, GLfloat param);
+extern GLvoid(APIENTRY * qglTextureParameteri)(GLuint texture, GLenum target, GLenum pname, GLint param);
+extern GLvoid(APIENTRY * qglTextureImage2D)(GLuint texture, GLenum target, GLint level, GLint internalformat,
+	GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+extern GLvoid(APIENTRY * qglTextureSubImage2D)(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+	GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
+extern GLvoid(APIENTRY * qglCopyTextureImage2D)(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+	GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+extern GLvoid(APIENTRY * qglCompressedTextureImage2D)(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+	GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
+extern GLvoid(APIENTRY * qglCompressedTextureSubImage2D)(GLuint texture, GLenum target, GLint level,
+	GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format,
+	GLsizei imageSize, const GLvoid *data);
+extern GLvoid(APIENTRY * qglGenerateTextureMipmap)(GLuint texture, GLenum target);
+
 
 #if defined(WIN32)
 // WGL_ARB_create_context

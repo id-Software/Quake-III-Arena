@@ -374,7 +374,7 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 	//tess.numIndexes = 0;
 	tess.firstIndex = tess.numIndexes;
 	
-	GL_Bind( image );
+	GL_BindToTMU( image, TB_COLORMAP );
 	GL_Cull( CT_TWO_SIDED );
 
 	for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t <= maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )

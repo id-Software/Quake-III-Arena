@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 #include "tr_local.h"
+#include "tr_dsa.h"
 
 backEndData_t	*backEndData;
 backEndState_t	backEnd;
@@ -36,80 +37,27 @@ static float	s_flipMatrix[16] = {
 
 
 /*
-** GL_Bind
-*/
-void GL_Bind( image_t *image ) {
-	int texnum;
-
-	if ( !image ) {
-		ri.Printf( PRINT_WARNING, "GL_Bind: NULL image\n" );
-		texnum = tr.defaultImage->texnum;
-	} else {
-		texnum = image->texnum;
-	}
-
-	if ( r_nobind->integer && tr.dlightImage ) {		// performance evaluation option
-		texnum = tr.dlightImage->texnum;
-	}
-
-	if ( glState.currenttextures[glState.currenttmu] != texnum ) {
-		if ( image ) {
-			image->frameUsed = tr.frameCount;
-		}
-		glState.currenttextures[glState.currenttmu] = texnum;
-		if (image && image->flags & IMGFLAG_CUBEMAP)
-			qglBindTexture( GL_TEXTURE_CUBE_MAP, texnum );
-		else
-			qglBindTexture( GL_TEXTURE_2D, texnum );
-	}
-}
-
-/*
-** GL_SelectTexture
-*/
-void GL_SelectTexture( int unit )
-{
-	if ( glState.currenttmu == unit )
-	{
-		return;
-	}
-
-	if (!(unit >= 0 && unit <= 31))
-		ri.Error( ERR_DROP, "GL_SelectTexture: unit = %i", unit );
-
-	if (!qglActiveTextureARB)
-		ri.Error( ERR_DROP, "GL_SelectTexture: multitexture disabled" );
-
-	qglActiveTextureARB( GL_TEXTURE0_ARB + unit );
-
-	glState.currenttmu = unit;
-}
-
-/*
 ** GL_BindToTMU
 */
 void GL_BindToTMU( image_t *image, int tmu )
 {
-	int		texnum;
-	int     oldtmu = glState.currenttmu;
+	GLuint texture = (tmu == TB_COLORMAP) ? tr.defaultImage->texnum : 0;
+	GLenum target = GL_TEXTURE_2D;
 
-	if (!image)
-		texnum = 0;
-	else
-		texnum = image->texnum;
+	if (image)
+	{
+		if (image->flags & IMGFLAG_CUBEMAP)
+			target = GL_TEXTURE_CUBE_MAP;
 
-	if ( glState.currenttextures[tmu] != texnum ) {
-		GL_SelectTexture( tmu );
-		if (image)
-			image->frameUsed = tr.frameCount;
-		glState.currenttextures[tmu] = texnum;
-
-		if (image && (image->flags & IMGFLAG_CUBEMAP))
-			qglBindTexture( GL_TEXTURE_CUBE_MAP, texnum );
-		else
-			qglBindTexture( GL_TEXTURE_2D, texnum );
-		GL_SelectTexture( oldtmu );
+		image->frameUsed = tr.frameCount;
+		texture = image->texnum;
 	}
+	else
+	{
+		ri.Printf(PRINT_WARNING, "GL_BindToTMU: NULL image\n");
+	}
+
+	GL_BindMultiTexture(GL_TEXTURE0_ARB + tmu, target, texture);
 }
 
 
@@ -139,39 +87,6 @@ void GL_Cull( int cullType ) {
 	}
 
 	glState.faceCulling = cullType;
-}
-
-/*
-** GL_TexEnv
-*/
-void GL_TexEnv( int env )
-{
-	if ( env == glState.texEnv[glState.currenttmu] )
-	{
-		return;
-	}
-
-	glState.texEnv[glState.currenttmu] = env;
-
-
-	switch ( env )
-	{
-	case GL_MODULATE:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		break;
-	case GL_REPLACE:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-		break;
-	case GL_DECAL:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-		break;
-	case GL_ADD:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
-		break;
-	default:
-		ri.Error( ERR_DROP, "GL_TexEnv: invalid env '%d' passed", env );
-		break;
-	}
 }
 
 /*
@@ -855,6 +770,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	}
 
 	RE_UploadCinematic (w, h, cols, rows, data, client, dirty);
+	GL_BindToTMU(tr.scratchImage[client], TB_COLORMAP);
 
 	if ( r_speeds->integer ) {
 		end = ri.Milliseconds();
@@ -895,23 +811,30 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 }
 
 void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
+	GLuint texture;
 
-	GL_Bind( tr.scratchImage[client] );
+	if (!tr.scratchImage[client])
+	{
+		ri.Printf(PRINT_WARNING, "RE_UploadCinematic: scratch images not initialized\n");
+		return;
+	}
+
+	texture = tr.scratchImage[client]->texnum;
 
 	// if the scratchImage isn't in the format we want, specify it as a new texture
 	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
 		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
 		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );	
+		qglTextureImage2D(texture, GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		qglTextureParameterf(texture, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		qglTextureParameterf(texture, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		qglTextureParameterf(texture, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		qglTextureParameterf(texture, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	} else {
 		if (dirty) {
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
-			qglTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data );
+			qglTextureSubImage2D(texture, GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
 	}
 }
@@ -1071,11 +994,10 @@ const void	*RB_DrawSurfs( const void *data ) {
 			// If we're using multisampling, resolve the depth first
 			FBO_FastBlit(tr.renderFbo, NULL, tr.msaaResolveFbo, NULL, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		}
-		else if (tr.renderFbo == NULL)
+		else if (tr.renderFbo == NULL && tr.renderDepthImage)
 		{
 			// If we're rendering directly to the screen, copy the depth to a texture
-			GL_BindToTMU(tr.renderDepthImage, 0);
-			qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, glConfig.vidWidth, glConfig.vidHeight, 0);
+			qglCopyTextureImage2D(tr.renderDepthImage->texnum, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, glConfig.vidWidth, glConfig.vidHeight, 0);
 		}
 
 		if (r_ssao->integer)
@@ -1315,10 +1237,8 @@ const void	*RB_DrawSurfs( const void *data ) {
 		cubemap_t *cubemap = &tr.cubemaps[backEnd.viewParms.targetFboCubemapIndex];
 
 		FBO_Bind(NULL);
-		GL_SelectTexture(TB_CUBEMAP);
-		GL_BindToTMU(cubemap->image, TB_CUBEMAP);
-		qglGenerateMipmapEXT(GL_TEXTURE_CUBE_MAP);
-		GL_SelectTexture(0);
+		if (cubemap && cubemap->image)
+			qglGenerateTextureMipmap(cubemap->image->texnum, GL_TEXTURE_CUBE_MAP);
 	}
 
 	return (const void *)(cmd + 1);
@@ -1395,7 +1315,7 @@ void RB_ShowImages( void ) {
 		{
 			vec4_t quadVerts[4];
 
-			GL_Bind(image);
+			GL_BindToTMU(image, TB_COLORMAP);
 
 			VectorSet4(quadVerts[0], x, y, 0, 1);
 			VectorSet4(quadVerts[1], x + w, y, 0, 1);
@@ -1571,21 +1491,18 @@ const void *RB_CapShadowMap(const void *data)
 
 	if (cmd->map != -1)
 	{
-		GL_SelectTexture(0);
 		if (cmd->cubeSide != -1)
 		{
 			if (tr.shadowCubemaps[cmd->map])
 			{
-				GL_Bind(tr.shadowCubemaps[cmd->map]);
-				qglCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cmd->cubeSide, 0, GL_RGBA8, backEnd.refdef.x, glConfig.vidHeight - ( backEnd.refdef.y + PSHADOW_MAP_SIZE ), PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, 0);
+				qglCopyTextureImage2D(tr.shadowCubemaps[cmd->map]->texnum, GL_TEXTURE_CUBE_MAP_POSITIVE_X + cmd->cubeSide, 0, GL_RGBA8, backEnd.refdef.x, glConfig.vidHeight - ( backEnd.refdef.y + PSHADOW_MAP_SIZE ), PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, 0);
 			}
 		}
 		else
 		{
 			if (tr.pshadowMaps[cmd->map])
 			{
-				GL_Bind(tr.pshadowMaps[cmd->map]);
-				qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, backEnd.refdef.x, glConfig.vidHeight - ( backEnd.refdef.y + PSHADOW_MAP_SIZE ), PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, 0);
+				qglCopyTextureImage2D(tr.pshadowMaps[cmd->map]->texnum, GL_TEXTURE_2D, 0, GL_RGBA8, backEnd.refdef.x, glConfig.vidHeight - (backEnd.refdef.y + PSHADOW_MAP_SIZE), PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, 0);
 			}
 		}
 	}
@@ -1658,7 +1575,7 @@ const void *RB_PostProcess(const void *data)
 
 	if (srcFbo)
 	{
-		if (r_hdr->integer && (r_toneMap->integer || r_forceToneMap->integer) && qglActiveTextureARB)
+		if (r_hdr->integer && (r_toneMap->integer || r_forceToneMap->integer))
 		{
 			autoExposure = r_autoExposure->integer || r_forceAutoExposure->integer;
 			RB_ToneMap(srcFbo, srcBox, NULL, dstBox, autoExposure);
@@ -1774,7 +1691,7 @@ const void *RB_ExportCubemaps(const void *data)
 		{
 			char filename[MAX_QPATH];
 			cubemap_t *cubemap = &tr.cubemaps[i];
-			char *p = cubemapPixels;
+			byte *p = cubemapPixels;
 
 			for (j = 0; j < 6; j++)
 			{
