@@ -974,8 +974,7 @@ void GL_SetDefaultState( void )
 	glState.faceCulling = CT_TWO_SIDED;
 	glState.faceCullFront = qtrue;
 
-	glState.currentProgram = 0;
-	qglUseProgramObjectARB(0);
+	GL_BindNullProgram();
 
 	if (glRefConfig.vertexArrayObject)
 		qglBindVertexArrayARB(0);

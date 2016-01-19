@@ -753,6 +753,20 @@ extern GLvoid(APIENTRY * qglCompressedTextureSubImage2D)(GLuint texture, GLenum 
 	GLsizei imageSize, const GLvoid *data);
 extern GLvoid(APIENTRY * qglGenerateTextureMipmap)(GLuint texture, GLenum target);
 
+extern GLvoid(APIENTRY * qglProgramUniform1i)(GLuint program, GLint location, GLint v0);
+extern GLvoid(APIENTRY * qglProgramUniform1f)(GLuint program, GLint location, GLfloat v0);
+extern GLvoid(APIENTRY * qglProgramUniform2f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1);
+extern GLvoid(APIENTRY * qglProgramUniform3f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2);
+extern GLvoid(APIENTRY * qglProgramUniform4f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+extern GLvoid(APIENTRY * qglProgramUniform1fv)(GLuint program, GLint location,
+	GLsizei count, const GLfloat *value);
+extern GLvoid(APIENTRY * qglProgramUniformMatrix4fv)(GLuint program, GLint location,
+	GLsizei count, GLboolean transpose,
+	const GLfloat *value);
+
 
 #if defined(WIN32)
 // WGL_ARB_create_context

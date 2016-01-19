@@ -1360,7 +1360,6 @@ typedef struct {
 	float           vertexAttribsInterpolation;
 	qboolean        vertexAnimation;
 	uint32_t        vertexAttribsEnabled;  // global if no VAOs, tess only otherwise
-	shaderProgram_t *currentProgram;
 	FBO_t          *currentFBO;
 	vao_t          *currentVao;
 	mat4_t        modelview;
@@ -2213,7 +2212,6 @@ void GLSL_InitGPUShaders(void);
 void GLSL_ShutdownGPUShaders(void);
 void GLSL_VertexAttribPointers(uint32_t attribBits);
 void GLSL_BindProgram(shaderProgram_t * program);
-void GLSL_BindNullProgram(void);
 
 void GLSL_SetUniformInt(shaderProgram_t *program, int uniformNum, GLint value);
 void GLSL_SetUniformFloat(shaderProgram_t *program, int uniformNum, GLfloat value);

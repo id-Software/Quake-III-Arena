@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "../renderercommon/qgl.h"
 
 void GL_BindNullTextures(void);
-void GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture);
+int GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture);
 
 GLvoid APIENTRY GLDSA_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture);
 GLvoid APIENTRY GLDSA_TextureParameterf(GLuint texture, GLenum target, GLenum pname, GLfloat param);
@@ -42,5 +42,22 @@ GLvoid APIENTRY GLDSA_CompressedTextureSubImage2D(GLuint texture, GLenum target,
 	GLsizei imageSize, const GLvoid *data);
 
 GLvoid APIENTRY GLDSA_GenerateTextureMipmap(GLuint texture, GLenum target);
+
+void GL_BindNullProgram(void);
+int GL_UseProgramObject(GLuint program);
+
+GLvoid APIENTRY GLDSA_ProgramUniform1i(GLuint program, GLint location, GLint v0);
+GLvoid APIENTRY GLDSA_ProgramUniform1f(GLuint program, GLint location, GLfloat v0);
+GLvoid APIENTRY GLDSA_ProgramUniform2f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1);
+GLvoid APIENTRY GLDSA_ProgramUniform3f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2);
+GLvoid APIENTRY GLDSA_ProgramUniform4f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+GLvoid APIENTRY GLDSA_ProgramUniform1fv(GLuint program, GLint location,
+	GLsizei count, const GLfloat *value);
+GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
+	GLsizei count, GLboolean transpose,
+	const GLfloat *value);
 
 #endif

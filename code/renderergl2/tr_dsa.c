@@ -26,6 +26,8 @@ static struct
 {
 	GLuint textures[NUM_TEXTURE_BUNDLES];
 	GLenum texunit;
+
+	GLuint program;
 }
 glDsaState;
 
@@ -55,15 +57,16 @@ void GL_BindNullTextures()
 	}
 }
 
-void GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture)
+int GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture)
 {
 	GLuint tmu = texunit - GL_TEXTURE0_ARB;
 
 	if (glDsaState.textures[tmu] == texture)
-		return;
+		return 0;
 
 	qglBindMultiTexture(texunit, target, texture);
 	glDsaState.textures[tmu] = texture;
+	return 1;
 }
 
 GLvoid APIENTRY GLDSA_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture)
@@ -129,4 +132,68 @@ GLvoid APIENTRY GLDSA_GenerateTextureMipmap(GLuint texture, GLenum target)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglGenerateMipmapEXT(target);
+}
+
+void GL_BindNullProgram()
+{
+	qglUseProgramObjectARB(0);
+	glDsaState.program = 0;
+}
+
+int GL_UseProgramObject(GLuint program)
+{
+	if (glDsaState.program == program)
+		return 0;
+
+	qglUseProgramObjectARB(program);
+	glDsaState.program = program;
+	return 1;
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform1i(GLuint program, GLint location, GLint v0)
+{
+	GL_UseProgramObject(program);
+	qglUniform1iARB(location, v0);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform1f(GLuint program, GLint location, GLfloat v0)
+{
+	GL_UseProgramObject(program);
+	qglUniform1fARB(location, v0);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform2f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1)
+{
+	GL_UseProgramObject(program);
+	qglUniform2fARB(location, v0, v1);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform3f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2)
+{
+	GL_UseProgramObject(program);
+	qglUniform3fARB(location, v0, v1, v2);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform4f(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+{
+	GL_UseProgramObject(program);
+	qglUniform4fARB(location, v0, v1, v2, v3);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniform1fv(GLuint program, GLint location,
+	GLsizei count, const GLfloat *value)
+{
+	GL_UseProgramObject(program);
+	qglUniform1fvARB(location, count, value);
+}
+
+GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
+	GLsizei count, GLboolean transpose,
+	const GLfloat *value)
+{
+	GL_UseProgramObject(program);
+	qglUniformMatrix4fvARB(location, count, transpose, value);
 }

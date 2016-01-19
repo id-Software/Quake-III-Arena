@@ -202,6 +202,20 @@ GLvoid (APIENTRY * qglCompressedTextureSubImage2D)(GLuint texture, GLenum target
 	GLsizei imageSize, const GLvoid *data);
 GLvoid (APIENTRY * qglGenerateTextureMipmap)(GLuint texture, GLenum target);
 
+GLvoid(APIENTRY * qglProgramUniform1i)(GLuint program, GLint location, GLint v0);
+GLvoid(APIENTRY * qglProgramUniform1f)(GLuint program, GLint location, GLfloat v0);
+GLvoid(APIENTRY * qglProgramUniform2f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1);
+GLvoid(APIENTRY * qglProgramUniform3f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2);
+GLvoid(APIENTRY * qglProgramUniform4f)(GLuint program, GLint location,
+	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+GLvoid(APIENTRY * qglProgramUniform1fv)(GLuint program, GLint location,
+	GLsizei count, const GLfloat *value);
+GLvoid(APIENTRY * qglProgramUniformMatrix4fv)(GLuint program, GLint location,
+	GLsizei count, GLboolean transpose,
+	const GLfloat *value);
+
 static qboolean GLimp_HaveExtension(const char *ext)
 {
 	const char *ptr = Q_stristr( glConfig.extensions_string, ext );
@@ -770,6 +784,7 @@ void GLimp_InitExtraExtensions()
 
 	// GL_EXT_direct_state_access
 	extension = "GL_EXT_direct_state_access";
+
 	qglBindMultiTexture = GLDSA_BindMultiTexture;
 	qglTextureParameterf = GLDSA_TextureParameterf;
 	qglTextureParameteri = GLDSA_TextureParameteri;
@@ -779,6 +794,15 @@ void GLimp_InitExtraExtensions()
 	qglCompressedTextureImage2D = GLDSA_CompressedTextureImage2D;
 	qglCompressedTextureSubImage2D = GLDSA_CompressedTextureSubImage2D;
 	qglGenerateTextureMipmap = GLDSA_GenerateTextureMipmap;
+
+	qglProgramUniform1i = GLDSA_ProgramUniform1i;
+	qglProgramUniform1f = GLDSA_ProgramUniform1f;
+	qglProgramUniform2f = GLDSA_ProgramUniform2f;
+	qglProgramUniform3f = GLDSA_ProgramUniform3f;
+	qglProgramUniform4f = GLDSA_ProgramUniform4f;
+	qglProgramUniform1fv = GLDSA_ProgramUniform1fv;
+	qglProgramUniformMatrix4fv = GLDSA_ProgramUniformMatrix4fv;
+
 	glRefConfig.directStateAccess = qfalse;
 	if (GLimp_HaveExtension(extension))
 	{
@@ -794,6 +818,14 @@ void GLimp_InitExtraExtensions()
 			qglCompressedTextureImage2D = (void *)SDL_GL_GetProcAddress("glCompressedTextureImage2DEXT");
 			qglCompressedTextureSubImage2D = (void *)SDL_GL_GetProcAddress("glCompressedTextureSubImage2DEXT");
 			qglGenerateTextureMipmap = (void *)SDL_GL_GetProcAddress("glGenerateTextureMipmapEXT");
+
+			qglProgramUniform1i = (void *)SDL_GL_GetProcAddress("glProgramUniform1iEXT");
+			qglProgramUniform1f = (void *)SDL_GL_GetProcAddress("glProgramUniform1fEXT");
+			qglProgramUniform2f = (void *)SDL_GL_GetProcAddress("glProgramUniform2fEXT");
+			qglProgramUniform3f = (void *)SDL_GL_GetProcAddress("glProgramUniform3fEXT");
+			qglProgramUniform4f = (void *)SDL_GL_GetProcAddress("glProgramUniform4fEXT");
+			qglProgramUniform1fv = (void *)SDL_GL_GetProcAddress("glProgramUniform1fvEXT");
+			qglProgramUniformMatrix4fv = (void *)SDL_GL_GetProcAddress("glProgramUniformMatrix4fvEXT");
 		}
 
 		ri.Printf(PRINT_ALL, result[glRefConfig.directStateAccess ? 1 : 0], extension);
