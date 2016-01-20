@@ -60,4 +60,21 @@ GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
 	GLsizei count, GLboolean transpose,
 	const GLfloat *value);
 
+void GL_BindNullFramebuffers(void);
+void GL_BindFramebuffer(GLenum target, GLuint framebuffer);
+void GL_BindRenderbuffer(GLuint renderbuffer);
+
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorage(GLuint renderbuffer,
+	GLenum internalformat, GLsizei width, GLsizei height);
+
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisample(GLuint renderbuffer,
+	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+
+GLenum APIENTRY GLDSA_CheckNamedFramebufferStatus(GLuint framebuffer, GLenum target);
+GLvoid APIENTRY GLDSA_NamedFramebufferTexture2D(GLuint framebuffer,
+	GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GLvoid APIENTRY GLDSA_NamedFramebufferRenderbuffer(GLuint framebuffer,
+	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+
 #endif

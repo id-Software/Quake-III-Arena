@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_fbo.c
 #include "tr_local.h"
 
+#include "tr_dsa.h"
+
 /*
 =============
 R_CheckFBO
@@ -30,19 +32,10 @@ R_CheckFBO
 */
 qboolean R_CheckFBO(const FBO_t * fbo)
 {
-	int             code;
-	int             id;
-
-	qglGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &id);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->frameBuffer);
-
-	code = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	GLenum code = qglCheckNamedFramebufferStatus(fbo->frameBuffer, GL_FRAMEBUFFER_EXT);
 
 	if(code == GL_FRAMEBUFFER_COMPLETE_EXT)
-	{
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, id);
 		return qtrue;
-	}
 
 	// an error occured
 	switch (code)
@@ -83,12 +76,8 @@ qboolean R_CheckFBO(const FBO_t * fbo)
 
 		default:
 			ri.Printf(PRINT_WARNING, "R_CheckFBO: (%s) unknown error 0x%X\n", fbo->name, code);
-			//ri.Error(ERR_FATAL, "R_CheckFBO: (%s) unknown error 0x%X", fbo->name, code);
-			//assert(0);
 			break;
 	}
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, id);
 
 	return qfalse;
 }
@@ -133,6 +122,11 @@ FBO_t          *FBO_Create(const char *name, int width, int height)
 	return fbo;
 }
 
+/*
+=================
+FBO_CreateBuffer
+=================
+*/
 void FBO_CreateBuffer(FBO_t *fbo, int format, int index, int multisample)
 {
 	uint32_t *pRenderBuffer;
@@ -189,115 +183,45 @@ void FBO_CreateBuffer(FBO_t *fbo, int format, int index, int multisample)
 	if (absent)
 		qglGenRenderbuffersEXT(1, pRenderBuffer);
 
-	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, *pRenderBuffer);
 	if (multisample && glRefConfig.framebufferMultisample)
-	{
-		qglRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, multisample, format, fbo->width, fbo->height);
-	}
+		qglNamedRenderbufferStorageMultisample(*pRenderBuffer, multisample, format, fbo->width, fbo->height);
 	else
-	{
-		qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, fbo->width, fbo->height);
-	}
+		qglNamedRenderbufferStorage(*pRenderBuffer, format, fbo->width, fbo->height);
 
 	if(absent)
 	{
 		if (attachment == 0)
 		{
-			qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,   GL_RENDERBUFFER_EXT, *pRenderBuffer);
-			qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, *pRenderBuffer);
+			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, GL_DEPTH_ATTACHMENT_EXT,   GL_RENDERBUFFER_EXT, *pRenderBuffer);
+			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, *pRenderBuffer);
 		}
 		else
-			qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, attachment, GL_RENDERBUFFER_EXT, *pRenderBuffer);
+		{
+			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, attachment, GL_RENDERBUFFER_EXT, *pRenderBuffer);
+		}
 	}
 }
 
 
 /*
 =================
-R_AttachFBOTexture1D
+FBO_AttachImage
 =================
 */
-void R_AttachFBOTexture1D(int texId, int index)
+void FBO_AttachImage(FBO_t *fbo, image_t *image, GLenum attachment)
 {
-	if(index < 0 || index >= glRefConfig.maxColorAttachments)
-	{
-		ri.Printf(PRINT_WARNING, "R_AttachFBOTexture1D: invalid attachment index %i\n", index);
-		return;
-	}
+	GLenum target = GL_TEXTURE_2D;
+	int index;
 
-	qglFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_1D, texId, 0);
+	if (image->flags & IMGFLAG_CUBEMAP)
+		target = GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB;
+
+	qglNamedFramebufferTexture2D(fbo->frameBuffer, attachment, target, image->texnum, 0);
+	index = attachment - GL_COLOR_ATTACHMENT0_EXT;
+	if (index >= 0 && index <= 15)
+		fbo->colorImage[index] = image;
 }
 
-/*
-=================
-R_AttachFBOTexture2D
-=================
-*/
-void R_AttachFBOTexture2D(int target, int texId, int index)
-{
-	if(target != GL_TEXTURE_2D && (target < GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB))
-	{
-		ri.Printf(PRINT_WARNING, "R_AttachFBOTexture2D: invalid target %i\n", target);
-		return;
-	}
-
-	if(index < 0 || index >= glRefConfig.maxColorAttachments)
-	{
-		ri.Printf(PRINT_WARNING, "R_AttachFBOTexture2D: invalid attachment index %i\n", index);
-		return;
-	}
-
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, target, texId, 0);
-}
-
-/*
-=================
-R_AttachFBOTexture3D
-=================
-*/
-void R_AttachFBOTexture3D(int texId, int index, int zOffset)
-{
-	if(index < 0 || index >= glRefConfig.maxColorAttachments)
-	{
-		ri.Printf(PRINT_WARNING, "R_AttachFBOTexture3D: invalid attachment index %i\n", index);
-		return;
-	}
-
-	qglFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_3D_EXT, texId, 0, zOffset);
-}
-
-/*
-=================
-R_AttachFBOTextureDepth
-=================
-*/
-void R_AttachFBOTextureDepth(int texId)
-{
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, texId, 0);
-}
-
-/*
-=================
-R_AttachFBOTexturePackedDepthStencil
-=================
-*/
-void R_AttachFBOTexturePackedDepthStencil(int texId)
-{
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, texId, 0);
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, texId, 0);
-}
-
-void FBO_AttachTextureImage(image_t *img, int index)
-{
-	if (!glState.currentFBO)
-	{
-		ri.Printf(PRINT_WARNING, "FBO: attempted to attach a texture image with no FBO bound!\n");
-		return;
-	}
-
-	R_AttachFBOTexture2D(GL_TEXTURE_2D, img->texnum, index);
-	glState.currentFBO->colorImage[index] = img;
-}
 
 /*
 ============
@@ -312,38 +236,10 @@ void FBO_Bind(FBO_t * fbo)
 	if (r_logFile->integer)
 	{
 		// don't just call LogComment, or we will get a call to va() every frame!
-		if (fbo)
-			GLimp_LogComment(va("--- FBO_Bind( %s ) ---\n", fbo->name));
-		else
-			GLimp_LogComment("--- FBO_Bind ( NULL ) ---\n");
+		GLimp_LogComment(va("--- FBO_Bind( %s ) ---\n", fbo ? fbo->name : "NULL"));
 	}
 
-	if (!fbo)
-	{
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-		//qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-		glState.currentFBO = NULL;
-		
-		return;
-	}
-		
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->frameBuffer);
-
-	/*
-	   if(fbo->colorBuffers[0])
-	   {
-	   qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo->colorBuffers[0]);
-	   }
-	 */
-
-	/*
-	   if(fbo->depthBuffer)
-	   {
-	   qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo->depthBuffer);
-	   qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depthBuffer);
-	   }
-	 */
-
+	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, fbo ? fbo->frameBuffer : 0);
 	glState.currentFBO = fbo;
 }
 
@@ -355,7 +251,6 @@ FBO_Init
 void FBO_Init(void)
 {
 	int             i;
-	// int             width, height, hdrFormat, multisample;
 	int             hdrFormat, multisample;
 
 	ri.Printf(PRINT_ALL, "------- FBO_Init -------\n");
@@ -369,73 +264,40 @@ void FBO_Init(void)
 
 	R_IssuePendingRenderCommands();
 
-/*	if(glRefConfig.textureNonPowerOfTwo)
-	{
-		width = glConfig.vidWidth;
-		height = glConfig.vidHeight;
-	}
-	else
-	{
-		width = NextPowerOfTwo(glConfig.vidWidth);
-		height = NextPowerOfTwo(glConfig.vidHeight);
-	} */
-
 	hdrFormat = GL_RGBA8;
 	if (r_hdr->integer && glRefConfig.framebufferObject && glRefConfig.textureFloat)
-	{
 		hdrFormat = GL_RGBA16F_ARB;
-	}
 
 	qglGetIntegerv(GL_MAX_SAMPLES_EXT, &multisample);
 
 	if (r_ext_framebuffer_multisample->integer < multisample)
-	{
 		multisample = r_ext_framebuffer_multisample->integer;
-	}
 
 	if (multisample < 2 || !glRefConfig.framebufferBlit)
 		multisample = 0;
 
 	if (multisample != r_ext_framebuffer_multisample->integer)
-	{
 		ri.Cvar_SetValue("r_ext_framebuffer_multisample", (float)multisample);
-	}
 	
 	// only create a render FBO if we need to resolve MSAA or do HDR
 	// otherwise just render straight to the screen (tr.renderFbo = NULL)
 	if (multisample && glRefConfig.framebufferMultisample)
 	{
 		tr.renderFbo = FBO_Create("_render", tr.renderDepthImage->width, tr.renderDepthImage->height);
-		FBO_Bind(tr.renderFbo);
-
 		FBO_CreateBuffer(tr.renderFbo, hdrFormat, 0, multisample);
 		FBO_CreateBuffer(tr.renderFbo, GL_DEPTH_COMPONENT24_ARB, 0, multisample);
-
 		R_CheckFBO(tr.renderFbo);
 
-
 		tr.msaaResolveFbo = FBO_Create("_msaaResolve", tr.renderDepthImage->width, tr.renderDepthImage->height);
-		FBO_Bind(tr.msaaResolveFbo);
-
-		//FBO_CreateBuffer(tr.msaaResolveFbo, hdrFormat, 0, 0);
-		FBO_AttachTextureImage(tr.renderImage, 0);
-
-		//FBO_CreateBuffer(tr.msaaResolveFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-		R_AttachFBOTextureDepth(tr.renderDepthImage->texnum);
-
+		FBO_AttachImage(tr.msaaResolveFbo, tr.renderImage, GL_COLOR_ATTACHMENT0_EXT);
+		FBO_AttachImage(tr.msaaResolveFbo, tr.renderDepthImage, GL_DEPTH_ATTACHMENT_EXT);
 		R_CheckFBO(tr.msaaResolveFbo);
 	}
 	else if (r_hdr->integer)
 	{
 		tr.renderFbo = FBO_Create("_render", tr.renderDepthImage->width, tr.renderDepthImage->height);
-		FBO_Bind(tr.renderFbo);
-
-		//FBO_CreateBuffer(tr.renderFbo, hdrFormat, 0, 0);
-		FBO_AttachTextureImage(tr.renderImage, 0);
-
-		//FBO_CreateBuffer(tr.renderFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-		R_AttachFBOTextureDepth(tr.renderDepthImage->texnum);
-
+		FBO_AttachImage(tr.renderFbo, tr.renderImage, GL_COLOR_ATTACHMENT0_EXT);
+		FBO_AttachImage(tr.renderFbo, tr.renderDepthImage, GL_DEPTH_ATTACHMENT_EXT);
 		R_CheckFBO(tr.renderFbo);
 	}
 
@@ -443,20 +305,15 @@ void FBO_Init(void)
 	// this fixes the corrupt screen bug with r_hdr 1 on older hardware
 	if (tr.renderFbo)
 	{
-		FBO_Bind(tr.renderFbo);
+		GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, tr.renderFbo->frameBuffer);
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		FBO_Bind(NULL);
 	}
 
 	if (r_drawSunRays->integer)
 	{
 		tr.sunRaysFbo = FBO_Create("_sunRays", tr.renderDepthImage->width, tr.renderDepthImage->height);
-		FBO_Bind(tr.sunRaysFbo);
-
-		FBO_AttachTextureImage(tr.sunRaysImage, 0);
-
-		R_AttachFBOTextureDepth(tr.renderDepthImage->texnum);
-
+		FBO_AttachImage(tr.sunRaysFbo, tr.sunRaysImage, GL_COLOR_ATTACHMENT0_EXT);
+		FBO_AttachImage(tr.sunRaysFbo, tr.renderDepthImage, GL_DEPTH_ATTACHMENT_EXT);
 		R_CheckFBO(tr.sunRaysFbo);
 	}
 
@@ -466,14 +323,8 @@ void FBO_Init(void)
 		for( i = 0; i < MAX_DRAWN_PSHADOWS; i++)
 		{
 			tr.pshadowFbos[i] = FBO_Create(va("_shadowmap%d", i), tr.pshadowMaps[i]->width, tr.pshadowMaps[i]->height);
-			FBO_Bind(tr.pshadowFbos[i]);
-
-			//FBO_CreateBuffer(tr.pshadowFbos[i], GL_RGBA8, 0, 0);
-			FBO_AttachTextureImage(tr.pshadowMaps[i], 0);
-
+			FBO_AttachImage(tr.pshadowFbos[i], tr.pshadowMaps[i], GL_COLOR_ATTACHMENT0_EXT);
 			FBO_CreateBuffer(tr.pshadowFbos[i], GL_DEPTH_COMPONENT24_ARB, 0, 0);
-			//R_AttachFBOTextureDepth(tr.textureDepthImage->texnum);
-
 			R_CheckFBO(tr.pshadowFbos[i]);
 		}
 	}
@@ -483,104 +334,64 @@ void FBO_Init(void)
 		for ( i = 0; i < 4; i++)
 		{
 			tr.sunShadowFbo[i] = FBO_Create("_sunshadowmap", tr.sunShadowDepthImage[i]->width, tr.sunShadowDepthImage[i]->height);
-			FBO_Bind(tr.sunShadowFbo[i]);
-
-			//FBO_CreateBuffer(tr.sunShadowFbo[i], GL_RGBA8, 0, 0);
-			//FBO_AttachTextureImage(tr.sunShadowImage, 0);
-			qglDrawBuffer(GL_NONE);
-			qglReadBuffer(GL_NONE);
-
-			//FBO_CreateBuffer(tr.sunShadowFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-			R_AttachFBOTextureDepth(tr.sunShadowDepthImage[i]->texnum);
-
+			FBO_AttachImage(tr.sunShadowFbo[i], tr.sunShadowDepthImage[i], GL_DEPTH_ATTACHMENT_EXT);
 			R_CheckFBO(tr.sunShadowFbo[i]);
-
 		}
 
 		tr.screenShadowFbo = FBO_Create("_screenshadow", tr.screenShadowImage->width, tr.screenShadowImage->height);
-		FBO_Bind(tr.screenShadowFbo);
-
-		FBO_AttachTextureImage(tr.screenShadowImage, 0);
-
+		FBO_AttachImage(tr.screenShadowFbo, tr.screenShadowImage, GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.screenShadowFbo);
 	}
 
 	for (i = 0; i < 2; i++)
 	{
 		tr.textureScratchFbo[i] = FBO_Create(va("_texturescratch%d", i), tr.textureScratchImage[i]->width, tr.textureScratchImage[i]->height);
-		FBO_Bind(tr.textureScratchFbo[i]);
-
-		//FBO_CreateBuffer(tr.textureScratchFbo[i], GL_RGBA8, 0, 0);
-		FBO_AttachTextureImage(tr.textureScratchImage[i], 0);
-
+		FBO_AttachImage(tr.textureScratchFbo[i], tr.textureScratchImage[i], GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.textureScratchFbo[i]);
 	}
 
 	{
 		tr.calcLevelsFbo = FBO_Create("_calclevels", tr.calcLevelsImage->width, tr.calcLevelsImage->height);
-		FBO_Bind(tr.calcLevelsFbo);
-
-		//FBO_CreateBuffer(tr.calcLevelsFbo, hdrFormat, 0, 0);
-		FBO_AttachTextureImage(tr.calcLevelsImage, 0);
-
+		FBO_AttachImage(tr.calcLevelsFbo, tr.calcLevelsImage, GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.calcLevelsFbo);
 	}
 
 	{
 		tr.targetLevelsFbo = FBO_Create("_targetlevels", tr.targetLevelsImage->width, tr.targetLevelsImage->height);
-		FBO_Bind(tr.targetLevelsFbo);
-
-		//FBO_CreateBuffer(tr.targetLevelsFbo, hdrFormat, 0, 0);
-		FBO_AttachTextureImage(tr.targetLevelsImage, 0);
-
+		FBO_AttachImage(tr.targetLevelsFbo, tr.targetLevelsImage, GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.targetLevelsFbo);
 	}
 
 	for (i = 0; i < 2; i++)
 	{
 		tr.quarterFbo[i] = FBO_Create(va("_quarter%d", i), tr.quarterImage[i]->width, tr.quarterImage[i]->height);
-		FBO_Bind(tr.quarterFbo[i]);
-
-		//FBO_CreateBuffer(tr.quarterFbo[i], hdrFormat, 0, 0);
-		FBO_AttachTextureImage(tr.quarterImage[i], 0);
-
+		FBO_AttachImage(tr.quarterFbo[i], tr.quarterImage[i], GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.quarterFbo[i]);
 	}
 
 	if (r_ssao->integer)
 	{
 		tr.hdrDepthFbo = FBO_Create("_hdrDepth", tr.hdrDepthImage->width, tr.hdrDepthImage->height);
-		FBO_Bind(tr.hdrDepthFbo);
-
-		FBO_AttachTextureImage(tr.hdrDepthImage, 0);
-
+		FBO_AttachImage(tr.hdrDepthFbo, tr.hdrDepthImage, GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.hdrDepthFbo);
 
 		tr.screenSsaoFbo = FBO_Create("_screenssao", tr.screenSsaoImage->width, tr.screenSsaoImage->height);
-		FBO_Bind(tr.screenSsaoFbo);
-		
-		FBO_AttachTextureImage(tr.screenSsaoImage, 0);
-
+		FBO_AttachImage(tr.screenSsaoFbo, tr.screenSsaoImage, GL_COLOR_ATTACHMENT0_EXT);
 		R_CheckFBO(tr.screenSsaoFbo);
 	}
 
 	if (tr.renderCubeImage)
 	{
 		tr.renderCubeFbo = FBO_Create("_renderCubeFbo", tr.renderCubeImage->width, tr.renderCubeImage->height);
-		FBO_Bind(tr.renderCubeFbo);
-		
-		//FBO_AttachTextureImage(tr.renderCubeImage, 0);
-		R_AttachFBOTexture2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB, tr.renderCubeImage->texnum, 0);
-		glState.currentFBO->colorImage[0] = tr.renderCubeImage;
-
+		FBO_AttachImage(tr.renderCubeFbo, tr.renderCubeImage, GL_COLOR_ATTACHMENT0_EXT);
 		FBO_CreateBuffer(tr.renderCubeFbo, GL_DEPTH_COMPONENT24_ARB, 0, 0);
-
 		R_CheckFBO(tr.renderCubeFbo);
 	}
 
 	GL_CheckErrors();
 
-	FBO_Bind(NULL);
+	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+	glState.currentFBO = NULL;
 }
 
 /*
@@ -849,12 +660,12 @@ void FBO_FastBlit(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, int bu
 		VectorSet4(dstBoxFinal, dstBox[0], dstBox[1], dstBox[0] + dstBox[2], dstBox[1] + dstBox[3]);
 	}
 
-	qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, srcFb);
-	qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, dstFb);
+	GL_BindFramebuffer(GL_READ_FRAMEBUFFER_EXT, srcFb);
+	GL_BindFramebuffer(GL_DRAW_FRAMEBUFFER_EXT, dstFb);
 	qglBlitFramebufferEXT(srcBoxFinal[0], srcBoxFinal[1], srcBoxFinal[2], srcBoxFinal[3],
 	                      dstBoxFinal[0], dstBoxFinal[1], dstBoxFinal[2], dstBoxFinal[3],
 						  buffers, filter);
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 	glState.currentFBO = NULL;
 }

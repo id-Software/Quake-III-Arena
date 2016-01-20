@@ -216,6 +216,19 @@ GLvoid(APIENTRY * qglProgramUniformMatrix4fv)(GLuint program, GLint location,
 	GLsizei count, GLboolean transpose,
 	const GLfloat *value);
 
+GLvoid(APIENTRY * qglNamedRenderbufferStorage)(GLuint renderbuffer,
+	GLenum internalformat, GLsizei width, GLsizei height);
+
+GLvoid(APIENTRY * qglNamedRenderbufferStorageMultisample)(GLuint renderbuffer,
+	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+
+GLenum(APIENTRY * qglCheckNamedFramebufferStatus)(GLuint framebuffer, GLenum target);
+GLvoid(APIENTRY * qglNamedFramebufferTexture2D)(GLuint framebuffer,
+	GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GLvoid(APIENTRY * qglNamedFramebufferRenderbuffer)(GLuint framebuffer,
+	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+
 static qboolean GLimp_HaveExtension(const char *ext)
 {
 	const char *ptr = Q_stristr( glConfig.extensions_string, ext );
@@ -803,6 +816,12 @@ void GLimp_InitExtraExtensions()
 	qglProgramUniform1fv = GLDSA_ProgramUniform1fv;
 	qglProgramUniformMatrix4fv = GLDSA_ProgramUniformMatrix4fv;
 
+	qglNamedRenderbufferStorage = GLDSA_NamedRenderbufferStorage;
+	qglNamedRenderbufferStorageMultisample = GLDSA_NamedRenderbufferStorageMultisample;
+	qglCheckNamedFramebufferStatus = GLDSA_CheckNamedFramebufferStatus;
+	qglNamedFramebufferTexture2D = GLDSA_NamedFramebufferTexture2D;
+	qglNamedFramebufferRenderbuffer = GLDSA_NamedFramebufferRenderbuffer;
+
 	glRefConfig.directStateAccess = qfalse;
 	if (GLimp_HaveExtension(extension))
 	{
@@ -826,6 +845,12 @@ void GLimp_InitExtraExtensions()
 			qglProgramUniform4f = (void *)SDL_GL_GetProcAddress("glProgramUniform4fEXT");
 			qglProgramUniform1fv = (void *)SDL_GL_GetProcAddress("glProgramUniform1fvEXT");
 			qglProgramUniformMatrix4fv = (void *)SDL_GL_GetProcAddress("glProgramUniformMatrix4fvEXT");
+
+			qglNamedRenderbufferStorage = (void *)SDL_GL_GetProcAddress("glNamedRenderbufferStorageEXT");
+			qglNamedRenderbufferStorageMultisample = (void *)SDL_GL_GetProcAddress("glNamedRenderbufferStorageMultisampleEXT");
+			qglCheckNamedFramebufferStatus = (void *)SDL_GL_GetProcAddress("glCheckNamedFramebufferStatusEXT");
+			qglNamedFramebufferTexture2D = (void *)SDL_GL_GetProcAddress("glNamedFramebufferTexture2DEXT");
+			qglNamedFramebufferRenderbuffer = (void *)SDL_GL_GetProcAddress("glNamedFramebufferRenderbufferEXT");
 		}
 
 		ri.Printf(PRINT_ALL, result[glRefConfig.directStateAccess ? 1 : 0], extension);

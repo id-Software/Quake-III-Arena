@@ -959,6 +959,7 @@ void GL_SetDefaultState( void )
 	qglColor4f (1,1,1,1);
 
 	GL_BindNullTextures();
+	GL_BindNullFramebuffers();
 
 	qglEnable(GL_TEXTURE_2D);
 	GL_TextureMode( r_textureMode->string );

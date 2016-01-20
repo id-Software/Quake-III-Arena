@@ -767,6 +767,20 @@ extern GLvoid(APIENTRY * qglProgramUniformMatrix4fv)(GLuint program, GLint locat
 	GLsizei count, GLboolean transpose,
 	const GLfloat *value);
 
+extern GLvoid(APIENTRY * qglNamedRenderbufferStorage)(GLuint renderbuffer,
+	GLenum internalformat, GLsizei width, GLsizei height);
+
+extern GLvoid(APIENTRY * qglNamedRenderbufferStorageMultisample)(GLuint renderbuffer,
+	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+
+extern GLenum(APIENTRY * qglCheckNamedFramebufferStatus)(GLuint framebuffer, GLenum target);
+extern GLvoid(APIENTRY * qglNamedFramebufferTexture2D)(GLuint framebuffer,
+	GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+extern GLvoid(APIENTRY * qglNamedFramebufferRenderbuffer)(GLuint framebuffer,
+	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+
+
 
 #if defined(WIN32)
 // WGL_ARB_create_context

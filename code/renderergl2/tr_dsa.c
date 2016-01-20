@@ -28,6 +28,10 @@ static struct
 	GLenum texunit;
 
 	GLuint program;
+
+	GLuint drawFramebuffer;
+	GLuint readFramebuffer;
+	GLuint renderbuffer;
 }
 glDsaState;
 
@@ -196,4 +200,85 @@ GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
 {
 	GL_UseProgramObject(program);
 	qglUniformMatrix4fvARB(location, count, transpose, value);
+}
+
+void GL_BindNullFramebuffers()
+{
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDsaState.drawFramebuffer = glDsaState.readFramebuffer = 0;
+	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	glDsaState.readFramebuffer = 0;
+}
+
+void GL_BindFramebuffer(GLenum target, GLuint framebuffer)
+{
+	switch (target)
+	{
+		case GL_FRAMEBUFFER_EXT:
+			if (framebuffer != glDsaState.drawFramebuffer || framebuffer != glDsaState.readFramebuffer)
+			{
+				qglBindFramebufferEXT(target, framebuffer);
+				glDsaState.drawFramebuffer = glDsaState.readFramebuffer = framebuffer;
+			}
+			break;
+
+		case GL_DRAW_FRAMEBUFFER_EXT:
+			if (framebuffer != glDsaState.drawFramebuffer)
+			{
+				qglBindFramebufferEXT(target, framebuffer);
+				glDsaState.drawFramebuffer = framebuffer;
+			}
+			break;
+
+		case GL_READ_FRAMEBUFFER_EXT:
+			if (framebuffer != glDsaState.readFramebuffer)
+			{
+				qglBindFramebufferEXT(target, framebuffer);
+				glDsaState.readFramebuffer = framebuffer;
+			}
+			break;
+	}
+}
+
+void GL_BindRenderbuffer(GLuint renderbuffer)
+{
+	if (renderbuffer != glDsaState.renderbuffer)
+	{
+		qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, renderbuffer);
+		glDsaState.renderbuffer = renderbuffer;
+	}
+}
+
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorage(GLuint renderbuffer,
+	GLenum internalformat, GLsizei width, GLsizei height)
+{
+	GL_BindRenderbuffer(renderbuffer);
+	qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, internalformat, width, height);
+}
+
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisample(GLuint renderbuffer,
+	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
+{
+	GL_BindRenderbuffer(renderbuffer);
+	qglRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, internalformat, width, height);
+}
+
+GLenum APIENTRY GLDSA_CheckNamedFramebufferStatus(GLuint framebuffer, GLenum target)
+{
+	GL_BindFramebuffer(target, framebuffer);
+	return qglCheckFramebufferStatusEXT(target);
+}
+
+GLvoid APIENTRY GLDSA_NamedFramebufferTexture2D(GLuint framebuffer,
+	GLenum attachment, GLenum textarget, GLuint texture, GLint level)
+{
+	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, framebuffer);
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, textarget, texture, level);
+}
+
+GLvoid APIENTRY GLDSA_NamedFramebufferRenderbuffer(GLuint framebuffer,
+	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
+{
+	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, framebuffer);
+	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, attachment, renderbuffertarget, renderbuffer);
 }
