@@ -52,6 +52,7 @@ typedef struct FBO_s
 	int             height;
 } FBO_t;
 
+void FBO_AttachImage(FBO_t *fbo, image_t *image, GLenum attachment, GLuint cubemapside);
 void FBO_Bind(FBO_t *fbo);
 void FBO_Init(void);
 void FBO_Shutdown(void);

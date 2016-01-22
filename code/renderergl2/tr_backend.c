@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 #include "tr_local.h"
+#include "tr_fbo.h"
 #include "tr_dsa.h"
 
 backEndData_t	*backEndData;
@@ -377,31 +378,20 @@ void RB_BeginDrawingView (void) {
 
 	if (glRefConfig.framebufferObject)
 	{
+		FBO_t *fbo = backEnd.viewParms.targetFbo;
+
 		// FIXME: HUGE HACK: render to the screen fbo if we've already postprocessed the frame and aren't drawing more world
 		// drawing more world check is in case of double renders, such as skyportals
-		if (backEnd.viewParms.targetFbo == NULL)
-		{
-			if (!tr.renderFbo || (backEnd.framePostProcessed && (backEnd.refdef.rdflags & RDF_NOWORLDMODEL)))
-			{
-				FBO_Bind(NULL);
-			}
-			else
-			{
-				FBO_Bind(tr.renderFbo);
-			}
-		}
-		else
-		{
-			FBO_Bind(backEnd.viewParms.targetFbo);
+		if (fbo == NULL && !(backEnd.framePostProcessed && (backEnd.refdef.rdflags & RDF_NOWORLDMODEL)))
+			fbo = tr.renderFbo;
 
-			// FIXME: hack for cubemap testing
-			if (tr.renderCubeFbo && backEnd.viewParms.targetFbo == tr.renderCubeFbo)
-			{
-				cubemap_t *cubemap = &tr.cubemaps[backEnd.viewParms.targetFboCubemapIndex];
-				//qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + backEnd.viewParms.targetFboLayer, backEnd.viewParms.targetFbo->colorImage[0]->texnum, 0);
-				qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + backEnd.viewParms.targetFboLayer, cubemap->image->texnum, 0);
-			}
+		if (tr.renderCubeFbo && fbo == tr.renderCubeFbo)
+		{
+			cubemap_t *cubemap = &tr.cubemaps[backEnd.viewParms.targetFboCubemapIndex];
+			FBO_AttachImage(fbo, cubemap->image, GL_COLOR_ATTACHMENT0_EXT, backEnd.viewParms.targetFboLayer);
 		}
+
+		FBO_Bind(fbo);
 	}
 
 	//
@@ -780,14 +770,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	// FIXME: HUGE hack
 	if (glRefConfig.framebufferObject)
 	{
-		if (!tr.renderFbo || backEnd.framePostProcessed)
-		{
-			FBO_Bind(NULL);
-		}
-		else
-		{
-			FBO_Bind(tr.renderFbo);
-		}
+		FBO_Bind(backEnd.framePostProcessed ? NULL : tr.renderFbo);
 	}
 
 	RB_SetGL2D();
@@ -873,16 +856,7 @@ const void *RB_StretchPic ( const void *data ) {
 
 	// FIXME: HUGE hack
 	if (glRefConfig.framebufferObject)
-	{
-		if (!tr.renderFbo || backEnd.framePostProcessed)
-		{
-			FBO_Bind(NULL);
-		}
-		else
-		{
-			FBO_Bind(tr.renderFbo);
-		}
-	}
+		FBO_Bind(backEnd.framePostProcessed ? NULL : tr.renderFbo);
 
 	RB_SetGL2D();
 
@@ -1695,7 +1669,7 @@ const void *RB_ExportCubemaps(const void *data)
 
 			for (j = 0; j < 6; j++)
 			{
-				qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, cubemap->image->texnum, 0);
+				FBO_AttachImage(tr.renderCubeFbo, cubemap->image, GL_COLOR_ATTACHMENT0_EXT, j);
 				qglReadPixels(0, 0, r_cubemapSize->integer, r_cubemapSize->integer, GL_RGBA, GL_UNSIGNED_BYTE, p);
 				p += sideSize;
 			}
