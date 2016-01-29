@@ -3068,23 +3068,41 @@ void R_AssignCubemapsToWorldSurfaces(void)
 }
 
 
-void R_RenderAllCubemaps(void)
+void R_LoadCubemaps(void)
+{
+	int i;
+	imgFlags_t flags = IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_NOLIGHTSCALE | IMGFLAG_CUBEMAP;
+
+	for (i = 0; i < tr.numCubemaps; i++)
+	{
+		char filename[MAX_QPATH];
+		cubemap_t *cubemap = &tr.cubemaps[i];
+
+		Com_sprintf(filename, MAX_QPATH, "cubemaps/%s/%03d.dds", tr.world->baseName, i);
+
+		cubemap->image = R_FindImageFile(filename, IMGTYPE_COLORALPHA, flags);
+	}
+}
+
+
+void R_RenderMissingCubemaps(void)
 {
 	int i, j;
+	imgFlags_t flags = IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_NOLIGHTSCALE | IMGFLAG_CUBEMAP;
 
 	for (i = 0; i < tr.numCubemaps; i++)
 	{
-		tr.cubemaps[i].image = R_CreateImage(va("*cubeMap%d", i), NULL, r_cubemapSize->integer, r_cubemapSize->integer, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE | IMGFLAG_MIPMAP | IMGFLAG_CUBEMAP, GL_RGBA8);
-	}
-
-	for (i = 0; i < tr.numCubemaps; i++)
-	{
-		for (j = 0; j < 6; j++)
+		if (!tr.cubemaps[i].image)
 		{
-			RE_ClearScene();
-			R_RenderCubemapSide(i, j, qfalse);
-			R_IssuePendingRenderCommands();
-			R_InitNextFrame();
+			tr.cubemaps[i].image = R_CreateImage(va("*cubeMap%d", i), NULL, r_cubemapSize->integer, r_cubemapSize->integer, IMGTYPE_COLORALPHA, flags, GL_RGBA8);
+
+			for (j = 0; j < 6; j++)
+			{
+				RE_ClearScene();
+				R_RenderCubemapSide(i, j, qfalse);
+				R_IssuePendingRenderCommands();
+				R_InitNextFrame();
+			}
 		}
 	}
 }
@@ -3425,10 +3443,11 @@ void RE_LoadWorldMap( const char *name ) {
 	// make sure the VAO glState entry is safe
 	R_BindNullVao();
 
-	// Render all cubemaps
+	// Render or load all cubemaps
 	if (r_cubeMapping->integer && tr.numCubemaps)
 	{
-		R_RenderAllCubemaps();
+		R_LoadCubemaps();
+		R_RenderMissingCubemaps();
 	}
 
     ri.FS_FreeFile( buffer.v );
