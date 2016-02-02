@@ -276,9 +276,9 @@ void main()
 	attenuation  = 1.0;
   #endif
 
-  #if defined(r_lightGamma)
-	lightColor   = pow(lightColor,   vec3(r_lightGamma));
-	ambientColor = pow(ambientColor, vec3(r_lightGamma));
+  #if defined(USE_PBR)
+	lightColor   = pow(lightColor,   vec3(2.2));
+	ambientColor = pow(ambientColor, vec3(2.2));
   #endif
 
   #if defined(USE_NORMALMAP)
@@ -319,7 +319,7 @@ void main()
 
 	// Recover any unused light as ambient, in case attenuation is over 4x or
 	// light is below the surface
-	ambientColor = clamp(ambientColor - lightColor * surfNL, 0.0, 1.0);
+	ambientColor = max(ambientColor - lightColor * surfNL, vec3(0.0));
   #endif
   
 	vec3 reflectance;
@@ -335,21 +335,18 @@ void main()
 
 	specular *= u_SpecularScale;
 
-  #if defined(r_materialGamma)
-	diffuse.rgb   = pow(diffuse.rgb,  vec3(r_materialGamma));
-    #if !defined(SPECULAR_IS_METALLIC)
-	specular.rgb  = pow(specular.rgb, vec3(r_materialGamma));
-    #endif
+  #if defined(USE_PBR)
+	diffuse.rgb = pow(diffuse.rgb, vec3(2.2));
   #endif
 
 	float gloss = specular.a;
-  #if defined(GLOSS_IS_ROUGHNESS)
-	float roughness = gloss;
+  #if defined(USE_PBR)
+	float roughness = 1.0 - specular.r;
   #else
 	float roughness = exp2(-3.0 * gloss);
   #endif
 
-  #if defined(SPECULAR_IS_METALLIC)
+  #if defined(USE_PBR)
 	// diffuse is actually base color, and green of specular is metallicness
 	float metallic = specular.g;
 
@@ -374,7 +371,7 @@ void main()
 	// from http://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 	vec3 parallax = u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
-    #if defined(GLOSS_IS_ROUGHNESS)
+    #if defined(USE_PBR)
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 * roughness).rgb * u_EnableTextures.w;
     #else
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
@@ -385,8 +382,8 @@ void main()
 	//vec3 cubeLightDiffuse = max(textureCubeLod(u_CubeMap, N, 6.0).rgb, 0.5 / 255.0);
 	//cubeLightColor /= dot(cubeLightDiffuse, vec3(0.2125, 0.7154, 0.0721));
 
-    #if defined(r_framebufferGamma)
-	cubeLightColor = pow(cubeLightColor, vec3(r_framebufferGamma));
+    #if defined(USE_PBR)
+	cubeLightColor = pow(cubeLightColor, vec3(2.2));
     #endif
 
 	// multiply cubemap values by lighting
@@ -421,8 +418,8 @@ void main()
 
 	lightColor = u_PrimaryLightColor;
 
-    #if defined(r_lightGamma)
-	lightColor = pow(lightColor, vec3(r_lightGamma));
+    #if defined(USE_PBR)
+	lightColor = pow(lightColor, vec3(2.2));
     #endif
 
     #if defined(USE_SHADOWMAP)
@@ -434,6 +431,11 @@ void main()
 
 	gl_FragColor.rgb += lightColor * reflectance * NL2;
   #endif
+
+  #if defined(USE_PBR)
+	gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / 2.2));
+  #endif
+
 #else
 	lightColor = var_Color.rgb;
 
@@ -441,20 +443,8 @@ void main()
 	lightColor *= lightmapColor.rgb;
   #endif
 
-  #if defined(r_lightGamma)
-	lightColor = pow(lightColor, vec3(r_lightGamma));
-  #endif
-
-  #if defined(r_materialGamma)
-	diffuse.rgb   = pow(diffuse.rgb,  vec3(r_materialGamma));
-  #endif
-
 	gl_FragColor.rgb = diffuse.rgb * lightColor;
 
-#endif
-
-#if defined(r_framebufferGamma)
-	gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / r_framebufferGamma));
 #endif
 
 	gl_FragColor.a = diffuse.a * var_Color.a;

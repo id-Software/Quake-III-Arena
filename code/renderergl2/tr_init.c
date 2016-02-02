@@ -132,11 +132,6 @@ cvar_t  *r_forceAutoExposure;
 cvar_t  *r_forceAutoExposureMin;
 cvar_t  *r_forceAutoExposureMax;
 
-cvar_t  *r_materialGamma;
-cvar_t  *r_lightGamma;
-cvar_t  *r_framebufferGamma;
-cvar_t  *r_tonemapGamma;
-
 cvar_t  *r_depthPrepass;
 cvar_t  *r_ssao;
 
@@ -146,8 +141,7 @@ cvar_t  *r_deluxeMapping;
 cvar_t  *r_parallaxMapping;
 cvar_t  *r_cubeMapping;
 cvar_t  *r_cubemapSize;
-cvar_t  *r_specularIsMetallic;
-cvar_t  *r_glossIsRoughness;
+cvar_t  *r_pbr;
 cvar_t  *r_baseNormalX;
 cvar_t  *r_baseNormalY;
 cvar_t  *r_baseParallax;
@@ -1213,7 +1207,7 @@ void R_Register( void )
 	r_floatLightmap = ri.Cvar_Get( "r_floatLightmap", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_postProcess = ri.Cvar_Get( "r_postProcess", "1", CVAR_ARCHIVE );
 
-	r_toneMap = ri.Cvar_Get( "r_toneMap", "1", CVAR_ARCHIVE | CVAR_LATCH );
+	r_toneMap = ri.Cvar_Get( "r_toneMap", "1", CVAR_ARCHIVE );
 	r_forceToneMap = ri.Cvar_Get( "r_forceToneMap", "0", CVAR_CHEAT );
 	r_forceToneMapMin = ri.Cvar_Get( "r_forceToneMapMin", "-8.0", CVAR_CHEAT );
 	r_forceToneMapAvg = ri.Cvar_Get( "r_forceToneMapAvg", "-2.0", CVAR_CHEAT );
@@ -1226,11 +1220,6 @@ void R_Register( void )
 
 	r_cameraExposure = ri.Cvar_Get( "r_cameraExposure", "0", CVAR_CHEAT );
 
-	r_materialGamma = ri.Cvar_Get( "r_materialGamma", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_lightGamma = ri.Cvar_Get( "r_lightGamma", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_framebufferGamma = ri.Cvar_Get( "r_framebufferGamma", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_tonemapGamma = ri.Cvar_Get( "r_tonemapGamma", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
-
 	r_depthPrepass = ri.Cvar_Get( "r_depthPrepass", "1", CVAR_ARCHIVE );
 	r_ssao = ri.Cvar_Get( "r_ssao", "0", CVAR_LATCH | CVAR_ARCHIVE );
 
@@ -1240,8 +1229,7 @@ void R_Register( void )
 	r_parallaxMapping = ri.Cvar_Get( "r_parallaxMapping", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_cubeMapping = ri.Cvar_Get( "r_cubeMapping", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_cubemapSize = ri.Cvar_Get( "r_cubemapSize", "128", CVAR_ARCHIVE | CVAR_LATCH );
-	r_specularIsMetallic = ri.Cvar_Get( "r_specularIsMetallic", "0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_glossIsRoughness = ri.Cvar_Get("r_glossIsRoughness", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_pbr = ri.Cvar_Get("r_pbr", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_baseNormalX = ri.Cvar_Get( "r_baseNormalX", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_baseNormalY = ri.Cvar_Get( "r_baseNormalY", "1.0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_baseParallax = ri.Cvar_Get( "r_baseParallax", "0.05", CVAR_ARCHIVE | CVAR_LATCH );

@@ -1776,11 +1776,6 @@ extern  cvar_t  *r_forceAutoExposureMax;
 
 extern  cvar_t  *r_cameraExposure;
 
-extern  cvar_t  *r_materialGamma;
-extern  cvar_t  *r_lightGamma;
-extern  cvar_t  *r_framebufferGamma;
-extern  cvar_t  *r_tonemapGamma;
-
 extern  cvar_t  *r_depthPrepass;
 extern  cvar_t  *r_ssao;
 
@@ -1790,8 +1785,7 @@ extern  cvar_t  *r_deluxeMapping;
 extern  cvar_t  *r_parallaxMapping;
 extern  cvar_t  *r_cubeMapping;
 extern  cvar_t  *r_cubemapSize;
-extern  cvar_t  *r_specularIsMetallic;
-extern  cvar_t  *r_glossIsRoughness;
+extern  cvar_t  *r_pbr;
 extern  cvar_t  *r_baseNormalX;
 extern  cvar_t  *r_baseNormalY;
 extern  cvar_t  *r_baseParallax;

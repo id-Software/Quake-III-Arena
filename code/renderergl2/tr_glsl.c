@@ -322,17 +322,8 @@ static void GLSL_GetShaderHeader( GLenum shaderType, const GLcharARB *extra, cha
 	Q_strcat(dest, size,
 			 va("#ifndef r_FBufScale\n#define r_FBufScale vec2(%f, %f)\n#endif\n", fbufWidthScale, fbufHeightScale));
 
-	if (r_materialGamma->value != 1.0f)
-		Q_strcat(dest, size, va("#ifndef r_materialGamma\n#define r_materialGamma %f\n#endif\n", r_materialGamma->value));
-
-	if (r_lightGamma->value != 1.0f)
-		Q_strcat(dest, size, va("#ifndef r_lightGamma\n#define r_lightGamma %f\n#endif\n", r_lightGamma->value));
-
-	if (r_framebufferGamma->value != 1.0f)
-		Q_strcat(dest, size, va("#ifndef r_framebufferGamma\n#define r_framebufferGamma %f\n#endif\n", r_framebufferGamma->value));
-
-	if (r_tonemapGamma->value != 1.0f)
-		Q_strcat(dest, size, va("#ifndef r_tonemapGamma\n#define r_tonemapGamma %f\n#endif\n", r_tonemapGamma->value));
+	if (r_pbr->integer)
+		Q_strcat(dest, size, "#define USE_PBR\n");
 
 	if (extra)
 	{
@@ -1008,12 +999,6 @@ void GLSL_InitGPUShaders(void)
 		attribs = ATTR_POSITION | ATTR_TEXCOORD | ATTR_COLOR | ATTR_NORMAL;
 
 		extradefines[0] = '\0';
-
-		if (r_specularIsMetallic->value)
-			Q_strcat(extradefines, 1024, "#define SPECULAR_IS_METALLIC\n");
-
-		if (r_glossIsRoughness->value)
-			Q_strcat(extradefines, 1024, "#define GLOSS_IS_ROUGHNESS\n");
 
 		if (r_dlightMode->integer >= 2)
 			Q_strcat(extradefines, 1024, "#define USE_SHADOWMAP\n");

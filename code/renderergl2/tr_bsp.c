@@ -141,7 +141,7 @@ static void R_ColorShiftLightingFloats(float in[4], float out[4], float scale )
 	float	r, g, b;
 
 #if defined(USE_OVERBRIGHT)
-	scale *= pow(2.0f, r_mapOverBrightBits->integer - tr.overbrightBits);
+	scale *= 1 << (r_mapOverBrightBits->integer - tr.overbrightBits);
 #endif
 
 	r = in[0] * scale;
@@ -2762,7 +2762,7 @@ void R_LoadLightGrid( lump_t *l ) {
 		if (hdrLightGrid)
 		{
 #if defined(USE_OVERBRIGHT)
-			float lightScale = pow(2, r_mapOverBrightBits->integer - tr.overbrightBits);
+			float lightScale = 1 << (r_mapOverBrightBits->integer - tr.overbrightBits);
 #else
 			float lightScale = 1.0f;
 #endif

@@ -2858,6 +2858,11 @@ void R_SetColorMappings( void ) {
 		tr.overbrightBits = 0;
 	}
 
+	// don't allow more overbright bits than map overbright bits
+	if ( tr.overbrightBits > r_mapOverBrightBits->integer ) {
+		tr.overbrightBits = r_mapOverBrightBits->integer;
+	}
+
 	tr.identityLight = 1.0f / ( 1 << tr.overbrightBits );
 	tr.identityLightByte = 255 * tr.identityLight;
 

@@ -14,8 +14,8 @@ vec3 GetValues(vec2 offset, vec3 current)
 
 #ifdef FIRST_PASS
 
-  #if defined(r_framebufferGamma)
-	minAvgMax = pow(minAvgMax, vec3(r_framebufferGamma));
+  #if defined(USE_PBR)
+	minAvgMax = pow(minAvgMax, vec3(2.2));
   #endif
 
 	float lumi = max(dot(LUMINANCE_VECTOR, minAvgMax), 0.000001);
