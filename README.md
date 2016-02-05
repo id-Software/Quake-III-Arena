@@ -244,7 +244,7 @@ The defaults for these variables differ depending on the target platform.
                                       ipv6 servers on the local network
   net_mcastiface                    - outgoing interface to use for scan
 
-  r_allowResize                     - make window resizable (SDL only)
+  r_allowResize                     - make window resizable
   r_ext_texture_filter_anisotropic  - anisotropic texture filtering
   r_zProj                           - distance of observer camera to projection
                                       plane in quake3 standard units
