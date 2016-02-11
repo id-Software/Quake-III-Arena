@@ -1674,7 +1674,16 @@ const void *RB_ExportCubemaps(const void *data)
 				p += sideSize;
 			}
 
-			Com_sprintf(filename, MAX_QPATH, "cubemaps/%s/%03d.dds", tr.world->baseName, i);
+			if (cubemap->name[0])
+			{
+				COM_StripExtension(cubemap->name, filename, MAX_QPATH);
+				Q_strcat(filename, MAX_QPATH, ".dds");
+			}
+			else
+			{
+				Com_sprintf(filename, MAX_QPATH, "cubemaps/%s/%03d.dds", tr.world->baseName, i);
+			}
+
 			R_SaveDDS(filename, cubemapPixels, r_cubemapSize->integer, r_cubemapSize->integer, 6);
 			ri.Printf(PRINT_ALL, "Saved cubemap %d as %s\n", i, filename);
 		}

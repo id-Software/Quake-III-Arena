@@ -59,6 +59,7 @@ typedef unsigned int glIndex_t;
 #define USE_OVERBRIGHT
 
 typedef struct cubemap_s {
+	char name[MAX_QPATH];
 	vec3_t origin;
 	float parallaxRadius;
 	image_t *image;

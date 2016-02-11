@@ -23,6 +23,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 
+#define JSON_IMPLEMENTATION
+#include "..\qcommon\json.h"
+#undef JSON_IMPLEMENTATION
+
 /*
 
 Loads and prepares a map file for scene rendering.
@@ -2972,6 +2976,78 @@ qboolean R_ParseSpawnVars( char *spawnVarChars, int maxSpawnVarChars, int *numSp
 	return qtrue;
 }
 
+void R_LoadEnvironmentJson(const char *baseName)
+{
+	char filename[MAX_QPATH];
+
+	union {
+		char *c;
+		void *v;
+	} buffer;
+	char *bufferEnd;
+
+	const char *cubemapArrayJson;
+	int filelen, i;
+
+	Com_sprintf(filename, MAX_QPATH, "cubemaps/%s/env.json", baseName);
+
+	filelen = ri.FS_ReadFile(filename, &buffer.v);
+	if (!buffer.c)
+		return;
+	bufferEnd = buffer.c + filelen;
+
+	if (JSON_ValueGetType(buffer.c, bufferEnd) != JSONTYPE_OBJECT)
+	{
+		ri.Printf(PRINT_ALL, "Bad %s: does not start with a object\n", filename);
+		ri.FS_FreeFile(buffer.v);
+		return;
+	}
+
+	cubemapArrayJson = JSON_ObjectGetNamedValue(buffer.c, bufferEnd, "Cubemaps");
+	if (!cubemapArrayJson)
+	{
+		ri.Printf(PRINT_ALL, "Bad %s: no Cubemaps\n", filename);
+		ri.FS_FreeFile(buffer.v);
+		return;
+	}
+
+	if (JSON_ValueGetType(cubemapArrayJson, bufferEnd) != JSONTYPE_ARRAY)
+	{
+		ri.Printf(PRINT_ALL, "Bad %s: Cubemaps not an array\n", filename);
+		ri.FS_FreeFile(buffer.v);
+		return;
+	}
+
+	tr.numCubemaps = JSON_ArrayGetIndex(cubemapArrayJson, bufferEnd, NULL, 0);
+	tr.cubemaps = ri.Hunk_Alloc(tr.numCubemaps * sizeof(*tr.cubemaps), h_low);
+	memset(tr.cubemaps, 0, tr.numCubemaps * sizeof(*tr.cubemaps));
+
+	for (i = 0; i < tr.numCubemaps; i++)
+	{
+		cubemap_t *cubemap = &tr.cubemaps[i];
+		const char *cubemapJson, *keyValueJson, *indexes[3];
+		int j;
+
+		cubemapJson = JSON_ArrayGetValue(cubemapArrayJson, bufferEnd, i);
+
+		keyValueJson = JSON_ObjectGetNamedValue(cubemapJson, bufferEnd, "Name");
+		if (!JSON_ValueGetString(keyValueJson, bufferEnd, cubemap->name, MAX_QPATH))
+			cubemap->name[0] = '\0';
+
+		keyValueJson = JSON_ObjectGetNamedValue(cubemapJson, bufferEnd, "Position");
+		JSON_ArrayGetIndex(keyValueJson, bufferEnd, indexes, 3);
+		for (j = 0; j < 3; j++)
+			cubemap->origin[j] = JSON_ValueGetFloat(indexes[j], bufferEnd);
+
+		cubemap->parallaxRadius = 1000.0f;
+		keyValueJson = JSON_ObjectGetNamedValue(cubemapJson, bufferEnd, "Radius");
+		if (keyValueJson)
+			cubemap->parallaxRadius = JSON_ValueGetFloat(keyValueJson, bufferEnd);
+	}
+
+	ri.FS_FreeFile(buffer.v);
+}
+
 void R_LoadCubemapEntities(char *cubemapEntityName)
 {
 	char spawnVarChars[2048];
@@ -3003,15 +3079,20 @@ void R_LoadCubemapEntities(char *cubemapEntityName)
 	while(R_ParseSpawnVars(spawnVarChars, sizeof(spawnVarChars), &numSpawnVars, spawnVars))
 	{
 		int i;
+		char name[MAX_QPATH];
 		qboolean isCubemap = qfalse;
 		qboolean originSet = qfalse;
 		vec3_t origin;
 		float parallaxRadius = 1000.0f;
 
+		name[0] = '\0';
 		for (i = 0; i < numSpawnVars; i++)
 		{
 			if (!Q_stricmp(spawnVars[i][0], "classname") && !Q_stricmp(spawnVars[i][1], cubemapEntityName))
 				isCubemap = qtrue;
+
+			if (!Q_stricmp(spawnVars[i][0], "name"))
+				Q_strncpyz(name, spawnVars[i][1], MAX_QPATH);
 
 			if (!Q_stricmp(spawnVars[i][0], "origin"))
 			{
@@ -3026,9 +3107,10 @@ void R_LoadCubemapEntities(char *cubemapEntityName)
 
 		if (isCubemap && originSet)
 		{
-			//ri.Printf(PRINT_ALL, "cubemap at %f %f %f\n", origin[0], origin[1], origin[2]);
-			VectorCopy(origin, tr.cubemaps[numCubemaps].origin);
-			tr.cubemaps[numCubemaps].parallaxRadius = parallaxRadius;
+			cubemap_t *cubemap = &tr.cubemaps[numCubemaps];
+			Q_strncpyz(cubemap->name, name, MAX_QPATH);
+			VectorCopy(origin, cubemap->origin);
+			cubemap->parallaxRadius = parallaxRadius;
 			numCubemaps++;
 		}
 	}
@@ -3419,7 +3501,14 @@ void RE_LoadWorldMap( const char *name ) {
 	// load cubemaps
 	if (r_cubeMapping->integer)
 	{
-		R_LoadCubemapEntities("misc_cubemap");
+		// Try loading an env.json file first
+		R_LoadEnvironmentJson(s_worldData.baseName);
+
+		if (!tr.numCubemaps)
+		{
+			R_LoadCubemapEntities("misc_cubemap");
+		}
+
 		if (!tr.numCubemaps)
 		{
 			// use deathmatch spawn points as cubemaps

@@ -2936,7 +2936,7 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 		// only print message for first side
 		if (directed[0] + directed[1] + directed[2] == 0 && cubemapSide == 0)
 		{
-			ri.Printf(PRINT_ALL, "cubemap %d (%f, %f, %f) is outside the lightgrid!\n", cubemapIndex, tr.refdef.vieworg[0], tr.refdef.vieworg[1], tr.refdef.vieworg[2]);
+			ri.Printf(PRINT_ALL, "cubemap %d %s (%f, %f, %f) is outside the lightgrid!\n", cubemapIndex, tr.cubemaps[cubemapIndex].name, tr.refdef.vieworg[0], tr.refdef.vieworg[1], tr.refdef.vieworg[2]);
 		}
 	}
 
