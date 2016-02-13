@@ -336,7 +336,7 @@ void RE_BeginScene(const refdef_t *fd)
 	else
 	{
 #if defined(USE_OVERBRIGHT)
-		float scale = (1 << (r_mapOverBrightBits->integer - tr.overbrightBits)) / 255.0f;;
+		float scale = (1 << (r_mapOverBrightBits->integer - tr.overbrightBits)) / 255.0f;
 #else
 		float scale = (1 << r_mapOverBrightBits->integer) / 255.0f;
 #endif
