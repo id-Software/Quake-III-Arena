@@ -29,11 +29,6 @@ uniform samplerCube u_CubeMap;
 uniform vec4      u_EnableTextures; 
 #endif
 
-#if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
-uniform vec3      u_DirectedLight;
-uniform vec3      u_AmbientLight;
-#endif
-
 #if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
 uniform vec3  u_PrimaryLightColor;
 uniform vec3  u_PrimaryLightAmbient;
@@ -53,6 +48,9 @@ uniform vec4      u_CubeMapInfo;
 varying vec4      var_TexCoords;
 
 varying vec4      var_Color;
+#if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
+varying vec4      var_ColorAmbient;
+#endif
 
 #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
   #if defined(USE_VERT_TANGENT_SPACE)
@@ -150,7 +148,7 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 }
 #endif
 
-vec3 CalcDiffuse(vec3 diffuseAlbedo, float EH, float NH, float roughness)
+vec3 CalcDiffuse(vec3 diffuseAlbedo, float NH, float EH, float roughness)
 {
 #if defined(USE_BURLEY)
 	// modified from https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -171,7 +169,7 @@ vec3 EnvironmentBRDF(float roughness, float NE, vec3 specular)
 	return vec3(v) + specular;
 }
 
-vec3 CalcSpecular(vec3 specular, float NH, float NL, float NE, float EH, float roughness)
+vec3 CalcSpecular(vec3 specular, float NH, float EH, float roughness)
 {
 	// from http://community.arm.com/servlet/JiveServlet/download/96891546-19496/siggraph2015-mmg-renaldas-slides.pdf
 	float rr = roughness*roughness;
@@ -220,7 +218,7 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 
 void main()
 {
-	vec3 viewDir, lightColor, ambientColor;
+	vec3 viewDir, lightColor, ambientColor, reflectance;
 	vec3 L, N, E, H;
 	float NL, NH, NE, EH, attenuation;
 
@@ -232,21 +230,20 @@ void main()
 	mat3 tangentToWorld = cotangent_frame(var_Normal, -var_ViewDir, var_TexCoords.xy);
 	viewDir = var_ViewDir;
   #endif
-
 	E = normalize(viewDir);
-
-	L = var_LightDir.xyz;
-  #if defined(USE_DELUXEMAP)
-	L += (texture2D(u_DeluxeMap, var_TexCoords.zw).xyz - vec3(0.5)) * u_EnableTextures.y;
-  #endif
-	float sqrLightDist = dot(L, L);
 #endif
+
+	lightColor = var_Color.rgb;
 
 #if defined(USE_LIGHTMAP)
 	vec4 lightmapColor = texture2D(u_LightMap, var_TexCoords.zw);
   #if defined(RGBM_LIGHTMAP)
 	lightmapColor.rgb *= lightmapColor.a;
   #endif
+  #if defined(USE_PBR) && !defined(USE_FAST_LIGHT)
+	lightmapColor.rgb *= lightmapColor.rgb;
+  #endif
+	lightColor *= lightmapColor.rgb;
 #endif
 
 	vec2 texCoords = var_TexCoords.xy;
@@ -262,23 +259,17 @@ void main()
 	vec4 diffuse = texture2D(u_DiffuseMap, texCoords);
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-  #if defined(USE_LIGHTMAP)
-	lightColor   = lightmapColor.rgb * var_Color.rgb;
-	ambientColor = vec3(0.0);
-	attenuation  = 1.0;
-  #elif defined(USE_LIGHT_VECTOR)
-	lightColor   = u_DirectedLight * var_Color.rgb;
-	ambientColor = u_AmbientLight * var_Color.rgb;
-	attenuation  = CalcLightAttenuation(float(var_LightDir.w > 0.0), var_LightDir.w / sqrLightDist);
-  #elif defined(USE_LIGHT_VERTEX)
-	lightColor   = var_Color.rgb;
-	ambientColor = vec3(0.0);
-	attenuation  = 1.0;
+	L = var_LightDir.xyz;
+  #if defined(USE_DELUXEMAP)
+	L += (texture2D(u_DeluxeMap, var_TexCoords.zw).xyz - vec3(0.5)) * u_EnableTextures.y;
   #endif
+	float sqrLightDist = dot(L, L);
+	L /= sqrt(sqrLightDist);
 
-  #if defined(USE_PBR)
-	lightColor   = pow(lightColor,   vec3(2.2));
-	ambientColor = pow(ambientColor, vec3(2.2));
+  #if defined(USE_LIGHT_VECTOR)
+	attenuation  = CalcLightAttenuation(float(var_LightDir.w > 0.0), var_LightDir.w / sqrLightDist);
+  #else
+	attenuation  = 1.0;
   #endif
 
   #if defined(USE_NORMALMAP)
@@ -295,21 +286,20 @@ void main()
   #endif
 
 	N = normalize(N);
-	L /= sqrt(sqrLightDist);
 
   #if defined(USE_SHADOWMAP) 
 	vec2 shadowTex = gl_FragCoord.xy * r_FBufScale;
 	float shadowValue = texture2D(u_ShadowMap, shadowTex).r;
 
 	// surfaces not facing the light are always shadowed
-	shadowValue *= float(dot(var_Normal.xyz, var_PrimaryLightDir.xyz) > 0.0);
+	shadowValue *= clamp(dot(var_Normal.xyz, var_PrimaryLightDir.xyz), 0.0, 1.0);
 
     #if defined(SHADOWMAP_MODULATE)
 	lightColor *= shadowValue * (1.0 - u_PrimaryLightAmbient.r) + u_PrimaryLightAmbient.r;
     #endif
   #endif
 
-  #if defined(USE_LIGHTMAP) || defined(USE_LIGHT_VERTEX)
+  #if !defined(USE_LIGHT_VECTOR)
 	ambientColor = lightColor;
 	float surfNL = clamp(dot(var_Normal.xyz, L), 0.0, 1.0);
 
@@ -320,9 +310,9 @@ void main()
 	// Recover any unused light as ambient, in case attenuation is over 4x or
 	// light is below the surface
 	ambientColor = max(ambientColor - lightColor * surfNL, vec3(0.0));
+  #else
+	ambientColor = var_ColorAmbient.rgb;
   #endif
-  
-	vec3 reflectance;
 
 	NL = clamp(dot(N, L), 0.0, 1.0);
 	NE = clamp(dot(N, E), 0.0, 1.0);
@@ -332,32 +322,30 @@ void main()
   #else
 	vec4 specular = vec4(1.0);
   #endif
-
 	specular *= u_SpecularScale;
 
   #if defined(USE_PBR)
-	diffuse.rgb = pow(diffuse.rgb, vec3(2.2));
+	diffuse.rgb *= diffuse.rgb;
   #endif
 
-	float gloss = specular.a;
   #if defined(USE_PBR)
+	// diffuse rgb is base color
+	// specular red is smoothness
+	// specular green is metallicness
 	float roughness = 1.0 - specular.r;
+	specular.rgb = specular.g * diffuse.rgb + vec3(0.04 - 0.04 * specular.g);
+	diffuse.rgb *= 1.0 - specular.g;
   #else
-	float roughness = exp2(-3.0 * gloss);
-  #endif
+	// diffuse rgb is diffuse
+	// specular rgb is specular reflectance at normal incidence
+	// specular alpha is gloss
+	float roughness = exp2(-3.0 * specular.a);
 
-  #if defined(USE_PBR)
-	// diffuse is actually base color, and green of specular is metallicness
-	float metallic = specular.g;
-
-	specular.rgb = metallic * diffuse.rgb + vec3(0.04 - 0.04 * metallic);
-	diffuse.rgb *= 1.0 - metallic;
-  #else
 	// adjust diffuse by specular reflectance, to maintain energy conservation
 	diffuse.rgb *= vec3(1.0) - specular.rgb;
   #endif
 
-	reflectance  = CalcDiffuse(diffuse.rgb, EH, NH, roughness);
+	reflectance  = CalcDiffuse(diffuse.rgb, NH, EH, roughness);
 
 	gl_FragColor.rgb  = lightColor   * reflectance * (attenuation * NL);
 	gl_FragColor.rgb += ambientColor * diffuse.rgb;
@@ -371,11 +359,7 @@ void main()
 	// from http://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 	vec3 parallax = u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
-    #if defined(USE_PBR)
 	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 * roughness).rgb * u_EnableTextures.w;
-    #else
-	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 - gloss * 7.0).rgb * u_EnableTextures.w;
-    #endif
 
 	// normalize cubemap based on lowest mip (~diffuse)
 	// multiplying cubemap values by lighting below depends on either this or the cubemap being normalized at generation
@@ -383,7 +367,7 @@ void main()
 	//cubeLightColor /= dot(cubeLightDiffuse, vec3(0.2125, 0.7154, 0.0721));
 
     #if defined(USE_PBR)
-	cubeLightColor = pow(cubeLightColor, vec3(2.2));
+	cubeLightColor *= cubeLightColor;
     #endif
 
 	// multiply cubemap values by lighting
@@ -404,23 +388,18 @@ void main()
 	//L2 /= sqrt(sqrLightDist);
 
 	NL2 = clamp(dot(N, L2), 0.0, 1.0);
-
 	H2 = normalize(L2 + E);
 	EH2 = clamp(dot(E, H2), 0.0, 1.0);
 	NH2 = clamp(dot(N, H2), 0.0, 1.0);
 
-	reflectance  = CalcSpecular(specular.rgb, NH2, NL2, NE, EH2, roughness);
+	reflectance  = CalcSpecular(specular.rgb, NH2, EH2, roughness);
 
 	// bit of a hack, with modulated shadowmaps, ignore diffuse
     #if !defined(SHADOWMAP_MODULATE)
-	reflectance += CalcDiffuse(diffuse.rgb, EH2, NH2, roughness);
+	reflectance += CalcDiffuse(diffuse.rgb, NH2, EH2, roughness);
     #endif
 
 	lightColor = u_PrimaryLightColor;
-
-    #if defined(USE_PBR)
-	lightColor = pow(lightColor, vec3(2.2));
-    #endif
 
     #if defined(USE_SHADOWMAP)
 	lightColor *= shadowValue;
@@ -433,15 +412,10 @@ void main()
   #endif
 
   #if defined(USE_PBR)
-	gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / 2.2));
+	gl_FragColor.rgb = sqrt(gl_FragColor.rgb);
   #endif
 
 #else
-	lightColor = var_Color.rgb;
-
-  #if defined(USE_LIGHTMAP) 
-	lightColor *= lightmapColor.rgb;
-  #endif
 
 	gl_FragColor.rgb = diffuse.rgb * lightColor;
 

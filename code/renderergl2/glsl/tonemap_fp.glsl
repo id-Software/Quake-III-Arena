@@ -29,7 +29,7 @@ void main()
 	vec4 color = texture2D(u_TextureMap, var_TexCoords) * u_Color;
 
 #if defined(USE_PBR)
-	color.rgb = pow(color.rgb, vec3(2.2));
+	color.rgb *= color.rgb;
 #endif
 
 	vec3 minAvgMax = texture2D(u_LevelsMap, var_TexCoords).rgb;
@@ -47,8 +47,11 @@ void main()
 	color.rgb = clamp(color.rgb * var_InvWhite, 0.0, 1.0);
 
 #if defined(USE_PBR)
-	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	color.rgb = sqrt(color.rgb);
 #endif
+
+	// add a bit of dither to reduce banding
+	color.rgb += vec3(1.0/510.0 * mod(gl_FragCoord.x + gl_FragCoord.y, 2.0) - 1.0/1020.0);
 
 	gl_FragColor = color;
 }

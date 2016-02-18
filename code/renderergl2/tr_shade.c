@@ -1273,7 +1273,19 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			{
 				GL_BindToTMU(tr.screenShadowImage, TB_SHADOWMAP);
 				GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTAMBIENT, backEnd.refdef.sunAmbCol);
-				GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTCOLOR,   backEnd.refdef.sunCol);
+				if (r_pbr->integer)
+				{
+					vec3_t color;
+
+					color[0] = backEnd.refdef.sunCol[0] * backEnd.refdef.sunCol[0];
+					color[1] = backEnd.refdef.sunCol[1] * backEnd.refdef.sunCol[1];
+					color[2] = backEnd.refdef.sunCol[2] * backEnd.refdef.sunCol[2];
+					GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTCOLOR, color);
+				}
+				else
+				{
+					GLSL_SetUniformVec3(sp, UNIFORM_PRIMARYLIGHTCOLOR, backEnd.refdef.sunCol);
+				}
 				GLSL_SetUniformVec4(sp, UNIFORM_PRIMARYLIGHTORIGIN,  backEnd.refdef.sunDir);
 			}
 

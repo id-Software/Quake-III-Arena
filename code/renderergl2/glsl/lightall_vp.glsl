@@ -57,10 +57,8 @@ uniform float  u_VertexLerp;
 #if defined(USE_LIGHT_VECTOR)
 uniform vec4   u_LightOrigin;
 uniform float  u_LightRadius;
-  #if defined(USE_FAST_LIGHT)
 uniform vec3   u_DirectedLight;
 uniform vec3   u_AmbientLight;
-  #endif
 #endif
 
 #if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
@@ -71,6 +69,9 @@ uniform float u_PrimaryLightRadius;
 varying vec4   var_TexCoords;
 
 varying vec4   var_Color;
+#if defined(USE_LIGHT_VECTOR) && !defined(USE_FAST_LIGHT)
+varying vec4   var_ColorAmbient;
+#endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
   #if defined(USE_VERT_TANGENT_SPACE)
@@ -208,12 +209,24 @@ void main()
 
 	var_Color = u_VertColor * attr_Color + u_BaseColor;
 
-#if defined(USE_LIGHT_VECTOR) && defined(USE_FAST_LIGHT)
+#if defined(USE_LIGHT_VECTOR)
+  #if defined(USE_FAST_LIGHT)
 	float sqrLightDist = dot(L, L);
-	float attenuation = CalcLightAttenuation(u_LightOrigin.w, u_LightRadius * u_LightRadius / sqrLightDist);
 	float NL = clamp(dot(normalize(normal), L) / sqrt(sqrLightDist), 0.0, 1.0);
+	float attenuation = CalcLightAttenuation(u_LightOrigin.w, u_LightRadius * u_LightRadius / sqrLightDist);
 
 	var_Color.rgb *= u_DirectedLight * (attenuation * NL) + u_AmbientLight;
+  #else
+	var_ColorAmbient.rgb = u_AmbientLight * var_Color.rgb;
+	var_Color.rgb *= u_DirectedLight;
+    #if defined(USE_PBR)
+	var_ColorAmbient.rgb *= var_ColorAmbient.rgb;
+    #endif
+  #endif
+#endif
+
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT) && defined(USE_PBR)
+	var_Color.rgb *= var_Color.rgb;
 #endif
 
 #if defined(USE_PRIMARY_LIGHT) || defined(USE_SHADOWMAP)
