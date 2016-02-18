@@ -251,7 +251,7 @@ FBO_Init
 void FBO_Init(void)
 {
 	int             i;
-	int             hdrFormat, multisample;
+	int             hdrFormat, multisample = 0;
 
 	ri.Printf(PRINT_ALL, "------- FBO_Init -------\n");
 
@@ -268,7 +268,8 @@ void FBO_Init(void)
 	if (r_hdr->integer && glRefConfig.framebufferObject && glRefConfig.textureFloat)
 		hdrFormat = GL_RGBA16F_ARB;
 
-	qglGetIntegerv(GL_MAX_SAMPLES_EXT, &multisample);
+	if (glRefConfig.framebufferMultisample)
+		qglGetIntegerv(GL_MAX_SAMPLES_EXT, &multisample);
 
 	if (r_ext_framebuffer_multisample->integer < multisample)
 		multisample = r_ext_framebuffer_multisample->integer;
@@ -334,6 +335,9 @@ void FBO_Init(void)
 		for ( i = 0; i < 4; i++)
 		{
 			tr.sunShadowFbo[i] = FBO_Create("_sunshadowmap", tr.sunShadowDepthImage[i]->width, tr.sunShadowDepthImage[i]->height);
+			// FIXME: this next line wastes 16mb with 4x1024x1024 sun shadow maps, skip if OpenGL 4.3+ or ARB_framebuffer_no_attachments
+			// This at least gets sun shadows working on older GPUs (Intel)
+			FBO_CreateBuffer(tr.sunShadowFbo[i], GL_RGBA8, 0, 0);
 			FBO_AttachImage(tr.sunShadowFbo[i], tr.sunShadowDepthImage[i], GL_DEPTH_ATTACHMENT_EXT, 0);
 			R_CheckFBO(tr.sunShadowFbo[i]);
 		}

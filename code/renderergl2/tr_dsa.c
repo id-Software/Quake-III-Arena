@@ -210,7 +210,7 @@ void GL_BindNullFramebuffers()
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glDsaState.drawFramebuffer = glDsaState.readFramebuffer = 0;
 	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-	glDsaState.readFramebuffer = 0;
+	glDsaState.renderbuffer = 0;
 }
 
 void GL_BindFramebuffer(GLenum target, GLuint framebuffer)
