@@ -332,17 +332,27 @@ void main()
 	// diffuse rgb is base color
 	// specular red is smoothness
 	// specular green is metallicness
-	float roughness = 1.0 - specular.r;
+	float gloss = specular.r;
 	specular.rgb = specular.g * diffuse.rgb + vec3(0.04 - 0.04 * specular.g);
 	diffuse.rgb *= 1.0 - specular.g;
   #else
 	// diffuse rgb is diffuse
 	// specular rgb is specular reflectance at normal incidence
 	// specular alpha is gloss
-	float roughness = exp2(-3.0 * specular.a);
+	float gloss = specular.a;
 
 	// adjust diffuse by specular reflectance, to maintain energy conservation
 	diffuse.rgb *= vec3(1.0) - specular.rgb;
+  #endif
+
+  #if defined(GLOSS_IS_GLOSS)
+	float roughness = exp2(-3.0 * gloss);
+  #elif defined(GLOSS_IS_SMOOTHNESS)
+	float roughness = 1.0 - gloss;
+  #elif defined(GLOSS_IS_ROUGHNESS)
+	float roughness = gloss;
+  #elif defined(GLOSS_IS_SHININESS)
+	float roughness = pow(2.0 / (8190.0 * gloss + 2.0), 0.25);
   #endif
 
 	reflectance  = CalcDiffuse(diffuse.rgb, NH, EH, roughness);

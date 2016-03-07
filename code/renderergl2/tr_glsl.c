@@ -1057,6 +1057,23 @@ void GLSL_InitGPUShaders(void)
 
 			if (r_cubeMapping->integer)
 				Q_strcat(extradefines, 1024, "#define USE_CUBEMAP\n");
+
+			switch (r_glossType->integer)
+			{
+				case 0:
+				default:
+					Q_strcat(extradefines, 1024, "#define GLOSS_IS_GLOSS\n");
+					break;
+				case 1:
+					Q_strcat(extradefines, 1024, "#define GLOSS_IS_SMOOTHNESS\n");
+					break;
+				case 2:
+					Q_strcat(extradefines, 1024, "#define GLOSS_IS_ROUGHNESS\n");
+					break;
+				case 3:
+					Q_strcat(extradefines, 1024, "#define GLOSS_IS_SHININESS\n");
+					break;
+			}
 		}
 
 		if (i & LIGHTDEF_USE_SHADOWMAP)

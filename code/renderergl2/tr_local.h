@@ -1794,6 +1794,7 @@ extern  cvar_t  *r_baseNormalY;
 extern  cvar_t  *r_baseParallax;
 extern  cvar_t  *r_baseSpecular;
 extern  cvar_t  *r_baseGloss;
+extern  cvar_t  *r_glossType;
 extern  cvar_t  *r_dlightMode;
 extern  cvar_t  *r_pshadowDist;
 extern  cvar_t  *r_mergeLightmaps;
