@@ -1520,6 +1520,7 @@ typedef struct {
 	image_t					*sunRaysImage;
 	image_t					*renderDepthImage;
 	image_t					*pshadowMaps[MAX_DRAWN_PSHADOWS];
+	image_t					*screenScratchImage;
 	image_t					*textureScratchImage[2];
 	image_t                 *quarterImage[2];
 	image_t					*calcLevelsImage;
@@ -1538,6 +1539,7 @@ typedef struct {
 	FBO_t					*sunRaysFbo;
 	FBO_t					*depthFbo;
 	FBO_t					*pshadowFbos[MAX_DRAWN_PSHADOWS];
+	FBO_t					*screenScratchFbo;
 	FBO_t					*textureScratchFbo[2];
 	FBO_t                   *quarterFbo[2];
 	FBO_t					*calcLevelsFbo;
@@ -1807,6 +1809,7 @@ extern  cvar_t  *r_sunlightMode;
 extern  cvar_t  *r_drawSunRays;
 extern  cvar_t  *r_sunShadows;
 extern  cvar_t  *r_shadowFilter;
+extern  cvar_t  *r_shadowBlur;
 extern  cvar_t  *r_shadowMapSize;
 extern  cvar_t  *r_shadowCascadeZNear;
 extern  cvar_t  *r_shadowCascadeZFar;

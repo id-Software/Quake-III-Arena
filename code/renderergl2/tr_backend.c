@@ -956,6 +956,9 @@ const void	*RB_DrawSurfs( const void *data ) {
 	if (glRefConfig.framebufferObject && !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL) && (r_depthPrepass->integer || (backEnd.viewParms.flags & VPF_DEPTHSHADOW)))
 	{
 		FBO_t *oldFbo = glState.currentFBO;
+		vec4_t viewInfo;
+
+		VectorSet4(viewInfo, backEnd.viewParms.zFar / r_znear->value, backEnd.viewParms.zFar, 0.0, 0.0);
 
 		backEnd.depthFill = qtrue;
 		qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1042,14 +1045,11 @@ const void	*RB_DrawSurfs( const void *data ) {
 			
 			GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWORIGIN,  backEnd.refdef.vieworg);
 			{
-				vec4_t viewInfo;
 				vec3_t viewVector;
 
 				float zmax = backEnd.viewParms.zFar;
 				float ymax = zmax * tan(backEnd.viewParms.fovY * M_PI / 360.0f);
 				float xmax = zmax * tan(backEnd.viewParms.fovX * M_PI / 360.0f);
-
-				float zmin = r_znear->value;
 
 				VectorScale(backEnd.refdef.viewaxis[0], zmax, viewVector);
 				GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWFORWARD, viewVector);
@@ -1058,19 +1058,48 @@ const void	*RB_DrawSurfs( const void *data ) {
 				VectorScale(backEnd.refdef.viewaxis[2], ymax, viewVector);
 				GLSL_SetUniformVec3(&tr.shadowmaskShader, UNIFORM_VIEWUP,      viewVector);
 
-				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
-
 				GLSL_SetUniformVec4(&tr.shadowmaskShader, UNIFORM_VIEWINFO, viewInfo);
 			}
 
-
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
+
+			if (r_shadowBlur->integer)
+			{
+				viewInfo[2] = 1.0f / (float)(tr.screenScratchFbo->width);
+				viewInfo[3] = 1.0f / (float)(tr.screenScratchFbo->height);
+
+				FBO_Bind(tr.screenScratchFbo);
+
+				GLSL_BindProgram(&tr.depthBlurShader[0]);
+
+				GL_BindToTMU(tr.screenShadowImage, TB_COLORMAP);
+				GL_BindToTMU(tr.hdrDepthImage, TB_LIGHTMAP);
+
+				GLSL_SetUniformVec4(&tr.depthBlurShader[0], UNIFORM_VIEWINFO, viewInfo);
+
+				RB_InstantQuad2(quadVerts, texCoords);
+
+
+				FBO_Bind(tr.screenShadowFbo);
+
+				GLSL_BindProgram(&tr.depthBlurShader[1]);
+
+				GL_BindToTMU(tr.screenScratchImage, TB_COLORMAP);
+				GL_BindToTMU(tr.hdrDepthImage, TB_LIGHTMAP);
+
+				GLSL_SetUniformVec4(&tr.depthBlurShader[1], UNIFORM_VIEWINFO, viewInfo);
+
+				RB_InstantQuad2(quadVerts, texCoords);
+			}
 		}
 
 		if (r_ssao->integer)
 		{
 			vec4_t quadVerts[4];
 			vec2_t texCoords[4];
+
+			viewInfo[2] = 1.0f / (float)(tr.quarterImage[0]->width);
+			viewInfo[3] = 1.0f / (float)(tr.quarterImage[0]->height);
 
 			FBO_Bind(tr.quarterFbo[0]);
 
@@ -1093,16 +1122,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 			GL_BindToTMU(tr.hdrDepthImage, TB_COLORMAP);
 
-			{
-				vec4_t viewInfo;
-
-				float zmax = backEnd.viewParms.zFar;
-				float zmin = r_znear->value;
-
-				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
-
-				GLSL_SetUniformVec4(&tr.ssaoShader, UNIFORM_VIEWINFO, viewInfo);
-			}
+			GLSL_SetUniformVec4(&tr.ssaoShader, UNIFORM_VIEWINFO, viewInfo);
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
 
@@ -1117,16 +1137,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			GL_BindToTMU(tr.quarterImage[0],  TB_COLORMAP);
 			GL_BindToTMU(tr.hdrDepthImage, TB_LIGHTMAP);
 
-			{
-				vec4_t viewInfo;
-
-				float zmax = backEnd.viewParms.zFar;
-				float zmin = r_znear->value;
-
-				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
-
-				GLSL_SetUniformVec4(&tr.depthBlurShader[0], UNIFORM_VIEWINFO, viewInfo);
-			}
+			GLSL_SetUniformVec4(&tr.depthBlurShader[0], UNIFORM_VIEWINFO, viewInfo);
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
 
@@ -1141,16 +1152,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			GL_BindToTMU(tr.quarterImage[1],  TB_COLORMAP);
 			GL_BindToTMU(tr.hdrDepthImage, TB_LIGHTMAP);
 
-			{
-				vec4_t viewInfo;
-
-				float zmax = backEnd.viewParms.zFar;
-				float zmin = r_znear->value;
-
-				VectorSet4(viewInfo, zmax / zmin, zmax, 0.0, 0.0);
-
-				GLSL_SetUniformVec4(&tr.depthBlurShader[1], UNIFORM_VIEWINFO, viewInfo);
-			}
+			GLSL_SetUniformVec4(&tr.depthBlurShader[1], UNIFORM_VIEWINFO, viewInfo);
 
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);

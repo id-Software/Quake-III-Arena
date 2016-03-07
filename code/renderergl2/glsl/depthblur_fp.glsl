@@ -1,13 +1,13 @@
 uniform sampler2D u_ScreenImageMap;
 uniform sampler2D u_ScreenDepthMap;
 
-uniform vec4   u_ViewInfo; // zfar / znear, zfar
+uniform vec4   u_ViewInfo; // zfar / znear, zfar, 1/width, 1/height
 varying vec2   var_ScreenTex;
 
 //float gauss[5] = float[5](0.30, 0.23, 0.097, 0.024, 0.0033);
 float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 //float gauss[3] = float[3](0.60, 0.19, 0.0066);
-#define GAUSS_SIZE 4
+#define BLUR_SIZE 4
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
@@ -17,7 +17,7 @@ float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNea
 
 vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFarDivZNear, float zFar)
 {
-	float scale = 1.0 / 256.0;
+	vec2 scale = u_ViewInfo.zw;
 
 #if defined(USE_HORIZONTAL_BLUR)
     vec2 direction = vec2(1.0, 0.0) * scale;
@@ -27,22 +27,32 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 	
 	float depthCenter = zFar * getLinearDepth(depthMap, tex, zFarDivZNear);
 	vec2 centerSlope = vec2(dFdx(depthCenter), dFdy(depthCenter)) / vec2(dFdx(tex.x), dFdy(tex.y));
-		
+
+#if defined(USE_GAUSS)
 	vec4 result = texture2D(imageMap, tex) * gauss[0];
 	float total = gauss[0];
+#else
+	vec4 result = texture2D(imageMap, tex);
+	float total = 1.0;
+#endif
 
 	int i, j;
 	for (i = 0; i < 2; i++)
 	{
-		for (j = 1; j < GAUSS_SIZE; j++)
+		for (j = 1; j < BLUR_SIZE; j++)
 		{
 			vec2 offset = direction * j;
 			float depthSample = zFar * getLinearDepth(depthMap, tex + offset, zFarDivZNear);
 			float depthExpected = depthCenter + dot(centerSlope, offset);
 			if(abs(depthSample - depthExpected) < 5.0)
 			{
+#if defined(USE_GAUSS)
 				result += texture2D(imageMap, tex + offset) * gauss[j];
 				total += gauss[j];
+#else
+				result += texture2D(imageMap, tex + offset);
+				total += 1.0;
+#endif
 			}
 		}
 		

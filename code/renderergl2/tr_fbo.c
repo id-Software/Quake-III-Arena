@@ -310,6 +310,14 @@ void FBO_Init(void)
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	}
 
+	if (r_shadowBlur->integer)
+	{
+		tr.screenScratchFbo = FBO_Create("screenScratch", tr.screenScratchImage->width, tr.screenScratchImage->height);
+		FBO_AttachImage(tr.screenScratchFbo, tr.screenScratchImage, GL_COLOR_ATTACHMENT0_EXT, 0);
+		FBO_AttachImage(tr.screenScratchFbo, tr.renderDepthImage, GL_DEPTH_ATTACHMENT_EXT, 0);
+		R_CheckFBO(tr.screenScratchFbo);
+	}
+
 	if (r_drawSunRays->integer)
 	{
 		tr.sunRaysFbo = FBO_Create("_sunRays", tr.renderDepthImage->width, tr.renderDepthImage->height);
