@@ -292,7 +292,7 @@ void main()
 	float shadowValue = texture2D(u_ShadowMap, shadowTex).r;
 
 	// surfaces not facing the light are always shadowed
-	shadowValue *= clamp(dot(var_Normal.xyz, var_PrimaryLightDir.xyz), 0.0, 1.0);
+	shadowValue *= clamp(dot(N, var_PrimaryLightDir.xyz), 0.0, 1.0);
 
     #if defined(SHADOWMAP_MODULATE)
 	lightColor *= shadowValue * (1.0 - u_PrimaryLightAmbient.r) + u_PrimaryLightAmbient.r;
@@ -330,7 +330,7 @@ void main()
 
   #if defined(USE_PBR)
 	// diffuse rgb is base color
-	// specular red is smoothness
+	// specular red is gloss
 	// specular green is metallicness
 	float gloss = specular.r;
 	specular.rgb = specular.g * diffuse.rgb + vec3(0.04 - 0.04 * specular.g);

@@ -1098,8 +1098,8 @@ const void	*RB_DrawSurfs( const void *data ) {
 			vec4_t quadVerts[4];
 			vec2_t texCoords[4];
 
-			viewInfo[2] = 1.0f / (float)(tr.quarterImage[0]->width);
-			viewInfo[3] = 1.0f / (float)(tr.quarterImage[0]->height);
+			viewInfo[2] = 1.0f / ((float)(tr.quarterImage[0]->width)  * tan(backEnd.viewParms.fovX * M_PI / 360.0f) * 2.0f);
+			viewInfo[3] = 1.0f / ((float)(tr.quarterImage[0]->height) * tan(backEnd.viewParms.fovY * M_PI / 360.0f) * 2.0f);
 
 			FBO_Bind(tr.quarterFbo[0]);
 
@@ -1126,6 +1126,9 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 			RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
 
+
+			viewInfo[2] = 1.0f / (float)(tr.quarterImage[0]->width);
+			viewInfo[3] = 1.0f / (float)(tr.quarterImage[0]->height);
 
 			FBO_Bind(tr.quarterFbo[1]);
 
