@@ -40,7 +40,8 @@ mat2 randomRotation( const vec2 p )
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
-	float sampleZDivW = texture2D(depthMap, tex).r;
+	// depth is upside down?
+	float sampleZDivW = texture2D(depthMap, vec2(tex.x, 1.0 - tex.y)).r;
 	return 1.0 / mix(zFarDivZNear, 1.0, sampleZDivW);
 }
 
@@ -80,7 +81,7 @@ float ambientOcclusion(sampler2D depthMap, const vec2 tex, const float zFarDivZN
 
 void main()
 {
-	float result = ambientOcclusion(u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.zw);
+	float result = ambientOcclusion(u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.wz);
 
 	gl_FragColor = vec4(vec3(result), 1.0);
 }

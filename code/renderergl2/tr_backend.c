@@ -977,7 +977,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			qglCopyTextureImage2D(tr.renderDepthImage->texnum, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, glConfig.vidWidth, glConfig.vidHeight, 0);
 		}
 
-		if (r_ssao->integer)
+		if (tr.hdrDepthFbo)
 		{
 			// need the depth in a texture we can do GL_LINEAR sampling on, so copy it to an HDR image
 			FBO_BlitFromTexture(tr.renderDepthImage, NULL, NULL, tr.hdrDepthFbo, NULL, NULL, NULL, 0);
@@ -1079,7 +1079,6 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 				RB_InstantQuad2(quadVerts, texCoords);
 
-
 				FBO_Bind(tr.screenShadowFbo);
 
 				GLSL_BindProgram(&tr.depthBlurShader[1]);
@@ -1100,6 +1099,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 			viewInfo[2] = 1.0f / ((float)(tr.quarterImage[0]->width)  * tan(backEnd.viewParms.fovX * M_PI / 360.0f) * 2.0f);
 			viewInfo[3] = 1.0f / ((float)(tr.quarterImage[0]->height) * tan(backEnd.viewParms.fovY * M_PI / 360.0f) * 2.0f);
+			viewInfo[3] *= (float)backEnd.viewParms.viewportHeight / (float)backEnd.viewParms.viewportWidth;
 
 			FBO_Bind(tr.quarterFbo[0]);
 
@@ -1541,9 +1541,6 @@ const void *RB_PostProcess(const void *data)
 		srcBox[3] = backEnd.viewParms.viewportHeight * tr.screenSsaoImage->height / (float)glConfig.vidHeight;
 
 		//FBO_BlitFromTexture(tr.screenSsaoImage, srcBox, NULL, srcFbo, dstBox, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
-		srcBox[1] = tr.screenSsaoImage->height - srcBox[1];
-		srcBox[3] = -srcBox[3];
-
 		FBO_Blit(tr.screenSsaoFbo, srcBox, NULL, srcFbo, dstBox, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 	}
 

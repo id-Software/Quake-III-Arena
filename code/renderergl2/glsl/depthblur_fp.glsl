@@ -4,6 +4,7 @@ uniform sampler2D u_ScreenDepthMap;
 uniform vec4   u_ViewInfo; // zfar / znear, zfar, 1/width, 1/height
 varying vec2   var_ScreenTex;
 
+//float gauss[8] = float[8](0.17, 0.17, 0.16, 0.14, 0.12, 0.1, 0.08, 0.06);
 //float gauss[5] = float[5](0.30, 0.23, 0.097, 0.024, 0.0033);
 float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 //float gauss[3] = float[3](0.60, 0.19, 0.0066);
@@ -11,15 +12,17 @@ float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
-	float sampleZDivW = texture2D(depthMap, tex).r;
+	// depth is upside down?
+	float sampleZDivW = texture2D(depthMap, vec2(tex.x, 1.0 - tex.y)).r;
 	return 1.0 / mix(zFarDivZNear, 1.0, sampleZDivW);
 }
 
 vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFarDivZNear, float zFar, vec2 scale)
 {
 	float depthCenter = getLinearDepth(depthMap, tex, zFarDivZNear);
-	//scale /= zFarDivZNear * depthCenter;
-	//int blurSteps = int(float(BLUR_SIZE) / (zFarDivZNear * depthCenter));
+
+	// enable for less blurring for farther objects
+	//scale /= min(zFarDivZNear * depthCenter / 32.0, 2.0);
 
 #if defined(USE_HORIZONTAL_BLUR)
     vec2 direction = vec2(scale.x, 0.0);
@@ -64,5 +67,5 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 
 void main()
 {
-	gl_FragColor = depthGaussian1D(u_ScreenImageMap, u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.zw);
+	gl_FragColor = depthGaussian1D(u_ScreenImageMap, u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.wz);
 }
