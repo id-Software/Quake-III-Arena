@@ -40,8 +40,7 @@ mat2 randomRotation( const vec2 p )
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
-	// depth is upside down?
-	float sampleZDivW = texture2D(depthMap, vec2(tex.x, 1.0 - tex.y)).r;
+	float sampleZDivW = texture2D(depthMap, tex).r;
 	return 1.0 / mix(zFarDivZNear, 1.0, sampleZDivW);
 }
 

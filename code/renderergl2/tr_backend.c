@@ -980,7 +980,11 @@ const void	*RB_DrawSurfs( const void *data ) {
 		if (tr.hdrDepthFbo)
 		{
 			// need the depth in a texture we can do GL_LINEAR sampling on, so copy it to an HDR image
-			FBO_BlitFromTexture(tr.renderDepthImage, NULL, NULL, tr.hdrDepthFbo, NULL, NULL, NULL, 0);
+			ivec4_t srcBox;
+
+			VectorSet4(srcBox, 0, tr.renderDepthImage->height, tr.renderDepthImage->width, -tr.renderDepthImage->height);
+
+			FBO_BlitFromTexture(tr.renderDepthImage, srcBox, NULL, tr.hdrDepthFbo, NULL, NULL, NULL, 0);
 		}
 
 		if (r_sunlightMode->integer && backEnd.viewParms.flags & VPF_USESUNLIGHT)
@@ -1540,7 +1544,6 @@ const void *RB_PostProcess(const void *data)
 		srcBox[2] = backEnd.viewParms.viewportWidth  * tr.screenSsaoImage->width  / (float)glConfig.vidWidth;
 		srcBox[3] = backEnd.viewParms.viewportHeight * tr.screenSsaoImage->height / (float)glConfig.vidHeight;
 
-		//FBO_BlitFromTexture(tr.screenSsaoImage, srcBox, NULL, srcFbo, dstBox, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 		FBO_Blit(tr.screenSsaoFbo, srcBox, NULL, srcFbo, dstBox, NULL, NULL, GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 	}
 

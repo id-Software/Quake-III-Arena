@@ -9,11 +9,11 @@ varying vec2   var_ScreenTex;
 float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 //float gauss[3] = float[3](0.60, 0.19, 0.0066);
 #define BLUR_SIZE 4
+//#define USE_GAUSS
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
-	// depth is upside down?
-	float sampleZDivW = texture2D(depthMap, vec2(tex.x, 1.0 - tex.y)).r;
+	float sampleZDivW = texture2D(depthMap, tex).r;
 	return 1.0 / mix(zFarDivZNear, 1.0, sampleZDivW);
 }
 
@@ -22,12 +22,14 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 	float depthCenter = getLinearDepth(depthMap, tex, zFarDivZNear);
 
 	// enable for less blurring for farther objects
-	//scale /= min(zFarDivZNear * depthCenter / 32.0, 2.0);
+	scale /= clamp(zFarDivZNear * depthCenter / 32.0, 1.0, 2.0);
 
 #if defined(USE_HORIZONTAL_BLUR)
-    vec2 direction = vec2(scale.x, 0.0);
+	vec2 direction = vec2(scale.x * 2.0, 0.0);
+	vec2 nudge = vec2(0.0, scale.y * 0.5);
 #else // if defined(USE_VERTICAL_BLUR)
-	vec2 direction = vec2(0.0, scale.y);
+	vec2 direction = vec2(0.0, scale.y * 2.0);
+	vec2 nudge = vec2(scale.x * 0.5, 0.0);
 #endif
 
 	vec2 slope = vec2(dFdx(depthCenter), dFdy(depthCenter)) / vec2(dFdx(tex.x), dFdy(tex.y));
@@ -46,7 +48,7 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 	{
 		for (j = 1; j < BLUR_SIZE; j++)
 		{
-			vec2 offset = direction * j;
+			vec2 offset = direction * (float(j) - 0.25) + nudge;
 			float depthSample = getLinearDepth(depthMap, tex + offset, zFarDivZNear);
 			float depthExpected = depthCenter + dot(slope, offset);
 			float useSample = float(abs(depthSample - depthExpected) < zLimit);
@@ -57,9 +59,11 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 			result += texture2D(imageMap, tex + offset) * useSample;
 			total += useSample;
 #endif
+			nudge = -nudge;
 		}
 
 		direction = -direction;
+		nudge = -nudge;
 	}
 
 	return result / total;
@@ -67,5 +71,5 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 
 void main()
 {
-	gl_FragColor = depthGaussian1D(u_ScreenImageMap, u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.wz);
+	gl_FragColor = depthGaussian1D(u_ScreenImageMap, u_ScreenDepthMap, var_ScreenTex, u_ViewInfo.x, u_ViewInfo.y, u_ViewInfo.zw);
 }
