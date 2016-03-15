@@ -333,8 +333,9 @@ void main()
 	// specular red is gloss
 	// specular green is metallicness
 	float gloss = specular.r;
-	specular.rgb = specular.g * diffuse.rgb + vec3(0.04 - 0.04 * specular.g);
-	diffuse.rgb *= 1.0 - specular.g;
+	float metal = specular.g;
+	specular.rgb = metal * diffuse.rgb + vec3(0.04 - 0.04 * metal);
+	diffuse.rgb *= 1.0 - metal;
   #else
 	// diffuse rgb is diffuse
 	// specular rgb is specular reflectance at normal incidence
