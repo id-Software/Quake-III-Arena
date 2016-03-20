@@ -15,14 +15,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 //
 // bg_slidemove.c -- part of bg_pmove functionality
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "bg_local.h"
 
@@ -232,7 +232,7 @@ PM_StepSlideMove
 */
 void PM_StepSlideMove( qboolean gravity ) {
 	vec3_t		start_o, start_v;
-	vec3_t		down_o, down_v;
+//	vec3_t		down_o, down_v;
 	trace_t		trace;
 //	float		down_dist, up_dist;
 //	vec3_t		delta, delta2;
@@ -256,8 +256,8 @@ void PM_StepSlideMove( qboolean gravity ) {
 		return;
 	}
 
-	VectorCopy (pm->ps->origin, down_o);
-	VectorCopy (pm->ps->velocity, down_v);
+	//VectorCopy (pm->ps->origin, down_o);
+	//VectorCopy (pm->ps->velocity, down_v);
 
 	VectorCopy (start_o, up);
 	up[2] += STEPSIZE;

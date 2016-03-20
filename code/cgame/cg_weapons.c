@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -213,7 +213,7 @@ CG_RailTrail
 ==========================
 */
 void CG_RailTrail (clientInfo_t *ci, vec3_t start, vec3_t end) {
-	vec3_t axis[36], move, move2, next_move, vec, temp;
+	vec3_t axis[36], move, move2, vec, temp;
 	float  len;
 	int    i, j, skip;
  
@@ -225,13 +225,6 @@ void CG_RailTrail (clientInfo_t *ci, vec3_t start, vec3_t end) {
 #define SPACING  5
  
 	start[2] -= 4;
-	VectorCopy (start, move);
-	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-	PerpendicularVector(temp, vec);
-	for (i = 0 ; i < 36; i++) {
-		RotatePointAroundVector(axis[i], vec, temp, i * 10);//banshee 2.4 was 10
-	}
  
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -249,9 +242,9 @@ void CG_RailTrail (clientInfo_t *ci, vec3_t start, vec3_t end) {
 	VectorCopy(end, re->oldorigin);
  
 	re->shaderRGBA[0] = ci->color1[0] * 255;
-    re->shaderRGBA[1] = ci->color1[1] * 255;
-    re->shaderRGBA[2] = ci->color1[2] * 255;
-    re->shaderRGBA[3] = 255;
+	re->shaderRGBA[1] = ci->color1[1] * 255;
+	re->shaderRGBA[2] = ci->color1[2] * 255;
+	re->shaderRGBA[3] = 255;
 
 	le->color[0] = ci->color1[0] * 0.75;
 	le->color[1] = ci->color1[1] * 0.75;
@@ -260,60 +253,72 @@ void CG_RailTrail (clientInfo_t *ci, vec3_t start, vec3_t end) {
 
 	AxisClear( re->axis );
  
-	VectorMA(move, 20, vec, move);
-	VectorCopy(move, next_move);
-	VectorScale (vec, SPACING, vec);
-
-	if (cg_oldRail.integer != 0) {
+	if (cg_oldRail.integer)
+	{
 		// nudge down a bit so it isn't exactly in center
 		re->origin[2] -= 8;
 		re->oldorigin[2] -= 8;
 		return;
 	}
+
+	VectorCopy (start, move);
+	VectorSubtract (end, start, vec);
+	len = VectorNormalize (vec);
+	PerpendicularVector(temp, vec);
+	for (i = 0 ; i < 36; i++)
+	{
+		RotatePointAroundVector(axis[i], vec, temp, i * 10);//banshee 2.4 was 10
+	}
+
+	VectorMA(move, 20, vec, move);
+	VectorScale (vec, SPACING, vec);
+
 	skip = -1;
  
 	j = 18;
-    for (i = 0; i < len; i += SPACING) {
-		if (i != skip) {
+	for (i = 0; i < len; i += SPACING)
+	{
+		if (i != skip)
+		{
 			skip = i + SPACING;
 			le = CG_AllocLocalEntity();
-            re = &le->refEntity;
-            le->leFlags = LEF_PUFF_DONT_SCALE;
+			re = &le->refEntity;
+			le->leFlags = LEF_PUFF_DONT_SCALE;
 			le->leType = LE_MOVE_SCALE_FADE;
-            le->startTime = cg.time;
-            le->endTime = cg.time + (i>>1) + 600;
-            le->lifeRate = 1.0 / (le->endTime - le->startTime);
+			le->startTime = cg.time;
+			le->endTime = cg.time + (i>>1) + 600;
+			le->lifeRate = 1.0 / (le->endTime - le->startTime);
 
-            re->shaderTime = cg.time / 1000.0f;
-            re->reType = RT_SPRITE;
-            re->radius = 1.1f;
+			re->shaderTime = cg.time / 1000.0f;
+			re->reType = RT_SPRITE;
+			re->radius = 1.1f;
 			re->customShader = cgs.media.railRingsShader;
 
-            re->shaderRGBA[0] = ci->color2[0] * 255;
-            re->shaderRGBA[1] = ci->color2[1] * 255;
-            re->shaderRGBA[2] = ci->color2[2] * 255;
-            re->shaderRGBA[3] = 255;
+			re->shaderRGBA[0] = ci->color2[0] * 255;
+			re->shaderRGBA[1] = ci->color2[1] * 255;
+			re->shaderRGBA[2] = ci->color2[2] * 255;
+			re->shaderRGBA[3] = 255;
 
-            le->color[0] = ci->color2[0] * 0.75;
-            le->color[1] = ci->color2[1] * 0.75;
-            le->color[2] = ci->color2[2] * 0.75;
-            le->color[3] = 1.0f;
+			le->color[0] = ci->color2[0] * 0.75;
+			le->color[1] = ci->color2[1] * 0.75;
+			le->color[2] = ci->color2[2] * 0.75;
+			le->color[3] = 1.0f;
 
-            le->pos.trType = TR_LINEAR;
-            le->pos.trTime = cg.time;
+			le->pos.trType = TR_LINEAR;
+			le->pos.trTime = cg.time;
 
 			VectorCopy( move, move2);
-            VectorMA(move2, RADIUS , axis[j], move2);
-            VectorCopy(move2, le->pos.trBase);
+			VectorMA(move2, RADIUS , axis[j], move2);
+			VectorCopy(move2, le->pos.trBase);
 
-            le->pos.trDelta[0] = axis[j][0]*6;
-            le->pos.trDelta[1] = axis[j][1]*6;
-            le->pos.trDelta[2] = axis[j][2]*6;
+			le->pos.trDelta[0] = axis[j][0]*6;
+			le->pos.trDelta[1] = axis[j][1]*6;
+			le->pos.trDelta[2] = axis[j][2]*6;
 		}
 
-        VectorAdd (move, vec, move);
+		VectorAdd (move, vec, move);
 
-        j = j + ROTATION < 36 ? j + ROTATION : (j + ROTATION) % 36;
+		j = (j + ROTATION) % 36;
 	}
 }
 
@@ -455,7 +460,7 @@ static void CG_NailTrail( centity_t *ent, const weaponInfo_t *wi ) {
 
 /*
 ==========================
-CG_NailTrail
+CG_PlasmaTrail
 ==========================
 */
 static void CG_PlasmaTrail( centity_t *cent, const weaponInfo_t *wi ) {
@@ -465,7 +470,6 @@ static void CG_PlasmaTrail( centity_t *cent, const weaponInfo_t *wi ) {
 	vec3_t			velocity, xvelocity, origin;
 	vec3_t			offset, xoffset;
 	vec3_t			v[3];
-	int				t, startTime, step;
 
 	float	waterScale = 1.0f;
 
@@ -473,11 +477,7 @@ static void CG_PlasmaTrail( centity_t *cent, const weaponInfo_t *wi ) {
 		return;
 	}
 
-	step = 50;
-
 	es = &cent->currentState;
-	startTime = cent->trailTime;
-	t = step * ( (startTime + step) / step );
 
 	BG_EvaluateTrajectory( &es->pos, cg.time, origin );
 
@@ -522,21 +522,21 @@ static void CG_PlasmaTrail( centity_t *cent, const weaponInfo_t *wi ) {
 	VectorScale( xvelocity, waterScale, le->pos.trDelta );
 
 	AxisCopy( axisDefault, re->axis );
-    re->shaderTime = cg.time / 1000.0f;
-    re->reType = RT_SPRITE;
-    re->radius = 0.25f;
+	re->shaderTime = cg.time / 1000.0f;
+	re->reType = RT_SPRITE;
+	re->radius = 0.25f;
 	re->customShader = cgs.media.railRingsShader;
 	le->bounceFactor = 0.3f;
 
-    re->shaderRGBA[0] = wi->flashDlightColor[0] * 63;
-    re->shaderRGBA[1] = wi->flashDlightColor[1] * 63;
-    re->shaderRGBA[2] = wi->flashDlightColor[2] * 63;
-    re->shaderRGBA[3] = 63;
+	re->shaderRGBA[0] = wi->flashDlightColor[0] * 63;
+	re->shaderRGBA[1] = wi->flashDlightColor[1] * 63;
+	re->shaderRGBA[2] = wi->flashDlightColor[2] * 63;
+	re->shaderRGBA[3] = 63;
 
-    le->color[0] = wi->flashDlightColor[0] * 0.2;
-    le->color[1] = wi->flashDlightColor[1] * 0.2;
-    le->color[2] = wi->flashDlightColor[2] * 0.2;
-    le->color[3] = 0.25f;
+	le->color[0] = wi->flashDlightColor[0] * 0.2;
+	le->color[1] = wi->flashDlightColor[1] * 0.2;
+	le->color[2] = wi->flashDlightColor[2] * 0.2;
+	le->color[3] = 0.25f;
 
 	le->angles.trType = TR_LINEAR;
 	le->angles.trTime = cg.time;
@@ -655,26 +655,21 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->ammoModel = trap_R_RegisterModel( ammo->world_model[0] );
 	}
 
-	strcpy( path, item->world_model[0] );
-	COM_StripExtension( path, path );
-	strcat( path, "_flash.md3" );
+	COM_StripExtension( item->world_model[0], path, sizeof(path) );
+	Q_strcat( path, sizeof(path), "_flash.md3" );
 	weaponInfo->flashModel = trap_R_RegisterModel( path );
 
-	strcpy( path, item->world_model[0] );
-	COM_StripExtension( path, path );
-	strcat( path, "_barrel.md3" );
+	COM_StripExtension( item->world_model[0], path, sizeof(path) );
+	Q_strcat( path, sizeof(path), "_barrel.md3" );
 	weaponInfo->barrelModel = trap_R_RegisterModel( path );
 
-	strcpy( path, item->world_model[0] );
-	COM_StripExtension( path, path );
-	strcat( path, "_hand.md3" );
+	COM_StripExtension( item->world_model[0], path, sizeof(path) );
+	Q_strcat( path, sizeof(path), "_hand.md3" );
 	weaponInfo->handsModel = trap_R_RegisterModel( path );
 
 	if ( !weaponInfo->handsModel ) {
 		weaponInfo->handsModel = trap_R_RegisterModel( "models/weapons2/shotgun/shotgun_hand.md3" );
 	}
-
-	weaponInfo->loopFireSound = qfalse;
 
 	switch ( weaponNum ) {
 	case WP_GAUNTLET:
@@ -702,17 +697,15 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->missileModel = trap_R_RegisterModel( "models/ammo/rocket/rocket.md3" );
 		weaponInfo->missileTrailFunc = CG_GrappleTrail;
 		weaponInfo->missileDlight = 200;
-		weaponInfo->wiTrailTime = 2000;
-		weaponInfo->trailRadius = 64;
 		MAKERGB( weaponInfo->missileDlightColor, 1, 0.75f, 0 );
 		weaponInfo->readySound = trap_S_RegisterSound( "sound/weapons/melee/fsthum.wav", qfalse );
 		weaponInfo->firingSound = trap_S_RegisterSound( "sound/weapons/melee/fstrun.wav", qfalse );
+		cgs.media.lightningShader = trap_R_RegisterShader( "lightningBoltNew");
 		break;
 
 #ifdef MISSIONPACK
 	case WP_CHAINGUN:
 		weaponInfo->firingSound = trap_S_RegisterSound( "sound/weapons/vulcan/wvulfire.wav", qfalse );
-		weaponInfo->loopFireSound = qtrue;
 		MAKERGB( weaponInfo->flashDlightColor, 1, 1, 0 );
 		weaponInfo->flashSound[0] = trap_S_RegisterSound( "sound/weapons/vulcan/vulcanf1b.wav", qfalse );
 		weaponInfo->flashSound[1] = trap_S_RegisterSound( "sound/weapons/vulcan/vulcanf2b.wav", qfalse );
@@ -846,7 +839,7 @@ void CG_RegisterItemVisuals( int itemNum ) {
 
 	item = &bg_itemlist[ itemNum ];
 
-	memset( itemInfo, 0, sizeof( &itemInfo ) );
+	memset( itemInfo, 0, sizeof( *itemInfo ) );
 	itemInfo->registered = qtrue;
 
 	itemInfo->models[0] = trap_R_RegisterModel( item->world_model[0] );
@@ -976,6 +969,7 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin ) {
 	refEntity_t  beam;
 	vec3_t   forward;
 	vec3_t   muzzlePoint, endPoint;
+	int      anim;
 
 	if (cent->currentState.weapon != WP_LIGHTNING) {
 		return;
@@ -1015,8 +1009,12 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin ) {
 		VectorCopy(cent->lerpOrigin, muzzlePoint );
 	}
 
-	// FIXME: crouch
-	muzzlePoint[2] += DEFAULT_VIEWHEIGHT;
+	anim = cent->currentState.legsAnim & ~ANIM_TOGGLEBIT;
+	if ( anim == LEGS_WALKCR || anim == LEGS_IDLECR ) {
+		muzzlePoint[2] += CROUCH_VIEWHEIGHT;
+	} else {
+		muzzlePoint[2] += DEFAULT_VIEWHEIGHT;
+	}
 
 	VectorMA( muzzlePoint, 14, forward, muzzlePoint );
 
@@ -1123,28 +1121,6 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin ) {
 }
 */
 
-/*
-===============
-CG_SpawnRailTrail
-
-Origin will be the exact tag point, which is slightly
-different than the muzzle point used for determining hits.
-===============
-*/
-static void CG_SpawnRailTrail( centity_t *cent, vec3_t origin ) {
-	clientInfo_t	*ci;
-
-	if ( cent->currentState.weapon != WP_RAILGUN ) {
-		return;
-	}
-	if ( !cent->pe.railgunFlash ) {
-		return;
-	}
-	cent->pe.railgunFlash = qtrue;
-	ci = &cgs.clientinfo[ cent->currentState.clientNum ];
-	CG_RailTrail( ci, origin, cent->pe.railgunImpact );
-}
-
 
 /*
 ======================
@@ -1227,7 +1203,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	weapon_t	weaponNum;
 	weaponInfo_t	*weapon;
 	centity_t	*nonPredictedCent;
-//	int	col;
+	orientation_t	lerped;
 
 	weaponNum = cent->currentState.weapon;
 
@@ -1241,20 +1217,17 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	gun.renderfx = parent->renderfx;
 
 	// set custom shading for railgun refire rate
-	if ( ps ) {
-		if ( cg.predictedPlayerState.weapon == WP_RAILGUN 
-			&& cg.predictedPlayerState.weaponstate == WEAPON_FIRING ) {
-			float	f;
-
-			f = (float)cg.predictedPlayerState.weaponTime / 1500;
-			gun.shaderRGBA[1] = 0;
-			gun.shaderRGBA[0] = 
-			gun.shaderRGBA[2] = 255 * ( 1.0 - f );
-		} else {
-			gun.shaderRGBA[0] = 255;
-			gun.shaderRGBA[1] = 255;
-			gun.shaderRGBA[2] = 255;
+	if( weaponNum == WP_RAILGUN ) {
+		clientInfo_t *ci = &cgs.clientinfo[cent->currentState.clientNum];
+		if( cent->pe.railFireTime + 1500 > cg.time ) {
+			int scale = 255 * ( cg.time - cent->pe.railFireTime ) / 1500;
+			gun.shaderRGBA[0] = ( ci->c1RGBA[0] * scale ) >> 8;
+			gun.shaderRGBA[1] = ( ci->c1RGBA[1] * scale ) >> 8;
+			gun.shaderRGBA[2] = ( ci->c1RGBA[2] * scale ) >> 8;
 			gun.shaderRGBA[3] = 255;
+		}
+		else {
+			Byte4Copy( ci->c1RGBA, gun.shaderRGBA );
 		}
 	}
 
@@ -1275,7 +1248,22 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		}
 	}
 
-	CG_PositionEntityOnTag( &gun, parent, parent->hModel, "tag_weapon");
+	trap_R_LerpTag(&lerped, parent->hModel, parent->oldframe, parent->frame,
+		1.0 - parent->backlerp, "tag_weapon");
+	VectorCopy(parent->origin, gun.origin);
+
+	VectorMA(gun.origin, lerped.origin[0], parent->axis[0], gun.origin);
+
+	// Make weapon appear left-handed for 2 and centered for 3
+	if(ps && cg_drawGun.integer == 2)
+		VectorMA(gun.origin, -lerped.origin[1], parent->axis[1], gun.origin);
+	else if(!ps || cg_drawGun.integer != 3)
+	       	VectorMA(gun.origin, lerped.origin[1], parent->axis[1], gun.origin);
+
+	VectorMA(gun.origin, lerped.origin[2], parent->axis[2], gun.origin);
+
+	MatrixMultiply(lerped.axis, ((refEntity_t *)parent)->axis, gun.axis);
+	gun.backlerp = parent->backlerp;
 
 	CG_AddWeaponWithPowerups( &gun, cent->currentState.powerups );
 
@@ -1314,7 +1302,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		// continuous flash
 	} else {
 		// impulse flash
-		if ( cg.time - cent->muzzleFlashTime > MUZZLE_FLASH_TIME && !cent->pe.railgunFlash ) {
+		if ( cg.time - cent->muzzleFlashTime > MUZZLE_FLASH_TIME ) {
 			return;
 		}
 	}
@@ -1350,9 +1338,6 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		cent->currentState.number != cg.predictedPlayerState.clientNum ) {
 		// add lightning bolt
 		CG_LightningBolt( nonPredictedCent, flash.origin );
-
-		// add rail trail
-		CG_SpawnRailTrail( cent, flash.origin );
 
 		if ( weapon->flashDlightColor[0] || weapon->flashDlightColor[1] || weapon->flashDlightColor[2] ) {
 			trap_R_AddLightToScene( flash.origin, 300 + (rand()&31), weapon->flashDlightColor[0],
@@ -1489,7 +1474,7 @@ void CG_DrawWeaponSelect( void ) {
 	// count the number of weapons owned
 	bits = cg.snap->ps.stats[ STAT_WEAPONS ];
 	count = 0;
-	for ( i = 1 ; i < 16 ; i++ ) {
+	for ( i = 1 ; i < MAX_WEAPONS ; i++ ) {
 		if ( bits & ( 1 << i ) ) {
 			count++;
 		}
@@ -1498,7 +1483,7 @@ void CG_DrawWeaponSelect( void ) {
 	x = 320 - count * 20;
 	y = 380;
 
-	for ( i = 1 ; i < 16 ; i++ ) {
+	for ( i = 1 ; i < MAX_WEAPONS ; i++ ) {
 		if ( !( bits & ( 1 << i ) ) ) {
 			continue;
 		}
@@ -1570,9 +1555,9 @@ void CG_NextWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
-	for ( i = 0 ; i < 16 ; i++ ) {
+	for ( i = 0 ; i < MAX_WEAPONS ; i++ ) {
 		cg.weaponSelect++;
-		if ( cg.weaponSelect == 16 ) {
+		if ( cg.weaponSelect == MAX_WEAPONS ) {
 			cg.weaponSelect = 0;
 		}
 		if ( cg.weaponSelect == WP_GAUNTLET ) {
@@ -1582,7 +1567,7 @@ void CG_NextWeapon_f( void ) {
 			break;
 		}
 	}
-	if ( i == 16 ) {
+	if ( i == MAX_WEAPONS ) {
 		cg.weaponSelect = original;
 	}
 }
@@ -1606,10 +1591,10 @@ void CG_PrevWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
-	for ( i = 0 ; i < 16 ; i++ ) {
+	for ( i = 0 ; i < MAX_WEAPONS ; i++ ) {
 		cg.weaponSelect--;
 		if ( cg.weaponSelect == -1 ) {
-			cg.weaponSelect = 15;
+			cg.weaponSelect = MAX_WEAPONS - 1;
 		}
 		if ( cg.weaponSelect == WP_GAUNTLET ) {
 			continue;		// never cycle to gauntlet
@@ -1618,7 +1603,7 @@ void CG_PrevWeapon_f( void ) {
 			break;
 		}
 	}
-	if ( i == 16 ) {
+	if ( i == MAX_WEAPONS ) {
 		cg.weaponSelect = original;
 	}
 }
@@ -1640,7 +1625,7 @@ void CG_Weapon_f( void ) {
 
 	num = atoi( CG_Argv( 1 ) );
 
-	if ( num < 1 || num > 15 ) {
+	if ( num < 1 || num > MAX_WEAPONS-1 ) {
 		return;
 	}
 
@@ -1665,7 +1650,7 @@ void CG_OutOfAmmoChange( void ) {
 
 	cg.weaponSelectTime = cg.time;
 
-	for ( i = 15 ; i > 0 ; i-- ) {
+	for ( i = MAX_WEAPONS-1 ; i > 0 ; i-- ) {
 		if ( CG_WeaponSelectable( i ) ) {
 			cg.weaponSelect = i;
 			break;
@@ -1714,6 +1699,10 @@ void CG_FireWeapon( centity_t *cent ) {
 		if ( cent->pe.lightningFiring ) {
 			return;
 		}
+	}
+
+	if( ent->weapon == WP_RAILGUN ) {
+		cent->pe.railFireTime = cg.time;
 	}
 
 	// play quad sound if needed
@@ -1765,9 +1754,6 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 	vec3_t			sprOrg;
 	vec3_t			sprVel;
 
-	mark = 0;
-	radius = 32;
-	sfx = 0;
 	mod = 0;
 	shader = 0;
 	light = 0;
@@ -1850,6 +1836,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 	case WP_RAILGUN:
 		mod = cgs.media.ringFlashModel;
 		shader = cgs.media.railExplosionShader;
+		//sfx = cgs.media.sfx_railg;
 		sfx = cgs.media.sfx_plasmaexp;
 		mark = cgs.media.energyMarkShader;
 		radius = 24;
@@ -1889,15 +1876,6 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 		}
 		mark = cgs.media.bulletMarkShader;
 
-		r = rand() & 3;
-		if ( r < 2 ) {
-			sfx = cgs.media.sfx_ric1;
-		} else if ( r == 2 ) {
-			sfx = cgs.media.sfx_ric2;
-		} else {
-			sfx = cgs.media.sfx_ric3;
-		}
-
 		radius = 8;
 		break;
 #endif
@@ -1936,6 +1914,10 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 		if ( weapon == WP_RAILGUN ) {
 			// colorize with client color
 			VectorCopy( cgs.clientinfo[clientNum].color1, le->color );
+			le->refEntity.shaderRGBA[0] = le->color[0] * 0xff;
+			le->refEntity.shaderRGBA[1] = le->color[1] * 0xff;
+			le->refEntity.shaderRGBA[2] = le->color[2] * 0xff;
+			le->refEntity.shaderRGBA[3] = 0xff;
 		}
 	}
 
@@ -1947,7 +1929,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 		float	*color;
 
 		// colorize with client color
-		color = cgs.clientinfo[clientNum].color2;
+		color = cgs.clientinfo[clientNum].color1;
 		CG_ImpactMark( mark, origin, dir, random()*360, color[0],color[1], color[2],1, alphaFade, radius, qfalse );
 	} else {
 		CG_ImpactMark( mark, origin, dir, random()*360, 1,1,1,1, alphaFade, radius, qfalse );
@@ -1968,6 +1950,8 @@ void CG_MissileHitPlayer( int weapon, vec3_t origin, vec3_t dir, int entityNum )
 	switch ( weapon ) {
 	case WP_GRENADE_LAUNCHER:
 	case WP_ROCKET_LAUNCHER:
+	case WP_PLASMAGUN:
+	case WP_BFG:
 #ifdef MISSIONPACK
 	case WP_NAILGUN:
 	case WP_CHAINGUN:
@@ -2001,8 +1985,8 @@ static void CG_ShotgunPellet( vec3_t start, vec3_t end, int skipNum ) {
 
 	CG_Trace( &tr, start, NULL, NULL, end, skipNum, MASK_SHOT );
 
-	sourceContentType = trap_CM_PointContents( start, 0 );
-	destContentType = trap_CM_PointContents( tr.endpos, 0 );
+	sourceContentType = CG_PointContents( start, 0 );
+	destContentType = CG_PointContents( tr.endpos, 0 );
 
 	// FIXME: should probably move this cruft into CG_BubbleTrail
 	if ( sourceContentType == destContentType ) {
@@ -2089,7 +2073,7 @@ void CG_ShotgunFire( entityState_t *es ) {
 		// ragepro can't alpha fade, so don't even bother with smoke
 		vec3_t			up;
 
-		contents = trap_CM_PointContents( es->pos.trBase, 0 );
+		contents = CG_PointContents( es->pos.trBase, 0 );
 		if ( !( contents & CONTENTS_WATER ) ) {
 			VectorSet( up, 0, 0, 8 );
 			CG_SmokePuff( v, up, 32, 1, 1, 1, 0.33f, 900, cg.time, 0, LEF_PUFF_DONT_SCALE, cgs.media.shotgunSmokePuffShader );
@@ -2242,8 +2226,8 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 	// do trail effects
 	if ( sourceEntityNum >= 0 && cg_tracerChance.value > 0 ) {
 		if ( CG_CalcMuzzlePoint( sourceEntityNum, start ) ) {
-			sourceContentType = trap_CM_PointContents( start, 0 );
-			destContentType = trap_CM_PointContents( end, 0 );
+			sourceContentType = CG_PointContents( start, 0 );
+			destContentType = CG_PointContents( end, 0 );
 
 			// do a complete bubble trail if necessary
 			if ( ( sourceContentType == destContentType ) && ( sourceContentType & CONTENTS_WATER ) ) {

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -83,7 +83,7 @@ CLIENT INFO
 ======================
 CG_ParseAnimationFile
 
-Read a configuration file containing animation coutns and rates
+Read a configuration file containing animation counts and rates
 models/players/visor/animation.cfg, etc
 ======================
 */
@@ -107,6 +107,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 	}
 	if ( len >= sizeof( text ) - 1 ) {
 		CG_Printf( "File %s too long\n", filename );
+		trap_FS_FCloseFile( f );
 		return qfalse;
 	}
 	trap_FS_Read( text, len, f );
@@ -184,7 +185,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 			text_p = prev;	// unget the token
 			break;
 		}
-		Com_Printf( "unknown token '%s' is %s\n", token, filename );
+		Com_Printf( "unknown token '%s' in %s\n", token, filename );
 	}
 
 	// read information for each frame
@@ -246,7 +247,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 	}
 
 	if ( i != MAX_ANIMATIONS ) {
-		CG_Printf( "Error parsing animation file: %s", filename );
+		CG_Printf( "Error parsing animation file: %s\n", filename );
 		return qfalse;
 	}
 
@@ -297,7 +298,7 @@ CG_FileExists
 static qboolean	CG_FileExists(const char *filename) {
 	int len;
 
-	len = trap_FS_FOpenFile( filename, 0, FS_READ );
+	len = trap_FS_FOpenFile( filename, NULL, FS_READ );
 	if (len>0) {
 		return qtrue;
 	}
@@ -519,9 +520,9 @@ CG_RegisterClientModelname
 ==========================
 */
 static qboolean CG_RegisterClientModelname( clientInfo_t *ci, const char *modelName, const char *skinName, const char *headModelName, const char *headSkinName, const char *teamName ) {
-	char	filename[MAX_QPATH*2];
+	char	filename[MAX_QPATH];
 	const char		*headName;
-	char newTeamName[MAX_QPATH*2];
+	char newTeamName[MAX_QPATH];
 
 	if ( headModelName[0] == '\0' ) {
 		headName = modelName;
@@ -648,11 +649,10 @@ Load it now, taking the disk hits.
 This will usually be deferred to a safe time
 ===================
 */
-static void CG_LoadClientInfo( clientInfo_t *ci ) {
+static void CG_LoadClientInfo( int clientNum, clientInfo_t *ci ) {
 	const char	*dir, *fallback;
 	int			i, modelloaded;
 	const char	*s;
-	int			clientNum;
 	char		teamname[MAX_QPATH];
 
 	teamname[0] = 0;
@@ -725,7 +725,6 @@ static void CG_LoadClientInfo( clientInfo_t *ci ) {
 
 	// reset any existing players and bodies, because they might be in bad
 	// frames for this new model
-	clientNum = ci - cgs.clientinfo;
 	for ( i = 0 ; i < MAX_GENTITIES ; i++ ) {
 		if ( cg_entities[i].currentState.clientNum == clientNum
 			&& cg_entities[i].currentState.eType == ET_PLAYER ) {
@@ -782,7 +781,7 @@ static qboolean CG_ScanForExistingClientInfo( clientInfo_t *ci ) {
 			&& !Q_stricmp( ci->blueTeam, match->blueTeam ) 
 			&& !Q_stricmp( ci->redTeam, match->redTeam )
 			&& (cgs.gametype < GT_TEAM || ci->team == match->team) ) {
-			// this clientinfo is identical, so use it's handles
+			// this clientinfo is identical, so use its handles
 
 			ci->deferred = qfalse;
 
@@ -804,7 +803,7 @@ We aren't going to load it now, so grab some other
 client's info to use until we have some spare time.
 ======================
 */
-static void CG_SetDeferredClientInfo( clientInfo_t *ci ) {
+static void CG_SetDeferredClientInfo( int clientNum, clientInfo_t *ci ) {
 	int		i;
 	clientInfo_t	*match;
 
@@ -823,7 +822,7 @@ static void CG_SetDeferredClientInfo( clientInfo_t *ci ) {
 			continue;
 		}
 		// just load the real info cause it uses the same models and skins
-		CG_LoadClientInfo( ci );
+		CG_LoadClientInfo( clientNum, ci );
 		return;
 	}
 
@@ -846,7 +845,7 @@ static void CG_SetDeferredClientInfo( clientInfo_t *ci ) {
 		// an improper team skin.  This will cause a hitch for the first
 		// player, when the second enters.  Combat shouldn't be going on
 		// yet, so it shouldn't matter
-		CG_LoadClientInfo( ci );
+		CG_LoadClientInfo( clientNum, ci );
 		return;
 	}
 
@@ -865,7 +864,7 @@ static void CG_SetDeferredClientInfo( clientInfo_t *ci ) {
 	// we should never get here...
 	CG_Printf( "CG_SetDeferredClientInfo: no valid clients!\n" );
 
-	CG_LoadClientInfo( ci );
+	CG_LoadClientInfo( clientNum, ci );
 }
 
 
@@ -901,8 +900,18 @@ void CG_NewClientInfo( int clientNum ) {
 	v = Info_ValueForKey( configstring, "c1" );
 	CG_ColorFromString( v, newInfo.color1 );
 
+	newInfo.c1RGBA[0] = 255 * newInfo.color1[0];
+	newInfo.c1RGBA[1] = 255 * newInfo.color1[1];
+	newInfo.c1RGBA[2] = 255 * newInfo.color1[2];
+	newInfo.c1RGBA[3] = 255;
+
 	v = Info_ValueForKey( configstring, "c2" );
 	CG_ColorFromString( v, newInfo.color2 );
+
+	newInfo.c2RGBA[0] = 255 * newInfo.color2[0];
+	newInfo.c2RGBA[1] = 255 * newInfo.color2[1];
+	newInfo.c2RGBA[2] = 255 * newInfo.color2[2];
+	newInfo.c2RGBA[3] = 255;
 
 	// bot skill
 	v = Info_ValueForKey( configstring, "skill" );
@@ -991,7 +1000,7 @@ void CG_NewClientInfo( int clientNum ) {
 		char *skin;
 
 		if( cgs.gametype >= GT_TEAM ) {
-			Q_strncpyz( newInfo.headModelName, DEFAULT_TEAM_MODEL, sizeof( newInfo.headModelName ) );
+			Q_strncpyz( newInfo.headModelName, DEFAULT_TEAM_HEAD, sizeof( newInfo.headModelName ) );
 			Q_strncpyz( newInfo.headSkinName, "default", sizeof( newInfo.headSkinName ) );
 		} else {
 			trap_Cvar_VariableStringBuffer( "headmodel", modelStr, sizeof( modelStr ) );
@@ -1036,14 +1045,14 @@ void CG_NewClientInfo( int clientNum ) {
 		// if we are defering loads, just have it pick the first valid
 		if ( forceDefer || (cg_deferPlayers.integer && !cg_buildScript.integer && !cg.loading ) ) {
 			// keep whatever they had if it won't violate team skins
-			CG_SetDeferredClientInfo( &newInfo );
+			CG_SetDeferredClientInfo( clientNum, &newInfo );
 			// if we are low on memory, leave them with this model
 			if ( forceDefer ) {
-				CG_Printf( "Memory is low.  Using deferred model.\n" );
+				CG_Printf( "Memory is low. Using deferred model.\n" );
 				newInfo.deferred = qfalse;
 			}
 		} else {
-			CG_LoadClientInfo( &newInfo );
+			CG_LoadClientInfo( clientNum, &newInfo );
 		}
 	}
 
@@ -1072,11 +1081,11 @@ void CG_LoadDeferredPlayers( void ) {
 		if ( ci->infoValid && ci->deferred ) {
 			// if we are low on memory, leave it deferred
 			if ( trap_MemoryRemaining() < 4000000 ) {
-				CG_Printf( "Memory is low.  Using deferred model.\n" );
+				CG_Printf( "Memory is low. Using deferred model.\n" );
 				ci->deferred = qfalse;
 				continue;
 			}
-			CG_LoadClientInfo( ci );
+			CG_LoadClientInfo( i, ci );
 //			break;
 		}
 	}
@@ -1390,7 +1399,8 @@ static void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], v
 
 	// allow yaw to drift a bit
 	if ( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) != LEGS_IDLE 
-		|| ( cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT ) != TORSO_STAND  ) {
+		|| ((cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT) != TORSO_STAND 
+		&& (cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT) != TORSO_STAND2)) {
 		// if not standing still, always point all in the same direction
 		cent->pe.torso.yawing = qtrue;	// always center
 		cent->pe.torso.pitching = qtrue;	// always center
@@ -1544,7 +1554,7 @@ static void CG_BreathPuffs( centity_t *cent, refEntity_t *head) {
 	if ( cent->currentState.eFlags & EF_DEAD ) {
 		return;
 	}
-	contents = trap_CM_PointContents( head->origin, 0 );
+	contents = CG_PointContents( head->origin, 0 );
 	if ( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
 		return;
 	}
@@ -1566,7 +1576,6 @@ CG_DustTrail
 */
 static void CG_DustTrail( centity_t *cent ) {
 	int				anim;
-	localEntity_t	*dust;
 	vec3_t end, vel;
 	trace_t tr;
 
@@ -1598,7 +1607,7 @@ static void CG_DustTrail( centity_t *cent ) {
 	end[2] -= 16;
 
 	VectorSet(vel, 0, 0, -30);
-	dust = CG_SmokePuff( end, vel,
+	CG_SmokePuff( end, vel,
 				  24,
 				  .8f, .8f, 0.7f, 0.33f,
 				  500,
@@ -1687,7 +1696,7 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hSkin, refEntity_t *torso 
 		dir[2] += 100;
 		VectorNormalize( dir );
 		d = DotProduct(pole.axis[2], dir);
-		// if there is anough movement orthogonal to the flag pole
+		// if there is enough movement orthogonal to the flag pole
 		if (fabs(d) < 0.9) {
 			//
 			d = DotProduct(pole.axis[0], dir);
@@ -1753,7 +1762,7 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hSkin, refEntity_t *torso 
 }
 
 
-#ifdef MISSIONPACK // bk001204
+#ifdef MISSIONPACK
 /*
 ===============
 CG_PlayerTokens
@@ -1765,6 +1774,9 @@ static void CG_PlayerTokens( centity_t *cent, int renderfx ) {
 	refEntity_t	ent;
 	vec3_t		dir, origin;
 	skulltrail_t *trail;
+	if ( cent->currentState.number >= MAX_CLIENTS ) {
+		return;
+	}
 	trail = &cg.skulltrails[cent->currentState.number];
 	tokens = cent->currentState.generic1;
 	if ( !tokens ) {
@@ -2026,7 +2038,7 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane ) {
 	// fade the shadow out with height
 	alpha = 1.0 - trace.fraction;
 
-	// bk0101022 - hack / FPE - bogus planes?
+	// hack / FPE - bogus planes?
 	//assert( DotProduct( trace.plane.normal, trace.plane.normal ) != 0.0f ) 
 
 	// add the mark as a temporary, so it goes directly to the renderer
@@ -2060,7 +2072,7 @@ static void CG_PlayerSplash( centity_t *cent ) {
 
 	// if the feet aren't in liquid, don't make a mark
 	// this won't handle moving water brushes, but they wouldn't draw right anyway...
-	contents = trap_CM_PointContents( end, 0 );
+	contents = CG_PointContents( end, 0 );
 	if ( !( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) ) {
 		return;
 	}
@@ -2069,7 +2081,7 @@ static void CG_PlayerSplash( centity_t *cent ) {
 	start[2] += 32;
 
 	// if the head isn't out of liquid, don't make a mark
-	contents = trap_CM_PointContents( start, 0 );
+	contents = CG_PointContents( start, 0 );
 	if ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
 		return;
 	}
@@ -2606,14 +2618,14 @@ void CG_ResetPlayerEntity( centity_t *cent ) {
 	cent->pe.legs.pitchAngle = 0;
 	cent->pe.legs.pitching = qfalse;
 
-	memset( &cent->pe.torso, 0, sizeof( cent->pe.legs ) );
+	memset( &cent->pe.torso, 0, sizeof( cent->pe.torso ) );
 	cent->pe.torso.yawAngle = cent->rawAngles[YAW];
 	cent->pe.torso.yawing = qfalse;
 	cent->pe.torso.pitchAngle = cent->rawAngles[PITCH];
 	cent->pe.torso.pitching = qfalse;
 
 	if ( cg_debugPosition.integer ) {
-		CG_Printf("%i ResetPlayerEntity yaw=%i\n", cent->currentState.number, cent->pe.torso.yawAngle );
+		CG_Printf("%i ResetPlayerEntity yaw=%f\n", cent->currentState.number, cent->pe.torso.yawAngle );
 	}
 }
 

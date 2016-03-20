@@ -1,0 +1,589 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug TA|Win32">
+      <Configuration>Debug TA</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release TA|Win32">
+      <Configuration>Release TA</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F7B397A4-8111-421B-A23B-B9A2CE509183}</ProjectGuid>
+    <RootNamespace>opengl2</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'">
+    <OutDir>..\..\build\release_ta-msvc12-x86\</OutDir>
+    <IntDir>..\..\build\release_ta-msvc12-x86\opengl2\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>renderer_opengl2_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\build\debug-msvc12-x86\</OutDir>
+    <IntDir>..\..\build\debug-msvc12-x86\opengl2\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>renderer_opengl2_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\build\release-msvc12-x86\</OutDir>
+    <IntDir>..\..\build\release-msvc12-x86\opengl2\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>renderer_opengl2_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'">
+    <OutDir>..\..\build\debug_ta-msvc12-x86\</OutDir>
+    <IntDir>..\..\build\debug_ta-msvc12-x86\opengl2\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>renderer_opengl2_x86</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'">
+    <PreBuildEvent>
+      <Message>Stringify GLSL files</Message>
+      <Command>mkdir ..\..\build\dynamic
+mkdir ..\..\build\dynamic\renderergl2
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_fp.glsl ..\..\build\dynamic\renderergl2\bokeh_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_vp.glsl ..\..\build\dynamic\renderergl2\bokeh_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_fp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_vp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_fp.glsl ..\..\build\dynamic\renderergl2\depthblur_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_vp.glsl ..\..\build\dynamic\renderergl2\depthblur_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_fp.glsl ..\..\build\dynamic\renderergl2\dlight_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_vp.glsl ..\..\build\dynamic\renderergl2\dlight_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_fp.glsl ..\..\build\dynamic\renderergl2\down4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_vp.glsl ..\..\build\dynamic\renderergl2\down4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_fp.glsl ..\..\build\dynamic\renderergl2\fogpass_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_vp.glsl ..\..\build\dynamic\renderergl2\fogpass_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_fp.glsl ..\..\build\dynamic\renderergl2\generic_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_vp.glsl ..\..\build\dynamic\renderergl2\generic_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_fp.glsl ..\..\build\dynamic\renderergl2\lightall_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_vp.glsl ..\..\build\dynamic\renderergl2\lightall_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_fp.glsl ..\..\build\dynamic\renderergl2\pshadow_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_vp.glsl ..\..\build\dynamic\renderergl2\pshadow_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_fp.glsl ..\..\build\dynamic\renderergl2\shadowfill_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_vp.glsl ..\..\build\dynamic\renderergl2\shadowfill_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_fp.glsl ..\..\build\dynamic\renderergl2\shadowmask_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_vp.glsl ..\..\build\dynamic\renderergl2\shadowmask_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_fp.glsl ..\..\build\dynamic\renderergl2\ssao_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_vp.glsl ..\..\build\dynamic\renderergl2\ssao_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_fp.glsl ..\..\build\dynamic\renderergl2\texturecolor_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_vp.glsl ..\..\build\dynamic\renderergl2\texturecolor_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_fp.glsl ..\..\build\dynamic\renderergl2\tonemap_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_vp.glsl ..\..\build\dynamic\renderergl2\tonemap_vp.c
+</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)opengl2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>$(IntDir)opengl2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>CompileAsC</CompileAs>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)renderer_opengl2_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)opengl2.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)opengl2.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>8388608</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Post build processing..</Message>
+      <Command>rem bash -c "perl ./unix/cons -- release-TA"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Message>Stringify GLSL files</Message>
+      <Command>mkdir ..\..\build\dynamic
+mkdir ..\..\build\dynamic\renderergl2
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_fp.glsl ..\..\build\dynamic\renderergl2\bokeh_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_vp.glsl ..\..\build\dynamic\renderergl2\bokeh_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_fp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_vp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_fp.glsl ..\..\build\dynamic\renderergl2\depthblur_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_vp.glsl ..\..\build\dynamic\renderergl2\depthblur_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_fp.glsl ..\..\build\dynamic\renderergl2\dlight_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_vp.glsl ..\..\build\dynamic\renderergl2\dlight_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_fp.glsl ..\..\build\dynamic\renderergl2\down4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_vp.glsl ..\..\build\dynamic\renderergl2\down4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_fp.glsl ..\..\build\dynamic\renderergl2\fogpass_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_vp.glsl ..\..\build\dynamic\renderergl2\fogpass_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_fp.glsl ..\..\build\dynamic\renderergl2\generic_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_vp.glsl ..\..\build\dynamic\renderergl2\generic_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_fp.glsl ..\..\build\dynamic\renderergl2\lightall_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_vp.glsl ..\..\build\dynamic\renderergl2\lightall_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_fp.glsl ..\..\build\dynamic\renderergl2\pshadow_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_vp.glsl ..\..\build\dynamic\renderergl2\pshadow_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_fp.glsl ..\..\build\dynamic\renderergl2\shadowfill_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_vp.glsl ..\..\build\dynamic\renderergl2\shadowfill_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_fp.glsl ..\..\build\dynamic\renderergl2\shadowmask_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_vp.glsl ..\..\build\dynamic\renderergl2\shadowmask_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_fp.glsl ..\..\build\dynamic\renderergl2\ssao_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_vp.glsl ..\..\build\dynamic\renderergl2\ssao_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_fp.glsl ..\..\build\dynamic\renderergl2\texturecolor_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_vp.glsl ..\..\build\dynamic\renderergl2\texturecolor_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_fp.glsl ..\..\build\dynamic\renderergl2\tonemap_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_vp.glsl ..\..\build\dynamic\renderergl2\tonemap_vp.c
+</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)opengl2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>$(IntDir)opengl2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>..\winquake.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)renderer_opengl2_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)opengl2.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)opengl2.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>8388608</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Post build processing..</Message>
+      <Command>rem bash -c "perl ./unix/cons -- debug"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Message>Stringify GLSL files</Message>
+      <Command>mkdir ..\..\build\dynamic
+mkdir ..\..\build\dynamic\renderergl2
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_fp.glsl ..\..\build\dynamic\renderergl2\bokeh_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_vp.glsl ..\..\build\dynamic\renderergl2\bokeh_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_fp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_vp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_fp.glsl ..\..\build\dynamic\renderergl2\depthblur_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_vp.glsl ..\..\build\dynamic\renderergl2\depthblur_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_fp.glsl ..\..\build\dynamic\renderergl2\dlight_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_vp.glsl ..\..\build\dynamic\renderergl2\dlight_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_fp.glsl ..\..\build\dynamic\renderergl2\down4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_vp.glsl ..\..\build\dynamic\renderergl2\down4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_fp.glsl ..\..\build\dynamic\renderergl2\fogpass_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_vp.glsl ..\..\build\dynamic\renderergl2\fogpass_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_fp.glsl ..\..\build\dynamic\renderergl2\generic_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_vp.glsl ..\..\build\dynamic\renderergl2\generic_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_fp.glsl ..\..\build\dynamic\renderergl2\lightall_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_vp.glsl ..\..\build\dynamic\renderergl2\lightall_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_fp.glsl ..\..\build\dynamic\renderergl2\pshadow_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_vp.glsl ..\..\build\dynamic\renderergl2\pshadow_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_fp.glsl ..\..\build\dynamic\renderergl2\shadowfill_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_vp.glsl ..\..\build\dynamic\renderergl2\shadowfill_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_fp.glsl ..\..\build\dynamic\renderergl2\shadowmask_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_vp.glsl ..\..\build\dynamic\renderergl2\shadowmask_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_fp.glsl ..\..\build\dynamic\renderergl2\ssao_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_vp.glsl ..\..\build\dynamic\renderergl2\ssao_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_fp.glsl ..\..\build\dynamic\renderergl2\texturecolor_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_vp.glsl ..\..\build\dynamic\renderergl2\texturecolor_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_fp.glsl ..\..\build\dynamic\renderergl2\tonemap_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_vp.glsl ..\..\build\dynamic\renderergl2\tonemap_vp.c
+</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)opengl2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>$(IntDir)opengl2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>CompileAsC</CompileAs>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)renderer_opengl2_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)opengl2.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)opengl2.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>8388608</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'">
+    <PreBuildEvent>
+      <Message>Stringify GLSL files</Message>
+      <Command>mkdir ..\..\build\dynamic
+mkdir ..\..\build\dynamic\renderergl2
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_fp.glsl ..\..\build\dynamic\renderergl2\bokeh_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\bokeh_vp.glsl ..\..\build\dynamic\renderergl2\bokeh_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_fp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\calclevels4x_vp.glsl ..\..\build\dynamic\renderergl2\calclevels4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_fp.glsl ..\..\build\dynamic\renderergl2\depthblur_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\depthblur_vp.glsl ..\..\build\dynamic\renderergl2\depthblur_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_fp.glsl ..\..\build\dynamic\renderergl2\dlight_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\dlight_vp.glsl ..\..\build\dynamic\renderergl2\dlight_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_fp.glsl ..\..\build\dynamic\renderergl2\down4x_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\down4x_vp.glsl ..\..\build\dynamic\renderergl2\down4x_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_fp.glsl ..\..\build\dynamic\renderergl2\fogpass_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\fogpass_vp.glsl ..\..\build\dynamic\renderergl2\fogpass_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_fp.glsl ..\..\build\dynamic\renderergl2\generic_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\generic_vp.glsl ..\..\build\dynamic\renderergl2\generic_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_fp.glsl ..\..\build\dynamic\renderergl2\lightall_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\lightall_vp.glsl ..\..\build\dynamic\renderergl2\lightall_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_fp.glsl ..\..\build\dynamic\renderergl2\pshadow_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\pshadow_vp.glsl ..\..\build\dynamic\renderergl2\pshadow_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_fp.glsl ..\..\build\dynamic\renderergl2\shadowfill_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowfill_vp.glsl ..\..\build\dynamic\renderergl2\shadowfill_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_fp.glsl ..\..\build\dynamic\renderergl2\shadowmask_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\shadowmask_vp.glsl ..\..\build\dynamic\renderergl2\shadowmask_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_fp.glsl ..\..\build\dynamic\renderergl2\ssao_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\ssao_vp.glsl ..\..\build\dynamic\renderergl2\ssao_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_fp.glsl ..\..\build\dynamic\renderergl2\texturecolor_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\texturecolor_vp.glsl ..\..\build\dynamic\renderergl2\texturecolor_vp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_fp.glsl ..\..\build\dynamic\renderergl2\tonemap_fp.c
+cscript.exe glsl_stringify.vbs ..\..\code\renderergl2\glsl\tonemap_vp.glsl ..\..\build\dynamic\renderergl2\tonemap_vp.c
+</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(IntDir)opengl2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl;..\..\code\AL;..\..\code\libspeex\include;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;HAVE_CONFIG_H;MISSIONPACK;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>$(IntDir)opengl2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>..\winquake.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)renderer_opengl2_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)opengl2.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)opengl2.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>8388608</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Post build processing..</Message>
+      <Command>rem bash -c "perl ./unix/cons -- debug-TA"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\bokeh_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\bokeh_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\calclevels4x_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\calclevels4x_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\depthblur_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\depthblur_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\dlight_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\dlight_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\down4x_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\down4x_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\fogpass_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\fogpass_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\generic_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\generic_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\lightall_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\lightall_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\pshadow_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\pshadow_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowfill_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowfill_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowmask_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowmask_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\ssao_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\ssao_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\texturecolor_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\texturecolor_vp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\tonemap_fp.c" />
+    <ClCompile Include="..\..\build\dynamic\renderergl2\tonemap_vp.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jaricom.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcapimin.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcapistd.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcarith.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jccoefct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jccolor.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcdctmgr.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jchuff.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcinit.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcmainct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcmarker.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcmaster.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcomapi.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcparam.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcprepct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jcsample.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jctrans.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdapimin.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdapistd.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdarith.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdatadst.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdatasrc.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdcoefct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdcolor.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jddctmgr.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdhuff.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdinput.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdmainct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdmarker.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdmaster.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdmerge.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdpostct.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdsample.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jdtrans.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jerror.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctflt.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctfst.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctint.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jidctflt.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jidctfst.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jidctint.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jmemmgr.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jmemnobs.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jquant1.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jquant2.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jutils.c" />
+    <ClCompile Include="..\..\code\qcommon\puff.c" />
+    <ClCompile Include="..\..\code\qcommon\q_math.c" />
+    <ClCompile Include="..\..\code\qcommon\q_shared.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_font.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_bmp.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_jpg.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_pcx.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_png.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_tga.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_noise.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_animation.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_backend.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_bsp.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_cmds.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_curve.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_dsa.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_extensions.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_extramath.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_fbo.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_flares.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_glsl.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_image.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_image_dds.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_init.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_light.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_main.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_marks.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_mesh.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_model.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_model_iqm.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_postprocess.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_scene.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shade.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shader.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shade_calc.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shadows.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_sky.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_subs.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_surface.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_vbo.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_world.c" />
+    <ClCompile Include="..\..\code\sdl\sdl_gamma.c" />
+    <ClCompile Include="..\..\code\sdl\sdl_glimp.c" />
+    <ClCompile Include="..\..\code\zlib\adler32.c" />
+    <ClCompile Include="..\..\code\zlib\crc32.c" />
+    <ClCompile Include="..\..\code\zlib\inffast.c" />
+    <ClCompile Include="..\..\code\zlib\inflate.c" />
+    <ClCompile Include="..\..\code\zlib\inftrees.c" />
+    <ClCompile Include="..\..\code\zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\cgame\tr_types.h" />
+    <ClInclude Include="..\..\code\client\snd_local.h" />
+    <ClInclude Include="..\..\code\client\snd_public.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jchuff.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jconfig.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jdct.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jdhuff.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jerror.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jinclude.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jmemsys.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jmorecfg.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jpegint.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jpeglib.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jversion.h" />
+    <ClInclude Include="..\..\code\qcommon\puff.h" />
+    <ClInclude Include="..\..\code\qcommon\qcommon.h" />
+    <ClInclude Include="..\..\code\qcommon\qfiles.h" />
+    <ClInclude Include="..\..\code\qcommon\q_shared.h" />
+    <ClInclude Include="..\..\code\qcommon\surfaceflags.h" />
+    <ClInclude Include="..\..\code\qcommon\unzip.h" />
+    <ClInclude Include="..\..\code\qcommon\vm_local.h" />
+    <ClInclude Include="..\..\code\renderercommon\qgl.h" />
+    <ClInclude Include="..\..\code\renderercommon\tr_public.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_extramath.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_extratypes.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_fbo.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_local.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_postprocess.h" />
+    <ClInclude Include="..\..\code\server\server.h" />
+    <ClInclude Include="..\..\code\ui\ui_public.h" />
+    <ClInclude Include="..\..\code\win32\resource.h" />
+    <ClInclude Include="..\..\code\win32\win_local.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

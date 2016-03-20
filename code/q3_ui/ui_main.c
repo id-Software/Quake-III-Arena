@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -40,7 +40,7 @@ This is the only way control passes into the module.
 This must be the very first function compiled into the .qvm file
 ================
 */
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
+Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
 	switch ( command ) {
 	case UI_GETAPIVERSION:
 		return UI_API_VERSION;
@@ -79,7 +79,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		UI_DrawConnectScreen( arg0 );
 		return 0;
 	case UI_HASUNIQUECDKEY:				// mod authors need to observe this
-		return qtrue;  // bk010117 - change this to qfalse for mods!
+		return qtrue;  // change this to qfalse for mods!
 	}
 
 	return -1;
@@ -155,8 +155,8 @@ vmCvar_t	ui_server15;
 vmCvar_t	ui_server16;
 
 vmCvar_t	ui_cdkeychecked;
+vmCvar_t	ui_ioq3;
 
-// bk001129 - made static to avoid aliasing.
 static cvarTable_t		cvarTable[] = {
 	{ &ui_ffa_fraglimit, "ui_ffa_fraglimit", "20", CVAR_ARCHIVE },
 	{ &ui_ffa_timelimit, "ui_ffa_timelimit", "0", CVAR_ARCHIVE },
@@ -174,13 +174,13 @@ static cvarTable_t		cvarTable[] = {
 
 	{ &ui_arenasFile, "g_arenasFile", "", CVAR_INIT|CVAR_ROM },
 	{ &ui_botsFile, "g_botsFile", "", CVAR_INIT|CVAR_ROM },
-	{ &ui_spScores1, "g_spScores1", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores2, "g_spScores2", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores3, "g_spScores3", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores4, "g_spScores4", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores5, "g_spScores5", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spAwards, "g_spAwards", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spVideos, "g_spVideos", "", CVAR_ARCHIVE | CVAR_ROM },
+	{ &ui_spScores1, "g_spScores1", "", CVAR_ARCHIVE },
+	{ &ui_spScores2, "g_spScores2", "", CVAR_ARCHIVE },
+	{ &ui_spScores3, "g_spScores3", "", CVAR_ARCHIVE },
+	{ &ui_spScores4, "g_spScores4", "", CVAR_ARCHIVE },
+	{ &ui_spScores5, "g_spScores5", "", CVAR_ARCHIVE },
+	{ &ui_spAwards, "g_spAwards", "", CVAR_ARCHIVE },
+	{ &ui_spVideos, "g_spVideos", "", CVAR_ARCHIVE },
 	{ &ui_spSkill, "g_spSkill", "2", CVAR_ARCHIVE | CVAR_LATCH },
 
 	{ &ui_spSelection, "ui_spSelection", "", CVAR_ROM },
@@ -213,11 +213,11 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_server15, "server15", "", CVAR_ARCHIVE },
 	{ &ui_server16, "server16", "", CVAR_ARCHIVE },
 
-	{ &ui_cdkeychecked, "ui_cdkeychecked", "0", CVAR_ROM }
+	{ &ui_cdkeychecked, "ui_cdkeychecked", "0", CVAR_ROM },
+	{ &ui_ioq3, "ui_ioq3", "1", CVAR_ROM }
 };
 
-// bk001129 - made static to avoid aliasing
-static int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
+static int cvarTableSize = ARRAY_LEN( cvarTable );
 
 
 /*

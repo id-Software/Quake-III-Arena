@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -23,17 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "server.h"
 
-#include "../game/botlib.h"
+#include "../botlib/botlib.h"
 
 botlib_export_t	*botlib_export;
-
-void SV_GameError( const char *string ) {
-	Com_Error( ERR_DROP, "%s", string );
-}
-
-void SV_GamePrint( const char *string ) {
-	Com_Printf( "%s", string );
-}
 
 // these functions must be used instead of pointer arithmetic, because
 // the game allocates gentities with private information after the server shared part
@@ -185,17 +177,14 @@ qboolean SV_inPVSIgnorePortals( const vec3_t p1, const vec3_t p2)
 {
 	int		leafnum;
 	int		cluster;
-	int		area1, area2;
 	byte	*mask;
 
 	leafnum = CM_PointLeafnum (p1);
 	cluster = CM_LeafCluster (leafnum);
-	area1 = CM_LeafArea (leafnum);
 	mask = CM_ClusterPVS (cluster);
 
 	leafnum = CM_PointLeafnum (p2);
 	cluster = CM_LeafCluster (leafnum);
-	area2 = CM_LeafArea (leafnum);
 
 	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
 		return qfalse;
@@ -222,7 +211,7 @@ void SV_AdjustAreaPortalState( sharedEntity_t *ent, qboolean open ) {
 
 /*
 ==================
-SV_GameAreaEntities
+SV_EntityContact
 ==================
 */
 qboolean	SV_EntityContact( vec3_t mins, vec3_t maxs, const sharedEntity_t *gEnt, int capsule ) {
@@ -288,14 +277,9 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd ) {
 //==============================================
 
 static int	FloatAsInt( float f ) {
-	union
-	{
-	    int i;
-	    float f;
-	} temp;
-	
-	temp.f = f;
-	return temp.i;
+	floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 /*
@@ -305,22 +289,13 @@ SV_GameSystemCalls
 The module is making a system call
 ====================
 */
-//rcg010207 - see my comments in VM_DllSyscall(), in qcommon/vm.c ...
-#if ((defined __linux__) && (defined __powerpc__))
-#define VMA(x) ((void *) args[x])
-#else
-#define	VMA(x) VM_ArgPtr(args[x])
-#endif
-
-#define	VMF(x)	((float *)args)[x]
-
-int SV_GameSystemCalls( int *args ) {
+intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case G_PRINT:
-		Com_Printf( "%s", VMA(1) );
+		Com_Printf( "%s", (const char*)VMA(1) );
 		return 0;
 	case G_ERROR:
-		Com_Error( ERR_DROP, "%s", VMA(1) );
+		Com_Error( ERR_DROP, "%s", (const char*)VMA(1) );
 		return 0;
 	case G_MILLISECONDS:
 		return Sys_Milliseconds();
@@ -331,7 +306,7 @@ int SV_GameSystemCalls( int *args ) {
 		Cvar_Update( VMA(1) );
 		return 0;
 	case G_CVAR_SET:
-		Cvar_Set( (const char *)VMA(1), (const char *)VMA(2) );
+		Cvar_SetSafe( (const char *)VMA(1), (const char *)VMA(2) );
 		return 0;
 	case G_CVAR_VARIABLE_INTEGER_VALUE:
 		return Cvar_VariableIntegerValue( (const char *)VMA(1) );
@@ -451,7 +426,7 @@ int SV_GameSystemCalls( int *args ) {
 	case G_REAL_TIME:
 		return Com_RealTime( VMA(1) );
 	case G_SNAPVECTOR:
-		Sys_SnapVector( VMA(1) );
+		Q_SnapVector(VMA(1));
 		return 0;
 
 		//====================================
@@ -559,7 +534,7 @@ int SV_GameSystemCalls( int *args ) {
 
 	case BOTLIB_EA_ACTION:
 		botlib_export->ea.EA_Action( args[1], args[2] );
-		break;
+		return 0;
 	case BOTLIB_EA_GESTURE:
 		botlib_export->ea.EA_Gesture( args[1] );
 		return 0;
@@ -828,7 +803,8 @@ int SV_GameSystemCalls( int *args ) {
 		return 0;
 
 	case TRAP_STRNCPY:
-		return (int)strncpy( VMA(1), VMA(2), args[3] );
+		strncpy( VMA(1), VMA(2), args[3] );
+		return args[1];
 
 	case TRAP_SIN:
 		return FloatAsInt( sin( VMF(1) ) );
@@ -862,9 +838,9 @@ int SV_GameSystemCalls( int *args ) {
 
 
 	default:
-		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );
+		Com_Error( ERR_DROP, "Bad game system trap: %ld", (long int) args[0] );
 	}
-	return -1;
+	return 0;
 }
 
 /*
@@ -906,7 +882,7 @@ static void SV_InitGameVM( qboolean restart ) {
 	
 	// use the current msec count for a random seed
 	// init for this gamestate
-	VM_Call( gvm, GAME_INIT, svs.time, Com_Milliseconds(), restart );
+	VM_Call (gvm, GAME_INIT, sv.time, Com_Milliseconds(), restart);
 }
 
 
@@ -925,8 +901,8 @@ void SV_RestartGameProgs( void ) {
 	VM_Call( gvm, GAME_SHUTDOWN, qtrue );
 
 	// do a restart instead of a free
-	gvm = VM_Restart( gvm );
-	if ( !gvm ) { // bk001212 - as done below
+	gvm = VM_Restart(gvm, qtrue);
+	if ( !gvm ) {
 		Com_Error( ERR_FATAL, "VM_Restart on game failed" );
 	}
 

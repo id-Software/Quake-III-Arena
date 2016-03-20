@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=ioquake3
+Exec=ioquake3
+Icon=quake3
+Type=Application
+Terminal=false
+Encoding=UTF-8
+Categories=Game;ActionGame;
+X-SuSE-translate=false

@@ -1,0 +1,4 @@
+- On Solaris/SPARC gcc optimizations higher than -O0 currently lead
+  to a segfault
+
+https://bugzilla.icculus.org/ for more.

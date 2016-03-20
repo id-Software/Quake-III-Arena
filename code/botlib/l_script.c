@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -49,8 +49,8 @@ typedef enum {qfalse, qtrue}	qboolean;
 
 #ifdef BOTLIB
 //include files for usage in the bot library
-#include "../game/q_shared.h"
-#include "../game/botlib.h"
+#include "../qcommon/q_shared.h"
+#include "botlib.h"
 #include "be_interface.h"
 #include "l_script.h"
 #include "l_memory.h"
@@ -236,7 +236,7 @@ void QDECL ScriptError(script_t *script, char *str, ...)
 	if (script->flags & SCFL_NOERRORS) return;
 
 	va_start(ap, str);
-	vsprintf(text, str, ap);
+	Q_vsnprintf(text, sizeof(text), str, ap);
 	va_end(ap);
 #ifdef BOTLIB
 	botimport.Print(PRT_ERROR, "file %s, line %d: %s\n", script->filename, script->line, text);
@@ -262,7 +262,7 @@ void QDECL ScriptWarning(script_t *script, char *str, ...)
 	if (script->flags & SCFL_NOWARNINGS) return;
 
 	va_start(ap, str);
-	vsprintf(text, str, ap);
+	Q_vsnprintf(text, sizeof(text), str, ap);
 	va_end(ap);
 #ifdef BOTLIB
 	botimport.Print(PRT_WARNING, "file %s, line %d: %s\n", script->filename, script->line, text);
@@ -421,7 +421,7 @@ int PS_ReadEscapeCharacter(script_t *script, char *ch)
 	script->script_p++;
 	//store the escape character
 	*ch = c;
-	//succesfully read escape character
+	//successfully read escape character
 	return 1;
 } //end of the function PS_ReadEscapeCharacter
 //============================================================================
@@ -431,7 +431,7 @@ int PS_ReadEscapeCharacter(script_t *script, char *ch)
 //
 // Parameter:				script		: script to read from
 //								token			: buffer to store the string
-// Returns:					qtrue when a string was read succesfully
+// Returns:					qtrue when a string was read successfully
 // Changes Globals:		-
 //============================================================================
 int PS_ReadString(script_t *script, token_t *token, int quote)
@@ -554,7 +554,7 @@ int PS_ReadName(script_t *script, token_t *token)
 // Changes Globals:		-
 //============================================================================
 void NumberValue(char *string, int subtype, unsigned long int *intvalue,
-															long double *floatvalue)
+															float *floatvalue)
 {
 	unsigned long int dotfound = 0;
 
@@ -573,13 +573,13 @@ void NumberValue(char *string, int subtype, unsigned long int *intvalue,
 			} //end if
 			if (dotfound)
 			{
-				*floatvalue = *floatvalue + (long double) (*string - '0') /
-																	(long double) dotfound;
+				*floatvalue = *floatvalue + (float) (*string - '0') /
+																	(float) dotfound;
 				dotfound *= 10;
 			} //end if
 			else
 			{
-				*floatvalue = *floatvalue * 10.0 + (long double) (*string - '0');
+				*floatvalue = *floatvalue * 10.0 + (float) (*string - '0');
 			} //end else
 			string++;
 		} //end while
@@ -631,7 +631,7 @@ int PS_ReadNumber(script_t *script, token_t *token)
 	int octal, dot;
 	char c;
 //	unsigned long int intvalue = 0;
-//	long double floatvalue = 0;
+//	double floatvalue = 0;
 
 	token->type = TT_NUMBER;
 	//check for a hexadecimal number
@@ -706,14 +706,14 @@ int PS_ReadNumber(script_t *script, token_t *token)
 	{
 		c = *script->script_p;
 		//check for a LONG number
-		if ( (c == 'l' || c == 'L') // bk001204 - brackets 
+		if ( (c == 'l' || c == 'L')
 		     && !(token->subtype & TT_LONG))
 		{
 			script->script_p++;
 			token->subtype |= TT_LONG;
 		} //end if
 		//check for an UNSIGNED number
-		else if ( (c == 'u' || c == 'U') // bk001204 - brackets 
+		else if ( (c == 'u' || c == 'U')
 			  && !(token->subtype & (TT_UNSIGNED | TT_FLOAT)))
 		{
 			script->script_p++;
@@ -828,7 +828,7 @@ int PS_ReadPrimitive(script_t *script, token_t *token)
 	len = 0;
 	while(*script->script_p > ' ' && *script->script_p != ';')
 	{
-		if (len >= MAX_TOKEN)
+		if (len >= MAX_TOKEN - 1)
 		{
 			ScriptError(script, "primitive token longer than MAX_TOKEN = %d", MAX_TOKEN);
 			return 0;
@@ -879,7 +879,7 @@ int PS_ReadToken(script_t *script, token_t *token)
 	{
 		if (!PS_ReadString(script, token, '\"')) return 0;
 	} //end if
-	//if an literal
+	//if a literal
 	else if (*script->script_p == '\'')
 	{
 		//if (!PS_ReadLiteral(script, token)) return 0;
@@ -912,7 +912,7 @@ int PS_ReadToken(script_t *script, token_t *token)
 	} //end if
 	//copy the token into the script structure
 	Com_Memcpy(&script->token, token, sizeof(token_t));
-	//succesfully read a token
+	//successfully read a token
 	return 1;
 } //end of the function PS_ReadToken
 //============================================================================
@@ -956,6 +956,7 @@ int PS_ExpectTokenType(script_t *script, int type, int subtype, token_t *token)
 
 	if (token->type != type)
 	{
+		strcpy(str, "");
 		if (type == TT_STRING) strcpy(str, "string");
 		if (type == TT_LITERAL) strcpy(str, "literal");
 		if (type == TT_NUMBER) strcpy(str, "number");
@@ -968,6 +969,7 @@ int PS_ExpectTokenType(script_t *script, int type, int subtype, token_t *token)
 	{
 		if ((token->subtype & subtype) != subtype)
 		{
+			strcpy(str, "");
 			if (subtype & TT_DECIMAL) strcpy(str, "decimal");
 			if (subtype & TT_HEX) strcpy(str, "hex");
 			if (subtype & TT_OCTAL) strcpy(str, "octal");
@@ -990,7 +992,7 @@ int PS_ExpectTokenType(script_t *script, int type, int subtype, token_t *token)
 		if (token->subtype != subtype)
 		{
 			ScriptError(script, "expected %s, found %s",
-							script->punctuations[subtype], token->string);
+							script->punctuations[subtype].p, token->string);
 			return 0;
 		} //end if
 	} //end else if
@@ -1118,7 +1120,7 @@ void StripDoubleQuotes(char *string)
 {
 	if (*string == '\"')
 	{
-		strcpy(string, string+1);
+		memmove(string, string+1, strlen(string));
 	} //end if
 	if (string[strlen(string)-1] == '\"')
 	{
@@ -1135,7 +1137,7 @@ void StripSingleQuotes(char *string)
 {
 	if (*string == '\'')
 	{
-		strcpy(string, string+1);
+		memmove(string, string+1, strlen(string));
 	} //end if
 	if (string[strlen(string)-1] == '\'')
 	{
@@ -1148,21 +1150,29 @@ void StripSingleQuotes(char *string)
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-long double ReadSignedFloat(script_t *script)
+float ReadSignedFloat(script_t *script)
 {
 	token_t token;
-	long double sign = 1;
+	float sign = 1.0;
 
 	PS_ExpectAnyToken(script, &token);
 	if (!strcmp(token.string, "-"))
 	{
-		sign = -1;
-		PS_ExpectTokenType(script, TT_NUMBER, 0, &token);
-	} //end if
-	else if (token.type != TT_NUMBER)
+		if(!PS_ExpectAnyToken(script, &token))
+		{
+			ScriptError(script, "Missing float value");
+			return 0;
+		}
+
+		sign = -1.0;
+	}
+	
+	if (token.type != TT_NUMBER)
 	{
-		ScriptError(script, "expected float value, found %s\n", token.string);
-	} //end else if
+		ScriptError(script, "expected float value, found %s", token.string);
+		return 0;
+	}
+
 	return sign * token.floatvalue;
 } //end of the function ReadSignedFloat
 //============================================================================
@@ -1179,13 +1189,21 @@ signed long int ReadSignedInt(script_t *script)
 	PS_ExpectAnyToken(script, &token);
 	if (!strcmp(token.string, "-"))
 	{
+		if(!PS_ExpectAnyToken(script, &token))
+		{
+			ScriptError(script, "Missing integer value");
+			return 0;
+		}
+
 		sign = -1;
-		PS_ExpectTokenType(script, TT_NUMBER, TT_INTEGER, &token);
-	} //end if
-	else if (token.type != TT_NUMBER || token.subtype == TT_FLOAT)
+	}
+
+	if (token.type != TT_NUMBER || token.subtype == TT_FLOAT)
 	{
-		ScriptError(script, "expected integer value, found %s\n", token.string);
-	} //end else if
+		ScriptError(script, "expected integer value, found %s", token.string);
+		return 0;
+	}
+	
 	return sign * token.intvalue;
 } //end of the function ReadSignedInt
 //============================================================================
@@ -1334,7 +1352,7 @@ script_t *LoadScriptFile(const char *filename)
 	buffer = GetClearedMemory(sizeof(script_t) + length + 1);
 	script = (script_t *) buffer;
 	Com_Memset(script, 0, sizeof(script_t));
-	strcpy(script->filename, filename);
+	Q_strncpyz(script->filename, filename, sizeof(script->filename));
 	script->buffer = (char *) buffer + sizeof(script_t);
 	script->buffer[length] = 0;
 	script->length = length;
@@ -1363,8 +1381,6 @@ script_t *LoadScriptFile(const char *filename)
 	} //end if
 	fclose(fp);
 #endif
-	//
-	script->length = COM_Compress(script->buffer);
 
 	return script;
 } //end of the function LoadScriptFile
@@ -1382,7 +1398,7 @@ script_t *LoadScriptMemory(char *ptr, int length, char *name)
 	buffer = GetClearedMemory(sizeof(script_t) + length + 1);
 	script = (script_t *) buffer;
 	Com_Memset(script, 0, sizeof(script_t));
-	strcpy(script->filename, name);
+	Q_strncpyz(script->filename, name, sizeof(script->filename));
 	script->buffer = (char *) buffer + sizeof(script_t);
 	script->buffer[length] = 0;
 	script->length = length;
@@ -1428,6 +1444,6 @@ void PS_SetBaseFolder(char *path)
 #ifdef BSPC
 	sprintf(basefolder, path);
 #else
-	Com_sprintf(basefolder, sizeof(basefolder), path);
+	Com_sprintf(basefolder, sizeof(basefolder), "%s", path);
 #endif
 } //end of the function PS_SetBaseFolder

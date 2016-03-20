@@ -1,0 +1,124 @@
+#!/bin/bash
+
+: ${MAKESELF:=/usr/share/loki-setup/makeself}
+: ${SETUPIMAGE:=/usr/share/loki-setup/image}
+
+: ${VERSION:=0.0_`date +%Y%m%d%H%M`}
+: ${RELEASE:=0}
+
+set -e
+set -x
+
+shopt -s nullglob
+
+rm -rf image
+mkdir image
+
+### loki-setup files
+cp -a $SETUPIMAGE/{setup.data,setup.sh} image/
+
+### splash
+rm -f image/setup.data/splash.xpm
+[ -e splash.xpm ] && cp splash.xpm image/setup.data/splash.xpm
+rm -f image/quake3.png
+cp ../quake3.png image/quake3.png
+
+### binaries
+topdir="../.."
+
+echo "changequote(\`[', \`]')dnl" > defines.m4
+echo "define(VERSION,$VERSION)dnl" >> defines.m4
+
+copystartscript()
+{
+	local arch="$1"
+	mkdir -p image/bin/Linux/$arch
+	if [ "$arch" = x86_64 ]; then
+		ln -s x86_64 image/bin/Linux/amd64
+	elif [ "$arch" = ppc ]; then
+		ln -s ppc image/bin/Linux/ppc64
+	fi
+	install -m 755 ioquake3.sh image/bin/Linux/$arch/ioquake3
+	install -m 755 ioq3demo.sh image/bin/Linux/$arch/ioq3demo
+}
+
+archs=()
+for arch in $topdir/build/release-*; do
+	arch=${arch##*-}
+	case "$arch" in
+		i386) echo "define(HAVE_I386,yes)dnl" >> defines.m4
+			copystartscript x86
+		;;
+		x86_64) echo "define(HAVE_X86_64,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		ppc) echo "define(HAVE_PPC,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		ppc64) echo "define(HAVE_PPC64,yes)dnl" >> defines.m4
+			copystartscript $arch
+		;;
+		*)
+			echo "architecture $arch unsupported"
+			continue;
+		;;
+	esac
+	archs[${#archs[@]}]=$arch
+done
+
+for arch in "${archs[@]}"; do
+	dst=image/tmp
+	mkdir $dst
+	mkdir $dst/baseq3 $dst/demoq3 $dst/missionpack
+	install -m 755 $topdir/build/release-linux-$arch/ioquake3.$arch $dst/ioquake3.$arch
+	install -m 755 $topdir/build/release-linux-$arch/ioq3ded.$arch $dst/ioq3ded.$arch
+	install -m 755 $topdir/build/release-linux-$arch/renderer_opengl1_$arch.so $dst/renderer_opengl1_$arch.so
+	install -m 755 $topdir/build/release-linux-$arch/renderer_opengl2_$arch.so $dst/renderer_opengl2_$arch.so
+	install -m 644 $topdir/build/release-linux-$arch/baseq3/*.so $dst/baseq3
+	install -m 644 $topdir/build/release-linux-$arch/missionpack/*.so $dst/missionpack
+	for i in cgame qagame ui; do
+		ln -s ../baseq3/$i$arch.so $dst/demoq3
+	done
+
+	tar --owner=root --group=root -C $dst -cf ./image/ioquake3.$arch.tar .
+	rm -rf ./image/tmp
+done
+
+# patch pk3 files
+if [ -e ./idpatchpk3s.tar -a -e ./idtapatchpk3s.tar ]; then
+	install -m 644 ./idpatchpk3s.tar image/idpatchpk3s.tar
+	install -m 644 ./idtapatchpk3s.tar image/idtapatchpk3s.tar
+	install -m 644 ./id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
+	echo "define(HAVE_PATCHPK3,yes)dnl" >> defines.m4
+elif [ -e quake3-latest-pk3s.zip ]; then
+	unzip quake3-latest-pk3s.zip
+	chmod 644 quake3-latest-pk3s/*/*.pk3
+	tar -C quake3-latest-pk3s/baseq3 -cf image/idpatchpk3s.tar .
+	tar -C quake3-latest-pk3s/missionpack -cf image/idtapatchpk3s.tar .
+	rm -r quake3-latest-pk3s
+	install -m 644 id_patch_pk3s_Q3A_EULA.txt image/id_patch_pk3s_Q3A_EULA.txt
+	echo "define(HAVE_PATCHPK3,yes)dnl" >> defines.m4
+fi
+
+### uninstall script
+install -m 755 ./preuninstall.sh image/preuninstall.sh
+
+# desktop file handling
+install -m 755 ./install-desktop-files.sh image/install-desktop-files.sh
+install -m 755 /usr/bin/xdg-desktop-menu image/xdg-desktop-menu
+install -m 644 ioquake3.desktop image/ioquake3.desktop.in
+
+### README, COPYING and EULA
+install -m 644 $topdir/voip-readme.txt image/voip-readme.txt
+install -m 644 $topdir/README image/README
+install -m 644 $topdir/COPYING.txt image/COPYING
+
+# create setup.xml
+m4 defines.m4 setup.xml.in > image/setup.data/setup.xml
+
+### makeself installer
+ARCH=
+if [ "${#archs[@]}" -eq 1 ]; then
+	ARCH=.$arch
+fi
+$MAKESELF/makeself.sh image ioquake3-$VERSION-$RELEASE$ARCH.run "ioquake3 $VERSION-$RELEASE" ./setup.sh

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -29,9 +29,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
-#include "../game/botlib.h"
+#include "../qcommon/q_shared.h"
+#include "botlib.h"
 #include "l_log.h"
+#include "l_memory.h"
 #include "be_interface.h"
 
 //#define MEMDEBUG
@@ -100,7 +101,7 @@ void *GetMemory(unsigned long size)
 {
 	void *ptr;
 	memoryblock_t *block;
-  assert(botimport.GetMemory); // bk001129 - was NULL'ed
+	assert(botimport.GetMemory);
 	ptr = botimport.GetMemory(size + sizeof(memoryblock_t));
 	block = (memoryblock_t *) ptr;
 	block->id = MEM_ID;

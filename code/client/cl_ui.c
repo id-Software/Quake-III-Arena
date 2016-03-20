@@ -15,14 +15,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
 #include "client.h"
 
-#include "../game/botlib.h"
+#include "../botlib/botlib.h"
 
 extern	botlib_export_t	*botlib_export;
 
@@ -35,8 +35,8 @@ GetClientState
 */
 static void GetClientState( uiClientState_t *state ) {
 	state->connectPacketCount = clc.connectPacketCount;
-	state->connState = cls.state;
-	Q_strncpyz( state->servername, cls.servername, sizeof( state->servername ) );
+	state->connState = clc.state;
+	Q_strncpyz( state->servername, clc.servername, sizeof( state->servername ) );
 	Q_strncpyz( state->updateInfoString, cls.updateInfoString, sizeof( state->updateInfoString ) );
 	Q_strncpyz( state->messageString, clc.serverMessage, sizeof( state->messageString ) );
 	state->clientNum = cl.snap.ps.clientNum;
@@ -47,22 +47,20 @@ static void GetClientState( uiClientState_t *state ) {
 LAN_LoadCachedServers
 ====================
 */
-void LAN_LoadCachedServers( ) {
+void LAN_LoadCachedServers( void ) {
 	int size;
 	fileHandle_t fileIn;
-	cls.numglobalservers = cls.nummplayerservers = cls.numfavoriteservers = 0;
+	cls.numglobalservers = cls.numfavoriteservers = 0;
 	cls.numGlobalServerAddresses = 0;
 	if (FS_SV_FOpenFileRead("servercache.dat", &fileIn)) {
 		FS_Read(&cls.numglobalservers, sizeof(int), fileIn);
-		FS_Read(&cls.nummplayerservers, sizeof(int), fileIn);
 		FS_Read(&cls.numfavoriteservers, sizeof(int), fileIn);
 		FS_Read(&size, sizeof(int), fileIn);
-		if (size == sizeof(cls.globalServers) + sizeof(cls.favoriteServers) + sizeof(cls.mplayerServers)) {
+		if (size == sizeof(cls.globalServers) + sizeof(cls.favoriteServers)) {
 			FS_Read(&cls.globalServers, sizeof(cls.globalServers), fileIn);
-			FS_Read(&cls.mplayerServers, sizeof(cls.mplayerServers), fileIn);
 			FS_Read(&cls.favoriteServers, sizeof(cls.favoriteServers), fileIn);
 		} else {
-			cls.numglobalservers = cls.nummplayerservers = cls.numfavoriteservers = 0;
+			cls.numglobalservers = cls.numfavoriteservers = 0;
 			cls.numGlobalServerAddresses = 0;
 		}
 		FS_FCloseFile(fileIn);
@@ -74,16 +72,14 @@ void LAN_LoadCachedServers( ) {
 LAN_SaveServersToCache
 ====================
 */
-void LAN_SaveServersToCache( ) {
+void LAN_SaveServersToCache( void ) {
 	int size;
 	fileHandle_t fileOut = FS_SV_FOpenFileWrite("servercache.dat");
 	FS_Write(&cls.numglobalservers, sizeof(int), fileOut);
-	FS_Write(&cls.nummplayerservers, sizeof(int), fileOut);
 	FS_Write(&cls.numfavoriteservers, sizeof(int), fileOut);
-	size = sizeof(cls.globalServers) + sizeof(cls.favoriteServers) + sizeof(cls.mplayerServers);
+	size = sizeof(cls.globalServers) + sizeof(cls.favoriteServers);
 	FS_Write(&size, sizeof(int), fileOut);
 	FS_Write(&cls.globalServers, sizeof(cls.globalServers), fileOut);
-	FS_Write(&cls.mplayerServers, sizeof(cls.mplayerServers), fileOut);
 	FS_Write(&cls.favoriteServers, sizeof(cls.favoriteServers), fileOut);
 	FS_FCloseFile(fileOut);
 }
@@ -104,10 +100,7 @@ static void LAN_ResetPings(int source) {
 			servers = &cls.localServers[0];
 			count = MAX_OTHER_SERVERS;
 			break;
-		case AS_MPLAYER :
-			servers = &cls.mplayerServers[0];
-			count = MAX_OTHER_SERVERS;
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			servers = &cls.globalServers[0];
 			count = MAX_GLOBAL_SERVERS;
@@ -134,17 +127,14 @@ static int LAN_AddServer(int source, const char *name, const char *address) {
 	netadr_t adr;
 	serverInfo_t *servers = NULL;
 	max = MAX_OTHER_SERVERS;
-	count = 0;
+	count = NULL;
 
 	switch (source) {
 		case AS_LOCAL :
 			count = &cls.numlocalservers;
 			servers = &cls.localServers[0];
 			break;
-		case AS_MPLAYER :
-			count = &cls.nummplayerservers;
-			servers = &cls.mplayerServers[0];
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			max = MAX_GLOBAL_SERVERS;
 			count = &cls.numglobalservers;
@@ -156,7 +146,7 @@ static int LAN_AddServer(int source, const char *name, const char *address) {
 			break;
 	}
 	if (servers && *count < max) {
-		NET_StringToAdr( address, &adr );
+		NET_StringToAdr( address, &adr, NA_UNSPEC );
 		for ( i = 0; i < *count; i++ ) {
 			if (NET_CompareAdr(servers[i].adr, adr)) {
 				break;
@@ -182,16 +172,13 @@ LAN_RemoveServer
 static void LAN_RemoveServer(int source, const char *addr) {
 	int *count, i;
 	serverInfo_t *servers = NULL;
-	count = 0;
+	count = NULL;
 	switch (source) {
 		case AS_LOCAL :
 			count = &cls.numlocalservers;
 			servers = &cls.localServers[0];
 			break;
-		case AS_MPLAYER :
-			count = &cls.nummplayerservers;
-			servers = &cls.mplayerServers[0];
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			count = &cls.numglobalservers;
 			servers = &cls.globalServers[0];
@@ -203,7 +190,7 @@ static void LAN_RemoveServer(int source, const char *addr) {
 	}
 	if (servers) {
 		netadr_t comp;
-		NET_StringToAdr( addr, &comp );
+		NET_StringToAdr( addr, &comp, NA_UNSPEC );
 		for (i = 0; i < *count; i++) {
 			if (NET_CompareAdr( comp, servers[i].adr)) {
 				int j = i;
@@ -229,9 +216,7 @@ static int LAN_GetServerCount( int source ) {
 		case AS_LOCAL :
 			return cls.numlocalservers;
 			break;
-		case AS_MPLAYER :
-			return cls.nummplayerservers;
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			return cls.numglobalservers;
 			break;
@@ -251,25 +236,20 @@ static void LAN_GetServerAddressString( int source, int n, char *buf, int buflen
 	switch (source) {
 		case AS_LOCAL :
 			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.localServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.localServers[n].adr) , buflen );
 				return;
 			}
 			break;
-		case AS_MPLAYER :
-			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.mplayerServers[n].adr) , buflen );
-				return;
-			}
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.globalServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.globalServers[n].adr) , buflen );
 				return;
 			}
 			break;
 		case AS_FAVORITES :
 			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				Q_strncpyz(buf, NET_AdrToString( cls.favoriteServers[n].adr) , buflen );
+				Q_strncpyz(buf, NET_AdrToStringwPort( cls.favoriteServers[n].adr) , buflen );
 				return;
 			}
 			break;
@@ -292,11 +272,7 @@ static void LAN_GetServerInfo( int source, int n, char *buf, int buflen ) {
 				server = &cls.localServers[n];
 			}
 			break;
-		case AS_MPLAYER :
-			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				server = &cls.mplayerServers[n];
-			}
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
 				server = &cls.globalServers[n];
@@ -320,8 +296,10 @@ static void LAN_GetServerInfo( int source, int n, char *buf, int buflen ) {
 		Info_SetValueForKey( info, "game", server->game);
 		Info_SetValueForKey( info, "gametype", va("%i",server->gameType));
 		Info_SetValueForKey( info, "nettype", va("%i",server->netType));
-		Info_SetValueForKey( info, "addr", NET_AdrToString(server->adr));
+		Info_SetValueForKey( info, "addr", NET_AdrToStringwPort(server->adr));
 		Info_SetValueForKey( info, "punkbuster", va("%i", server->punkbuster));
+		Info_SetValueForKey( info, "g_needpass", va("%i", server->g_needpass));
+		Info_SetValueForKey( info, "g_humanplayers", va("%i", server->g_humanplayers));
 		Q_strncpyz(buf, info, buflen);
 	} else {
 		if (buf) {
@@ -343,11 +321,7 @@ static int LAN_GetServerPing( int source, int n ) {
 				server = &cls.localServers[n];
 			}
 			break;
-		case AS_MPLAYER :
-			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				server = &cls.mplayerServers[n];
-			}
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
 				server = &cls.globalServers[n];
@@ -377,11 +351,7 @@ static serverInfo_t *LAN_GetServerPtr( int source, int n ) {
 				return &cls.localServers[n];
 			}
 			break;
-		case AS_MPLAYER :
-			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				return &cls.mplayerServers[n];
-			}
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
 				return &cls.globalServers[n];
@@ -514,9 +484,7 @@ static void LAN_MarkServerVisible(int source, int n, qboolean visible ) {
 			case AS_LOCAL :
 				server = &cls.localServers[0];
 				break;
-			case AS_MPLAYER :
-				server = &cls.mplayerServers[0];
-				break;
+			case AS_MPLAYER:
 			case AS_GLOBAL :
 				server = &cls.globalServers[0];
 				count = MAX_GLOBAL_SERVERS;
@@ -538,11 +506,7 @@ static void LAN_MarkServerVisible(int source, int n, qboolean visible ) {
 					cls.localServers[n].visible = visible;
 				}
 				break;
-			case AS_MPLAYER :
-				if (n >= 0 && n < MAX_OTHER_SERVERS) {
-					cls.mplayerServers[n].visible = visible;
-				}
-				break;
+			case AS_MPLAYER:
 			case AS_GLOBAL :
 				if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
 					cls.globalServers[n].visible = visible;
@@ -570,11 +534,7 @@ static int LAN_ServerIsVisible(int source, int n ) {
 				return cls.localServers[n].visible;
 			}
 			break;
-		case AS_MPLAYER :
-			if (n >= 0 && n < MAX_OTHER_SERVERS) {
-				return cls.mplayerServers[n].visible;
-			}
-			break;
+		case AS_MPLAYER:
 		case AS_GLOBAL :
 			if (n >= 0 && n < MAX_GLOBAL_SERVERS) {
 				return cls.globalServers[n].visible;
@@ -618,10 +578,10 @@ static void CL_GetGlconfig( glconfig_t *config ) {
 
 /*
 ====================
-GetClipboardData
+CL_GetClipboardData
 ====================
 */
-static void GetClipboardData( char *buf, int buflen ) {
+static void CL_GetClipboardData( char *buf, int buflen ) {
 	char	*cbd;
 
 	cbd = Sys_GetClipboardData();
@@ -664,29 +624,11 @@ static void Key_GetBindingBuf( int keynum, char *buf, int buflen ) {
 
 /*
 ====================
-Key_GetCatcher
-====================
-*/
-int Key_GetCatcher( void ) {
-	return cls.keyCatchers;
-}
-
-/*
-====================
-Ket_SetCatcher
-====================
-*/
-void Key_SetCatcher( int catcher ) {
-	cls.keyCatchers = catcher;
-}
-
-
-/*
-====================
 CLUI_GetCDKey
 ====================
 */
 static void CLUI_GetCDKey( char *buf, int buflen ) {
+#ifndef STANDALONE
 	cvar_t	*fs;
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
 	if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
@@ -696,6 +638,9 @@ static void CLUI_GetCDKey( char *buf, int buflen ) {
 		Com_Memcpy( buf, cl_cdkey, 16);
 		buf[16] = 0;
 	}
+#else
+	*buf = 0;
+#endif
 }
 
 
@@ -704,6 +649,7 @@ static void CLUI_GetCDKey( char *buf, int buflen ) {
 CLUI_SetCDKey
 ====================
 */
+#ifndef STANDALONE
 static void CLUI_SetCDKey( char *buf ) {
 	cvar_t	*fs;
 	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
@@ -718,6 +664,7 @@ static void CLUI_SetCDKey( char *buf ) {
 		cvar_modifiedFlags |= CVAR_ARCHIVE;
 	}
 }
+#endif
 
 /*
 ====================
@@ -750,16 +697,10 @@ FloatAsInt
 ====================
 */
 static int FloatAsInt( float f ) {
-	int		temp;
-
-	*(float *)&temp = f;
-
-	return temp;
+	floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
-
-void *VM_ArgPtr( int intValue );
-#define	VMA(x) VM_ArgPtr(args[x])
-#define	VMF(x)	((float *)args)[x]
 
 /*
 ====================
@@ -768,14 +709,14 @@ CL_UISystemCalls
 The ui module is making a system call
 ====================
 */
-int CL_UISystemCalls( int *args ) {
+intptr_t CL_UISystemCalls( intptr_t *args ) {
 	switch( args[0] ) {
 	case UI_ERROR:
-		Com_Error( ERR_DROP, "%s", VMA(1) );
+		Com_Error( ERR_DROP, "%s", (const char*)VMA(1) );
 		return 0;
 
 	case UI_PRINT:
-		Com_Printf( "%s", VMA(1) );
+		Com_Printf( "%s", (const char*)VMA(1) );
 		return 0;
 
 	case UI_MILLISECONDS:
@@ -790,7 +731,7 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_CVAR_SET:
-		Cvar_Set( VMA(1), VMA(2) );
+		Cvar_SetSafe( VMA(1), VMA(2) );
 		return 0;
 
 	case UI_CVAR_VARIABLEVALUE:
@@ -801,7 +742,7 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_CVAR_SETVALUE:
-		Cvar_SetValue( VMA(1), VMF(2) );
+		Cvar_SetValueSafe( VMA(1), VMF(2) );
 		return 0;
 
 	case UI_CVAR_RESET:
@@ -809,7 +750,7 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_CVAR_CREATE:
-		Cvar_Get( VMA(1), VMA(2), args[3] );
+		Cvar_Register( NULL, VMA(1), VMA(2), args[3] );
 		return 0;
 
 	case UI_CVAR_INFOSTRINGBUFFER:
@@ -824,6 +765,14 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_CMD_EXECUTETEXT:
+		if(args[1] == EXEC_NOW
+		&& (!strncmp(VMA(2), "snd_restart", 11)
+		|| !strncmp(VMA(2), "vid_restart", 11)
+		|| !strncmp(VMA(2), "quit", 5)))
+		{
+			Com_Printf (S_COLOR_YELLOW "turning EXEC_NOW '%.11s' into EXEC_INSERT\n", (const char*)VMA(2));
+			args[1] = EXEC_INSERT;
+		}
 		Cbuf_ExecuteText( args[1], VMA(2) );
 		return 0;
 
@@ -934,11 +883,12 @@ int CL_UISystemCalls( int *args ) {
 		return Key_GetCatcher();
 
 	case UI_KEY_SETCATCHER:
-		Key_SetCatcher( args[1] );
+		// Don't allow the ui module to close the console
+		Key_SetCatcher( args[1] | ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) );
 		return 0;
 
 	case UI_GETCLIPBOARDDATA:
-		GetClipboardData( VMA(1), args[2] );
+		CL_GetClipboardData( VMA(1), args[2] );
 		return 0;
 
 	case UI_GETCLIENTSTATE:
@@ -1024,7 +974,9 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_SET_CDKEY:
+#ifndef STANDALONE
 		CLUI_SetCDKey( VMA(1) );
+#endif
 		return 0;
 	
 	case UI_SET_PBCLSTATUS:
@@ -1043,7 +995,8 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_STRNCPY:
-		return (int)strncpy( VMA(1), VMA(2), args[3] );
+		strncpy( VMA(1), VMA(2), args[3] );
+		return args[1];
 
 	case UI_SIN:
 		return FloatAsInt( sin( VMF(1) ) );
@@ -1108,11 +1061,9 @@ int CL_UISystemCalls( int *args ) {
 
 	case UI_VERIFY_CDKEY:
 		return CL_CDKeyValidate(VMA(1), VMA(2));
-
-
 		
 	default:
-		Com_Error( ERR_DROP, "Bad UI system trap: %i", args[0] );
+		Com_Error( ERR_DROP, "Bad UI system trap: %ld", (long int) args[0] );
 
 	}
 
@@ -1125,7 +1076,7 @@ CL_ShutdownUI
 ====================
 */
 void CL_ShutdownUI( void ) {
-	cls.keyCatchers &= ~KEYCATCH_UI;
+	Key_SetCatcher( Key_GetCatcher( ) & ~KEYCATCH_UI );
 	cls.uiStarted = qfalse;
 	if ( !uivm ) {
 		return;
@@ -1147,13 +1098,14 @@ void CL_InitUI( void ) {
 	vmInterpret_t		interpret;
 
 	// load the dll or bytecode
-	if ( cl_connectedToPureServer != 0 ) {
+	interpret = Cvar_VariableValue("vm_ui");
+	if(cl_connectedToPureServer)
+	{
 		// if sv_pure is set we only allow qvms to be loaded
-		interpret = VMI_COMPILED;
+		if(interpret != VMI_COMPILED && interpret != VMI_BYTECODE)
+			interpret = VMI_COMPILED;
 	}
-	else {
-		interpret = Cvar_VariableValue( "vm_ui" );
-	}
+
 	uivm = VM_Create( "ui", CL_UISystemCalls, interpret );
 	if ( !uivm ) {
 		Com_Error( ERR_FATAL, "VM_Create on UI failed" );
@@ -1164,25 +1116,31 @@ void CL_InitUI( void ) {
 	if (v == UI_OLD_API_VERSION) {
 //		Com_Printf(S_COLOR_YELLOW "WARNING: loading old Quake III Arena User Interface version %d\n", v );
 		// init for this gamestate
-		VM_Call( uivm, UI_INIT, (cls.state >= CA_AUTHORIZING && cls.state < CA_ACTIVE));
+		VM_Call( uivm, UI_INIT, (clc.state >= CA_AUTHORIZING && clc.state < CA_ACTIVE));
 	}
 	else if (v != UI_API_VERSION) {
+		// Free uivm now, so UI_SHUTDOWN doesn't get called later.
+		VM_Free( uivm );
+		uivm = NULL;
+
 		Com_Error( ERR_DROP, "User Interface is version %d, expected %d", v, UI_API_VERSION );
 		cls.uiStarted = qfalse;
 	}
 	else {
 		// init for this gamestate
-		VM_Call( uivm, UI_INIT, (cls.state >= CA_AUTHORIZING && cls.state < CA_ACTIVE) );
+		VM_Call( uivm, UI_INIT, (clc.state >= CA_AUTHORIZING && clc.state < CA_ACTIVE) );
 	}
 }
 
-qboolean UI_usesUniqueCDKey() {
+#ifndef STANDALONE
+qboolean UI_usesUniqueCDKey( void ) {
 	if (uivm) {
 		return (VM_Call( uivm, UI_HASUNIQUECDKEY) == qtrue);
 	} else {
 		return qfalse;
 	}
 }
+#endif
 
 /*
 ====================

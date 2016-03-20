@@ -15,14 +15,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
 #include "snd_local.h"
-
-long myftol( float f );
 
 #define C0 0.4829629131445341
 #define C1 0.8365163037378079
@@ -31,7 +29,7 @@ long myftol( float f );
 
 void daub4(float b[], unsigned long n, int isign)
 {
-	float wksp[4097];
+	float wksp[4097] = { 0.0f };
 	float	*a=b-1;						// numerical recipies so a[1] = b[0]
 
 	unsigned long nh,nh1,i,j;
@@ -121,7 +119,7 @@ void NXPutc(NXStream *stream, char out) {
 
 
 void encodeWavelet( sfx_t *sfx, short *packets) {
-	float	wksp[4097], temp;
+	float	wksp[4097] = {0}, temp;
 	int		i, samples, size;
 	sndBuffer		*newchunk, *chunk;
 	byte			*out;
@@ -148,7 +146,7 @@ void encodeWavelet( sfx_t *sfx, short *packets) {
 		newchunk = SND_malloc();
 		if (sfx->soundData == NULL) {
 			sfx->soundData = newchunk;
-		} else {
+		} else if (chunk != NULL) {
 			chunk->next = newchunk;
 		}
 		chunk = newchunk;
@@ -171,7 +169,7 @@ void encodeWavelet( sfx_t *sfx, short *packets) {
 }
 
 void decodeWavelet(sndBuffer *chunk, short *to) {
-	float			wksp[4097];
+	float			wksp[4097] = {0};
 	int				i;
 	byte			*out;
 
@@ -217,7 +215,7 @@ void encodeMuLaw( sfx_t *sfx, short *packets) {
 		newchunk = SND_malloc();
 		if (sfx->soundData == NULL) {
 			sfx->soundData = newchunk;
-		} else {
+		} else if (chunk != NULL) {
 			chunk->next = newchunk;
 		}
 		chunk = newchunk;

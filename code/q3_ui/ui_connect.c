@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -82,16 +82,7 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 	downloadCount = trap_Cvar_VariableValue( "cl_downloadCount" );
 	downloadTime = trap_Cvar_VariableValue( "cl_downloadTime" );
 
-#if 0 // bk010104
-	fprintf( stderr, "\n\n-----------------------------------------------\n");
-	fprintf( stderr, "DB: downloadSize:  %16d\n", downloadSize );
-	fprintf( stderr, "DB: downloadCount: %16d\n", downloadCount );
-	fprintf( stderr, "DB: downloadTime:  %16d\n", downloadTime );  
-  	fprintf( stderr, "DB: UI realtime:   %16d\n", uis.realtime );	// bk
-	fprintf( stderr, "DB: UI frametime:  %16d\n", uis.frametime );	// bk
-#endif
-
-	leftWidth = width = UI_ProportionalStringWidth( dlText ) * UI_ProportionalSizeScale( style );
+	leftWidth = UI_ProportionalStringWidth( dlText ) * UI_ProportionalSizeScale( style );
 	width = UI_ProportionalStringWidth( etaText ) * UI_ProportionalSizeScale( style );
 	if (width > leftWidth) leftWidth = width;
 	width = UI_ProportionalStringWidth( xferText ) * UI_ProportionalSizeScale( style );
@@ -103,7 +94,7 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 	UI_DrawProportionalString( 8, 224, xferText, style, color_white );
 
 	if (downloadSize > 0) {
-		s = va( "%s (%d%%)", downloadName, downloadCount * 100 / downloadSize );
+		s = va( "%s (%d%%)", downloadName, (int)( (float)downloadCount * 100.0f / downloadSize ) );
 	} else {
 		s = downloadName;
 	}
@@ -118,19 +109,12 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 		UI_DrawProportionalString( leftWidth, 192, 
 			va("(%s of %s copied)", dlSizeBuf, totalSizeBuf), style, color_white );
 	} else {
-	  // bk010108
-	  //float elapsedTime = (float)(uis.realtime - downloadTime); // current - start (msecs)
-	  //elapsedTime = elapsedTime * 0.001f; // in seconds
-	  //if ( elapsedTime <= 0.0f ) elapsedTime == 0.0f;
 	  if ( (uis.realtime - downloadTime) / 1000) {
 			xferRate = downloadCount / ((uis.realtime - downloadTime) / 1000);
 		  //xferRate = (int)( ((float)downloadCount) / elapsedTime);
 		} else {
 			xferRate = 0;
 		}
-
-	  //fprintf( stderr, "DB: elapsedTime:  %16.8f\n", elapsedTime );	// bk
-	  //fprintf( stderr, "DB: xferRate:   %16d\n", xferRate );	// bk
 
 		UI_ReadableSize( xferRateBuf, sizeof xferRateBuf, xferRate );
 
@@ -141,7 +125,7 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 			// We do it in K (/1024) because we'd overflow around 4MB
 			n = (n - (((downloadCount/1024) * n) / (downloadSize/1024))) * 1000;
 			
-			UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf, n ); // bk010104
+			UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf, n );
 				//(n - (((downloadCount/1024) * n) / (downloadSize/1024))) * 1000);
 
 			UI_DrawProportionalString( leftWidth, 160, 

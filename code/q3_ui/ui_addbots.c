@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -59,10 +59,16 @@ ADD BOTS MENU
 
 typedef struct {
 	menuframework_s	menu;
+
+	menutext_s		banner;
+	menubitmap_s	background;
+
 	menubitmap_s	arrows;
 	menubitmap_s	up;
 	menubitmap_s	down;
+
 	menutext_s		bots[7];
+
 	menulist_s		skill;
 	menulist_s		team;
 	menubitmap_s	go;
@@ -215,21 +221,6 @@ static void UI_AddBotsMenu_GetSortedBotNums( void ) {
 	qsort( addBotsMenuInfo.sortedBotNums, addBotsMenuInfo.numBots, sizeof(addBotsMenuInfo.sortedBotNums[0]), UI_AddBotsMenu_SortCompare );
 }
 
-
-/*
-=================
-UI_AddBotsMenu_Draw
-=================
-*/
-static void UI_AddBotsMenu_Draw( void ) {
-	UI_DrawBannerString( 320, 16, "ADD BOTS", UI_CENTER, color_white );
-	UI_DrawNamedPic( 320-233, 240-166, 466, 332, ART_BACKGROUND );
-
-	// standard menu drawing
-	Menu_Draw( &addBotsMenuInfo.menu );
-}
-
-	
 /*
 =================
 UI_AddBotsMenu_Init
@@ -241,18 +232,18 @@ static const char *skillNames[] = {
 	"Hurt Me Plenty",
 	"Hardcore",
 	"Nightmare!",
-	0
+	NULL
 };
 
 static const char *teamNames1[] = {
 	"Free",
-	0
+	NULL
 };
 
 static const char *teamNames2[] = {
 	"Red",
 	"Blue",
-	0
+	NULL
 };
 
 static void UI_AddBotsMenu_Init( void ) {
@@ -266,7 +257,6 @@ static void UI_AddBotsMenu_Init( void ) {
 	gametype = atoi( Info_ValueForKey( info,"g_gametype" ) );
 
 	memset( &addBotsMenuInfo, 0 ,sizeof(addBotsMenuInfo) );
-	addBotsMenuInfo.menu.draw = UI_AddBotsMenu_Draw;
 	addBotsMenuInfo.menu.fullscreen = qfalse;
 	addBotsMenuInfo.menu.wrapAround = qtrue;
 	addBotsMenuInfo.delay = 1000;
@@ -275,6 +265,21 @@ static void UI_AddBotsMenu_Init( void ) {
 
 	addBotsMenuInfo.numBots = UI_GetNumBots();
 	count = addBotsMenuInfo.numBots < 7 ? addBotsMenuInfo.numBots : 7;
+
+	addBotsMenuInfo.banner.generic.type			= MTYPE_BTEXT;
+	addBotsMenuInfo.banner.generic.x			= 320;
+	addBotsMenuInfo.banner.generic.y			= 16;
+	addBotsMenuInfo.banner.string				= "ADD BOTS";
+	addBotsMenuInfo.banner.color				= color_white;
+	addBotsMenuInfo.banner.style				= UI_CENTER;
+
+	addBotsMenuInfo.background.generic.type		= MTYPE_BITMAP;
+	addBotsMenuInfo.background.generic.name		= ART_BACKGROUND;
+	addBotsMenuInfo.background.generic.flags	= QMF_INACTIVE;
+	addBotsMenuInfo.background.generic.x		= 320-233;
+	addBotsMenuInfo.background.generic.y		= 240-166;
+	addBotsMenuInfo.background.width			= 466;
+	addBotsMenuInfo.background.height			= 332;
 
 	addBotsMenuInfo.arrows.generic.type  = MTYPE_BITMAP;
 	addBotsMenuInfo.arrows.generic.name  = ART_ARROWS;
@@ -370,8 +375,9 @@ static void UI_AddBotsMenu_Init( void ) {
 	UI_AddBotsMenu_GetSortedBotNums();
 	UI_AddBotsMenu_SetBotNames();
 
+	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.background );
+	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.banner );
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.arrows );
-
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.up );
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.down );
 	for( n = 0; n < count; n++ ) {

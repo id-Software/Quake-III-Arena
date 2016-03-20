@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -74,7 +74,7 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 ===================
 CG_AllocLocalEntity
 
-Will allways succeed, even if it requires freeing an old active entity
+Will always succeed, even if it requires freeing an old active entity
 ===================
 */
 localEntity_t	*CG_AllocLocalEntity( void ) {
@@ -298,7 +298,7 @@ void CG_AddFragment( localEntity_t *le ) {
 	// if it is in a nodrop zone, remove it
 	// this keeps gibs from waiting at the bottom of pits of death
 	// and floating levels
-	if ( trap_CM_PointContents( trace.endpos, 0 ) & CONTENTS_NODROP ) {
+	if ( CG_PointContents( trace.endpos, 0 ) & CONTENTS_NODROP ) {
 		CG_FreeLocalEntity( le );
 		return;
 	}
@@ -628,9 +628,6 @@ void CG_AddKamikaze( localEntity_t *le ) {
 			le->angles.trBase[0] = random() * 360;
 			le->angles.trBase[1] = random() * 360;
 			le->angles.trBase[2] = random() * 360;
-		}
-		else {
-			c = 0;
 		}
 		memset(&shockwave, 0, sizeof(shockwave));
 		shockwave.hModel = cgs.media.kamikazeShockWave;

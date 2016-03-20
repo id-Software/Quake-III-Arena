@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:cgame.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:game.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:q3_ui.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ui.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:renderer_opengl1.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:renderer_opengl2.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:botlib.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:jpeg8.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:speex.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:ioquake3.xcodeproj">
+   </FileRef>
+</Workspace>

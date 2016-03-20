@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -28,25 +28,28 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #error "Do not use in VM build"
 #endif
 
-static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
+static intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
 
 
-void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
+Q_EXPORT void dllEntry( intptr_t (QDECL *syscallptr)( intptr_t arg,... ) ) {
 	syscall = syscallptr;
 }
 
 int PASSFLOAT( float x ) {
-	float	floatTemp;
-	floatTemp = x;
-	return *(int *)&floatTemp;
+	floatint_t fi;
+	fi.f = x;
+	return fi.i;
 }
 
-void	trap_Printf( const char *fmt ) {
-	syscall( G_PRINT, fmt );
+void	trap_Print( const char *text ) {
+	syscall( G_PRINT, text );
 }
 
-void	trap_Error( const char *fmt ) {
-	syscall( G_ERROR, fmt );
+void trap_Error( const char *text )
+{
+	syscall( G_ERROR, text );
+	// shut up GCC warning about returning functions, because we know better
+	exit(1);
 }
 
 int		trap_Milliseconds( void ) {
@@ -225,7 +228,6 @@ int trap_RealTime( qtime_t *qtime ) {
 
 void trap_SnapVector( float *v ) {
 	syscall( G_SNAPVECTOR, v );
-	return;
 }
 
 // BotLib traps start here
@@ -290,9 +292,9 @@ void trap_AAS_PresenceTypeBoundingBox(int presencetype, vec3_t mins, vec3_t maxs
 }
 
 float trap_AAS_Time(void) {
-	int temp;
-	temp = syscall( BOTLIB_AAS_TIME );
-	return (*(float*)&temp);
+	floatint_t fi;
+	fi.i = syscall( BOTLIB_AAS_TIME );
+	return fi.f;
 }
 
 int trap_AAS_PointAreaNum(vec3_t point) {
@@ -476,15 +478,15 @@ void trap_BotFreeCharacter(int character) {
 }
 
 float trap_Characteristic_Float(int character, int index) {
-	int temp;
-	temp = syscall( BOTLIB_AI_CHARACTERISTIC_FLOAT, character, index );
-	return (*(float*)&temp);
+	floatint_t fi;
+	fi.i = syscall( BOTLIB_AI_CHARACTERISTIC_FLOAT, character, index );
+	return fi.f;
 }
 
 float trap_Characteristic_BFloat(int character, int index, float min, float max) {
-	int temp;
-	temp = syscall( BOTLIB_AI_CHARACTERISTIC_BFLOAT, character, index, PASSFLOAT(min), PASSFLOAT(max) );
-	return (*(float*)&temp);
+	floatint_t fi;
+	fi.i = syscall( BOTLIB_AI_CHARACTERISTIC_BFLOAT, character, index, PASSFLOAT(min), PASSFLOAT(max) );
+	return fi.f;
 }
 
 int trap_Characteristic_Integer(int character, int index) {
@@ -652,9 +654,9 @@ int trap_BotGetMapLocationGoal(char *name, void /* struct bot_goal_s */ *goal) {
 }
 
 float trap_BotAvoidGoalTime(int goalstate, int number) {
-	int temp;
-	temp = syscall( BOTLIB_AI_AVOID_GOAL_TIME, goalstate, number );
-	return (*(float*)&temp);
+	floatint_t fi;
+	fi.i = syscall( BOTLIB_AI_AVOID_GOAL_TIME, goalstate, number );
+	return fi.f;
 }
 
 void trap_BotSetAvoidGoalTime(int goalstate, int number, float avoidtime) {
@@ -686,7 +688,7 @@ void trap_BotSaveGoalFuzzyLogic(int goalstate, char *filename) {
 }
 
 void trap_BotMutateGoalFuzzyLogic(int goalstate, float range) {
-	syscall( BOTLIB_AI_MUTATE_GOAL_FUZZY_LOGIC, goalstate, range );
+	syscall( BOTLIB_AI_MUTATE_GOAL_FUZZY_LOGIC, goalstate, PASSFLOAT(range) );
 }
 
 int trap_BotAllocGoalState(int state) {

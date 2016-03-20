@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -327,7 +327,6 @@ void Bitmap_Draw( menubitmap_s *b )
 		if (b->shader)
 			UI_DrawHandlePic( x, y, w, h, b->shader );
 
-		// bk001204 - parentheses
 		if (  ( (b->generic.flags & QMF_PULSE) 
 			|| (b->generic.flags & QMF_PULSEIFFOCUS) )
 		      && (Menu_ItemAtCursor( b->generic.parent ) == b))
@@ -799,6 +798,8 @@ static sfxHandle_t SpinControl_Key( menulist_s *s, int key )
 	sound = 0;
 	switch (key)
 	{
+		case K_KP_RIGHTARROW:
+		case K_RIGHTARROW:
 		case K_MOUSE1:
 			s->curvalue++;
 			if (s->curvalue >= s->numitems)
@@ -808,24 +809,10 @@ static sfxHandle_t SpinControl_Key( menulist_s *s, int key )
 		
 		case K_KP_LEFTARROW:
 		case K_LEFTARROW:
-			if (s->curvalue > 0)
-			{
-				s->curvalue--;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
-			break;
-
-		case K_KP_RIGHTARROW:
-		case K_RIGHTARROW:
-			if (s->curvalue < s->numitems-1)
-			{
-				s->curvalue++;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
+			s->curvalue--;
+			if (s->curvalue < 0)
+				s->curvalue = s->numitems-1;
+			sound = menu_move_sound;
 			break;
 	}
 
@@ -1554,7 +1541,7 @@ Menu_ItemAtCursor
 void *Menu_ItemAtCursor( menuframework_s *m )
 {
 	if ( m->cursor < 0 || m->cursor >= m->nitems )
-		return 0;
+		return NULL;
 
 	return m->items[m->cursor];
 }

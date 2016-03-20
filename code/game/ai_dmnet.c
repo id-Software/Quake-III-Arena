@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -31,15 +31,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *****************************************************************************/
 
 #include "g_local.h"
-#include "botlib.h"
-#include "be_aas.h"
-#include "be_ea.h"
-#include "be_ai_char.h"
-#include "be_ai_chat.h"
-#include "be_ai_gen.h"
-#include "be_ai_goal.h"
-#include "be_ai_move.h"
-#include "be_ai_weap.h"
+#include "../botlib/botlib.h"
+#include "../botlib/be_aas.h"
+#include "../botlib/be_ea.h"
+#include "../botlib/be_ai_char.h"
+#include "../botlib/be_ai_chat.h"
+#include "../botlib/be_ai_gen.h"
+#include "../botlib/be_ai_goal.h"
+#include "../botlib/be_ai_move.h"
+#include "../botlib/be_ai_weap.h"
 //
 #include "ai_main.h"
 #include "ai_dmq3.h"
@@ -56,7 +56,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // for the voice chats
 #include "../../ui/menudef.h"
 
-//goal flag, see be_ai_goal.h for the other GFL_*
+//goal flag, see ../botlib/be_ai_goal.h for the other GFL_*
 #define GFL_AIR			128
 
 int numnodeswitches;
@@ -85,7 +85,7 @@ void BotDumpNodeSwitches(bot_state_t *bs) {
 	ClientName(bs->client, netname, sizeof(netname));
 	BotAI_Print(PRT_MESSAGE, "%s at %1.1f switched more than %d AI nodes\n", netname, FloatTime(), MAX_NODESWITCHES);
 	for (i = 0; i < numnodeswitches; i++) {
-		BotAI_Print(PRT_MESSAGE, nodeswitch[i]);
+		BotAI_Print(PRT_MESSAGE, "%s", nodeswitch[i]);
 	}
 	BotAI_Print(PRT_FATAL, "");
 }
@@ -102,7 +102,7 @@ void BotRecordNodeSwitch(bot_state_t *bs, char *node, char *str, char *s) {
 	Com_sprintf(nodeswitch[numnodeswitches], 144, "%s at %2.1f entered %s: %s from %s\n", netname, FloatTime(), node, str, s);
 #ifdef DEBUG
 	if (0) {
-		BotAI_Print(PRT_MESSAGE, nodeswitch[numnodeswitches]);
+		BotAI_Print(PRT_MESSAGE, "%s", nodeswitch[numnodeswitches]);
 	}
 #endif //DEBUG
 	numnodeswitches++;
@@ -193,8 +193,12 @@ int BotNearbyGoal(bot_state_t *bs, int tfl, bot_goal_t *ltg, float range) {
 
 	//check if the bot should go for air
 	if (BotGoForAir(bs, tfl, ltg, range)) return qtrue;
-	//if the bot is carrying the enemy flag
-	if (BotCTFCarryingFlag(bs)) {
+	// if the bot is carrying a flag or cubes
+	if (BotCTFCarryingFlag(bs)
+#ifdef MISSIONPACK
+		|| Bot1FCTFCarryingFlag(bs) || BotHarvesterCarryingCubes(bs)
+#endif
+		) {
 		//if the bot is just a few secs away from the base 
 		if (trap_AAS_AreaTravelTimeToGoalArea(bs->areanum, bs->origin,
 				bs->teamgoal.areanum, TFL_DEFAULT) < 300) {
@@ -684,9 +688,7 @@ int BotGetLongTermGoal(bot_state_t *bs, int tfl, int retreat, bot_goal_t *goal) 
 				bs->ltgtype = 0;
 			}
 			//
-			if (bs->camp_range > 0) {
-				//FIXME: move around a bit
-			}
+			//FIXME: move around a bit
 			//
 			trap_BotResetAvoidReach(bs->ms);
 			return qfalse;
@@ -1305,7 +1307,11 @@ int BotSelectActivateWeapon(bot_state_t *bs) {
 		return WEAPONINDEX_CHAINGUN;
 	else if (bs->inventory[INVENTORY_NAILGUN] > 0 && bs->inventory[INVENTORY_NAILS] > 0)
 		return WEAPONINDEX_NAILGUN;
+	else if (bs->inventory[INVENTORY_PROXLAUNCHER] > 0 && bs->inventory[INVENTORY_MINES] > 0)
+		return WEAPONINDEX_PROXLAUNCHER;
 #endif
+	else if (bs->inventory[INVENTORY_GRENADELAUNCHER] > 0 && bs->inventory[INVENTORY_GRENADES] > 0)
+		return WEAPONINDEX_GRENADE_LAUNCHER;
 	else if (bs->inventory[INVENTORY_RAILGUN] > 0 && bs->inventory[INVENTORY_SLUGS] > 0)
 		return WEAPONINDEX_RAILGUN;
 	else if (bs->inventory[INVENTORY_ROCKETLAUNCHER] > 0 && bs->inventory[INVENTORY_ROCKETS] > 0)
@@ -1352,7 +1358,7 @@ void BotClearPath(bot_state_t *bs, bot_moveresult_t *moveresult) {
 				moveresult->flags |= MOVERESULT_MOVEMENTWEAPON | MOVERESULT_MOVEMENTVIEW;
 				// if holding the right weapon
 				if (bs->cur_ps.weapon == moveresult->weapon) {
-					// if the bot is pretty close with it's aim
+					// if the bot is pretty close with its aim
 					if (InFieldOfVision(bs->viewangles, 20, moveresult->ideal_viewangles)) {
 						//
 						BotAI_Trace(&bsptrace, bs->eye, NULL, NULL, target, bs->entitynum, MASK_SHOT);
@@ -1409,7 +1415,7 @@ void BotClearPath(bot_state_t *bs, bot_moveresult_t *moveresult) {
 				moveresult->flags |= MOVERESULT_MOVEMENTWEAPON | MOVERESULT_MOVEMENTVIEW;
 				// if holding the right weapon
 				if (bs->cur_ps.weapon == moveresult->weapon) {
-					// if the bot is pretty close with it's aim
+					// if the bot is pretty close with its aim
 					if (InFieldOfVision(bs->viewangles, 20, moveresult->ideal_viewangles)) {
 						//
 						BotAI_Trace(&bsptrace, bs->eye, NULL, NULL, target, bs->entitynum, MASK_SHOT);
@@ -1495,7 +1501,7 @@ int AINode_Seek_ActivateEntity(bot_state_t *bs) {
 			if (bs->cur_ps.weapon == bs->activatestack->weapon) {
 				VectorSubtract(bs->activatestack->target, bs->eye, dir);
 				vectoangles(dir, ideal_viewangles);
-				// if the bot is pretty close with it's aim
+				// if the bot is pretty close with its aim
 				if (InFieldOfVision(bs->viewangles, 20, ideal_viewangles)) {
 					trap_EA_Attack(bs->client);
 				}
@@ -1964,11 +1970,12 @@ void AIEnter_Battle_Fight(bot_state_t *bs, char *s) {
 	BotRecordNodeSwitch(bs, "battle fight", "", s);
 	trap_BotResetLastAvoidReach(bs->ms);
 	bs->ainode = AINode_Battle_Fight;
+	bs->flags &= ~BFL_FIGHTSUICIDAL;
 }
 
 /*
 ==================
-AIEnter_Battle_Fight
+AIEnter_Battle_SuicidalFight
 ==================
 */
 void AIEnter_Battle_SuicidalFight(bot_state_t *bs, char *s) {
@@ -2085,6 +2092,12 @@ int AINode_Battle_Fight(bot_state_t *bs) {
 	}
 	//if the enemy is not visible
 	if (!BotEntityVisible(bs->entitynum, bs->eye, bs->viewangles, 360, bs->enemy)) {
+#ifdef MISSIONPACK
+		if (bs->enemy == redobelisk.entitynum || bs->enemy == blueobelisk.entitynum) {
+			AIEnter_Battle_Chase(bs, "battle fight: obelisk out of sight");
+			return qfalse;
+		}
+#endif
 		if (BotWantsToChase(bs)) {
 			AIEnter_Battle_Chase(bs, "battle fight: enemy out of sight");
 			return qfalse;
@@ -2438,7 +2451,7 @@ int AINode_Battle_Retreat(bot_state_t *bs) {
 	else if (!(moveresult.flags & MOVERESULT_MOVEMENTVIEWSET)
 				&& !(bs->flags & BFL_IDEALVIEWSET) ) {
 		attack_skill = trap_Characteristic_BFloat(bs->character, CHARACTERISTIC_ATTACK_SKILL, 0, 1);
-		//if the bot is skilled anough
+		//if the bot is skilled enough
 		if (attack_skill > 0.3) {
 			BotAimAtEnemy(bs);
 		}
@@ -2584,7 +2597,7 @@ int AINode_Battle_NBG(bot_state_t *bs) {
 	else if (!(moveresult.flags & MOVERESULT_MOVEMENTVIEWSET)
 				&& !(bs->flags & BFL_IDEALVIEWSET)) {
 		attack_skill = trap_Characteristic_BFloat(bs->character, CHARACTERISTIC_ATTACK_SKILL, 0, 1);
-		//if the bot is skilled anough and the enemy is visible
+		//if the bot is skilled enough and the enemy is visible
 		if (attack_skill > 0.3) {
 			//&& BotEntityVisible(bs->entitynum, bs->eye, bs->viewangles, 360, bs->enemy)
 			BotAimAtEnemy(bs);

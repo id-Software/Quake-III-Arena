@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -42,7 +42,7 @@ typedef struct scrollInfo_s {
 
 static scrollInfo_t scrollInfo;
 
-static void (*captureFunc) (void *p) = NULL;
+static void (*captureFunc) (void *p) = 0;
 static void *captureData = NULL;
 static itemDef_t *itemCapture = NULL;   // item that has the mouse captured ( if any )
 
@@ -118,7 +118,7 @@ void UI_InitMemory( void ) {
 	outOfMemory = qfalse;
 }
 
-qboolean UI_OutOfMemory() {
+qboolean UI_OutOfMemory( void ) {
 	return outOfMemory;
 }
 
@@ -132,16 +132,16 @@ qboolean UI_OutOfMemory() {
 return a hash value for the string
 ================
 */
-static long hashForString(const char *str) {
+static unsigned hashForString(const char *str) {
 	int		i;
-	long	hash;
+	unsigned	hash;
 	char	letter;
 
 	hash = 0;
 	i = 0;
 	while (str[i] != '\0') {
 		letter = tolower(str[i]);
-		hash+=(long)(letter)*(i+119);
+		hash+=(unsigned)(letter)*(i+119);
 		i++;
 	}
 	hash &= (HASH_TABLE_SIZE-1);
@@ -162,7 +162,7 @@ static stringDef_t *strHandle[HASH_TABLE_SIZE];
 
 const char *String_Alloc(const char *p) {
 	int len;
-	long hash;
+	unsigned hash;
 	stringDef_t *str, *last;
 	static const char *staticNULL = "";
 
@@ -210,7 +210,7 @@ const char *String_Alloc(const char *p) {
 	return NULL;
 }
 
-void String_Report() {
+void String_Report(void) {
 	float f;
 	Com_Printf("Memory/String Pool Info\n");
 	Com_Printf("----------------\n");
@@ -229,10 +229,10 @@ void String_Report() {
 String_Init
 =================
 */
-void String_Init() {
+void String_Init(void) {
 	int i;
 	for (i = 0; i < HASH_TABLE_SIZE; i++) {
-		strHandle[i] = 0;
+		strHandle[i] = NULL;
 	}
 	strHandleCount = 0;
 	strPoolIndex = 0;
@@ -246,19 +246,20 @@ void String_Init() {
 	}
 }
 
+#if 0
 /*
 =================
 PC_SourceWarning
 =================
 */
-void PC_SourceWarning(int handle, char *format, ...) {
+static __attribute__ ((format (printf, 2, 3))) void PC_SourceWarning(int handle, char *format, ...) {
 	int line;
 	char filename[128];
 	va_list argptr;
 	static char string[4096];
 
 	va_start (argptr, format);
-	vsprintf (string, format, argptr);
+	Q_vsnprintf (string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	filename[0] = '\0';
@@ -267,20 +268,21 @@ void PC_SourceWarning(int handle, char *format, ...) {
 
 	Com_Printf(S_COLOR_YELLOW "WARNING: %s, line %d: %s\n", filename, line, string);
 }
+#endif
 
 /*
 =================
 PC_SourceError
 =================
 */
-void PC_SourceError(int handle, char *format, ...) {
+static __attribute__ ((format (printf, 2, 3))) void PC_SourceError(int handle, char *format, ...) {
 	int line;
 	char filename[128];
 	va_list argptr;
 	static char string[4096];
 
 	va_start (argptr, format);
-	vsprintf (string, format, argptr);
+	Q_vsnprintf (string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	filename[0] = '\0';
@@ -343,7 +345,7 @@ qboolean PC_Float_Parse(int handle, float *f) {
 		negative = qtrue;
 	}
 	if (token.type != TT_NUMBER) {
-		PC_SourceError(handle, "expected float but found %s\n", token.string);
+		PC_SourceError(handle, "expected float but found %s", token.string);
 		return qfalse;
 	}
 	if (negative)
@@ -415,6 +417,8 @@ qboolean PC_Int_Parse(int handle, int *i) {
 	pc_token_t token;
 	int negative = qfalse;
 
+	if (!i)
+		return qfalse;
 	if (!trap_PC_ReadToken(handle, &token))
 		return qfalse;
 	if (token.string[0] == '-') {
@@ -423,7 +427,7 @@ qboolean PC_Int_Parse(int handle, int *i) {
 		negative = qtrue;
 	}
 	if (token.type != TT_NUMBER) {
-		PC_SourceError(handle, "expected integer but found %s\n", token.string);
+		PC_SourceError(handle, "expected integer but found %s", token.string);
 		return qfalse;
 	}
 	*i = token.intvalue;
@@ -534,7 +538,7 @@ qboolean PC_Script_Parse(int handle, const char **out) {
 		}
 		Q_strcat(script, 1024, " ");
 	}
-	return qfalse; 	// bk001105 - LCC   missing return value
+	return qfalse;
 }
 
 // display, window, menu, item code
@@ -604,18 +608,23 @@ void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime, qboo
 
 void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle) {
   //float bordersize = 0;
-  vec4_t color;
-  rectDef_t fillRect = w->rect;
+  vec4_t color = {0};
+  rectDef_t fillRect;
 
+  if ( w == NULL ) {
+    return;
+  }
 
   if (debugMode) {
     color[0] = color[1] = color[2] = color[3] = 1;
     DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, 1, color);
   }
 
-  if (w == NULL || (w->style == 0 && w->border == 0)) {
+  if (w->style == 0 && w->border == 0) {
     return;
   }
+
+  fillRect = w->rect;
 
   if (w->border != 0) {
     fillRect.x += w->borderSize;
@@ -1032,7 +1041,7 @@ void Menus_CloseByName(const char *p) {
   }
 }
 
-void Menus_CloseAll() {
+void Menus_CloseAll(void) {
   int i;
   for (i = 0; i < menuCount; i++) {
 		Menu_RunCloseScript(&Menus[i]);
@@ -1258,7 +1267,7 @@ commandDef_t commandList[] =
   {"orbit", &Script_Orbit}                      // group/name
 };
 
-int scriptCommandCount = sizeof(commandList) / sizeof(commandDef_t);
+int scriptCommandCount = ARRAY_LEN(commandList);
 
 
 void Item_RunScript(itemDef_t *item, const char *s) {
@@ -1342,13 +1351,13 @@ qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
 	itemDef_t *oldFocus;
 	sfxHandle_t *sfx = &DC->Assets.itemFocusSound;
 	qboolean playSound = qfalse;
-	menuDef_t *parent; // bk001206: = (menuDef_t*)item->parent;
+	menuDef_t *parent;
 	// sanity check, non-null, not a decoration and does not already have the focus
 	if (item == NULL || item->window.flags & WINDOW_DECORATION || item->window.flags & WINDOW_HASFOCUS || !(item->window.flags & WINDOW_VISIBLE)) {
 		return qfalse;
 	}
 
-	// bk001206 - this can be NULL.
+	// this can be NULL
 	parent = (menuDef_t*)item->parent; 
       
 	// items can be enabled and disabled based on cvars
@@ -1489,7 +1498,7 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
 		x = item->window.rect.x;
 	}
 
-	if (editDef == NULL && item->cvar) {
+	if (!editDef || !item->cvar) {
 		return x;
 	}
 
@@ -1528,12 +1537,8 @@ int Item_Slider_OverSlider(itemDef_t *item, float x, float y) {
 
 int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
 	rectDef_t r;
-	listBoxDef_t *listPtr;
 	int thumbstart;
-	int count;
 
-	count = DC->feederCount(item->special);
-	listPtr = (listBoxDef_t*)item->typeData;
 	if (item->window.flags & WINDOW_HORIZONTAL) {
 		// check if on left arrow
 		r.x = item->window.rect.x;
@@ -2371,10 +2376,9 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
 	if (itemCapture) {
 		Item_StopCapture(itemCapture);
 		itemCapture = NULL;
-		captureFunc = NULL;
+		captureFunc = 0;
 		captureData = NULL;
 	} else {
-	  // bk001206 - parentheses
 		if ( down && ( key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 ) ) {
 			Item_StartCapture(item, key);
 		}
@@ -2513,7 +2517,7 @@ static void Menu_CloseCinematics(menuDef_t *menu) {
 	}
 }
 
-static void Display_CloseCinematics() {
+static void Display_CloseCinematics( void ) {
 	int i;
 	for (i = 0; i < menuCount; i++) {
 		Menu_CloseCinematics(&Menus[i]);
@@ -2537,7 +2541,7 @@ void  Menus_Activate(menuDef_t *menu) {
 
 }
 
-int Display_VisibleMenuCount() {
+int Display_VisibleMenuCount( void ) {
 	int i, count;
 	count = 0;
 	for (i = 0; i < menuCount; i++) {
@@ -2593,16 +2597,9 @@ static rectDef_t *Item_CorrectedTextRect(itemDef_t *item) {
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 	int i;
 	itemDef_t *item = NULL;
-	qboolean inHandler = qfalse;
 
-	if (inHandler) {
-		return;
-	}
-
-	inHandler = qtrue;
 	if (g_waitingForKey && down) {
 		Item_Bind_HandleKey(g_bindItem, key, down);
-		inHandler = qfalse;
 		return;
 	}
 
@@ -2610,7 +2607,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 		if (!Item_TextField_HandleKey(g_editItem, key)) {
 			g_editingField = qfalse;
 			g_editItem = NULL;
-			inHandler = qfalse;
 			return;
 		} else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
 			g_editingField = qfalse;
@@ -2622,19 +2618,16 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 	}
 
 	if (menu == NULL) {
-		inHandler = qfalse;
 		return;
 	}
 
-		// see if the mouse is within the window bounds and if so is this a mouse click
+	// see if the mouse is within the window bounds and if so is this a mouse click
 	if (down && !(menu->window.flags & WINDOW_POPUP) && !Rect_ContainsPoint(&menu->window.rect, DC->cursorx, DC->cursory)) {
 		static qboolean inHandleKey = qfalse;
-		// bk001206 - parentheses
 		if (!inHandleKey && ( key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 ) ) {
 			inHandleKey = qtrue;
 			Menus_HandleOOBClick(menu, key, down);
 			inHandleKey = qfalse;
-			inHandler = qfalse;
 			return;
 		}
 	}
@@ -2649,13 +2642,11 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 	if (item != NULL) {
 		if (Item_HandleKey(item, key, down)) {
 			Item_Action(item);
-			inHandler = qfalse;
 			return;
 		}
 	}
 
 	if (!down) {
-		inHandler = qfalse;
 		return;
 	}
 
@@ -2703,7 +2694,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 						item->cursorPos = 0;
 						g_editingField = qtrue;
 						g_editItem = item;
-						DC->setOverstrikeMode(qtrue);
 					}
 				} else {
 					if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory)) {
@@ -2741,14 +2731,12 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 					item->cursorPos = 0;
 					g_editingField = qtrue;
 					g_editItem = item;
-					DC->setOverstrikeMode(qtrue);
 				} else {
 						Item_Action(item);
 				}
 			}
 			break;
 	}
-	inHandler = qfalse;
 }
 
 void ToWindowCoords(float *x, float *y, windowDef_t *window) {
@@ -3040,8 +3028,6 @@ void Item_TextField_Paint(itemDef_t *item) {
 		DC->getCVarString(item->cvar, buff, sizeof(buff));
 	} 
 
-	parent = (menuDef_t*)item->parent;
-
 	if (item->window.flags & WINDOW_HASFOCUS) {
 		lowLight[0] = 0.8 * parent->focusColor[0]; 
 		lowLight[1] = 0.8 * parent->focusColor[1]; 
@@ -3115,7 +3101,6 @@ void Item_Multi_Paint(itemDef_t *item) {
 
 typedef struct {
 	char	*command;
-	int		id;
 	int		defaultbind1;
 	int		defaultbind2;
 	int		bind1;
@@ -3188,7 +3173,6 @@ static bind_t g_bindings[] =
 	{"tauntGauntlet", K_F5,			-1,		-1, -1},
 	{"scoresUp", K_KP_PGUP,			-1,		-1, -1},
 	{"scoresDown", K_KP_PGDN,			-1,		-1, -1},
-	// bk001205 - this one below was:  '-1' 
 	{"messagemode",  -1,					-1,		-1, -1},
 	{"messagemode2", -1,						-1,		-1, -1},
 	{"messagemode3", -1,						-1,		-1, -1},
@@ -3196,9 +3180,9 @@ static bind_t g_bindings[] =
 };
 
 
-static const int g_bindCount = sizeof(g_bindings) / sizeof(bind_t);
+static const int g_bindCount = ARRAY_LEN(g_bindings);
 
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static configcvar_t g_configcvars[] =
 {
 	{"cl_run",			0,					0},
@@ -3381,10 +3365,8 @@ void BindingFromName(const char *cvar) {
 
 void Item_Slider_Paint(itemDef_t *item) {
 	vec4_t newColor, lowLight;
-	float x, y, value;
+	float x, y;
 	menuDef_t *parent = (menuDef_t*)item->parent;
-
-	value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
 
 	if (item->window.flags & WINDOW_HASFOCUS) {
 		lowLight[0] = 0.8 * parent->focusColor[0]; 
@@ -3408,20 +3390,16 @@ void Item_Slider_Paint(itemDef_t *item) {
 
 	x = Item_Slider_ThumbPosition(item);
 	DC->drawHandlePic( x - (SLIDER_THUMB_WIDTH / 2), y - 2, SLIDER_THUMB_WIDTH, SLIDER_THUMB_HEIGHT, DC->Assets.sliderThumb );
-
 }
 
 void Item_Bind_Paint(itemDef_t *item) {
 	vec4_t newColor, lowLight;
-	float value;
 	int maxChars = 0;
 	menuDef_t *parent = (menuDef_t*)item->parent;
 	editFieldDef_t *editPtr = (editFieldDef_t*)item->typeData;
 	if (editPtr) {
 		maxChars = editPtr->maxPaintChars;
 	}
-
-	value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
 
 	if (item->window.flags & WINDOW_HASFOCUS) {
 		if (g_bindItem == item) {
@@ -3445,11 +3423,11 @@ void Item_Bind_Paint(itemDef_t *item) {
 		BindingFromName(item->cvar);
 		DC->drawText(item->textRect.x + item->textRect.w + 8, item->textRect.y, item->textscale, newColor, g_nameBind1, 0, maxChars, item->textStyle);
 	} else {
-		DC->drawText(item->textRect.x, item->textRect.y, item->textscale, newColor, (value != 0) ? "FIXME" : "FIXME", 0, maxChars, item->textStyle);
+		DC->drawText(item->textRect.x, item->textRect.y, item->textscale, newColor, "FIXME", 0, maxChars, item->textStyle);
 	}
 }
 
-qboolean Display_KeyBindPending() {
+qboolean Display_KeyBindPending(void) {
 	return g_waitingForKey;
 }
 
@@ -3650,7 +3628,8 @@ void Item_Image_Paint(itemDef_t *item) {
 }
 
 void Item_ListBox_Paint(itemDef_t *item) {
-	float x, y, size, count, i, thumb;
+	float x, y, size, thumb;
+	int	count, i;
 	qhandle_t image;
 	qhandle_t optionalImage;
 	listBoxDef_t *listPtr = (listBoxDef_t*)item->typeData;
@@ -3803,12 +3782,9 @@ void Item_ListBox_Paint(itemDef_t *item) {
 
 
 void Item_OwnerDraw_Paint(itemDef_t *item) {
-  menuDef_t *parent;
-
 	if (item == NULL) {
 		return;
 	}
-  parent = (menuDef_t*)item->parent;
 
 	if (DC->ownerDrawItem) {
 		vec4_t color, lowLight;
@@ -3842,7 +3818,7 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 		}
 
 		if (item->cvarFlags & (CVAR_ENABLE | CVAR_DISABLE) && !Item_EnableShowViaCvar(item, CVAR_ENABLE)) {
-		  memcpy(color, parent->disableColor, sizeof(vec4_t)); // bk001207 - FIXME: Com_Memcpy
+		  Com_Memcpy(color, parent->disableColor, sizeof(vec4_t));
 		}
 	
 		if (item->text) {
@@ -3862,13 +3838,16 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 void Item_Paint(itemDef_t *item) {
   vec4_t red;
-  menuDef_t *parent = (menuDef_t*)item->parent;
+  menuDef_t *parent;
+
   red[0] = red[3] = 1;
   red[1] = red[2] = 0;
 
   if (item == NULL) {
     return;
   }
+
+  parent = (menuDef_t*)item->parent;
 
   if (item->window.flags & WINDOW_ORBITING) {
     if (DC->realTime > item->window.nextTime) {
@@ -4075,7 +4054,7 @@ itemDef_t *Menu_GetFocusedItem(menuDef_t *menu) {
   return NULL;
 }
 
-menuDef_t *Menu_GetFocused() {
+menuDef_t *Menu_GetFocused(void) {
   int i;
   for (i = 0; i < menuCount; i++) {
     if (Menus[i].window.flags & WINDOW_HASFOCUS && Menus[i].window.flags & WINDOW_VISIBLE) {
@@ -4125,7 +4104,7 @@ void Menu_SetFeederSelection(menuDef_t *menu, int feeder, int index, const char 
 	}
 }
 
-qboolean Menus_AnyFullScreenVisible() {
+qboolean Menus_AnyFullScreenVisible(void) {
   int i;
   for (i = 0; i < menuCount; i++) {
     if (Menus[i].window.flags & WINDOW_VISIBLE && Menus[i].fullScreen) {
@@ -4156,6 +4135,10 @@ menuDef_t *Menus_ActivateByName(const char *p) {
 
 
 void Item_Init(itemDef_t *item) {
+	if (item == NULL) {
+		return;
+	}
+
 	memset(item, 0, sizeof(itemDef_t));
 	item->textscale = 0.55f;
 	Window_Init(&item->window);
@@ -4225,12 +4208,12 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y) {
 						}
 					}
 				}
-      } else if (menu->items[i]->window.flags & WINDOW_MOUSEOVER) {
-          Item_MouseLeave(menu->items[i]);
-          Item_SetMouseOver(menu->items[i], qfalse);
-      }
-    }
-  }
+			} else if (menu->items[i] && menu->items[i]->window.flags & WINDOW_MOUSEOVER) {
+				Item_MouseLeave(menu->items[i]);
+				Item_SetMouseOver(menu->items[i], qfalse);
+			}
+		}
+	}
 
 }
 
@@ -4939,7 +4922,7 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 	pass = 0;
 	while ( 1 ) {
 		if (!trap_PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
@@ -4964,7 +4947,7 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 		}
 
 	}
-	return qfalse; 	// bk001205 - LCC missing return value
+	return qfalse;
 }
 
 qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle ) {
@@ -4986,7 +4969,7 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle ) {
 
 	while ( 1 ) {
 		if (!trap_PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
@@ -5009,7 +4992,7 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle ) {
 		}
 
 	}
-	return qfalse; 	// bk001205 - LCC missing return value
+	return qfalse;
 }
 
 
@@ -5134,7 +5117,7 @@ keywordHash_t itemParseKeywords[] = {
 	{"hideCvar", ItemParse_hideCvar, NULL},
 	{"cinematic", ItemParse_cinematic, NULL},
 	{"doubleclick", ItemParse_doubleClick, NULL},
-	{NULL, NULL, NULL}
+	{NULL, 0, NULL}
 };
 
 keywordHash_t *itemParseKeywordHash[KEYWORDHASH_SIZE];
@@ -5155,6 +5138,42 @@ void Item_SetupKeywordHash(void) {
 
 /*
 ===============
+Item_ApplyHacks
+
+Hacks to fix issues with Team Arena menu scripts
+===============
+*/
+static void Item_ApplyHacks( itemDef_t *item ) {
+
+	// Fix length of favorite address in createfavorite.menu
+	if ( item->type == ITEM_TYPE_EDITFIELD && item->cvar && !Q_stricmp( item->cvar, "ui_favoriteAddress" ) ) {
+		editFieldDef_t *editField = (editFieldDef_t *)item->typeData;
+
+		// enough to hold an IPv6 address plus null
+		if ( editField->maxChars < 48 ) {
+			Com_Printf( "Extended create favorite address edit field length to hold an IPv6 address\n" );
+			editField->maxChars = 48;
+		}
+	}
+
+	if ( item->type == ITEM_TYPE_EDITFIELD && item->cvar && ( !Q_stricmp( item->cvar, "ui_Name" ) || !Q_stricmp( item->cvar, "ui_findplayer" ) ) ) {
+		editFieldDef_t *editField = (editFieldDef_t *)item->typeData;
+
+		// enough to hold a full player name
+		if ( editField->maxChars < MAX_NAME_LENGTH ) {
+			if ( editField->maxPaintChars > editField->maxChars ) {
+				editField->maxPaintChars = editField->maxChars;
+			}
+
+			Com_Printf( "Extended player name field using cvar %s to %d characters\n", item->cvar, MAX_NAME_LENGTH );
+			editField->maxChars = MAX_NAME_LENGTH;
+		}
+	}
+
+}
+
+/*
+===============
 Item_Parse
 ===============
 */
@@ -5170,11 +5189,12 @@ qboolean Item_Parse(int handle, itemDef_t *item) {
 	}
 	while ( 1 ) {
 		if (!trap_PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
 		if (*token.string == '}') {
+			Item_ApplyHacks( item );
 			return qtrue;
 		}
 
@@ -5188,7 +5208,7 @@ qboolean Item_Parse(int handle, itemDef_t *item) {
 			return qfalse;
 		}
 	}
-	return qfalse; 	// bk001205 - LCC missing return value
+	return qfalse;
 }
 
 
@@ -5242,9 +5262,16 @@ qboolean MenuParse_name( itemDef_t *item, int handle ) {
 
 qboolean MenuParse_fullscreen( itemDef_t *item, int handle ) {
 	menuDef_t *menu = (menuDef_t*)item;
-	if (!PC_Int_Parse(handle, (int*) &menu->fullScreen)) { // bk001206 - cast qboolean
+	union
+	{
+		qboolean b;
+		int i;
+	} fullScreen;
+
+	if (!PC_Int_Parse(handle, &fullScreen.i)) {
 		return qfalse;
 	}
+	menu->fullScreen = fullScreen.b;
 	return qtrue;
 }
 
@@ -5496,6 +5523,9 @@ qboolean MenuParse_itemDef( itemDef_t *item, int handle ) {
 	menuDef_t *menu = (menuDef_t*)item;
 	if (menu->itemCount < MAX_MENUITEMS) {
 		menu->items[menu->itemCount] = UI_Alloc(sizeof(itemDef_t));
+		if (!menu->items[menu->itemCount]) {
+			return qfalse;
+		}
 		Item_Init(menu->items[menu->itemCount]);
 		if (!Item_Parse(handle, menu->items[menu->itemCount])) {
 			return qfalse;
@@ -5535,7 +5565,7 @@ keywordHash_t menuParseKeywords[] = {
 	{"fadeClamp", MenuParse_fadeClamp, NULL},
 	{"fadeCycle", MenuParse_fadeCycle, NULL},
 	{"fadeAmount", MenuParse_fadeAmount, NULL},
-	{NULL, NULL, NULL}
+	{NULL, 0, NULL}
 };
 
 keywordHash_t *menuParseKeywordHash[KEYWORDHASH_SIZE];
@@ -5573,7 +5603,7 @@ qboolean Menu_Parse(int handle, menuDef_t *menu) {
 
 		memset(&token, 0, sizeof(pc_token_t));
 		if (!trap_PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu\n");
+			PC_SourceError(handle, "end of file inside menu");
 			return qfalse;
 		}
 
@@ -5591,7 +5621,7 @@ qboolean Menu_Parse(int handle, menuDef_t *menu) {
 			return qfalse;
 		}
 	}
-	return qfalse; 	// bk001205 - LCC missing return value
+	return qfalse;
 }
 
 /*
@@ -5611,11 +5641,11 @@ void Menu_New(int handle) {
 	}
 }
 
-int Menu_Count() {
+int Menu_Count(void) {
 	return menuCount;
 }
 
-void Menu_PaintAll() {
+void Menu_PaintAll(void) {
 	int i;
 	if (captureFunc) {
 		captureFunc(captureData);
@@ -5631,15 +5661,15 @@ void Menu_PaintAll() {
 	}
 }
 
-void Menu_Reset() {
+void Menu_Reset(void) {
 	menuCount = 0;
 }
 
-displayContextDef_t *Display_GetContext() {
+displayContextDef_t *Display_GetContext(void) {
 	return DC;
 }
  
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static float captureX;
 static float captureY;
 #endif
@@ -5740,7 +5770,7 @@ static void Menu_CacheContents(menuDef_t *menu) {
 
 }
 
-void Display_CacheAll() {
+void Display_CacheAll(void) {
 	int i;
 	for (i = 0; i < menuCount; i++) {
 		Menu_CacheContents(&Menus[i]);

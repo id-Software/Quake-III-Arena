@@ -1,0 +1,37 @@
+language: c
+
+env:
+  global:
+    # coverity token
+    - secure: "a2pGsG/+LS12sD/vgCF912TKBDDiT8PwRTH50eE94trQoHmD+bubIc4mXR9rSuU/NKNPdn6KZlqrVkVuoIanjYaf+rg28VavGMcBrtVO2cI1yjTUxb5Eq/cT20m3KfZCSFw3iWXfiK1CpDkm9Pdrr2Yz99EGZse3Y6jRGJ6giWM="
+  matrix:
+    # standard builds
+    - CC=gcc
+    - CC=clang
+    # extra libs
+    - CC=gcc USE_CODEC_VORBIS=1 USE_FREETYPE=1
+    - CC=clang USE_CODEC_VORBIS=1 USE_FREETYPE=1
+    # cross-compile using mingw
+    - CC= PLATFORM="mingw32" ARCH="x86"
+    - CC= PLATFORM="mingw32" ARCH="x86_64"
+
+script: ./travis-ci-build.sh
+
+before_install:
+  - echo "yes" | sudo apt-add-repository ppa:zoogie/sdl2-snapshots
+  - sudo apt-get update -qq
+  - sudo apt-get remove -qq -y mingw32
+  - sudo apt-get install -q -y libgl1-mesa-dev libsdl2-dev libfreetype6-dev mingw-w64
+
+notifications:
+  email: false
+
+addons:
+  coverity_scan:
+    project:
+      name: "ioquake/ioq3"
+      description: "Build submitted via Travis CI"
+    notification_email: quake3-commits@icculus.org
+    build_command_prepend: "make clean"
+    build_command: "make release"
+    branch_pattern: master

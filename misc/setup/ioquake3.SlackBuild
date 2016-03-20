@@ -1,0 +1,83 @@
+#!/bin/sh
+
+CWD=`pwd`
+BASE=$CWD/../..
+if [ "$TMP" = "" ]; then
+  TMP=/tmp
+fi
+
+# clean, update
+make -C $BASE clean || exit 1
+svn up $BASE || exit 1
+
+# extract version info
+VERSION=`grep "\#define *PRODUCT_VERSION" $BASE/code/qcommon/q_shared.h | \
+  sed -e 's/[^"]*"\(.*\)"/\1/'`
+
+SVN_REV=`LANG=C svnversion $BASE`
+if [ ! "$SVN_REV" = "" ]; then
+  VERSION=${VERSION}_SVN${SVN_REV}
+fi
+
+PKG_VERSION=$VERSION
+
+ARCH=${ARCH:-i586}
+
+if [ "$ARCH" = "i?86" ]; then
+  ARCHSUFFIX="i386"
+elif [ "$ARCH" = "x86_64" ]; then
+  ARCHSUFFIX="64"
+fi
+
+BUILD=${BUILD:-1_io}
+
+APP=ioquake3
+
+PKG=$TMP/package-$APP
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# build
+make -C $BASE release copyfiles COPYDIR="$PKG"/usr/games/$APP|| exit 1
+
+# copy additional files
+cp $BASE/BUGS $BASE/COPYING.txt $BASE/ChangeLog $BASE/README $PKG/usr/games/$APP/
+cat $CWD/$APP.SlackBuild > $PKG/usr/games/$APP/$APP.SlackBuild
+
+mkdir -p $PKG/usr/share/$APP/icons
+cp $BASE/misc/quake3.png $PKG/usr/share/$APP/icons/ioquake3.png
+
+mkdir -p $PKG/usr/bin
+cat >> $PKG/usr/bin/ioquake3 << EOF
+#!/bin/sh
+cd /usr/games/$APP/
+./ioquake3.${ARCHSUFFIX} \$*
+exit \$? 
+EOF
+chmod 754 $PKG/usr/bin/ioquake3
+
+mkdir -p $PKG/usr/bin
+cat >> $PKG/usr/bin/ioq3ded << EOF
+#!/bin/sh
+cd /usr/games/$APP/
+./ioq3ded.${ARCHSUFFIX} \$*
+exit \$? 
+EOF
+chmod 754 $PKG/usr/bin/ioq3ded
+
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+
+cat >> $PKG/install/doinst.sh << EOF
+chmod 754 /usr/games/$APP/*.${ARCHSUFFIX}
+chmod 754 /usr/bin/ioquake3 /usr/bin/ioq3ded
+EOF
+chmod +x $PKG/install/doinst.sh
+
+pushd $PKG
+chown -R root:root install/ || exit 1
+chown -R root:games usr/ || exit 1
+/sbin/makepkg -l y -c n $TMP/$APP-$VERSION-$ARCH-$BUILD.tgz
+popd
+

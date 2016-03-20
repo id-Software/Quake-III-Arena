@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "l_memory.h"
 #include "l_libvar.h"
 #include "l_utils.h"
@@ -38,8 +38,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "l_struct.h"
 #include "l_log.h"
 #include "aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "botlib.h"
+#include "be_aas.h"
 #include "be_aas_funcs.h"
 #include "be_interface.h"
 #include "be_aas_def.h"
@@ -60,100 +60,10 @@ void QDECL AAS_Error(char *fmt, ...)
 	va_list arglist;
 
 	va_start(arglist, fmt);
-	vsprintf(str, fmt, arglist);
+	Q_vsnprintf(str, sizeof(str), fmt, arglist);
 	va_end(arglist);
-	botimport.Print(PRT_FATAL, str);
+	botimport.Print(PRT_FATAL, "%s", str);
 } //end of the function AAS_Error
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-char *AAS_StringFromIndex(char *indexname, char *stringindex[], int numindexes, int index)
-{
-	if (!aasworld.indexessetup)
-	{
-		botimport.Print(PRT_ERROR, "%s: index %d not setup\n", indexname, index);
-		return "";
-	} //end if
-	if (index < 0 || index >= numindexes)
-	{
-		botimport.Print(PRT_ERROR, "%s: index %d out of range\n", indexname, index);
-		return "";
-	} //end if
-	if (!stringindex[index])
-	{
-		if (index)
-		{
-			botimport.Print(PRT_ERROR, "%s: reference to unused index %d\n", indexname, index);
-		} //end if
-		return "";
-	} //end if
-	return stringindex[index];
-} //end of the function AAS_StringFromIndex
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int AAS_IndexFromString(char *indexname, char *stringindex[], int numindexes, char *string)
-{
-	int i;
-	if (!aasworld.indexessetup)
-	{
-		botimport.Print(PRT_ERROR, "%s: index not setup \"%s\"\n", indexname, string);
-		return 0;
-	} //end if
-	for (i = 0; i < numindexes; i++)
-	{
-		if (!stringindex[i]) continue;
-		if (!Q_stricmp(stringindex[i], string)) return i;
-	} //end for
-	return 0;
-} //end of the function AAS_IndexFromString
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-char *AAS_ModelFromIndex(int index)
-{
-	return AAS_StringFromIndex("ModelFromIndex", &aasworld.configstrings[CS_MODELS], MAX_MODELS, index);
-} //end of the function AAS_ModelFromIndex
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int AAS_IndexFromModel(char *modelname)
-{
-	return AAS_IndexFromString("IndexFromModel", &aasworld.configstrings[CS_MODELS], MAX_MODELS, modelname);
-} //end of the function AAS_IndexFromModel
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void AAS_UpdateStringIndexes(int numconfigstrings, char *configstrings[])
-{
-	int i;
-	//set string pointers and copy the strings
-	for (i = 0; i < numconfigstrings; i++)
-	{
-		if (configstrings[i])
-		{
-			//if (aasworld.configstrings[i]) FreeMemory(aasworld.configstrings[i]);
-			aasworld.configstrings[i] = (char *) GetMemory(strlen(configstrings[i]) + 1);
-			strcpy(aasworld.configstrings[i], configstrings[i]);
-		} //end if
-	} //end for
-	aasworld.indexessetup = qtrue;
-} //end of the function AAS_UpdateStringIndexes
 //===========================================================================
 //
 // Parameter:				-
@@ -216,7 +126,7 @@ void AAS_ContinueInit(float time)
 		//save the AAS file
 		if (AAS_WriteAASFile(aasworld.filename))
 		{
-			botimport.Print(PRT_MESSAGE, "%s written succesfully\n", aasworld.filename);
+			botimport.Print(PRT_MESSAGE, "%s written successfully\n", aasworld.filename);
 		} //end if
 		else
 		{
@@ -247,7 +157,7 @@ int AAS_StartFrame(float time)
 	//
 	aasworld.frameroutingupdates = 0;
 	//
-	if (bot_developer)
+	if (botDeveloper)
 	{
 		if (LibVarGetValue("showcacheupdates"))
 		{
@@ -423,7 +333,7 @@ void AAS_Shutdown(void)
 	//aas has not been initialized
 	aasworld.initialized = qfalse;
 	//NOTE: as soon as a new .bsp file is loaded the .bsp file memory is
-	// freed an reallocated, so there's no need to free that memory here
+	// freed and reallocated, so there's no need to free that memory here
 	//print shutdown
 	botimport.Print(PRT_MESSAGE, "AAS shutdown.\n");
 } //end of the function AAS_Shutdown

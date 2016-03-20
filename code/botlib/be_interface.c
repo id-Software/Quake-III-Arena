@@ -15,13 +15,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
 /*****************************************************************************
- * name:		be_interface.c // bk010221 - FIXME - DEAD code elimination
+ * name:		be_interface.c
  *
  * desc:		bot library interface
  *
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "l_memory.h"
 #include "l_log.h"
 #include "l_libvar.h"
@@ -37,20 +37,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "l_precomp.h"
 #include "l_struct.h"
 #include "aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "botlib.h"
+#include "be_aas.h"
 #include "be_aas_funcs.h"
 #include "be_aas_def.h"
 #include "be_interface.h"
 
-#include "../game/be_ea.h"
+#include "be_ea.h"
 #include "be_ai_weight.h"
-#include "../game/be_ai_goal.h"
-#include "../game/be_ai_move.h"
-#include "../game/be_ai_weap.h"
-#include "../game/be_ai_chat.h"
-#include "../game/be_ai_char.h"
-#include "../game/be_ai_gen.h"
+#include "be_ai_goal.h"
+#include "be_ai_move.h"
+#include "be_ai_weap.h"
+#include "be_ai_chat.h"
+#include "be_ai_char.h"
+#include "be_ai_gen.h"
 
 //library globals in a structure
 botlib_globals_t botlibglobals;
@@ -58,7 +58,7 @@ botlib_globals_t botlibglobals;
 botlib_export_t be_botlib_export;
 botlib_import_t botimport;
 //
-int bot_developer;
+int botDeveloper;
 //qtrue if the library is setup
 int botlibsetup = qfalse;
 
@@ -137,14 +137,37 @@ int Export_BotLibSetup(void)
 {
 	int		errnum;
 	
-	bot_developer = LibVarGetValue("bot_developer");
-  memset( &botlibglobals, 0, sizeof(botlibglobals) ); // bk001207 - init
+	botDeveloper = LibVarGetValue("bot_developer");
+ 	memset( &botlibglobals, 0, sizeof(botlibglobals) );
 	//initialize byte swapping (litte endian etc.)
 //	Swap_Init();
-	Log_Open("botlib.log");
-	//
+
+	if(botDeveloper)
+	{
+		char *homedir, *gamedir, *basegame;
+		char logfilename[MAX_OSPATH];
+
+		homedir = LibVarGetString("homedir");
+		gamedir = LibVarGetString("gamedir");
+		basegame = LibVarGetString("basegame");
+
+		if (*homedir)
+		{
+			if(*gamedir)
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, gamedir, PATH_SEP);
+			else if(*basegame)
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c%s%cbotlib.log", homedir, PATH_SEP, basegame, PATH_SEP);
+			else
+				Com_sprintf(logfilename, sizeof(logfilename), "%s%c" BASEGAME "%cbotlib.log", homedir, PATH_SEP, PATH_SEP);
+		}
+		else
+			Com_sprintf(logfilename, sizeof(logfilename), "botlib.log");
+	
+		Log_Open(logfilename);
+	}
+
 	botimport.Print(PRT_MESSAGE, "------- BotLib Initialization -------\n");
-	//
+
 	botlibglobals.maxclients = (int) LibVarValue("maxclients", "128");
 	botlibglobals.maxentities = (int) LibVarValue("maxentities", "1024");
 
@@ -300,7 +323,7 @@ void ElevatorBottomCenter(aas_reachability_t *reach, vec3_t bottomcenter);
 int BotGetReachabilityToGoal(vec3_t origin, int areanum,
 									  int lastgoalareanum, int lastareanum,
 									  int *avoidreach, float *avoidreachtimes, int *avoidreachtries,
-									  bot_goal_t *goal, int travelflags, int movetravelflags,
+									  bot_goal_t *goal, int travelflags,
 									  struct bot_avoidspot_s *avoidspots, int numavoidspots, int *flags);
 
 int AAS_PointLight(vec3_t origin, int *red, int *green, int *blue);
@@ -523,7 +546,7 @@ int BotExportTest(int parm0, char *parm1, vec3_t parm2, vec3_t parm3)
 		reachnum = BotGetReachabilityToGoal(origin, newarea,
 									  lastgoalareanum, lastareanum,
 									  avoidreach, avoidreachtimes, avoidreachtries,
-									  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
+									  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
 									  NULL, 0, &resultFlags);
 		AAS_ReachabilityFromNum(reachnum, &reach);
 		AAS_ShowReachability(&reach);
@@ -542,7 +565,7 @@ int BotExportTest(int parm0, char *parm1, vec3_t parm2, vec3_t parm3)
 			reachnum = BotGetReachabilityToGoal(curorigin, curarea,
 										  lastgoalareanum, lastareanum,
 										  avoidreach, avoidreachtimes, avoidreachtries,
-										  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
+										  &goal, TFL_DEFAULT|TFL_FUNCBOB|TFL_ROCKETJUMP,
 										  NULL, 0, &resultFlags);
 			AAS_ReachabilityFromNum(reachnum, &reach);
 			AAS_ShowReachability(&reach);
@@ -846,9 +869,9 @@ GetBotLibAPI
 ============
 */
 botlib_export_t *GetBotLibAPI(int apiVersion, botlib_import_t *import) {
-	assert(import);   // bk001129 - this wasn't set for baseq3/
-  botimport = *import;
-  assert(botimport.Print);   // bk001129 - pars pro toto
+	assert(import);
+	botimport = *import;
+	assert(botimport.Print);
 
 	Com_Memset( &be_botlib_export, 0, sizeof( be_botlib_export ) );
 

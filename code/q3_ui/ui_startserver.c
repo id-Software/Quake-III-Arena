@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -51,11 +51,7 @@ START SERVER MENU *****
 #define MAX_MAPCOLS		2
 #define MAX_MAPSPERPAGE	4
 
-#define	MAX_SERVERSTEXT	8192
-
-#define MAX_SERVERMAPS	64
 #define MAX_NAMELENGTH	16
-
 #define ID_GAMETYPE				10
 #define ID_PICTURES				11	// 12, 13, 14
 #define ID_PREVPAGE				15
@@ -87,8 +83,7 @@ typedef struct {
 	int				nummaps;
 	int				page;
 	int				maxpages;
-	char			maplist[MAX_SERVERMAPS][MAX_NAMELENGTH];
-	int				mapGamebits[MAX_SERVERMAPS];
+	int 			maplist[MAX_ARENAS];
 } startserver_t;
 
 static startserver_t s_startserver;
@@ -98,7 +93,7 @@ static const char *gametype_items[] = {
 	"Team Deathmatch",
 	"Tournament",
 	"Capture the Flag",
-	0
+	NULL
 };
 
 static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_TOURNAMENT, GT_CTF};
@@ -167,6 +162,8 @@ static void StartServer_Update( void ) {
 	int				i;
 	int				top;
 	static	char	picname[MAX_MAPSPERPAGE][64];
+	const char		*info;
+	char			mapname[MAX_NAMELENGTH];
 
 	top = s_startserver.page*MAX_MAPSPERPAGE;
 
@@ -174,8 +171,12 @@ static void StartServer_Update( void ) {
 	{
 		if (top+i >= s_startserver.nummaps)
 			break;
+		
+		info = UI_GetArenaInfoByNumber( s_startserver.maplist[ top + i ]);
+		Q_strncpyz( mapname, Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
+		Q_strupr( mapname );
 
-		Com_sprintf( picname[i], sizeof(picname[i]), "levelshots/%s", s_startserver.maplist[top+i] );
+		Com_sprintf( picname[i], sizeof(picname[i]), "levelshots/%s", mapname );
 
 		s_startserver.mappics[i].generic.flags &= ~QMF_HIGHLIGHT;
 		s_startserver.mappics[i].generic.name   = picname[i];
@@ -216,7 +217,8 @@ static void StartServer_Update( void ) {
 		}
 
 		// set the map name
-		strcpy( s_startserver.mapname.string, s_startserver.maplist[s_startserver.currentmap] );
+		info = UI_GetArenaInfoByNumber( s_startserver.maplist[ s_startserver.currentmap ]);
+		Q_strncpyz( s_startserver.mapname.string, Info_ValueForKey( info, "map" ), MAX_NAMELENGTH);
 	}
 	
 	Q_strupr( s_startserver.mapname.string );
@@ -262,15 +264,13 @@ static void StartServer_GametypeEvent( void* ptr, int event ) {
 	}
 	for( i = 0; i < count; i++ ) {
 		info = UI_GetArenaInfoByNumber( i );
-
+	
 		gamebits = GametypeBits( Info_ValueForKey( info, "type") );
 		if( !( gamebits & matchbits ) ) {
 			continue;
 		}
 
-		Q_strncpyz( s_startserver.maplist[s_startserver.nummaps], Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
-		Q_strupr( s_startserver.maplist[s_startserver.nummaps] );
-		s_startserver.mapGamebits[s_startserver.nummaps] = gamebits;
+		s_startserver.maplist[ s_startserver.nummaps ] = i;
 		s_startserver.nummaps++;
 	}
 	s_startserver.maxpages = (s_startserver.nummaps + MAX_MAPSPERPAGE-1)/MAX_MAPSPERPAGE;
@@ -330,6 +330,7 @@ static void StartServer_LevelshotDraw( void *self ) {
 	int				w;
 	int				h;
 	int				n;
+	const char		*info;
 
 	b = (menubitmap_s *)self;
 
@@ -363,7 +364,9 @@ static void StartServer_LevelshotDraw( void *self ) {
 	x += b->width / 2;
 	y += 4;
 	n = s_startserver.page * MAX_MAPSPERPAGE + b->generic.id - ID_PICTURES;
-	UI_DrawString( x, y, s_startserver.maplist[n], UI_CENTER|UI_SMALLFONT, color_orange );
+
+	info = UI_GetArenaInfoByNumber( s_startserver.maplist[ n ]);
+	UI_DrawString( x, y, Info_ValueForKey( info, "map" ), UI_CENTER|UI_SMALLFONT, color_orange );
 
 	x = b->generic.x;
 	y = b->generic.y;
@@ -556,6 +559,7 @@ void StartServer_Cache( void )
 	const char		*info;
 	qboolean		precache;
 	char			picname[64];
+	char			mapname[ MAX_NAMELENGTH ];
 
 	trap_R_RegisterShaderNoMip( GAMESERVER_BACK0 );	
 	trap_R_RegisterShaderNoMip( GAMESERVER_BACK1 );	
@@ -572,22 +576,16 @@ void StartServer_Cache( void )
 
 	precache = trap_Cvar_VariableValue("com_buildscript");
 
-	s_startserver.nummaps = UI_GetNumArenas();
-
-	for( i = 0; i < s_startserver.nummaps; i++ ) {
-		info = UI_GetArenaInfoByNumber( i );
-
-		Q_strncpyz( s_startserver.maplist[i], Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
-		Q_strupr( s_startserver.maplist[i] );
-		s_startserver.mapGamebits[i] = GametypeBits( Info_ValueForKey( info, "type") );
-
-		if( precache ) {
-			Com_sprintf( picname, sizeof(picname), "levelshots/%s", s_startserver.maplist[i] );
+	if( precache ) {
+		for( i = 0; i < UI_GetNumArenas(); i++ ) {
+			info = UI_GetArenaInfoByNumber( i );
+			Q_strncpyz( mapname, Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
+			Q_strupr( mapname );
+	
+			Com_sprintf( picname, sizeof(picname), "levelshots/%s", mapname );
 			trap_R_RegisterShaderNoMip(picname);
 		}
 	}
-
-	s_startserver.maxpages = (s_startserver.nummaps + MAX_MAPSPERPAGE-1)/MAX_MAPSPERPAGE;
 }
 
 
@@ -665,20 +663,20 @@ static const char *dedicated_list[] = {
 	"No",
 	"LAN",
 	"Internet",
-	0
+	NULL
 };
 
 static const char *playerType_list[] = {
 	"Open",
 	"Bot",
 	"----",
-	0
+	NULL
 };
 
 static const char *playerTeam_list[] = {
 	"Blue",
 	"Red",
-	0
+	NULL
 };
 
 static const char *botSkill_list[] = {
@@ -687,7 +685,7 @@ static const char *botSkill_list[] = {
 	"Hurt Me Plenty",
 	"Hardcore",
 	"Nightmare!",
-	0
+	NULL
 };
 
 
@@ -732,7 +730,7 @@ static void ServerOptions_Start( void ) {
 	int		skill;
 	int		n;
 	char	buf[64];
-
+	const char *info;
 
 	timelimit	 = atoi( s_serveroptions.timelimit.field.buffer );
 	fraglimit	 = atoi( s_serveroptions.fraglimit.field.buffer );
@@ -768,13 +766,13 @@ static void ServerOptions_Start( void ) {
 	case GT_TEAM:
 		trap_Cvar_SetValue( "ui_team_fraglimit", fraglimit );
 		trap_Cvar_SetValue( "ui_team_timelimit", timelimit );
-		trap_Cvar_SetValue( "ui_team_friendlt", friendlyfire );
+		trap_Cvar_SetValue( "ui_team_friendly", friendlyfire );
 		break;
 
 	case GT_CTF:
-		trap_Cvar_SetValue( "ui_ctf_fraglimit", fraglimit );
+		trap_Cvar_SetValue( "ui_ctf_capturelimit", flaglimit );
 		trap_Cvar_SetValue( "ui_ctf_timelimit", timelimit );
-		trap_Cvar_SetValue( "ui_ctf_friendlt", friendlyfire );
+		trap_Cvar_SetValue( "ui_ctf_friendly", friendlyfire );
 		break;
 	}
 
@@ -790,7 +788,8 @@ static void ServerOptions_Start( void ) {
 	trap_Cvar_SetValue( "sv_punkbuster", s_serveroptions.punkbuster.curvalue );
 
 	// the wait commands will allow the dedicated to take effect
-	trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait ; wait ; map %s\n", s_startserver.maplist[s_startserver.currentmap] ) );
+	info = UI_GetArenaInfoByNumber( s_startserver.maplist[ s_startserver.currentmap ]);
+	trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait ; wait ; map %s\n", Info_ValueForKey( info, "map" )));
 
 	// add bots
 	trap_Cmd_ExecuteText( EXEC_APPEND, "wait 3\n" );
@@ -1077,7 +1076,7 @@ static void ServerOptions_InitBotNames( void ) {
 		while( *p && *p == ' ' ) {
 			p++;
 		}
-		if( !p ) {
+		if( !*p ) {
 			break;
 		}
 
@@ -1093,6 +1092,10 @@ static void ServerOptions_InitBotNames( void ) {
 		}
 
 		botInfo = UI_GetBotInfoByName( bot );
+		if( !botInfo )
+		{
+			botInfo = UI_GetBotInfoByNumber( count );
+		}
 		bot = Info_ValueForKey( botInfo, "name" );
 
 		Q_strncpyz( s_serveroptions.playerNameBuffers[count], bot, sizeof(s_serveroptions.playerNameBuffers[count]) );
@@ -1125,6 +1128,8 @@ ServerOptions_SetMenuItems
 */
 static void ServerOptions_SetMenuItems( void ) {
 	static char picname[64];
+	char		mapname[MAX_NAMELENGTH];
+	const char	*info;
 
 	switch( s_serveroptions.gametype ) {
 	case GT_FFA:
@@ -1155,7 +1160,10 @@ static void ServerOptions_SetMenuItems( void ) {
 	s_serveroptions.pure.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "sv_pure" ) );
 
 	// set the map pic
-	Com_sprintf( picname, 64, "levelshots/%s", s_startserver.maplist[s_startserver.currentmap] );
+	info = UI_GetArenaInfoByNumber( s_startserver.maplist[ s_startserver.currentmap ]);
+	Q_strncpyz( mapname, Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
+	Q_strupr( mapname );
+	Com_sprintf( picname, 64, "levelshots/%s", mapname );
 	s_serveroptions.mappic.generic.name = picname;
 
 	// set the map name
@@ -1231,7 +1239,8 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 
 	memset( &s_serveroptions, 0 ,sizeof(serveroptions_t) );
 	s_serveroptions.multiplayer = multiplayer;
-	s_serveroptions.gametype = (int)Com_Clamp( 0, 5, trap_Cvar_VariableValue( "g_gameType" ) );
+	s_serveroptions.gametype = (int) Com_Clamp(0, ARRAY_LEN(gametype_remap2) - 1,
+						trap_Cvar_VariableValue("g_gametype"));
 	s_serveroptions.punkbuster.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "sv_punkbuster" ) );
 
 	ServerOptions_Cache();
@@ -1346,7 +1355,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	y = 80;
 	s_serveroptions.botSkill.generic.type			= MTYPE_SPINCONTROL;
 	s_serveroptions.botSkill.generic.flags			= QMF_PULSEIFFOCUS|QMF_SMALLFONT;
-	s_serveroptions.botSkill.generic.name			= "Bot Skill:  ";
+	s_serveroptions.botSkill.generic.name			= "Bot Skill:";
 	s_serveroptions.botSkill.generic.x				= 32 + (strlen(s_serveroptions.botSkill.generic.name) + 2 ) * SMALLCHAR_WIDTH;
 	s_serveroptions.botSkill.generic.y				= y;
 	s_serveroptions.botSkill.itemnames				= botSkill_list;
@@ -1608,7 +1617,7 @@ static void ServerPlayerIcon( const char *modelAndSkin, char *iconName, int icon
 	char	model[MAX_QPATH];
 
 	Q_strncpyz( model, modelAndSkin, sizeof(model));
-	skin = Q_strrchr( model, '/' );
+	skin = strrchr( model, '/' );
 	if ( skin ) {
 		*skin++ = '\0';
 	}

@@ -1,9 +1,0 @@
-tst/incr.c:1: warning: missing return value
-tst/incr.c:6: warning: expression with no effect elided
-tst/incr.c:6: warning: expression with no effect elided
-tst/incr.c:11: warning: missing return value
-tst/incr.c:16: warning: expression with no effect elided
-tst/incr.c:16: warning: expression with no effect elided
-tst/incr.c:21: warning: missing return value
-tst/incr.c:30: warning: missing return value
-tst/incr.c:39: warning: missing return value

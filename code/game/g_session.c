@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -46,7 +46,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 
 	s = va("%i %i %i %i %i %i %i", 
 		client->sess.sessionTeam,
-		client->sess.spectatorTime,
+		client->sess.spectatorNum,
 		client->sess.spectatorState,
 		client->sess.spectatorClient,
 		client->sess.wins,
@@ -54,7 +54,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.teamLeader
 		);
 
-	var = va( "session%i", client - level.clients );
+	var = va( "session%i", (int)(client - level.clients) );
 
 	trap_Cvar_Set( var, s );
 }
@@ -69,26 +69,23 @@ Called on a reconnect
 void G_ReadSessionData( gclient_t *client ) {
 	char	s[MAX_STRING_CHARS];
 	const char	*var;
-
-	// bk001205 - format
 	int teamLeader;
 	int spectatorState;
 	int sessionTeam;
 
-	var = va( "session%i", client - level.clients );
+	var = va( "session%i", (int)(client - level.clients) );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
 	sscanf( s, "%i %i %i %i %i %i %i",
-		&sessionTeam,                 // bk010221 - format
-		&client->sess.spectatorTime,
-		&spectatorState,              // bk010221 - format
+		&sessionTeam,
+		&client->sess.spectatorNum,
+		&spectatorState,
 		&client->sess.spectatorClient,
 		&client->sess.wins,
 		&client->sess.losses,
-		&teamLeader                   // bk010221 - format
+		&teamLeader
 		);
 
-	// bk001205 - format issues
 	client->sess.sessionTeam = (team_t)sessionTeam;
 	client->sess.spectatorState = (spectatorState_t)spectatorState;
 	client->sess.teamLeader = (qboolean)teamLeader;
@@ -110,7 +107,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 
 	// initial team determination
 	if ( g_gametype.integer >= GT_TEAM ) {
-		if ( g_teamAutoJoin.integer ) {
+		if ( g_teamAutoJoin.integer && !(g_entities[ client - level.clients ].r.svFlags & SVF_BOT) ) {
 			sess->sessionTeam = PickTeam( -1 );
 			BroadcastTeamChange( client, -1 );
 		} else {
@@ -147,7 +144,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	}
 
 	sess->spectatorState = SPECTATOR_FREE;
-	sess->spectatorTime = level.time;
+	AddTournamentQueue(client);
 
 	G_WriteClientSessionData( client );
 }

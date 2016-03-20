@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'ioquake3fe' target in the 'ioquake3fe' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif

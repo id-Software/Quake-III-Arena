@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -88,15 +88,13 @@ tryagain:
 	}
 
 	if ( weaponNum == WP_MACHINEGUN || weaponNum == WP_GAUNTLET || weaponNum == WP_BFG ) {
-		strcpy( path, item->world_model[0] );
-		COM_StripExtension( path, path );
-		strcat( path, "_barrel.md3" );
+		COM_StripExtension( item->world_model[0], path, sizeof(path) );
+		Q_strcat( path, sizeof(path), "_barrel.md3" );
 		pi->barrelModel = trap_R_RegisterModel( path );
 	}
 
-	strcpy( path, item->world_model[0] );
-	COM_StripExtension( path, path );
-	strcat( path, "_flash.md3" );
+	COM_StripExtension( item->world_model[0], path, sizeof(path) );
+	Q_strcat( path, sizeof(path), "_flash.md3" );
 	pi->flashModel = trap_R_RegisterModel( path );
 
 	switch( weaponNum ) {
@@ -332,8 +330,8 @@ static void UI_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_
 	}
 
 	// cast away const because of compiler problems
-	MatrixMultiply( entity->axis, ((refEntity_t *)parent)->axis, tempAxis );
-	MatrixMultiply( lerped.axis, tempAxis, entity->axis );
+	MatrixMultiply( entity->axis, lerped.axis, tempAxis );
+	MatrixMultiply( tempAxis, ((refEntity_t *)parent)->axis, entity->axis );
 }
 
 
@@ -689,12 +687,12 @@ UI_DrawPlayer
 */
 void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int time ) {
 	refdef_t		refdef;
-	refEntity_t		legs;
-	refEntity_t		torso;
-	refEntity_t		head;
-	refEntity_t		gun;
-	refEntity_t		barrel;
-	refEntity_t		flash;
+	refEntity_t		legs = {0};
+	refEntity_t		torso = {0};
+	refEntity_t		head = {0};
+	refEntity_t		gun = {0};
+	refEntity_t		barrel = {0};
+	refEntity_t		flash = {0};
 	vec3_t			origin;
 	int				renderfx;
 	vec3_t			mins = {-16, -16, -24};
@@ -708,10 +706,10 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 
 	dp_realtime = time;
 
-	if ( pi->pendingWeapon != -1 && dp_realtime > pi->weaponTimer ) {
+	if ( pi->pendingWeapon != WP_NUM_WEAPONS && dp_realtime > pi->weaponTimer ) {
 		pi->weapon = pi->pendingWeapon;
 		pi->lastWeapon = pi->pendingWeapon;
-		pi->pendingWeapon = -1;
+		pi->pendingWeapon = WP_NUM_WEAPONS;
 		pi->weaponTimer = 0;
 		if( pi->currentWeapon != pi->weapon ) {
 			trap_S_StartLocalSound( weaponChangeSound, CHAN_LOCAL );
@@ -736,9 +734,9 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 	refdef.width = w;
 	refdef.height = h;
 
-	refdef.fov_x = (int)((float)refdef.width / 640.0f * 90.0f);
-	xx = refdef.width / tan( refdef.fov_x / 360 * M_PI );
-	refdef.fov_y = atan2( refdef.height, xx );
+	refdef.fov_x = (int)((float)refdef.width / uis.xscale / 640.0f * 90.0f);
+	xx = refdef.width / uis.xscale / tan( refdef.fov_x / 360 * M_PI );
+	refdef.fov_y = atan2( refdef.height / uis.yscale, xx );
 	refdef.fov_y *= ( 360 / M_PI );
 
 	// calculate distance so the player nearly fills the box
@@ -819,6 +817,12 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 	if ( pi->currentWeapon != WP_NONE ) {
 		memset( &gun, 0, sizeof(gun) );
 		gun.hModel = pi->weaponModel;
+		if( pi->currentWeapon == WP_RAILGUN ) {
+			Byte4Copy( pi->c1RGBA, gun.shaderRGBA );
+		}
+		else {
+			Byte4Copy( colorWhite, gun.shaderRGBA );
+		}
 		VectorCopy( origin, gun.lightingOrigin );
 		UI_PositionEntityOnTag( &gun, &torso, pi->torsoModel, "tag_weapon");
 		gun.renderfx = renderfx;
@@ -839,10 +843,6 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 		angles[YAW] = 0;
 		angles[PITCH] = 0;
 		angles[ROLL] = UI_MachinegunSpinAngle( pi );
-		if( pi->realWeapon == WP_GAUNTLET || pi->realWeapon == WP_BFG ) {
-			angles[PITCH] = angles[ROLL];
-			angles[ROLL] = 0;
-		}
 		AnglesToAxis( angles, barrel.axis );
 
 		UI_PositionRotatedEntityOnTag( &barrel, &gun, pi->weaponModel, "tag_barrel");
@@ -857,6 +857,12 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 		if ( pi->flashModel ) {
 			memset( &flash, 0, sizeof(flash) );
 			flash.hModel = pi->flashModel;
+			if( pi->currentWeapon == WP_RAILGUN ) {
+				Byte4Copy( pi->c1RGBA, flash.shaderRGBA );
+			}
+			else {
+				Byte4Copy( colorWhite, flash.shaderRGBA );
+			}
 			VectorCopy( origin, flash.lightingOrigin );
 			UI_PositionEntityOnTag( &flash, &gun, pi->weaponModel, "tag_flash");
 			flash.renderfx = renderfx;
@@ -943,6 +949,7 @@ static qboolean UI_ParseAnimationFile( const char *filename, animation_t *animat
 	}
 	if ( len >= ( sizeof( text ) - 1 ) ) {
 		Com_Printf( "File %s too long\n", filename );
+		trap_FS_FCloseFile( f );
 		return qfalse;
 	}
 	trap_FS_Read( text, len, f );
@@ -988,7 +995,7 @@ static qboolean UI_ParseAnimationFile( const char *filename, animation_t *animat
 			break;
 		}
 
-		Com_Printf( "unknown token '%s' is %s\n", token, filename );
+		Com_Printf( "unknown token '%s' in %s\n", token, filename );
 	}
 
 	// read information for each frame
@@ -1032,7 +1039,7 @@ static qboolean UI_ParseAnimationFile( const char *filename, animation_t *animat
 	}
 
 	if ( i != MAX_ANIMATIONS ) {
-		Com_Printf( "Error parsing animation file: %s", filename );
+		Com_Printf( "Error parsing animation file: %s\n", filename );
 		return qfalse;
 	}
 
@@ -1123,7 +1130,7 @@ void UI_PlayerInfo_SetModel( playerInfo_t *pi, const char *model ) {
 	pi->weapon = WP_MACHINEGUN;
 	pi->currentWeapon = pi->weapon;
 	pi->lastWeapon = pi->weapon;
-	pi->pendingWeapon = -1;
+	pi->pendingWeapon = WP_NUM_WEAPONS;
 	pi->weaponTimer = 0;
 	pi->chat = qfalse;
 	pi->newModel = qtrue;
@@ -1139,8 +1146,35 @@ UI_PlayerInfo_SetInfo
 void UI_PlayerInfo_SetInfo( playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t viewAngles, vec3_t moveAngles, weapon_t weaponNumber, qboolean chat ) {
 	int			currentAnim;
 	weapon_t	weaponNum;
+	int			c;
 
 	pi->chat = chat;
+
+	c = (int)trap_Cvar_VariableValue( "color1" );
+ 
+	VectorClear( pi->color1 );
+
+	if( c < 1 || c > 7 ) {
+		VectorSet( pi->color1, 1, 1, 1 );
+	}
+	else {
+		if( c & 1 ) {
+			pi->color1[2] = 1.0f;
+		}
+
+		if( c & 2 ) {
+			pi->color1[1] = 1.0f;
+		}
+
+		if( c & 4 ) {
+			pi->color1[0] = 1.0f;
+		}
+	}
+
+	pi->c1RGBA[0] = 255 * pi->color1[0];
+	pi->c1RGBA[1] = 255 * pi->color1[1];
+	pi->c1RGBA[2] = 255 * pi->color1[2];
+	pi->c1RGBA[3] = 255;
 
 	// view angles
 	VectorCopy( viewAngles, pi->viewAngles );
@@ -1162,11 +1196,11 @@ void UI_PlayerInfo_SetInfo( playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_
 		pi->torso.yawAngle = viewAngles[YAW];
 		pi->torso.yawing = qfalse;
 
-		if ( weaponNumber != -1 ) {
+		if ( weaponNumber != WP_NUM_WEAPONS ) {
 			pi->weapon = weaponNumber;
 			pi->currentWeapon = weaponNumber;
 			pi->lastWeapon = weaponNumber;
-			pi->pendingWeapon = -1;
+			pi->pendingWeapon = WP_NUM_WEAPONS;
 			pi->weaponTimer = 0;
 			UI_PlayerInfo_SetWeapon( pi, pi->weapon );
 		}
@@ -1175,8 +1209,8 @@ void UI_PlayerInfo_SetInfo( playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_
 	}
 
 	// weapon
-	if ( weaponNumber == -1 ) {
-		pi->pendingWeapon = -1;
+	if ( weaponNumber == WP_NUM_WEAPONS ) {
+		pi->pendingWeapon = WP_NUM_WEAPONS;
 		pi->weaponTimer = 0;
 	}
 	else if ( weaponNumber != WP_NONE ) {

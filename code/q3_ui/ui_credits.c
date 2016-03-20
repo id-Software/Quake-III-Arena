@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -34,9 +34,54 @@ CREDITS
 
 typedef struct {
 	menuframework_s	menu;
+	int frame;
 } creditsmenu_t;
 
 static creditsmenu_t	s_credits;
+
+
+/*
+===============
+UI_CreditMenu_Draw_ioq3
+===============
+*/
+static void UI_CreditMenu_Draw_ioq3( void ) {
+	int		y;
+	int		i;
+
+	// These are all people that have made commits to Subversion, and thus
+	//  probably incomplete.
+	// (These are in alphabetical order, for the defense of everyone's egos.)
+	static const char *names[] = {
+		"Tim Angus",
+		"James Canete",
+		"Vincent Cojot",
+		"Ryan C. Gordon",
+		"Aaron Gyes",
+		"Zack Middleton",
+		"Ludwig Nussel",
+		"Julian Priestley",
+		"Scirocco Six",
+		"Thilo Schulz",
+		"Zachary J. Slater",
+		"Tony J. White",
+		"...and many, many others!",  // keep this one last.
+		NULL
+	};
+
+	// Center text vertically on the screen
+	y = (SCREEN_HEIGHT - ARRAY_LEN(names) * (1.42 * PROP_HEIGHT * PROP_SMALL_SIZE_SCALE)) / 2;
+
+	UI_DrawProportionalString( 320, y, "ioquake3 contributors:", UI_CENTER|UI_SMALLFONT, color_white );
+	y += 1.42 * PROP_HEIGHT * PROP_SMALL_SIZE_SCALE;
+
+	for (i = 0; names[i]; i++) {
+		UI_DrawProportionalString( 320, y, names[i], UI_CENTER|UI_SMALLFONT, color_white );
+		y += 1.42 * PROP_HEIGHT * PROP_SMALL_SIZE_SCALE;
+	}
+
+	UI_DrawString( 320, 459, "http://www.ioquake3.org/", UI_CENTER|UI_SMALLFONT, color_red );
+}
 
 
 /*
@@ -49,7 +94,12 @@ static sfxHandle_t UI_CreditMenu_Key( int key ) {
 		return 0;
 	}
 
-	trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
+	s_credits.frame++;
+	if (s_credits.frame == 1) {
+		s_credits.menu.draw = UI_CreditMenu_Draw_ioq3;
+	} else {
+		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
+	}
 	return 0;
 }
 

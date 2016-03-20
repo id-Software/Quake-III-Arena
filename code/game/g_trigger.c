@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -390,14 +390,13 @@ void SP_trigger_hurt( gentity_t *self ) {
 		self->damage = 5;
 	}
 
-	self->r.contents = CONTENTS_TRIGGER;
-
-	if ( self->spawnflags & 2 ) {
-		self->use = hurt_use;
-	}
+	self->use = hurt_use;
 
 	// link in to the world if starting active
-	if ( ! (self->spawnflags & 1) ) {
+	if ( self->spawnflags & 1 ) {
+		trap_UnlinkEntity (self);
+	}
+	else {
 		trap_LinkEntity (self);
 	}
 }

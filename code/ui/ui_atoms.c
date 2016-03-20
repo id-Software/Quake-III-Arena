@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -29,18 +29,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 qboolean		m_entersound;		// after a frame, so caching won't disrupt the sound
 
-// these are here so the functions in q_shared.c can link
-#ifndef UI_HARD_LINKED
-
 void QDECL Com_Error( int level, const char *error, ... ) {
 	va_list		argptr;
 	char		text[1024];
 
 	va_start (argptr, error);
-	vsprintf (text, error, argptr);
+	Q_vsnprintf (text, sizeof(text), error, argptr);
 	va_end (argptr);
 
-	trap_Error( va("%s", text) );
+	trap_Error( text );
 }
 
 void QDECL Com_Printf( const char *msg, ... ) {
@@ -48,13 +45,11 @@ void QDECL Com_Printf( const char *msg, ... ) {
 	char		text[1024];
 
 	va_start (argptr, msg);
-	vsprintf (text, msg, argptr);
+	Q_vsnprintf (text, sizeof(text), msg, argptr);
 	va_end (argptr);
 
-	trap_Print( va("%s", text) );
+	trap_Print( text );
 }
-
-#endif
 
 qboolean newUI = qfalse;
 
@@ -81,7 +76,7 @@ void UI_StartDemoLoop( void ) {
 }
 
 
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static void NeedCDAction( qboolean result ) {
 	if ( !result ) {
 		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
@@ -89,7 +84,7 @@ static void NeedCDAction( qboolean result ) {
 }
 #endif // MISSIONPACK
 
-#ifndef MISSIONPACK // bk001206
+#ifndef MISSIONPACK
 static void NeedCDKeyAction( qboolean result ) {
 	if ( !result ) {
 		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
@@ -151,10 +146,13 @@ void UI_SetBestScores(postGameInfo_t *newInfo, qboolean postGame) {
 	}
 }
 
-void UI_LoadBestScores(const char *map, int game) {
+void UI_LoadBestScores(const char *map, int game)
+{
 	char		fileName[MAX_QPATH];
 	fileHandle_t f;
 	postGameInfo_t newInfo;
+	int protocol, protocolLegacy;
+	
 	memset(&newInfo, 0, sizeof(postGameInfo_t));
 	Com_sprintf(fileName, MAX_QPATH, "games/%s_%i.game", map, game);
 	if (trap_FS_FOpenFile(fileName, &f, FS_READ) >= 0) {
@@ -167,11 +165,30 @@ void UI_LoadBestScores(const char *map, int game) {
 	}
 	UI_SetBestScores(&newInfo, qfalse);
 
-	Com_sprintf(fileName, MAX_QPATH, "demos/%s_%d.dm_%d", map, game, (int)trap_Cvar_VariableValue("protocol"));
 	uiInfo.demoAvailable = qfalse;
-	if (trap_FS_FOpenFile(fileName, &f, FS_READ) >= 0) {
+
+	protocolLegacy = trap_Cvar_VariableValue("com_legacyprotocol");
+	protocol = trap_Cvar_VariableValue("com_protocol");
+
+	if(!protocol)
+		protocol = trap_Cvar_VariableValue("protocol");
+	if(protocolLegacy == protocol)
+		protocolLegacy = 0;
+
+	Com_sprintf(fileName, MAX_QPATH, "demos/%s_%d.%s%d", map, game, DEMOEXT, protocol);
+	if(trap_FS_FOpenFile(fileName, &f, FS_READ) >= 0)
+	{
 		uiInfo.demoAvailable = qtrue;
 		trap_FS_FCloseFile(f);
+	}
+	else if(protocolLegacy > 0)
+	{
+		Com_sprintf(fileName, MAX_QPATH, "demos/%s_%d.%s%d", map, game, DEMOEXT, protocolLegacy);
+		if (trap_FS_FOpenFile(fileName, &f, FS_READ) >= 0)
+		{
+			uiInfo.demoAvailable = qtrue;
+			trap_FS_FCloseFile(f);
+		}
 	} 
 }
 
@@ -180,7 +197,7 @@ void UI_LoadBestScores(const char *map, int game) {
 UI_ClearScores
 ===============
 */
-void UI_ClearScores() {
+void UI_ClearScores(void) {
 	char	gameList[4096];
 	char *gameFile;
 	int		i, len, count, size;
@@ -211,7 +228,7 @@ void UI_ClearScores() {
 
 
 
-static void	UI_Cache_f() {
+static void	UI_Cache_f( void ) {
 	Display_CacheAll();
 }
 
@@ -220,7 +237,7 @@ static void	UI_Cache_f() {
 UI_CalcPostGameStats
 =======================
 */
-static void UI_CalcPostGameStats() {
+static void UI_CalcPostGameStats( void ) {
 	char		map[MAX_QPATH];
 	char		fileName[MAX_QPATH];
 	char		info[MAX_INFO_STRING];
@@ -334,6 +351,7 @@ qboolean UI_ConsoleCommand( int realTime ) {
 
 	if ( Q_stricmp (cmd, "ui_test") == 0 ) {
 		UI_ShowPostGame(qtrue);
+		return qtrue;
 	}
 
 	if ( Q_stricmp (cmd, "ui_report") == 0 ) {
@@ -350,9 +368,13 @@ qboolean UI_ConsoleCommand( int realTime ) {
 		if (trap_Argc() == 4) {
 			char shader1[MAX_QPATH];
 			char shader2[MAX_QPATH];
+			char shader3[MAX_QPATH];
+			
 			Q_strncpyz(shader1, UI_Argv(1), sizeof(shader1));
 			Q_strncpyz(shader2, UI_Argv(2), sizeof(shader2));
-			trap_R_RemapShader(shader1, shader2, UI_Argv(3));
+			Q_strncpyz(shader3, UI_Argv(3), sizeof(shader3));
+			
+			trap_R_RemapShader(shader1, shader2, shader3);
 			return qtrue;
 		}
 	}

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -68,7 +68,7 @@ static void		SV_RankEncodeGameID( uint64_t game_id, char* result,
 static uint64_t	SV_RankDecodePlayerID( const char* string );
 static void		SV_RankDecodePlayerKey( const char* string, GR_PLAYER_TOKEN key );
 static char*	SV_RankStatusString( GR_STATUS status );
-static void		SV_RankError( const char* fmt, ... );
+static void		SV_RankError( const char* fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 static char     SV_RankGameKey[64];
 
 /*
@@ -1004,7 +1004,7 @@ static void SV_RankNewGameCBF( GR_NEWGAME* gr_newgame, void* cbf_arg )
 	}
 	else if( gr_newgame->status == GR_STATUS_BADLEAGUE )
 	{
-		SV_RankError( "SV_RankNewGameCBF: Invalid League name\n" );
+		SV_RankError( "SV_RankNewGameCBF: Invalid League name" );
 	}
 	else
 	{
@@ -1523,7 +1523,7 @@ static void SV_RankError( const char* fmt, ... )
 	char	text[1024];
 
 	va_start( arg_ptr, fmt );
-	vsprintf( text, fmt, arg_ptr );
+	Q_vsnprintf(text, sizeof(text), fmt, arg_ptr );
 	va_end( arg_ptr );
 
 	Com_DPrintf( "****************************************\n" );

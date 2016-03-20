@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -25,7 +25,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // be a valid snapshot this frame
 
 #include "cg_local.h"
-#include "../../ui/menudef.h" // bk001205 - for Q3_ui as well
+#ifdef MISSIONPACK
+#include "../../ui/menudef.h"
 
 typedef struct {
 	const char *order;
@@ -44,9 +45,8 @@ static const orderTask_t validOrders[] = {
 	{ VOICECHAT_FOLLOWFLAGCARRIER,	TEAMTASK_ESCORT }
 };
 
-static const int numValidOrders = sizeof(validOrders) / sizeof(orderTask_t);
+static const int numValidOrders = ARRAY_LEN(validOrders);
 
-#ifdef MISSIONPACK // bk001204
 static int CG_ValidOrder(const char *p) {
 	int i;
 	for (i = 0; i < numValidOrders; i++) {
@@ -118,9 +118,20 @@ static void CG_ParseTeamInfo( void ) {
 	int		client;
 
 	numSortedTeamPlayers = atoi( CG_Argv( 1 ) );
+	if( numSortedTeamPlayers < 0 || numSortedTeamPlayers > TEAM_MAXOVERLAY )
+	{
+		CG_Error( "CG_ParseTeamInfo: numSortedTeamPlayers out of range (%d)",
+				numSortedTeamPlayers );
+		return;
+	}
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
 		client = atoi( CG_Argv( i * 6 + 2 ) );
+		if( client < 0 || client >= MAX_CLIENTS )
+		{
+		  CG_Error( "CG_ParseTeamInfo: bad client number: %d", client );
+		  return;
+		}
 
 		sortedTeamPlayers[i] = client;
 
@@ -315,7 +326,7 @@ static void CG_ConfigStringModified( void ) {
 		cgs.teamVoteNo[num-CS_TEAMVOTE_NO] = atoi( str );
 		cgs.teamVoteModified[num-CS_TEAMVOTE_NO] = qtrue;
 	} else if ( num >= CS_TEAMVOTE_STRING && num <= CS_TEAMVOTE_STRING + 1) {
-		Q_strncpyz( cgs.teamVoteString[num-CS_TEAMVOTE_STRING], str, sizeof( cgs.teamVoteString ) );
+		Q_strncpyz( cgs.teamVoteString[num-CS_TEAMVOTE_STRING], str, sizeof( cgs.teamVoteString[0] ) );
 #ifdef MISSIONPACK
 		trap_S_StartLocalSound( cgs.media.voteNow, CHAN_ANNOUNCER );
 #endif
@@ -323,7 +334,7 @@ static void CG_ConfigStringModified( void ) {
 		cg.intermissionStarted = atoi( str );
 	} else if ( num >= CS_MODELS && num < CS_MODELS+MAX_MODELS ) {
 		cgs.gameModels[ num-CS_MODELS ] = trap_R_RegisterModel( str );
-	} else if ( num >= CS_SOUNDS && num < CS_SOUNDS+MAX_MODELS ) {
+	} else if ( num >= CS_SOUNDS && num < CS_SOUNDS+MAX_SOUNDS ) {
 		if ( str[0] != '*' ) {	// player specific sounds don't register here
 			cgs.gameSounds[ num-CS_SOUNDS] = trap_S_RegisterSound( str, qfalse );
 		}
@@ -446,8 +457,10 @@ static void CG_MapRestart( void ) {
 	cg.fraglimitWarnings = 0;
 
 	cg.timelimitWarnings = 0;
-
+	cg.rewardTime = 0;
+	cg.rewardStack = 0;
 	cg.intermissionStarted = qfalse;
+	cg.levelShot = qfalse;
 
 	cgs.voteTime = 0;
 
@@ -467,13 +480,15 @@ static void CG_MapRestart( void ) {
 #ifdef MISSIONPACK
 	if (cg_singlePlayerActive.integer) {
 		trap_Cvar_Set("ui_matchStartTime", va("%i", cg.time));
-		if (cg_recordSPDemo.integer && cg_recordSPDemoName.string && *cg_recordSPDemoName.string) {
+		if (cg_recordSPDemo.integer && *cg_recordSPDemoName.string) {
 			trap_SendConsoleCommand(va("set g_synchronousclients 1 ; record %s \n", cg_recordSPDemoName.string));
 		}
 	}
 #endif
 	trap_Cvar_Set("cg_thirdPerson", "0");
 }
+
+#ifdef MISSIONPACK
 
 #define MAX_VOICEFILESIZE	16384
 #define MAX_VOICEFILES		8
@@ -533,7 +548,7 @@ int CG_ParseVoiceChats( const char *filename, voiceChatList_t *voiceChatList, in
 		return qfalse;
 	}
 	if ( len >= MAX_VOICEFILESIZE ) {
-		trap_Print( va( S_COLOR_RED "voice chat file too large: %s is %i, max allowed is %i", filename, len, MAX_VOICEFILESIZE ) );
+		trap_Print( va( S_COLOR_RED "voice chat file too large: %s is %i, max allowed is %i\n", filename, len, MAX_VOICEFILESIZE ) );
 		trap_FS_FCloseFile( f );
 		return qfalse;
 	}
@@ -646,7 +661,7 @@ int CG_HeadModelVoiceChats( char *filename ) {
 		return -1;
 	}
 	if ( len >= MAX_VOICEFILESIZE ) {
-		trap_Print( va( S_COLOR_RED "voice chat file too large: %s is %i, max allowed is %i", filename, len, MAX_VOICEFILESIZE ) );
+		trap_Print( va( S_COLOR_RED "voice chat file too large: %s is %i, max allowed is %i\n", filename, len, MAX_VOICEFILESIZE ) );
 		trap_FS_FCloseFile( f );
 		return -1;
 	}
@@ -805,7 +820,6 @@ CG_PlayVoiceChat
 =================
 */
 void CG_PlayVoiceChat( bufferedVoiceChat_t *vchat ) {
-#ifdef MISSIONPACK
 	// if we are going into the intermission, don't start any voices
 	if ( cg.intermissionStarted ) {
 		return;
@@ -830,7 +844,6 @@ void CG_PlayVoiceChat( bufferedVoiceChat_t *vchat ) {
 		CG_Printf( "%s\n", vchat->message );
 	}
 	voiceChatBuffer[cg.voiceChatBufferOut].snd = 0;
-#endif
 }
 
 /*
@@ -839,7 +852,6 @@ CG_PlayBufferedVoieChats
 =====================
 */
 void CG_PlayBufferedVoiceChats( void ) {
-#ifdef MISSIONPACK
 	if ( cg.voiceChatTime < cg.time ) {
 		if (cg.voiceChatBufferOut != cg.voiceChatBufferIn && voiceChatBuffer[cg.voiceChatBufferOut].snd) {
 			//
@@ -849,7 +861,6 @@ void CG_PlayBufferedVoiceChats( void ) {
 			cg.voiceChatTime = cg.time + 1000;
 		}
 	}
-#endif
 }
 
 /*
@@ -858,7 +869,6 @@ CG_AddBufferedVoiceChat
 =====================
 */
 void CG_AddBufferedVoiceChat( bufferedVoiceChat_t *vchat ) {
-#ifdef MISSIONPACK
 	// if we are going into the intermission, don't start any voices
 	if ( cg.intermissionStarted ) {
 		return;
@@ -870,7 +880,6 @@ void CG_AddBufferedVoiceChat( bufferedVoiceChat_t *vchat ) {
 		CG_PlayVoiceChat( &voiceChatBuffer[cg.voiceChatBufferOut] );
 		cg.voiceChatBufferOut++;
 	}
-#endif
 }
 
 /*
@@ -879,7 +888,6 @@ CG_VoiceChatLocal
 =================
 */
 void CG_VoiceChatLocal( int mode, qboolean voiceOnly, int clientNum, int color, const char *cmd ) {
-#ifdef MISSIONPACK
 	char *chat;
 	voiceChatList_t *voiceChatList;
 	clientInfo_t *ci;
@@ -919,7 +927,6 @@ void CG_VoiceChatLocal( int mode, qboolean voiceOnly, int clientNum, int color, 
 			CG_AddBufferedVoiceChat(&vchat);
 		}
 	}
-#endif
 }
 
 /*
@@ -928,7 +935,6 @@ CG_VoiceChat
 =================
 */
 void CG_VoiceChat( int mode ) {
-#ifdef MISSIONPACK
 	const char *cmd;
 	int clientNum, color;
 	qboolean voiceOnly;
@@ -947,8 +953,8 @@ void CG_VoiceChat( int mode ) {
 	}
 
 	CG_VoiceChatLocal( mode, voiceOnly, clientNum, color, cmd );
-#endif
 }
+#endif // MISSIONPACK
 
 /*
 =================
@@ -1028,6 +1034,8 @@ static void CG_ServerCommand( void ) {
 		CG_Printf( "%s\n", text );
 		return;
 	}
+
+#ifdef MISSIONPACK
 	if ( !strcmp( cmd, "vchat" ) ) {
 		CG_VoiceChat( SAY_ALL );
 		return;
@@ -1042,6 +1050,7 @@ static void CG_ServerCommand( void ) {
 		CG_VoiceChat( SAY_TELL );
 		return;
 	}
+#endif
 
 	if ( !strcmp( cmd, "scores" ) ) {
 		CG_ParseScores();
@@ -1058,10 +1067,22 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-  if ( Q_stricmp (cmd, "remapShader") == 0 ) {
-		if (trap_Argc() == 4) {
-			trap_R_RemapShader(CG_Argv(1), CG_Argv(2), CG_Argv(3));
+	if ( Q_stricmp (cmd, "remapShader") == 0 )
+	{
+		if (trap_Argc() == 4)
+		{
+			char shader1[MAX_QPATH];
+			char shader2[MAX_QPATH];
+			char shader3[MAX_QPATH];
+
+			Q_strncpyz(shader1, CG_Argv(1), sizeof(shader1));
+			Q_strncpyz(shader2, CG_Argv(2), sizeof(shader2));
+			Q_strncpyz(shader3, CG_Argv(3), sizeof(shader3));
+
+			trap_R_RemapShader(shader1, shader2, shader3);
 		}
+		
+		return;
 	}
 
 	// loaddeferred can be both a servercmd and a consolecmd

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -186,7 +186,7 @@ int		CG_PointContents( const vec3_t point, int passEntityNum ) {
 			continue;
 		}
 
-		contents |= trap_CM_TransformedPointContents( point, cmodel, ent->origin, ent->angles );
+		contents |= trap_CM_TransformedPointContents( point, cmodel, cent->lerpOrigin, cent->lerpAngles );
 	}
 
 	return contents;
@@ -283,19 +283,17 @@ static void CG_TouchItem( centity_t *cent ) {
 	// We don't predict touching our own flag
 #ifdef MISSIONPACK
 	if( cgs.gametype == GT_1FCTF ) {
-		if( item->giTag != PW_NEUTRALFLAG ) {
+		if( item->giType == IT_TEAM && item->giTag != PW_NEUTRALFLAG ) {
 			return;
 		}
 	}
-	if( cgs.gametype == GT_CTF || cgs.gametype == GT_HARVESTER ) {
-#else
-	if( cgs.gametype == GT_CTF ) {
 #endif
+	if( cgs.gametype == GT_CTF ) {
 		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_RED &&
-			item->giTag == PW_REDFLAG)
+			item->giType == IT_TEAM && item->giTag == PW_REDFLAG)
 			return;
 		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_BLUE &&
-			item->giTag == PW_BLUEFLAG)
+			item->giType == IT_TEAM && item->giTag == PW_BLUEFLAG)
 			return;
 	}
 
@@ -308,7 +306,7 @@ static void CG_TouchItem( centity_t *cent ) {
 	// don't touch it again this prediction
 	cent->miscTime = cg.time;
 
-	// if its a weapon, give them some predicted ammo so the autoswitch will work
+	// if it's a weapon, give them some predicted ammo so the autoswitch will work
 	if ( item->giType == IT_WEAPON ) {
 		cg.predictedPlayerState.stats[ STAT_WEAPONS ] |= 1 << item->giTag;
 		if ( !cg.predictedPlayerState.ammo[ item->giTag ] ) {
@@ -536,9 +534,9 @@ void CG_PredictPlayerState( void ) {
 				}
 				cg.thisFrameTeleport = qfalse;
 			} else {
-				vec3_t	adjusted;
+				vec3_t adjusted, new_angles;
 				CG_AdjustPositionForMover( cg.predictedPlayerState.origin, 
-					cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted );
+				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, cg.predictedPlayerState.viewangles, new_angles);
 
 				if ( cg_showmiss.integer ) {
 					if (!VectorCompare( oldPlayerState.origin, adjusted )) {
@@ -606,7 +604,7 @@ void CG_PredictPlayerState( void ) {
 	// adjust for the movement of the groundentity
 	CG_AdjustPositionForMover( cg.predictedPlayerState.origin, 
 		cg.predictedPlayerState.groundEntityNum, 
-		cg.physicsTime, cg.time, cg.predictedPlayerState.origin );
+		cg.physicsTime, cg.time, cg.predictedPlayerState.origin, cg.predictedPlayerState.viewangles, cg.predictedPlayerState.viewangles);
 
 	if ( cg_showmiss.integer ) {
 		if (cg.predictedPlayerState.eventSequence > oldPlayerState.eventSequence + MAX_PS_EVENTS) {

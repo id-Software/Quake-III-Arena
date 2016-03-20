@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -130,7 +130,7 @@ static void PlayerIcon( const char *modelAndSkin, char *iconName, int iconNameMa
 	char	model[MAX_QPATH];
 
 	Q_strncpyz( model, modelAndSkin, sizeof(model));
-	skin = Q_strrchr( model, '/' );
+	skin = strrchr( model, '/' );
 	if ( skin ) {
 		*skin++ = '\0';
 	}
@@ -183,7 +183,7 @@ static void UI_SPLevelMenu_SetBots( void ) {
 		while( *p && *p == ' ' ) {
 			p++;
 		}
-		if( !p ) {
+		if( !*p ) {
 			break;
 		}
 
@@ -199,6 +199,11 @@ static void UI_SPLevelMenu_SetBots( void ) {
 		}
 
 		botInfo = UI_GetBotInfoByName( bot );
+		if(!botInfo)
+		{
+			botInfo = UI_GetBotInfoByNumber( levelMenuInfo.numBots );
+		}
+	
 		if( botInfo ) {
 			levelMenuInfo.botPics[levelMenuInfo.numBots] = PlayerIconHandle( Info_ValueForKey( botInfo, "model" ) );
 			Q_strncpyz( levelMenuInfo.botNames[levelMenuInfo.numBots], Info_ValueForKey( botInfo, "name" ), 10 );
@@ -231,7 +236,7 @@ static void UI_SPLevelMenu_SetMenuArena( int n, int level, const char *arenaInfo
 		levelMenuInfo.levelScores[n] = 8;
 	}
 
-	strcpy( levelMenuInfo.levelPicNames[n], va( "levelshots/%s.tga", map ) );
+	Com_sprintf( levelMenuInfo.levelPicNames[n], sizeof(levelMenuInfo.levelPicNames[n]), "levelshots/%s.tga", map );
 	if( !trap_R_RegisterShaderNoMip( levelMenuInfo.levelPicNames[n] ) ) {
 		strcpy( levelMenuInfo.levelPicNames[n], ART_MAP_UNKNOWN );
 	}
@@ -363,7 +368,11 @@ static void UI_SPLevelMenu_ResetAction( qboolean result ) {
 
 	// clear game variables
 	UI_NewGame();
-	trap_Cvar_SetValue( "ui_spSelection", -4 );
+	if ( UI_GetSpecialArenaInfo( "training" ) ) {
+		trap_Cvar_SetValue( "ui_spSelection", -4 );
+	} else {
+		trap_Cvar_SetValue( "ui_spSelection", 0 );
+	}
 
 	// make the level select menu re-initialize
 	UI_PopMenu();
@@ -720,7 +729,6 @@ static void UI_SPLevelMenu_Init( void ) {
 	skill = (int)trap_Cvar_VariableValue( "g_spSkill" );
 	if( skill < 1 || skill > 5 ) {
 		trap_Cvar_Set( "g_spSkill", "2" );
-		skill = 2;
 	}
 
 	memset( &levelMenuInfo, 0, sizeof(levelMenuInfo) );

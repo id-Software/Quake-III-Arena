@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -142,6 +142,7 @@ static void CG_TransitionSnapshot( void ) {
 
 	// if we had a map_restart, set everthing with initial
 	if ( !cg.snap ) {
+		return;
 	}
 
 	// clear the currentValid flag for all entities in the existing snapshot
@@ -261,7 +262,7 @@ static snapshot_t *CG_ReadNextSnapshot( void ) {
 	snapshot_t	*dest;
 
 	if ( cg.latestSnapshotNum > cgs.processedSnapshotNum + 1000 ) {
-		CG_Printf( "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i", 
+		CG_Printf( "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i\n", 
 			cg.latestSnapshotNum, cgs.processedSnapshotNum );
 	}
 

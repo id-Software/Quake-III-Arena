@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -23,9 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define __UI_SHARED_H
 
 
-#include "../game/q_shared.h"
-#include "../cgame/tr_types.h"
-#include "keycodes.h"
+#include "../qcommon/q_shared.h"
+#include "../renderercommon/tr_types.h"
+#include "../client/keycodes.h"
 
 #include "../../ui/menudef.h"
 
@@ -329,7 +329,7 @@ typedef struct {
   void (*drawRect) ( float x, float y, float w, float h, float size, const vec4_t color);
   void (*drawSides) (float x, float y, float w, float h, float size);
   void (*drawTopBottom) (float x, float y, float w, float h, float size);
-  void (*clearScene) ();
+  void (*clearScene) ( void );
   void (*addRefEntityToScene) (const refEntity_t *re );
   void (*renderScene) ( const refdef_t *fd );
   void (*registerFont) (const char *pFontname, int pointSize, fontInfo_t *font);
@@ -343,7 +343,7 @@ typedef struct {
   void (*setCVar)(const char *cvar, const char *value);
   void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int limit, int style);
   void (*setOverstrikeMode)(qboolean b);
-  qboolean (*getOverstrikeMode)();
+  qboolean (*getOverstrikeMode)( void );
   void (*startLocalSound)( sfxHandle_t sfx, int channelNum );
   qboolean (*ownerDrawHandleKey)(int ownerDraw, int flags, float *special, int key);
   int (*feederCount)(float feederID);
@@ -354,13 +354,13 @@ typedef struct {
 	void (*getBindingBuf)( int keynum, char *buf, int buflen );
 	void (*setBinding)( int keynum, const char *binding );
 	void (*executeText)(int exec_when, const char *text );	
-	void (*Error)(int level, const char *error, ...);
-	void (*Print)(const char *msg, ...);
+	void (*Error)(int level, const char *error, ...) __attribute__ ((noreturn, format (printf, 2, 3)));
+	void (*Print)(const char *msg, ...) __attribute__ ((format (printf, 1, 2)));
 	void (*Pause)(qboolean b);
 	int (*ownerDrawWidth)(int ownerDraw, float scale);
 	sfxHandle_t (*registerSound)(const char *name, qboolean compressed);
 	void (*startBackgroundTrack)( const char *intro, const char *loop);
-	void (*stopBackgroundTrack)();
+	void (*stopBackgroundTrack)( void );
 	int (*playCinematic)(const char *name, float x, float y, float w, float h);
 	void (*stopCinematic)(int handle);
 	void (*drawCinematic)(int handle, float x, float y, float w, float h);
@@ -386,14 +386,14 @@ typedef struct {
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);
-void String_Init();
-void String_Report();
+void String_Init( void );
+void String_Report( void );
 void Init_Display(displayContextDef_t *dc);
 void Display_ExpandMacros(char * buff);
 void Menu_Init(menuDef_t *menu);
 void Item_Init(itemDef_t *item);
 void Menu_PostParse(menuDef_t *menu);
-menuDef_t *Menu_GetFocused();
+menuDef_t *Menu_GetFocused( void );
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down);
 void Menu_HandleMouseMove(menuDef_t *menu, float x, float y);
 void Menu_ScrollFeeder(menuDef_t *menu, int feeder, qboolean down);
@@ -409,33 +409,33 @@ qboolean PC_Int_Parse(int handle, int *i);
 qboolean PC_Rect_Parse(int handle, rectDef_t *r);
 qboolean PC_String_Parse(int handle, const char **out);
 qboolean PC_Script_Parse(int handle, const char **out);
-int Menu_Count();
+int Menu_Count( void );
 void Menu_New(int handle);
-void Menu_PaintAll();
+void Menu_PaintAll( void );
 menuDef_t *Menus_ActivateByName(const char *p);
-void Menu_Reset();
-qboolean Menus_AnyFullScreenVisible();
+void Menu_Reset( void );
+qboolean Menus_AnyFullScreenVisible( void );
 void  Menus_Activate(menuDef_t *menu);
 
-displayContextDef_t *Display_GetContext();
+displayContextDef_t *Display_GetContext( void );
 void *Display_CaptureItem(int x, int y);
 qboolean Display_MouseMove(void *p, int x, int y);
 int Display_CursorType(int x, int y);
-qboolean Display_KeyBindPending();
+qboolean Display_KeyBindPending( void );
 void Menus_OpenByName(const char *p);
 menuDef_t *Menus_FindByName(const char *p);
 void Menus_ShowByName(const char *p);
 void Menus_CloseByName(const char *p);
 void Display_HandleKey(int key, qboolean down, int x, int y);
 void LerpColor(vec4_t a, vec4_t b, vec4_t c, float t);
-void Menus_CloseAll();
+void Menus_CloseAll( void );
 void Menu_Paint(menuDef_t *menu, qboolean forcePaint);
 void Menu_SetFeederSelection(menuDef_t *menu, int feeder, int index, const char *name);
-void Display_CacheAll();
+void Display_CacheAll( void );
 
 void *UI_Alloc( int size );
 void UI_InitMemory( void );
-qboolean UI_OutOfMemory();
+qboolean UI_OutOfMemory( void );
 
 void Controls_GetConfig( void );
 void Controls_SetConfig(qboolean restart);

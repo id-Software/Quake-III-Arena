@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -29,17 +29,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
+#include "../qcommon/q_shared.h"
+
 //debugging on
 #define AAS_DEBUG
-
-#define MAX_CLIENTS			64
-#define	MAX_MODELS			256		// these are sent over the net as 8 bits
-#define	MAX_SOUNDS			256		// so they cannot be blindly increased
-#define	MAX_CONFIGSTRINGS	1024
-
-#define	CS_SCORES			32
-#define	CS_MODELS			(CS_SCORES+MAX_CLIENTS)
-#define	CS_SOUNDS			(CS_MODELS+MAX_MODELS)
 
 #define DF_AASENTNUMBER(x)		(x - aasworld.entities)
 #define DF_NUMBERAASENT(x)		(&aasworld.entities[x])
@@ -49,13 +42,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef MAX_PATH
 	#define MAX_PATH				MAX_QPATH
 #endif
-
-//string index (for model, sound and image index)
-typedef struct aas_stringindex_s
-{
-	int numindexes;
-	char **index;
-} aas_stringindex_t;
 
 //structure to link entities to areas and areas to entities
 typedef struct aas_link_s
@@ -257,9 +243,6 @@ typedef struct aas_s
 	int maxentities;
 	int maxclients;
 	aas_entity_t *entities;
-	//string indexes
-	char *configstrings[MAX_CONFIGSTRINGS];
-	int indexessetup;
 	//index to retrieve travel flag for a travel type
 	int travelflagfortype[MAX_TRAVELTYPES];
 	//travel flags for each area based on contents

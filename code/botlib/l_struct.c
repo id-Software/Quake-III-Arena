@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *****************************************************************************/
 
 #ifdef BOTLIB
-#include "../game/q_shared.h"
-#include "../game/botlib.h"				//for the include of be_interface.h
+#include "../qcommon/q_shared.h"
+#include "botlib.h"				//for the include of be_interface.h
 #include "l_script.h"
 #include "l_precomp.h"
 #include "l_struct.h"
@@ -150,7 +150,7 @@ qboolean ReadNumber(source_t *source, fielddef_t *fd, void *p)
 		} //end if
 		if (intval < intmin || intval > intmax)
 		{
-			SourceError(source, "value %d out of range [%d, %d]", intval, intmin, intmax);
+			SourceError(source, "value %ld out of range [%ld, %ld]", intval, intmin, intmax);
 			return 0;
 		} //end if
 	} //end if
@@ -160,7 +160,7 @@ qboolean ReadNumber(source_t *source, fielddef_t *fd, void *p)
 		{
 			if (intval < fd->floatmin || intval > fd->floatmax)
 			{
-				SourceError(source, "value %d out of range [%f, %f]", intval, fd->floatmin, fd->floatmax);
+				SourceError(source, "value %ld out of range [%f, %f]", intval, fd->floatmin, fd->floatmax);
 				return 0;
 			} //end if
 		} //end if
@@ -346,7 +346,7 @@ int WriteFloat(FILE *fp, float value)
 	char buf[128];
 	int l;
 
-	sprintf(buf, "%f", value);
+	Com_sprintf(buf, sizeof(buf), "%f", value);
 	l = strlen(buf);
 	//strip any trailing zeros
 	while(l-- > 1)

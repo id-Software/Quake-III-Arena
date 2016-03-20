@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -85,6 +85,10 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
 		return qfalse;
 	}
 
+	if ( ent->client->noclip ) {
+		return qfalse;
+	}
+
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	// send blood impact
@@ -142,21 +146,22 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
 
 	for ( i = 0 ; i < 3 ; i++ ) {
 		if ( to[i] <= v[i] ) {
-			v[i] = (int)v[i];
+			v[i] = floor(v[i]);
 		} else {
-			v[i] = (int)v[i] + 1;
+			v[i] = ceil(v[i]);
 		}
 	}
 }
 
 #ifdef MISSIONPACK
 #define CHAINGUN_SPREAD		600
+#define CHAINGUN_DAMAGE		7
 #endif
 #define MACHINEGUN_SPREAD	200
 #define	MACHINEGUN_DAMAGE	7
 #define	MACHINEGUN_TEAM_DAMAGE	5		// wimpier MG in teamplay
 
-void Bullet_Fire (gentity_t *ent, float spread, int damage ) {
+void Bullet_Fire (gentity_t *ent, float spread, int damage, int mod ) {
 	trace_t		tr;
 	vec3_t		end;
 #ifdef MISSIONPACK
@@ -221,7 +226,7 @@ void Bullet_Fire (gentity_t *ent, float spread, int damage ) {
 			else {
 #endif
 				G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-					damage, 0, MOD_MACHINEGUN);
+					damage, 0, mod);
 #ifdef MISSIONPACK
 			}
 #endif
@@ -324,7 +329,6 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	float		r, u;
 	vec3_t		end;
 	vec3_t		forward, right, up;
-	int			oldScore;
 	qboolean	hitClient = qfalse;
 
 	// derive the right and up vectors from the forward vector, because
@@ -332,8 +336,6 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	VectorNormalize2( origin2, forward );
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
-
-	oldScore = ent->client->ps.persistant[PERS_SCORE];
 
 	// generate the "random" spread pattern
 	for ( i = 0 ; i < DEFAULT_SHOTGUN_COUNT ; i++ ) {
@@ -852,9 +854,9 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 	case WP_MACHINEGUN:
 		if ( g_gametype.integer != GT_TEAM ) {
-			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_DAMAGE );
+			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_DAMAGE, MOD_MACHINEGUN );
 		} else {
-			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_TEAM_DAMAGE );
+			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_TEAM_DAMAGE, MOD_MACHINEGUN );
 		}
 		break;
 	case WP_GRENADE_LAUNCHER:
@@ -883,7 +885,7 @@ void FireWeapon( gentity_t *ent ) {
 		weapon_proxlauncher_fire( ent );
 		break;
 	case WP_CHAINGUN:
-		Bullet_Fire( ent, CHAINGUN_SPREAD, MACHINEGUN_DAMAGE );
+		Bullet_Fire( ent, CHAINGUN_SPREAD, CHAINGUN_DAMAGE, MOD_CHAINGUN );
 		break;
 #endif
 	default:

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -253,7 +253,7 @@ void MField_CharEvent( mfield_t *edit, int ch ) {
 		return;
 	}
 
-	if ( !trap_Key_GetOverstrikeMode() ) {	
+	if ( trap_Key_GetOverstrikeMode() ) {
 		if ((edit->cursor == MAX_EDIT_LINE - 1) || (edit->maxchars && edit->cursor >= edit->maxchars))
 			return;
 	} else {
@@ -334,7 +334,6 @@ void MenuField_Draw( menufield_s *f )
 	int		x;
 	int		y;
 	int		w;
-	int		h;
 	int		style;
 	qboolean focus;
 	float	*color;
@@ -345,13 +344,11 @@ void MenuField_Draw( menufield_s *f )
 	if (f->generic.flags & QMF_SMALLFONT)
 	{
 		w = SMALLCHAR_WIDTH;
-		h = SMALLCHAR_HEIGHT;
 		style = UI_SMALLFONT;
 	}
 	else
 	{
 		w = BIGCHAR_WIDTH;
-		h = BIGCHAR_HEIGHT;
 		style = UI_BIGFONT;
 	}	
 

@@ -15,21 +15,21 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 //
 // g_local.h -- local definitions for game module
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
 
 //==================================================================
 
 // the "gameversion" client command will print this plus compile date
-#define	GAMEVERSION	"baseq3"
+#define	GAMEVERSION	BASEGAME
 
 #define BODY_QUEUE_SIZE		8
 
@@ -118,7 +118,6 @@ struct gentity_s {
 
 	int			timestamp;		// body queue sinking, etc
 
-	float		angle;			// set in editor, -1 = up, -2 = down
 	char		*target;
 	char		*targetname;
 	char		*team;
@@ -214,18 +213,13 @@ typedef struct {
 	float		lastfraggedcarrier;
 } playerTeamState_t;
 
-// the auto following clients don't follow a specific client
-// number, but instead follow the first two active players
-#define	FOLLOW_ACTIVE1	-1
-#define	FOLLOW_ACTIVE2	-2
-
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
 // time and reading them back at connection time.  Anything added here
 // MUST be dealt with in G_InitSessionData() / G_ReadSessionData() / G_WriteSessionData()
 typedef struct {
 	team_t		sessionTeam;
-	int			spectatorTime;		// for determining next-in-line to play
+	int			spectatorNum;		// for determining next-in-line to play
 	spectatorState_t	spectatorState;
 	int			spectatorClient;	// for chasecam and follow mode
 	int			wins, losses;		// tournament stats
@@ -337,7 +331,7 @@ typedef struct {
 
 	struct gentity_s	*gentities;
 	int			gentitySize;
-	int			num_entities;		// current number, <= MAX_GENTITIES
+	int			num_entities;		// MAX_CLIENTS <= num_entities <= ENTITYNUM_MAX_NORMAL
 
 	int			warmupTime;			// restart match at this time
 
@@ -479,7 +473,6 @@ void	G_FreeEntity( gentity_t *e );
 qboolean	G_EntitiesFree( void );
 
 void	G_TouchTriggers (gentity_t *ent);
-void	G_TouchSolids (gentity_t *ent);
 
 float	*tv (float x, float y, float z);
 char	*vtos( const vec3_t v );
@@ -490,7 +483,7 @@ void G_AddPredictableEvent( gentity_t *ent, int event, int eventParm );
 void G_AddEvent( gentity_t *ent, int event, int eventParm );
 void G_SetOrigin( gentity_t *ent, vec3_t origin );
 void AddRemap(const char *oldShader, const char *newShader, float timeOffset);
-const char *BuildShaderStateConfig();
+const char *BuildShaderStateConfig( void );
 
 //
 // g_combat.c
@@ -520,7 +513,6 @@ void TossClientCubes( gentity_t *self );
 //
 void G_RunMissile( gentity_t *ent );
 
-gentity_t *fire_blaster (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_plasma (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_grenade (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_rocket (gentity_t *self, vec3_t start, vec3_t dir);
@@ -568,16 +560,14 @@ void Weapon_HookThink (gentity_t *ent);
 //
 // g_client.c
 //
-team_t TeamCount( int ignoreClientNum, int team );
+int TeamCount( int ignoreClientNum, team_t team );
 int TeamLeader( int team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
-gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
+gentity_t *SelectSpawnPoint (vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean isbot);
 void CopyToBodyQue( gentity_t *ent );
-void respawn (gentity_t *ent);
+void ClientRespawn(gentity_t *ent);
 void BeginIntermission (void);
-void InitClientPersistant (gclient_t *client);
-void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
 void ClientSpawn( gentity_t *ent );
 void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
@@ -601,32 +591,23 @@ void G_StartKamikaze( gentity_t *ent );
 #endif
 
 //
-// p_hud.c
-//
-void MoveClientToIntermission (gentity_t *client);
-void G_SetStats (gentity_t *ent);
-void DeathmatchScoreboardMessage (gentity_t *client);
-
-//
 // g_cmds.c
 //
-
-//
-// g_pweapon.c
-//
-
+void DeathmatchScoreboardMessage( gentity_t *ent );
 
 //
 // g_main.c
 //
+void MoveClientToIntermission( gentity_t *ent );
 void FindIntermissionPoint( void );
 void SetLeader(int team, int client);
 void CheckTeamLeader( int team );
 void G_RunThink (gentity_t *ent);
-void QDECL G_LogPrintf( const char *fmt, ... );
+void AddTournamentQueue(gclient_t *client);
+void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void SendScoreboardMessageToAllClients( void );
-void QDECL G_Printf( const char *fmt, ... );
-void QDECL G_Error( const char *fmt, ... );
+void QDECL G_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
+void QDECL G_Error( const char *fmt, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
 
 //
 // g_client.c
@@ -712,7 +693,7 @@ void BotTestAAS(vec3_t origin);
 extern	level_locals_t	level;
 extern	gentity_t		g_entities[MAX_GENTITIES];
 
-#define	FOFS(x) ((int)&(((gentity_t *)0)->x))
+#define	FOFS(x) ((size_t)&(((gentity_t *)0)->x))
 
 extern	vmCvar_t	g_gametype;
 extern	vmCvar_t	g_dedicated;
@@ -765,9 +746,10 @@ extern	vmCvar_t	g_enableBreath;
 extern	vmCvar_t	g_singlePlayer;
 extern	vmCvar_t	g_proxMineTimeout;
 
-void	trap_Printf( const char *fmt );
-void	trap_Error( const char *fmt );
+void	trap_Print( const char *text );
+void	trap_Error( const char *text ) __attribute__((noreturn));
 int		trap_Milliseconds( void );
+int	trap_RealTime( qtime_t *qtime );
 int		trap_Argc( void );
 void	trap_Argv( int n, char *buffer, int bufferLength );
 void	trap_Args( char *buffer, int bufferLength );
