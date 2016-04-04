@@ -13,9 +13,6 @@ Restart=on-abort
 # dedicated 0 is non-dedicted an not available with ioq3ded, 1 is LAN, 2 is Internet
 # sv_pure 1 prevents clients from using their own pk3-files
 # com_hunkmegs defaults to 56, should be 128/192/256 on a modern system(?)
-# rate 25000 defines the rate in which client & server communicate
-# snaps 40 defines gamestate-snapshots client & server exchange in secs
-# cl_maxpackets 125 max amount of FPS being counted on the server-side
 
 [Install]
 WantedBy=multi-user.target
