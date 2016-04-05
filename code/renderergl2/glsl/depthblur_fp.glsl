@@ -9,7 +9,10 @@ varying vec2   var_ScreenTex;
 float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 //float gauss[3] = float[3](0.60, 0.19, 0.0066);
 #define BLUR_SIZE 4
+
+#if !defined(USE_DEPTH)
 //#define USE_GAUSS
+#endif
 
 float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNear)
 {
@@ -19,20 +22,20 @@ float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNea
 
 vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFarDivZNear, float zFar, vec2 scale)
 {
-	float depthCenter = getLinearDepth(depthMap, tex, zFarDivZNear);
 
-	// enable for less blurring for farther objects
+#if defined(USE_DEPTH)
+	float depthCenter = getLinearDepth(depthMap, tex, zFarDivZNear);
+	vec2 slope = vec2(dFdx(depthCenter), dFdy(depthCenter)) / vec2(dFdx(tex.x), dFdy(tex.y));
 	scale /= clamp(zFarDivZNear * depthCenter / 32.0, 1.0, 2.0);
+#endif
 
 #if defined(USE_HORIZONTAL_BLUR)
 	vec2 direction = vec2(scale.x * 2.0, 0.0);
 	vec2 nudge = vec2(0.0, scale.y * 0.5);
 #else // if defined(USE_VERTICAL_BLUR)
 	vec2 direction = vec2(0.0, scale.y * 2.0);
-	vec2 nudge = vec2(scale.x * 0.5, 0.0);
+	vec2 nudge = vec2(-scale.x * 0.5, 0.0);
 #endif
-
-	vec2 slope = vec2(dFdx(depthCenter), dFdy(depthCenter)) / vec2(dFdx(tex.x), dFdy(tex.y));
 
 #if defined(USE_GAUSS)
 	vec4 result = texture2D(imageMap, tex) * gauss[0];
@@ -49,9 +52,13 @@ vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFa
 		for (j = 1; j < BLUR_SIZE; j++)
 		{
 			vec2 offset = direction * (float(j) - 0.25) + nudge;
+#if defined(USE_DEPTH)
 			float depthSample = getLinearDepth(depthMap, tex + offset, zFarDivZNear);
 			float depthExpected = depthCenter + dot(slope, offset);
 			float useSample = float(abs(depthSample - depthExpected) < zLimit);
+#else
+			float useSample = 1.0;
+#endif
 #if defined(USE_GAUSS)
 			result += texture2D(imageMap, tex + offset) * (gauss[j] * useSample);
 			total += gauss[j] * useSample;

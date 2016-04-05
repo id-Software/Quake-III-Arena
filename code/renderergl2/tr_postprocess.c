@@ -227,6 +227,7 @@ void RB_BokehBlur(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, float 
 static void RB_RadialBlur(FBO_t *srcFbo, FBO_t *dstFbo, int passes, float stretch, float x, float y, float w, float h, float xcenter, float ycenter, float alpha)
 {
 	ivec4_t srcBox, dstBox;
+	int srcWidth, srcHeight;
 	vec4_t color;
 	const float inc = 1.f / passes;
 	const float mul = powf(stretch, inc);
@@ -235,10 +236,10 @@ static void RB_RadialBlur(FBO_t *srcFbo, FBO_t *dstFbo, int passes, float stretc
 	alpha *= inc;
 	VectorSet4(color, alpha, alpha, alpha, 1.0f);
 
-	if (srcFbo)
-		VectorSet4(srcBox, 0, 0, srcFbo->width, srcFbo->height);
-	else
-		VectorSet4(srcBox, 0, 0, glConfig.vidWidth, glConfig.vidHeight);
+	srcWidth  = srcFbo ? srcFbo->width  : glConfig.vidWidth;
+	srcHeight = srcFbo ? srcFbo->height : glConfig.vidHeight;
+
+	VectorSet4(srcBox, 0, 0, srcWidth, srcHeight);
 
 	VectorSet4(dstBox, x, y, w, h);
 	FBO_Blit(srcFbo, srcBox, NULL, dstFbo, dstBox, NULL, color, 0);
@@ -251,20 +252,10 @@ static void RB_RadialBlur(FBO_t *srcFbo, FBO_t *dstFbo, int passes, float stretc
 		float s0 = xcenter * (1.f - iscale);
 		float t0 = (1.0f - ycenter) * (1.f - iscale);
 
-		if (srcFbo)
-		{
-			srcBox[0] = s0 * srcFbo->width;
-			srcBox[1] = t0 * srcFbo->height;
-			srcBox[2] = iscale * srcFbo->width;
-			srcBox[3] = iscale * srcFbo->height;
-		}
-		else
-		{
-			srcBox[0] = s0 * glConfig.vidWidth;
-			srcBox[1] = t0 * glConfig.vidHeight;
-			srcBox[2] = iscale * glConfig.vidWidth;
-			srcBox[3] = iscale * glConfig.vidHeight;
-		}
+		srcBox[0] = s0 * srcWidth;
+		srcBox[1] = t0 * srcHeight;
+		srcBox[2] = iscale * srcWidth;
+		srcBox[3] = iscale * srcHeight;
 			
 		FBO_Blit(srcFbo, srcBox, NULL, dstFbo, dstBox, NULL, color, GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
 
@@ -349,23 +340,15 @@ void RB_SunRays(FBO_t *srcFbo, ivec4_t srcBox, FBO_t *dstFbo, ivec4_t dstBox)
 	{
 		float mul = 1.f;
 		ivec4_t rayBox, quarterBox;
+		int srcWidth  = srcFbo ? srcFbo->width  : glConfig.vidWidth;
+		int srcHeight = srcFbo ? srcFbo->height : glConfig.vidHeight;
 
 		VectorSet4(color, mul, mul, mul, 1);
 
-		if (srcFbo)
-		{
-			rayBox[0] = srcBox[0] * tr.sunRaysFbo->width  / srcFbo->width;
-			rayBox[1] = srcBox[1] * tr.sunRaysFbo->height / srcFbo->height;
-			rayBox[2] = srcBox[2] * tr.sunRaysFbo->width  / srcFbo->width;
-			rayBox[3] = srcBox[3] * tr.sunRaysFbo->height / srcFbo->height;
-		}
-		else
-		{
-			rayBox[0] = srcBox[0] * tr.sunRaysFbo->width  / glConfig.vidWidth;
-			rayBox[1] = srcBox[1] * tr.sunRaysFbo->height / glConfig.vidHeight;
-			rayBox[2] = srcBox[2] * tr.sunRaysFbo->width  / glConfig.vidWidth;
-			rayBox[3] = srcBox[3] * tr.sunRaysFbo->height / glConfig.vidHeight;
-		}
+		rayBox[0] = srcBox[0] * tr.sunRaysFbo->width  / srcWidth;
+		rayBox[1] = srcBox[1] * tr.sunRaysFbo->height / srcHeight;
+		rayBox[2] = srcBox[2] * tr.sunRaysFbo->width  / srcWidth;
+		rayBox[3] = srcBox[3] * tr.sunRaysFbo->height / srcHeight;
 
 		quarterBox[0] = 0;
 		quarterBox[1] = tr.quarterFbo[0]->height;
@@ -483,10 +466,8 @@ void RB_GaussianBlur(float blur)
 		FBO_FastBlit(tr.quarterFbo[0], NULL, tr.textureScratchFbo[0], NULL, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		// set the alpha channel
-		VectorSet4(srcBox, 0, 0, tr.whiteImage->width, tr.whiteImage->height);
-		VectorSet4(dstBox, 0, 0, tr.textureScratchFbo[0]->width, tr.textureScratchFbo[0]->height);
 		qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
-		FBO_BlitFromTexture(tr.whiteImage, srcBox, NULL, tr.textureScratchFbo[0], dstBox, NULL, color, GLS_DEPTHTEST_DISABLE);
+		FBO_BlitFromTexture(tr.whiteImage, NULL, NULL, tr.textureScratchFbo[0], NULL, NULL, color, GLS_DEPTHTEST_DISABLE);
 		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		// blur the tiny buffer horizontally and vertically

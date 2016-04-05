@@ -487,10 +487,9 @@ void R_FBOList_f(void)
 	ri.Printf(PRINT_ALL, " %i FBOs\n", tr.numFBOs);
 }
 
-void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexScale, FBO_t *dst, ivec4_t inDstBox, struct shaderProgram_s *shaderProgram, vec4_t inColor, int blend)
+void FBO_BlitFromTexture(struct image_s *src, vec4_t inSrcTexCorners, vec2_t inSrcTexScale, FBO_t *dst, ivec4_t inDstBox, struct shaderProgram_s *shaderProgram, vec4_t inColor, int blend)
 {
-	ivec4_t dstBox, srcBox;
-	vec2_t srcTexScale;
+	ivec4_t dstBox;
 	vec4_t color;
 	vec4_t quadVerts[4];
 	vec2_t texCoords[4];
@@ -505,49 +504,44 @@ void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexS
 		return;
 	}
 
-	if (inSrcBox)
+	width  = dst ? dst->width  : glConfig.vidWidth;
+	height = dst ? dst->height : glConfig.vidHeight;
+
+	if (inSrcTexCorners)
 	{
-		VectorSet4(srcBox, inSrcBox[0], inSrcBox[1], inSrcBox[0] + inSrcBox[2],  inSrcBox[1] + inSrcBox[3]);
+		VectorSet2(texCoords[0], inSrcTexCorners[0], inSrcTexCorners[1]);
+		VectorSet2(texCoords[1], inSrcTexCorners[2], inSrcTexCorners[1]);
+		VectorSet2(texCoords[2], inSrcTexCorners[2], inSrcTexCorners[3]);
+		VectorSet2(texCoords[3], inSrcTexCorners[0], inSrcTexCorners[3]);
 	}
 	else
 	{
-		VectorSet4(srcBox, 0, 0, src->width, src->height);
+		VectorSet2(texCoords[0], 0.0f, 1.0f);
+		VectorSet2(texCoords[1], 1.0f, 1.0f);
+		VectorSet2(texCoords[2], 1.0f, 0.0f);
+		VectorSet2(texCoords[3], 0.0f, 0.0f);
 	}
 
 	// framebuffers are 0 bottom, Y up.
 	if (inDstBox)
 	{
-		if (dst)
-		{
-			dstBox[0] = inDstBox[0];
-			dstBox[1] = dst->height - inDstBox[1] - inDstBox[3];
-			dstBox[2] = inDstBox[0] + inDstBox[2];
-			dstBox[3] = dst->height - inDstBox[1];
-		}
-		else
-		{
-			dstBox[0] = inDstBox[0];
-			dstBox[1] = glConfig.vidHeight - inDstBox[1] - inDstBox[3];
-			dstBox[2] = inDstBox[0] + inDstBox[2];
-			dstBox[3] = glConfig.vidHeight - inDstBox[1];
-		}
-	}
-	else if (dst)
-	{
-		VectorSet4(dstBox, 0, dst->height, dst->width, 0);
+		dstBox[0] = inDstBox[0];
+		dstBox[1] = height - inDstBox[1] - inDstBox[3];
+		dstBox[2] = inDstBox[0] + inDstBox[2];
+		dstBox[3] = height - inDstBox[1];
 	}
 	else
 	{
-		VectorSet4(dstBox, 0, glConfig.vidHeight, glConfig.vidWidth, 0);
+		VectorSet4(dstBox, 0, height, width, 0);
 	}
 
 	if (inSrcTexScale)
 	{
-		VectorCopy2(inSrcTexScale, srcTexScale);
+		VectorCopy2(inSrcTexScale, invTexRes);
 	}
 	else
 	{
-		srcTexScale[0] = srcTexScale[1] = 1.0f;
+		VectorSet2(invTexRes, 1.0f, 1.0f);
 	}
 
 	if (inColor)
@@ -566,17 +560,6 @@ void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexS
 
 	FBO_Bind(dst);
 
-	if (glState.currentFBO)
-	{
-		width = glState.currentFBO->width;
-		height = glState.currentFBO->height;
-	}
-	else
-	{
-		width = glConfig.vidWidth;
-		height = glConfig.vidHeight;
-	}
-
 	qglViewport( 0, 0, width, height );
 	qglScissor( 0, 0, width, height );
 
@@ -586,18 +569,13 @@ void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexS
 
 	GL_BindToTMU(src, TB_COLORMAP);
 
-	VectorSet4(quadVerts[0], dstBox[0], dstBox[1], 0, 1);
-	VectorSet4(quadVerts[1], dstBox[2], dstBox[1], 0, 1);
-	VectorSet4(quadVerts[2], dstBox[2], dstBox[3], 0, 1);
-	VectorSet4(quadVerts[3], dstBox[0], dstBox[3], 0, 1);
+	VectorSet4(quadVerts[0], dstBox[0], dstBox[1], 0.0f, 1.0f);
+	VectorSet4(quadVerts[1], dstBox[2], dstBox[1], 0.0f, 1.0f);
+	VectorSet4(quadVerts[2], dstBox[2], dstBox[3], 0.0f, 1.0f);
+	VectorSet4(quadVerts[3], dstBox[0], dstBox[3], 0.0f, 1.0f);
 
-	texCoords[0][0] = srcBox[0] / (float)src->width; texCoords[0][1] = 1.0f - srcBox[1] / (float)src->height;
-	texCoords[1][0] = srcBox[2] / (float)src->width; texCoords[1][1] = 1.0f - srcBox[1] / (float)src->height;
-	texCoords[2][0] = srcBox[2] / (float)src->width; texCoords[2][1] = 1.0f - srcBox[3] / (float)src->height;
-	texCoords[3][0] = srcBox[0] / (float)src->width; texCoords[3][1] = 1.0f - srcBox[3] / (float)src->height;
-
-	invTexRes[0] = 1.0f / src->width  * srcTexScale[0];
-	invTexRes[1] = 1.0f / src->height * srcTexScale[1];
+	invTexRes[0] /= src->width;
+	invTexRes[1] /= src->height;
 
 	GL_State( blend );
 
@@ -609,14 +587,14 @@ void FBO_BlitFromTexture(struct image_s *src, ivec4_t inSrcBox, vec2_t inSrcTexS
 	GLSL_SetUniformVec2(shaderProgram, UNIFORM_AUTOEXPOSUREMINMAX, tr.refdef.autoExposureMinMax);
 	GLSL_SetUniformVec3(shaderProgram, UNIFORM_TONEMINAVGMAXLINEAR, tr.refdef.toneMinAvgMaxLinear);
 
-	RB_InstantQuad2(quadVerts, texCoords); //, color, shaderProgram, invTexRes);
+	RB_InstantQuad2(quadVerts, texCoords);
 
 	FBO_Bind(oldFbo);
 }
 
 void FBO_Blit(FBO_t *src, ivec4_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, ivec4_t dstBox, struct shaderProgram_s *shaderProgram, vec4_t color, int blend)
 {
-	ivec4_t srcBox;
+	vec4_t srcTexCorners;
 
 	if (!src)
 	{
@@ -624,20 +602,19 @@ void FBO_Blit(FBO_t *src, ivec4_t inSrcBox, vec2_t srcTexScale, FBO_t *dst, ivec
 		return;
 	}
 
-	// framebuffers are 0 bottom, Y up.
 	if (inSrcBox)
 	{
-		srcBox[0] = inSrcBox[0];
-		srcBox[1] = src->height - inSrcBox[1] - inSrcBox[3];
-		srcBox[2] = inSrcBox[2];
-		srcBox[3] = inSrcBox[3];
+		srcTexCorners[0] =  inSrcBox[0]                / (float)src->width;
+		srcTexCorners[1] = (inSrcBox[1] + inSrcBox[3]) / (float)src->height;
+		srcTexCorners[2] = (inSrcBox[0] + inSrcBox[2]) / (float)src->width;
+		srcTexCorners[3] =  inSrcBox[1]                / (float)src->height;
 	}
 	else
 	{
-		VectorSet4(srcBox, 0, src->height, src->width, -src->height);
+		VectorSet4(srcTexCorners, 0.0f, 0.0f, 1.0f, 1.0f);
 	}
 
-	FBO_BlitFromTexture(src->colorImage[0], srcBox, srcTexScale, dst, dstBox, shaderProgram, color, blend | GLS_DEPTHTEST_DISABLE);
+	FBO_BlitFromTexture(src->colorImage[0], srcTexCorners, srcTexScale, dst, dstBox, shaderProgram, color, blend | GLS_DEPTHTEST_DISABLE);
 }
 
 void FBO_FastBlit(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, int buffers, int filter)
@@ -651,22 +628,15 @@ void FBO_FastBlit(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, int bu
 		return;
 	}
 
-	// get to a neutral state first
-	//FBO_Bind(NULL);
-
 	srcFb = src ? src->frameBuffer : 0;
 	dstFb = dst ? dst->frameBuffer : 0;
 
 	if (!srcBox)
 	{
-		if (src)
-		{
-			VectorSet4(srcBoxFinal, 0, 0, src->width, src->height);
-		}
-		else
-		{
-			VectorSet4(srcBoxFinal, 0, 0, glConfig.vidWidth, glConfig.vidHeight);
-		}
+		int width =  src ? src->width  : glConfig.vidWidth;
+		int height = src ? src->height : glConfig.vidHeight;
+
+		VectorSet4(srcBoxFinal, 0, 0, width, height);
 	}
 	else
 	{
@@ -675,14 +645,10 @@ void FBO_FastBlit(FBO_t *src, ivec4_t srcBox, FBO_t *dst, ivec4_t dstBox, int bu
 
 	if (!dstBox)
 	{
-		if (dst)
-		{
-			VectorSet4(dstBoxFinal, 0, 0, dst->width, dst->height);
-		}
-		else
-		{
-			VectorSet4(dstBoxFinal, 0, 0, glConfig.vidWidth, glConfig.vidHeight);
-		}
+		int width  = dst ? dst->width  : glConfig.vidWidth;
+		int height = dst ? dst->height : glConfig.vidHeight;
+
+		VectorSet4(dstBoxFinal, 0, 0, width, height);
 	}
 	else
 	{

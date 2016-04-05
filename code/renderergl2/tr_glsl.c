@@ -1284,7 +1284,7 @@ void GLSL_InitGPUShaders(void)
 	numEtcShaders++;
 
 
-	for (i = 0; i < 2; i++)
+	for (i = 0; i < 4; i++)
 	{
 		attribs = ATTR_POSITION | ATTR_TEXCOORD;
 		extradefines[0] = '\0';
@@ -1293,6 +1293,9 @@ void GLSL_InitGPUShaders(void)
 			Q_strcat(extradefines, 1024, "#define USE_VERTICAL_BLUR\n");
 		else
 			Q_strcat(extradefines, 1024, "#define USE_HORIZONTAL_BLUR\n");
+
+		if (!(i & 2))
+			Q_strcat(extradefines, 1024, "#define USE_DEPTH\n");
 
 
 		if (!GLSL_InitGPUShader(&tr.depthBlurShader[i], "depthBlur", attribs, qtrue, extradefines, qtrue, fallbackShader_depthblur_vp, fallbackShader_depthblur_fp))
@@ -1373,7 +1376,7 @@ void GLSL_ShutdownGPUShaders(void)
 	GLSL_DeleteGPUShader(&tr.shadowmaskShader);
 	GLSL_DeleteGPUShader(&tr.ssaoShader);
 
-	for ( i = 0; i < 2; i++)
+	for ( i = 0; i < 4; i++)
 		GLSL_DeleteGPUShader(&tr.depthBlurShader[i]);
 }
 

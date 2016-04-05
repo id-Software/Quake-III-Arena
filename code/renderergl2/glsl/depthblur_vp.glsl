@@ -8,7 +8,8 @@ varying vec2   var_ScreenTex;
 void main()
 {
 	gl_Position = attr_Position;
-	var_ScreenTex = (floor(attr_TexCoord0.xy * (1.0 / u_ViewInfo.zw - vec2(1.0))) + vec2(0.5)) * u_ViewInfo.zw;
+	vec2 wh = vec2(1.0) / u_ViewInfo.zw - vec2(1.0);
+	var_ScreenTex = (floor(attr_TexCoord0.xy * wh) + vec2(0.5)) * u_ViewInfo.zw;
 
 	//vec2 screenCoords = gl_Position.xy / gl_Position.w;
 	//var_ScreenTex = screenCoords * 0.5 + 0.5;

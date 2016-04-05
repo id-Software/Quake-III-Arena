@@ -1591,7 +1591,7 @@ typedef struct {
 	shaderProgram_t calclevels4xShader[2];
 	shaderProgram_t shadowmaskShader;
 	shaderProgram_t ssaoShader;
-	shaderProgram_t depthBlurShader[2];
+	shaderProgram_t depthBlurShader[4];
 	shaderProgram_t testcubeShader;
 
 
