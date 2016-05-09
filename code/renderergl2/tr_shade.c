@@ -1270,7 +1270,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 					specularScale[1] = 0.0f;
 			}
 
-			GLSL_SetUniformVec4(sp, UNIFORM_SPECULARSCALE, pStage->specularScale);
+			GLSL_SetUniformVec4(sp, UNIFORM_SPECULARSCALE, specularScale);
 		}
 
 		//GLSL_SetUniformFloat(sp, UNIFORM_MAPLIGHTSCALE, backEnd.refdef.mapLightScale);
