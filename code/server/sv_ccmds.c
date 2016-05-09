@@ -1480,7 +1480,7 @@ SV_CompletePlayerName
 static void SV_CompletePlayerName( char *args, int argNum ) {
 	if( argNum == 2 ) {
 		char		names[MAX_CLIENTS][MAX_NAME_LENGTH];
-		char		*namesPtr[MAX_CLIENTS];
+		const char	*namesPtr[MAX_CLIENTS];
 		client_t	*cl;
 		int			i;
 		int			nameCount;

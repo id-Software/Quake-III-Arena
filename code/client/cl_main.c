@@ -1806,7 +1806,7 @@ static void CL_CompletePlayerName( char *args, int argNum )
 	if( argNum == 2 )
 	{
 		char		names[MAX_CLIENTS][MAX_NAME_LENGTH];
-		char		*namesPtr[MAX_CLIENTS];
+		const char	*namesPtr[MAX_CLIENTS];
 		int			i;
 		int			clientCount;
 		int			nameCount;

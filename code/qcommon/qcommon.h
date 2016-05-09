@@ -762,7 +762,7 @@ void Field_CompleteFilename( const char *dir,
 		const char *ext, qboolean stripExt, qboolean allowNonPureFilesOnDisk );
 void Field_CompleteCommand( char *cmd,
 		qboolean doCommands, qboolean doCvars );
-void Field_CompletePlayerName( char **names, int count );
+void Field_CompletePlayerName( const char **names, int count );
 
 /*
 ==============================================================
