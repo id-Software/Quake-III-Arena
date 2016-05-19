@@ -2120,12 +2120,6 @@ static void R_CreateWorldVaos(void)
 		// -1 represents 0, -2 represents 1, and so on
 		s_worldData.viewSurfaces = ri.Hunk_Alloc(sizeof(*s_worldData.viewSurfaces) * s_worldData.nummarksurfaces, h_low);
 
-		// copy view surfaces into mark surfaces
-		for (i = 0; i < s_worldData.nummarksurfaces; i++)
-		{
-			s_worldData.viewSurfaces[i] = s_worldData.marksurfaces[i];
-		}
-
 		// actually merge surfaces
 		mergedSurf = s_worldData.mergedSurfaces;
 		for(firstSurf = lastSurf = surfacesSorted; firstSurf < surfacesSorted + numSortedSurfaces; firstSurf = lastSurf)
@@ -2186,23 +2180,22 @@ static void R_CreateWorldVaos(void)
 			mergedSurf->cubemapIndex  =  (*firstSurf)->cubemapIndex;
 			mergedSurf->shader        =  (*firstSurf)->shader;
 
-			// redirect view surfaces to this surf
+			// change surfacesViewCount[] from leaf index to viewSurface index - 1 so we can redirect later
+			// subtracting 2 (viewSurface index - 1) to avoid collision with -1 (no leaf)
 			for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
-				s_worldData.surfacesViewCount[*currSurf - s_worldData.surfaces] = -2;
-
-			for (k = 0; k < s_worldData.nummarksurfaces; k++)
-			{
-				if (s_worldData.surfacesViewCount[s_worldData.marksurfaces[k]] == -2)
-					s_worldData.viewSurfaces[k] = -((int)(mergedSurf - s_worldData.mergedSurfaces) + 1);
-			}
-
-			for (currSurf = firstSurf; currSurf < lastSurf; currSurf++)
-				s_worldData.surfacesViewCount[*currSurf - s_worldData.surfaces] = -1;
+				s_worldData.surfacesViewCount[*currSurf - s_worldData.surfaces] = -((int)(mergedSurf - s_worldData.mergedSurfaces)) - 2;
 
 			mergedSurf++;
 		}
 
-		ri.Printf(PRINT_ALL, "Processed %d mergeable surfaces into %d merged, %d unmerged\n", 
+		// direct viewSurfaces to merged and unmerged surfaces
+		for (i = 0; i < s_worldData.nummarksurfaces; i++)
+		{
+			int viewSurfaceIndex = s_worldData.surfacesViewCount[s_worldData.marksurfaces[i]] + 1;
+			s_worldData.viewSurfaces[i] = (viewSurfaceIndex < 0) ? viewSurfaceIndex : s_worldData.marksurfaces[i];
+		}
+
+		ri.Printf(PRINT_ALL, "Processed %d mergeable surfaces into %d merged, %d unmerged\n",
 			numSortedSurfaces, numMergedSurfaces, numUnmergedSurfaces);
 	}
 
