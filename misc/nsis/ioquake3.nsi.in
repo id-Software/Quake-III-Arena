@@ -5,7 +5,7 @@
 ; This file is used to automatically build the installers in the
 ; openSUSE build service, don't break this!
 ;
-; you have to copy SDL.dll and OpenAL32.dll here manually
+; you have to copy OpenAL32.dll here manually
 
 !define MULTIUSER_MUI
 !define MULTIUSER_EXECUTIONLEVEL Highest
@@ -97,7 +97,7 @@ Section "ioquake3 (required)"
 !endif
 
   File "../../COPYING.txt"
-  File "/oname=README.txt" "../../README"
+  File "/oname=README.txt" "../../README.md"
   File "../../id-readme.txt"
   File "../../voip-readme.txt"
 
@@ -132,11 +132,11 @@ Section "Start Menu Shortcuts"
 
 SectionEnd
 
-Section "SDL.dll"
+Section "SDL2.dll"
 
   SetOutPath $INSTDIR
 
-  File "SDL.dll"
+  File "../../build/release-mingw32-x86/SDL2.dll"
 
 SectionEnd
 
@@ -199,7 +199,7 @@ Section "Uninstall"
   Delete $INSTDIR\jpeg8c.dll
 !endif
 
-  Delete $INSTDIR\SDL.dll
+  Delete $INSTDIR\SDL2.dll
 !ifdef USE_OPENAL_DLOPEN
   Delete $INSTDIR\OpenAL32.dll
 !endif
