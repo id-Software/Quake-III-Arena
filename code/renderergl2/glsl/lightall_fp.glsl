@@ -370,11 +370,11 @@ void main()
 	// from http://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 	vec3 parallax = u_CubeMapInfo.xyz + u_CubeMapInfo.w * viewDir;
 
-	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, 7.0 * roughness).rgb * u_EnableTextures.w;
+	vec3 cubeLightColor = textureCubeLod(u_CubeMap, R + parallax, ROUGHNESS_MIPS * roughness).rgb * u_EnableTextures.w;
 
-	// normalize cubemap based on lowest mip (~diffuse)
+	// normalize cubemap based on last roughness mip (~diffuse)
 	// multiplying cubemap values by lighting below depends on either this or the cubemap being normalized at generation
-	//vec3 cubeLightDiffuse = max(textureCubeLod(u_CubeMap, N, 6.0).rgb, 0.5 / 255.0);
+	//vec3 cubeLightDiffuse = max(textureCubeLod(u_CubeMap, N, ROUGHNESS_MIPS).rgb, 0.5 / 255.0);
 	//cubeLightColor /= dot(cubeLightDiffuse, vec3(0.2125, 0.7154, 0.0721));
 
     #if defined(USE_PBR)

@@ -325,6 +325,20 @@ static void GLSL_GetShaderHeader( GLenum shaderType, const GLcharARB *extra, cha
 	if (r_pbr->integer)
 		Q_strcat(dest, size, "#define USE_PBR\n");
 
+	if (r_cubeMapping->integer)
+	{
+		int cubeMipSize = r_cubemapSize->integer;
+		int numRoughnessMips = 0;
+
+		while (cubeMipSize)
+		{
+			cubeMipSize >>= 1;
+			numRoughnessMips++;
+		}
+		numRoughnessMips = MAX(1, numRoughnessMips - 2);
+		Q_strcat(dest, size, va("#define ROUGHNESS_MIPS float(%d)\n", numRoughnessMips));
+	}
+
 	if (extra)
 	{
 		Q_strcat(dest, size, extra);
