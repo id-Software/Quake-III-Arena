@@ -468,7 +468,6 @@ void GLimp_InitExtraExtensions()
 
 	// GL_ARB_shading_language_100
 	extension = "GL_ARB_shading_language_100";
-	glRefConfig.textureFloat = qfalse;
 	if( GLimp_HaveExtension( extension ) )
 	{
 		char version[256];
