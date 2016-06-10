@@ -693,29 +693,6 @@ extern void (APIENTRY * qglRenderbufferStorageMultisampleEXT)(GLenum target, GLs
 #define GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB         0x8E8F
 #endif
 
-// GL_ARB_draw_buffers
-extern void (APIENTRY * qglDrawBuffersARB)(GLsizei n, const GLenum *bufs);
-#ifndef GL_ARB_draw_buffers
-#define GL_ARB_draw_buffers
-#define GL_MAX_DRAW_BUFFERS_ARB                    0x8824
-#define GL_DRAW_BUFFER0_ARB                        0x8825
-#define GL_DRAW_BUFFER1_ARB                        0x8826
-#define GL_DRAW_BUFFER2_ARB                        0x8827
-#define GL_DRAW_BUFFER3_ARB                        0x8828
-#define GL_DRAW_BUFFER4_ARB                        0x8829
-#define GL_DRAW_BUFFER5_ARB                        0x882A
-#define GL_DRAW_BUFFER6_ARB                        0x882B
-#define GL_DRAW_BUFFER7_ARB                        0x882C
-#define GL_DRAW_BUFFER8_ARB                        0x882D
-#define GL_DRAW_BUFFER9_ARB                        0x882E
-#define GL_DRAW_BUFFER10_ARB                       0x882F
-#define GL_DRAW_BUFFER11_ARB                       0x8830
-#define GL_DRAW_BUFFER12_ARB                       0x8831
-#define GL_DRAW_BUFFER13_ARB                       0x8832
-#define GL_DRAW_BUFFER14_ARB                       0x8833
-#define GL_DRAW_BUFFER15_ARB                       0x8834
-#endif
-
 #ifndef GL_ARB_depth_clamp
 #define GL_ARB_depth_clamp
 #define GL_DEPTH_CLAMP				      0x864F
