@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WIN32
   #define DEFAULT_CURL_LIB "libcurl-4.dll"
   #define ALTERNATE_CURL_LIB "libcurl-3.dll"
-#elif defined(MACOS_X)
+#elif defined(__APPLE__)
   #define DEFAULT_CURL_LIB "libcurl.dylib"
 #else
   #define DEFAULT_CURL_LIB "libcurl.so.4"

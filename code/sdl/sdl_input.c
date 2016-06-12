@@ -247,7 +247,7 @@ static keyNum_t IN_TranslateSDLToQ3Key( SDL_Keysym *keysym, qboolean down )
 			case SDLK_LCTRL:
 			case SDLK_RCTRL:        key = K_CTRL;          break;
 
-#ifdef MACOS_X
+#ifdef __APPLE__
 			case SDLK_RGUI:
 			case SDLK_LGUI:         key = K_COMMAND;       break;
 #else

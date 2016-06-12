@@ -106,7 +106,7 @@ char *basepath( char *fname )
    all and others do a terrible job (like calling malloc) */
 // -- ouch, that hurts -- ln
 /* always use the system memmove() on Mac OS X. --ryan. */
-#if !defined(MACOS_X) && !defined(_MSC_VER)
+#if !defined(__APPLE__) && !defined(_MSC_VER)
 #ifdef memmove
 #undef memmove
 #endif
