@@ -246,7 +246,7 @@ static	char		fs_gamedir[MAX_OSPATH];	// this will be a single file name with no 
 static	cvar_t		*fs_debug;
 static	cvar_t		*fs_homepath;
 
-#ifdef MACOS_X
+#ifdef __APPLE__
 // Also search the .app bundle for .pk3 files
 static  cvar_t          *fs_apppath;
 #endif
@@ -3319,7 +3319,7 @@ static void FS_Startup( const char *gameName )
 	}
 	// fs_homepath is somewhat particular to *nix systems, only add if relevant
 
-#ifdef MACOS_X
+#ifdef __APPLE__
 	fs_apppath = Cvar_Get ("fs_apppath", Sys_DefaultAppPath(), CVAR_INIT|CVAR_PROTECTED );
 	// Make MacOSX also include the base path included with the .app bundle
 	if (fs_apppath->string[0])

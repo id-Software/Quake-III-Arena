@@ -46,7 +46,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define idppc 1
 #if defined(__VEC__)
 #define idppc_altivec 1
-#ifdef MACOS_X  // Apple's GCC does this differently than the FSF.
+#ifdef __APPLE__  // Apple's GCC does this differently than the FSF.
 #define VECCONST_UINT8(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
 	(vector unsigned char) (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
 #else
@@ -139,12 +139,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //============================================================== MAC OS X ===
 
-#if defined(MACOS_X) || defined(__APPLE_CC__)
-
-// make sure this is defined, just for sanity's sake...
-#ifndef MACOS_X
-#define MACOS_X
-#endif
+#if defined(__APPLE__) || defined(__APPLE_CC__)
 
 #define OS_STRING "macosx"
 #define ID_INLINE inline

@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#ifndef MACOS_X
+#ifndef __APPLE__
 #error This file is for Mac OS X only. You probably should not compile it.
 #endif
 
