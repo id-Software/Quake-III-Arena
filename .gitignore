@@ -23,6 +23,7 @@ Icon?
 *.user
 *.xcuserstate
 *.moved-aside
+*~.nib
 .idea/
 DerivedData/
 project.xcworkspace/
