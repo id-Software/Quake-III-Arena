@@ -2,6 +2,7 @@ build
 Makefile.local
 *.swp
 *tags
+*~
 
 # OS X
 ####################
@@ -22,7 +23,6 @@ Icon?
 *.user
 *.xcuserstate
 *.moved-aside
-*~.nib
 .idea/
 DerivedData/
 project.xcworkspace/
