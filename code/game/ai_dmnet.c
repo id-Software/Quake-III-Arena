@@ -573,11 +573,10 @@ int BotGetLongTermGoal(bot_state_t *bs, int tfl, int retreat, bot_goal_t *goal) 
 			bs->teammessage_time = 0;
 		}
 		//
-		if (bs->lastkilledplayer == bs->teamgoal.entitynum) {
+		if (bs->killedenemy_time > bs->teamgoal_time - TEAM_KILL_SOMEONE && bs->lastkilledplayer == bs->teamgoal.entitynum) {
 			EasyClientName(bs->teamgoal.entitynum, buf, sizeof(buf));
 			BotAI_BotInitialChat(bs, "kill_done", buf, NULL);
 			trap_BotEnterChat(bs->cs, bs->decisionmaker, CHAT_TELL);
-			bs->lastkilledplayer = -1;
 			bs->ltgtype = 0;
 		}
 		//
