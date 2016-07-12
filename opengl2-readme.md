@@ -1,4 +1,4 @@
-OpenGL2
+# OpenGL2
 <insert ascii art here>
 
 OpenGL2 is an alternate renderer for ioquake3.  It aims to implement modern
@@ -398,7 +398,7 @@ The first thing to notice is that this is basically the same as old Quake 3
 shader files.  The next thing to notice are the new keywords.  Here is what 
 they mean:
 
-  stage <type>        
+  `stage <type>`
     - State how this imagemap will be used by OpenGL2:
         diffuseMap        - Standard, same as no stage entry
         normalMap         - Image will be used as a normal map
@@ -407,7 +407,7 @@ they mean:
         specularMap       - Image will be used as a specular map with
                             alpha treated as shininess.
 
-  specularReflectance <value> 
+  `specularReflectance <value>`
     - State how metallic this material is.  Metals typically have a high 
       specular and a low diffuse, so this is typically high for them, and low
       for other materials, such as plastic.  For typical values for various
@@ -415,18 +415,18 @@ they mean:
       down to the reflection calculator and look up its reflectance.  Default
       is 0.04, since most materials aren't metallic.
   
-  specularExponent <value>
+  `specularExponent <value>`
     - State how shiny this material is.  Note that this is modulated by the 
       alpha channel of the specular map, so if it were set to 16, and the alpha
       channel of the specular map was set to 0.5, then the shininess would be
       set to 8.  Default 256.
 
-  normalScale <x> <y>
+  `normalScale <x> <y>`
     - State the X and Y scales of the normal map.  This is useful for increasing
       or decreasing the "strength" of the normal map, or entering negative values
       to flip the X and/or Y values.  Default 1 1.
 
-  parallaxDepth <value>
+  `parallaxDepth <value>`
     - State the maximum depth of the parallax map.  This is a fairly sensitive
       value, and I recommend the default or lower.  Default 0.05.
 
@@ -506,8 +506,7 @@ and is the equivalent for 'exactVertex'.
 
 This adds a new keyword to sky materials, q3gl2_sun.  The syntax is:
 
-  q3gl2_sun <red> <green> <blue> <intensity> <degrees> <elevation> 
-  <mapLightScale> <ambientLightScale>
+    q3gl2_sun <red> <green> <blue> <intensity> <degrees> <elevation> <mapLightScale> <ambientLightScale>
   
 Note the first six parameters are the same as in q3map_sun or q3map_sunExt,
 and the last two indicate scaling factors for the map brightness and an ambient
@@ -519,21 +518,21 @@ There are currently two ways to use this in your own (and other people's) maps.
      'q3gl2_sun' line after your 'q3map_sun' line in your sky material, like
      so:
      
-    textures/skies/bluesky
-    {
-        qer_editorimage textures/skies/bluesky.jpg
+        textures/skies/bluesky
+        {
+          qer_editorimage textures/skies/bluesky.jpg
 
-        surfaceparm nomarks
-        surfaceparm noimpact
-        surfaceparm nolightmap
-        surfaceparm sky
-        q3map_sunExt 240 238 200 100 195 35 3 16
-        q3gl2_sun 240 238 200 50 195 35 1.0 0.2
-        q3map_skylight 50 16
-        q3map_lightimage $whiteimage
+          surfaceparm nomarks
+          surfaceparm noimpact
+          surfaceparm nolightmap
+          surfaceparm sky
+          q3map_sunExt 240 238 200 100 195 35 3 16
+          q3gl2_sun 240 238 200 50 195 35 1.0 0.2
+          q3map_skylight 50 16
+          q3map_lightimage $whiteimage
 
-        skyparms env/bluesky - -
-    }
+          skyparms env/bluesky - -
+        }
 
      The advantages with this method are that your map will continue to work
      with the old renderer with the sunlight baked into the lightmap, and it
@@ -543,20 +542,20 @@ There are currently two ways to use this in your own (and other people's) maps.
   2. Set r_sunlightMode to 2 and use 'q3gl2_sun' instead of 'q3map_sun' or
      'q3map_sunExt', like so:
   
-    textures/skies/bluesky
-    {
-        qer_editorimage textures/skies/bluesky.jpg
+        textures/skies/bluesky
+        {
+          qer_editorimage textures/skies/bluesky.jpg
 
-        surfaceparm nomarks
-        surfaceparm noimpact
-        surfaceparm nolightmap
-        surfaceparm sky
-        q3gl2_sun 240 238 200 50 195 35 0.5 0.2
-        q3map_skylight 50 16
-        q3map_lightimage $whiteimage
+          surfaceparm nomarks
+          surfaceparm noimpact
+          surfaceparm nolightmap
+          surfaceparm sky
+          q3gl2_sun 240 238 200 50 195 35 0.5 0.2
+          q3map_skylight 50 16
+          q3map_lightimage $whiteimage
 
-        skyparms env/bluesky - -
-    }
+          skyparms env/bluesky - -
+        }
 
      The advantages with this method are that you don't get the artifacts that
      characterize the other method, and your map compiles a lot faster without
@@ -571,8 +570,7 @@ There are currently two ways to use this in your own (and other people's) maps.
 
 This adds a new keyword to sky materials, q3gl2_tonemap.  The syntax is:
 
-  q3gl2_tonemap <toneMapMin> <toneMapAvg> <toneMapMax <autoExposureMin>
-  <autoExposureMax>
+    q3gl2_tonemap <toneMapMin> <toneMapAvg> <toneMapMax> <autoExposureMin> <autoExposureMax>
   
 Each of these settings corresponds to a matching cvar, so you can view and
 adjust the effect before settling on fixed settings.
