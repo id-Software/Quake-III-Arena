@@ -2054,7 +2054,7 @@ bot_moveresult_t BotTravel_Elevator(bot_movestate_t *ms, aas_reachability_t *rea
 		botimport.Print(PRT_MESSAGE, "bot on elevator\n");
 #endif //DEBUG_ELEVATOR
 		//if vertically not too far from the end point
-		if (abs(ms->origin[2] - reach->end[2]) < sv_maxbarrier->value)
+		if (fabsf(ms->origin[2] - reach->end[2]) < sv_maxbarrier->value)
 		{
 #ifdef DEBUG_ELEVATOR
 			botimport.Print(PRT_MESSAGE, "bot moving to end\n");
