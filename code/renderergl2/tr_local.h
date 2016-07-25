@@ -706,9 +706,9 @@ typedef struct shaderProgram_s
 {
 	char            name[MAX_QPATH];
 
-	GLhandleARB     program;
-	GLhandleARB     vertexShader;
-	GLhandleARB     fragmentShader;
+	GLuint          program;
+	GLuint          vertexShader;
+	GLuint          fragmentShader;
 	uint32_t        attribs;	// vertex array attributes
 
 	// uniform parameters
@@ -1383,6 +1383,9 @@ typedef enum {
 // We can't change glConfig_t without breaking DLL/vms compatibility, so
 // store extensions we have here.
 typedef struct {
+	int openglMajorVersion;
+	int openglMinorVersion;
+
 	qboolean    drawRangeElements;
 	qboolean    multiDrawArrays;
 	qboolean	occlusionQuery;
@@ -1400,7 +1403,6 @@ typedef struct {
 	qboolean textureFloat;
 	qboolean halfFloatPixel;
 	qboolean packedDepthStencil;
-	qboolean arbTextureCompression;
 	textureCompressionRef_t textureCompression;
 	qboolean swizzleNormalmap;
 	

@@ -644,7 +644,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	}
 
 	if (inQuery) {
-		qglEndQueryARB(GL_SAMPLES_PASSED_ARB);
+		qglEndQuery(GL_SAMPLES_PASSED);
 	}
 
 	if (glRefConfig.framebufferObject)
@@ -1195,14 +1195,14 @@ const void	*RB_DrawSurfs( const void *data ) {
 			if (glRefConfig.occlusionQuery)
 			{
 				tr.sunFlareQueryActive[tr.sunFlareQueryIndex] = qtrue;
-				qglBeginQueryARB(GL_SAMPLES_PASSED_ARB, tr.sunFlareQuery[tr.sunFlareQueryIndex]);
+				qglBeginQuery(GL_SAMPLES_PASSED, tr.sunFlareQuery[tr.sunFlareQueryIndex]);
 			}
 
 			RB_DrawSun(0.3, tr.sunFlareShader);
 
 			if (glRefConfig.occlusionQuery)
 			{
-				qglEndQueryARB(GL_SAMPLES_PASSED_ARB);
+				qglEndQuery(GL_SAMPLES_PASSED);
 			}
 
 			FBO_Bind(oldFbo);

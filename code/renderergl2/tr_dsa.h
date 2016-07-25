@@ -44,7 +44,7 @@ GLvoid APIENTRY GLDSA_CompressedTextureSubImage2D(GLuint texture, GLenum target,
 GLvoid APIENTRY GLDSA_GenerateTextureMipmap(GLuint texture, GLenum target);
 
 void GL_BindNullProgram(void);
-int GL_UseProgramObject(GLuint program);
+int GL_UseProgram(GLuint program);
 
 GLvoid APIENTRY GLDSA_ProgramUniform1i(GLuint program, GLint location, GLint v0);
 GLvoid APIENTRY GLDSA_ProgramUniform1f(GLuint program, GLint location, GLfloat v0);

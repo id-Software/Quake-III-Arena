@@ -282,7 +282,7 @@ static qboolean RB_UpdateSunFlareVis(void)
 		for (iter=0 ; ; ++iter)
 		{
 			GLint available = 0;
-			qglGetQueryObjectivARB(tr.sunFlareQuery[tr.sunFlareQueryIndex], GL_QUERY_RESULT_AVAILABLE_ARB, &available);
+			qglGetQueryObjectiv(tr.sunFlareQuery[tr.sunFlareQueryIndex], GL_QUERY_RESULT_AVAILABLE, &available);
 			if (available)
 				break;
 		}
@@ -290,7 +290,7 @@ static qboolean RB_UpdateSunFlareVis(void)
 		ri.Printf(PRINT_DEVELOPER, "Waited %d iterations\n", iter);
 	}
 	
-	qglGetQueryObjectuivARB(tr.sunFlareQuery[tr.sunFlareQueryIndex], GL_QUERY_RESULT_ARB, &sampleCount);
+	qglGetQueryObjectuiv(tr.sunFlareQuery[tr.sunFlareQueryIndex], GL_QUERY_RESULT, &sampleCount);
 	return sampleCount > 0;
 }
 
