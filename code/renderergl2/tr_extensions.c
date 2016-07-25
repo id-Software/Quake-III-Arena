@@ -30,59 +30,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tr_local.h"
 #include "tr_dsa.h"
 
-// OpenGL 1.2, was GL_EXT_draw_range_elements
-void (APIENTRY * qglDrawRangeElements) (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
-
-// OpenGL 1.3, was GL_ARB_texture_compression
-void (APIENTRY * qglCompressedTexImage2D) (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data);
-void (APIENTRY * qglCompressedTexSubImage2D) (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data);
-
-// OpenGL 1.4, was GL_EXT_multi_draw_arrays
-void (APIENTRY * qglMultiDrawElements) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount);
-
-// OpenGL 1.5, previously GL_ARB_vertex_buffer_object
-void (APIENTRY * qglGenQueries) (GLsizei n, GLuint *ids);
-void (APIENTRY * qglDeleteQueries) (GLsizei n, const GLuint *ids);
-void (APIENTRY * qglBeginQuery) (GLenum target, GLuint id);
-void (APIENTRY * qglEndQuery) (GLenum target);
-void (APIENTRY * qglGetQueryObjectiv) (GLuint id, GLenum pname, GLint *params);
-void (APIENTRY * qglGetQueryObjectuiv) (GLuint id, GLenum pname, GLuint *params);
-void (APIENTRY * qglBindBuffer) (GLenum target, GLuint buffer);
-void (APIENTRY * qglDeleteBuffers) (GLsizei n, const GLuint *buffers);
-void (APIENTRY * qglGenBuffers) (GLsizei n, GLuint *buffers);
-void (APIENTRY * qglBufferData) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
-void (APIENTRY * qglBufferSubData) (GLenum target, GLintptr offset, GLsizeiptr size, const void *data);
-
-// OpenGL 2.0, previously GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
-void (APIENTRY * qglAttachShader) (GLuint program, GLuint shader);
-void (APIENTRY * qglBindAttribLocation) (GLuint program, GLuint index, const GLchar *name);
-void (APIENTRY * qglCompileShader) (GLuint shader);
-GLuint(APIENTRY * qglCreateProgram) (void);
-GLuint(APIENTRY * qglCreateShader) (GLenum type);
-void (APIENTRY * qglDeleteProgram) (GLuint program);
-void (APIENTRY * qglDeleteShader) (GLuint shader);
-void (APIENTRY * qglDetachShader) (GLuint program, GLuint shader);
-void (APIENTRY * qglDisableVertexAttribArray) (GLuint index);
-void (APIENTRY * qglEnableVertexAttribArray) (GLuint index);
-void (APIENTRY * qglGetActiveUniform) (GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name);
-void (APIENTRY * qglGetProgramiv) (GLuint program, GLenum pname, GLint *params);
-void (APIENTRY * qglGetProgramInfoLog) (GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-void (APIENTRY * qglGetShaderiv) (GLuint shader, GLenum pname, GLint *params);
-void (APIENTRY * qglGetShaderInfoLog) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-void (APIENTRY * qglGetShaderSource) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source);
-GLint(APIENTRY * qglGetUniformLocation) (GLuint program, const GLchar *name);
-void (APIENTRY * qglLinkProgram) (GLuint program);
-void (APIENTRY * qglShaderSource)  (GLuint shader, GLsizei count, const GLchar* *string, const GLint *length);
-void (APIENTRY * qglUseProgram) (GLuint program);
-void (APIENTRY * qglUniform1f) (GLint location, GLfloat v0);
-void (APIENTRY * qglUniform2f) (GLint location, GLfloat v0, GLfloat v1);
-void (APIENTRY * qglUniform3f) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-void (APIENTRY * qglUniform4f) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-void (APIENTRY * qglUniform1i) (GLint location, GLint v0);
-void (APIENTRY * qglUniform1fv) (GLint location, GLsizei count, const GLfloat *value);
-void (APIENTRY * qglUniformMatrix4fv) (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-void (APIENTRY * qglValidateProgram) (GLuint program);
-void (APIENTRY * qglVertexAttribPointer) (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
+#define GLE(ret, name, ...) name##proc * qgl##name;
+QGL_1_2_PROCS;
+QGL_1_3_PROCS;
+QGL_1_4_PROCS;
+QGL_1_5_PROCS;
+QGL_2_0_PROCS;
+#undef GLE
 
 // GL_EXT_framebuffer_object
 GLboolean (APIENTRY * qglIsRenderbufferEXT)(GLuint renderbuffer);
@@ -193,64 +147,31 @@ void GLimp_InitExtraExtensions()
 		ri.Error(ERR_FATAL, "OpenGL 2.0 required!");
 	ri.Printf(PRINT_ALL, "...using OpenGL %s\n", glConfig.version_string);
 
+	// GL function loader, based on https://gist.github.com/rygorous/16796a0c876cf8a5f542caddb55bce8a
+
+#define GLE(ret, name, ...) qgl##name = (name##proc *) SDL_GL_GetProcAddress("gl" #name);
+
 	// OpenGL 1.2, was GL_EXT_draw_range_elements
-	qglDrawRangeElements = (PFNGLDRAWRANGEELEMENTSPROC)SDL_GL_GetProcAddress("glDrawRangeElements");
+	QGL_1_2_PROCS;
 	glRefConfig.drawRangeElements = r_ext_draw_range_elements->integer ? qtrue : qfalse;
 	ri.Printf(PRINT_ALL, result[glRefConfig.drawRangeElements], "glDrawRangeElements()");
 
 	// OpenGL 1.3, was GL_ARB_texture_compression
-	qglCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) SDL_GL_GetProcAddress("glCompressedTexImage2D");
-	qglCompressedTexSubImage2D = (PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC) SDL_GL_GetProcAddress("qglCompressedTexSubImage2D");
+	QGL_1_3_PROCS;
 
 	// OpenGL 1.4, was GL_EXT_multi_draw_arrays
-	qglMultiDrawElements = (PFNGLMULTIDRAWELEMENTSPROC)SDL_GL_GetProcAddress("glMultiDrawElements");
+	QGL_1_4_PROCS;
 	glRefConfig.drawRangeElements = r_ext_multi_draw_arrays->integer ? qtrue : qfalse;
 	ri.Printf(PRINT_ALL, result[glRefConfig.drawRangeElements], "glMultiDrawElements()");
 
 	// OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
-	qglGenQueries = (PFNGLGENQUERIESPROC) SDL_GL_GetProcAddress("glGenQueries");
-	qglDeleteQueries = (PFNGLDELETEQUERIESPROC) SDL_GL_GetProcAddress("glDeleteQueries");
-	qglBeginQuery = (PFNGLBEGINQUERYPROC) SDL_GL_GetProcAddress("glBeginQuery");
-	qglEndQuery = (PFNGLENDQUERYPROC) SDL_GL_GetProcAddress("glEndQuery");
-	qglGetQueryObjectiv = (PFNGLGETQUERYOBJECTIVPROC) SDL_GL_GetProcAddress("glGetQueryObjectiv");
-	qglGetQueryObjectuiv = (PFNGLGETQUERYOBJECTUIVPROC) SDL_GL_GetProcAddress("glGetQueryObjectuiv");
-	qglBindBuffer = (PFNGLBINDBUFFERPROC) SDL_GL_GetProcAddress("glBindBuffer");
-	qglDeleteBuffers = (PFNGLDELETEBUFFERSPROC) SDL_GL_GetProcAddress("glDeleteBuffers");
-	qglGenBuffers = (PFNGLGENBUFFERSPROC) SDL_GL_GetProcAddress("glGenBuffers");
-	qglBufferData = (PFNGLBUFFERDATAPROC) SDL_GL_GetProcAddress("glBufferData");
-	qglBufferSubData = (PFNGLBUFFERSUBDATAPROC) SDL_GL_GetProcAddress("glBufferSubData");
+	QGL_1_5_PROCS;
 	glRefConfig.occlusionQuery = qtrue;
 
 	// OpenGL 2.0, was GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
-	qglAttachShader = (PFNGLATTACHSHADERPROC) SDL_GL_GetProcAddress("glAttachShader");
-	qglBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC) SDL_GL_GetProcAddress("glBindAttribLocation");
-	qglCompileShader = (PFNGLCOMPILESHADERPROC) SDL_GL_GetProcAddress("glCompileShader");
-	qglCreateProgram = (PFNGLCREATEPROGRAMPROC) SDL_GL_GetProcAddress("glCreateProgram");
-	qglCreateShader = (PFNGLCREATESHADERPROC) SDL_GL_GetProcAddress("glCreateShader");
-	qglDeleteProgram = (PFNGLDELETEPROGRAMPROC) SDL_GL_GetProcAddress("glDeleteProgram");
-	qglDeleteShader = (PFNGLDELETESHADERPROC) SDL_GL_GetProcAddress("glDeleteShader");
-	qglDetachShader = (PFNGLDETACHSHADERPROC) SDL_GL_GetProcAddress("glDetachShader");
-	qglDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC) SDL_GL_GetProcAddress("glDisableVertexAttribArray");
-	qglEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC) SDL_GL_GetProcAddress("glEnableVertexAttribArray");
-	qglGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC) SDL_GL_GetProcAddress("glGetActiveUniform");
-	qglGetProgramiv = (PFNGLGETPROGRAMIVPROC) SDL_GL_GetProcAddress("glGetProgramiv");
-	qglGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC) SDL_GL_GetProcAddress("glGetProgramInfoLog");
-	qglGetShaderiv = (PFNGLGETSHADERIVPROC) SDL_GL_GetProcAddress("glGetShaderiv");
-	qglGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC) SDL_GL_GetProcAddress("glGetShaderInfoLog");
-	qglGetShaderSource = (PFNGLGETSHADERSOURCEPROC) SDL_GL_GetProcAddress("glGetShaderSource");
-	qglGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) SDL_GL_GetProcAddress("glGetUniformLocation");
-	qglLinkProgram = (PFNGLLINKPROGRAMPROC) SDL_GL_GetProcAddress("glLinkProgram");
-	qglShaderSource = (PFNGLSHADERSOURCEPROC) SDL_GL_GetProcAddress("glShaderSource");
-	qglUseProgram = (PFNGLUSEPROGRAMPROC) SDL_GL_GetProcAddress("glUseProgram");
-	qglUniform1f = (PFNGLUNIFORM1FPROC) SDL_GL_GetProcAddress("glUniform1f");
-	qglUniform2f = (PFNGLUNIFORM2FPROC) SDL_GL_GetProcAddress("glUniform2f");
-	qglUniform3f = (PFNGLUNIFORM3FPROC) SDL_GL_GetProcAddress("glUniform3f");
-	qglUniform4f = (PFNGLUNIFORM4FPROC) SDL_GL_GetProcAddress("glUniform4f");
-	qglUniform1i = (PFNGLUNIFORM1IPROC) SDL_GL_GetProcAddress("glUniform1i");
-	qglUniform1fv = (PFNGLUNIFORM1FVPROC) SDL_GL_GetProcAddress("glUniform1fv");
-	qglUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) SDL_GL_GetProcAddress("glUniformMatrix4fv");
-	qglValidateProgram = (PFNGLVALIDATEPROGRAMPROC) SDL_GL_GetProcAddress("glValidateProgram");
-	qglVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC) SDL_GL_GetProcAddress("glVertexAttribPointer");
+	QGL_2_0_PROCS;
+
+#undef GLE
 
 	if (1)
 	{

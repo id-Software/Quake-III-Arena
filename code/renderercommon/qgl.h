@@ -377,59 +377,74 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 #define qglVertexPointer glVertexPointer
 #define qglViewport glViewport
 
+// GL function loader, based on https://gist.github.com/rygorous/16796a0c876cf8a5f542caddb55bce8a
+
 // OpenGL 1.2, was GL_EXT_draw_range_elements
-extern void (APIENTRY * qglDrawRangeElements) (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
+#define QGL_1_2_PROCS \
+	GLE(void, DrawRangeElements, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices) \
 
 // OpenGL 1.3, was GL_ARB_texture_compression
-extern void (APIENTRY * qglCompressedTexImage2D) (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data);
-extern void (APIENTRY * qglCompressedTexSubImage2D) (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data);
+#define QGL_1_3_PROCS \
+	GLE(void, CompressedTexImage2D, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data) \
+	GLE(void, CompressedTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data) \
 
 // OpenGL 1.4, was GL_EXT_multi_draw_arrays
-extern void (APIENTRY * qglMultiDrawElements) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount);
+#define QGL_1_4_PROCS \
+	GLE(void, MultiDrawElements, GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount) \
 
 // OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
-extern void (APIENTRY * qglGenQueries) (GLsizei n, GLuint *ids);
-extern void (APIENTRY * qglDeleteQueries) (GLsizei n, const GLuint *ids);
-extern void (APIENTRY * qglBeginQuery) (GLenum target, GLuint id);
-extern void (APIENTRY * qglEndQuery) (GLenum target);
-extern void (APIENTRY * qglGetQueryObjectiv) (GLuint id, GLenum pname, GLint *params);
-extern void (APIENTRY * qglGetQueryObjectuiv) (GLuint id, GLenum pname, GLuint *params);
-extern void (APIENTRY * qglBindBuffer) (GLenum target, GLuint buffer);
-extern void (APIENTRY * qglDeleteBuffers) (GLsizei n, const GLuint *buffers);
-extern void (APIENTRY * qglGenBuffers) (GLsizei n, GLuint *buffers);
-extern void (APIENTRY * qglBufferData) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
-extern void (APIENTRY * qglBufferSubData) (GLenum target, GLintptr offset, GLsizeiptr size, const void *data);
+#define QGL_1_5_PROCS \
+	GLE(void, GenQueries, GLsizei n, GLuint *ids) \
+	GLE(void, DeleteQueries, GLsizei n, const GLuint *ids) \
+	GLE(void, BeginQuery, GLenum target, GLuint id) \
+	GLE(void, EndQuery, GLenum target) \
+	GLE(void, GetQueryObjectiv, GLuint id, GLenum pname, GLint *params) \
+	GLE(void, GetQueryObjectuiv, GLuint id, GLenum pname, GLuint *params) \
+	GLE(void, BindBuffer, GLenum target, GLuint buffer) \
+	GLE(void, DeleteBuffers, GLsizei n, const GLuint *buffers) \
+	GLE(void, GenBuffers, GLsizei n, GLuint *buffers) \
+	GLE(void, BufferData, GLenum target, GLsizeiptr size, const void *data, GLenum usage) \
+	GLE(void, BufferSubData, GLenum target, GLintptr offset, GLsizeiptr size, const void *data) \
 
 // OpenGL 2.0, was GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
-extern void (APIENTRY * qglAttachShader) (GLuint program, GLuint shader);
-extern void (APIENTRY * qglBindAttribLocation) (GLuint program, GLuint index, const GLchar *name);
-extern void (APIENTRY * qglCompileShader) (GLuint shader);
-extern GLuint (APIENTRY * qglCreateProgram) (void);
-extern GLuint (APIENTRY * qglCreateShader) (GLenum type);
-extern void (APIENTRY * qglDeleteProgram) (GLuint program);
-extern void (APIENTRY * qglDeleteShader) (GLuint shader);
-extern void (APIENTRY * qglDetachShader) (GLuint program, GLuint shader);
-extern void (APIENTRY * qglDisableVertexAttribArray) (GLuint index);
-extern void (APIENTRY * qglEnableVertexAttribArray) (GLuint index);
-extern void (APIENTRY * qglGetActiveUniform) (GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name);
-extern void (APIENTRY * qglGetProgramiv) (GLuint program, GLenum pname, GLint *params);
-extern void (APIENTRY * qglGetProgramInfoLog) (GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-extern void (APIENTRY * qglGetShaderiv) (GLuint shader, GLenum pname, GLint *params);
-extern void (APIENTRY * qglGetShaderInfoLog) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-extern void (APIENTRY * qglGetShaderSource) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source);
-extern GLint (APIENTRY * qglGetUniformLocation) (GLuint program, const GLchar *name);
-extern void (APIENTRY * qglLinkProgram) (GLuint program);
-extern void (APIENTRY * qglShaderSource) (GLuint shader, GLsizei count, const GLchar* *string, const GLint *length);
-extern void (APIENTRY * qglUseProgram) (GLuint program);
-extern void (APIENTRY * qglUniform1f) (GLint location, GLfloat v0);
-extern void (APIENTRY * qglUniform2f) (GLint location, GLfloat v0, GLfloat v1);
-extern void (APIENTRY * qglUniform3f) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-extern void (APIENTRY * qglUniform4f) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-extern void (APIENTRY * qglUniform1i) (GLint location, GLint v0);
-extern void (APIENTRY * qglUniform1fv) (GLint location, GLsizei count, const GLfloat *value);
-extern void (APIENTRY * qglUniformMatrix4fv) (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-extern void (APIENTRY * qglValidateProgram) (GLuint program);
-extern void (APIENTRY * qglVertexAttribPointer) (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
+#define QGL_2_0_PROCS \
+	GLE(void, AttachShader, GLuint program, GLuint shader) \
+	GLE(void, BindAttribLocation, GLuint program, GLuint index, const GLchar *name) \
+	GLE(void, CompileShader, GLuint shader) \
+	GLE(GLuint, CreateProgram, void) \
+	GLE(GLuint, CreateShader, GLenum type) \
+	GLE(void, DeleteProgram, GLuint program) \
+	GLE(void, DeleteShader, GLuint shader) \
+	GLE(void, DetachShader, GLuint program, GLuint shader) \
+	GLE(void, DisableVertexAttribArray, GLuint index) \
+	GLE(void, EnableVertexAttribArray, GLuint index) \
+	GLE(void, GetActiveUniform, GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name) \
+	GLE(void, GetProgramiv, GLuint program, GLenum pname, GLint *params) \
+	GLE(void, GetProgramInfoLog, GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog) \
+	GLE(void, GetShaderiv, GLuint shader, GLenum pname, GLint *params) \
+	GLE(void, GetShaderInfoLog, GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog) \
+	GLE(void, GetShaderSource, GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) \
+	GLE(GLint, GetUniformLocation, GLuint program, const GLchar *name) \
+	GLE(void, LinkProgram, GLuint program) \
+	GLE(void, ShaderSource, GLuint shader, GLsizei count, const GLchar* *string, const GLint *length) \
+	GLE(void, UseProgram, GLuint program) \
+	GLE(void, Uniform1f, GLint location, GLfloat v0) \
+	GLE(void, Uniform2f, GLint location, GLfloat v0, GLfloat v1) \
+	GLE(void, Uniform3f, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) \
+	GLE(void, Uniform4f, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) \
+	GLE(void, Uniform1i, GLint location, GLint v0) \
+	GLE(void, Uniform1fv, GLint location, GLsizei count, const GLfloat *value) \
+	GLE(void, UniformMatrix4fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) \
+	GLE(void, ValidateProgram, GLuint program) \
+	GLE(void, VertexAttribPointer, GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer) \
+
+#define GLE(ret, name, ...) typedef ret APIENTRY name##proc(__VA_ARGS__); extern name##proc * qgl##name;
+QGL_1_2_PROCS
+QGL_1_3_PROCS
+QGL_1_4_PROCS
+QGL_1_5_PROCS
+QGL_2_0_PROCS
+#undef GLE
 
 // GL_NVX_gpu_memory_info
 #ifndef GL_NVX_gpu_memory_info
