@@ -869,7 +869,7 @@ void CM_AddFacetBevels( facet_t *facet ) {
 			if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped)) {
 				continue;
 			}
-			// see if the plane is allready present
+			// see if the plane is already present
 			for ( i = 0 ; i < facet->numBorders ; i++ ) {
 				if (CM_PlaneEqual(&planes[facet->borderPlanes[i]], plane, &flipped))
 					break;
@@ -933,7 +933,7 @@ void CM_AddFacetBevels( facet_t *facet ) {
 				if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped)) {
 					continue;
 				}
-				// see if the plane is allready present
+				// see if the plane is already present
 				for ( i = 0 ; i < facet->numBorders ; i++ ) {
 					if (CM_PlaneEqual(&planes[facet->borderPlanes[i]], plane, &flipped)) {
 							break;
