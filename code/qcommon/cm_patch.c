@@ -826,7 +826,7 @@ CM_AddFacetBevels
 void CM_AddFacetBevels( facet_t *facet ) {
 
 	int i, j, k, l;
-	int axis, dir, order, flipped;
+	int axis, dir, flipped;
 	float plane[4], d, newplane[4];
 	winding_t *w, *w2;
 	vec3_t mins, maxs, vec, vec2;
@@ -852,10 +852,9 @@ void CM_AddFacetBevels( facet_t *facet ) {
 	WindingBounds(w, mins, maxs);
 
 	// add the axial planes
-	order = 0;
 	for ( axis = 0 ; axis < 3 ; axis++ )
 	{
-		for ( dir = -1 ; dir <= 1 ; dir += 2, order++ )
+		for ( dir = -1 ; dir <= 1 ; dir += 2 )
 		{
 			VectorClear(plane);
 			plane[axis] = dir;
