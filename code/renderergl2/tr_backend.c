@@ -1184,7 +1184,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 			RB_DrawSun(0.1, tr.sunShader);
 		}
 
-		if (r_drawSunRays->integer)
+		if (glRefConfig.framebufferObject && r_drawSunRays->integer)
 		{
 			FBO_t *oldFbo = glState.currentFBO;
 			FBO_Bind(tr.sunRaysFbo);
