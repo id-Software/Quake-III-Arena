@@ -701,7 +701,7 @@ void GLSL_SetUniformInt(shaderProgram_t *program, int uniformNum, GLint value)
 
 	*compare = value;
 
-	qglProgramUniform1i(program->program, uniforms[uniformNum], value);
+	qglProgramUniform1iEXT(program->program, uniforms[uniformNum], value);
 }
 
 void GLSL_SetUniformFloat(shaderProgram_t *program, int uniformNum, GLfloat value)
@@ -725,7 +725,7 @@ void GLSL_SetUniformFloat(shaderProgram_t *program, int uniformNum, GLfloat valu
 
 	*compare = value;
 	
-	qglProgramUniform1f(program->program, uniforms[uniformNum], value);
+	qglProgramUniform1fEXT(program->program, uniforms[uniformNum], value);
 }
 
 void GLSL_SetUniformVec2(shaderProgram_t *program, int uniformNum, const vec2_t v)
@@ -750,7 +750,7 @@ void GLSL_SetUniformVec2(shaderProgram_t *program, int uniformNum, const vec2_t 
 	compare[0] = v[0];
 	compare[1] = v[1];
 
-	qglProgramUniform2f(program->program, uniforms[uniformNum], v[0], v[1]);
+	qglProgramUniform2fEXT(program->program, uniforms[uniformNum], v[0], v[1]);
 }
 
 void GLSL_SetUniformVec3(shaderProgram_t *program, int uniformNum, const vec3_t v)
@@ -774,7 +774,7 @@ void GLSL_SetUniformVec3(shaderProgram_t *program, int uniformNum, const vec3_t 
 
 	VectorCopy(v, compare);
 
-	qglProgramUniform3f(program->program, uniforms[uniformNum], v[0], v[1], v[2]);
+	qglProgramUniform3fEXT(program->program, uniforms[uniformNum], v[0], v[1], v[2]);
 }
 
 void GLSL_SetUniformVec4(shaderProgram_t *program, int uniformNum, const vec4_t v)
@@ -798,7 +798,7 @@ void GLSL_SetUniformVec4(shaderProgram_t *program, int uniformNum, const vec4_t 
 
 	VectorCopy4(v, compare);
 
-	qglProgramUniform4f(program->program, uniforms[uniformNum], v[0], v[1], v[2], v[3]);
+	qglProgramUniform4fEXT(program->program, uniforms[uniformNum], v[0], v[1], v[2], v[3]);
 }
 
 void GLSL_SetUniformFloat5(shaderProgram_t *program, int uniformNum, const vec5_t v)
@@ -822,7 +822,7 @@ void GLSL_SetUniformFloat5(shaderProgram_t *program, int uniformNum, const vec5_
 
 	VectorCopy5(v, compare);
 
-	qglProgramUniform1fv(program->program, uniforms[uniformNum], 5, v);
+	qglProgramUniform1fvEXT(program->program, uniforms[uniformNum], 5, v);
 }
 
 void GLSL_SetUniformMat4(shaderProgram_t *program, int uniformNum, const mat4_t matrix)
@@ -846,7 +846,7 @@ void GLSL_SetUniformMat4(shaderProgram_t *program, int uniformNum, const mat4_t 
 
 	Mat4Copy(matrix, compare);
 
-	qglProgramUniformMatrix4fv(program->program, uniforms[uniformNum], 1, GL_FALSE, matrix);
+	qglProgramUniformMatrix4fvEXT(program->program, uniforms[uniformNum], 1, GL_FALSE, matrix);
 }
 
 void GLSL_DeleteGPUShader(shaderProgram_t *program)

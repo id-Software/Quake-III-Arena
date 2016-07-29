@@ -617,27 +617,27 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 
 // GL_EXT_direct_state_access
 #define QGL_EXT_direct_state_access_PROCS \
-	GLE(GLvoid, BindMultiTexture, GLenum texunit, GLenum target, GLuint texture) \
-	GLE(GLvoid, TextureParameterf, GLuint texture, GLenum target, GLenum pname, GLfloat param) \
-	GLE(GLvoid, TextureParameteri, GLuint texture, GLenum target, GLenum pname, GLint param) \
-	GLE(GLvoid, TextureImage2D, GLuint texture, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) \
-	GLE(GLvoid, TextureSubImage2D, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels) \
-	GLE(GLvoid, CopyTextureImage2D, GLuint texture, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) \
-	GLE(GLvoid, CompressedTextureImage2D, GLuint texture, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) \
-	GLE(GLvoid, CompressedTextureSubImage2D, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data) \
-	GLE(GLvoid, GenerateTextureMipmap, GLuint texture, GLenum target) \
-	GLE(GLvoid, ProgramUniform1i, GLuint program, GLint location, GLint v0) \
-	GLE(GLvoid, ProgramUniform1f, GLuint program, GLint location, GLfloat v0) \
-	GLE(GLvoid, ProgramUniform2f, GLuint program, GLint location, GLfloat v0, GLfloat v1) \
-	GLE(GLvoid, ProgramUniform3f, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) \
-	GLE(GLvoid, ProgramUniform4f, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) \
-	GLE(GLvoid, ProgramUniform1fv, GLuint program, GLint location, GLsizei count, const GLfloat *value) \
-	GLE(GLvoid, ProgramUniformMatrix4fv, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) \
-	GLE(GLvoid, NamedRenderbufferStorage, GLuint renderbuffer, GLenum internalformat, GLsizei width, GLsizei height) \
-	GLE(GLvoid, NamedRenderbufferStorageMultisample, GLuint renderbuffer, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
-	GLE(GLenum, CheckNamedFramebufferStatus, GLuint framebuffer, GLenum target) \
-	GLE(GLvoid, NamedFramebufferTexture2D, GLuint framebuffer, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
-	GLE(GLvoid, NamedFramebufferRenderbuffer, GLuint framebuffer, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+	GLE(GLvoid, BindMultiTextureEXT, GLenum texunit, GLenum target, GLuint texture) \
+	GLE(GLvoid, TextureParameterfEXT, GLuint texture, GLenum target, GLenum pname, GLfloat param) \
+	GLE(GLvoid, TextureParameteriEXT, GLuint texture, GLenum target, GLenum pname, GLint param) \
+	GLE(GLvoid, TextureImage2DEXT, GLuint texture, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) \
+	GLE(GLvoid, TextureSubImage2DEXT, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels) \
+	GLE(GLvoid, CopyTextureImage2DEXT, GLuint texture, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) \
+	GLE(GLvoid, CompressedTextureImage2DEXT, GLuint texture, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) \
+	GLE(GLvoid, CompressedTextureSubImage2DEXT, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data) \
+	GLE(GLvoid, GenerateTextureMipmapEXT, GLuint texture, GLenum target) \
+	GLE(GLvoid, ProgramUniform1iEXT, GLuint program, GLint location, GLint v0) \
+	GLE(GLvoid, ProgramUniform1fEXT, GLuint program, GLint location, GLfloat v0) \
+	GLE(GLvoid, ProgramUniform2fEXT, GLuint program, GLint location, GLfloat v0, GLfloat v1) \
+	GLE(GLvoid, ProgramUniform3fEXT, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) \
+	GLE(GLvoid, ProgramUniform4fEXT, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) \
+	GLE(GLvoid, ProgramUniform1fvEXT, GLuint program, GLint location, GLsizei count, const GLfloat *value) \
+	GLE(GLvoid, ProgramUniformMatrix4fvEXT, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) \
+	GLE(GLvoid, NamedRenderbufferStorageEXT, GLuint renderbuffer, GLenum internalformat, GLsizei width, GLsizei height) \
+	GLE(GLvoid, NamedRenderbufferStorageMultisampleEXT, GLuint renderbuffer, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
+	GLE(GLenum, CheckNamedFramebufferStatusEXT, GLuint framebuffer, GLenum target) \
+	GLE(GLvoid, NamedFramebufferTexture2DEXT, GLuint framebuffer, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+	GLE(GLvoid, NamedFramebufferRenderbufferEXT, GLuint framebuffer, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
 
 #define GLE(ret, name, ...) typedef ret APIENTRY name##proc(__VA_ARGS__); extern name##proc * qgl##name;
 QGL_1_2_PROCS;

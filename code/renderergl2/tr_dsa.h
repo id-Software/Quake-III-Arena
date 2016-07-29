@@ -26,37 +26,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 void GL_BindNullTextures(void);
 int GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture);
 
-GLvoid APIENTRY GLDSA_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture);
-GLvoid APIENTRY GLDSA_TextureParameterf(GLuint texture, GLenum target, GLenum pname, GLfloat param);
-GLvoid APIENTRY GLDSA_TextureParameteri(GLuint texture, GLenum target, GLenum pname, GLint param);
-GLvoid APIENTRY GLDSA_TextureImage2D(GLuint texture, GLenum target, GLint level, GLint internalformat,
+GLvoid APIENTRY GLDSA_BindMultiTextureEXT(GLenum texunit, GLenum target, GLuint texture);
+GLvoid APIENTRY GLDSA_TextureParameterfEXT(GLuint texture, GLenum target, GLenum pname, GLfloat param);
+GLvoid APIENTRY GLDSA_TextureParameteriEXT(GLuint texture, GLenum target, GLenum pname, GLint param);
+GLvoid APIENTRY GLDSA_TextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLint internalformat,
 	GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-GLvoid APIENTRY GLDSA_TextureSubImage2D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+GLvoid APIENTRY GLDSA_TextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
 	GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-GLvoid APIENTRY GLDSA_CopyTextureImage2D(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+GLvoid APIENTRY GLDSA_CopyTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
 	GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-GLvoid APIENTRY GLDSA_CompressedTextureImage2D(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+GLvoid APIENTRY GLDSA_CompressedTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
 	GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
-GLvoid APIENTRY GLDSA_CompressedTextureSubImage2D(GLuint texture, GLenum target, GLint level,
+GLvoid APIENTRY GLDSA_CompressedTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level,
 	GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format,
 	GLsizei imageSize, const GLvoid *data);
 
-GLvoid APIENTRY GLDSA_GenerateTextureMipmap(GLuint texture, GLenum target);
+GLvoid APIENTRY GLDSA_GenerateTextureMipmapEXT(GLuint texture, GLenum target);
 
 void GL_BindNullProgram(void);
 int GL_UseProgram(GLuint program);
 
-GLvoid APIENTRY GLDSA_ProgramUniform1i(GLuint program, GLint location, GLint v0);
-GLvoid APIENTRY GLDSA_ProgramUniform1f(GLuint program, GLint location, GLfloat v0);
-GLvoid APIENTRY GLDSA_ProgramUniform2f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform1iEXT(GLuint program, GLint location, GLint v0);
+GLvoid APIENTRY GLDSA_ProgramUniform1fEXT(GLuint program, GLint location, GLfloat v0);
+GLvoid APIENTRY GLDSA_ProgramUniform2fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1);
-GLvoid APIENTRY GLDSA_ProgramUniform3f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform3fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1, GLfloat v2);
-GLvoid APIENTRY GLDSA_ProgramUniform4f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform4fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-GLvoid APIENTRY GLDSA_ProgramUniform1fv(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform1fvEXT(GLuint program, GLint location,
 	GLsizei count, const GLfloat *value);
-GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fvEXT(GLuint program, GLint location,
 	GLsizei count, GLboolean transpose,
 	const GLfloat *value);
 
@@ -64,16 +64,16 @@ void GL_BindNullFramebuffers(void);
 void GL_BindFramebuffer(GLenum target, GLuint framebuffer);
 void GL_BindRenderbuffer(GLuint renderbuffer);
 
-GLvoid APIENTRY GLDSA_NamedRenderbufferStorage(GLuint renderbuffer,
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageEXT(GLuint renderbuffer,
 	GLenum internalformat, GLsizei width, GLsizei height);
 
-GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisample(GLuint renderbuffer,
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisampleEXT(GLuint renderbuffer,
 	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 
-GLenum APIENTRY GLDSA_CheckNamedFramebufferStatus(GLuint framebuffer, GLenum target);
-GLvoid APIENTRY GLDSA_NamedFramebufferTexture2D(GLuint framebuffer,
+GLenum APIENTRY GLDSA_CheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target);
+GLvoid APIENTRY GLDSA_NamedFramebufferTexture2DEXT(GLuint framebuffer,
 	GLenum attachment, GLenum textarget, GLuint texture, GLint level);
-GLvoid APIENTRY GLDSA_NamedFramebufferRenderbuffer(GLuint framebuffer,
+GLvoid APIENTRY GLDSA_NamedFramebufferRenderbufferEXT(GLuint framebuffer,
 	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
 

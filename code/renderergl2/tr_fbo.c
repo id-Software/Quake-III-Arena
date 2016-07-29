@@ -32,7 +32,7 @@ R_CheckFBO
 */
 qboolean R_CheckFBO(const FBO_t * fbo)
 {
-	GLenum code = qglCheckNamedFramebufferStatus(fbo->frameBuffer, GL_FRAMEBUFFER_EXT);
+	GLenum code = qglCheckNamedFramebufferStatusEXT(fbo->frameBuffer, GL_FRAMEBUFFER_EXT);
 
 	if(code == GL_FRAMEBUFFER_COMPLETE_EXT)
 		return qtrue;
@@ -184,20 +184,20 @@ void FBO_CreateBuffer(FBO_t *fbo, int format, int index, int multisample)
 		qglGenRenderbuffersEXT(1, pRenderBuffer);
 
 	if (multisample && glRefConfig.framebufferMultisample)
-		qglNamedRenderbufferStorageMultisample(*pRenderBuffer, multisample, format, fbo->width, fbo->height);
+		qglNamedRenderbufferStorageMultisampleEXT(*pRenderBuffer, multisample, format, fbo->width, fbo->height);
 	else
-		qglNamedRenderbufferStorage(*pRenderBuffer, format, fbo->width, fbo->height);
+		qglNamedRenderbufferStorageEXT(*pRenderBuffer, format, fbo->width, fbo->height);
 
 	if(absent)
 	{
 		if (attachment == 0)
 		{
-			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, GL_DEPTH_ATTACHMENT_EXT,   GL_RENDERBUFFER_EXT, *pRenderBuffer);
-			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, *pRenderBuffer);
+			qglNamedFramebufferRenderbufferEXT(fbo->frameBuffer, GL_DEPTH_ATTACHMENT_EXT,   GL_RENDERBUFFER_EXT, *pRenderBuffer);
+			qglNamedFramebufferRenderbufferEXT(fbo->frameBuffer, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, *pRenderBuffer);
 		}
 		else
 		{
-			qglNamedFramebufferRenderbuffer(fbo->frameBuffer, attachment, GL_RENDERBUFFER_EXT, *pRenderBuffer);
+			qglNamedFramebufferRenderbufferEXT(fbo->frameBuffer, attachment, GL_RENDERBUFFER_EXT, *pRenderBuffer);
 		}
 	}
 }
@@ -216,7 +216,7 @@ void FBO_AttachImage(FBO_t *fbo, image_t *image, GLenum attachment, GLuint cubem
 	if (image->flags & IMGFLAG_CUBEMAP)
 		target = GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + cubemapside;
 
-	qglNamedFramebufferTexture2D(fbo->frameBuffer, attachment, target, image->texnum, 0);
+	qglNamedFramebufferTexture2DEXT(fbo->frameBuffer, attachment, target, image->texnum, 0);
 	index = attachment - GL_COLOR_ATTACHMENT0_EXT;
 	if (index >= 0 && index <= 15)
 		fbo->colorImage[index] = image;

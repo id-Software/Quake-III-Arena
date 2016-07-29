@@ -43,7 +43,7 @@ void GL_BindNullTextures()
 	{
 		for (i = 0; i < NUM_TEXTURE_BUNDLES; i++)
 		{
-			qglBindMultiTexture(GL_TEXTURE0_ARB + i, GL_TEXTURE_2D, 0);
+			qglBindMultiTextureEXT(GL_TEXTURE0_ARB + i, GL_TEXTURE_2D, 0);
 			glDsaState.textures[i] = 0;
 		}
 	}
@@ -71,12 +71,12 @@ int GL_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture)
 	if (target >= GL_TEXTURE_CUBE_MAP_POSITIVE_X && target <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z)
 		target = GL_TEXTURE_CUBE_MAP;
 
-	qglBindMultiTexture(texunit, target, texture);
+	qglBindMultiTextureEXT(texunit, target, texture);
 	glDsaState.textures[tmu] = texture;
 	return 1;
 }
 
-GLvoid APIENTRY GLDSA_BindMultiTexture(GLenum texunit, GLenum target, GLuint texture)
+GLvoid APIENTRY GLDSA_BindMultiTextureEXT(GLenum texunit, GLenum target, GLuint texture)
 {
 	if (glDsaState.texunit != texunit)
 	{
@@ -87,47 +87,47 @@ GLvoid APIENTRY GLDSA_BindMultiTexture(GLenum texunit, GLenum target, GLuint tex
 	qglBindTexture(target, texture);
 }
 
-GLvoid APIENTRY GLDSA_TextureParameterf(GLuint texture, GLenum target, GLenum pname, GLfloat param)
+GLvoid APIENTRY GLDSA_TextureParameterfEXT(GLuint texture, GLenum target, GLenum pname, GLfloat param)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglTexParameterf(target, pname, param);
 }
 
-GLvoid APIENTRY GLDSA_TextureParameteri(GLuint texture, GLenum target, GLenum pname, GLint param)
+GLvoid APIENTRY GLDSA_TextureParameteriEXT(GLuint texture, GLenum target, GLenum pname, GLint param)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglTexParameteri(target, pname, param);
 }
 
-GLvoid APIENTRY GLDSA_TextureImage2D(GLuint texture, GLenum target, GLint level, GLint internalformat,
+GLvoid APIENTRY GLDSA_TextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLint internalformat,
 	GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
-GLvoid APIENTRY GLDSA_TextureSubImage2D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+GLvoid APIENTRY GLDSA_TextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
 	GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 
-GLvoid APIENTRY GLDSA_CopyTextureImage2D(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+GLvoid APIENTRY GLDSA_CopyTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
 	GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
 }
 
-GLvoid APIENTRY  GLDSA_CompressedTextureImage2D(GLuint texture, GLenum target, GLint level, GLenum internalformat,
+GLvoid APIENTRY  GLDSA_CompressedTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
 	GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 }
 
-GLvoid APIENTRY GLDSA_CompressedTextureSubImage2D(GLuint texture, GLenum target, GLint level,
+GLvoid APIENTRY GLDSA_CompressedTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level,
 	GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format,
 	GLsizei imageSize, const GLvoid *data)
 {
@@ -135,7 +135,7 @@ GLvoid APIENTRY GLDSA_CompressedTextureSubImage2D(GLuint texture, GLenum target,
 	qglCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
-GLvoid APIENTRY GLDSA_GenerateTextureMipmap(GLuint texture, GLenum target)
+GLvoid APIENTRY GLDSA_GenerateTextureMipmapEXT(GLuint texture, GLenum target)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
 	qglGenerateMipmapEXT(target);
@@ -157,47 +157,47 @@ int GL_UseProgram(GLuint program)
 	return 1;
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform1i(GLuint program, GLint location, GLint v0)
+GLvoid APIENTRY GLDSA_ProgramUniform1iEXT(GLuint program, GLint location, GLint v0)
 {
 	GL_UseProgram(program);
 	qglUniform1i(location, v0);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform1f(GLuint program, GLint location, GLfloat v0)
+GLvoid APIENTRY GLDSA_ProgramUniform1fEXT(GLuint program, GLint location, GLfloat v0)
 {
 	GL_UseProgram(program);
 	qglUniform1f(location, v0);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform2f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform2fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1)
 {
 	GL_UseProgram(program);
 	qglUniform2f(location, v0, v1);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform3f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform3fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1, GLfloat v2)
 {
 	GL_UseProgram(program);
 	qglUniform3f(location, v0, v1, v2);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform4f(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform4fEXT(GLuint program, GLint location,
 	GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
 	GL_UseProgram(program);
 	qglUniform4f(location, v0, v1, v2, v3);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniform1fv(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniform1fvEXT(GLuint program, GLint location,
 	GLsizei count, const GLfloat *value)
 {
 	GL_UseProgram(program);
 	qglUniform1fv(location, count, value);
 }
 
-GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fv(GLuint program, GLint location,
+GLvoid APIENTRY GLDSA_ProgramUniformMatrix4fvEXT(GLuint program, GLint location,
 	GLsizei count, GLboolean transpose,
 	const GLfloat *value)
 {
@@ -252,34 +252,34 @@ void GL_BindRenderbuffer(GLuint renderbuffer)
 	}
 }
 
-GLvoid APIENTRY GLDSA_NamedRenderbufferStorage(GLuint renderbuffer,
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageEXT(GLuint renderbuffer,
 	GLenum internalformat, GLsizei width, GLsizei height)
 {
 	GL_BindRenderbuffer(renderbuffer);
 	qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, internalformat, width, height);
 }
 
-GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisample(GLuint renderbuffer,
+GLvoid APIENTRY GLDSA_NamedRenderbufferStorageMultisampleEXT(GLuint renderbuffer,
 	GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
 {
 	GL_BindRenderbuffer(renderbuffer);
 	qglRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, internalformat, width, height);
 }
 
-GLenum APIENTRY GLDSA_CheckNamedFramebufferStatus(GLuint framebuffer, GLenum target)
+GLenum APIENTRY GLDSA_CheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target)
 {
 	GL_BindFramebuffer(target, framebuffer);
 	return qglCheckFramebufferStatusEXT(target);
 }
 
-GLvoid APIENTRY GLDSA_NamedFramebufferTexture2D(GLuint framebuffer,
+GLvoid APIENTRY GLDSA_NamedFramebufferTexture2DEXT(GLuint framebuffer,
 	GLenum attachment, GLenum textarget, GLuint texture, GLint level)
 {
 	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, framebuffer);
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, textarget, texture, level);
 }
 
-GLvoid APIENTRY GLDSA_NamedFramebufferRenderbuffer(GLuint framebuffer,
+GLvoid APIENTRY GLDSA_NamedFramebufferRenderbufferEXT(GLuint framebuffer,
 	GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
 {
 	GL_BindFramebuffer(GL_FRAMEBUFFER_EXT, framebuffer);
