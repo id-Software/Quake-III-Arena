@@ -434,15 +434,15 @@ static void IN_InitJoystick( void )
 	stick = NULL;
 	memset(&stick_state, '\0', sizeof (stick_state));
 
-	if (!SDL_WasInit(SDL_INIT_JOYSTICK))
+	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER))
 	{
-		Com_DPrintf("Calling SDL_Init(SDL_INIT_JOYSTICK)...\n");
-		if (SDL_Init(SDL_INIT_JOYSTICK) != 0)
+		Com_DPrintf("Calling SDL_Init(SDL_INIT_GAMECONTROLLER)...\n");
+		if (SDL_Init(SDL_INIT_GAMECONTROLLER) != 0)
 		{
-			Com_DPrintf("SDL_Init(SDL_INIT_JOYSTICK) failed: %s\n", SDL_GetError());
+			Com_DPrintf("SDL_Init(SDL_INIT_GAMECONTROLLER) failed: %s\n", SDL_GetError());
 			return;
 		}
-		Com_DPrintf("SDL_Init(SDL_INIT_JOYSTICK) passed.\n");
+		Com_DPrintf("SDL_Init(SDL_INIT_GAMECONTROLLER) passed.\n");
 	}
 
 	total = SDL_NumJoysticks();
@@ -459,7 +459,7 @@ static void IN_InitJoystick( void )
 
 	if( !in_joystick->integer ) {
 		Com_DPrintf( "Joystick is not active.\n" );
-		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+		SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 		return;
 	}
 
@@ -494,7 +494,7 @@ IN_ShutdownJoystick
 */
 static void IN_ShutdownJoystick( void )
 {
-	if ( !SDL_WasInit( SDL_INIT_JOYSTICK ) )
+	if ( !SDL_WasInit( SDL_INIT_GAMECONTROLLER ) )
 		return;
 
 	if (stick)
@@ -503,7 +503,7 @@ static void IN_ShutdownJoystick( void )
 		stick = NULL;
 	}
 
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+	SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
 /*
@@ -838,6 +838,11 @@ static void IN_ProcessEvents( void )
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qtrue, 0, NULL );
 					Com_QueueEvent( 0, SE_KEY, K_MWHEELDOWN, qfalse, 0, NULL );
 				}
+				break;
+
+			case SDL_CONTROLLERDEVICEADDED:
+			case SDL_CONTROLLERDEVICEREMOVED:
+				IN_InitJoystick();
 				break;
 
 			case SDL_QUIT:
