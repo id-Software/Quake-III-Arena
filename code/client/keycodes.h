@@ -260,6 +260,36 @@ typedef enum {
 	K_EURO,
 	K_UNDO,
 
+	// Gamepad controls
+	// Ordered to match SDL2 game controller buttons and axes
+	// Do not change this order without also changing IN_GamepadMove() in SDL_input.c
+	K_PAD0_A,
+	K_PAD0_B,
+	K_PAD0_X,
+	K_PAD0_Y,
+	K_PAD0_BACK,
+	K_PAD0_GUIDE,
+	K_PAD0_START,
+	K_PAD0_LEFTSTICK_CLICK,
+	K_PAD0_RIGHTSTICK_CLICK,
+	K_PAD0_LEFTSHOULDER,
+	K_PAD0_RIGHTSHOULDER,
+	K_PAD0_DPAD_UP,
+	K_PAD0_DPAD_DOWN,
+	K_PAD0_DPAD_LEFT,
+	K_PAD0_DPAD_RIGHT,
+
+	K_PAD0_LEFTSTICK_LEFT,
+	K_PAD0_LEFTSTICK_RIGHT,
+	K_PAD0_LEFTSTICK_UP,
+	K_PAD0_LEFTSTICK_DOWN,
+	K_PAD0_RIGHTSTICK_LEFT,
+	K_PAD0_RIGHTSTICK_RIGHT,
+	K_PAD0_RIGHTSTICK_UP,
+	K_PAD0_RIGHTSTICK_DOWN,
+	K_PAD0_LEFTTRIGGER,
+	K_PAD0_RIGHTTRIGGER,
+
 	// Pseudo-key that brings the console down
 	K_CONSOLE,
 
