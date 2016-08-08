@@ -14,7 +14,7 @@ echo "This process requires you to have the following installed through your dis
  git
  and all of the ioquake3 dependencies necessary for an ioquake3 server.
  If you do not have the necessary dependencies this script will bail out.
- Please post a message to http://community.ioquake.org/ asking for help and include whatever error messages you received during the compile phase.
+ Please post a message to http://discourse.ioquake.org/ asking for help and include whatever error messages you received during the compile phase.
  Please edit this script. Inside you will find a COPYDIR variable you can alter to change where ioquake3 will be installed to."
 while true; do
         read -p "Are you ready to compile ioquake3 in the $IOQ3LOCAL directory, and have it installed into $COPYDIR? " yn
