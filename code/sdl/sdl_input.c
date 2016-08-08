@@ -537,52 +537,52 @@ static qboolean KeyToAxisAndSign(int keynum, int *outAxis, int *outSign)
 
 	*outSign = 0;
 
-	if (stricmp(bind, "+forward") == 0)
+	if (Q_stricmp(bind, "+forward") == 0)
 	{
 		*outAxis = j_forward_axis->integer;
 		*outSign = j_forward->value > 0.0f ? 1 : -1;
 	}
-	else if (stricmp(bind, "+back") == 0)
+	else if (Q_stricmp(bind, "+back") == 0)
 	{
 		*outAxis = j_forward_axis->integer;
 		*outSign = j_forward->value > 0.0f ? -1 : 1;
 	}
-	else if (stricmp(bind, "+moveleft") == 0)
+	else if (Q_stricmp(bind, "+moveleft") == 0)
 	{
 		*outAxis = j_side_axis->integer;
 		*outSign = j_side->value > 0.0f ? -1 : 1;
 	}
-	else if (stricmp(bind, "+moveright") == 0)
+	else if (Q_stricmp(bind, "+moveright") == 0)
 	{
 		*outAxis = j_side_axis->integer;
 		*outSign = j_side->value > 0.0f ? 1 : -1;
 	}
-	else if (stricmp(bind, "+lookup") == 0)
+	else if (Q_stricmp(bind, "+lookup") == 0)
 	{
 		*outAxis = j_pitch_axis->integer;
 		*outSign = j_pitch->value > 0.0f ? -1 : 1;
 	}
-	else if (stricmp(bind, "+lookdown") == 0)
+	else if (Q_stricmp(bind, "+lookdown") == 0)
 	{
 		*outAxis = j_pitch_axis->integer;
 		*outSign = j_pitch->value > 0.0f ? 1 : -1;
 	}
-	else if (stricmp(bind, "+left") == 0)
+	else if (Q_stricmp(bind, "+left") == 0)
 	{
 		*outAxis = j_yaw_axis->integer;
 		*outSign = j_yaw->value > 0.0f ? 1 : -1;
 	}
-	else if (stricmp(bind, "+right") == 0)
+	else if (Q_stricmp(bind, "+right") == 0)
 	{
 		*outAxis = j_yaw_axis->integer;
 		*outSign = j_yaw->value > 0.0f ? -1 : 1;
 	}
-	else if (stricmp(bind, "+moveup") == 0)
+	else if (Q_stricmp(bind, "+moveup") == 0)
 	{
 		*outAxis = j_up_axis->integer;
 		*outSign = j_up->value > 0.0f ? 1 : -1;
 	}
-	else if (stricmp(bind, "+movedown") == 0)
+	else if (Q_stricmp(bind, "+movedown") == 0)
 	{
 		*outAxis = j_up_axis->integer;
 		*outSign = j_up->value > 0.0f ? -1 : 1;
