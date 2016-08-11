@@ -1062,7 +1062,8 @@ static void IN_ProcessEvents( void )
 
 			case SDL_CONTROLLERDEVICEADDED:
 			case SDL_CONTROLLERDEVICEREMOVED:
-				IN_InitJoystick();
+				if (in_joystick->integer)
+					IN_InitJoystick();
 				break;
 
 			case SDL_QUIT:
