@@ -1083,7 +1083,7 @@ static void ParseFlare( dsurface_t *ds, drawVert_t *verts, msurface_t *surf, int
 		flare->normal[i] = LittleFloat( ds->lightmapVecs[2][i] );
 	}
 
-	surf->cullinfo = CULLINFO_NONE;
+	surf->cullinfo.type = CULLINFO_NONE;
 }
 
 
