@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -98,6 +98,9 @@
 #define HAVE_SIN    1
 #define HAVE_SINF   1
 #define HAVE_SQRT   1
+#define HAVE_SQRTF  1
+#define HAVE_TAN    1
+#define HAVE_TANF   1
 #define HAVE_SIGACTION  1
 #define HAVE_SETJMP 1
 #define HAVE_NANOSLEEP  1
@@ -110,10 +113,13 @@
 #define SDL_AUDIO_DRIVER_DUMMY  1
 
 /* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
-#define SDL_HAPTIC_DISABLED 1
+#define SDL_HAPTIC_DUMMY 1
+
+/* Enable MFi joystick support */
+#define SDL_JOYSTICK_MFI 1
 
 /* Enable Unix style SO loading */
-/* Technically this works, but it violates the iPhone developer agreement */
+/* Technically this works, but violates the iOS dev agreement prior to iOS 8 */
 /* #define SDL_LOADSO_DLOPEN 1 */
 
 /* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
@@ -131,6 +137,7 @@
 #define SDL_VIDEO_DRIVER_DUMMY  1
 
 /* enable OpenGL ES */
+#define SDL_VIDEO_OPENGL_ES2 1
 #define SDL_VIDEO_OPENGL_ES 1
 #define SDL_VIDEO_RENDER_OGL_ES 1
 #define SDL_VIDEO_RENDER_OGL_ES2    1
@@ -141,11 +148,11 @@
 /* enable iPhone keyboard support */
 #define SDL_IPHONE_KEYBOARD 1
 
-/* enable joystick subsystem */
-#define SDL_JOYSTICK_DISABLED 0
+/* enable iOS extended launch screen */
+#define SDL_IPHONE_LAUNCHSCREEN 1
 
 /* Set max recognized G-force from accelerometer
-   See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
+   See src/joystick/uikit/SDL_sysjoystick.m for notes on why this is needed
  */
 #define SDL_IPHONE_MAX_GFORCE 5.0
 

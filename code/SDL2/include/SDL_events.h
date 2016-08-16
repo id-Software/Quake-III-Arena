@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -59,7 +59,7 @@ typedef enum
     /* Application events */
     SDL_QUIT           = 0x100, /**< User-requested quit */
 
-    /* These application events have special meaning on iOS, see README-ios.txt for details */
+    /* These application events have special meaning on iOS, see README-ios.md for details */
     SDL_APP_TERMINATING,        /**< The application is being terminated by the OS
                                      Called on iOS in applicationWillTerminate()
                                      Called on Android in onDestroy()
@@ -94,6 +94,9 @@ typedef enum
     SDL_KEYUP,                  /**< Key released */
     SDL_TEXTEDITING,            /**< Keyboard text editing (composition) */
     SDL_TEXTINPUT,              /**< Keyboard text input */
+    SDL_KEYMAPCHANGED,          /**< Keymap changed due to a system event such as an
+                                     input language or keyboard layout change.
+                                */
 
     /* Mouse events */
     SDL_MOUSEMOTION    = 0x400, /**< Mouse moved */
@@ -134,8 +137,13 @@ typedef enum
     /* Drag and drop events */
     SDL_DROPFILE        = 0x1000, /**< The system requests a file open */
 
+    /* Audio hotplug events */
+    SDL_AUDIODEVICEADDED = 0x1100, /**< A new audio device is available */
+    SDL_AUDIODEVICEREMOVED,        /**< An audio device has been removed. */
+
     /* Render events */
-    SDL_RENDER_TARGETS_RESET = 0x2000, /**< The render targets have been reset */
+    SDL_RENDER_TARGETS_RESET = 0x2000, /**< The render targets have been reset and their contents need to be updated */
+    SDL_RENDER_DEVICE_RESET, /**< The device has been reset and all textures need to be recreated */
 
     /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
      *  and should be allocated with SDL_RegisterEvents()
@@ -259,6 +267,7 @@ typedef struct SDL_MouseWheelEvent
     Uint32 which;       /**< The mouse instance id, or SDL_TOUCH_MOUSEID */
     Sint32 x;           /**< The amount scrolled horizontally, positive to the right and negative to the left */
     Sint32 y;           /**< The amount scrolled vertically, positive away from the user and negative toward the user */
+    Uint32 direction;   /**< Set to one of the SDL_MOUSEWHEEL_* defines. When FLIPPED the values in X and Y will be opposite. Multiply by -1 to change them back */
 } SDL_MouseWheelEvent;
 
 /**
@@ -380,6 +389,20 @@ typedef struct SDL_ControllerDeviceEvent
     Sint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED or REMAPPED event */
 } SDL_ControllerDeviceEvent;
 
+/**
+ *  \brief Audio device event structure (event.adevice.*)
+ */
+typedef struct SDL_AudioDeviceEvent
+{
+    Uint32 type;        /**< ::SDL_AUDIODEVICEADDED, or ::SDL_AUDIODEVICEREMOVED */
+    Uint32 timestamp;
+    Uint32 which;       /**< The audio device index for the ADDED event (valid until next SDL_GetNumAudioDevices() call), SDL_AudioDeviceID for the REMOVED event */
+    Uint8 iscapture;    /**< zero if an output device, non-zero if a capture device. */
+    Uint8 padding1;
+    Uint8 padding2;
+    Uint8 padding3;
+} SDL_AudioDeviceEvent;
+
 
 /**
  *  \brief Touch finger event structure (event.tfinger.*)
@@ -392,8 +415,8 @@ typedef struct SDL_TouchFingerEvent
     SDL_FingerID fingerId;
     float x;            /**< Normalized in the range 0...1 */
     float y;            /**< Normalized in the range 0...1 */
-    float dx;           /**< Normalized in the range 0...1 */
-    float dy;           /**< Normalized in the range 0...1 */
+    float dx;           /**< Normalized in the range -1...1 */
+    float dy;           /**< Normalized in the range -1...1 */
     float pressure;     /**< Normalized in the range 0...1 */
 } SDL_TouchFingerEvent;
 
@@ -420,7 +443,7 @@ typedef struct SDL_MultiGestureEvent
  */
 typedef struct SDL_DollarGestureEvent
 {
-    Uint32 type;        /**< ::SDL_DOLLARGESTURE */
+    Uint32 type;        /**< ::SDL_DOLLARGESTURE or ::SDL_DOLLARRECORD */
     Uint32 timestamp;
     SDL_TouchID touchId; /**< The touch device id */
     SDL_GestureID gestureId;
@@ -433,8 +456,8 @@ typedef struct SDL_DollarGestureEvent
 
 /**
  *  \brief An event used to request a file open by the system (event.drop.*)
- *         This event is disabled by default, you can enable it with SDL_EventState()
- *  \note If you enable this event, you must free the filename in the event.
+ *         This event is enabled by default, you can disable it with SDL_EventState().
+ *  \note If this event is enabled, you must free the filename in the event.
  */
 typedef struct SDL_DropEvent
 {
@@ -514,6 +537,7 @@ typedef union SDL_Event
     SDL_ControllerAxisEvent caxis;      /**< Game Controller axis event data */
     SDL_ControllerButtonEvent cbutton;  /**< Game Controller button event data */
     SDL_ControllerDeviceEvent cdevice;  /**< Game Controller device event data */
+    SDL_AudioDeviceEvent adevice;   /**< Audio device event data */
     SDL_QuitEvent quit;             /**< Quit request event data */
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
@@ -583,6 +607,9 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasEvents(Uint32 minType, Uint32 maxType);
 
 /**
  *  This function clears events from the event queue
+ *  This function only affects currently queued events. If you want to make
+ *  sure that all pending OS events are flushed, you can call SDL_PumpEvents()
+ *  on the main thread immediately before the flush call.
  */
 extern DECLSPEC void SDLCALL SDL_FlushEvent(Uint32 type);
 extern DECLSPEC void SDLCALL SDL_FlushEvents(Uint32 minType, Uint32 maxType);

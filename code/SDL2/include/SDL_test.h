@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -52,7 +52,7 @@ extern "C" {
 /* Global definitions */
 
 /*
- * Note: Maximum size of SDLTest log message is less than SDLs limit
+ * Note: Maximum size of SDLTest log message is less than SDL's limit
  * to ensure we can fit additional information such as the timestamp.
  */
 #define SDLTEST_MAX_LOGMESSAGE_LENGTH   3584

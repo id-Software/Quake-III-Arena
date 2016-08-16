@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -102,11 +102,6 @@
  *    return 0; // Success
  * }
  * \endcode
- *
- * You can also find out more information on my blog:
- * http://bobbens.dyndns.org/journal/2010/sdl_haptic/
- *
- * \author Edgar Simo Serra
  */
 
 #ifndef _SDL_haptic_h
@@ -347,6 +342,9 @@ typedef struct _SDL_Haptic SDL_Haptic;
 /**
  *  \brief Structure that represents a haptic direction.
  *
+ *  This is the direction where the force comes from,
+ *  instead of the direction in which the force is exerted.
+ *
  *  Directions can be specified by:
  *   - ::SDL_HAPTIC_POLAR : Specified by polar coordinates.
  *   - ::SDL_HAPTIC_CARTESIAN : Specified by cartesian coordinates.
@@ -370,7 +368,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
                          ^
                          |
                          |
-    (1,0)  West <----[ HAPTIC ]----> East (-1,0)
+   (-1,0)  West <----[ HAPTIC ]----> East (1,0)
                          |
                          |
                          v
@@ -395,9 +393,9 @@ typedef struct _SDL_Haptic SDL_Haptic;
  *  (X axis, Y axis and Z axis (with 3 axes)).  ::SDL_HAPTIC_CARTESIAN uses
  *  the first three \c dir parameters.  The cardinal directions would be:
  *   - North:  0,-1, 0
- *   - East:  -1, 0, 0
+ *   - East:   1, 0, 0
  *   - South:  0, 1, 0
- *   - West:   1, 0, 0
+ *   - West:  -1, 0, 0
  *
  *  The Z axis represents the height of the effect if supported, otherwise
  *  it's unused.  In cartesian encoding (1, 2) would be the same as (2, 4), you
@@ -492,7 +490,7 @@ typedef struct SDL_HapticConstant
  *  over time.  The type determines the shape of the wave and the parameters
  *  determine the dimensions of the wave.
  *
- *  Phase is given by hundredth of a cycle meaning that giving the phase a value
+ *  Phase is given by hundredth of a degree meaning that giving the phase a value
  *  of 9000 will displace it 25% of its period.  Here are sample values:
  *   -     0: No phase displacement.
  *   -  9000: Displaced 25% of its period.
@@ -553,9 +551,9 @@ typedef struct SDL_HapticPeriodic
 
     /* Periodic */
     Uint16 period;      /**< Period of the wave. */
-    Sint16 magnitude;   /**< Peak value. */
+    Sint16 magnitude;   /**< Peak value; if negative, equivalent to 180 degrees extra phase shift. */
     Sint16 offset;      /**< Mean value of the wave. */
-    Uint16 phase;       /**< Horizontal shift given by hundredth of a cycle. */
+    Uint16 phase;       /**< Positive phase shift given by hundredth of a degree. */
 
     /* Envelope */
     Uint16 attack_length;   /**< Duration of the attack. */
@@ -604,11 +602,11 @@ typedef struct SDL_HapticCondition
     Uint16 interval;        /**< How soon it can be triggered again after button. */
 
     /* Condition */
-    Uint16 right_sat[3];    /**< Level when joystick is to the positive side. */
-    Uint16 left_sat[3];     /**< Level when joystick is to the negative side. */
+    Uint16 right_sat[3];    /**< Level when joystick is to the positive side; max 0xFFFF. */
+    Uint16 left_sat[3];     /**< Level when joystick is to the negative side; max 0xFFFF. */
     Sint16 right_coeff[3];  /**< How fast to increase the force towards the positive side. */
     Sint16 left_coeff[3];   /**< How fast to increase the force towards the negative side. */
-    Uint16 deadband[3];     /**< Size of the dead zone. */
+    Uint16 deadband[3];     /**< Size of the dead zone; max 0xFFFF: whole axis-range when 0-centered. */
     Sint16 center[3];       /**< Position of the dead zone. */
 } SDL_HapticCondition;
 
@@ -897,7 +895,7 @@ extern DECLSPEC int SDLCALL SDL_JoystickIsHaptic(SDL_Joystick * joystick);
 /**
  *  \brief Opens a Haptic device for usage from a Joystick device.
  *
- *  You must still close the haptic device seperately.  It will not be closed
+ *  You must still close the haptic device separately.  It will not be closed
  *  with the joystick.
  *
  *  When opening from a joystick you should first close the haptic device before
@@ -954,7 +952,7 @@ extern DECLSPEC int SDLCALL SDL_HapticNumEffects(SDL_Haptic * haptic);
 extern DECLSPEC int SDLCALL SDL_HapticNumEffectsPlaying(SDL_Haptic * haptic);
 
 /**
- *  \brief Gets the haptic devices supported features in bitwise matter.
+ *  \brief Gets the haptic device's supported features in bitwise manner.
  *
  *  Example:
  *  \code
@@ -1148,7 +1146,7 @@ extern DECLSPEC int SDLCALL SDL_HapticPause(SDL_Haptic * haptic);
  *
  *  Call to unpause after SDL_HapticPause().
  *
- *  \param haptic Haptic device to pause.
+ *  \param haptic Haptic device to unpause.
  *  \return 0 on success or -1 on error.
  *
  *  \sa SDL_HapticPause
