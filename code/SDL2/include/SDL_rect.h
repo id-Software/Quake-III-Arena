@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -43,6 +43,7 @@ extern "C" {
  *  \brief  The structure that defines a point
  *
  *  \sa SDL_EnclosePoints
+ *  \sa SDL_PointInRect
  */
 typedef struct SDL_Point
 {
@@ -65,6 +66,15 @@ typedef struct SDL_Rect
     int x, y;
     int w, h;
 } SDL_Rect;
+
+/**
+ *  \brief Returns true if point resides inside a rectangle.
+ */
+SDL_FORCE_INLINE SDL_bool SDL_PointInRect(const SDL_Point *p, const SDL_Rect *r)
+{
+    return ( (p->x >= r->x) && (p->x < (r->x + r->w)) &&
+             (p->y >= r->y) && (p->y < (r->y + r->h)) ) ? SDL_TRUE : SDL_FALSE;
+}
 
 /**
  *  \brief Returns true if the rectangle has no area.

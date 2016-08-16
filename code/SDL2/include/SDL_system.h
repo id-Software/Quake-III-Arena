@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,24 +42,36 @@ extern "C" {
 
 /* Platform specific functions for Windows */
 #ifdef __WIN32__
+	
+/**
+   \brief Set a function that is called for every windows message, before TranslateMessage()
+*/
+typedef void (SDLCALL * SDL_WindowsMessageHook)(void *userdata, void *hWnd, unsigned int message, Uint64 wParam, Sint64 lParam);
+extern DECLSPEC void SDLCALL SDL_SetWindowsMessageHook(SDL_WindowsMessageHook callback, void *userdata);
 
-/* Returns the D3D9 adapter index that matches the specified display index.
+/**
+   \brief Returns the D3D9 adapter index that matches the specified display index.
+
    This adapter index can be passed to IDirect3D9::CreateDevice and controls
    on which monitor a full screen application will appear.
 */
 extern DECLSPEC int SDLCALL SDL_Direct3D9GetAdapterIndex( int displayIndex );
 
-/* Returns the D3D device associated with a renderer, or NULL if it's not a D3D renderer.
+typedef struct IDirect3DDevice9 IDirect3DDevice9;
+/**
+   \brief Returns the D3D device associated with a renderer, or NULL if it's not a D3D renderer.
+
    Once you are done using the device, you should release it to avoid a resource leak.
  */
-typedef struct IDirect3DDevice9 IDirect3DDevice9;
 extern DECLSPEC IDirect3DDevice9* SDLCALL SDL_RenderGetD3D9Device(SDL_Renderer * renderer);
 
-/* Returns the DXGI Adapter and Output indices for the specified display index. 
+/**
+   \brief Returns the DXGI Adapter and Output indices for the specified display index.
+
    These can be passed to EnumAdapters and EnumOutputs respectively to get the objects
    required to create a DX10 or DX11 device and swap chain.
  */
-extern DECLSPEC void SDLCALL SDL_DXGIGetOutputInfo( int displayIndex, int *adapterIndex, int *outputIndex );
+extern DECLSPEC SDL_bool SDLCALL SDL_DXGIGetOutputInfo( int displayIndex, int *adapterIndex, int *outputIndex );
 
 #endif /* __WIN32__ */
 
@@ -67,7 +79,10 @@ extern DECLSPEC void SDLCALL SDL_DXGIGetOutputInfo( int displayIndex, int *adapt
 /* Platform specific functions for iOS */
 #if defined(__IPHONEOS__) && __IPHONEOS__
 
+#define SDL_iOSSetAnimationCallback(window, interval, callback, callbackParam) SDL_iPhoneSetAnimationCallback(window, interval, callback, callbackParam)
 extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
+
+#define SDL_iOSSetEventPump(enabled) SDL_iPhoneSetEventPump(enabled)
 extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
 #endif /* __IPHONEOS__ */
@@ -76,12 +91,16 @@ extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 /* Platform specific functions for Android */
 #if defined(__ANDROID__) && __ANDROID__
 
-/* Get the JNI environment for the current thread
+/**
+   \brief Get the JNI environment for the current thread
+
    This returns JNIEnv*, but the prototype is void* so we don't need jni.h
  */
 extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv();
 
-/* Get the SDL Activity object for the application
+/**
+   \brief Get the SDL Activity object for the application
+
    This returns jobject, but the prototype is void* so we don't need jni.h
    The jobject returned by SDL_AndroidGetActivity is a local reference.
    It is the caller's responsibility to properly release it
@@ -89,26 +108,33 @@ extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv();
  */
 extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity();
 
-/* See the official Android developer guide for more information:
+/**
+   See the official Android developer guide for more information:
    http://developer.android.com/guide/topics/data/data-storage.html
 */
 #define SDL_ANDROID_EXTERNAL_STORAGE_READ   0x01
 #define SDL_ANDROID_EXTERNAL_STORAGE_WRITE  0x02
 
-/* Get the path used for internal storage for this application.
+/**
+   \brief Get the path used for internal storage for this application.
+
    This path is unique to your application and cannot be written to
    by other applications.
  */
 extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath();
 
-/* Get the current state of external storage, a bitmask of these values:
+/**
+   \brief Get the current state of external storage, a bitmask of these values:
     SDL_ANDROID_EXTERNAL_STORAGE_READ
     SDL_ANDROID_EXTERNAL_STORAGE_WRITE
+
    If external storage is currently unavailable, this will return 0.
 */
 extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState();
 
-/* Get the path used for external storage for this application.
+/**
+   \brief Get the path used for external storage for this application.
+
    This path is unique to your application, but is public and can be
    written to by other applications.
  */
@@ -151,7 +177,7 @@ typedef enum
  *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
  *
  *  \param pathType The type of path to retrieve.
- *  \ret A UCS-2 string (16-bit, wide-char) containing the path, or NULL
+ *  \return A UCS-2 string (16-bit, wide-char) containing the path, or NULL
  *      if the path is not available for any reason.  Not all paths are
  *      available on all versions of Windows.  This is especially true on
  *      Windows Phone.  Check the documentation for the given
@@ -168,7 +194,7 @@ extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path
  *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
  *
  *  \param pathType The type of path to retrieve.
- *  \ret A UTF-8 string (8-bit, multi-byte) containing the path, or NULL
+ *  \return A UTF-8 string (8-bit, multi-byte) containing the path, or NULL
  *      if the path is not available for any reason.  Not all paths are
  *      available on all versions of Windows.  This is especially true on
  *      Windows Phone.  Check the documentation for the given
@@ -178,7 +204,6 @@ extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path
 extern DECLSPEC const char * SDLCALL SDL_WinRTGetFSPathUTF8(SDL_WinRT_Path pathType);
 
 #endif /* __WINRT__ */
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

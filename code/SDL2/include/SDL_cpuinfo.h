@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -138,6 +138,11 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE42(void);
  *  This function returns true if the CPU has AVX features.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasAVX(void);
+
+/**
+ *  This function returns true if the CPU has AVX2 features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasAVX2(void);
 
 /**
  *  This function returns the amount of RAM configured in the system, in MB.

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,6 +41,14 @@
 #  endif
 #endif
 
+#ifndef SDL_UNUSED
+#  ifdef __GNUC__
+#    define SDL_UNUSED __attribute__((unused))
+#  else
+#    define SDL_UNUSED
+#  endif
+#endif
+
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
 # if defined(__WIN32__) || defined(__WINRT__)
@@ -56,8 +64,6 @@
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #   define DECLSPEC __attribute__ ((visibility("default")))
-#  elif defined(__GNUC__) && __GNUC__ >= 2
-#   define DECLSPEC __declspec(dllexport)
 #  else
 #   define DECLSPEC
 #  endif

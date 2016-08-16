@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -233,9 +233,9 @@ extern DECLSPEC void SDLCALL SDL_DetachThread(SDL_Thread * thread);
  *          if (!thread_local_storage) {
  *              thread_local_storage = SDL_TLSCreate();
  *          }
- *          SDL_AtomicUnLock(&tls_lock);
+ *          SDL_AtomicUnlock(&tls_lock);
  *      }
- *      SDL_TLSSet(thread_local_storage, value);
+ *      SDL_TLSSet(thread_local_storage, value, 0);
  *  }
  *  
  *  void *GetMyThreadData(void)
