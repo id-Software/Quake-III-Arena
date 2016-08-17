@@ -439,6 +439,21 @@ static void IN_InitJoystick( void )
 	gamepad = NULL;
 	memset(&stick_state, '\0', sizeof (stick_state));
 
+	// SDL 2.0.4 requires SDL_INIT_JOYSTICK to be initialized separately from
+	// SDL_INIT_GAMECONTROLLER for SDL_JoystickOpen() to work correctly,
+	// despite https://wiki.libsdl.org/SDL_Init (retrieved 2016-08-16)
+	// indicating SDL_INIT_JOYSTICK should be initialized automatically.
+	if (!SDL_WasInit(SDL_INIT_JOYSTICK))
+	{
+		Com_DPrintf("Calling SDL_Init(SDL_INIT_JOYSTICK)...\n");
+		if (SDL_Init(SDL_INIT_JOYSTICK) != 0)
+		{
+			Com_DPrintf("SDL_Init(SDL_INIT_JOYSTICK) failed: %s\n", SDL_GetError());
+			return;
+		}
+		Com_DPrintf("SDL_Init(SDL_INIT_JOYSTICK) passed.\n");
+	}
+
 	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER))
 	{
 		Com_DPrintf("Calling SDL_Init(SDL_INIT_GAMECONTROLLER)...\n");
@@ -477,7 +492,7 @@ static void IN_InitJoystick( void )
 	stick = SDL_JoystickOpen( in_joystickNo->integer );
 
 	if (stick == NULL) {
-		Com_DPrintf( "No joystick opened.\n" );
+		Com_DPrintf( "No joystick opened: %s\n", SDL_GetError() );
 		return;
 	}
 
@@ -507,6 +522,9 @@ static void IN_ShutdownJoystick( void )
 	if ( !SDL_WasInit( SDL_INIT_GAMECONTROLLER ) )
 		return;
 
+	if ( !SDL_WasInit( SDL_INIT_JOYSTICK ) )
+		return;
+
 	if (gamepad)
 	{
 		SDL_GameControllerClose(gamepad);
@@ -520,6 +538,7 @@ static void IN_ShutdownJoystick( void )
 	}
 
 	SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
 
