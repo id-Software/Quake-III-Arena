@@ -667,6 +667,63 @@ static shader_t *ShaderForShaderNum( int shaderNum, int lightmapNum ) {
 	return shader;
 }
 
+void LoadDrawVertToSrfVert(srfVert_t *s, drawVert_t *d, int realLightmapNum, float hdrVertColors[3])
+{
+	vec4_t v;
+
+	s->xyz[0] = LittleFloat(d->xyz[0]);
+	s->xyz[1] = LittleFloat(d->xyz[1]);
+	s->xyz[2] = LittleFloat(d->xyz[2]);
+
+	s->st[0] = LittleFloat(d->st[0]);
+	s->st[1] = LittleFloat(d->st[1]);
+
+	if (realLightmapNum >= 0)
+	{
+		s->lightmap[0] = FatPackU(LittleFloat(d->lightmap[0]), realLightmapNum);
+		s->lightmap[1] = FatPackV(LittleFloat(d->lightmap[1]), realLightmapNum);
+	}
+	else
+	{
+		s->lightmap[0] = LittleFloat(d->lightmap[0]);
+		s->lightmap[1] = LittleFloat(d->lightmap[1]);
+	}
+
+	v[0] = LittleFloat(d->normal[0]);
+	v[1] = LittleFloat(d->normal[1]);
+	v[2] = LittleFloat(d->normal[2]);
+
+	R_VaoPackNormal(s->normal, v);
+
+	if (hdrVertColors)
+	{
+		v[0] = hdrVertColors[0];
+		v[1] = hdrVertColors[1];
+		v[2] = hdrVertColors[2];
+	}
+	else
+	{
+		//hack: convert LDR vertex colors to HDR
+		if (r_hdr->integer)
+		{
+			v[0] = MAX(d->color[0], 0.499f);
+			v[1] = MAX(d->color[1], 0.499f);
+			v[2] = MAX(d->color[2], 0.499f);
+		}
+		else
+		{
+			v[0] = d->color[0];
+			v[1] = d->color[1];
+			v[2] = d->color[2];
+		}
+
+	}
+	v[3] = d->color[3] / 255.0f;
+
+	R_ColorShiftLightingFloats(v, s->vertexColors, 1.0f / 255.0f);
+}
+
+
 /*
 ===============
 ParseFace
@@ -714,50 +771,7 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 	ClearBounds(surf->cullinfo.bounds[0], surf->cullinfo.bounds[1]);
 	verts += LittleLong(ds->firstVert);
 	for(i = 0; i < numVerts; i++)
-	{
-		vec4_t color;
-
-		for(j = 0; j < 3; j++)
-		{
-			cv->verts[i].xyz[j] = LittleFloat(verts[i].xyz[j]);
-			cv->verts[i].normal[j] = LittleFloat(verts[i].normal[j]);
-		}
-		AddPointToBounds(cv->verts[i].xyz, surf->cullinfo.bounds[0], surf->cullinfo.bounds[1]);
-		for(j = 0; j < 2; j++)
-		{
-			cv->verts[i].st[j] = LittleFloat(verts[i].st[j]);
-			//cv->verts[i].lightmap[j] = LittleFloat(verts[i].lightmap[j]);
-		}
-		cv->verts[i].lightmap[0] = FatPackU(LittleFloat(verts[i].lightmap[0]), realLightmapNum);
-		cv->verts[i].lightmap[1] = FatPackV(LittleFloat(verts[i].lightmap[1]), realLightmapNum);
-
-		if (hdrVertColors)
-		{
-			color[0] = hdrVertColors[(ds->firstVert + i) * 3    ];
-			color[1] = hdrVertColors[(ds->firstVert + i) * 3 + 1];
-			color[2] = hdrVertColors[(ds->firstVert + i) * 3 + 2];
-		}
-		else
-		{
-			//hack: convert LDR vertex colors to HDR
-			if (r_hdr->integer)
-			{
-				color[0] = MAX(verts[i].color[0], 0.499f);
-				color[1] = MAX(verts[i].color[1], 0.499f);
-				color[2] = MAX(verts[i].color[2], 0.499f);
-			}
-			else
-			{
-				color[0] = verts[i].color[0];
-				color[1] = verts[i].color[1];
-				color[2] = verts[i].color[2];
-			}
-
-		}
-		color[3] = verts[i].color[3] / 255.0f;
-
-		R_ColorShiftLightingFloats( color, cv->verts[i].vertexColors, 1.0f / 255.0f );
-	}
+		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
 
 	// copy triangles
 	badTriangles = 0;
@@ -823,7 +837,7 @@ ParseMesh
 */
 static void ParseMesh ( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, msurface_t *surf ) {
 	srfBspSurface_t	*grid = (srfBspSurface_t *)surf->data;
-	int				i, j;
+	int				i;
 	int				width, height, numPoints;
 	srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE];
 	vec3_t			bounds[2];
@@ -858,49 +872,7 @@ static void ParseMesh ( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors,
 	verts += LittleLong( ds->firstVert );
 	numPoints = width * height;
 	for(i = 0; i < numPoints; i++)
-	{
-		vec4_t color;
-
-		for(j = 0; j < 3; j++)
-		{
-			points[i].xyz[j] = LittleFloat(verts[i].xyz[j]);
-			points[i].normal[j] = LittleFloat(verts[i].normal[j]);
-		}
-
-		for(j = 0; j < 2; j++)
-		{
-			points[i].st[j] = LittleFloat(verts[i].st[j]);
-			//points[i].lightmap[j] = LittleFloat(verts[i].lightmap[j]);
-		}
-		points[i].lightmap[0] = FatPackU(LittleFloat(verts[i].lightmap[0]), realLightmapNum);
-		points[i].lightmap[1] = FatPackV(LittleFloat(verts[i].lightmap[1]), realLightmapNum);
-
-		if (hdrVertColors)
-		{
-			color[0] = hdrVertColors[(ds->firstVert + i) * 3    ];
-			color[1] = hdrVertColors[(ds->firstVert + i) * 3 + 1];
-			color[2] = hdrVertColors[(ds->firstVert + i) * 3 + 2];
-		}
-		else
-		{
-			//hack: convert LDR vertex colors to HDR
-			if (r_hdr->integer)
-			{
-				color[0] = MAX(verts[i].color[0], 0.499f);
-				color[1] = MAX(verts[i].color[1], 0.499f);
-				color[2] = MAX(verts[i].color[2], 0.499f);
-			}
-			else
-			{
-				color[0] = verts[i].color[0];
-				color[1] = verts[i].color[1];
-				color[2] = verts[i].color[2];
-			}
-		}
-		color[3] = verts[i].color[3] / 255.0f;
-
-		R_ColorShiftLightingFloats( color, points[i].vertexColors, 1.0f / 255.0f );
-	}
+		LoadDrawVertToSrfVert(&points[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
 
 	// pre-tesseleate
 	R_SubdividePatchToGrid( grid, width, height, points );
@@ -964,49 +936,7 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	ClearBounds(surf->cullinfo.bounds[0], surf->cullinfo.bounds[1]);
 	verts += LittleLong(ds->firstVert);
 	for(i = 0; i < numVerts; i++)
-	{
-		vec4_t color;
-
-		for(j = 0; j < 3; j++)
-		{
-			cv->verts[i].xyz[j] = LittleFloat(verts[i].xyz[j]);
-			cv->verts[i].normal[j] = LittleFloat(verts[i].normal[j]);
-		}
-
-		AddPointToBounds( cv->verts[i].xyz, surf->cullinfo.bounds[0], surf->cullinfo.bounds[1] );
-
-		for(j = 0; j < 2; j++)
-		{
-			cv->verts[i].st[j] = LittleFloat(verts[i].st[j]);
-			cv->verts[i].lightmap[j] = LittleFloat(verts[i].lightmap[j]);
-		}
-
-		if (hdrVertColors)
-		{
-			color[0] = hdrVertColors[(ds->firstVert + i) * 3    ];
-			color[1] = hdrVertColors[(ds->firstVert + i) * 3 + 1];
-			color[2] = hdrVertColors[(ds->firstVert + i) * 3 + 2];
-		}
-		else
-		{
-			//hack: convert LDR vertex colors to HDR
-			if (r_hdr->integer)
-			{
-				color[0] = MAX(verts[i].color[0], 0.499f);
-				color[1] = MAX(verts[i].color[1], 0.499f);
-				color[2] = MAX(verts[i].color[2], 0.499f);
-			}
-			else
-			{
-				color[0] = verts[i].color[0];
-				color[1] = verts[i].color[1];
-				color[2] = verts[i].color[2];
-			}
-		}
-		color[3] = verts[i].color[3] / 255.0f;
-
-		R_ColorShiftLightingFloats( color, cv->verts[i].vertexColors, 1.0f / 255.0f );
-	}
+		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], -1, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
 
 	// copy triangles
 	badTriangles = 0;
@@ -1849,8 +1779,8 @@ static void CopyVert(const srfVert_t * in, srfVert_t * out)
 #ifdef USE_VERT_TANGENT_SPACE
 	VectorCopy4(in->tangent, out->tangent);
 #endif
-	VectorCopy(in->normal,   out->normal);
-	VectorCopy(in->lightdir, out->lightdir);
+	VectorCopy4(in->normal,   out->normal);
+	VectorCopy4(in->lightdir, out->lightdir);
 
 	VectorCopy2(in->st,       out->st);
 	VectorCopy2(in->lightmap, out->lightmap);
@@ -3193,7 +3123,14 @@ void R_CalcVertexLightDirs( void )
 			case SF_GRID:
 			case SF_TRIANGLES:
 				for(i = 0; i < bspSurf->numVerts; i++)
-					R_LightDirForPoint( bspSurf->verts[i].xyz, bspSurf->verts[i].lightdir, bspSurf->verts[i].normal, &s_worldData );
+				{
+					vec3_t lightDir;
+					vec3_t normal;
+
+					R_VaoUnpackNormal(normal, bspSurf->verts[i].normal);
+					R_LightDirForPoint( bspSurf->verts[i].xyz, lightDir, normal, &s_worldData );
+					R_VaoPackNormal(bspSurf->verts[i].lightdir, lightDir);
+				}
 
 				break;
 

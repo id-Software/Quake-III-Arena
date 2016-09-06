@@ -295,23 +295,6 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
-	// GL_ARB_vertex_type_2_10_10_10_rev
-	extension = "GL_ARB_vertex_type_2_10_10_10_rev";
-	glRefConfig.packedNormalDataType = GL_BYTE;
-	if( GLimp_HaveExtension( extension ) )
-	{
-		qboolean useExt = !!r_arb_vertex_type_2_10_10_10_rev->integer;
-
-		if (useExt)
-			glRefConfig.packedNormalDataType = GL_INT_2_10_10_10_REV;
-
-		ri.Printf(PRINT_ALL, result[useExt], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
 	// use float lightmaps?
 	glRefConfig.floatLightmap = (glRefConfig.textureFloat && glRefConfig.halfFloatPixel && r_floatLightmap->integer && r_hdr->integer);
 
