@@ -667,13 +667,16 @@ static shader_t *ShaderForShaderNum( int shaderNum, int lightmapNum ) {
 	return shader;
 }
 
-void LoadDrawVertToSrfVert(srfVert_t *s, drawVert_t *d, int realLightmapNum, float hdrVertColors[3])
+void LoadDrawVertToSrfVert(srfVert_t *s, drawVert_t *d, int realLightmapNum, float hdrVertColors[3], vec3_t *bounds)
 {
 	vec4_t v;
 
 	s->xyz[0] = LittleFloat(d->xyz[0]);
 	s->xyz[1] = LittleFloat(d->xyz[1]);
 	s->xyz[2] = LittleFloat(d->xyz[2]);
+
+	if (bounds)
+		AddPointToBounds(s->xyz, bounds[0], bounds[1]);
 
 	s->st[0] = LittleFloat(d->st[0]);
 	s->st[1] = LittleFloat(d->st[1]);
@@ -771,7 +774,7 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors, 
 	ClearBounds(surf->cullinfo.bounds[0], surf->cullinfo.bounds[1]);
 	verts += LittleLong(ds->firstVert);
 	for(i = 0; i < numVerts; i++)
-		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
+		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL, surf->cullinfo.bounds);
 
 	// copy triangles
 	badTriangles = 0;
@@ -872,7 +875,7 @@ static void ParseMesh ( dsurface_t *ds, drawVert_t *verts, float *hdrVertColors,
 	verts += LittleLong( ds->firstVert );
 	numPoints = width * height;
 	for(i = 0; i < numPoints; i++)
-		LoadDrawVertToSrfVert(&points[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
+		LoadDrawVertToSrfVert(&points[i], &verts[i], realLightmapNum, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL, NULL);
 
 	// pre-tesseleate
 	R_SubdividePatchToGrid( grid, width, height, points );
@@ -936,7 +939,7 @@ static void ParseTriSurf( dsurface_t *ds, drawVert_t *verts, float *hdrVertColor
 	ClearBounds(surf->cullinfo.bounds[0], surf->cullinfo.bounds[1]);
 	verts += LittleLong(ds->firstVert);
 	for(i = 0; i < numVerts; i++)
-		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], -1, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL);
+		LoadDrawVertToSrfVert(&cv->verts[i], &verts[i], -1, hdrVertColors ? hdrVertColors + (ds->firstVert + i) * 3 : NULL, surf->cullinfo.bounds);
 
 	// copy triangles
 	badTriangles = 0;
