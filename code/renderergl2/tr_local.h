@@ -2153,7 +2153,6 @@ void R_SubdividePatchToGrid( srfBspSurface_t *grid, int width, int height,
 								srfVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] );
 void R_GridInsertColumn( srfBspSurface_t *grid, int column, int row, vec3_t point, float loderror );
 void R_GridInsertRow( srfBspSurface_t *grid, int row, int column, vec3_t point, float loderror );
-void R_FreeSurfaceGridMesh( srfBspSurface_t *grid );
 
 /*
 ============================================================
