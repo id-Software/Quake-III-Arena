@@ -1125,14 +1125,14 @@ static void RB_SurfaceGrid( srfBspSurface_t *srf ) {
 
 				if ( tess.shader->vertexAttribs & ATTR_NORMAL )
 				{
-					VectorCopy4(normal, dv->normal);
+					VectorCopy4(dv->normal, normal);
 					normal += 4;
 				}
 
 #ifdef USE_VERT_TANGENT_SPACE
 				if ( tess.shader->vertexAttribs & ATTR_TANGENT )
 				{
-					VectorCopy4(tangent, dv->tangent);
+					VectorCopy4(dv->tangent, tangent);
 					tangent += 4;
 				}
 #endif
