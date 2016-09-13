@@ -2055,7 +2055,7 @@ void R_RenderPshadowMaps(const refdef_t *fd)
 		VectorScale(lightDir, -1.0f, shadow->lightViewAxis[0]);
 		VectorSet(up, 0, 0, -1);
 
-		if ( abs(DotProduct(up, shadow->lightViewAxis[0])) > 0.9f )
+		if ( fabsf(DotProduct(up, shadow->lightViewAxis[0])) > 0.9f )
 		{
 			VectorSet(up, -1, 0, 0);
 		}
@@ -2298,7 +2298,7 @@ void R_RenderSunShadowMaps(const refdef_t *fd, int level)
 	}
 
 	// Check if too close to parallel to light direction
-	if (abs(DotProduct(lightViewAxis[2], lightViewAxis[0])) > 0.9f)
+	if (fabsf(DotProduct(lightViewAxis[2], lightViewAxis[0])) > 0.9f)
 	{
 		if (level == 3 || lightViewIndependentOfCameraView)
 		{
