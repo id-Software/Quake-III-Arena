@@ -1061,10 +1061,7 @@ void GLSL_InitGPUShaders(void)
 			{
 				Q_strcat(extradefines, 1024, "#define USE_NORMALMAP\n");
 
-#ifdef USE_VERT_TANGENT_SPACE
-				Q_strcat(extradefines, 1024, "#define USE_VERT_TANGENT_SPACE\n");
 				attribs |= ATTR_TANGENT;
-#endif
 
 				if ((i & LIGHTDEF_USE_PARALLAXMAP) && !(i & LIGHTDEF_ENTITY) && r_parallaxMapping->integer)
 				{
@@ -1119,12 +1116,10 @@ void GLSL_InitGPUShaders(void)
 			Q_strcat(extradefines, 1024, "#define USE_VERTEX_ANIMATION\n#define USE_MODELMATRIX\n");
 			attribs |= ATTR_POSITION2 | ATTR_NORMAL2;
 
-#ifdef USE_VERT_TANGENT_SPACE
 			if (r_normalMapping->integer)
 			{
 				attribs |= ATTR_TANGENT2;
 			}
-#endif
 		}
 
 		if (!GLSL_InitGPUShader(&tr.lightallShader[i], "lightall", attribs, qtrue, extradefines, qtrue, fallbackShader_lightall_vp, fallbackShader_lightall_fp))

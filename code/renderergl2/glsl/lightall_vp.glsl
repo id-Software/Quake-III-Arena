@@ -6,16 +6,12 @@ attribute vec4 attr_Color;
 
 attribute vec3 attr_Position;
 attribute vec3 attr_Normal;
-#if defined(USE_VERT_TANGENT_SPACE)
 attribute vec4 attr_Tangent;
-#endif
 
 #if defined(USE_VERTEX_ANIMATION)
 attribute vec3 attr_Position2;
 attribute vec3 attr_Normal2;
-  #if defined(USE_VERT_TANGENT_SPACE)
 attribute vec4 attr_Tangent2;
-  #endif
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_LIGHT_VECTOR)
@@ -74,14 +70,9 @@ varying vec4   var_ColorAmbient;
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-  #if defined(USE_VERT_TANGENT_SPACE)
 varying vec4   var_Normal;
 varying vec4   var_Tangent;
 varying vec4   var_Bitangent;
-  #else
-varying vec3   var_Normal;
-varying vec3   var_ViewDir;
-  #endif
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
@@ -157,13 +148,13 @@ void main()
 #if defined(USE_VERTEX_ANIMATION)
 	vec3 position  = mix(attr_Position,    attr_Position2,    u_VertexLerp);
 	vec3 normal    = mix(attr_Normal,      attr_Normal2,      u_VertexLerp);
-  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+  #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 tangent   = mix(attr_Tangent.xyz, attr_Tangent2.xyz, u_VertexLerp);
   #endif
 #else
 	vec3 position  = attr_Position;
 	vec3 normal    = attr_Normal;
-  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+  #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 tangent   = attr_Tangent.xyz;
   #endif
 #endif
@@ -185,12 +176,12 @@ void main()
 #if defined(USE_MODELMATRIX)
 	position  = (u_ModelMatrix * vec4(position, 1.0)).xyz;
 	normal    = (u_ModelMatrix * vec4(normal,   0.0)).xyz;
-  #if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+  #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	tangent   = (u_ModelMatrix * vec4(tangent,  0.0)).xyz;
   #endif
 #endif
 
-#if defined(USE_VERT_TANGENT_SPACE) && defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
+#if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 bitangent = cross(normal, tangent) * attr_Tangent.w;
 #endif
 
@@ -247,14 +238,9 @@ void main()
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
 	vec3 viewDir = u_ViewOrigin - position;
-  #if defined(USE_VERT_TANGENT_SPACE)
 	// store view direction in tangent space to save on varyings
 	var_Normal    = vec4(normal,    viewDir.x);
 	var_Tangent   = vec4(tangent,   viewDir.y);
 	var_Bitangent = vec4(bitangent, viewDir.z);
-  #else
-	var_Normal = normal;
-	var_ViewDir = viewDir;
-  #endif
 #endif
 }

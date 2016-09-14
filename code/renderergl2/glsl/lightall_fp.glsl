@@ -53,14 +53,9 @@ varying vec4      var_ColorAmbient;
 #endif
 
 #if (defined(USE_LIGHT) && !defined(USE_FAST_LIGHT))
-  #if defined(USE_VERT_TANGENT_SPACE)
 varying vec4   var_Normal;
 varying vec4   var_Tangent;
 varying vec4   var_Bitangent;
-  #else
-varying vec3   var_Normal;
-varying vec3   var_ViewDir;
-  #endif
 #endif
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
@@ -196,25 +191,6 @@ float CalcLightAttenuation(float point, float normDist)
 	return attenuation;
 }
 
-// from http://www.thetenthplanet.de/archives/1180
-mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
-{
-	// get edge vectors of the pixel triangle
-	vec3 dp1 = dFdx( p );
-	vec3 dp2 = dFdy( p );
-	vec2 duv1 = dFdx( uv );
-	vec2 duv2 = dFdy( uv );
-
-	// solve the linear system
-	vec3 dp2perp = cross( dp2, N );
-	vec3 dp1perp = cross( N, dp1 );
-	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-
-	// construct a scale-invariant frame 
-	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
-	return mat3( T * invmax, B * invmax, N );
-}
 
 void main()
 {
@@ -223,13 +199,8 @@ void main()
 	float NL, NH, NE, EH, attenuation;
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-  #if defined(USE_VERT_TANGENT_SPACE)
 	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, var_Normal.xyz);
 	viewDir = vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w);
-  #else
-	mat3 tangentToWorld = cotangent_frame(var_Normal, -var_ViewDir, var_TexCoords.xy);
-	viewDir = var_ViewDir;
-  #endif
 	E = normalize(viewDir);
 #endif
 

@@ -128,7 +128,6 @@ vec_t R_CalcTangentSpace(vec3_t tangent, vec3_t bitangent, const vec3_t normal, 
 	return handedness;
 }
 
-#ifdef USE_VERT_TANGENT_SPACE
 qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 {
 	int             i;
@@ -189,7 +188,6 @@ qboolean R_CalcTangentVectors(srfVert_t * dv[3])
 
 	return qtrue;
 }
-#endif
 
 
 /*
