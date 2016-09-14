@@ -446,18 +446,16 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 		|| ((blend & GLS_SRCBLEND_BITS) == GLS_SRCBLEND_ONE_MINUS_DST_COLOR)
 		|| ((blend & GLS_DSTBLEND_BITS) == GLS_DSTBLEND_SRC_COLOR)
 		|| ((blend & GLS_DSTBLEND_BITS) == GLS_DSTBLEND_ONE_MINUS_SRC_COLOR);
-	qboolean isWorldDraw = !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL);
-	float scale = 1.0f;
 
-#if defined(USE_OVERBRIGHT)
-	float exactLight = 1.0f;
-#else
-	float exactLight = (isBlend || !isWorldDraw) ? 1.0f : (float)(1 << r_mapOverBrightBits->integer);
-#endif
+	qboolean is2DDraw = backEnd.currentEntity == &backEnd.entity2D;
+
+	float overbright = (isBlend || is2DDraw) ? 1.0f : (float)(1 << tr.overbrightBits);
+
+	fog_t *fog;
 
 	baseColor[0] = 
 	baseColor[1] =
-	baseColor[2] = exactLight;
+	baseColor[2] =
 	baseColor[3] = 1.0f;
 
 	vertColor[0] =
@@ -470,11 +468,6 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 	//
 	switch ( pStage->rgbGen )
 	{
-		case CGEN_IDENTITY_LIGHTING:
-			baseColor[0] = 
-			baseColor[1] =
-			baseColor[2] = tr.identityLight;
-			break;
 		case CGEN_EXACT_VERTEX:
 		case CGEN_EXACT_VERTEX_LIT:
 			baseColor[0] = 
@@ -484,7 +477,7 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 
 			vertColor[0] =
 			vertColor[1] =
-			vertColor[2] = exactLight;
+			vertColor[2] = overbright;
 			vertColor[3] = 1.0f;
 			break;
 		case CGEN_CONST:
@@ -494,47 +487,33 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 			baseColor[3] = pStage->constantColor[3] / 255.0f;
 			break;
 		case CGEN_VERTEX:
-			baseColor[0] = 
+		case CGEN_VERTEX_LIT:
+			baseColor[0] =
 			baseColor[1] =
 			baseColor[2] =
 			baseColor[3] = 0.0f;
 
 			vertColor[0] =
 			vertColor[1] =
-			vertColor[2] = tr.identityLight;
+			vertColor[2] =
 			vertColor[3] = 1.0f;
-			break;
-		case CGEN_VERTEX_LIT:
-			baseColor[0] = 
-			baseColor[1] =
-			baseColor[2] = 
-			baseColor[3] = 0.0f;
-
-			vertColor[0] =
-			vertColor[1] =
-			vertColor[2] = 
-			vertColor[3] = tr.identityLight;
 			break;
 		case CGEN_ONE_MINUS_VERTEX:
 			baseColor[0] = 
 			baseColor[1] =
-			baseColor[2] = tr.identityLight;
+			baseColor[2] = 1.0f;
 
 			vertColor[0] =
 			vertColor[1] =
-			vertColor[2] = -tr.identityLight;
+			vertColor[2] = -1.0f;
 			break;
 		case CGEN_FOG:
-			{
-				fog_t		*fog;
+			fog = tr.world->fogs + tess.fogNum;
 
-				fog = tr.world->fogs + tess.fogNum;
-
-				baseColor[0] = ((unsigned char *)(&fog->colorInt))[0] / 255.0f;
-				baseColor[1] = ((unsigned char *)(&fog->colorInt))[1] / 255.0f;
-				baseColor[2] = ((unsigned char *)(&fog->colorInt))[2] / 255.0f;
-				baseColor[3] = ((unsigned char *)(&fog->colorInt))[3] / 255.0f;
-			}
+			baseColor[0] = ((unsigned char *)(&fog->colorInt))[0] / 255.0f;
+			baseColor[1] = ((unsigned char *)(&fog->colorInt))[1] / 255.0f;
+			baseColor[2] = ((unsigned char *)(&fog->colorInt))[2] / 255.0f;
+			baseColor[3] = ((unsigned char *)(&fog->colorInt))[3] / 255.0f;
 			break;
 		case CGEN_WAVEFORM:
 			baseColor[0] = 
@@ -561,6 +540,11 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 			break;
 		case CGEN_IDENTITY:
 		case CGEN_LIGHTING_DIFFUSE:
+			baseColor[0] =
+			baseColor[1] =
+			baseColor[2] = overbright;
+			break;
+		case CGEN_IDENTITY_LIGHTING:
 		case CGEN_BAD:
 			break;
 	}
@@ -609,18 +593,6 @@ static void ComputeShaderColors( shaderStage_t *pStage, vec4_t baseColor, vec4_t
 			baseColor[3] = 1.0f;
 			vertColor[3] = 0.0f;
 			break;
-	}
-
-	if (tr.overbrightBits && !isBlend)
-		scale *= 1 << tr.overbrightBits;
-
-	if ((backEnd.refdef.colorScale != 1.0f) && !isBlend && isWorldDraw)
-		scale *= backEnd.refdef.colorScale;
-
-	if (scale != 1.0f)
-	{
-		VectorScale(baseColor, scale, baseColor);
-		VectorScale(vertColor, scale, vertColor);
 	}
 
 	// FIXME: find some way to implement this.

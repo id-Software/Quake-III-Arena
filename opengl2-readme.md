@@ -264,10 +264,6 @@ Cvars for the sunlight and cascaded shadow maps:
                                      1 - Do.
                                      2 - Sunrise, sunset.
 
-*  `r_forceSunMapLightScale`        - Cheat. Scale map brightness by this factor
-                                   when r_forceSun 1.
-                                     1.0 - Default
-                                     
 *  `r_forceSunLightScale`           - Cheat. Scale sun brightness by this factor
                                    when r_forceSun 1.
                                      1.0 - Default
@@ -506,7 +502,7 @@ and is the equivalent for 'exactVertex'.
 
 This adds a new keyword to sky materials, q3gl2_sun.  The syntax is:
 
-    q3gl2_sun <red> <green> <blue> <intensity> <degrees> <elevation> <mapLightScale> <ambientLightScale>
+    q3gl2_sun <red> <green> <blue> <intensity> <degrees> <elevation> <shadowScale>
   
 Note the first six parameters are the same as in q3map_sun or q3map_sunExt,
 and the last two indicate scaling factors for the map brightness and an ambient
@@ -527,7 +523,7 @@ There are currently two ways to use this in your own (and other people's) maps.
           surfaceparm nolightmap
           surfaceparm sky
           q3map_sunExt 240 238 200 100 195 35 3 16
-          q3gl2_sun 240 238 200 50 195 35 1.0 0.2
+          q3gl2_sun 240 238 200 50 195 35 0.2
           q3map_skylight 50 16
           q3map_lightimage $whiteimage
 
@@ -550,7 +546,7 @@ There are currently two ways to use this in your own (and other people's) maps.
           surfaceparm noimpact
           surfaceparm nolightmap
           surfaceparm sky
-          q3gl2_sun 240 238 200 50 195 35 0.5 0.2
+          q3gl2_sun 240 238 200 50 195 35 0.2
           q3map_skylight 50 16
           q3map_lightimage $whiteimage
 

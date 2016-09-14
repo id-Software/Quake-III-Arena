@@ -56,7 +56,6 @@ typedef unsigned int glIndex_t;
 #define PSHADOW_MAP_SIZE      512
 
 #define USE_VERT_TANGENT_SPACE
-#define USE_OVERBRIGHT
 
 typedef struct cubemap_s {
 	char name[MAX_QPATH];
@@ -761,7 +760,6 @@ typedef struct {
 	float       sunDir[4];
 	float       sunCol[4];
 	float       sunAmbCol[4];
-	float       colorScale;
 
 	float       autoExposureMinMax[2];
 	float       toneMinAvgMaxLinear[3];
@@ -1608,7 +1606,6 @@ typedef struct {
 
 	int						viewCluster;
 
-	float                   mapLightScale;
 	float                   sunShadowScale;
 
 	qboolean                sunShadows;
@@ -1801,7 +1798,6 @@ extern  cvar_t  *r_imageUpsampleMaxSize;
 extern  cvar_t  *r_imageUpsampleType;
 extern  cvar_t  *r_genNormalMaps;
 extern  cvar_t  *r_forceSun;
-extern  cvar_t  *r_forceSunMapLightScale;
 extern  cvar_t  *r_forceSunLightScale;
 extern  cvar_t  *r_forceSunAmbientScale;
 extern  cvar_t  *r_sunlightMode;

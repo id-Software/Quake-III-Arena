@@ -2551,7 +2551,6 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 {
 	refdef_t refdef;
 	viewParms_t	parms;
-	float oldColorScale = tr.refdef.colorScale;
 
 	memset( &refdef, 0, sizeof( refdef ) );
 	refdef.rdflags = 0;
@@ -2629,7 +2628,6 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 		R_LightForPoint(tr.refdef.vieworg, ambient, directed, lightDir);
 		scale = directed[0] + directed[1] + directed[2] + ambient[0] + ambient[1] + ambient[2] + 1.0f;
 
-		tr.refdef.colorScale = 1.0f; //766.0f / scale;
 		// only print message for first side
 		if (scale < 1.0001f && cubemapSide == 0)
 		{
@@ -2670,12 +2668,6 @@ void R_RenderCubemapSide( int cubemapIndex, int cubemapSide, qboolean subscene )
 
 	R_RenderView(&parms);
 
-	if (subscene)
-	{
-		tr.refdef.colorScale = oldColorScale;
-	}
-	else
-	{
+	if (!subscene)
 		RE_EndScene();
-	}
 }
