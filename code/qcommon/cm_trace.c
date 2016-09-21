@@ -1053,7 +1053,7 @@ void CM_TraceThroughTree( traceWork_t *tw, int num, float p1f, float p2f, vec3_t
 	}
 
 	//
-	// find the point distances to the seperating plane
+	// find the point distances to the separating plane
 	// and the offset for the size of the box
 	//
 	node = cm.nodes + num;

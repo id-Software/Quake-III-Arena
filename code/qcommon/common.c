@@ -411,7 +411,7 @@ void Com_ParseCommandLine( char *commandLine ) {
         if (*commandLine == '"') {
             inq = !inq;
         }
-        // look for a + seperating character
+        // look for a + separating character
         // if commandLine came from a file, we might have real line seperators
         if ( (*commandLine == '+' && !inq) || *commandLine == '\n'  || *commandLine == '\r' ) {
             if ( com_numConsoleLines == MAX_CONSOLE_LINES ) {
