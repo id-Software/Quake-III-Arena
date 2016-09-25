@@ -4135,7 +4135,7 @@ static void UI_BuildFindPlayerList(qboolean force) {
 	else {
 		// add a line that shows the number of servers found
 		if (!uiInfo.numFoundPlayerServers) {
-			Com_sprintf(uiInfo.foundPlayerServerNames[uiInfo.numFoundPlayerServers-1], sizeof(uiInfo.foundPlayerServerAddresses[0]), "no servers found");
+			Com_sprintf(uiInfo.foundPlayerServerNames[0], sizeof(uiInfo.foundPlayerServerNames[0]), "no servers found");
 		}
 		else {
 			Com_sprintf(uiInfo.foundPlayerServerNames[uiInfo.numFoundPlayerServers-1], sizeof(uiInfo.foundPlayerServerAddresses[0]),
