@@ -553,7 +553,7 @@ void Sys_ParseArgs( int argc, char **argv )
 		if( !strcmp( argv[1], "--version" ) ||
 				!strcmp( argv[1], "-v" ) )
 		{
-			const char* date = __DATE__;
+			const char* date = PRODUCT_DATE;
 #ifdef DEDICATED
 			fprintf( stdout, Q3_VERSION " dedicated server (%s)\n", date );
 #else
