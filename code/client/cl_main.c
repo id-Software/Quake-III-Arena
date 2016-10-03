@@ -3199,7 +3199,7 @@ void CL_InitRef( void ) {
 	Com_Printf( "----- Initializing Renderer ----\n" );
 
 #ifdef USE_RENDERER_DLOPEN
-	cl_renderer = Cvar_Get("cl_renderer", "opengl1", CVAR_ARCHIVE | CVAR_LATCH);
+	cl_renderer = Cvar_Get("cl_renderer", "opengl2", CVAR_ARCHIVE | CVAR_LATCH);
 
 	Com_sprintf(dllName, sizeof(dllName), "renderer_%s_" ARCH_STRING DLL_EXT, cl_renderer->string);
 
@@ -3208,7 +3208,7 @@ void CL_InitRef( void ) {
 		Com_Printf("failed:\n\"%s\"\n", Sys_LibraryError());
 		Cvar_ForceReset("cl_renderer");
 
-		Com_sprintf(dllName, sizeof(dllName), "renderer_opengl1_" ARCH_STRING DLL_EXT);
+		Com_sprintf(dllName, sizeof(dllName), "renderer_opengl2_" ARCH_STRING DLL_EXT);
 		rendererLib = Sys_LoadDll(dllName, qfalse);
 	}
 
