@@ -637,6 +637,8 @@ int		FS_LoadStack( void );
 int		FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 int		FS_GetModList(  char *listbuf, int bufsize );
 
+void	FS_GetModDescription( const char *modDir, char *description, int descriptionLen );
+
 fileHandle_t	FS_FOpenFileWrite( const char *qpath );
 fileHandle_t	FS_FOpenFileAppend( const char *filename );
 fileHandle_t	FS_FCreateOpenPipeFile( const char *filename );
@@ -1145,7 +1147,8 @@ typedef enum
 
 dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title );
 
-qboolean Sys_WritePIDFile( void );
+void Sys_RemovePIDFile( const char *gamedir );
+void Sys_InitPIDFile( const char *gamedir );
 
 /* This is based on the Adaptive Huffman algorithm described in Sayood's Data
  * Compression book.  The ranks are not actually stored, but implicitly defined

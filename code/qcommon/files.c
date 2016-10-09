@@ -2484,6 +2484,33 @@ static char** Sys_ConcatenateFileLists( char **list0, char **list1 )
 
 /*
 ================
+FS_GetModDescription
+================
+*/
+void FS_GetModDescription( const char *modDir, char *description, int descriptionLen ) {
+	fileHandle_t	descHandle;
+	char			descPath[MAX_QPATH];
+	int				nDescLen;
+	FILE			*file;
+
+	Com_sprintf( descPath, sizeof ( descPath ), "%s/description.txt", modDir );
+	nDescLen = FS_SV_FOpenFileRead( descPath, &descHandle );
+
+	if ( nDescLen > 0 && descHandle ) {
+		file = FS_FileForHandle(descHandle);
+		Com_Memset( description, 0, descriptionLen );
+		nDescLen = fread(description, 1, descriptionLen, file);
+		if (nDescLen >= 0) {
+			description[nDescLen] = '\0';
+		}
+		FS_FCloseFile(descHandle);
+	} else {
+		Q_strncpyz( description, modDir, descriptionLen );
+	}
+}
+
+/*
+================
 FS_GetModList
 
 Returns a list of mod directory names
@@ -2496,8 +2523,7 @@ int	FS_GetModList( char *listbuf, int bufsize ) {
 	char **pFiles = NULL;
 	char **pPaks = NULL;
 	char *name, *path;
-	char descPath[MAX_OSPATH];
-	fileHandle_t descHandle;
+	char description[MAX_OSPATH];
 
 	int dummy;
 	char **pFiles0 = NULL;
@@ -2571,28 +2597,13 @@ int	FS_GetModList( char *listbuf, int bufsize ) {
 				nLen = strlen(name) + 1;
 				// nLen is the length of the mod path
 				// we need to see if there is a description available
-				descPath[0] = '\0';
-				strcpy(descPath, name);
-				strcat(descPath, "/description.txt");
-				nDescLen = FS_SV_FOpenFileRead( descPath, &descHandle );
-				if ( nDescLen > 0 && descHandle) {
-					FILE *file;
-					file = FS_FileForHandle(descHandle);
-					Com_Memset( descPath, 0, sizeof( descPath ) );
-					nDescLen = fread(descPath, 1, 48, file);
-					if (nDescLen >= 0) {
-						descPath[nDescLen] = '\0';
-					}
-					FS_FCloseFile(descHandle);
-				} else {
-					strcpy(descPath, name);
-				}
-				nDescLen = strlen(descPath) + 1;
+				FS_GetModDescription( name, description, sizeof( description ) );
+				nDescLen = strlen(description) + 1;
 
 				if (nTotal + nLen + 1 + nDescLen + 1 < bufsize) {
 					strcpy(listbuf, name);
 					listbuf += nLen;
-					strcpy(listbuf, descPath);
+					strcpy(listbuf, description);
 					listbuf += nDescLen;
 					nTotal += nLen + nDescLen;
 					nMods++;
@@ -3999,6 +4010,9 @@ void FS_Restart( int checksumFeed ) {
 	}
 
 	if ( Q_stricmp(fs_gamedirvar->string, lastValidGame) ) {
+		Sys_RemovePIDFile( lastValidGame );
+		Sys_InitPIDFile( fs_gamedirvar->string );
+
 		// skip the q3config.cfg if "safe" is on the command line
 		if ( !Com_SafeMode() ) {
 			Cbuf_AddText ("exec " Q3CONFIG_CFG "\n");
