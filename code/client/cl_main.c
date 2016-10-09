@@ -1417,6 +1417,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		for (i = 0; i < MAX_CLIENTS; i++) {
 			opus_decoder_destroy(clc.opusDecoder[i]);
 		}
+		clc.voipCodecInitialized = qfalse;
 	}
 	Cmd_RemoveCommand ("voip");
 #endif
