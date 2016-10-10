@@ -201,13 +201,14 @@ R_LoadLightmaps
 ===============
 */
 #define	DEFAULT_LIGHTMAP_SIZE	128
-#define MAX_LIGHTMAP_PAGES 2
 static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
+	imgFlags_t  imgFlags = IMGFLAG_NOLIGHTSCALE | IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE;
 	byte		*buf, *buf_p;
 	dsurface_t  *surf;
 	int			len;
 	byte		*image;
 	int			i, j, numLightmaps, textureInternalFormat = 0;
+	int			numLightmapsPerPage = 16;
 	float maxIntensity = 0;
 	double sumIntensity = 0;
 
@@ -247,36 +248,24 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 	if (tr.worldDeluxeMapping)
 		numLightmaps >>= 1;
 
-	if(numLightmaps == 1)
-	{
-		//FIXME: HACK: maps with only one lightmap turn up fullbright for some reason.
-		//this avoids this, but isn't the correct solution.
-		numLightmaps++;
-	}
-	else if (r_mergeLightmaps->integer && numLightmaps >= 1024 )
-	{
-		// FIXME: fat light maps don't support more than 1024 light maps
-		ri.Printf(PRINT_WARNING, "WARNING: number of lightmaps > 1024\n");
-		numLightmaps = 1024;
-	}
-
-	// use fat lightmaps of an appropriate size
+	// Use fat lightmaps of an appropriate size.
 	if (r_mergeLightmaps->integer)
 	{
-		tr.fatLightmapSize = 512;
-		tr.fatLightmapStep = tr.fatLightmapSize / tr.lightmapSize;
+		int maxLightmapsPerAxis = glConfig.maxTextureSize / tr.lightmapSize;
+		int lightmapCols = 4, lightmapRows = 4;
 
-		// at most MAX_LIGHTMAP_PAGES
-		while (tr.fatLightmapStep * tr.fatLightmapStep * MAX_LIGHTMAP_PAGES < numLightmaps && tr.fatLightmapSize != glConfig.maxTextureSize )
-		{
-			tr.fatLightmapSize <<= 1;
-			tr.fatLightmapStep = tr.fatLightmapSize / tr.lightmapSize;
-		}
+		// Increase width at first, then height.
+		while (lightmapCols * lightmapRows < numLightmaps && lightmapCols != maxLightmapsPerAxis)
+			lightmapCols <<= 1;
 
-		tr.numLightmaps = numLightmaps / (tr.fatLightmapStep * tr.fatLightmapStep);
+		while (lightmapCols * lightmapRows < numLightmaps && lightmapRows != maxLightmapsPerAxis)
+			lightmapRows <<= 1;
 
-		if (numLightmaps % (tr.fatLightmapStep * tr.fatLightmapStep) != 0)
-			tr.numLightmaps++;
+		tr.fatLightmapCols  = lightmapCols;
+		tr.fatLightmapRows  = lightmapRows;
+		numLightmapsPerPage = lightmapCols * lightmapRows;
+
+		tr.numLightmaps = (numLightmaps + (numLightmapsPerPage - 1)) / numLightmapsPerPage;
 	}
 	else
 	{
@@ -286,9 +275,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 	tr.lightmaps = ri.Hunk_Alloc( tr.numLightmaps * sizeof(image_t *), h_low );
 
 	if (tr.worldDeluxeMapping)
-	{
 		tr.deluxemaps = ri.Hunk_Alloc( tr.numLightmaps * sizeof(image_t *), h_low );
-	}
 
 	if (glRefConfig.floatLightmap)
 		textureInternalFormat = GL_RGBA16F_ARB;
@@ -297,14 +284,15 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 
 	if (r_mergeLightmaps->integer)
 	{
+		int width  = tr.fatLightmapCols * tr.lightmapSize;
+		int height = tr.fatLightmapRows * tr.lightmapSize;
+
 		for (i = 0; i < tr.numLightmaps; i++)
 		{
-			tr.lightmaps[i] = R_CreateImage(va("_fatlightmap%d", i), NULL, tr.fatLightmapSize, tr.fatLightmapSize, IMGTYPE_COLORALPHA, IMGFLAG_NOLIGHTSCALE | IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, textureInternalFormat );
+			tr.lightmaps[i] = R_CreateImage(va("_fatlightmap%d", i), NULL, width, height, IMGTYPE_COLORALPHA, imgFlags, textureInternalFormat);
 
 			if (tr.worldDeluxeMapping)
-			{
-				tr.deluxemaps[i] = R_CreateImage(va("_fatdeluxemap%d", i), NULL, tr.fatLightmapSize, tr.fatLightmapSize, IMGTYPE_DELUXE, IMGFLAG_NOLIGHTSCALE | IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, 0 );
-			}
+				tr.deluxemaps[i] = R_CreateImage(va("_fatdeluxemap%d", i), NULL, width, height, IMGTYPE_DELUXE, imgFlags, 0);
 		}
 	}
 
@@ -316,11 +304,11 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 
 		if (r_mergeLightmaps->integer)
 		{
-			int lightmaponpage = i % (tr.fatLightmapStep * tr.fatLightmapStep);
-			xoff = (lightmaponpage % tr.fatLightmapStep) * tr.lightmapSize;
-			yoff = (lightmaponpage / tr.fatLightmapStep) * tr.lightmapSize;
+			int lightmaponpage = i % numLightmapsPerPage;
+			xoff = (lightmaponpage % tr.fatLightmapCols) * tr.lightmapSize;
+			yoff = (lightmaponpage / tr.fatLightmapCols) * tr.lightmapSize;
 
-			lightmapnum /= (tr.fatLightmapStep * tr.fatLightmapStep);
+			lightmapnum /= numLightmapsPerPage;
 		}
 
 		// if (tr.worldLightmapping)
@@ -340,47 +328,37 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 
 			if (hdrLightmap)
 			{
-				byte *p = hdrLightmap;
+				byte *p = hdrLightmap, *end = hdrLightmap + size;
 				//ri.Printf(PRINT_ALL, "found!\n");
 				
 				/* FIXME: don't just skip over this header and actually parse it */
-				while (size && !(*p == '\n' && *(p+1) == '\n'))
-				{
-					size--;
+				while (p < end && !(*p == '\n' && *(p+1) == '\n'))
 					p++;
-				}
 
-				if (!size)
-					ri.Error(ERR_DROP, "Bad header for %s!", filename);
-
-				size -= 2;
 				p += 2;
 				
-				while (size && !(*p == '\n'))
-				{
-					size--;
+				while (p < end && !(*p == '\n'))
 					p++;
-				}
 
-				size--;
 				p++;
 
-				buf_p = (byte *)p;
+				if (p >= end)
+					ri.Error(ERR_DROP, "Bad header for %s!", filename);
+
+				buf_p = p;
 
 #if 0 // HDRFILE_RGBE
-				if (size != tr.lightmapSize * tr.lightmapSize * 4)
+				if ((int)(end - hdrLightmap) != tr.lightmapSize * tr.lightmapSize * 4)
 					ri.Error(ERR_DROP, "Bad size for %s (%i)!", filename, size);
 #else // HDRFILE_FLOAT
-				if (size != tr.lightmapSize * tr.lightmapSize * 12)
+				if ((int)(end - hdrLightmap) != tr.lightmapSize * tr.lightmapSize * 12)
 					ri.Error(ERR_DROP, "Bad size for %s (%i)!", filename, size);
 #endif
 			}
 			else
 			{
-				if (tr.worldDeluxeMapping)
-					buf_p = buf + (i * 2) * tr.lightmapSize * tr.lightmapSize * 3;
-				else
-					buf_p = buf + i * tr.lightmapSize * tr.lightmapSize * 3;
+				int imgOffset = tr.worldDeluxeMapping ? i * 2 : i;
+				buf_p = buf + imgOffset * tr.lightmapSize * tr.lightmapSize * 3;
 			}
 
 			for ( j = 0 ; j < tr.lightmapSize * tr.lightmapSize; j++ ) 
@@ -475,7 +453,7 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 			if (r_mergeLightmaps->integer)
 				R_UpdateSubImage(tr.lightmaps[lightmapnum], image, xoff, yoff, tr.lightmapSize, tr.lightmapSize);
 			else
-				tr.lightmaps[i] = R_CreateImage(va("*lightmap%d", i), image, tr.lightmapSize, tr.lightmapSize, IMGTYPE_COLORALPHA, IMGFLAG_NOLIGHTSCALE | IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, textureInternalFormat );
+				tr.lightmaps[i] = R_CreateImage(va("*lightmap%d", i), image, tr.lightmapSize, tr.lightmapSize, IMGTYPE_COLORALPHA, imgFlags, textureInternalFormat );
 
 			if (hdrLightmap)
 				ri.FS_FreeFile(hdrLightmap);
@@ -502,13 +480,9 @@ static	void R_LoadLightmaps( lump_t *l, lump_t *surfs ) {
 			}
 
 			if (r_mergeLightmaps->integer)
-			{
 				R_UpdateSubImage(tr.deluxemaps[lightmapnum], image, xoff, yoff, tr.lightmapSize, tr.lightmapSize );
-			}
 			else
-			{
-				tr.deluxemaps[i] = R_CreateImage(va("*deluxemap%d", i), image, tr.lightmapSize, tr.lightmapSize, IMGTYPE_DELUXE, IMGFLAG_NOLIGHTSCALE | IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, 0 );
-			}
+				tr.deluxemaps[i] = R_CreateImage(va("*deluxemap%d", i), image, tr.lightmapSize, tr.lightmapSize, IMGTYPE_DELUXE, imgFlags, 0 );
 		}
 	}
 
@@ -528,15 +502,10 @@ static float FatPackU(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	if(tr.fatLightmapSize > 0)
+	if (tr.fatLightmapCols > 0)
 	{
-		int             x;
-
-		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
-		x = lightmapnum % tr.fatLightmapStep;
-
-		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)x);
+		lightmapnum %= (tr.fatLightmapCols * tr.fatLightmapRows);
+		return (input + (lightmapnum % tr.fatLightmapCols)) / (float)(tr.fatLightmapCols);
 	}
 
 	return input;
@@ -550,15 +519,10 @@ static float FatPackV(float input, int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	if(tr.fatLightmapSize > 0)
+	if (tr.fatLightmapCols > 0)
 	{
-		int             y;
-
-		lightmapnum %= (tr.fatLightmapStep * tr.fatLightmapStep);
-
-		y = lightmapnum / tr.fatLightmapStep;
-
-		return (input / ((float)tr.fatLightmapStep)) + ((1.0 / ((float)tr.fatLightmapStep)) * (float)y);
+		lightmapnum %= (tr.fatLightmapCols * tr.fatLightmapRows);
+		return (input + (lightmapnum / tr.fatLightmapCols)) / (float)(tr.fatLightmapRows);
 	}
 
 	return input;
@@ -573,10 +537,8 @@ static int FatLightmap(int lightmapnum)
 	if (tr.worldDeluxeMapping)
 		lightmapnum >>= 1;
 
-	if (tr.fatLightmapSize > 0)
-	{
-		return lightmapnum / (tr.fatLightmapStep * tr.fatLightmapStep);
-	}
+	if (tr.fatLightmapCols > 0)
+		return lightmapnum / (tr.fatLightmapCols * tr.fatLightmapRows);
 	
 	return lightmapnum;
 }

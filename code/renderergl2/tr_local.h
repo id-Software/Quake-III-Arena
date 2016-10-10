@@ -1550,8 +1550,8 @@ typedef struct {
 	image_t					**lightmaps;
 	image_t					**deluxemaps;
 
-	int                     fatLightmapSize;
-	int		                fatLightmapStep;
+	int						fatLightmapCols;
+	int						fatLightmapRows;
 
 	int                     numCubemaps;
 	cubemap_t               *cubemaps;
