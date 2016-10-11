@@ -1027,7 +1027,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	int16_t	*outNormal;
 	int16_t	*outTangent;
 	vec2_t		(*outTexCoord)[2];
-	vec4_t	*outColor;
+	uint16_t *outColor;
 
 	int	frame = data->num_frames ? backEnd.currentEntity->e.frame % data->num_frames : 0;
 	int	oldframe = data->num_frames ? backEnd.currentEntity->e.oldframe % data->num_frames : 0;
@@ -1043,7 +1043,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	outNormal = tess.normal[tess.numVertexes];
 	outTangent = tess.tangent[tess.numVertexes];
 	outTexCoord = &tess.texCoords[tess.numVertexes];
-	outColor = &tess.vertexColors[tess.numVertexes];
+	outColor = tess.color[tess.numVertexes];
 
 	// compute interpolated joint matrices
 	if ( data->num_poses > 0 ) {
@@ -1052,7 +1052,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 
 	// transform vertexes and fill other data
 	for( i = 0; i < surf->num_vertexes;
-	     i++, outXYZ++, outNormal+=4, outTexCoord++, outColor++ ) {
+	     i++, outXYZ++, outNormal+=4, outTexCoord++, outColor+=4 ) {
 		int	j, k;
 		float	vtxMat[12];
 		float	nrmMat[9];
@@ -1137,10 +1137,10 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 			outTangent+=4;
 		}
 
-		(*outColor)[0] = data->colors[4*vtx+0] / 255.0f;
-		(*outColor)[1] = data->colors[4*vtx+1] / 255.0f;
-		(*outColor)[2] = data->colors[4*vtx+2] / 255.0f;
-		(*outColor)[3] = data->colors[4*vtx+3] / 255.0f;
+		outColor[0] = data->colors[4*vtx+0] * 257;
+		outColor[1] = data->colors[4*vtx+1] * 257;
+		outColor[2] = data->colors[4*vtx+2] * 257;
+		outColor[3] = data->colors[4*vtx+3] * 257;
 	}
 
 	tri = data->triangles + 3 * surf->first_triangle;

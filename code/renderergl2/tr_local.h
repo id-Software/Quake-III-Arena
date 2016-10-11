@@ -894,7 +894,7 @@ typedef struct
 	int16_t         normal[4];
 	int16_t         tangent[4];
 	int16_t         lightdir[4];
-	vec4_t			vertexColors;
+	uint16_t        color[4];
 
 #if DEBUG_OPTIMIZEVERTICES
 	unsigned int    id;
@@ -1153,7 +1153,7 @@ typedef struct {
 	vec3_t		lightGridInverseSize;
 	int			lightGridBounds[3];
 	byte		*lightGridData;
-	float		*hdrLightGrid;
+	uint16_t	*lightGrid16;
 
 
 	int			numClusters;
@@ -1399,11 +1399,8 @@ typedef struct {
 	qboolean seamlessCubeMap;
 
 	GLenum packedTexcoordDataType;
-	GLenum packedColorDataType;
 	int packedTexcoordDataSize;
-	int packedColorDataSize;
 
-	qboolean floatLightmap;
 	qboolean vertexArrayObject;
 	qboolean directStateAccess;
 } glRefConfig_t;
@@ -1994,7 +1991,7 @@ typedef struct shaderCommands_s
 	int16_t		normal[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	int16_t		tangent[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	vec2_t		texCoords[SHADER_MAX_VERTEXES][2] QALIGN(16);
-	vec4_t		vertexColors[SHADER_MAX_VERTEXES] QALIGN(16);
+	uint16_t	color[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	int16_t		lightdir[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	//int			vertexDlightBits[SHADER_MAX_VERTEXES] QALIGN(16);
 
@@ -2161,7 +2158,7 @@ VERTEX BUFFER OBJECTS
 void R_VaoPackTangent(int16_t *out, vec4_t v);
 void R_VaoPackNormal(int16_t *out, vec3_t v);
 int R_VaoPackTexCoord(byte *out, vec2_t st);
-int R_VaoPackColors(byte *out, vec4_t color);
+void R_VaoPackColor(uint16_t *out, vec4_t c);
 void R_VaoUnpackTangent(vec4_t v, int16_t *pack);
 void R_VaoUnpackNormal(vec3_t v, int16_t *pack);
 

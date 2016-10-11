@@ -150,12 +150,12 @@ void R_ImageList_f( void ) {
 	int i;
 	int estTotalSize = 0;
 
-	ri.Printf(PRINT_ALL, "\n      -w-- -h-- type  -size- --name-------\n");
+	ri.Printf(PRINT_ALL, "\n      -w-- -h-- -type-- -size- --name-------\n");
 
 	for ( i = 0 ; i < tr.numImages ; i++ )
 	{
 		image_t *image = tr.images[i];
-		char *format = "???? ";
+		char *format = "????   ";
 		char *sizeSuffix;
 		int estSize;
 		int displaySize;
@@ -165,94 +165,120 @@ void R_ImageList_f( void ) {
 		switch(image->internalFormat)
 		{
 			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
-				format = "sDXT1";
+				format = "sDXT1  ";
 				// 64 bits per 16 pixels, so 4 bits per pixel
 				estSize /= 2;
 				break;
 			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
-				format = "sDXT5";
+				format = "sDXT5  ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
 			case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB:
-				format = "sBPTC";
+				format = "sBPTC  ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
 			case GL_COMPRESSED_RG_RGTC2:
-				format = "RGTC2";
+				format = "RGTC2  ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
 			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-				format = "DXT1 ";
+				format = "DXT1   ";
 				// 64 bits per 16 pixels, so 4 bits per pixel
 				estSize /= 2;
 				break;
 			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-				format = "DXT1a";
+				format = "DXT1a  ";
 				// 64 bits per 16 pixels, so 4 bits per pixel
 				estSize /= 2;
 				break;
 			case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-				format = "DXT5 ";
+				format = "DXT5   ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
 			case GL_COMPRESSED_RGBA_BPTC_UNORM_ARB:
-				format = "BPTC ";
+				format = "BPTC   ";
 				// 128 bits per 16 pixels, so 1 byte per pixel
 				break;
 			case GL_RGB4_S3TC:
-				format = "S3TC ";
+				format = "S3TC   ";
 				// same as DXT1?
 				estSize /= 2;
+				break;
+			case GL_RGBA16F:
+				format = "RGBA16F";
+				// 8 bytes per pixel
+				estSize *= 8;
+				break;
+			case GL_RGBA16:
+				format = "RGBA16 ";
+				// 8 bytes per pixel
+				estSize *= 8;
 				break;
 			case GL_RGBA4:
 			case GL_RGBA8:
 			case GL_RGBA:
-				format = "RGBA ";
+				format = "RGBA   ";
 				// 4 bytes per pixel
 				estSize *= 4;
 				break;
 			case GL_LUMINANCE8:
 			case GL_LUMINANCE16:
 			case GL_LUMINANCE:
-				format = "L    ";
+				format = "L      ";
 				// 1 byte per pixel?
 				break;
 			case GL_RGB5:
 			case GL_RGB8:
 			case GL_RGB:
-				format = "RGB  ";
+				format = "RGB    ";
 				// 3 bytes per pixel?
 				estSize *= 3;
 				break;
 			case GL_LUMINANCE8_ALPHA8:
 			case GL_LUMINANCE16_ALPHA16:
 			case GL_LUMINANCE_ALPHA:
-				format = "LA   ";
+				format = "LA     ";
 				// 2 bytes per pixel?
 				estSize *= 2;
 				break;
 			case GL_SRGB_EXT:
 			case GL_SRGB8_EXT:
-				format = "sRGB ";
+				format = "sRGB   ";
 				// 3 bytes per pixel?
 				estSize *= 3;
 				break;
 			case GL_SRGB_ALPHA_EXT:
 			case GL_SRGB8_ALPHA8_EXT:
-				format = "sRGBA";
+				format = "sRGBA  ";
 				// 4 bytes per pixel?
 				estSize *= 4;
 				break;
 			case GL_SLUMINANCE_EXT:
 			case GL_SLUMINANCE8_EXT:
-				format = "sL   ";
+				format = "sL     ";
 				// 1 byte per pixel?
 				break;
 			case GL_SLUMINANCE_ALPHA_EXT:
 			case GL_SLUMINANCE8_ALPHA8_EXT:
-				format = "sLA  ";
+				format = "sLA    ";
 				// 2 byte per pixel?
 				estSize *= 2;
+				break;
+			case GL_DEPTH_COMPONENT16:
+				format = "Depth16";
+				// 2 bytes per pixel
+				estSize *= 2;
+				break;
+			case GL_DEPTH_COMPONENT24:
+				format = "Depth24";
+				// 3 bytes per pixel
+				estSize *= 3;
+				break;
+			case GL_DEPTH_COMPONENT:
+			case GL_DEPTH_COMPONENT32:
+				format = "Depth32";
+				// 4 bytes per pixel
+				estSize *= 4;
 				break;
 		}
 
@@ -1931,7 +1957,20 @@ static void RawImage_UploadTexture(GLuint texture, byte *data, int x, int y, int
 	dataFormat = PixelDataFormatFromInternalFormat(internalFormat);
 
 	// FIXME: This is an old hack to use half floats with lightmaps, use picFormat to determine this instead.
-	dataType = (internalFormat == GL_RGBA16F_ARB) ? GL_HALF_FLOAT_ARB : GL_UNSIGNED_BYTE;
+	switch (internalFormat)
+	{
+		case GL_RGBA16F_ARB:
+			dataType = GL_HALF_FLOAT_ARB;
+			break;
+
+		case GL_RGBA16:
+			dataType = GL_UNSIGNED_SHORT;
+			break;
+
+		default:
+			dataType = GL_UNSIGNED_BYTE;
+			break;
+	}
 
 	miplevel = 0;
 	do

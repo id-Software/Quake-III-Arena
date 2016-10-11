@@ -295,9 +295,6 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
-	// use float lightmaps?
-	glRefConfig.floatLightmap = (glRefConfig.textureFloat && glRefConfig.halfFloatPixel && r_floatLightmap->integer && r_hdr->integer);
-
 	// GL_ARB_vertex_array_object
 	extension = "GL_ARB_vertex_array_object";
 	glRefConfig.vertexArrayObject = qfalse;
@@ -318,8 +315,6 @@ void GLimp_InitExtraExtensions()
 	extension = "GL_ARB_half_float_vertex";
 	glRefConfig.packedTexcoordDataType = GL_FLOAT;
 	glRefConfig.packedTexcoordDataSize = sizeof(float) * 2;
-	glRefConfig.packedColorDataType    = GL_FLOAT;
-	glRefConfig.packedColorDataSize    = sizeof(float) * 4;
 	if( GLimp_HaveExtension( extension ) )
 	{
 		qboolean useExt = !!r_arb_half_float_vertex->integer;
@@ -328,8 +323,6 @@ void GLimp_InitExtraExtensions()
 		{
 			glRefConfig.packedTexcoordDataType = GL_HALF_FLOAT;
 			glRefConfig.packedTexcoordDataSize = sizeof(uint16_t) * 2;
-			glRefConfig.packedColorDataType    = GL_HALF_FLOAT;
-			glRefConfig.packedColorDataSize    = sizeof(uint16_t) * 4;
 		}
 
 		ri.Printf(PRINT_ALL, result[useExt], extension);

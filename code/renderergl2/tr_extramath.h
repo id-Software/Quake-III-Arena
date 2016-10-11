@@ -98,5 +98,6 @@ void BoundingSphereOfSpheres(vec3_t origin1, float radius1, vec3_t origin2, floa
 
 int NextPowerOfTwo(int in);
 unsigned short FloatToHalf(float in);
+float HalfToFloat(unsigned short in);
 
 #endif

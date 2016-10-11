@@ -384,6 +384,7 @@ static void AutospriteDeform( void ) {
 	}
 
 	for ( i = 0 ; i < oldVerts ; i+=4 ) {
+		vec4_t color;
 		// find the midpoint
 		xyz = tess.xyz[i];
 
@@ -414,7 +415,8 @@ static void AutospriteDeform( void ) {
       VectorScale(up, axisLength, up);
     }
 
-		RB_AddQuadStamp( mid, left, up, tess.vertexColors[i] );
+		VectorScale4(tess.color[i], 1.0f / 65535.0f, color);
+		RB_AddQuadStamp( mid, left, up, color );
 	}
 }
 

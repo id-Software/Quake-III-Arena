@@ -201,7 +201,7 @@ int NextPowerOfTwo(int in)
 
 union f32_u {
 	float f;
-	uint32_t i;
+	uint32_t ui;
 	struct {
 		unsigned int fraction:23;
 		unsigned int exponent:8;
@@ -210,7 +210,7 @@ union f32_u {
 };
 
 union f16_u {
-	uint16_t i;
+	uint16_t ui;
 	struct {
 		unsigned int fraction:10;
 		unsigned int exponent:5;
@@ -229,5 +229,19 @@ uint16_t FloatToHalf(float in)
 	f16.pack.fraction = f32.pack.fraction >> 13;
 	f16.pack.sign     = f32.pack.sign;
 
-	return f16.i;
+	return f16.ui;
+}
+
+float HalfToFloat(uint16_t in)
+{
+	union f32_u f32;
+	union f16_u f16;
+
+	f16.ui = in;
+
+	f32.pack.exponent = (int)(f16.pack.exponent) + 112;
+	f32.pack.fraction = f16.pack.fraction << 13;
+	f32.pack.sign = f16.pack.sign;
+
+	return f32.f;
 }
