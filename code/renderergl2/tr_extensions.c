@@ -138,20 +138,6 @@ void GLimp_InitExtraExtensions()
 		ri.Printf(PRINT_ALL, result[2], extension);
 	}
 
-	// GL_ARB_texture_non_power_of_two
-	extension = "GL_ARB_texture_non_power_of_two";
-	glRefConfig.textureNonPowerOfTwo = qfalse;
-	if( GLimp_HaveExtension( extension ) )
-	{
-		glRefConfig.textureNonPowerOfTwo = qtrue; // !!r_ext_texture_non_power_of_two->integer
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.textureNonPowerOfTwo], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
 	// GL_ARB_texture_float
 	extension = "GL_ARB_texture_float";
 	glRefConfig.textureFloat = qfalse;

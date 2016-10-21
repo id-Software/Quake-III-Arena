@@ -1492,7 +1492,7 @@ static qboolean RawImage_ScaleToPower2( byte **data, int *inout_width, int *inou
 	//
 	// convert to exact power of 2 sizes
 	//
-	if (glRefConfig.textureNonPowerOfTwo && !mipmap)
+	if (!mipmap)
 	{
 		scaled_width = width;
 		scaled_height = height;
@@ -2749,16 +2749,8 @@ void R_CreateBuiltinImages( void ) {
 	{
 		int width, height, hdrFormat, rgbFormat;
 
-		if(glRefConfig.textureNonPowerOfTwo)
-		{
-			width = glConfig.vidWidth;
-			height = glConfig.vidHeight;
-		}
-		else
-		{
-			width = NextPowerOfTwo(glConfig.vidWidth);
-			height = NextPowerOfTwo(glConfig.vidHeight);
-		}
+		width = glConfig.vidWidth;
+		height = glConfig.vidHeight;
 
 		hdrFormat = GL_RGBA8;
 		if (r_hdr->integer && glRefConfig.framebufferObject && glRefConfig.textureFloat)
