@@ -683,10 +683,10 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			{
 				// vertex animation, store texcoords first, then position/normal/tangents
 				offset_st      = 0;
-				offset_xyz     = surf->numVerts * glRefConfig.packedTexcoordDataSize;
+				offset_xyz     = surf->numVerts * sizeof(vec2_t);
 				offset_normal  = offset_xyz + sizeof(vec3_t);
 				offset_tangent = offset_normal + sizeof(int16_t) * 4;
-				stride_st  = glRefConfig.packedTexcoordDataSize;
+				stride_st  = sizeof(vec2_t);
 				stride_xyz = sizeof(vec3_t) + sizeof(int16_t) * 4;
 				stride_xyz += sizeof(int16_t) * 4;
 				stride_normal = stride_tangent = stride_xyz;
@@ -698,7 +698,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 				// no animation, interleave everything
 				offset_xyz     = 0;
 				offset_st      = offset_xyz + sizeof(vec3_t);
-				offset_normal  = offset_st + glRefConfig.packedTexcoordDataSize;
+				offset_normal  = offset_st + sizeof(vec2_t);
 				offset_tangent = offset_normal + sizeof(int16_t) * 4;
 				stride_xyz = offset_tangent + sizeof(int16_t) * 4;
 				stride_st = stride_normal = stride_tangent = stride_xyz;
@@ -714,7 +714,8 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			{
 				st = surf->st;
 				for ( j = 0 ; j < surf->numVerts ; j++, st++ ) {
-					dataOfs += R_VaoPackTexCoord(data + dataOfs, st->st);
+					memcpy(data + dataOfs, &st->st, sizeof(vec2_t));
+					dataOfs += sizeof(st->st);
 				}
 
 				v = surf->verts;
@@ -744,7 +745,8 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 					dataOfs += sizeof(v->xyz);
 
 					// st
-					dataOfs += R_VaoPackTexCoord(data + dataOfs, st->st);
+					memcpy(data + dataOfs, &st->st, sizeof(vec2_t));
+					dataOfs += sizeof(st->st);
 
 					// normal
 					memcpy(data + dataOfs, &v->normal, sizeof(int16_t) * 4);
@@ -778,7 +780,7 @@ static qboolean R_LoadMD3(model_t * mod, int lod, void *buffer, int bufferSize, 
 			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].count = 4;
 
 			vaoSurf->vao->attribs[ATTR_INDEX_POSITION].type = GL_FLOAT;
-			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].type = glRefConfig.packedTexcoordDataType;
+			vaoSurf->vao->attribs[ATTR_INDEX_TEXCOORD].type = GL_FLOAT;
 			vaoSurf->vao->attribs[ATTR_INDEX_NORMAL  ].type = GL_SHORT;
 			vaoSurf->vao->attribs[ATTR_INDEX_TANGENT ].type = GL_SHORT;
 

@@ -39,28 +39,6 @@ void R_VaoPackNormal(int16_t *out, vec3_t v)
 	out[3] = 0;
 }
 
-int R_VaoPackTexCoord(byte *out, vec2_t st)
-{
-	if (glRefConfig.packedTexcoordDataType == GL_HALF_FLOAT)
-	{
-		uint16_t *num = (uint16_t *)out;
-
-		*num++ = FloatToHalf(st[0]);
-		*num++ = FloatToHalf(st[1]);
-
-		return sizeof(*num) * 2;
-	}
-	else
-	{
-		float *num = (float *)out;
-
-		*num++ = st[0];
-		*num++ = st[1];
-
-		return sizeof(*num) * 2;
-	}
-}
-
 void R_VaoPackColor(uint16_t *out, vec4_t c)
 {
 	out[0] = c[0] * 65535.0f + 0.5f;
@@ -247,8 +225,8 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 	vao->attribs[ATTR_INDEX_POSITION      ].type = GL_FLOAT;
 	vao->attribs[ATTR_INDEX_NORMAL        ].type = GL_SHORT;
 	vao->attribs[ATTR_INDEX_TANGENT       ].type = GL_SHORT;
-	vao->attribs[ATTR_INDEX_TEXCOORD      ].type = glRefConfig.packedTexcoordDataType;
-	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].type = glRefConfig.packedTexcoordDataType;
+	vao->attribs[ATTR_INDEX_TEXCOORD      ].type = GL_FLOAT;
+	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].type = GL_FLOAT;
 	vao->attribs[ATTR_INDEX_COLOR         ].type = GL_UNSIGNED_SHORT;
 	vao->attribs[ATTR_INDEX_LIGHTDIRECTION].type = GL_SHORT;
 
@@ -263,8 +241,8 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 	vao->attribs[ATTR_INDEX_POSITION      ].offset = 0;        dataSize  = sizeof(verts[0].xyz);
 	vao->attribs[ATTR_INDEX_NORMAL        ].offset = dataSize; dataSize += sizeof(verts[0].normal);
 	vao->attribs[ATTR_INDEX_TANGENT       ].offset = dataSize; dataSize += sizeof(verts[0].tangent);
-	vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = dataSize; dataSize += glRefConfig.packedTexcoordDataSize;
-	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = dataSize; dataSize += glRefConfig.packedTexcoordDataSize;
+	vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = dataSize; dataSize += sizeof(verts[0].st);
+	vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = dataSize; dataSize += sizeof(verts[0].lightmap);
 	vao->attribs[ATTR_INDEX_COLOR         ].offset = dataSize; dataSize += sizeof(verts[0].color);
 	vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = dataSize; dataSize += sizeof(verts[0].lightdir);
 
@@ -304,10 +282,12 @@ vao_t *R_CreateVao2(const char *name, int numVertexes, srfVert_t *verts, int num
 		dataOfs += sizeof(verts[i].tangent);
 
 		// texcoords
-		dataOfs += R_VaoPackTexCoord(data + dataOfs, verts[i].st);
+		memcpy(data + dataOfs, &verts[i].st, sizeof(verts[i].st));
+		dataOfs += sizeof(verts[i].st);
 
 		// lightmap texcoords
-		dataOfs += R_VaoPackTexCoord(data + dataOfs, verts[i].lightmap);
+		memcpy(data + dataOfs, &verts[i].lightmap, sizeof(verts[i].lightmap));
+		dataOfs += sizeof(verts[i].lightmap);
 
 		// colors
 		memcpy(data + dataOfs, &verts[i].color, sizeof(verts[i].color));

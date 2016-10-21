@@ -1921,6 +1921,9 @@ static int CalculateMipSize(int width, int height, GLenum picFormat)
 		case GL_SRGB8_ALPHA8_EXT:
 			return numPixels * 4;
 
+		case GL_RGBA16:
+			return numPixels * 8;
+
 		default:
 			ri.Printf(PRINT_ALL, "Unsupported texture format %08x\n", picFormat);
 			return 0;
@@ -1948,29 +1951,15 @@ static GLenum PixelDataFormatFromInternalFormat(GLenum internalFormat)
 static void RawImage_UploadTexture(GLuint texture, byte *data, int x, int y, int width, int height, GLenum target, GLenum picFormat, int numMips, GLenum internalFormat, imgType_t type, imgFlags_t flags, qboolean subtexture )
 {
 	GLenum dataFormat, dataType;
-	qboolean rgtc = (internalFormat == GL_COMPRESSED_RG_RGTC2);
-	qboolean compressed = (!(picFormat == GL_RGBA8) || (picFormat == GL_SRGB8_ALPHA8_EXT));
+	qboolean rgtc = internalFormat == GL_COMPRESSED_RG_RGTC2;
+	qboolean rgba8 = picFormat == GL_RGBA8 || picFormat == GL_SRGB8_ALPHA8_EXT;
+	qboolean rgba = rgba8 || picFormat == GL_RGBA16;
 	qboolean mipmap = !!(flags & IMGFLAG_MIPMAP);
 	int size, miplevel;
 	qboolean lastMip = qfalse;
 
 	dataFormat = PixelDataFormatFromInternalFormat(internalFormat);
-
-	// FIXME: This is an old hack to use half floats with lightmaps, use picFormat to determine this instead.
-	switch (internalFormat)
-	{
-		case GL_RGBA16F_ARB:
-			dataType = GL_HALF_FLOAT_ARB;
-			break;
-
-		case GL_RGBA16:
-			dataType = GL_UNSIGNED_SHORT;
-			break;
-
-		default:
-			dataType = GL_UNSIGNED_BYTE;
-			break;
-	}
+	dataType = picFormat == GL_RGBA16 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
 
 	miplevel = 0;
 	do
@@ -1978,21 +1967,21 @@ static void RawImage_UploadTexture(GLuint texture, byte *data, int x, int y, int
 		lastMip = (width == 1 && height == 1) || !mipmap;
 		size = CalculateMipSize(width, height, picFormat);
 
-		if (compressed)
+		if (!rgba)
 		{
 			qglCompressedTextureSubImage2DEXT(texture, target, miplevel, x, y, width, height, picFormat, size, data);
 		}
 		else
 		{
-			if (miplevel != 0 && r_colorMipLevels->integer)
+			if (rgba8 && miplevel != 0 && r_colorMipLevels->integer)
 				R_BlendOverTexture((byte *)data, width * height, mipBlendColors[miplevel]);
 
-			if (rgtc)
+			if (rgba8 && rgtc)
 				RawImage_UploadToRgtc2Texture(texture, miplevel, x, y, width, height, data);
 			else
 				qglTextureSubImage2DEXT(texture, target, miplevel, x, y, width, height, dataFormat, dataType, data);
 
-			if (!lastMip && numMips < 2)
+			if (rgba8 && !lastMip && numMips < 2)
 			{
 				if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 					R_MipMapNormalHeight(data, data, width, height, glRefConfig.swizzleNormalmap);
@@ -2031,12 +2020,12 @@ static void Upload32(byte *data, int x, int y, int width, int height, GLenum pic
 	imgType_t type = image->type;
 	imgFlags_t flags = image->flags;
 	GLenum internalFormat = image->internalFormat;
-	qboolean compressed = (picFormat != GL_RGBA8 && picFormat != GL_SRGB8_ALPHA8_EXT);
-	qboolean mipmap = !!(flags & IMGFLAG_MIPMAP) && (!compressed || numMips > 1);
+	qboolean rgba8 = picFormat == GL_RGBA8 || picFormat == GL_SRGB8_ALPHA8_EXT;
+	qboolean mipmap = !!(flags & IMGFLAG_MIPMAP) && (rgba8 || numMips > 1);
 	qboolean cubemap = !!(flags & IMGFLAG_CUBEMAP);
 
-	// These operations cannot be performed on pre-compressed images.
-	if (!compressed && !cubemap)
+	// These operations cannot be performed on non-rgba8 images.
+	if (rgba8 && !cubemap)
 	{
 		c = width*height;
 		scan = data;
@@ -2109,7 +2098,7 @@ image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLe
 	qboolean    isLightmap = qfalse, scaled = qfalse;
 	long        hash;
 	int         glWrapClampMode, mipWidth, mipHeight, miplevel;
-	qboolean    compressed = (!(picFormat == GL_RGBA8) || (picFormat == GL_SRGB8_ALPHA8_EXT));
+	qboolean    rgba8 = picFormat == GL_RGBA8 || picFormat == GL_SRGB8_ALPHA8_EXT;
 	qboolean    mipmap = !!(flags & IMGFLAG_MIPMAP);
 	qboolean    cubemap = !!(flags & IMGFLAG_CUBEMAP);
 	qboolean    picmip = !!(flags & IMGFLAG_PICMIP);
@@ -2150,10 +2139,10 @@ image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLe
 	image->internalFormat = internalFormat;
 
 	// Possibly scale image before uploading.
-	// if compressed and uploading an image, skip picmips.
+	// if not rgba8 and uploading an image, skip picmips.
 	if (!cubemap)
 	{
-		if (!compressed)
+		if (rgba8)
 			scaled = RawImage_ScaleToPower2(&pic, &width, &height, type, flags, &resampledBuffer);
 		else if (pic && picmip)
 		{
@@ -2255,9 +2244,9 @@ image_t *R_CreateImage(const char *name, byte *pic, int width, int height, imgTy
 }
 
 
-void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int height )
+void R_UpdateSubImage( image_t *image, byte *pic, int x, int y, int width, int height, GLenum picFormat )
 {
-	Upload32(pic, x, y, width, height, GL_RGBA8, 0, image, qfalse);
+	Upload32(pic, x, y, width, height, picFormat, 0, image, qfalse);
 }
 
 //===================================================================
@@ -2792,25 +2781,13 @@ void R_CreateBuiltinImages( void ) {
 		tr.textureDepthImage = R_CreateImage("*texturedepth", NULL, PSHADOW_MAP_SIZE, PSHADOW_MAP_SIZE, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, GL_DEPTH_COMPONENT24_ARB);
 
 		{
-			unsigned short sdata[4];
 			void *p;
 
-			if (hdrFormat == GL_RGBA16F_ARB)
-			{
-				sdata[0] = FloatToHalf(0.0f);
-				sdata[1] = FloatToHalf(0.45f);
-				sdata[2] = FloatToHalf(1.0f);
-				sdata[3] = FloatToHalf(1.0f);
-				p = &sdata[0];
-			}
-			else
-			{
-				data[0][0][0] = 0;
-				data[0][0][1] = 0.45f * 255;
-				data[0][0][2] = 255;
-				data[0][0][3] = 255;
-				p = data;
-			}
+			data[0][0][0] = 0;
+			data[0][0][1] = 0.45f * 255;
+			data[0][0][2] = 255;
+			data[0][0][3] = 255;
+			p = data;
 
 			tr.calcLevelsImage =   R_CreateImage("*calcLevels",    p, 1, 1, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, hdrFormat);
 			tr.targetLevelsImage = R_CreateImage("*targetLevels",  p, 1, 1, IMGTYPE_COLORALPHA, IMGFLAG_NO_COMPRESSION | IMGFLAG_CLAMPTOEDGE, hdrFormat);
