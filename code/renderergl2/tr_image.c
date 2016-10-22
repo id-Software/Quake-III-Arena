@@ -1980,8 +1980,16 @@ static void RawImage_UploadTexture(GLuint texture, byte *data, int x, int y, int
 				RawImage_UploadToRgtc2Texture(texture, miplevel, x, y, width, height, data);
 			else
 				qglTextureSubImage2DEXT(texture, target, miplevel, x, y, width, height, dataFormat, dataType, data);
+		}
 
-			if (rgba8 && !lastMip && numMips < 2)
+		if (!lastMip && numMips < 2)
+		{
+			if (glRefConfig.framebufferObject)
+			{
+				qglGenerateTextureMipmapEXT(texture, target);
+				break;
+			}
+			else if (rgba8)
 			{
 				if (type == IMGTYPE_NORMAL || type == IMGTYPE_NORMALHEIGHT)
 					R_MipMapNormalHeight(data, data, width, height, glRefConfig.swizzleNormalmap);
