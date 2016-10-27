@@ -274,6 +274,9 @@ void main()
 	ambientColor = lightColor;
 	float surfNL = clamp(dot(var_Normal.xyz, L), 0.0, 1.0);
 
+	// reserve 25% ambient to avoid black areas on normalmaps
+	lightColor *= 0.75;
+
 	// Scale the incoming light to compensate for the baked-in light angle
 	// attenuation.
 	lightColor /= max(surfNL, 0.25);
