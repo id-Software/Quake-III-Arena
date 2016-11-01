@@ -4,6 +4,9 @@ endif
 ifndef RELEASE
 RELEASE=0
 endif
+ifndef PLATFORM
+PLATFORM=mingw32
+endif
 ifndef ARCH
 ARCH=x86
 endif
@@ -60,7 +63,7 @@ endif
 all: ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe
 
 ioquake3.$(ARCH).nsi: ioquake3.nsi.in
-	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/x86/$(ARCH)/g;s/SDL2.dll/$(SDLDLL)/' < $< > $@
+	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/mingw32/$(PLATFORM)/g;s/x86/$(ARCH)/g;s/SDL2.dll/$(SDLDLL)/g' < $< > $@
 
 ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe: ioquake3.$(ARCH).nsi
 	makensis $(DEFINES) ioquake3.$(ARCH).nsi
