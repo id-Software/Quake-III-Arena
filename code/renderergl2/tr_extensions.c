@@ -159,8 +159,8 @@ void GLimp_InitExtraExtensions()
 	{
 		glRefConfig.framebufferObject = !!r_ext_framebuffer_object->integer;
 
-		glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_EXT, &glRefConfig.maxRenderbufferSize);
-		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &glRefConfig.maxColorAttachments);
+		qglGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_EXT, &glRefConfig.maxRenderbufferSize);
+		qglGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &glRefConfig.maxColorAttachments);
 
 		QGL_EXT_framebuffer_object_PROCS;
 
