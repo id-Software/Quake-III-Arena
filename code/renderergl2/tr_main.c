@@ -1333,8 +1333,8 @@ qboolean R_MirrorViewBySurface (drawSurf_t *drawSurf, int entityNum) {
 		return qfalse;		// bad portal, no portalentity
 	}
 
-	if (newParms.isMirror)
-		newParms.flags |= VPF_NOVIEWMODEL;
+	// Never draw viewmodels in portal or mirror views.
+	newParms.flags |= VPF_NOVIEWMODEL;
 
 	R_MirrorPoint (oldParms.or.origin, &surface, &camera, newParms.or.origin );
 
