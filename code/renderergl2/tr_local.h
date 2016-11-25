@@ -1983,7 +1983,8 @@ typedef struct shaderCommands_s
 	vec4_t		xyz[SHADER_MAX_VERTEXES] QALIGN(16);
 	int16_t		normal[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	int16_t		tangent[SHADER_MAX_VERTEXES][4] QALIGN(16);
-	vec2_t		texCoords[SHADER_MAX_VERTEXES][2] QALIGN(16);
+	vec2_t		texCoords[SHADER_MAX_VERTEXES] QALIGN(16);
+	vec2_t		lightCoords[SHADER_MAX_VERTEXES] QALIGN(16);
 	uint16_t	color[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	int16_t		lightdir[SHADER_MAX_VERTEXES][4] QALIGN(16);
 	//int			vertexDlightBits[SHADER_MAX_VERTEXES] QALIGN(16);

@@ -386,8 +386,8 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 			tess.xyz[tess.numVertexes][2] = s_skyPoints[t][s][2];
 			tess.xyz[tess.numVertexes][3] = 1.0;
 
-			tess.texCoords[tess.numVertexes][0][0] = s_skyTexCoords[t][s][0];
-			tess.texCoords[tess.numVertexes][0][1] = s_skyTexCoords[t][s][1];
+			tess.texCoords[tess.numVertexes][0] = s_skyTexCoords[t][s][0];
+			tess.texCoords[tess.numVertexes][1] = s_skyTexCoords[t][s][1];
 
 			tess.numVertexes++;
 
@@ -563,8 +563,8 @@ static void FillCloudySkySide( const int mins[2], const int maxs[2], qboolean ad
 		for ( s = mins[0]+HALF_SKY_SUBDIVISIONS; s <= maxs[0]+HALF_SKY_SUBDIVISIONS; s++ )
 		{
 			VectorAdd( s_skyPoints[t][s], backEnd.viewParms.or.origin, tess.xyz[tess.numVertexes] );
-			tess.texCoords[tess.numVertexes][0][0] = s_skyTexCoords[t][s][0];
-			tess.texCoords[tess.numVertexes][0][1] = s_skyTexCoords[t][s][1];
+			tess.texCoords[tess.numVertexes][0] = s_skyTexCoords[t][s][0];
+			tess.texCoords[tess.numVertexes][1] = s_skyTexCoords[t][s][1];
 
 			tess.numVertexes++;
 

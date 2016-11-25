@@ -428,7 +428,8 @@ void R_InitVaos(void)
 	vertexesSize += sizeof(tess.normal[0]);
 	vertexesSize += sizeof(tess.tangent[0]);
 	vertexesSize += sizeof(tess.color[0]);
-	vertexesSize += sizeof(tess.texCoords[0][0]) * 2;
+	vertexesSize += sizeof(tess.texCoords[0]);
+	vertexesSize += sizeof(tess.lightCoords[0]);
 	vertexesSize += sizeof(tess.lightdir[0]);
 	vertexesSize *= SHADER_MAX_VERTEXES;
 
@@ -470,29 +471,27 @@ void R_InitVaos(void)
 	tess.vao->attribs[ATTR_INDEX_COLOR         ].normalized = GL_TRUE;
 	tess.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].normalized = GL_TRUE;
 
-	tess.vao->attribs[ATTR_INDEX_POSITION      ].offset = offset; offset += sizeof(tess.xyz[0])              * SHADER_MAX_VERTEXES;
-	tess.vao->attribs[ATTR_INDEX_NORMAL        ].offset = offset; offset += sizeof(tess.normal[0])           * SHADER_MAX_VERTEXES;
-	tess.vao->attribs[ATTR_INDEX_TANGENT       ].offset = offset; offset += sizeof(tess.tangent[0])          * SHADER_MAX_VERTEXES;
-	// these next two are actually interleaved
-	tess.vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = offset; 
-	tess.vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = offset + sizeof(tess.texCoords[0][0]);
-	                                                              offset += sizeof(tess.texCoords[0][0]) * 2 * SHADER_MAX_VERTEXES;
-
-	tess.vao->attribs[ATTR_INDEX_COLOR         ].offset = offset; offset += sizeof(tess.color[0])            * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_POSITION      ].offset = offset; offset += sizeof(tess.xyz[0])         * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_NORMAL        ].offset = offset; offset += sizeof(tess.normal[0])      * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_TANGENT       ].offset = offset; offset += sizeof(tess.tangent[0])     * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_TEXCOORD      ].offset = offset; offset += sizeof(tess.texCoords[0])   * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_LIGHTCOORD    ].offset = offset; offset += sizeof(tess.lightCoords[0]) * SHADER_MAX_VERTEXES;
+	tess.vao->attribs[ATTR_INDEX_COLOR         ].offset = offset; offset += sizeof(tess.color[0])       * SHADER_MAX_VERTEXES;
 	tess.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = offset;
 
 	tess.vao->attribs[ATTR_INDEX_POSITION      ].stride = sizeof(tess.xyz[0]);
 	tess.vao->attribs[ATTR_INDEX_NORMAL        ].stride = sizeof(tess.normal[0]);
 	tess.vao->attribs[ATTR_INDEX_TANGENT       ].stride = sizeof(tess.tangent[0]);
+	tess.vao->attribs[ATTR_INDEX_TEXCOORD      ].stride = sizeof(tess.texCoords[0]);
+	tess.vao->attribs[ATTR_INDEX_LIGHTCOORD    ].stride = sizeof(tess.lightCoords[0]);
 	tess.vao->attribs[ATTR_INDEX_COLOR         ].stride = sizeof(tess.color[0]);
-	tess.vao->attribs[ATTR_INDEX_TEXCOORD      ].stride = sizeof(tess.texCoords[0][0]) * 2;
-	tess.vao->attribs[ATTR_INDEX_LIGHTCOORD    ].stride = sizeof(tess.texCoords[0][0]) * 2;
 	tess.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].stride = sizeof(tess.lightdir[0]);
 
 	tess.attribPointers[ATTR_INDEX_POSITION]       = tess.xyz;
-	tess.attribPointers[ATTR_INDEX_TEXCOORD]       = tess.texCoords;
 	tess.attribPointers[ATTR_INDEX_NORMAL]         = tess.normal;
 	tess.attribPointers[ATTR_INDEX_TANGENT]        = tess.tangent;
+	tess.attribPointers[ATTR_INDEX_TEXCOORD]       = tess.texCoords;
+	tess.attribPointers[ATTR_INDEX_LIGHTCOORD]     = tess.lightCoords;
 	tess.attribPointers[ATTR_INDEX_COLOR]          = tess.color;
 	tess.attribPointers[ATTR_INDEX_LIGHTDIRECTION] = tess.lightdir;
 
@@ -612,14 +611,6 @@ void RB_UpdateTessVao(unsigned int attribBits)
 			attribBits = ATTR_BITS;
 
 		attribUpload = attribBits;
-
-		if((attribUpload & ATTR_TEXCOORD) || (attribUpload & ATTR_LIGHTCOORD))
-		{
-			// these are interleaved, so we update both if either need it
-			// this translates to updating ATTR_TEXCOORD twice as large as it needs
-			attribUpload &= ~ATTR_LIGHTCOORD;
-			attribUpload |= ATTR_TEXCOORD;
-		}
 
 		for (attribIndex = 0; attribIndex < ATTR_INDEX_COUNT; attribIndex++)
 		{
