@@ -141,7 +141,7 @@ static int ResampleSfx( sfx_t *sfx, int channels, int inrate, int inwidth, int s
 			if( inwidth == 2 ) {
 				sample = ( ((short *)data)[srcsample+j] );
 			} else {
-				sample = (int)( (unsigned char)(data[srcsample+j]) - 128) << 8;
+				sample = (unsigned int)( (unsigned char)(data[srcsample+j]) - 128) << 8;
 			}
 			part = (i*channels+j)&(SND_CHUNK_SIZE-1);
 			if (part == 0) {
