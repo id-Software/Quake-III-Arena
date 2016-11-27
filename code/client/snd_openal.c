@@ -900,7 +900,8 @@ static void S_AL_NewLoopMaster(src_t *rmSource, qboolean iskilled)
 				S_AL_SaveLoopPos(rmSource, rmSource->alSource);
 			}
 		}
-		else if(rmSource == &srcList[curSfx->masterLoopSrc])
+		else if(curSfx->masterLoopSrc != -1 &&
+		        rmSource == &srcList[curSfx->masterLoopSrc])
 		{
 			int firstInactive = -1;
 
