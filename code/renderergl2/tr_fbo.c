@@ -230,6 +230,12 @@ FBO_Bind
 */
 void FBO_Bind(FBO_t * fbo)
 {
+	if (!glRefConfig.framebufferObject)
+	{
+		ri.Printf(PRINT_WARNING, "FBO_Bind() called without framebuffers enabled!\n");
+		return;
+	}
+
 	if (glState.currentFBO == fbo)
 		return;
 		
