@@ -63,6 +63,11 @@ void GLimp_InitExtraExtensions()
 		ri.Error(ERR_FATAL, "OpenGL 2.0 required!");
 	ri.Printf(PRINT_ALL, "...using OpenGL %s\n", glConfig.version_string);
 
+	// Check if we need Intel graphics specific fixes.
+	glRefConfig.intelGraphics = qfalse;
+	if (strstr((char *)qglGetString(GL_RENDERER), "Intel"))
+		glRefConfig.intelGraphics = qtrue;
+
 	// set DSA fallbacks
 #define GLE(ret, name, ...) qgl##name = GLDSA_##name;
 	QGL_EXT_direct_state_access_PROCS;

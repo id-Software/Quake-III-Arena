@@ -33,8 +33,8 @@ GLvoid APIENTRY GLDSA_TextureImage2DEXT(GLuint texture, GLenum target, GLint lev
 	GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 GLvoid APIENTRY GLDSA_TextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
 	GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-GLvoid APIENTRY GLDSA_CopyTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
-	GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+GLvoid APIENTRY GLDSA_CopyTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+	GLint x, GLint y, GLsizei width, GLsizei height);
 GLvoid APIENTRY GLDSA_CompressedTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
 	GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
 GLvoid APIENTRY GLDSA_CompressedTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level,

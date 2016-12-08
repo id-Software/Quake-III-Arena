@@ -271,7 +271,7 @@ void FBO_Init(void)
 	R_IssuePendingRenderCommands();
 
 	hdrFormat = GL_RGBA8;
-	if (r_hdr->integer && glRefConfig.framebufferObject && glRefConfig.textureFloat)
+	if (r_hdr->integer && glRefConfig.textureFloat)
 		hdrFormat = GL_RGBA16F_ARB;
 
 	if (glRefConfig.framebufferMultisample)

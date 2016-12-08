@@ -360,8 +360,8 @@ void R_BindVao(vao_t * vao)
 		{
 			qglBindVertexArray(vao->vao);
 
-			// why you no save GL_ELEMENT_ARRAY_BUFFER binding, Intel?
-			if (1)
+			// Intel Graphics doesn't save GL_ELEMENT_ARRAY_BUFFER binding with VAO binding.
+			if (glRefConfig.intelGraphics || vao == tess.vao)
 				qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->indexesIBO);
 
 			// tess VAO always has buffers bound

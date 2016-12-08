@@ -113,11 +113,11 @@ GLvoid APIENTRY GLDSA_TextureSubImage2DEXT(GLuint texture, GLenum target, GLint 
 	qglTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 
-GLvoid APIENTRY GLDSA_CopyTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
-	GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+GLvoid APIENTRY GLDSA_CopyTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+	GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	GL_BindMultiTexture(glDsaState.texunit, target, texture);
-	qglCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+	qglCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
 }
 
 GLvoid APIENTRY  GLDSA_CompressedTextureImage2DEXT(GLuint texture, GLenum target, GLint level, GLenum internalformat,
