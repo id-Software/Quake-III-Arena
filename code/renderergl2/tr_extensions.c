@@ -43,15 +43,6 @@ QGL_ARB_vertex_array_object_PROCS;
 QGL_EXT_direct_state_access_PROCS;
 #undef GLE
 
-static qboolean GLimp_HaveExtension(const char *ext)
-{
-	const char *ptr = Q_stristr( glConfig.extensions_string, ext );
-	if (ptr == NULL)
-		return qfalse;
-	ptr += strlen(ext);
-	return ((*ptr == ' ') || (*ptr == '\0'));  // verify it's complete string.
-}
-
 void GLimp_InitExtraExtensions()
 {
 	char *extension;
@@ -112,7 +103,7 @@ void GLimp_InitExtraExtensions()
 
 	// GL_NVX_gpu_memory_info
 	extension = "GL_NVX_gpu_memory_info";
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.memInfo = MI_NVX;
 
@@ -125,7 +116,7 @@ void GLimp_InitExtraExtensions()
 
 	// GL_ATI_meminfo
 	extension = "GL_ATI_meminfo";
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		if (glRefConfig.memInfo == MI_NONE)
 		{
@@ -146,7 +137,7 @@ void GLimp_InitExtraExtensions()
 	// GL_ARB_texture_float
 	extension = "GL_ARB_texture_float";
 	glRefConfig.textureFloat = qfalse;
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.textureFloat = !!r_ext_texture_float->integer;
 
@@ -160,7 +151,7 @@ void GLimp_InitExtraExtensions()
 	// GL_EXT_framebuffer_object
 	extension = "GL_EXT_framebuffer_object";
 	glRefConfig.framebufferObject = qfalse;
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.framebufferObject = !!r_ext_framebuffer_object->integer;
 
@@ -179,7 +170,7 @@ void GLimp_InitExtraExtensions()
 	// GL_EXT_framebuffer_blit
 	extension = "GL_EXT_framebuffer_blit";
 	glRefConfig.framebufferBlit = qfalse;
-	if (GLimp_HaveExtension(extension))
+	if (SDL_GL_ExtensionSupported(extension))
 	{
 		glRefConfig.framebufferBlit = qtrue;
 
@@ -195,7 +186,7 @@ void GLimp_InitExtraExtensions()
 	// GL_EXT_framebuffer_multisample
 	extension = "GL_EXT_framebuffer_multisample";
 	glRefConfig.framebufferMultisample = qfalse;
-	if (GLimp_HaveExtension(extension))
+	if (SDL_GL_ExtensionSupported(extension))
 	{
 		glRefConfig.framebufferMultisample = qtrue;
 
@@ -212,7 +203,7 @@ void GLimp_InitExtraExtensions()
 
 	// GL_ARB_texture_compression_rgtc
 	extension = "GL_ARB_texture_compression_rgtc";
-	if (GLimp_HaveExtension(extension))
+	if (SDL_GL_ExtensionSupported(extension))
 	{
 		qboolean useRgtc = r_ext_compressed_textures->integer >= 1;
 
@@ -230,7 +221,7 @@ void GLimp_InitExtraExtensions()
 
 	// GL_ARB_texture_compression_bptc
 	extension = "GL_ARB_texture_compression_bptc";
-	if (GLimp_HaveExtension(extension))
+	if (SDL_GL_ExtensionSupported(extension))
 	{
 		qboolean useBptc = r_ext_compressed_textures->integer >= 2;
 
@@ -247,7 +238,7 @@ void GLimp_InitExtraExtensions()
 	// GL_ARB_depth_clamp
 	extension = "GL_ARB_depth_clamp";
 	glRefConfig.depthClamp = qfalse;
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.depthClamp = qtrue;
 
@@ -261,7 +252,7 @@ void GLimp_InitExtraExtensions()
 	// GL_ARB_seamless_cube_map
 	extension = "GL_ARB_seamless_cube_map";
 	glRefConfig.seamlessCubeMap = qfalse;
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.seamlessCubeMap = !!r_arb_seamless_cube_map->integer;
 
@@ -275,7 +266,7 @@ void GLimp_InitExtraExtensions()
 	// GL_ARB_vertex_array_object
 	extension = "GL_ARB_vertex_array_object";
 	glRefConfig.vertexArrayObject = qfalse;
-	if( GLimp_HaveExtension( extension ) )
+	if( SDL_GL_ExtensionSupported( extension ) )
 	{
 		glRefConfig.vertexArrayObject = !!r_arb_vertex_array_object->integer;
 
@@ -291,7 +282,7 @@ void GLimp_InitExtraExtensions()
 	// GL_EXT_direct_state_access
 	extension = "GL_EXT_direct_state_access";
 	glRefConfig.directStateAccess = qfalse;
-	if (GLimp_HaveExtension(extension))
+	if (SDL_GL_ExtensionSupported(extension))
 	{
 		glRefConfig.directStateAccess = !!r_ext_direct_state_access->integer;
 
