@@ -502,11 +502,11 @@ static void RGBAtoNormal(const byte *in, byte *out, int width, int height, qbool
 
 					if (clampToEdge)
 					{
-						src_x = CLAMP(src_x, 0, height - 1);
+						src_x = CLAMP(src_x, 0, width - 1);
 					}
 					else
 					{
-						src_x = (src_x + height) % height;
+						src_x = (src_x + width) % width;
 					}
 
 					s[i++] = *(out + (src_y * width + src_x) * 4 + 3);
