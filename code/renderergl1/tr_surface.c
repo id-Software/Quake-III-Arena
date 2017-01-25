@@ -563,8 +563,8 @@ static void VectorArrayNormalize(vec4_t *normals, unsigned int count)
         
 #if idppc
     {
-        register float half = 0.5;
-        register float one  = 1.0;
+        float half = 0.5;
+        float one  = 1.0;
         float *components = (float *)normals;
         
         // Vanilla PPC code, but since PPC has a reciprocal square root estimate instruction,
