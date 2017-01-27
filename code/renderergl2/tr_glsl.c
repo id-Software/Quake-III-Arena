@@ -1015,7 +1015,7 @@ void GLSL_InitGPUShaders(void)
 		if ((i & LIGHTDEF_USE_PARALLAXMAP) && !r_parallaxMapping->integer)
 			continue;
 
-		if (!lightType && (i & LIGHTDEF_USE_SHADOWMAP))
+		if ((i & LIGHTDEF_USE_SHADOWMAP) && (!lightType || !r_sunlightMode->integer))
 			continue;
 
 		attribs = ATTR_POSITION | ATTR_TEXCOORD | ATTR_COLOR | ATTR_NORMAL;
