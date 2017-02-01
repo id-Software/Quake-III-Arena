@@ -199,15 +199,6 @@ static void CG_DrawPlayerArmorValue(rectDef_t *rect, float scale, vec4_t color, 
 	}
 }
 
-#ifndef MISSIONPACK
-static float healthColors[4][4] = { 
-//		{ 0.2, 1.0, 0.2, 1.0 } , { 1.0, 0.2, 0.2, 1.0 }, {0.5, 0.5, 0.5, 1} };
-  { 1.0f, 0.69f, 0.0f, 1.0f } ,		// normal
-  { 1.0f, 0.2f, 0.2f, 1.0f },		// low health
-  { 0.5f, 0.5f, 0.5f, 1.0f},		// weapon firing
-  { 1.0f, 1.0f, 1.0f, 1.0f } };		// health > 100
-#endif
-
 static void CG_DrawPlayerAmmoIcon( rectDef_t *rect, qboolean draw2D ) {
 	centity_t	*cent;
 	vec3_t		angles;
