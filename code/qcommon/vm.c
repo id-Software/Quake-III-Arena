@@ -451,7 +451,7 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc, qboolean unpure)
 	if(alloc)
 	{
 		// allocate zero filled space for initialized and uninitialized data
-		// leave some space beyound data mask so we can secure all mask operations
+		// leave some space beyond data mask so we can secure all mask operations
 		vm->dataAlloc = dataLength + 4;
 		vm->dataBase = Hunk_Alloc(vm->dataAlloc, h_high);
 		vm->dataMask = dataLength - 1;
