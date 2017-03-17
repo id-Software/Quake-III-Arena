@@ -543,7 +543,7 @@ void SV_BotInitBotLib(void) {
 
 	// file system access
 	botlib_import.FS_FOpenFile = FS_FOpenFileByMode;
-	botlib_import.FS_Read = FS_Read2;
+	botlib_import.FS_Read = FS_Read;
 	botlib_import.FS_Write = FS_Write;
 	botlib_import.FS_FCloseFile = FS_FCloseFile;
 	botlib_import.FS_Seek = FS_Seek;
