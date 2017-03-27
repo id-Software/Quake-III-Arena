@@ -2975,6 +2975,8 @@ void Com_WriteConfig_f( void ) {
 		return;
 	}
 
+	Q_strncpyz( filename, Cmd_Argv(1), sizeof( filename ) );
+	COM_DefaultExtension( filename, sizeof( filename ), ".cfg" );
 
 	if (!COM_CompareExtension(filename, ".cfg"))
 	{
@@ -2982,8 +2984,6 @@ void Com_WriteConfig_f( void ) {
 		return;
 	}
 
-	Q_strncpyz( filename, Cmd_Argv(1), sizeof( filename ) );
-	COM_DefaultExtension( filename, sizeof( filename ), ".cfg" );
 	Com_Printf( "Writing %s.\n", filename );
 	Com_WriteConfigToFile( filename );
 }
