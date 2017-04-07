@@ -1108,6 +1108,7 @@ char	*Sys_Cwd( void );
 void	Sys_SetDefaultInstallPath(const char *path);
 char	*Sys_DefaultInstallPath(void);
 char	*Sys_SteamPath(void);
+char	*Sys_GogPath(void);
 
 #ifdef __APPLE__
 char    *Sys_DefaultAppPath(void);
