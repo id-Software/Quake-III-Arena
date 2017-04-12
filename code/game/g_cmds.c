@@ -1312,6 +1312,13 @@ void Cmd_CallVote_f( gentity_t *ent ) {
 
 	// if there is still a vote to be executed
 	if ( level.voteExecuteTime ) {
+		// don't start a vote when map change or restart is in progress
+		if ( !Q_stricmpn( level.voteString, "map", 3 )
+			|| !Q_stricmpn( level.voteString, "nextmap", 7 ) ) {
+			trap_SendServerCommand( ent-g_entities, "print \"Vote after map change.\n\"" );
+			return;
+		}
+
 		level.voteExecuteTime = 0;
 		trap_SendConsoleCommand( EXEC_APPEND, va("%s\n", level.voteString ) );
 	}
