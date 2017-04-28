@@ -379,18 +379,10 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 
 // GL function loader, based on https://gist.github.com/rygorous/16796a0c876cf8a5f542caddb55bce8a
 
-// OpenGL 1.2, was GL_EXT_draw_range_elements
-#define QGL_1_2_PROCS \
-	GLE(void, DrawRangeElements, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices) \
-
 // OpenGL 1.3, was GL_ARB_texture_compression
 #define QGL_1_3_PROCS \
 	GLE(void, CompressedTexImage2D, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data) \
 	GLE(void, CompressedTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data) \
-
-// OpenGL 1.4, was GL_EXT_multi_draw_arrays
-#define QGL_1_4_PROCS \
-	GLE(void, MultiDrawElements, GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount) \
 
 // OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
 #define QGL_1_5_PROCS \
@@ -640,9 +632,7 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(GLvoid, NamedFramebufferRenderbufferEXT, GLuint framebuffer, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
 
 #define GLE(ret, name, ...) typedef ret APIENTRY name##proc(__VA_ARGS__); extern name##proc * qgl##name;
-QGL_1_2_PROCS;
 QGL_1_3_PROCS;
-QGL_1_4_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
 QGL_EXT_framebuffer_object_PROCS;

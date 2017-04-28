@@ -499,6 +499,8 @@ void R_InitVaos(void)
 
 	R_BindNullVao();
 
+	VaoCache_Init();
+
 	GL_CheckErrors();
 }
 
@@ -649,4 +651,316 @@ void RB_UpdateTessVao(unsigned int attribBits)
 
 		qglBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, tess.numIndexes * sizeof(tess.indexes[0]), tess.indexes);
 	}
+}
+
+// FIXME: This sets a limit of 65536 verts/262144 indexes per static surface
+// This is higher than the old vq3 limits but is worth noting
+#define VAOCACHE_QUEUE_MAX_SURFACES (1 << 10)
+#define VAOCACHE_QUEUE_MAX_VERTEXES (1 << 16)
+#define VAOCACHE_QUEUE_MAX_INDEXES (VAOCACHE_QUEUE_MAX_VERTEXES * 4)
+
+typedef struct queuedSurface_s
+{
+	srfVert_t *vertexes;
+	int numVerts;
+	glIndex_t *indexes;
+	int numIndexes;
+}
+queuedSurface_t;
+
+static struct
+{
+	queuedSurface_t surfaces[VAOCACHE_QUEUE_MAX_SURFACES];
+	int numSurfaces;
+
+	srfVert_t vertexes[VAOCACHE_QUEUE_MAX_VERTEXES];
+	int vertexCommitSize;
+
+	glIndex_t indexes[VAOCACHE_QUEUE_MAX_INDEXES];
+	int indexCommitSize;
+}
+vcq;
+
+#define VAOCACHE_MAX_SURFACES (1 << 16)
+#define VAOCACHE_MAX_BATCHES (1 << 10)
+
+// srfVert_t is 60 bytes
+// assuming each vert is referenced 4 times, need 16 bytes (4 glIndex_t) per vert
+// -> need about 4/15ths the space for indexes as vertexes
+#define VAOCACHE_VERTEX_BUFFER_SIZE (16 * 1024 * 1024)
+#define VAOCACHE_INDEX_BUFFER_SIZE (5 * 1024 * 1024)
+
+typedef struct buffered_s
+{
+	void *data;
+	int size;
+	int bufferOffset;
+}
+buffered_t;
+
+static struct
+{
+	vao_t *vao;
+	buffered_t surfaceIndexSets[VAOCACHE_MAX_SURFACES];
+	int numSurfaces;
+
+	int batchLengths[VAOCACHE_MAX_BATCHES];
+	int numBatches;
+
+	int vertexOffset;
+	int indexOffset;
+}
+vc;
+
+void VaoCache_Commit(void)
+{
+	buffered_t *indexSet;
+	int *batchLength;
+	queuedSurface_t *surf, *end = vcq.surfaces + vcq.numSurfaces;
+
+	R_BindVao(vc.vao);
+
+	// Search for a matching batch
+	// FIXME: Use faster search
+	indexSet = vc.surfaceIndexSets;
+	batchLength = vc.batchLengths;
+	for (; batchLength < vc.batchLengths + vc.numBatches; batchLength++)
+	{
+		if (*batchLength == vcq.numSurfaces)
+		{
+			buffered_t *indexSet2 = indexSet;
+			for (surf = vcq.surfaces; surf < end; surf++, indexSet2++)
+			{
+				if (surf->indexes != indexSet2->data || (surf->numIndexes * sizeof(glIndex_t)) != indexSet2->size)
+					break;
+			}
+
+			if (surf == end)
+				break;
+		}
+
+		indexSet += *batchLength;
+	}
+
+	// If found, use it
+	if (indexSet < vc.surfaceIndexSets + vc.numSurfaces)
+	{
+		tess.firstIndex = indexSet->bufferOffset / sizeof(glIndex_t);
+		//ri.Printf(PRINT_ALL, "firstIndex %d numIndexes %d as %d\n", tess.firstIndex, tess.numIndexes, batchLength - vc.batchLengths);
+		//ri.Printf(PRINT_ALL, "vc.numSurfaces %d vc.numBatches %d\n", vc.numSurfaces, vc.numBatches);
+	}
+	// If not, rebuffer the batch
+	// FIXME: keep track of the vertexes so we don't have to reupload them every time
+	else
+	{
+		srfVert_t *dstVertex = vcq.vertexes;
+		glIndex_t *dstIndex = vcq.indexes;
+
+		batchLength = vc.batchLengths + vc.numBatches;
+		*batchLength = vcq.numSurfaces;
+		vc.numBatches++;
+
+		tess.firstIndex = vc.indexOffset / sizeof(glIndex_t);
+		vcq.vertexCommitSize = 0;
+		vcq.indexCommitSize = 0;
+		for (surf = vcq.surfaces; surf < end; surf++)
+		{
+			glIndex_t *srcIndex = surf->indexes;
+			int vertexesSize = surf->numVerts * sizeof(srfVert_t);
+			int indexesSize = surf->numIndexes * sizeof(glIndex_t);
+			int i, indexOffset = (vc.vertexOffset + vcq.vertexCommitSize) / sizeof(srfVert_t);
+
+			Com_Memcpy(dstVertex, surf->vertexes, vertexesSize);
+			dstVertex += surf->numVerts;
+
+			vcq.vertexCommitSize += vertexesSize;
+
+			indexSet = vc.surfaceIndexSets + vc.numSurfaces;
+			indexSet->data = surf->indexes;
+			indexSet->size = indexesSize;
+			indexSet->bufferOffset = vc.indexOffset + vcq.indexCommitSize;
+			vc.numSurfaces++;
+
+			for (i = 0; i < surf->numIndexes; i++)
+				*dstIndex++ = *srcIndex++ + indexOffset;
+
+			vcq.indexCommitSize += indexesSize;
+		}
+
+		//ri.Printf(PRINT_ALL, "committing %d to %d, %d to %d as %d\n", vcq.vertexCommitSize, vc.vertexOffset, vcq.indexCommitSize, vc.indexOffset, batchLength - vc.batchLengths);
+
+		if (vcq.vertexCommitSize)
+		{
+			qglBindBuffer(GL_ARRAY_BUFFER, vc.vao->vertexesVBO);
+			qglBufferSubData(GL_ARRAY_BUFFER, vc.vertexOffset, vcq.vertexCommitSize, vcq.vertexes);
+			vc.vertexOffset += vcq.vertexCommitSize;
+		}
+
+		if (vcq.indexCommitSize)
+		{
+			qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vc.vao->indexesIBO);
+			qglBufferSubData(GL_ELEMENT_ARRAY_BUFFER, vc.indexOffset, vcq.indexCommitSize, vcq.indexes);
+			vc.indexOffset += vcq.indexCommitSize;
+		}
+	}
+}
+
+void VaoCache_Init(void)
+{
+	srfVert_t vert;
+	int dataSize;
+
+	vc.vao = R_CreateVao("VaoCache", NULL, VAOCACHE_VERTEX_BUFFER_SIZE, NULL, VAOCACHE_INDEX_BUFFER_SIZE, VAO_USAGE_DYNAMIC);
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].enabled       = 1;
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].enabled       = 1;
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].enabled     = 1;
+	vc.vao->attribs[ATTR_INDEX_NORMAL].enabled         = 1;
+	vc.vao->attribs[ATTR_INDEX_TANGENT].enabled        = 1;
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].enabled = 1;
+	vc.vao->attribs[ATTR_INDEX_COLOR].enabled          = 1;
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].count       = 3;
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].count       = 2;
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].count     = 2;
+	vc.vao->attribs[ATTR_INDEX_NORMAL].count         = 4;
+	vc.vao->attribs[ATTR_INDEX_TANGENT].count        = 4;
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].count = 4;
+	vc.vao->attribs[ATTR_INDEX_COLOR].count          = 4;
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].type             = GL_FLOAT;
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].type             = GL_FLOAT;
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].type           = GL_FLOAT;
+	vc.vao->attribs[ATTR_INDEX_NORMAL].type               = GL_SHORT;
+	vc.vao->attribs[ATTR_INDEX_TANGENT].type              = GL_SHORT;
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].type       = GL_SHORT;
+	vc.vao->attribs[ATTR_INDEX_COLOR].type                = GL_UNSIGNED_SHORT;
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].normalized       = GL_FALSE;
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].normalized       = GL_FALSE;
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].normalized     = GL_FALSE;
+	vc.vao->attribs[ATTR_INDEX_NORMAL].normalized         = GL_TRUE;
+	vc.vao->attribs[ATTR_INDEX_TANGENT].normalized        = GL_TRUE;
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].normalized = GL_TRUE;
+	vc.vao->attribs[ATTR_INDEX_COLOR].normalized          = GL_TRUE;
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].offset       = 0;        dataSize  = sizeof(vert.xyz);
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].offset       = dataSize; dataSize += sizeof(vert.st);
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].offset     = dataSize; dataSize += sizeof(vert.lightmap);
+	vc.vao->attribs[ATTR_INDEX_NORMAL].offset         = dataSize; dataSize += sizeof(vert.normal);
+	vc.vao->attribs[ATTR_INDEX_TANGENT].offset        = dataSize; dataSize += sizeof(vert.tangent);
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = dataSize; dataSize += sizeof(vert.lightdir);
+	vc.vao->attribs[ATTR_INDEX_COLOR].offset          = dataSize; dataSize += sizeof(vert.color);
+
+	vc.vao->attribs[ATTR_INDEX_POSITION].stride       = dataSize;
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].stride       = dataSize;
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].stride     = dataSize;
+	vc.vao->attribs[ATTR_INDEX_NORMAL].stride         = dataSize;
+	vc.vao->attribs[ATTR_INDEX_TANGENT].stride        = dataSize;
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].stride = dataSize;
+	vc.vao->attribs[ATTR_INDEX_COLOR].stride          = dataSize;
+
+	Vao_SetVertexPointers(vc.vao);
+
+	vc.numSurfaces = 0;
+	vc.numBatches = 0;
+	vc.vertexOffset = 0;
+	vc.indexOffset = 0;
+	vcq.vertexCommitSize = 0;
+	vcq.indexCommitSize = 0;
+	vcq.numSurfaces = 0;
+}
+
+void VaoCache_BindVao(void)
+{
+	R_BindVao(vc.vao);
+}
+
+void VaoCache_CheckAdd(qboolean *endSurface, qboolean *recycleVertexBuffer, qboolean *recycleIndexBuffer, int numVerts, int numIndexes)
+{
+	int vertexesSize = sizeof(srfVert_t) * numVerts;
+	int indexesSize = sizeof(glIndex_t) * numIndexes;
+
+	if (vc.vao->vertexesSize < vc.vertexOffset + vcq.vertexCommitSize + vertexesSize)
+	{
+		//ri.Printf(PRINT_ALL, "out of space in vertex cache: %d < %d + %d + %d\n", vc.vao->vertexesSize, vc.vertexOffset, vc.vertexCommitSize, vertexesSize);
+		*recycleVertexBuffer = qtrue;
+		*recycleIndexBuffer = qtrue;
+		*endSurface = qtrue;
+	}
+
+	if (vc.vao->indexesSize < vc.indexOffset + vcq.indexCommitSize + indexesSize)
+	{
+		//ri.Printf(PRINT_ALL, "out of space in index cache\n");
+		*recycleIndexBuffer = qtrue;
+		*endSurface = qtrue;
+	}
+
+	if (vc.numSurfaces + vcq.numSurfaces >= VAOCACHE_MAX_SURFACES)
+	{
+		//ri.Printf(PRINT_ALL, "out of surfaces in index cache\n");
+		*recycleIndexBuffer = qtrue;
+		*endSurface = qtrue;
+	}
+
+	if (vc.numBatches >= VAOCACHE_MAX_BATCHES)
+	{
+		//ri.Printf(PRINT_ALL, "out of batches in index cache\n");
+		*recycleIndexBuffer = qtrue;
+		*endSurface = qtrue;
+	}
+
+	if (vcq.numSurfaces >= VAOCACHE_QUEUE_MAX_SURFACES)
+	{
+		//ri.Printf(PRINT_ALL, "out of queued surfaces\n");
+		*endSurface = qtrue;
+	}
+
+	if (VAOCACHE_QUEUE_MAX_VERTEXES * sizeof(srfVert_t) < vcq.vertexCommitSize + vertexesSize)
+	{
+		//ri.Printf(PRINT_ALL, "out of queued vertexes\n");
+		*endSurface = qtrue;
+	}
+
+	if (VAOCACHE_QUEUE_MAX_INDEXES * sizeof(glIndex_t) < vcq.indexCommitSize + indexesSize)
+	{
+		//ri.Printf(PRINT_ALL, "out of queued indexes\n");
+		*endSurface = qtrue;
+	}
+}
+
+void VaoCache_RecycleVertexBuffer(void)
+{
+	qglBindBuffer(GL_ARRAY_BUFFER, vc.vao->vertexesVBO);
+	qglBufferData(GL_ARRAY_BUFFER, vc.vao->vertexesSize, NULL, GL_DYNAMIC_DRAW);
+	vc.vertexOffset = 0;
+}
+
+void VaoCache_RecycleIndexBuffer(void)
+{
+	qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vc.vao->indexesIBO);
+	qglBufferData(GL_ELEMENT_ARRAY_BUFFER, vc.vao->indexesSize, NULL, GL_DYNAMIC_DRAW);
+	vc.indexOffset = 0;
+	vc.numSurfaces = 0;
+	vc.numBatches = 0;
+}
+
+void VaoCache_InitQueue(void)
+{
+	vcq.vertexCommitSize = 0;
+	vcq.indexCommitSize = 0;
+	vcq.numSurfaces = 0;
+}
+
+void VaoCache_AddSurface(srfVert_t *verts, int numVerts, glIndex_t *indexes, int numIndexes)
+{
+	queuedSurface_t *queueEntry = vcq.surfaces + vcq.numSurfaces;
+	queueEntry->vertexes = verts;
+	queueEntry->numVerts = numVerts;
+	queueEntry->indexes = indexes;
+	queueEntry->numIndexes = numIndexes;
+	vcq.numSurfaces++;
+
+	vcq.vertexCommitSize += sizeof(srfVert_t) * numVerts;;
+	vcq.indexCommitSize += sizeof(glIndex_t) * numIndexes;
 }

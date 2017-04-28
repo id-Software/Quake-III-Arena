@@ -31,9 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tr_dsa.h"
 
 #define GLE(ret, name, ...) name##proc * qgl##name;
-QGL_1_2_PROCS;
 QGL_1_3_PROCS;
-QGL_1_4_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
 QGL_EXT_framebuffer_object_PROCS;
@@ -67,18 +65,8 @@ void GLimp_InitExtraExtensions()
 	// GL function loader, based on https://gist.github.com/rygorous/16796a0c876cf8a5f542caddb55bce8a
 #define GLE(ret, name, ...) qgl##name = (name##proc *) SDL_GL_GetProcAddress("gl" #name);
 
-	// OpenGL 1.2, was GL_EXT_draw_range_elements
-	QGL_1_2_PROCS;
-	glRefConfig.drawRangeElements = !!r_ext_draw_range_elements->integer;
-	ri.Printf(PRINT_ALL, result[glRefConfig.drawRangeElements], "glDrawRangeElements()");
-
 	// OpenGL 1.3, was GL_ARB_texture_compression
 	QGL_1_3_PROCS;
-
-	// OpenGL 1.4, was GL_EXT_multi_draw_arrays
-	QGL_1_4_PROCS;
-	glRefConfig.multiDrawArrays = !!r_ext_multi_draw_arrays->integer;
-	ri.Printf(PRINT_ALL, result[glRefConfig.multiDrawArrays], "glMultiDrawElements()");
 
 	// OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
 	QGL_1_5_PROCS;
