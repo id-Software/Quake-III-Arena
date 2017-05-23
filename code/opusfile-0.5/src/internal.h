@@ -186,6 +186,11 @@ struct OggOpusFile{
   opus_int32         cur_discard_count;
   /*The granule position of the previous packet (current packet start time).*/
   ogg_int64_t        prev_packet_gp;
+  /*The stream offset of the most recent page with completed packets, or -1.
+    This is only needed to recover continued packet data in the seeking logic,
+     when we use the current position as one of our bounds, only to later
+     discover it was the correct starting point.*/
+  opus_int64         prev_page_offset;
   /*The number of bytes read since the last bitrate query, including framing.*/
   opus_int64         bytes_tracked;
   /*The number of samples decoded since the last bitrate query.*/

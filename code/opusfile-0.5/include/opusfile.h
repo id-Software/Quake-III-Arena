@@ -503,6 +503,22 @@ int opus_tags_add(OpusTags *_tags,const char *_tag,const char *_value)
 int opus_tags_add_comment(OpusTags *_tags,const char *_comment)
  OP_ARG_NONNULL(1) OP_ARG_NONNULL(2);
 
+/**Replace the binary suffix data at the end of the packet (if any).
+   \param _tags An initialized #OpusTags structure.
+   \param _data A buffer of binary data to append after the encoded user
+                 comments.
+                The least significant bit of the first byte of this data must
+                 be set (to ensure the data is preserved by other editors).
+   \param _len  The number of bytes of binary data to append.
+                This may be zero to remove any existing binary suffix data.
+   \return 0 on success, or a negative value on error.
+   \retval #OP_EINVAL \a _len was negative, or \a _len was positive but
+                       \a _data was <code>NULL</code> or the least significant
+                       bit of the first byte was not set.
+   \retval #OP_EFAULT An internal memory allocation failed.*/
+int opus_tags_set_binary_suffix(OpusTags *_tags,
+ const unsigned char *_data,int _len) OP_ARG_NONNULL(1);
+
 /**Look up a comment value by its tag.
    \param _tags  An initialized #OpusTags structure.
    \param _tag   The tag to look up.
@@ -529,6 +545,32 @@ const char *opus_tags_query(const OpusTags *_tags,const char *_tag,int _count)
    \param _tag  The tag to look up.
    \return The number of instances of this particular tag.*/
 int opus_tags_query_count(const OpusTags *_tags,const char *_tag)
+ OP_ARG_NONNULL(1) OP_ARG_NONNULL(2);
+
+/**Retrieve the binary suffix data at the end of the packet (if any).
+   \param      _tags An initialized #OpusTags structure.
+   \param[out] _len  Returns the number of bytes of binary suffix data returned.
+   \return A pointer to the binary suffix data, or <code>NULL</code> if none
+            was present.*/
+const unsigned char *opus_tags_get_binary_suffix(const OpusTags *_tags,
+ int *_len) OP_ARG_NONNULL(1) OP_ARG_NONNULL(2);
+
+/**Get the album gain from an R128_ALBUM_GAIN tag, if one was specified.
+   This searches for the first R128_ALBUM_GAIN tag with a valid signed,
+    16-bit decimal integer value and returns the value.
+   This routine is exposed merely for convenience for applications which wish
+    to do something special with the album gain (i.e., display it).
+   If you simply wish to apply the album gain instead of the header gain, you
+    can use op_set_gain_offset() with an #OP_ALBUM_GAIN type and no offset.
+   \param      _tags    An initialized #OpusTags structure.
+   \param[out] _gain_q8 The album gain, in 1/256ths of a dB.
+                        This will lie in the range [-32768,32767], and should
+                         be applied in <em>addition</em> to the header gain.
+                        On error, no value is returned, and the previous
+                         contents remain unchanged.
+   \return 0 on success, or a negative value on error.
+   \retval #OP_FALSE There was no album gain available in the given tags.*/
+int opus_tags_get_album_gain(const OpusTags *_tags,int *_gain_q8)
  OP_ARG_NONNULL(1) OP_ARG_NONNULL(2);
 
 /**Get the track gain from an R128_TRACK_GAIN tag, if one was specified.
@@ -1453,6 +1495,10 @@ int op_channel_count(const OggOpusFile *_of,int _li) OP_ARG_NONNULL(1);
 /**Get the total (compressed) size of the stream, or of an individual link in
     a (possibly-chained) Ogg Opus stream, including all headers and Ogg muxing
     overhead.
+   \warning If the Opus stream (or link) is concurrently multiplexed with other
+    logical streams (e.g., video), this returns the size of the entire stream
+    (or link), not just the number of bytes in the first logical Opus stream.
+   Returning the latter would require scanning the entire file.
    \param _of The \c OggOpusFile from which to retrieve the compressed size.
    \param _li The index of the link whose compressed size should be computed.
               Use a negative number to get the compressed size of the entire
@@ -1537,13 +1583,22 @@ const OpusTags *op_tags(const OggOpusFile *_of,int _li) OP_ARG_NONNULL(1);
    \retval #OP_EINVAL The stream was only partially open.*/
 int op_current_link(const OggOpusFile *_of) OP_ARG_NONNULL(1);
 
-/**Computes the bitrate for a given link in a (possibly chained) Ogg Opus
-    stream.
+/**Computes the bitrate of the stream, or of an individual link in a
+    (possibly-chained) Ogg Opus stream.
    The stream must be seekable to compute the bitrate.
    For unseekable streams, use op_bitrate_instant() to get periodic estimates.
+   \warning If the Opus stream (or link) is concurrently multiplexed with other
+    logical streams (e.g., video), this uses the size of the entire stream (or
+    link) to compute the bitrate, not just the number of bytes in the first
+    logical Opus stream.
+   Returning the latter requires scanning the entire file, but this may be done
+    by decoding the whole file and calling op_bitrate_instant() once at the
+    end.
+   Install a trivial decoding callback with op_set_decode_callback() if you
+    wish to skip actual decoding during this process.
    \param _of The \c OggOpusFile from which to retrieve the bitrate.
    \param _li The index of the link whose bitrate should be computed.
-              USe a negative number to get the bitrate of the whole stream.
+              Use a negative number to get the bitrate of the whole stream.
    \return The bitrate on success, or a negative value on error.
    \retval #OP_EINVAL The stream was only partially open, the stream was not
                        seekable, or \a _li was larger than the number of
@@ -1658,11 +1713,11 @@ int op_pcm_seek(OggOpusFile *_of,ogg_int64_t _pcm_offset) OP_ARG_NONNULL(1);
    These downmix multichannel files to two channels, so they can always return
     samples in the same format for every link in a chained file.
 
-   If the rest of your audio processing chain can handle floating point, those
-    routines should be preferred, as floating point output avoids introducing
-    clipping and other issues which might be avoided entirely if, e.g., you
-    scale down the volume at some other stage.
-   However, if you intend to direct consume 16-bit samples, the conversion in
+   If the rest of your audio processing chain can handle floating point, the
+    floating-point routines should be preferred, as they prevent clipping and
+    other issues which might be avoided entirely if, e.g., you scale down the
+    volume at some other stage.
+   However, if you intend to consume 16-bit samples directly, the conversion in
     <tt>libopusfile</tt> provides noise-shaping dithering and, if compiled
     against <tt>libopus</tt>&nbsp;1.1 or later, soft-clipping prevention.
 
@@ -1715,26 +1770,35 @@ int op_pcm_seek(OggOpusFile *_of,ogg_int64_t _pcm_offset) OP_ARG_NONNULL(1);
                       #OP_DEC_FORMAT_FLOAT.
    \param _li        The index of the link from which this packet was decoded.
    \return A non-negative value on success, or a negative value on error.
-           The error codes should be the same as those returned by
+           Any error codes should be the same as those returned by
             opus_multistream_decode() or opus_multistream_decode_float().
+           Success codes are as follows:
    \retval 0                   Decoding was successful.
                                The application has filled the buffer with
                                 exactly <code>\a _nsamples*\a
                                 _nchannels</code> samples in the requested
                                 format.
    \retval #OP_DEC_USE_DEFAULT No decoding was done.
-                               <tt>libopusfile</tt> should decode normally
-                                instead.*/
+                               <tt>libopusfile</tt> should do the decoding
+                                by itself instead.*/
 typedef int (*op_decode_cb_func)(void *_ctx,OpusMSDecoder *_decoder,void *_pcm,
  const ogg_packet *_op,int _nsamples,int _nchannels,int _format,int _li);
 
 /**Sets the packet decode callback function.
-   This is called once for each packet that needs to be decoded.
+   If set, this is called once for each packet that needs to be decoded.
+   This can be used by advanced applications to do additional processing on the
+    compressed or uncompressed data.
+   For example, an application might save the final entropy coder state for
+    debugging and testing purposes, or it might apply additional filters
+    before the downmixing, dithering, or soft-clipping performed by
+    <tt>libopusfile</tt>, so long as these filters do not introduce any
+    latency.
+
    A call to this function is no guarantee that the audio will eventually be
     delivered to the application.
-   Some or all of the data from the packet may be discarded (i.e., at the
-    beginning or end of a link, or after a seek), however the callback is
-    required to provide all of it.
+   <tt>libopusfile</tt> may discard some or all of the decoded audio data
+    (i.e., at the beginning or end of a link, or after a seek), however the
+    callback is still required to provide all of it.
    \param _of        The \c OggOpusFile on which to set the decode callback.
    \param _decode_cb The callback function to call.
                      This may be <code>NULL</code> to disable calling the
@@ -1748,6 +1812,10 @@ void op_set_decode_callback(OggOpusFile *_of,
     header gain.
    This is the default.*/
 #define OP_HEADER_GAIN   (0)
+
+/**Gain offset type that indicates that the provided offset is relative to the
+    R128_ALBUM_GAIN value (if any), in addition to the header gain.*/
+#define OP_ALBUM_GAIN    (3007)
 
 /**Gain offset type that indicates that the provided offset is relative to the
     R128_TRACK_GAIN value (if any), in addition to the header gain.*/
@@ -1769,8 +1837,8 @@ void op_set_decode_callback(OggOpusFile *_of,
    It is meant for setting a target volume level, rather than applying smooth
     fades, etc.
    \param _of             The \c OggOpusFile on which to set the gain offset.
-   \param _gain_type      One of #OP_HEADER_GAIN, #OP_TRACK_GAIN, or
-                           #OP_ABSOLUTE_GAIN.
+   \param _gain_type      One of #OP_HEADER_GAIN, #OP_ALBUM_GAIN,
+                           #OP_TRACK_GAIN, or #OP_ABSOLUTE_GAIN.
    \param _gain_offset_q8 The gain offset to apply, in 1/256ths of a dB.
    \return 0 on success or a negative value on error.
    \retval #OP_EINVAL The \a _gain_type was unrecognized.*/

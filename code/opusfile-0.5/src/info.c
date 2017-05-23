@@ -28,11 +28,13 @@ static int op_parse_int16le(const unsigned char *_data){
 }
 
 static opus_uint32 op_parse_uint32le(const unsigned char *_data){
-  return _data[0]|_data[1]<<8|_data[2]<<16|_data[3]<<24;
+  return _data[0]|(opus_uint32)_data[1]<<8|
+   (opus_uint32)_data[2]<<16|(opus_uint32)_data[3]<<24;
 }
 
 static opus_uint32 op_parse_uint32be(const unsigned char *_data){
-  return _data[3]|_data[2]<<8|_data[1]<<16|_data[0]<<24;
+  return _data[3]|(opus_uint32)_data[2]<<8|
+   (opus_uint32)_data[1]<<16|(opus_uint32)_data[0]<<24;
 }
 
 int opus_head_parse(OpusHead *_head,const unsigned char *_data,size_t _len){
@@ -90,8 +92,11 @@ void opus_tags_init(OpusTags *_tags){
 }
 
 void opus_tags_clear(OpusTags *_tags){
+  int ncomments;
   int ci;
-  for(ci=_tags->comments;ci-->0;)_ogg_free(_tags->user_comments[ci]);
+  ncomments=_tags->comments;
+  if(_tags->user_comments!=NULL)ncomments++;
+  for(ci=ncomments;ci-->0;)_ogg_free(_tags->user_comments[ci]);
   _ogg_free(_tags->user_comments);
   _ogg_free(_tags->comment_lengths);
   _ogg_free(_tags->vendor);
@@ -101,19 +106,27 @@ void opus_tags_clear(OpusTags *_tags){
 static int op_tags_ensure_capacity(OpusTags *_tags,size_t _ncomments){
   char   **user_comments;
   int     *comment_lengths;
+  int      cur_ncomments;
+  char    *binary_suffix_data;
+  int      binary_suffix_len;
   size_t   size;
   if(OP_UNLIKELY(_ncomments>=(size_t)INT_MAX))return OP_EFAULT;
   size=sizeof(*_tags->comment_lengths)*(_ncomments+1);
   if(size/sizeof(*_tags->comment_lengths)!=_ncomments+1)return OP_EFAULT;
+  cur_ncomments=_tags->comments;
+  comment_lengths=_tags->comment_lengths;
+  binary_suffix_len=comment_lengths==NULL?0:comment_lengths[cur_ncomments];
   comment_lengths=(int *)_ogg_realloc(_tags->comment_lengths,size);
   if(OP_UNLIKELY(comment_lengths==NULL))return OP_EFAULT;
-  comment_lengths[_ncomments]=0;
+  comment_lengths[_ncomments]=binary_suffix_len;
   _tags->comment_lengths=comment_lengths;
   size=sizeof(*_tags->user_comments)*(_ncomments+1);
   if(size/sizeof(*_tags->user_comments)!=_ncomments+1)return OP_EFAULT;
+  user_comments=_tags->user_comments;
+  binary_suffix_data=user_comments==NULL?NULL:user_comments[cur_ncomments];
   user_comments=(char **)_ogg_realloc(_tags->user_comments,size);
   if(OP_UNLIKELY(user_comments==NULL))return OP_EFAULT;
-  user_comments[_ncomments]=NULL;
+  user_comments[_ncomments]=binary_suffix_data;
   _tags->user_comments=user_comments;
   return 0;
 }
@@ -186,9 +199,21 @@ static int opus_tags_parse_impl(OpusTags *_tags,
       if(_tags->user_comments[ci]==NULL)return OP_EFAULT;
       _tags->comment_lengths[ci]=(int)count;
       _tags->comments=ci+1;
+      /*Needed by opus_tags_clear() if we fail before parsing the (optional)
+         binary metadata.*/
+      _tags->user_comments[ci+1]=NULL;
     }
     _data+=count;
     len-=count;
+  }
+  if(len>0&&(_data[0]&1)){
+    if(len>(opus_uint32)INT_MAX)return OP_EFAULT;
+    if(_tags!=NULL){
+      _tags->user_comments[ncomments]=(char *)_ogg_malloc(len);
+      if(OP_UNLIKELY(_tags->user_comments[ncomments]==NULL))return OP_EFAULT;
+      memcpy(_tags->user_comments[ncomments],_data,len);
+      _tags->comment_lengths[ncomments]=(int)len;
+    }
   }
   return 0;
 }
@@ -230,6 +255,16 @@ static int opus_tags_copy_impl(OpusTags *_dst,const OpusTags *_src){
     _dst->comment_lengths[ci]=len;
     _dst->comments=ci+1;
   }
+  if(_src->comment_lengths!=NULL){
+    int len;
+    len=_src->comment_lengths[ncomments];
+    if(len>0){
+      _dst->user_comments[ncomments]=(char *)_ogg_malloc(len);
+      if(OP_UNLIKELY(_dst->user_comments[ncomments]==NULL))return OP_EFAULT;
+      memcpy(_dst->user_comments[ncomments],_src->user_comments[ncomments],len);
+      _dst->comment_lengths[ncomments]=len;
+    }
+  }
   return 0;
 }
 
@@ -255,29 +290,49 @@ int opus_tags_add(OpusTags *_tags,const char *_tag,const char *_value){
   tag_len=strlen(_tag);
   value_len=strlen(_value);
   /*+2 for '=' and '\0'.*/
-  _tags->comment_lengths[ncomments]=0;
-  _tags->user_comments[ncomments]=comment=
-   (char *)_ogg_malloc(sizeof(*comment)*(tag_len+value_len+2));
+  comment=(char *)_ogg_malloc(sizeof(*comment)*(tag_len+value_len+2));
   if(OP_UNLIKELY(comment==NULL))return OP_EFAULT;
-  _tags->comment_lengths[ncomments]=tag_len+value_len+1;
   memcpy(comment,_tag,sizeof(*comment)*tag_len);
   comment[tag_len]='=';
   memcpy(comment+tag_len+1,_value,sizeof(*comment)*(value_len+1));
+  _tags->user_comments[ncomments]=comment;
+  _tags->comment_lengths[ncomments]=tag_len+value_len+1;
+  _tags->comments=ncomments+1;
   return 0;
 }
 
 int opus_tags_add_comment(OpusTags *_tags,const char *_comment){
-  int comment_len;
-  int ncomments;
-  int ret;
+  char *comment;
+  int   comment_len;
+  int   ncomments;
+  int   ret;
   ncomments=_tags->comments;
   ret=op_tags_ensure_capacity(_tags,ncomments+1);
   if(OP_UNLIKELY(ret<0))return ret;
   comment_len=(int)strlen(_comment);
-  _tags->comment_lengths[ncomments]=0;
-  _tags->user_comments[ncomments]=op_strdup_with_len(_comment,comment_len);
-  if(OP_UNLIKELY(_tags->user_comments[ncomments]==NULL))return OP_EFAULT;
+  comment=op_strdup_with_len(_comment,comment_len);
+  if(OP_UNLIKELY(comment==NULL))return OP_EFAULT;
+  _tags->user_comments[ncomments]=comment;
   _tags->comment_lengths[ncomments]=comment_len;
+  _tags->comments=ncomments+1;
+  return 0;
+}
+
+int opus_tags_set_binary_suffix(OpusTags *_tags,
+ const unsigned char *_data,int _len){
+  unsigned char *binary_suffix_data;
+  int            ncomments;
+  int            ret;
+  if(_len<0||_len>0&&(_data==NULL||!(_data[0]&1)))return OP_EINVAL;
+  ncomments=_tags->comments;
+  ret=op_tags_ensure_capacity(_tags,ncomments);
+  if(OP_UNLIKELY(ret<0))return ret;
+  binary_suffix_data=
+   (unsigned char *)_ogg_realloc(_tags->user_comments[ncomments],_len);
+  if(OP_UNLIKELY(binary_suffix_data==NULL))return OP_EFAULT;
+  memcpy(binary_suffix_data,_data,_len);
+  _tags->user_comments[ncomments]=(char *)binary_suffix_data;
+  _tags->comment_lengths[ncomments]=_len;
   return 0;
 }
 
@@ -328,19 +383,31 @@ int opus_tags_query_count(const OpusTags *_tags,const char *_tag){
   return found;
 }
 
-int opus_tags_get_track_gain(const OpusTags *_tags,int *_gain_q8){
+const unsigned char *opus_tags_get_binary_suffix(const OpusTags *_tags,
+ int *_len){
+  int ncomments;
+  int len;
+  ncomments=_tags->comments;
+  len=_tags->comment_lengths==NULL?0:_tags->comment_lengths[ncomments];
+  *_len=len;
+  OP_ASSERT(len==0||_tags->user_comments!=NULL);
+  return len>0?(const unsigned char *)_tags->user_comments[ncomments]:NULL;
+}
+
+static int opus_tags_get_gain(const OpusTags *_tags,int *_gain_q8,
+ const char *_tag_name,size_t _tag_len){
   char **comments;
   int    ncomments;
   int    ci;
   comments=_tags->user_comments;
   ncomments=_tags->comments;
-  /*Look for the first valid R128_TRACK_GAIN tag and use that.*/
+  /*Look for the first valid tag with the name _tag_name and use that.*/
   for(ci=0;ci<ncomments;ci++){
-    if(opus_tagncompare("R128_TRACK_GAIN",15,comments[ci])==0){
+    if(opus_tagncompare(_tag_name,_tag_len,comments[ci])==0){
       char       *p;
       opus_int32  gain_q8;
       int         negative;
-      p=comments[ci]+16;
+      p=comments[ci]+_tag_len+1;
       negative=0;
       if(*p=='-'){
         negative=-1;
@@ -354,13 +421,21 @@ int opus_tags_get_track_gain(const OpusTags *_tags,int *_gain_q8){
         p++;
       }
       /*This didn't look like a signed 16-bit decimal integer.
-        Not a valid R128_TRACK_GAIN tag.*/
+        Not a valid gain tag.*/
       if(*p!='\0')continue;
       *_gain_q8=(int)(gain_q8+negative^negative);
       return 0;
     }
   }
   return OP_FALSE;
+}
+
+int opus_tags_get_album_gain(const OpusTags *_tags,int *_gain_q8){
+  return opus_tags_get_gain(_tags,_gain_q8,"R128_ALBUM_GAIN",15);
+}
+
+int opus_tags_get_track_gain(const OpusTags *_tags,int *_gain_q8){
+  return opus_tags_get_gain(_tags,_gain_q8,"R128_TRACK_GAIN",15);
 }
 
 static int op_is_jpeg(const unsigned char *_buf,size_t _buf_sz){
@@ -560,7 +635,7 @@ static int opus_picture_tag_parse_impl(OpusPictureTag *_pic,const char *_tag,
   i+=4;
   /*If one of these is set, they all must be, but colors==0 is a valid value.*/
   colors_set=width!=0||height!=0||depth!=0||colors!=0;
-  if(width==0||height==0||depth==0&&colors_set)return OP_ENOTFORMAT;
+  if((width==0||height==0||depth==0)&&colors_set)return OP_ENOTFORMAT;
   data_length=op_parse_uint32be(_buf+i);
   i+=4;
   if(data_length>_buf_sz-i)return OP_ENOTFORMAT;
