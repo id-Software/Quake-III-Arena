@@ -131,7 +131,7 @@ void compute_pulse_cache(CELTMode *m, int LM)
    for (i=0;i<nbEntries;i++)
    {
       unsigned char *ptr = bits+entryI[i];
-      opus_int16 tmp[MAX_PULSES+1];
+      opus_int16 tmp[CELT_MAX_PULSES+1];
       get_required_bits(tmp, entryN[i], get_pulses(entryK[i]), BITRES);
       for (j=1;j<=entryK[i];j++)
          ptr[j] = tmp[get_pulses(j)]-1;
@@ -296,7 +296,7 @@ static OPUS_INLINE int interp_bits2pulses(const CELTMode *m, int start, int end,
    done = 0;
    for (j=end;j-->start;)
    {
-      int tmp = bits1[j] + (lo*bits2[j]>>ALLOC_STEPS);
+      int tmp = bits1[j] + ((opus_int32)lo*bits2[j]>>ALLOC_STEPS);
       if (tmp < thresh[j] && !done)
       {
          if (tmp >= alloc_floor)
@@ -333,7 +333,7 @@ static OPUS_INLINE int interp_bits2pulses(const CELTMode *m, int start, int end,
       /*Figure out how many left-over bits we would be adding to this band.
         This can include bits we've stolen back from higher, skipped bands.*/
       left = total-psum;
-      percoeff = left/(m->eBands[codedBands]-m->eBands[start]);
+      percoeff = celt_udiv(left, m->eBands[codedBands]-m->eBands[start]);
       left -= (m->eBands[codedBands]-m->eBands[start])*percoeff;
       rem = IMAX(left-(m->eBands[j]-m->eBands[start]),0);
       band_width = m->eBands[codedBands]-m->eBands[j];
@@ -414,7 +414,7 @@ static OPUS_INLINE int interp_bits2pulses(const CELTMode *m, int start, int end,
 
    /* Allocate the remaining bits */
    left = total-psum;
-   percoeff = left/(m->eBands[codedBands]-m->eBands[start]);
+   percoeff = celt_udiv(left, m->eBands[codedBands]-m->eBands[start]);
    left -= (m->eBands[codedBands]-m->eBands[start])*percoeff;
    for (j=start;j<codedBands;j++)
       bits[j] += ((int)percoeff*(m->eBands[j+1]-m->eBands[j]));
@@ -465,7 +465,8 @@ static OPUS_INLINE int interp_bits2pulses(const CELTMode *m, int start, int end,
             offset += NClogN>>3;
 
          /* Divide with rounding */
-         ebits[j] = IMAX(0, (bits[j] + offset + (den<<(BITRES-1))) / (den<<BITRES));
+         ebits[j] = IMAX(0, (bits[j] + offset + (den<<(BITRES-1))));
+         ebits[j] = celt_udiv(ebits[j], den)>>BITRES;
 
          /* Make sure not to bust */
          if (C*ebits[j] > (bits[j]>>BITRES))
