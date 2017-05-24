@@ -842,3 +842,14 @@ qboolean Sys_PIDIsRunning( int pid )
 
 	return qfalse;
 }
+
+/*
+=================
+Sys_DllExtension
+
+Check if filename should be allowed to be loaded as a DLL.
+=================
+*/
+qboolean Sys_DllExtension( const char *name ) {
+	return COM_CompareExtension( name, DLL_EXT );
+}

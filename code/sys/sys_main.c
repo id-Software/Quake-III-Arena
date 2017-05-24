@@ -499,11 +499,10 @@ from executable path, then fs_basepath.
 void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 {
 	void *dllhandle;
-	
-	// Don't load any DLLs that end with the pk3 extension
-	if (COM_CompareExtension(name, ".pk3"))
+
+	if(!Sys_DllExtension(name))
 	{
-		Com_Printf("Rejecting DLL named \"%s\"", name);
+		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", name);
 		return NULL;
 	}
 
@@ -560,6 +559,12 @@ void *Sys_LoadGameDll(const char *name,
 	void (*dllEntry)(intptr_t (*syscallptr)(intptr_t, ...));
 
 	assert(name);
+
+	if(!Sys_DllExtension(name))
+	{
+		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", name);
+		return NULL;
+	}
 
 	Com_Printf( "Loading DLL file: %s\n", name);
 	libHandle = Sys_LoadLibrary(name);
