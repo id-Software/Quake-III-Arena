@@ -815,7 +815,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		return;
 	}
 
-	// the intermission has allready been qualified for, so don't
+	// the intermission has already been qualified for, so don't
 	// allow any extra scoring
 	if ( level.intermissionQueued ) {
 		return;
