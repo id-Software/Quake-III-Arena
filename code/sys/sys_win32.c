@@ -39,6 +39,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <psapi.h>
 #include <float.h>
 
+#ifndef KEY_WOW64_32KEY
+#define KEY_WOW64_32KEY 0x0200
+#endif
+
 // Used to determine where to store user-specific files
 static char homePath[ MAX_OSPATH ] = { 0 };
 
