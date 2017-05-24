@@ -513,16 +513,25 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 	{
 		const char *topDir;
 		char libPath[MAX_OSPATH];
+		int len;
 
 		topDir = Sys_BinaryPath();
 
 		if(!*topDir)
 			topDir = ".";
 
-		Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, topDir);
-		Com_sprintf(libPath, sizeof(libPath), "%s%c%s", topDir, PATH_SEP, name);
+		len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", topDir, PATH_SEP, name);
+		if(len < sizeof(libPath))
+		{
+			Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, topDir);
+			dllhandle = Sys_LoadLibrary(libPath);
+		}
+		else
+		{
+			Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", name, topDir);
+		}
 
-		if(!(dllhandle = Sys_LoadLibrary(libPath)))
+		if(!dllhandle)
 		{
 			const char *basePath = Cvar_VariableString("fs_basepath");
 			
@@ -531,9 +540,16 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 			
 			if(FS_FilenameCompare(topDir, basePath))
 			{
-				Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, basePath);
-				Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, name);
-				dllhandle = Sys_LoadLibrary(libPath);
+				len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, name);
+				if(len < sizeof(libPath))
+				{
+					Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, basePath);
+					dllhandle = Sys_LoadLibrary(libPath);
+				}
+				else
+				{
+					Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", name, basePath);
+				}
 			}
 			
 			if(!dllhandle)
