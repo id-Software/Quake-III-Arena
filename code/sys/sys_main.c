@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ctype.h>
 #include <errno.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 #ifndef DEDICATED
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL.h"
@@ -658,6 +662,48 @@ int main( int argc, char **argv )
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
+
+#ifdef USE_AUTOUPDATER
+{
+    #ifndef AUTOUPDATER_BIN
+    #error The build system should have defined AUTOUPDATER_BIN
+    #endif
+
+	int updater_pipes[2];
+	if (pipe(updater_pipes) == 0)
+	{
+		pid_t pid = fork();
+		if (pid == -1)  /* failure, oh well. */
+		{
+			close(updater_pipes[0]);
+			close(updater_pipes[1]);
+		}
+		else if (pid == 0)  /* child process */
+		{
+			close(updater_pipes[1]);  /* don't need write end. */
+			if (dup2(updater_pipes[0], 3) != -1)
+			{
+				char pidstr[64];
+				char *ptr = strrchr(argv[0], '/');
+				if (ptr)
+					*ptr = '\0';
+				chdir(argv[0]);
+                #ifdef __APPLE__
+                chdir("../..");  /* put this at base of app bundle so paths make sense later. */
+                #endif
+				snprintf(pidstr, sizeof (pidstr), "%lld", (long long) getppid());
+				execl(AUTOUPDATER_BIN, AUTOUPDATER_BIN, "--waitpid", pidstr, NULL);
+			}
+			_exit(0);  /* oh well. */
+		}
+		else   /* parent process */
+		{
+			/* leave the write end open until we terminate so updater can block on it. */
+			close(updater_pipes[0]);
+		}
+	}
+}
+#endif
 
 #ifndef DEDICATED
 	// SDL version check

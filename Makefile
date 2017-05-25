@@ -35,6 +35,9 @@ endif
 ifndef BUILD_RENDERER_OPENGL2
   BUILD_RENDERER_OPENGL2=
 endif
+ifndef BUILD_AUTOUPDATER
+  BUILD_AUTOUPDATER=
+endif
 
 #############################################################################
 #
@@ -228,6 +231,10 @@ ifndef USE_YACC
 USE_YACC=0
 endif
 
+ifndef USE_AUTOUPDATER
+USE_AUTOUPDATER=1
+endif
+
 ifndef DEBUG_CFLAGS
 DEBUG_CFLAGS=-ggdb -O0
 endif
@@ -262,6 +269,7 @@ LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
+AUTOUPDATERSRCDIR=$(MOUNT_DIR)/autoupdater
 LOKISETUPDIR=misc/setup
 NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL2
@@ -269,29 +277,30 @@ LIBSDIR=$(MOUNT_DIR)/libs
 
 bin_path=$(shell which $(1) 2> /dev/null)
 
+# The autoupdater uses curl, so figure out its flags no matter what.
 # We won't need this if we only build the server
-ifneq ($(BUILD_CLIENT),0)
-  # set PKG_CONFIG_PATH to influence this, e.g.
-  # PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
-  ifneq ($(call bin_path, pkg-config),)
-    CURL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags libcurl)
-    CURL_LIBS ?= $(shell pkg-config --silence-errors --libs libcurl)
-    OPENAL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags openal)
-    OPENAL_LIBS ?= $(shell pkg-config --silence-errors --libs openal)
-    SDL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags sdl2|sed 's/-Dmain=SDL_main//')
-    SDL_LIBS ?= $(shell pkg-config --silence-errors --libs sdl2)
-    FREETYPE_CFLAGS ?= $(shell pkg-config --silence-errors --cflags freetype2)
-  else
-    # assume they're in the system default paths (no -I or -L needed)
-    CURL_LIBS ?= -lcurl
-    OPENAL_LIBS ?= -lopenal
-  endif
-  # Use sdl2-config if all else fails
-  ifeq ($(SDL_CFLAGS),)
-    ifneq ($(call bin_path, sdl2-config),)
-      SDL_CFLAGS ?= $(shell sdl2-config --cflags)
-      SDL_LIBS ?= $(shell sdl2-config --libs)
-    endif
+
+# set PKG_CONFIG_PATH to influence this, e.g.
+# PKG_CONFIG_PATH=/opt/cross/i386-mingw32msvc/lib/pkgconfig
+ifneq ($(call bin_path, pkg-config),)
+  CURL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags libcurl)
+  CURL_LIBS ?= $(shell pkg-config --silence-errors --libs libcurl)
+  OPENAL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags openal)
+  OPENAL_LIBS ?= $(shell pkg-config --silence-errors --libs openal)
+  SDL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags sdl2|sed 's/-Dmain=SDL_main//')
+  SDL_LIBS ?= $(shell pkg-config --silence-errors --libs sdl2)
+  FREETYPE_CFLAGS ?= $(shell pkg-config --silence-errors --cflags freetype2)
+else
+  # assume they're in the system default paths (no -I or -L needed)
+  CURL_LIBS ?= -lcurl
+  OPENAL_LIBS ?= -lopenal
+endif
+
+# Use sdl2-config if all else fails
+ifeq ($(SDL_CFLAGS),)
+  ifneq ($(call bin_path, sdl2-config),)
+    SDL_CFLAGS ?= $(shell sdl2-config --cflags)
+    SDL_LIBS ?= $(shell sdl2-config --libs)
   endif
 endif
 
@@ -975,6 +984,11 @@ ifneq ($(BUILD_GAME_QVM),0)
   endif
 endif
 
+ifneq ($(BUILD_AUTOUPDATER),0)
+  AUTOUPDATER_BIN := autoupdater$(FULLBINEXT)
+  TARGETS += $(B)/$(AUTOUPDATER_BIN)
+endif
+
 ifeq ($(USE_OPENAL),1)
   CLIENT_CFLAGS += -DUSE_OPENAL
   ifeq ($(USE_OPENAL_DLOPEN),1)
@@ -1073,6 +1087,11 @@ ifeq ($(USE_FREETYPE),1)
 
   BASE_CFLAGS += -DBUILD_FREETYPE $(FREETYPE_CFLAGS)
   RENDERER_LIBS += $(FREETYPE_LIBS)
+endif
+
+ifeq ($(USE_AUTOUPDATER),1)
+  CLIENT_CFLAGS += -DUSE_AUTOUPDATER -DAUTOUPDATER_BIN=\\\"$(AUTOUPDATER_BIN)\\\"
+  SERVER_CFLAGS += -DUSE_AUTOUPDATER -DAUTOUPDATER_BIN=\\\"$(AUTOUPDATER_BIN)\\\"
 endif
 
 ifeq ("$(CC)", $(findstring "$(CC)", "clang" "clang++"))
@@ -1331,6 +1350,7 @@ endif
 makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
 	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
+	@if [ ! -d $(B)/autoupdater ];then $(MKDIR) $(B)/autoupdater;fi
 	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
 	@if [ ! -d $(B)/client/opus ];then $(MKDIR) $(B)/client/opus;fi
 	@if [ ! -d $(B)/client/vorbis ];then $(MKDIR) $(B)/client/vorbis;fi
@@ -1548,6 +1568,27 @@ $(B)/tools/asm/%.o: $(Q3ASMDIR)/%.c
 $(Q3ASM): $(Q3ASMOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(TOOLS_CC) $(TOOLS_CFLAGS) $(TOOLS_LDFLAGS) -o $@ $^ $(TOOLS_LIBS)
+
+
+#############################################################################
+# AUTOUPDATER
+#############################################################################
+
+define DO_AUTOUPDATER_CC
+$(echo_cmd) "AUTOUPDATER_CC $<"
+$(Q)$(TOOLS_CC) $(CFLAGS) $(CURL_CFLAGS) -o $@ -c $<
+endef
+
+Q3AUTOUPDATEROBJ = \
+  $(B)/autoupdater/autoupdater.o \
+  $(B)/autoupdater/sha256.o \
+
+$(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
+	$(DO_AUTOUPDATER_CC)
+
+$(B)/$(AUTOUPDATER_BIN): $(Q3AUTOUPDATEROBJ)
+	$(echo_cmd) "AUTOUPDATER_LD $@"
+	$(Q)$(CC) $(LDFLAGS) $(CURL_LIBS) -o $@ $(Q3AUTOUPDATEROBJ)
 
 
 #############################################################################
