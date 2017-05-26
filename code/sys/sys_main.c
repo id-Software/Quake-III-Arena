@@ -498,7 +498,7 @@ from executable path, then fs_basepath.
 
 void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 {
-	void *dllhandle;
+	void *dllhandle = NULL;
 
 	if(!Sys_DllExtension(name))
 	{
@@ -507,9 +507,12 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 	}
 
 	if(useSystemLib)
+	{
 		Com_Printf("Trying to load \"%s\"...\n", name);
+		dllhandle = Sys_LoadLibrary(name);
+	}
 	
-	if(!useSystemLib || !(dllhandle = Sys_LoadLibrary(name)))
+	if(!dllhandle)
 	{
 		const char *topDir;
 		char libPath[MAX_OSPATH];
