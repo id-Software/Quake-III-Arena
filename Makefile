@@ -1581,7 +1581,7 @@ endef
 
 Q3AUTOUPDATEROBJ = \
   $(B)/autoupdater/autoupdater.o \
-  $(B)/autoupdater/sha256.o \
+  $(B)/autoupdater/sha256.o
 
 $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 	$(DO_AUTOUPDATER_CC)
