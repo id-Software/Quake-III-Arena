@@ -1576,7 +1576,7 @@ $(Q3ASM): $(Q3ASMOBJ)
 
 define DO_AUTOUPDATER_CC
 $(echo_cmd) "AUTOUPDATER_CC $<"
-$(Q)$(TOOLS_CC) $(CFLAGS) $(CURL_CFLAGS) -o $@ -c $<
+$(Q)$(CC) $(CFLAGS) $(CURL_CFLAGS) -o $@ -c $<
 endef
 
 Q3AUTOUPDATEROBJ = \
