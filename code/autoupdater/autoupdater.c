@@ -76,7 +76,7 @@ typedef struct ManifestItem
     struct ManifestItem *next;
 } ManifestItem;
 
-static ManifestItem *manifest;
+static ManifestItem *manifest = NULL;
 
 static void freeManifest(void)
 {
@@ -90,6 +90,22 @@ static void freeManifest(void)
         item = next;
     }
     manifest = NULL;
+}
+
+static const char *timestamp(void)
+{
+    time_t t = time(NULL);
+    char *retval = asctime(localtime(&t));
+    if (retval) {
+        char *ptr;
+        for (ptr = retval; *ptr; ptr++) {
+            if ((*ptr == '\r') || (*ptr == '\n')) {
+                *ptr = '\0';
+                break;
+            }
+        }
+    }
+    return retval ? retval : "[date unknown]";
 }
 
 
@@ -140,8 +156,10 @@ static void die(const char *why) NEVER_RETURNS;
 static void die(const char *why)
 {
     infof("FAILURE: %s", why);
+    curl_global_cleanup();
     restoreRollbacks();
     freeManifest();
+    infof("Updater ending (in failure), %s", timestamp());
     exit(1);
 }
 
@@ -626,22 +644,6 @@ static void deleteRollbacks(void)
             remove(rollbackPath);
         }
     }
-}
-
-static const char *timestamp(void)
-{
-    time_t t = time(NULL);
-    char *retval = asctime(localtime(&t));
-    if (retval) {
-        char *ptr;
-        for (ptr = retval; *ptr; ptr++) {
-            if ((*ptr == '\r') || (*ptr == '\n')) {
-                *ptr = '\0';
-                break;
-            }
-        }
-    }
-    return retval ? retval : "[date unknown]";
 }
 
 static void chdirToBasePath(const char *argv0)
