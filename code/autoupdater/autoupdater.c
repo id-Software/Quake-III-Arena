@@ -145,8 +145,8 @@ static void die(const char *why)
     exit(1);
 }
 
-static void outOfMemory() NEVER_RETURNS;
-static void outOfMemory()
+static void outOfMemory(void) NEVER_RETURNS;
+static void outOfMemory(void)
 {
     die("Out of memory");
 }
