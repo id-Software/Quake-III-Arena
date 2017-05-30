@@ -1588,7 +1588,7 @@ $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 
 $(B)/$(AUTOUPDATER_BIN): $(Q3AUTOUPDATEROBJ)
 	$(echo_cmd) "AUTOUPDATER_LD $@"
-	$(Q)$(CC) $(LDFLAGS) $(CURL_LIBS) -o $@ $(Q3AUTOUPDATEROBJ)
+	$(Q)$(CC) $(LDFLAGS) -o $@ $(Q3AUTOUPDATEROBJ) $(CURL_LIBS)
 
 
 #############################################################################
