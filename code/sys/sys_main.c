@@ -31,8 +31,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ctype.h>
 #include <errno.h>
 
-#ifndef _WIN32
+#ifdef USE_AUTOUPDATER
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 #endif
 
 #ifndef DEDICATED
@@ -669,6 +674,20 @@ int main( int argc, char **argv )
     #error The build system should have defined AUTOUPDATER_BIN
     #endif
 
+	#ifdef _WIN32
+	{
+		/* We don't need the Unix pipe() tapdance here because Windows lets children wait on parent processes. */
+		PROCESS_INFORMATION procinfo;
+		char cmdline[128];
+		Com_sprintf(cmdline, sizeof (cmdline), AUTOUPDATER_BIN " --waitpid %u", (unsigned int) GetCurrentProcessId());
+		if (CreateProcessA(AUTOUPDATER_BIN, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, NULL, &procinfo))
+		{
+			/* close handles now so child cleans up immediately if nothing to do */
+			CloseHandle(procinfo.hProcess);
+			CloseHandle(procinfo.hThread);
+		}
+	}
+	#else
 	int updater_pipes[2];
 	if (pipe(updater_pipes) == 0)
 	{
@@ -702,6 +721,7 @@ int main( int argc, char **argv )
 			close(updater_pipes[0]);
 		}
 	}
+    #endif
 }
 #endif
 
