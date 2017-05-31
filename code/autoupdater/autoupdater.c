@@ -651,10 +651,10 @@ static void applyUpdates(void)
         }
 
         io = fopen(item->fname, "rb");
-        fclose(io);
         if (io != NULL) {
             static int rollbackIndex = 0;
             char rollbackPath[64];
+            fclose(io);
             item->rollback = ++rollbackIndex;
             snprintf(rollbackPath, sizeof (rollbackPath), "updates/rollbacks/%d", rollbackIndex);
             infof("Moving file for rollback: '%s' -> '%s'", item->fname, rollbackPath);
