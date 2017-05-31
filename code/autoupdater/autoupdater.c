@@ -151,8 +151,61 @@ static void restoreRollbacks(void)
     }
 }
 
-
 static void die(const char *why) NEVER_RETURNS;
+
+
+#ifndef _WIN32  /* hooray for Unix linker hostility! */
+#undef curl_easy_setopt
+#include <dlfcn.h>
+typedef void (*CURLFN_curl_easy_cleanup)(CURL *curl);
+typedef CURL *(*CURLFN_curl_easy_init)(void);
+typedef CURLcode (*CURLFN_curl_easy_setopt)(CURL *curl, CURLoption option, ...);
+typedef CURLcode (*CURLFN_curl_easy_perform)(CURL *curl);
+typedef CURLcode (*CURLFN_curl_global_init)(long flags);
+typedef void (*CURLFN_curl_global_cleanup)(void);
+
+static CURLFN_curl_easy_cleanup CURL_curl_easy_cleanup;
+static CURLFN_curl_easy_init CURL_curl_easy_init;
+static CURLFN_curl_easy_setopt CURL_curl_easy_setopt;
+static CURLFN_curl_easy_perform CURL_curl_easy_perform;
+static CURLFN_curl_global_init CURL_curl_global_init;
+static CURLFN_curl_global_cleanup CURL_curl_global_cleanup;
+
+static void load_libcurl(void)
+{
+    #ifdef __APPLE__
+    const char *libname = "libcurl.4.dylib";
+    #else
+    const char *libname = "libcurl.so.4";
+    #endif
+
+    void *handle = dlopen(libname, RTLD_NOW | RTLD_GLOBAL);
+    if (!handle) {
+        infof("dlopen(\"%s\") failed: %s", libname, dlerror());
+        die("Failed to load libcurl library");
+    }
+    #define LOADCURLSYM(fn) \
+        if ((CURL_##fn = (CURLFN_##fn) dlsym(handle, #fn)) == NULL) { \
+            die("Failed to load libcurl symbol '" #fn "'"); \
+        }
+
+    LOADCURLSYM(curl_easy_cleanup);
+    LOADCURLSYM(curl_easy_init);
+    LOADCURLSYM(curl_easy_setopt);
+    LOADCURLSYM(curl_easy_perform);
+    LOADCURLSYM(curl_global_init);
+    LOADCURLSYM(curl_global_cleanup);
+}
+
+#define curl_easy_cleanup CURL_curl_easy_cleanup
+#define curl_easy_init CURL_curl_easy_init
+#define curl_easy_setopt CURL_curl_easy_setopt
+#define curl_easy_perform CURL_curl_easy_perform
+#define curl_global_init CURL_curl_global_init
+#define curl_global_cleanup CURL_curl_global_cleanup
+#endif
+
+
 static void die(const char *why)
 {
     infof("FAILURE: %s", why);
@@ -695,6 +748,10 @@ int main(int argc, char **argv)
     if (options.updateself) {
         upgradeSelfAndRestart(argv[0]);
     }
+
+    #ifndef _WIN32
+    load_libcurl();
+    #endif
 
     if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
         die("curl_global_init() failed!");
