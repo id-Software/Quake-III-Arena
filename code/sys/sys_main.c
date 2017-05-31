@@ -670,9 +670,9 @@ int main( int argc, char **argv )
 
 #ifdef USE_AUTOUPDATER
 {
-    #ifndef AUTOUPDATER_BIN
-    #error The build system should have defined AUTOUPDATER_BIN
-    #endif
+	#ifndef AUTOUPDATER_BIN
+	#error The build system should have defined AUTOUPDATER_BIN
+	#endif
 
 	#ifdef _WIN32
 	{
@@ -707,9 +707,9 @@ int main( int argc, char **argv )
 				if (ptr)
 					*ptr = '\0';
 				chdir(argv[0]);
-                #ifdef __APPLE__
-                chdir("../..");  /* put this at base of app bundle so paths make sense later. */
-                #endif
+				#ifdef __APPLE__
+				chdir("../..");  /* put this at base of app bundle so paths make sense later. */
+				#endif
 				snprintf(pidstr, sizeof (pidstr), "%lld", (long long) getppid());
 				execl(AUTOUPDATER_BIN, AUTOUPDATER_BIN, "--waitpid", pidstr, NULL);
 			}
@@ -721,7 +721,7 @@ int main( int argc, char **argv )
 			close(updater_pipes[0]);
 		}
 	}
-    #endif
+	#endif
 }
 #endif
 
