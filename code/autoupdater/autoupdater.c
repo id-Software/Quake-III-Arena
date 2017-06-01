@@ -399,7 +399,7 @@ static void parseManifest(const char *fname)
         if (!item) {
             infof("Next manifest item: %s", buf);
 
-            item = (ManifestItem *) malloc(sizeof (ManifestItem));
+            item = (ManifestItem *) calloc(1, sizeof (ManifestItem));
             if (!item) {
                 outOfMemory();
             }
