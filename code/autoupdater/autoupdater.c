@@ -40,7 +40,7 @@ is licensed until the GPLv2. Do not mingle code, please!
 #endif
 
 #ifdef __i386__
-#define AUTOUPDATE_ARCH "i386"
+#define AUTOUPDATE_ARCH "x86"
 #elif defined(__x86_64__)
 #define AUTOUPDATE_ARCH "x86-64"
 #else
