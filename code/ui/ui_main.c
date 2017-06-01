@@ -5779,7 +5779,7 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_blueteam3, "ui_blueteam3", "0", CVAR_ARCHIVE },
 	{ &ui_blueteam4, "ui_blueteam4", "0", CVAR_ARCHIVE },
 	{ &ui_blueteam5, "ui_blueteam5", "0", CVAR_ARCHIVE },
-	{ &ui_netSource, "ui_netSource", "0", CVAR_ARCHIVE },
+	{ &ui_netSource, "ui_netSource", "1", CVAR_ARCHIVE },
 	{ &ui_menuFiles, "ui_menuFiles", "ui/menus.txt", CVAR_ARCHIVE },
 	{ &ui_currentTier, "ui_currentTier", "0", CVAR_ARCHIVE },
 	{ &ui_currentMap, "ui_currentMap", "0", CVAR_ARCHIVE },
