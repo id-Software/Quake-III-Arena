@@ -1073,10 +1073,10 @@ static void ArenaServers_StartRefresh( void )
 		protocol[0] = '\0';
 		trap_Cvar_VariableStringBuffer( "debug_protocol", protocol, sizeof(protocol) );
 		if (strlen(protocol)) {
-			trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %s%s\n", g_servertype - 1, protocol, myargs ));
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %s%s\n", g_servertype - UIAS_GLOBAL1, protocol, myargs ));
 		}
 		else {
-			trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %d%s\n", g_servertype - 1, (int)trap_Cvar_VariableValue( "protocol" ), myargs ) );
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %d%s\n", g_servertype - UIAS_GLOBAL1, (int)trap_Cvar_VariableValue( "protocol" ), myargs ) );
 		}
 	}
 }
