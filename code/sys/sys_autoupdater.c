@@ -26,9 +26,14 @@ void Sys_LaunchAutoupdater(int argc, char **argv)
 	{
 		/* We don't need the Unix pipe() tapdance here because Windows lets children wait on parent processes. */
 		PROCESS_INFORMATION procinfo;
+		STARTUPINFO startinfo;
 		char cmdline[128];
-		sprintf(cmdline, AUTOUPDATER_BIN " --waitpid %u", (unsigned int) GetCurrentProcessId());
-		if (CreateProcessA(AUTOUPDATER_BIN, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, NULL, &procinfo))
+		memset(&procinfo, '\0', sizeof (procinfo));
+		memset(&startinfo, '\0', sizeof (startinfo));
+		startinfo.cb = sizeof (startinfo);
+		sprintf(cmdline, "" AUTOUPDATER_BIN " --waitpid %u", (unsigned int) GetCurrentProcessId());
+
+		if (CreateProcessA(AUTOUPDATER_BIN, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &startinfo, &procinfo))
 		{
 			/* close handles now so child cleans up immediately if nothing to do */
 			CloseHandle(procinfo.hProcess);

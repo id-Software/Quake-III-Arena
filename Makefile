@@ -592,6 +592,8 @@ ifdef MINGW
   endif
 
   LIBS= -lws2_32 -lwinmm -lpsapi
+  AUTOUPDATER_LIBS += -lwininet
+
   # clang 3.4 doesn't support this
   ifneq ("$(CC)", $(findstring "$(CC)", "clang" "clang++"))
     CLIENT_LDFLAGS += -mwindows
@@ -985,7 +987,12 @@ ifneq ($(BUILD_GAME_QVM),0)
 endif
 
 ifneq ($(BUILD_AUTOUPDATER),0)
-  AUTOUPDATER_BIN := autoupdater$(FULLBINEXT)
+  # PLEASE NOTE that if you run an exe on Windows Vista or later
+  #  with "setup", "install", "update" or other related terms, it
+  #  will unconditionally trigger a UAC prompt, and in the case of
+  #  ioq3 calling CreateProcess() on it, it'll just fail immediately.
+  #  So don't call this thing "autoupdater" here!
+  AUTOUPDATER_BIN := autosyncerator$(FULLBINEXT)
   TARGETS += $(B)/$(AUTOUPDATER_BIN)
 endif
 
@@ -1325,6 +1332,9 @@ endif
 	@echo "  CLIENT_LIBS:"
 	$(call print_wrapped, $(CLIENT_LIBS))
 	@echo ""
+	@echo "  AUTOUPDATER_LIBS:"
+	$(call print_wrapped, $(AUTOUPDATER_LIBS))
+	@echo ""
 	@echo "  Output:"
 	$(call print_list, $(NAKED_TARGETS))
 	@echo ""
@@ -1588,7 +1598,7 @@ $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 
 $(B)/$(AUTOUPDATER_BIN): $(Q3AUTOUPDATEROBJ)
 	$(echo_cmd) "AUTOUPDATER_LD $@"
-	$(Q)$(CC) $(LDFLAGS) -o $@ $(Q3AUTOUPDATEROBJ) $(LIBS)
+	$(Q)$(CC) $(LDFLAGS) -o $@ $(Q3AUTOUPDATEROBJ) $(AUTOUPDATER_LIBS)
 
 
 #############################################################################

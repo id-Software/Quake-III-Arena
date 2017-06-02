@@ -6,15 +6,36 @@ is licensed until the GPLv2. Do not mingle code, please!
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <stdarg.h>
 
+#ifdef _MSC_VER
+typedef __int64 int64_t;
+#else
+#include <stdint.h>
+#endif
+
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <signal.h>
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
+#include <wininet.h>
+#include <tlhelp32.h>
+#define PIDFMT "%u"
+#define PIDFMTCAST unsigned int
+typedef DWORD PID;
+#else
+#include <signal.h>
 #include <curl/curl.h>
+typedef pid_t PID;
+#define PIDFMT "%llu"
+#define PIDFMTCAST unsigned long long
+#endif
+
 #include "sha256.h"
+
 
 #ifndef AUTOUPDATE_USER_AGENT
 #define AUTOUPDATE_USER_AGENT "ioq3autoupdater/0.1"
@@ -35,6 +56,8 @@ is licensed until the GPLv2. Do not mingle code, please!
 #define AUTOUPDATE_PLATFORM "mac"
 #elif defined(__linux__)
 #define AUTOUPDATE_PLATFORM "linux"
+#elif defined(_WIN32)
+#define AUTOUPDATE_PLATFORM "windows"
 #else
 #error Please define your platform.
 #endif
@@ -154,7 +177,146 @@ static void restoreRollbacks(void)
 static void die(const char *why) NEVER_RETURNS;
 
 
-#ifndef _WIN32  /* hooray for Unix linker hostility! */
+
+#ifdef _WIN32
+
+#define chmod(a,b) do {} while (0)
+#define makeDir(path) mkdir(path)
+
+static void windowsWaitForProcessToDie(const DWORD pid)
+{
+    HANDLE h;
+    infof("Waiting on process ID #%u", (unsigned int) pid);
+    h = OpenProcess(SYNCHRONIZE, FALSE, pid);
+    if (!h) {
+// !!! FIXME: what does this return if process is already dead?  
+        die("OpenProcess failed");
+    }
+    if (WaitForSingleObject(h, INFINITE) != WAIT_OBJECT_0) {
+        die("WaitForSingleObject failed");
+    }
+    CloseHandle(h);
+}
+
+static void launchProcess(const char *exe, ...)
+{
+     PROCESS_INFORMATION procinfo;
+     STARTUPINFO startinfo;
+     va_list ap;
+     char cmdline[1024];
+     char *ptr = cmdline;
+     size_t totallen = 0;
+     const char *arg = NULL;
+
+     #define APPENDCMDLINE(str) { \
+        const size_t len = strlen(str); \
+        totallen += len; \
+        if ((totallen + 1) < sizeof (cmdline)) { \
+            strcpy(ptr, str); \
+            ptr += len; \
+        } \
+     }
+
+     va_start(ap, exe);
+     APPENDCMDLINE(exe);
+     while ((arg = va_arg(ap, const char *)) != NULL) {
+         APPENDCMDLINE(arg);
+     }
+     va_end(ap);
+
+     if (totallen >= sizeof (cmdline)) {
+        die("command line too long to launch.");
+     }
+
+     cmdline[totallen] = 0;
+
+     infof("launching process '%s' with cmdline '%s'", exe, cmdline);
+
+     memset(&procinfo, '\0', sizeof (procinfo));
+     memset(&startinfo, '\0', sizeof (startinfo));
+     startinfo.cb = sizeof (startinfo);
+     if (CreateProcessA(exe, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &startinfo, &procinfo))
+     {
+         CloseHandle(procinfo.hProcess);
+         CloseHandle(procinfo.hThread);
+         exit(0);  /* we're done, it's launched. */
+     }
+
+     infof("CreateProcess failed: err=%d", (int) GetLastError());
+}
+
+static HINTERNET hInternet;
+static void prepHttpLib(void)
+{
+    hInternet = InternetOpenA(AUTOUPDATE_USER_AGENT,
+                              INTERNET_OPEN_TYPE_PRECONFIG,
+                              NULL, NULL, 0);
+    if (!hInternet) {
+        die("InternetOpen failed");
+    }
+}
+
+static void shutdownHttpLib(void)
+{
+    if (hInternet) {
+        InternetCloseHandle(hInternet);
+        hInternet = NULL;
+    }
+}
+
+static int runHttpDownload(const char *from, FILE *to)
+{
+    /* !!! FIXME: some of this could benefit from GetLastError+FormatMessage. */
+    int retval = 0;
+    DWORD httpcode = 0;
+    DWORD dwordlen = sizeof (DWORD);
+    DWORD zero = 0;
+    HINTERNET hUrl = InternetOpenUrlA(hInternet, from, NULL, 0,
+                                INTERNET_FLAG_HYPERLINK |
+                                INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP |
+                                INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+                                INTERNET_FLAG_NO_CACHE_WRITE |
+                                INTERNET_FLAG_NO_COOKIES |
+                                INTERNET_FLAG_NO_UI |
+                                INTERNET_FLAG_RESYNCHRONIZE |
+                                INTERNET_FLAG_RELOAD |
+                                INTERNET_FLAG_SECURE, 0);
+
+    if (!hUrl) {
+        infof("InternetOpenUrl failed. err=%d", (int) GetLastError());
+    } else if (!HttpQueryInfo(hUrl, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &httpcode, &dwordlen, &zero)) {
+        infof("HttpQueryInfo failed. err=%d", (int) GetLastError());
+    } else if (httpcode != 200) {
+        infof("HTTP request failed with response code %d", (int) httpcode);
+    } else {
+        while (1) {
+            DWORD br = 0;
+            BYTE buf[1024 * 64];
+            if (!InternetReadFile(hUrl, buf, sizeof (buf), &br)) {
+                infof("InternetReadFile failed. err=%d", (int) GetLastError());
+                break;
+            } else if (br == 0) {
+                retval = 1;
+                break;  /* done! */
+            } else {
+                if (fwrite(buf, br, 1, to) != 1) {
+                    info("fwrite failed");
+                    break;
+                }
+            }
+        }
+    }
+
+    InternetCloseHandle(hUrl);
+    return retval;
+}
+
+#else  /* Everything that isn't Windows. */
+
+#define launchProcess execl
+#define makeDir(path) mkdir(path, 0777)
+
+/* hooray for Unix linker hostility! */
 #undef curl_easy_setopt
 #include <dlfcn.h>
 typedef void (*CURLFN_curl_easy_cleanup)(CURL *curl);
@@ -171,7 +333,7 @@ static CURLFN_curl_easy_perform CURL_curl_easy_perform;
 static CURLFN_curl_global_init CURL_curl_global_init;
 static CURLFN_curl_global_cleanup CURL_curl_global_cleanup;
 
-static void load_libcurl(void)
+static void prepHttpLib(void)
 {
     #ifdef __APPLE__
     const char *libname = "libcurl.4.dylib";
@@ -195,21 +357,69 @@ static void load_libcurl(void)
     LOADCURLSYM(curl_easy_perform);
     LOADCURLSYM(curl_global_init);
     LOADCURLSYM(curl_global_cleanup);
+
+    #define curl_easy_cleanup CURL_curl_easy_cleanup
+    #define curl_easy_init CURL_curl_easy_init
+    #define curl_easy_setopt CURL_curl_easy_setopt
+    #define curl_easy_perform CURL_curl_easy_perform
+    #define curl_global_init CURL_curl_global_init
+    #define curl_global_cleanup CURL_curl_global_cleanup
+
+    if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
+        die("curl_global_init() failed!");
+    }
 }
 
-#define curl_easy_cleanup CURL_curl_easy_cleanup
-#define curl_easy_init CURL_curl_easy_init
-#define curl_easy_setopt CURL_curl_easy_setopt
-#define curl_easy_perform CURL_curl_easy_perform
-#define curl_global_init CURL_curl_global_init
-#define curl_global_cleanup CURL_curl_global_cleanup
+static void shutdownHttpLib(void)
+{
+    if (curl_global_cleanup) {
+        curl_global_cleanup();
+    }
+}
+
+static int runHttpDownload(const char *from, FILE *to)
+{
+    int retval;
+    CURL *curl = curl_easy_init();
+    if (!curl) {
+        info("curl_easy_init() failed");
+        return 0;
+    }
+
+    #if 0
+    /* !!! FIXME: enable compression? */
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");  /* enable compression */
+
+    /* !!! FIXME; hook up proxy support to libcurl */
+    curl_easy_setopt(curl, CURLOPT_PROXY, proxyURL);
+    #endif
+
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(curl, CURLOPT_STDERR, logfile);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, to);
+
+    curl_easy_setopt(curl, CURLOPT_URL, from);
+
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);  /* allow redirects. */
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, AUTOUPDATE_USER_AGENT);
+
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);  /* require valid SSL cert. */
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);  /* require SSL cert with same hostname as we connected to. */
+
+    retval = (curl_easy_perform(curl) == CURLE_OK);
+    curl_easy_cleanup(curl);
+    return retval;
+}
 #endif
 
 
 static void die(const char *why)
 {
     infof("FAILURE: %s", why);
-    curl_global_cleanup();
     restoreRollbacks();
     freeManifest();
     infof("Updater ending (in failure), %s", timestamp());
@@ -220,12 +430,6 @@ static void outOfMemory(void) NEVER_RETURNS;
 static void outOfMemory(void)
 {
     die("Out of memory");
-}
-
-static void makeDir(const char *dirname)
-{
-    /* !!! FIXME: we don't care if this fails right now. */
-    mkdir(dirname, 0777);
 }
 
 static void buildParentDirs(const char *_path)
@@ -267,7 +471,7 @@ static void parseArgv(int argc, char **argv)
     for (i = 1; i < argc; i += 2) {
         if (strcmp(argv[i], "--waitpid") == 0) {
             options.waitforprocess = atoll(argv[i + 1]);
-            infof("We will wait for process %lld if necessary", (long long) options.waitforprocess);
+            infof("We will wait for process " PIDFMT " if necessary", (PIDFMTCAST) options.waitforprocess);
         } else if (strcmp(argv[i], "--updateself") == 0) {
             options.updateself = argv[i + 1];
             infof("We are updating ourself ('%s')", options.updateself);
@@ -275,57 +479,17 @@ static void parseArgv(int argc, char **argv)
     }
 }
 
-static CURL *prepCurl(const char *url, FILE *outfile)
+static void downloadURL(const char *from, const char *to)
 {
-    char *fullurl;
-    const size_t len = strlen(AUTOUPDATE_URL) + strlen(url) + 1;
-    CURL *curl = curl_easy_init();
-    if (!curl) {
-        die("curl_easy_init() failed");
-    }
-
-    fullurl = (char *) alloca(len);
+    FILE *io = NULL;
+    const size_t len = strlen(AUTOUPDATE_URL) + strlen(from) + 1;
+    char *fullurl = (char *) alloca(len);
     if (!fullurl) {
         outOfMemory();
     }
+    snprintf(fullurl, len, "%s%s", AUTOUPDATE_URL, from);
 
-    snprintf(fullurl, len, "%s%s", AUTOUPDATE_URL, url);
-
-    infof("Downloading from '%s'", fullurl);
-
-    #if 0
-    /* !!! FIXME: enable compression? */
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");  /* enable compression */
-
-    /* !!! FIXME; hook up proxy support to libcurl */
-    curl_easy_setopt(curl, CURLOPT_PROXY, proxyURL);
-    #endif
-
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(curl, CURLOPT_STDERR, logfile);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-
-    curl_easy_setopt(curl, CURLOPT_URL, fullurl);
-
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);  /* allow redirects. */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, AUTOUPDATE_USER_AGENT);
-
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);  /* require valid SSL cert. */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);  /* require SSL cert with same hostname as we connected to. */
-
-    return curl;
-}
-
-static void downloadURL(const char *from, const char *to)
-{
-    FILE *io;
-    CURL *curl;
-
-    infof("Preparing to download to '%s'", to);
+    infof("Downloading from '%s' to '%s'", fullurl, to);
 
     buildParentDirs(to);
     io = fopen(to, "wb");
@@ -333,12 +497,11 @@ static void downloadURL(const char *from, const char *to)
         die("Failed to open output file");
     }
 
-    curl = prepCurl(from, io);
-    if (curl_easy_perform(curl) != CURLE_OK) {
+    if (!runHttpDownload(fullurl, io)) {
+        fclose(io);
         remove(to);
         die("Download failed");
     }
-    curl_easy_cleanup(curl);
 
     if (fclose(io) == EOF) {
         die("Can't flush file on close. i/o error? Disk full?");
@@ -361,7 +524,7 @@ static int hexcvt(const int ch)
     return 0;
 }
 
-static void convertSha256(char *str, BYTE *sha256)
+static void convertSha256(char *str, uint8 *sha256)
 {
     int i;
     for (i = 0; i < 32; i++) {
@@ -446,6 +609,32 @@ static void upgradeSelfAndRestart(const char *argv0)
     FILE *in = NULL;
     FILE *out = NULL;
 
+    /* unix replaces the process with execl(), but Windows needs to wait for the parent to terminate. */
+    #ifdef _WIN32
+    DWORD ppid = 0;
+    HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (h) {
+        const DWORD myPid = GetCurrentProcessId();
+        PROCESSENTRY32 pe;
+        memset(&pe, '\0', sizeof (pe));
+        pe.dwSize = sizeof(PROCESSENTRY32);
+
+        if (Process32First(h, &pe)) {
+            do {
+                if (pe.th32ProcessID == myPid) {
+                    ppid = pe.th32ParentProcessID;
+                    break;
+                }
+            } while (Process32Next(h, &pe));
+        }
+        CloseHandle(h);
+    }
+    if (!ppid) {
+        die("Can't determine parent process id");
+    }
+    windowsWaitForProcessToDie(ppid);
+    #endif
+
     in = fopen(argv0, "rb");
     if (!in) {
         die("Can't open self for input while upgrading updater");
@@ -491,10 +680,10 @@ static void upgradeSelfAndRestart(const char *argv0)
 
     if (options.waitforprocess) {
         char pidstr[64];
-        snprintf(pidstr, sizeof (pidstr), "%lld", (long long) options.waitforprocess);
-        execl(options.updateself, options.updateself, "--waitpid", pidstr, NULL);
+        snprintf(pidstr, sizeof (pidstr), PIDFMT, (PIDFMTCAST) options.waitforprocess);
+        launchProcess(options.updateself, options.updateself, "--waitpid", pidstr, NULL);
     } else {
-        execl(options.updateself, options.updateself, NULL);
+        launchProcess(options.updateself, options.updateself, NULL);
     }
     die("Failed to relaunch upgraded updater");
 }
@@ -508,7 +697,7 @@ static const char *justFilename(const char *path)
 static void hashFile(const char *fname, unsigned char *sha256)
 {
     SHA256_CTX sha256ctx;
-    BYTE buf[512];
+    uint8 buf[512];
     FILE *io;
 
     io = fopen(fname, "rb");
@@ -611,10 +800,10 @@ static void maybeUpdateSelf(const char *argv0)
 
                 if (options.waitforprocess) {
                     char pidstr[64];
-                    snprintf(pidstr, sizeof (pidstr), "%lld", (long long) options.waitforprocess);
-                    execl(to, to, "--updateself", argv0, "--waitpid", pidstr, NULL);
+                    snprintf(pidstr, sizeof (pidstr), PIDFMT, (PIDFMTCAST) options.waitforprocess);
+                    launchProcess(to, to, "--updateself", argv0, "--waitpid", pidstr, NULL);
                 } else {
-                    execl(to, to, "--updateself", argv0, NULL);
+                    launchProcess(to, to, "--updateself", argv0, NULL);
                 }
                 die("Failed to initially launch upgraded updater");
             }
@@ -668,19 +857,26 @@ static void applyUpdates(void)
     }
 }
 
+
 static void waitToApplyUpdates(void)
 {
     if (options.waitforprocess) {
-        /* ioquake3 opens a pipe on fd 3, and then forgets about it. We block
-           on a read to that pipe here. When the game process quits (and the
-           OS forcibly closes the pipe), we will unblock. Then we can loop on
-           kill() until the process is truly gone. */
-        int x = 0;
-        infof("Waiting for pid %lld to die...", (long long) options.waitforprocess);
-        read(3, &x, sizeof (x));
-        info("Pipe has closed, waiting for process to fully go away now.");
-        while (kill(options.waitforprocess, 0) == 0) {
-            usleep(100000);
+        infof("Waiting for pid " PIDFMT " to die...", (PIDFMTCAST) options.waitforprocess);
+        {
+            #ifdef _WIN32
+            windowsWaitForProcessToDie(options.waitforprocess);
+            #else
+            /* The parent opens a pipe on fd 3, and then forgets about it. We block
+               on a read to that pipe here. When the game process quits (and the
+               OS forcibly closes the pipe), we will unblock. Then we can loop on
+               kill() until the process is truly gone. */
+            int x = 0;
+            read(3, &x, sizeof (x));
+            info("Pipe has closed, waiting for process to fully go away now.");
+            while (kill(options.waitforprocess, 0) == 0) {
+                usleep(100000);
+            }
+            #endif
         }
         info("pid is gone, continuing");
     }
@@ -725,7 +921,9 @@ static void chdirToBasePath(const char *argv0)
 
 int main(int argc, char **argv)
 {
+    #ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);  /* don't trigger signal when fd3 closes */
+    #endif
 
     logfile = stdout;
     chdirToBasePath(argv[0]);
@@ -749,13 +947,7 @@ int main(int argc, char **argv)
         upgradeSelfAndRestart(argv[0]);
     }
 
-    #ifndef _WIN32
-    load_libcurl();
-    #endif
-
-    if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
-        die("curl_global_init() failed!");
-    }
+    prepHttpLib();
 
     downloadManifest();  /* see if we need an update at all. */
 
@@ -771,7 +963,7 @@ int main(int argc, char **argv)
     }
 
     freeManifest();
-    curl_global_cleanup();
+    shutdownHttpLib();
 
     infof("Updater ending, %s", timestamp());
 
