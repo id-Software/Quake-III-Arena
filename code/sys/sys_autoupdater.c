@@ -59,9 +59,13 @@ void Sys_LaunchAutoupdater(int argc, char **argv)
 				char *ptr = strrchr(argv[0], '/');
 				if (ptr)
 					*ptr = '\0';
-				chdir(argv[0]);
+				if (chdir(argv[0]) == -1) {
+					_exit(1);  /* oh well. */
+				}
 				#ifdef __APPLE__
-				chdir("../..");  /* put this at base of app bundle so paths make sense later. */
+				if (chdir("../..") == -1) {  /* put this at base of app bundle so paths make sense later. */
+					_exit(1);  /* oh well. */
+				}
 				#endif
 				snprintf(pidstr, sizeof (pidstr), "%lld", (long long) getppid());
 				execl(AUTOUPDATER_BIN, AUTOUPDATER_BIN, "--waitpid", pidstr, NULL);
