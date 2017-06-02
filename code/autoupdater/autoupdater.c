@@ -8,7 +8,7 @@ is licensed until the GPLv2. Do not mingle code, please!
 #include <string.h>
 #include <stdarg.h>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 typedef __int64 int64_t;
 #else
 #include <stdint.h>
