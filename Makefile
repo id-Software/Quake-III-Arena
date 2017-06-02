@@ -35,8 +35,8 @@ endif
 ifndef BUILD_RENDERER_OPENGL2
   BUILD_RENDERER_OPENGL2=
 endif
-ifndef BUILD_AUTOUPDATER
-  BUILD_AUTOUPDATER=
+ifndef BUILD_AUTOUPDATER  # DON'T build unless you mean to!
+  BUILD_AUTOUPDATER=0
 endif
 
 #############################################################################
@@ -231,8 +231,8 @@ ifndef USE_YACC
 USE_YACC=0
 endif
 
-ifndef USE_AUTOUPDATER
-USE_AUTOUPDATER=1
+ifndef USE_AUTOUPDATER  # DON'T include unless you mean to!
+USE_AUTOUPDATER=0
 endif
 
 ifndef DEBUG_CFLAGS
