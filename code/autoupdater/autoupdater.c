@@ -1,6 +1,6 @@
 /*
 The code in this file is in the public domain. The rest of ioquake3
-is licensed until the GPLv2. Do not mingle code, please!
+is licensed under the GPLv2. Do not mingle code, please!
 */
 
 #include <stdio.h>
