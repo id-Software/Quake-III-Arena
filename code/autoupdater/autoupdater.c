@@ -189,7 +189,12 @@ static void windowsWaitForProcessToDie(const DWORD pid)
     infof("Waiting on process ID #%u", (unsigned int) pid);
     h = OpenProcess(SYNCHRONIZE, FALSE, pid);
     if (!h) {
-// !!! FIXME: what does this return if process is already dead?  
+        const DWORD err = GetLastError();
+        if (err == ERROR_INVALID_PARAMETER) {
+            info("No such process; probably already dead. Carry on.");
+            return;  /* process is (probably) already gone. */
+        }
+        infof("OpenProcess failed. err=%d", (unsigned int) err);
         die("OpenProcess failed");
     }
     if (WaitForSingleObject(h, INFINITE) != WAIT_OBJECT_0) {
