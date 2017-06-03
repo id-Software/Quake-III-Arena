@@ -1034,6 +1034,50 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 			}
 			return (menu_buzz_sound);
 
+		case K_MWHEELUP:
+			if( l->columns > 1 ) {
+				return menu_null_sound;
+			}
+
+			if (l->top > 0)
+			{
+				// if scrolling 3 lines would replace over half of the
+				// displayed items, only scroll 1 item at a time.
+				int scroll = l->height < 6 ? 1 : 3;
+				l->top -= scroll;
+				if (l->top < 0)
+					l->top = 0;
+
+				if (l->generic.callback)
+					l->generic.callback( l, QM_GOTFOCUS );
+
+				// make scrolling silent
+				return (menu_null_sound);
+			}
+			return (menu_buzz_sound);
+
+		case K_MWHEELDOWN:
+			if( l->columns > 1 ) {
+				return menu_null_sound;
+			}
+
+			if (l->top < l->numitems-l->height)
+			{
+				// if scrolling 3 items would replace over half of the
+				// displayed items, only scroll 1 item at a time.
+				int scroll = l->height < 6 ? 1 : 3;
+				l->top += scroll;
+				if (l->top > l->numitems-l->height)
+					l->top = l->numitems-l->height;
+
+				if (l->generic.callback)
+					l->generic.callback( l, QM_GOTFOCUS );
+
+				// make scrolling silent
+				return (menu_null_sound);
+			}
+			return (menu_buzz_sound);
+
 		case K_KP_UPARROW:
 		case K_UPARROW:
 			if( l->curvalue == 0 ) {
