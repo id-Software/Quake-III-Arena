@@ -1440,7 +1440,7 @@ void CG_DrawInformation( void );
 // cg_scoreboard.c
 //
 qboolean CG_DrawOldScoreboard( void );
-void CG_DrawOldTourneyScoreboard( void );
+void CG_DrawTourneyScoreboard( void );
 
 //
 // cg_consolecmds.c

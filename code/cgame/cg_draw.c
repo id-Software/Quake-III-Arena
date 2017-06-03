@@ -2610,13 +2610,6 @@ static void CG_Draw2D(stereoFrame_t stereoFrame)
 }
 
 
-static void CG_DrawTourneyScoreboard( void ) {
-#ifdef MISSIONPACK
-#else
-	CG_DrawOldTourneyScoreboard();
-#endif
-}
-
 /*
 =====================
 CG_DrawActive
