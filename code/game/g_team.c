@@ -1280,8 +1280,8 @@ static void ObeliskTouch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
-	PrintMsg(NULL, "%s" S_COLOR_WHITE " brought in %i skull%s.\n",
-					other->client->pers.netname, tokens, tokens ? "s" : "" );
+	PrintMsg(NULL, "%s" S_COLOR_WHITE " brought in %i %s.\n",
+					other->client->pers.netname, tokens, ( tokens == 1 ) ? "skull" : "skulls" );
 
 	AddTeamScore(self->s.pos.trBase, other->client->sess.sessionTeam, tokens);
 	Team_ForceGesture(other->client->sess.sessionTeam);
