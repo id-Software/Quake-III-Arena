@@ -1145,6 +1145,7 @@ void LogExit( const char *string ) {
 	gclient_t		*cl;
 #ifdef MISSIONPACK
 	qboolean won = qtrue;
+	team_t team = TEAM_RED;
 #endif
 	G_LogPrintf( "Exit: %s\n", string );
 
@@ -1181,7 +1182,10 @@ void LogExit( const char *string ) {
 
 		G_LogPrintf( "score: %i  ping: %i  client: %i %s\n", cl->ps.persistant[PERS_SCORE], ping, level.sortedClients[i],	cl->pers.netname );
 #ifdef MISSIONPACK
-		if (g_singlePlayer.integer && g_gametype.integer == GT_TOURNAMENT) {
+		if (g_singlePlayer.integer && !(g_entities[cl - level.clients].r.svFlags & SVF_BOT)) {
+			team = cl->sess.sessionTeam;
+		}
+		if (g_singlePlayer.integer && g_gametype.integer < GT_TEAM) {
 			if (g_entities[cl - level.clients].r.svFlags & SVF_BOT && cl->ps.persistant[PERS_RANK] == 0) {
 				won = qfalse;
 			}
@@ -1192,8 +1196,12 @@ void LogExit( const char *string ) {
 
 #ifdef MISSIONPACK
 	if (g_singlePlayer.integer) {
-		if (g_gametype.integer >= GT_CTF) {
-			won = level.teamScores[TEAM_RED] > level.teamScores[TEAM_BLUE];
+		if (g_gametype.integer >= GT_TEAM) {
+			if (team == TEAM_BLUE) {
+				won = level.teamScores[TEAM_BLUE] > level.teamScores[TEAM_RED];
+			} else {
+				won = level.teamScores[TEAM_RED] > level.teamScores[TEAM_BLUE];
+			}
 		}
 		trap_SendConsoleCommand( EXEC_APPEND, (won) ? "spWin\n" : "spLose\n" );
 	}
