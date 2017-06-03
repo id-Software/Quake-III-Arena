@@ -5982,11 +5982,10 @@ static void UI_StartServerRefresh(qboolean full, qboolean force)
 
 	// This function is called with force=qfalse when server browser menu opens or net source changes.
 	// Automatically update local and favorite servers.
-	// Only update master server list the first time because the server info cache will be available after that.
+	// Only auto update master server list if there is no server info cache.
 	if ( !force && ( ui_netSource.integer >= UIAS_GLOBAL1 && ui_netSource.integer <= UIAS_GLOBAL5 ) ) {
-		char *value = UI_Cvar_VariableString( va( "ui_lastServerRefresh_%i", ui_netSource.integer ) );
-		if ( value[0] != 0 ) {
-			return; // should have cached list
+		if ( trap_LAN_GetServerCount( UI_SourceForLAN() ) > 0 ) {
+			return; // have cached list
 		}
 	}
 
