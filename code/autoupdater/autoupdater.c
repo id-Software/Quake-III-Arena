@@ -75,8 +75,10 @@ typedef pid_t PID;
 
 #if defined(__GNUC__) || defined(__clang__)
 #define NEVER_RETURNS __attribute__((noreturn))
+#define PRINTF_FUNC(fmtargnum, dotargnum) __attribute__ (( format( __printf__, fmtargnum, dotargnum )))
 #else
 #define NEVER_RETURNS
+#define PRINTF_FUNC(fmtargnum, dotargnum)
 #endif
 
 
@@ -134,8 +136,6 @@ static const char *timestamp(void)
 
 static FILE *logfile = NULL;
 
-#define SDL_PRINTF_VARARG_FUNC( fmtargnumber ) __attribute__ (( format( __printf__, fmtargnumber, fmtargnumber+1 )))
-
 static void info(const char *str)
 {
     fputs(str, logfile);
@@ -143,12 +143,7 @@ static void info(const char *str)
     fflush(logfile);
 }
 
-static void infof(const char *fmt, ...)
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__ (( format( __printf__, 1, 2 )))
-#endif
-;
-
+static void infof(const char *fmt, ...) PRINTF_FUNC(1, 2);
 static void infof(const char *fmt, ...)
 {
     va_list ap;
