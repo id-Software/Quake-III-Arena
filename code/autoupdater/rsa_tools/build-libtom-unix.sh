@@ -22,22 +22,31 @@ elif [ "$NCPU" = "0" ]; then
     NCPU=1
 fi
 
-if [ ! -f ./crypt-$LTCVER.tar.bz2 ]; then
-    echo "Downloading LibTomCrypt $LTCVER sources..."
-    curl -L -o crypt-$LTCVER.tar.bz2 https://github.com/libtom/libtomcrypt/releases/download/$LTCVER/crypt-$LTCVER.tar.bz2 || exit 1
-fi
-
 if [ ! -f tfm-$TFMVER.tar.xz ]; then
     echo "Downloading TomsFastMath $TFMVER sources..."
     curl -L -o tfm-$TFMVER.tar.xz https://github.com/libtom/tomsfastmath/releases/download/v$TFMVER/tfm-$TFMVER.tar.xz || exit 1
 fi
 
+if [ ! -f ./crypt-$LTCVER.tar.bz2 ]; then
+    echo "Downloading LibTomCrypt $LTCVER sources..."
+    curl -L -o crypt-$LTCVER.tar.bz2 https://github.com/libtom/libtomcrypt/releases/download/$LTCVER/crypt-$LTCVER.tar.bz2 || exit 1
+fi
+
 if [ ! -d tomsfastmath-$TFMVER ]; then
+    echo "Checking TomsFastMath archive hash..."
+    if [ "`shasum -a 256 tfm-$TFMVER.tar.xz |awk '{print $1;}'`" != "47c97a1ada3ccc9fcbd2a8a922d5859a84b4ba53778c84c1d509c1a955ac1738" ]; then
+        echo "Uhoh, tfm-$TFMVER.tar.xz does not have the sha256sum we expected!"
+        exit 1
+    fi
     echo "Unpacking TomsFastMath $TFMVER sources..."
     tar -xJvvf ./tfm-$TFMVER.tar.xz
 fi
 
 if [ ! -d libtomcrypt-$LTCVER ]; then
+    if [ "`shasum -a 256 crypt-$LTCVER.tar.bz2 |awk '{print $1;}'`" != "e33b47d77a495091c8703175a25c8228aff043140b2554c08a3c3cd71f79d116" ]; then
+        echo "Uhoh, crypt-$LTCVER.tar.bz2 does not have the sha256sum we expected!"
+        exit 1
+    fi
     echo "Unpacking LibTomCrypt $LTCVER sources..."
     tar -xjvvf ./crypt-$LTCVER.tar.bz2
 fi
