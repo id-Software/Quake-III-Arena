@@ -34,7 +34,13 @@ typedef pid_t PID;
 #define PIDFMTCAST unsigned long long
 #endif
 
-#include "sha256.h"
+/* If your build fails here with tomcrypt.h missing, you probably need to
+   run the build-libtom script in the rsa_tools subdirectory. */
+#define TFM_DESC
+#define LTC_NO_ROLC
+#include "tomcrypt.h"
+
+static int sha256_hash_index = 0;
 
 
 #ifndef AUTOUPDATE_USER_AGENT
@@ -524,7 +530,7 @@ static int hexcvt(const int ch)
     return 0;
 }
 
-static void convertSha256(char *str, uint8 *sha256)
+static void convertSha256(char *str, unsigned char *sha256)
 {
     int i;
     for (i = 0; i < 32; i++) {
@@ -696,29 +702,12 @@ static const char *justFilename(const char *path)
 
 static void hashFile(const char *fname, unsigned char *sha256)
 {
-    SHA256_CTX sha256ctx;
-    uint8 buf[512];
-    FILE *io;
-
-    io = fopen(fname, "rb");
-    if (!io) {
-        die("Failed to open file for hashing");
+    int rc = 0;
+    unsigned long hashlen = 32;
+    if ((rc = hash_file(sha256_hash_index, fname, sha256, &hashlen)) != CRYPT_OK) {
+        infof("hash_file failed for '%s': %s", fname, error_to_string(rc));
+        die("Can't hash file");
     }
-
-    sha256_init(&sha256ctx);
-    do {
-        size_t br = fread(buf, 1, sizeof (buf), io);
-        if (br > 0) {
-            sha256_update(&sha256ctx, buf, br);
-        }
-        if (ferror(io)) {
-            die("Error reading file for hashing");
-        }
-    } while (!feof(io));
-
-    fclose(io);
-
-    sha256_final(&sha256ctx, sha256);
 }
 
 static int fileHashMatches(const char *fname, const unsigned char *wanted)
@@ -941,6 +930,13 @@ int main(int argc, char **argv)
 
     parseArgv(argc, argv);
 
+    /* set up crypto */
+    ltc_mp = tfm_desc;
+    sha256_hash_index = register_hash(&sha256_desc);
+    if (sha256_hash_index == -1) {
+        die("Failed to register sha256 hasher");
+    }
+
     /* if we have downloaded a new updater and restarted with that binary,
        replace the original updater and restart again in the right place. */
     if (options.updateself) {
@@ -964,6 +960,8 @@ int main(int argc, char **argv)
 
     freeManifest();
     shutdownHttpLib();
+
+    unregister_hash(&sha256_desc);
 
     infof("Updater ending, %s", timestamp());
 
