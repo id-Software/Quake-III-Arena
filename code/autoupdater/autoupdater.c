@@ -666,6 +666,7 @@ static void verifySignature(const char *fname, const char *sigfname, const char 
         die("Manifest is incomplete, corrupt, or compromised");
     }
 
+    info("Manifest signature appears to be valid");
     rsa_free(&key);
 }
 
