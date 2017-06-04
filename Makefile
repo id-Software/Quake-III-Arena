@@ -270,6 +270,8 @@ Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
 AUTOUPDATERSRCDIR=$(MOUNT_DIR)/autoupdater
+LIBTOMCRYPTSRCDIR=$(AUTOUPDATERSRCDIR)/rsa_tools/libtomcrypt-1.17
+TOMSFASTMATHSRCDIR=$(AUTOUPDATERSRCDIR)/rsa_tools/tomsfastmath-0.13.1
 LOKISETUPDIR=misc/setup
 NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL2
@@ -376,7 +378,7 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu" "gnu")
 
   THREAD_LIBS=-lpthread
   LIBS=-ldl -lm
-  AUTOUPDATER_LIBS += -ldl
+  AUTOUPDATER_LIBS += -ldl $(LIBTOMCRYPTSRCDIR)/libtomcrypt.a $(TOMSFASTMATHSRCDIR)/libtfm.a
 
   CLIENT_LIBS=$(SDL_LIBS)
   RENDERER_LIBS = $(SDL_LIBS) -lGL
@@ -418,6 +420,8 @@ ifeq ($(PLATFORM),darwin)
   CLIENT_LIBS=
   RENDERER_LIBS=
   OPTIMIZEVM=
+
+  AUTOUPDATER_LIBS += $(LIBTOMCRYPTSRCDIR)/libtomcrypt.a $(TOMSFASTMATHSRCDIR)/libtfm.a
 
   # Default minimum Mac OS X version
   ifeq ($(MACOSX_VERSION_MIN),)
@@ -1601,12 +1605,11 @@ $(Q3ASM): $(Q3ASMOBJ)
 
 define DO_AUTOUPDATER_CC
 $(echo_cmd) "AUTOUPDATER_CC $<"
-$(Q)$(CC) $(CFLAGS) $(CURL_CFLAGS) -o $@ -c $<
+$(Q)$(CC) $(CFLAGS) -I$(LIBTOMCRYPTSRCDIR)/src/headers -I$(TOMSFASTMATHSRCDIR)/src/headers $(CURL_CFLAGS) -o $@ -c $<
 endef
 
 Q3AUTOUPDATEROBJ = \
   $(B)/autoupdater/autoupdater.o \
-  $(B)/autoupdater/sha256.o
 
 $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 	$(DO_AUTOUPDATER_CC)

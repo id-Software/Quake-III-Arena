@@ -7,7 +7,7 @@ export TFMDIR="tomsfastmath-0.13.1"
 export LTCDIR="libtomcrypt-1.17"
 
 function build {
-    clang -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
+    clang -mmacosx-version-min=10.7 -DMAC_OS_X_VERSION_MIN_REQUIRED=1070 -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
 }
 
 set -e

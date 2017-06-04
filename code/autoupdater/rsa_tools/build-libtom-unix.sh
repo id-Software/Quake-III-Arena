@@ -10,6 +10,8 @@ if [ "$OSTYPE" = "Linux" ]; then
     let NCPU=$NCPU+1
 elif [ "$OSTYPE" = "Darwin" ]; then
     NCPU=`sysctl -n hw.ncpu`
+    export CFLAGS="$CFLAGS -mmacosx-version-min=10.7 -DMAC_OS_X_VERSION_MIN_REQUIRED=1070"
+    export LDFLAGS="$LDFLAGS -mmacosx-version-min=10.7"
 elif [ "$OSTYPE" = "SunOS" ]; then
     NCPU=`/usr/sbin/psrinfo |wc -l |sed -e 's/^ *//g;s/ *$//g'`
 else
