@@ -1,16 +1,22 @@
 #!/bin/bash
 
-# You don't need these to be built with the autoupdater, so here's a simple
-#  shell file to make them on a Mac.
-
 export TFMDIR="tomsfastmath-0.13.1"
 export LTCDIR="libtomcrypt-1.17"
 
+OSTYPE=`uname -s`
+if [ -z "$CC" ]; then
+    if [ "`uname -o`" = "Cygwin" ]; then
+        export CC=/usr/bin/i686-w64-mingw32-gcc
+    else
+        export CC=cc
+    fi
+fi
+
 function build {
     if [ "$OSTYPE" = "Darwin" ]; then
-        clang -mmacosx-version-min=10.7 -DMAC_OS_X_VERSION_MIN_REQUIRED=1070 -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
+        $CC -mmacosx-version-min=10.7 -DMAC_OS_X_VERSION_MIN_REQUIRED=1070 -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
     else
-        gcc -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
+        $CC -I $TFMDIR/src/headers -I $LTCDIR/src/headers -o "$1" -Wall -O3 "$1.c" rsa_common.c $LTCDIR/libtomcrypt.a $TFMDIR/libtfm.a
     fi
 }
 
