@@ -7,6 +7,7 @@ is licensed under the GPLv2. Do not mingle code, please!
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 typedef __int64 int64_t;
@@ -40,6 +41,8 @@ typedef pid_t PID;
 #define LTC_NO_ROLC
 #include "tomcrypt.h"
 
+#define PUBLICKEY_FNAME "updater-publickey.bin"
+#define SALT_LEN 8
 static int sha256_hash_index = 0;
 
 
@@ -599,11 +602,80 @@ static void parseManifest(const char *fname)
     fclose(io);
 }
 
+static void read_file(const char *fname, void *buf, unsigned long *len)
+{
+    ssize_t br;
+    FILE *io = fopen(fname, "rb");
+    if (!io) {
+        infof("Can't open '%s' for reading: %s", fname, strerror(errno));
+        die("Failed to read file");
+    }
+
+    br = fread(buf, 1, *len, io);
+    if (ferror(io)) {
+        infof("Couldn't read '%s': %s", fname, strerror(errno));
+        die("Failed to read file");
+    } else if (!feof(io)) {
+        infof("Buffer too small to read '%s'", fname);
+        die("Failed to read file");
+    }
+    fclose(io);
+
+    *len = (unsigned long) br;
+}
+
+static void read_rsakey(rsa_key *key, const char *fname)
+{
+    unsigned char buf[4096];
+    unsigned long len = sizeof (buf);
+    int rc;
+
+    read_file(fname, buf, &len);
+
+    if ((rc = rsa_import(buf, len, key)) != CRYPT_OK) {
+        infof("rsa_import for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't import public key");
+    }
+}
+
+static void verifySignature(const char *fname, const char *sigfname, const char *keyfname)
+{
+    rsa_key key;
+    unsigned char hash[256];
+    unsigned long hashlen = sizeof (hash);
+    unsigned char sig[1024];
+    unsigned long siglen = sizeof (sig);
+    int status = 0;
+    int rc = 0;
+
+    read_rsakey(&key, keyfname);
+    read_file(sigfname, sig, &siglen);
+
+    if ((rc = hash_file(sha256_hash_index, fname, hash, &hashlen)) != CRYPT_OK) {
+        infof("hash_file for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't verify manifest signature");
+    }
+
+    if ((rc = rsa_verify_hash(sig, siglen, hash, hashlen, sha256_hash_index, SALT_LEN, &status, &key)) != CRYPT_OK) {
+        infof("rsa_verify_hash for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't verify manifest signature");
+    }
+
+    if (!status) {
+        infof("Invalid signature for '%s'! Don't trust this file!", fname);
+        die("Manifest is incomplete, corrupt, or compromised");
+    }
+
+    rsa_free(&key);
+}
+
 static void downloadManifest(void)
 {
     const char *manifestfname = "updates/manifest.txt";
+    const char *manifestsigfname = "updates/manifest.txt.sig";
     downloadURL("manifest.txt", manifestfname);
-    /* !!! FIXME: verify manifest download is complete... */
+    downloadURL("manifest.txt.sig", manifestsigfname);
+    verifySignature(manifestfname, manifestsigfname, PUBLICKEY_FNAME);
     parseManifest(manifestfname);
 }
 
