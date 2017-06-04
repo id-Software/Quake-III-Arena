@@ -1611,7 +1611,7 @@ $(Q)$(CC) $(CFLAGS) -I$(LIBTOMCRYPTSRCDIR)/src/headers -I$(TOMSFASTMATHSRCDIR)/s
 endef
 
 Q3AUTOUPDATEROBJ = \
-  $(B)/autoupdater/autoupdater.o \
+  $(B)/autoupdater/autoupdater.o
 
 $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 	$(DO_AUTOUPDATER_CC)
