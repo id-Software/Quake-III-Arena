@@ -74,7 +74,7 @@ static int sha256_hash_index = 0;
 #ifdef __i386__
 #define AUTOUPDATE_ARCH "x86"
 #elif defined(__x86_64__)
-#define AUTOUPDATE_ARCH "x86-64"
+#define AUTOUPDATE_ARCH "x86_64"
 #else
 #error Please define your platform.
 #endif
