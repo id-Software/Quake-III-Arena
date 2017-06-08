@@ -342,7 +342,7 @@ void BotQueueConsoleMessage(int chatstate, int type, char *message)
 	m->handle = cs->handle;
 	m->time = AAS_Time();
 	m->type = type;
-	strncpy(m->message, message, MAX_MESSAGE_SIZE);
+	Q_strncpyz(m->message, message, MAX_MESSAGE_SIZE);
 	m->next = NULL;
 	if (cs->lastmessage)
 	{
@@ -1456,7 +1456,7 @@ int BotFindMatch(char *str, bot_match_t *match, unsigned long int context)
 	int i;
 	bot_matchtemplate_t *ms;
 
-	strncpy(match->string, str, MAX_MESSAGE_SIZE);
+	Q_strncpyz(match->string, str, MAX_MESSAGE_SIZE);
 	//remove any trailing enters
 	while(strlen(match->string) &&
 			match->string[strlen(match->string)-1] == '\n')
@@ -2114,7 +2114,7 @@ bot_chat_t *BotLoadInitialChat(char *chatfile, char *chatname)
 						if (pass && ptr)
 						{
 							chattype = (bot_chattype_t *) ptr;
-							strncpy(chattype->name, token.string, MAX_CHATTYPE_NAME);
+							Q_strncpyz(chattype->name, token.string, MAX_CHATTYPE_NAME);
 							chattype->firstchatmessage = NULL;
 							//add the chat type to the chat
 							chattype->next = chat->types;
@@ -2884,7 +2884,7 @@ void BotSetChatName(int chatstate, char *name, int client)
 	if (!cs) return;
 	cs->client = client;
 	Com_Memset(cs->name, 0, sizeof(cs->name));
-	strncpy(cs->name, name, sizeof(cs->name));
+	strncpy(cs->name, name, sizeof(cs->name)-1);
 	cs->name[sizeof(cs->name)-1] = '\0';
 } //end of the function BotSetChatName
 //===========================================================================
