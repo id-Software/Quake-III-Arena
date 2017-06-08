@@ -4556,7 +4556,7 @@ int BotAIPredictObstacles(bot_state_t *bs, bot_goal_t *goal) {
 	bs->predictobstacles_goalareanum = goal->areanum;
 	bs->predictobstacles_time = FloatTime();
 
-	// predict at most 100 areas or 10 seconds ahead
+	// predict at most 100 areas or 1 second ahead
 	trap_AAS_PredictRoute(&route, bs->areanum, bs->origin,
 							goal->areanum, bs->tfl, 100, 1000,
 							RSE_USETRAVELTYPE|RSE_ENTERCONTENTS,
