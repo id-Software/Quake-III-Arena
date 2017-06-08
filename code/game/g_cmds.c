@@ -34,7 +34,7 @@ DeathmatchScoreboardMessage
 */
 void DeathmatchScoreboardMessage( gentity_t *ent ) {
 	char		entry[1024];
-	char		string[1400];
+	char		string[1000];
 	int			stringlength;
 	int			i, j;
 	gclient_t	*cl;
