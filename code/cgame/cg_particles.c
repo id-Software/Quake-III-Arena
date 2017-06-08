@@ -1027,10 +1027,6 @@ void CG_ParticleSnowFlurry (qhandle_t pshader, centity_t *cent)
 	
 	VectorCopy(cent->currentState.origin, p->org);
 
-	p->org[0] = p->org[0];
-	p->org[1] = p->org[1];
-	p->org[2] = p->org[2];
-
 	p->vel[0] = p->vel[1] = 0;
 	
 	p->accel[0] = p->accel[1] = p->accel[2] = 0;
