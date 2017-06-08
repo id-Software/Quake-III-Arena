@@ -465,7 +465,13 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	case BOTLIB_GET_CONSOLE_MESSAGE:
 		return SV_BotGetConsoleMessage( args[1], VMA(2), args[3] );
 	case BOTLIB_USER_COMMAND:
-		SV_ClientThink( &svs.clients[args[1]], VMA(2) );
+		{
+			int clientNum = args[1];
+
+			if ( clientNum >= 0 && clientNum < sv_maxclients->integer ) {
+				SV_ClientThink( &svs.clients[clientNum], VMA(2) );
+			}
+		}
 		return 0;
 
 	case BOTLIB_AAS_BBOX_AREAS:
