@@ -1891,6 +1891,7 @@ void CL_Rcon_f( void ) {
 	}
 	
 	NET_SendPacket (NS_CLIENT, strlen(message)+1, message, to);
+	cls.rconAddress = to;
 }
 
 /*
@@ -2749,7 +2750,10 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 	// echo request from server
 	if ( !Q_stricmp(c, "echo") ) {
-		NET_OutOfBandPrint( NS_CLIENT, from, "%s", Cmd_Argv(1) );
+		// NOTE: we may have to add exceptions for auth and update servers
+		if ( NET_CompareAdr( from, clc.serverAddress ) || NET_CompareAdr( from, cls.rconAddress ) ) {
+			NET_OutOfBandPrint( NS_CLIENT, from, "%s", Cmd_Argv(1) );
+		}
 		return;
 	}
 
@@ -2766,12 +2770,14 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	}
 
 	// echo request from server
-	if(!Q_stricmp(c, "print")){
-		s = MSG_ReadString( msg );
-		
-		Q_strncpyz( clc.serverMessage, s, sizeof( clc.serverMessage ) );
-		Com_Printf( "%s", s );
+	if ( !Q_stricmp(c, "print") ) {
+		// NOTE: we may have to add exceptions for auth and update servers
+		if ( NET_CompareAdr( from, clc.serverAddress ) || NET_CompareAdr( from, cls.rconAddress ) ) {
+			s = MSG_ReadString( msg );
 
+			Q_strncpyz( clc.serverMessage, s, sizeof( clc.serverMessage ) );
+			Com_Printf( "%s", s );
+		}
 		return;
 	}
 
