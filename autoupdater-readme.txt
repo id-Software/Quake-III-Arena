@@ -1,7 +1,8 @@
 The updater program's code is public domain. The rest of ioquake3 is not.
 
 The source code to the autoupdater is in the code/autoupdater directory.
-There is a small piece of code in ioquake3 itself at startup, too.
+There is a small piece of code in ioquake3 itself at startup, too; this is
+in code/sys/sys_autoupdater.c ...
 
 (This is all Unix terminology, but similar approaches on Windows apply.)
 
@@ -20,8 +21,14 @@ The basic flow looks like this:
 - The updater downloads a manifest from a known URL over https://, using
   libCurl. The base URL is platform-specific (it might be
   https://example.com/mac/, or https://example.com/linux-x86/, whatever).
+  The url might have other features, like a updater version or a specific
+  product name, etc.
   The manifest is at $BASEURL/manifest.txt
-- The manifest looks like this: three lines per file...
+- The updater also downloads $BASEURL/manifest.txt.sig, which is a digital
+  signature for the manifest. It checks the manifest against this signature
+  and a known public RSA key; if the manifest doesn't match the signature,
+  the updater refuses to continue.
+- The manifest looks like this: three lines per item...
 
 Contents/MacOS/baseq3/uix86_64.dylib
 332428
@@ -105,13 +112,46 @@ Failure points:
 - If an update bricks ioquake3 to the point where it can't run the updater,
   running the updater directly should let it recover (assuming a future update
   fixes the problem).
+- If the download server is compromised, they would need the private key
+  (not stored on the download server) to alter the manifest to serve
+  compromised files to players. If they try to change a file or the manifest,
+  the updater will know to abort without updating anything.
+- If the private key is compromised, we generate a new one, ship new
+  installers with an updated public key, and re-sign the manifest with the
+  new private key. Existing installations will never update again until they
+  do a fresh install, or at least update their copy of the public key.
+
+
+How manifest signing works:
+
+Some admin will generate a public/private key with the rsa_make_keys program,
+keeping the private key secret. Using the private key and the rsa_sign
+program, the admin will sign the manifest, generating manifest.txt.sig.
+
+The public key ships with the game (adding 270 bytes to the download), the
+.sig is downloaded with the manifest by the autoupdater (256 bytes extra
+download), then the autoupdater checks the manifest against the signature
+with the public key. if the signature isn't valid (the manifest was tampered
+with or corrupt), the autoupdater refuses to continue.
+
+If the manifest is to be trusted, it lists sha256 checksums for every file to
+download, so there's no need to sign every file; if they can't tamper with the
+manifest, they can't tamper with any other file to be updated since the file's
+listed sha256 won't match.
+
+If the private key is compromised, we generate new keys and ship new
+installers, so new installations will be able to update but existing ones
+will need to do a new install to keep getting updates. Don't let the private
+key get compromised. The private key doesn't go on a public server. Maybe it
+doesn't even live on the admin's laptop hard drive.
+
+If the download server is compromised and serving malware, the autoupdater
+will reject it outright if they haven't compromised the private key, generated
+a new manifest, and signed it with the private key.
+
 
 
 Items to consider for future revisions:
-- GPG sign the manifest; if we can be confident that the manifest isn't
-  compromised, then the sha256 hashes of each file it contains should protect
-  the rest of the process. As it currently stands, we trust the download
-  server isn't compromised.
 - Maybe put a limit on the number manifest downloads, so we only check once
   every hour? Every day?
 - Channels? Stable (what everyone gets by default), Nightly (once a day),

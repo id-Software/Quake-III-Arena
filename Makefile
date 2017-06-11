@@ -270,6 +270,8 @@ Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
 AUTOUPDATERSRCDIR=$(MOUNT_DIR)/autoupdater
+LIBTOMCRYPTSRCDIR=$(AUTOUPDATERSRCDIR)/rsa_tools/libtomcrypt-1.17
+TOMSFASTMATHSRCDIR=$(AUTOUPDATERSRCDIR)/rsa_tools/tomsfastmath-0.13.1
 LOKISETUPDIR=misc/setup
 NSISDIR=misc/nsis
 SDLHDIR=$(MOUNT_DIR)/SDL2
@@ -1116,6 +1118,10 @@ ifeq ($(USE_AUTOUPDATER),1)
   SERVER_CFLAGS += -DUSE_AUTOUPDATER -DAUTOUPDATER_BIN=\\\"$(AUTOUPDATER_BIN)\\\"
 endif
 
+ifeq ($(BUILD_AUTOUPDATER),1)
+  AUTOUPDATER_LIBS += $(LIBTOMCRYPTSRCDIR)/libtomcrypt.a $(TOMSFASTMATHSRCDIR)/libtfm.a
+endif
+
 ifeq ("$(CC)", $(findstring "$(CC)", "clang" "clang++"))
   BASE_CFLAGS += -Qunused-arguments
 endif
@@ -1601,12 +1607,11 @@ $(Q3ASM): $(Q3ASMOBJ)
 
 define DO_AUTOUPDATER_CC
 $(echo_cmd) "AUTOUPDATER_CC $<"
-$(Q)$(CC) $(CFLAGS) $(CURL_CFLAGS) -o $@ -c $<
+$(Q)$(CC) $(CFLAGS) -I$(LIBTOMCRYPTSRCDIR)/src/headers -I$(TOMSFASTMATHSRCDIR)/src/headers $(CURL_CFLAGS) -o $@ -c $<
 endef
 
 Q3AUTOUPDATEROBJ = \
-  $(B)/autoupdater/autoupdater.o \
-  $(B)/autoupdater/sha256.o
+  $(B)/autoupdater/autoupdater.o
 
 $(B)/autoupdater/%.o: $(AUTOUPDATERSRCDIR)/%.c
 	$(DO_AUTOUPDATER_CC)

@@ -7,6 +7,7 @@ is licensed under the GPLv2. Do not mingle code, please!
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 typedef __int64 int64_t;
@@ -34,7 +35,15 @@ typedef pid_t PID;
 #define PIDFMTCAST unsigned long long
 #endif
 
-#include "sha256.h"
+/* If your build fails here with tomcrypt.h missing, you probably need to
+   run the build-libtom script in the rsa_tools subdirectory. */
+#define TFM_DESC
+#define LTC_NO_ROLC
+#include "tomcrypt.h"
+
+#define PUBLICKEY_FNAME "updater-publickey.bin"
+#define SALT_LEN 8
+static int sha256_hash_index = 0;
 
 
 #ifndef AUTOUPDATE_USER_AGENT
@@ -65,7 +74,7 @@ typedef pid_t PID;
 #ifdef __i386__
 #define AUTOUPDATE_ARCH "x86"
 #elif defined(__x86_64__)
-#define AUTOUPDATE_ARCH "x86-64"
+#define AUTOUPDATE_ARCH "x86_64"
 #else
 #error Please define your platform.
 #endif
@@ -524,7 +533,7 @@ static int hexcvt(const int ch)
     return 0;
 }
 
-static void convertSha256(char *str, uint8 *sha256)
+static void convertSha256(char *str, unsigned char *sha256)
 {
     int i;
     for (i = 0; i < 32; i++) {
@@ -593,11 +602,81 @@ static void parseManifest(const char *fname)
     fclose(io);
 }
 
+static void read_file(const char *fname, void *buf, unsigned long *len)
+{
+    ssize_t br;
+    FILE *io = fopen(fname, "rb");
+    if (!io) {
+        infof("Can't open '%s' for reading: %s", fname, strerror(errno));
+        die("Failed to read file");
+    }
+
+    br = fread(buf, 1, *len, io);
+    if (ferror(io)) {
+        infof("Couldn't read '%s': %s", fname, strerror(errno));
+        die("Failed to read file");
+    } else if (!feof(io)) {
+        infof("Buffer too small to read '%s'", fname);
+        die("Failed to read file");
+    }
+    fclose(io);
+
+    *len = (unsigned long) br;
+}
+
+static void read_rsakey(rsa_key *key, const char *fname)
+{
+    unsigned char buf[4096];
+    unsigned long len = sizeof (buf);
+    int rc;
+
+    read_file(fname, buf, &len);
+
+    if ((rc = rsa_import(buf, len, key)) != CRYPT_OK) {
+        infof("rsa_import for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't import public key");
+    }
+}
+
+static void verifySignature(const char *fname, const char *sigfname, const char *keyfname)
+{
+    rsa_key key;
+    unsigned char hash[256];
+    unsigned long hashlen = sizeof (hash);
+    unsigned char sig[1024];
+    unsigned long siglen = sizeof (sig);
+    int status = 0;
+    int rc = 0;
+
+    read_rsakey(&key, keyfname);
+    read_file(sigfname, sig, &siglen);
+
+    if ((rc = hash_file(sha256_hash_index, fname, hash, &hashlen)) != CRYPT_OK) {
+        infof("hash_file for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't verify manifest signature");
+    }
+
+    if ((rc = rsa_verify_hash(sig, siglen, hash, hashlen, sha256_hash_index, SALT_LEN, &status, &key)) != CRYPT_OK) {
+        infof("rsa_verify_hash for '%s' failed: %s", fname, error_to_string(rc));
+        die("Couldn't verify manifest signature");
+    }
+
+    if (!status) {
+        infof("Invalid signature for '%s'! Don't trust this file!", fname);
+        die("Manifest is incomplete, corrupt, or compromised");
+    }
+
+    info("Manifest signature appears to be valid");
+    rsa_free(&key);
+}
+
 static void downloadManifest(void)
 {
     const char *manifestfname = "updates/manifest.txt";
+    const char *manifestsigfname = "updates/manifest.txt.sig";
     downloadURL("manifest.txt", manifestfname);
-    /* !!! FIXME: verify manifest download is complete... */
+    downloadURL("manifest.txt.sig", manifestsigfname);
+    verifySignature(manifestfname, manifestsigfname, PUBLICKEY_FNAME);
     parseManifest(manifestfname);
 }
 
@@ -696,29 +775,12 @@ static const char *justFilename(const char *path)
 
 static void hashFile(const char *fname, unsigned char *sha256)
 {
-    SHA256_CTX sha256ctx;
-    uint8 buf[512];
-    FILE *io;
-
-    io = fopen(fname, "rb");
-    if (!io) {
-        die("Failed to open file for hashing");
+    int rc = 0;
+    unsigned long hashlen = 32;
+    if ((rc = hash_file(sha256_hash_index, fname, sha256, &hashlen)) != CRYPT_OK) {
+        infof("hash_file failed for '%s': %s", fname, error_to_string(rc));
+        die("Can't hash file");
     }
-
-    sha256_init(&sha256ctx);
-    do {
-        size_t br = fread(buf, 1, sizeof (buf), io);
-        if (br > 0) {
-            sha256_update(&sha256ctx, buf, br);
-        }
-        if (ferror(io)) {
-            die("Error reading file for hashing");
-        }
-    } while (!feof(io));
-
-    fclose(io);
-
-    sha256_final(&sha256ctx, sha256);
 }
 
 static int fileHashMatches(const char *fname, const unsigned char *wanted)
@@ -941,6 +1003,13 @@ int main(int argc, char **argv)
 
     parseArgv(argc, argv);
 
+    /* set up crypto */
+    ltc_mp = tfm_desc;
+    sha256_hash_index = register_hash(&sha256_desc);
+    if (sha256_hash_index == -1) {
+        die("Failed to register sha256 hasher");
+    }
+
     /* if we have downloaded a new updater and restarted with that binary,
        replace the original updater and restart again in the right place. */
     if (options.updateself) {
@@ -964,6 +1033,8 @@ int main(int argc, char **argv)
 
     freeManifest();
     shutdownHttpLib();
+
+    unregister_hash(&sha256_desc);
 
     infof("Updater ending, %s", timestamp());
 
