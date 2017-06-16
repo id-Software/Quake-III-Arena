@@ -850,7 +850,6 @@ typedef enum {
 	SF_IQM,
 	SF_FLARE,
 	SF_ENTITY,				// beams, rails, lightning, etc that can be determined by entity
-	SF_VAO_MESH,
 	SF_VAO_MDVMESH,
 
 	SF_NUM_SURFACE_TYPES,
@@ -903,7 +902,7 @@ typedef struct
 
 #define srfVert_t_cleared(x) srfVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
 
-// srfBspSurface_t covers SF_GRID, SF_TRIANGLES, SF_POLY, and SF_VAO_MESH
+// srfBspSurface_t covers SF_GRID, SF_TRIANGLES, and SF_POLY
 typedef struct srfBspSurface_s
 {
 	surfaceType_t   surfaceType;
@@ -925,13 +924,6 @@ typedef struct srfBspSurface_s
 	// vertexes
 	int             numVerts;
 	srfVert_t      *verts;
-
-	// BSP VBO offsets
-	int             firstVert;
-	int             firstIndex;
-
-	// static render data
-	vao_t          *vao;
 	
 	// SF_GRID specific variables after here
 
