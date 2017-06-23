@@ -815,7 +815,11 @@ static void ServerOptions_Start( void ) {
 
 	// set player's team
 	if( dedicated == 0 && s_serveroptions.gametype >= GT_TEAM ) {
+		// send team command for vanilla q3 game qvm
 		trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait 5; team %s\n", playerTeam_list[s_serveroptions.playerTeam[0].curvalue] ) );
+
+		// set g_localTeamPref for ioq3 game qvm
+		trap_Cvar_Set( "g_localTeamPref", playerTeam_list[s_serveroptions.playerTeam[0].curvalue] );
 	}
 }
 

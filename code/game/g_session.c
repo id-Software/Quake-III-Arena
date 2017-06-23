@@ -105,17 +105,27 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 
 	sess = &client->sess;
 
+	// check for team preference, mainly for bots
+	value = Info_ValueForKey( userinfo, "teampref" );
+
+	// check for human's team preference set by start server menu
+	if ( !value[0] && g_localTeamPref.string[0] && client->pers.localClient ) {
+		value = g_localTeamPref.string;
+
+		// clear team so it's only used once
+		trap_Cvar_Set( "g_localTeamPref", "" );
+	}
+
 	// initial team determination
 	if ( g_gametype.integer >= GT_TEAM ) {
-		if ( g_teamAutoJoin.integer && !(g_entities[ client - level.clients ].r.svFlags & SVF_BOT) ) {
-			sess->sessionTeam = PickTeam( -1 );
-			BroadcastTeamChange( client, -1 );
-		} else {
-			// always spawn as spectator in team games
-			sess->sessionTeam = TEAM_SPECTATOR;	
+		// always spawn as spectator in team games
+		sess->sessionTeam = TEAM_SPECTATOR;
+		sess->spectatorState = SPECTATOR_FREE;
+
+		if ( value[0] || g_teamAutoJoin.integer ) {
+			SetTeam( &g_entities[client - level.clients], value );
 		}
 	} else {
-		value = Info_ValueForKey( userinfo, "team" );
 		if ( value[0] == 's' ) {
 			// a willing spectator, not a waiting-in-line
 			sess->sessionTeam = TEAM_SPECTATOR;
@@ -141,9 +151,10 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 				break;
 			}
 		}
+
+		sess->spectatorState = SPECTATOR_FREE;
 	}
 
-	sess->spectatorState = SPECTATOR_FREE;
 	AddTournamentQueue(client);
 
 	G_WriteClientSessionData( client );

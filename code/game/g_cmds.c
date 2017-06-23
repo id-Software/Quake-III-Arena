@@ -512,7 +512,7 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 SetTeam
 =================
 */
-void SetTeam( gentity_t *ent, char *s ) {
+void SetTeam( gentity_t *ent, const char *s ) {
 	int					team, oldTeam;
 	gclient_t			*client;
 	int					clientNum;
@@ -554,7 +554,7 @@ void SetTeam( gentity_t *ent, char *s ) {
 			team = PickTeam( clientNum );
 		}
 
-		if ( g_teamForceBalance.integer  ) {
+		if ( g_teamForceBalance.integer && !client->pers.localClient && !( ent->r.svFlags & SVF_BOT ) ) {
 			int		counts[TEAM_NUM_TEAMS];
 
 			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE );
@@ -642,7 +642,7 @@ void SetTeam( gentity_t *ent, char *s ) {
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
-	// client hasn't spawned yet, they sent an early team command
+	// client hasn't spawned yet, they sent an early team command, teampref userinfo, or g_teamAutoJoin is enabled
 	if ( client->pers.connected != CON_CONNECTED ) {
 		return;
 	}
