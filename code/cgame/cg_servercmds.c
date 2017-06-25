@@ -899,6 +899,10 @@ void CG_VoiceChatLocal( int mode, qboolean voiceOnly, int clientNum, int color, 
 		return;
 	}
 
+	if ( mode == SAY_ALL && cgs.gametype >= GT_TEAM && cg_teamChatsOnly.integer ) {
+		return;
+	}
+
 	if ( clientNum < 0 || clientNum >= MAX_CLIENTS ) {
 		clientNum = 0;
 	}
@@ -909,23 +913,20 @@ void CG_VoiceChatLocal( int mode, qboolean voiceOnly, int clientNum, int color, 
 	voiceChatList = CG_VoiceChatListForClient( clientNum );
 
 	if ( CG_GetVoiceChat( voiceChatList, cmd, &snd, &chat ) ) {
-		//
-		if ( mode == SAY_TEAM || !cg_teamChatsOnly.integer ) {
-			vchat.clientNum = clientNum;
-			vchat.snd = snd;
-			vchat.voiceOnly = voiceOnly;
-			Q_strncpyz(vchat.cmd, cmd, sizeof(vchat.cmd));
-			if ( mode == SAY_TELL ) {
-				Com_sprintf(vchat.message, sizeof(vchat.message), "[%s]: %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
-			}
-			else if ( mode == SAY_TEAM ) {
-				Com_sprintf(vchat.message, sizeof(vchat.message), "(%s): %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
-			}
-			else {
-				Com_sprintf(vchat.message, sizeof(vchat.message), "%s: %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
-			}
-			CG_AddBufferedVoiceChat(&vchat);
+		vchat.clientNum = clientNum;
+		vchat.snd = snd;
+		vchat.voiceOnly = voiceOnly;
+		Q_strncpyz(vchat.cmd, cmd, sizeof(vchat.cmd));
+		if ( mode == SAY_TELL ) {
+			Com_sprintf(vchat.message, sizeof(vchat.message), "[%s]: %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
 		}
+		else if ( mode == SAY_TEAM ) {
+			Com_sprintf(vchat.message, sizeof(vchat.message), "(%s): %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
+		}
+		else {
+			Com_sprintf(vchat.message, sizeof(vchat.message), "%s: %c%c%s", ci->name, Q_COLOR_ESCAPE, color, chat);
+		}
+		CG_AddBufferedVoiceChat(&vchat);
 	}
 }
 
@@ -1017,12 +1018,14 @@ static void CG_ServerCommand( void ) {
 	}
 
 	if ( !strcmp( cmd, "chat" ) ) {
-		if ( !cg_teamChatsOnly.integer ) {
-			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
-			Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
-			CG_RemoveChatEscapeChar( text );
-			CG_Printf( "%s\n", text );
+		if ( cgs.gametype >= GT_TEAM && cg_teamChatsOnly.integer ) {
+			return;
 		}
+
+		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+		Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
+		CG_RemoveChatEscapeChar( text );
+		CG_Printf( "%s\n", text );
 		return;
 	}
 
