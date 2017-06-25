@@ -321,7 +321,12 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client = ent->client;
 
 	if ( client->sess.spectatorState != SPECTATOR_FOLLOW ) {
-		client->ps.pm_type = PM_SPECTATOR;
+		if ( client->noclip ) {
+			client->ps.pm_type = PM_NOCLIP;
+		} else {
+			client->ps.pm_type = PM_SPECTATOR;
+		}
+
 		client->ps.speed = 400;	// faster than normal
 
 		// set up for pmove
