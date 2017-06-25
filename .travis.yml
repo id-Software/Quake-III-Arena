@@ -34,4 +34,4 @@ addons:
     notification_email: quake3-commits@icculus.org
     build_command_prepend: "make clean"
     build_command: "make release"
-    branch_pattern: master
+    branch_pattern: coverity_scan
