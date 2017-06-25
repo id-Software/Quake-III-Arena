@@ -1197,10 +1197,15 @@ static float CG_DrawPowerups( float y ) {
 		if ( !ps->powerups[ i ] ) {
 			continue;
 		}
-		t = ps->powerups[ i ] - cg.time;
-		// ZOID--don't draw if the power up has unlimited time (999 seconds)
+
+		// ZOID--don't draw if the power up has unlimited time
 		// This is true of the CTF flags
-		if ( t < 0 || t > 999000) {
+		if ( ps->powerups[ i ] == INT_MAX ) {
+			continue;
+		}
+
+		t = ps->powerups[ i ] - cg.time;
+		if ( t <= 0 ) {
 			continue;
 		}
 
