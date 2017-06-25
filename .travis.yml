@@ -1,3 +1,8 @@
+# sudo is required for travis-ci to use ubuntu trusty
+# ubuntu trusty is required for libsdl2-dev
+sudo: required
+dist: trusty
+
 language: c
 
 env:
@@ -17,16 +22,21 @@ env:
 
 script: ./travis-ci-build.sh
 
-before_install:
-  - echo "yes" | sudo apt-add-repository ppa:zoogie/sdl2-snapshots
-  - sudo apt-get update -qq
-  - sudo apt-get remove -qq -y mingw32
-  - sudo apt-get install -q -y libgl1-mesa-dev libsdl2-dev libfreetype6-dev mingw-w64
-
 notifications:
   email: false
 
 addons:
+  apt:
+    packages:
+      - binutils-mingw-w64-i686
+      - gcc-mingw-w64-i686
+      - binutils-mingw-w64-x86-64
+      - gcc-mingw-w64-x86-64
+      - gcc-mingw-w64
+      - mingw-w64
+      - libgl1-mesa-dev
+      - libsdl2-dev
+      - libfreetype6-dev
   coverity_scan:
     project:
       name: "ioquake/ioq3"
