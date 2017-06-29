@@ -387,31 +387,24 @@ int G_CountHumanPlayers( int team ) {
 /*
 ===============
 G_CountBotPlayers
+
+Check connected and connecting (delay join) bots.
 ===============
 */
 int G_CountBotPlayers( int team ) {
-	int i, n, num;
+	int i, num;
 	gclient_t	*cl;
 
 	num = 0;
 	for ( i=0 ; i< g_maxclients.integer ; i++ ) {
 		cl = level.clients + i;
-		if ( cl->pers.connected != CON_CONNECTED ) {
+		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
 		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
 		if ( team >= 0 && cl->sess.sessionTeam != team ) {
-			continue;
-		}
-		num++;
-	}
-	for( n = 0; n < BOT_SPAWN_QUEUE_DEPTH; n++ ) {
-		if( !botSpawnQueue[n].spawnTime ) {
-			continue;
-		}
-		if ( botSpawnQueue[n].spawnTime > level.time ) {
 			continue;
 		}
 		num++;
