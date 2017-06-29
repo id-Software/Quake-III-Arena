@@ -274,6 +274,11 @@ int G_SelectRandomBotInfo( int team ) {
 	int		count, bestCount;
 	char	*value;
 
+	// don't add duplicate bots to the server if there are less bots than bot types
+	if ( team != -1 && G_CountBotPlayersByName( NULL, -1 ) < g_numBots ) {
+		team = -1;
+	}
+
 	num = 0;
 	bestCount = MAX_CLIENTS;
 	for ( n = 0; n < g_numBots ; n++ ) {
@@ -312,26 +317,14 @@ G_AddRandomBot
 ===============
 */
 void G_AddRandomBot( int team ) {
-	int		n;
-	char	*value, netname[36], *teamstr;
+	char	*teamstr;
 	float	skill;
-
-	n = G_SelectRandomBotInfo( team );
-
-	if ( n < 0 ) {
-		// no bot info available
-		return;
-	}
-
-	value = Info_ValueForKey( g_botInfos[n], "name" );
 
 	skill = trap_Cvar_VariableValue( "g_spSkill" );
 	if (team == TEAM_RED) teamstr = "red";
 	else if (team == TEAM_BLUE) teamstr = "blue";
 	else teamstr = "free";
-	Q_strncpyz(netname, value, sizeof(netname));
-	Q_CleanStr(netname);
-	trap_SendConsoleCommand( EXEC_INSERT, va("addbot %s %f %s %i\n", netname, skill, teamstr, 0) );
+	trap_SendConsoleCommand( EXEC_INSERT, va("addbot random %f %s %i\n", skill, teamstr, 0) );
 }
 
 /*
