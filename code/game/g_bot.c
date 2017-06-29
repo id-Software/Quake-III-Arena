@@ -582,6 +582,8 @@ G_AddBot
 */
 static void G_AddBot( const char *name, float skill, const char *team, int delay, char *altname) {
 	int				clientNum;
+	int				teamNum;
+	int				botinfoNum;
 	char			*botinfo;
 	char			*key;
 	char			*s;
@@ -598,8 +600,50 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 		return;
 	}
 
+	// set default team
+	if( !team || !*team ) {
+		if( g_gametype.integer >= GT_TEAM ) {
+			if( PickTeam(clientNum) == TEAM_RED) {
+				team = "red";
+			}
+			else {
+				team = "blue";
+			}
+		}
+		else {
+			team = "free";
+		}
+	}
+
 	// get the botinfo from bots.txt
-	botinfo = G_GetBotInfoByName( name );
+	if ( Q_stricmp( name, "random" ) == 0 ) {
+		if ( Q_stricmp( team, "red" ) == 0 || Q_stricmp( team, "r" ) == 0 ) {
+			teamNum = TEAM_RED;
+		}
+		else if ( Q_stricmp( team, "blue" ) == 0 || Q_stricmp( team, "b" ) == 0 ) {
+			teamNum = TEAM_BLUE;
+		}
+		else if ( !Q_stricmp( team, "spectator" ) || !Q_stricmp( team, "s" ) ) {
+			teamNum = TEAM_SPECTATOR;
+		}
+		else {
+			teamNum = TEAM_FREE;
+		}
+
+		botinfoNum = G_SelectRandomBotInfo( teamNum );
+
+		if ( botinfoNum < 0 ) {
+			G_Printf( S_COLOR_YELLOW "WARNING: Cannot add random bot: all bot types in use on team '%s'.\n", team );
+			trap_BotFreeClient( clientNum );
+			return;
+		}
+
+		botinfo = G_GetBotInfoByNumber( botinfoNum );
+	}
+	else {
+		botinfo = G_GetBotInfoByName( name );
+	}
+
 	if ( !botinfo ) {
 		G_Printf( S_COLOR_RED "Error: Bot '%s' not defined\n", name );
 		trap_BotFreeClient( clientNum );
@@ -621,6 +665,7 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	Info_SetValueForKey( userinfo, "rate", "25000" );
 	Info_SetValueForKey( userinfo, "snaps", "20" );
 	Info_SetValueForKey( userinfo, "skill", va("%.2f", skill) );
+	Info_SetValueForKey( userinfo, "teampref", team );
 
 	if ( skill >= 1 && skill < 2 ) {
 		Info_SetValueForKey( userinfo, "handicap", "50" );
@@ -678,21 +723,6 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 		return;
 	}
 	Info_SetValueForKey( userinfo, "characterfile", s );
-
-	if( !team || !*team ) {
-		if( g_gametype.integer >= GT_TEAM ) {
-			if( PickTeam(clientNum) == TEAM_RED) {
-				team = "red";
-			}
-			else {
-				team = "blue";
-			}
-		}
-		else {
-			team = "red";
-		}
-	}
-	Info_SetValueForKey( userinfo, "teampref", team );
 
 	// register the userinfo
 	trap_SetUserinfo( clientNum, userinfo );
