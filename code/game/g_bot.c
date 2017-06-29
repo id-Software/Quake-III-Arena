@@ -273,7 +273,10 @@ int G_SelectRandomBotInfo( int team ) {
 
 	num = 0;
 	for ( n = 0; n < g_numBots ; n++ ) {
-		value = Info_ValueForKey( g_botInfos[n], "name" );
+		value = Info_ValueForKey( g_botInfos[n], "funname" );
+		if ( !value[0] ) {
+			value = Info_ValueForKey( g_botInfos[n], "name" );
+		}
 		//
 		if ( G_CountBotPlayersByName( value, team ) == 0 ) {
 			selection[num++] = n;
