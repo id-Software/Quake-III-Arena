@@ -333,6 +333,8 @@ The defaults for these variables differ depending on the target platform.
 
   cvar_modified [filter]  - list modified cvars, can filter results (such as "r*"
                             for renderer cvars) like cvarlist which lists all cvars
+
+  addbot random           - the bot name "random" now selects a random bot
 ```
 
 
