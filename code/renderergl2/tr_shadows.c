@@ -162,7 +162,7 @@ void RB_ShadowTessEnd( void ) {
 		return;
 	}
 
-	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
+	VectorCopy( backEnd.currentEntity->modelLightDir, lightDir );
 
 	// project vertexes away from light direction
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
@@ -302,7 +302,7 @@ void RB_ProjectionShadowDeform( void ) {
 
 	groundDist = backEnd.or.origin[2] - backEnd.currentEntity->e.shadowPlane;
 
-	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
+	VectorCopy( backEnd.currentEntity->modelLightDir, lightDir );
 	d = DotProduct( lightDir, ground );
 	// don't let the shadows get too long or go negative
 	if ( d < 0.5 ) {
