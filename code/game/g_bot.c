@@ -772,7 +772,7 @@ void Svcmd_AddBot_f( void ) {
 		skill = 4;
 	}
 	else {
-		skill = atof( string );
+		skill = Com_Clamp( 1, 5, atof( string ) );
 	}
 
 	// team
