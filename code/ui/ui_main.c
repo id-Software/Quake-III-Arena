@@ -5985,6 +5985,10 @@ static void UI_DoServerRefresh( void )
 		UI_BuildServerDisplayList(2);
 		// stop the refresh
 		UI_StopServerRefresh();
+	} else if ( ui_netSource.integer == UIAS_LOCAL ) {
+		// no local servers found, check again
+		trap_Cmd_ExecuteText( EXEC_NOW, "localservers\n" );
+		uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
 	}
 	//
 	UI_BuildServerDisplayList(qfalse);
@@ -6032,7 +6036,7 @@ static void UI_StartServerRefresh(qboolean full, qboolean force)
 	//
 	if( ui_netSource.integer == UIAS_LOCAL ) {
 		trap_Cmd_ExecuteText( EXEC_NOW, "localservers\n" );
-		uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 1000;
+		uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
 		return;
 	}
 

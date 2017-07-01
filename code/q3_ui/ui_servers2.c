@@ -881,6 +881,13 @@ static void ArenaServers_DoRefresh( void )
 			  return;
 			}
 	  }
+	} else if (g_servertype == UIAS_LOCAL) {
+		if (!trap_LAN_GetServerCount(AS_LOCAL)) {
+			// no local servers found, check again
+			trap_Cmd_ExecuteText( EXEC_APPEND, "localservers\n" );
+			g_arenaservers.refreshtime = uis.realtime + 5000;
+			return;
+		}
 	}
 
 	if (uis.realtime < g_arenaservers.nextpingtime)
