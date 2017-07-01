@@ -872,17 +872,21 @@ UI_MouseEvent
 void UI_MouseEvent( int dx, int dy )
 {
 	int				i;
+	int				bias;
 	menucommon_s*	m;
 
 	if (!uis.activemenu)
 		return;
 
+	// convert X bias to 640 coords
+	bias = uis.bias / uis.xscale;
+
 	// update mouse screen position
 	uis.cursorx += dx;
-	if (uis.cursorx < -uis.bias)
-		uis.cursorx = -uis.bias;
-	else if (uis.cursorx > SCREEN_WIDTH+uis.bias)
-		uis.cursorx = SCREEN_WIDTH+uis.bias;
+	if (uis.cursorx < -bias)
+		uis.cursorx = -bias;
+	else if (uis.cursorx > SCREEN_WIDTH+bias)
+		uis.cursorx = SCREEN_WIDTH+bias;
 
 	uis.cursory += dy;
 	if (uis.cursory < 0)
