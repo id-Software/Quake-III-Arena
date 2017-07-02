@@ -136,7 +136,7 @@ Cvars for HDR and tonemapping:
                                    r_hdr, r_postprocess, and r_toneMap.
                                      0 - No.
                                      1 - Yes. (default)
-                                     
+
 *  `r_forceAutoExposure`            - Cheat.  Override built-in and map auto
                                    exposure settings and use cvars
                                    r_forceAutoExposureMin and 
@@ -252,7 +252,7 @@ Cvars for image interpolation and generation:
                                          FCBI without second derivatives)
                                      2 - Okay but slow (normal FCBI)
 
-*  `r_genNormalMaps*                - Naively generate normal maps for all
+*  `r_genNormalMaps`                - Naively generate normal maps for all
                                    textures.
                                      0 - Don't. (default)
                                      1 - Do.
@@ -301,23 +301,6 @@ Cvars for the sunlight and cascaded shadow maps:
                                             2048.
 
 Cvars that you probably don't care about or shouldn't mess with:
-
-*  `r_mergeMultidraws`              - Optimize number of calls to 
-                                   glMultiDrawElements().
-                                     0 - Don't.
-                                     1 - Do some. (default)
-                                     2 - Do more than necessary (eats CPU).
-
-*  `r_mergeLeafSurfaces`            - Merge surfaces that share common materials
-                                   and a common leaf.  Speeds up rendering.
-                                     0 - Don't.
-                                     1 - Do. (default)
-
-*  `r_recalcMD3Normals`             - Recalculate the normals when loading an MD3.
-                                   Fixes normal maps in some cases but looks
-                                   ugly in others.
-                                     0 - Don't. (default)
-                                     1 - Do.
 
 *  `r_depthPrepass`                 - Do a depth-only pass before rendering.
                                    Speeds up rendering in cases where advanced

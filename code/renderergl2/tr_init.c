@@ -105,9 +105,6 @@ cvar_t  *r_arb_seamless_cube_map;
 cvar_t  *r_arb_vertex_array_object;
 cvar_t  *r_ext_direct_state_access;
 
-cvar_t  *r_mergeMultidraws;
-cvar_t  *r_mergeLeafSurfaces;
-
 cvar_t  *r_cameraExposure;
 
 cvar_t  *r_externalGLSL;
@@ -1293,8 +1290,6 @@ void R_Register( void )
 	r_directedScale = ri.Cvar_Get( "r_directedScale", "1", CVAR_CHEAT );
 
 	r_anaglyphMode = ri.Cvar_Get("r_anaglyphMode", "0", CVAR_ARCHIVE);
-	r_mergeMultidraws = ri.Cvar_Get("r_mergeMultidraws", "1", CVAR_ARCHIVE);
-	r_mergeLeafSurfaces = ri.Cvar_Get("r_mergeLeafSurfaces", "1", CVAR_ARCHIVE);
 
 	//
 	// temporary variables that can change at any time
