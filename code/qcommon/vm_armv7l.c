@@ -599,11 +599,11 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 	unsigned char *code;
 	int i_count, pc = 0;
 	int pass;
-	int codeoffsets[1024];
+	int codeoffsets[2]; // was 1024 but it's only used for OFF_CODE and OFF_IMMEDIATES
 
 #define j_rel(x) (pass?_j_rel(x, pc):0xBAD)
 #define OFFSET(i) (pass?(j_rel(codeoffsets[i]-vm->codeLength)):(0xF000000F))
-#define new_offset() (offsidx++)
+//#define new_offset() (offsidx++)
 #define get_offset(i) (codeoffsets[i])
 #define save_offset(i) (codeoffsets[i] = vm->codeLength)
 #define OFF_CODE 0
@@ -616,10 +616,12 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 
 	for (pass = 0; pass < 2; ++pass) {
 
-	int offsidx = 0;
+//	int offsidx = 0;
 
+#ifdef CONST_OPTIMIZE
 	// const optimization
 	unsigned got_const = 0, const_value = 0;
+#endif
 
 	if(pass)
 	{
@@ -656,7 +658,7 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 	emit(BKPT(0));
 
 	save_offset(OFF_CODE);
-	offsidx = OFF_IMMEDIATES+1;
+//	offsidx = OFF_IMMEDIATES+1;
 
 	code = (unsigned char *) header + header->codeOffset;
 	pc = 0;
@@ -744,9 +746,14 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 				emit_MOVR0i(i_count);
 				emit(STRa(R0, rDATABASE, rPSTACK));      // dataBase[pstack] = r0
 #endif
-				if (got_const) {
+#ifdef CONST_OPTIMIZE
+				if (got_const)
+				{
 					NOTIMPL(op);
-				} else {
+				}
+				else
+#endif
+				{
 					static int bytes_to_skip = -1;
 					static unsigned start_block = -1;
 					MAYBE_EMIT_CONST();
@@ -803,9 +810,14 @@ void VM_Compile(vm_t *vm, vmHeader_t *header)
 				break;
 
 			case OP_JUMP:
-				if(got_const) {
+#ifdef CONST_OPTIMIZE
+				if (got_const)
+				{
 					NOTIMPL(op);
-				} else {
+				}
+				else
+#endif
+				{
 					emit(LDRTxi(R0, rOPSTACK, 4));  // r0 = *opstack; rOPSTACK -= 4
 					CHECK_JUMP;
 					emit_MOVRxi(R1, (unsigned)vm->instructionPointers);
