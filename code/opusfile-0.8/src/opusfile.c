@@ -2193,7 +2193,7 @@ static int op_pcm_seek_page(OggOpusFile *_of,
   ogg_int64_t        pcm_start;
   ogg_int64_t        pcm_end;
   ogg_int64_t        best_gp;
-  ogg_int64_t        diff;
+  ogg_int64_t        diff=0;
   ogg_uint32_t       serialno;
   opus_int32         pre_skip;
   opus_int64         begin;
@@ -2331,7 +2331,7 @@ static int op_pcm_seek_page(OggOpusFile *_of,
       d2=end-begin>>1;
       if(force_bisect)bisect=begin+(end-begin>>1);
       else{
-        ogg_int64_t diff2;
+        ogg_int64_t diff2=0;
         OP_ALWAYS_TRUE(!op_granpos_diff(&diff,_target_gp,pcm_start));
         OP_ALWAYS_TRUE(!op_granpos_diff(&diff2,pcm_end,pcm_start));
         /*Take a (pretty decent) guess.*/
