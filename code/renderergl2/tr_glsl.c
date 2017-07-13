@@ -487,20 +487,6 @@ static void GLSL_LinkProgram(GLuint program)
 	}
 }
 
-static void GLSL_ValidateProgram(GLuint program)
-{
-	GLint           validated;
-
-	qglValidateProgram(program);
-
-	qglGetProgramiv(program, GL_VALIDATE_STATUS, &validated);
-	if(!validated)
-	{
-		GLSL_PrintLog(program, GLSL_PRINTLOG_PROGRAM_INFO, qfalse);
-		ri.Error(ERR_DROP, "shaders failed to validate");
-	}
-}
-
 static void GLSL_ShowProgramUniforms(GLuint program)
 {
 	int             i, count, size;
@@ -695,7 +681,6 @@ void GLSL_InitUniforms(shaderProgram_t *program)
 
 void GLSL_FinishGPUShader(shaderProgram_t *program)
 {
-	GLSL_ValidateProgram(program->program);
 	GLSL_ShowProgramUniforms(program->program);
 	GL_CheckErrors();
 }
