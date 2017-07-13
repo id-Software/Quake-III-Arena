@@ -34,10 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 QGL_1_3_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
-QGL_EXT_framebuffer_object_PROCS;
-QGL_EXT_framebuffer_blit_PROCS;
-QGL_EXT_framebuffer_multisample_PROCS;
-QGL_ARB_vertex_array_object_PROCS;
+QGL_3_0_PROCS;
 QGL_EXT_direct_state_access_PROCS;
 #undef GLE
 
@@ -74,6 +71,33 @@ void GLimp_InitExtraExtensions()
 
 	// OpenGL 2.0, was GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
 	QGL_2_0_PROCS;
+
+	// OpenGL 3.0, was GL_EXT_framebuffer_object, GL_EXT_framebuffer_blit, GL_EXT_framebuffer_multisample, and GL_ARB_vertex_array_object
+	// QGL_*_PROCS becomes several functions, do not remove {}
+	if (glRefConfig.openglMajorVersion >= 3)
+	{
+		QGL_3_0_PROCS;
+
+		glRefConfig.framebufferObject = !!r_ext_framebuffer_object->integer;
+		glRefConfig.framebufferBlit = qtrue;
+		glRefConfig.framebufferMultisample = qtrue;
+
+		qglGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_EXT, &glRefConfig.maxRenderbufferSize);
+		qglGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &glRefConfig.maxColorAttachments);
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferObject], "OpenGL 3.0+ framebuffer procs");
+
+		// Don't let this be disabled, core context requires it
+		glRefConfig.vertexArrayObject = qtrue;
+
+		ri.Printf(PRINT_ALL, result[glRefConfig.vertexArrayObject], "OpenGL 3.0+ vertex array object procs");
+	}
+	else
+	{
+		ri.Printf(PRINT_ALL, result[2], "OpenGL 3.0+ framebuffer procs");
+		ri.Printf(PRINT_ALL, result[2], "OpenGL 3.0+ vertex array object procs");
+
+	}
 
 	// Determine GLSL version
 	if (1)
@@ -130,57 +154,6 @@ void GLimp_InitExtraExtensions()
 		glRefConfig.textureFloat = !!r_ext_texture_float->integer;
 
 		ri.Printf(PRINT_ALL, result[glRefConfig.textureFloat], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_EXT_framebuffer_object
-	extension = "GL_EXT_framebuffer_object";
-	glRefConfig.framebufferObject = qfalse;
-	if( SDL_GL_ExtensionSupported( extension ) )
-	{
-		glRefConfig.framebufferObject = !!r_ext_framebuffer_object->integer;
-
-		qglGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_EXT, &glRefConfig.maxRenderbufferSize);
-		qglGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &glRefConfig.maxColorAttachments);
-
-		QGL_EXT_framebuffer_object_PROCS;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferObject], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_EXT_framebuffer_blit
-	extension = "GL_EXT_framebuffer_blit";
-	glRefConfig.framebufferBlit = qfalse;
-	if (SDL_GL_ExtensionSupported(extension))
-	{
-		glRefConfig.framebufferBlit = qtrue;
-
-		QGL_EXT_framebuffer_blit_PROCS;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferBlit], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_EXT_framebuffer_multisample
-	extension = "GL_EXT_framebuffer_multisample";
-	glRefConfig.framebufferMultisample = qfalse;
-	if (SDL_GL_ExtensionSupported(extension))
-	{
-		glRefConfig.framebufferMultisample = qtrue;
-
-		QGL_EXT_framebuffer_multisample_PROCS;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.framebufferMultisample], extension);
 	}
 	else
 	{
@@ -245,22 +218,6 @@ void GLimp_InitExtraExtensions()
 		glRefConfig.seamlessCubeMap = !!r_arb_seamless_cube_map->integer;
 
 		ri.Printf(PRINT_ALL, result[glRefConfig.seamlessCubeMap], extension);
-	}
-	else
-	{
-		ri.Printf(PRINT_ALL, result[2], extension);
-	}
-
-	// GL_ARB_vertex_array_object
-	extension = "GL_ARB_vertex_array_object";
-	glRefConfig.vertexArrayObject = qfalse;
-	if( SDL_GL_ExtensionSupported( extension ) )
-	{
-		glRefConfig.vertexArrayObject = !!r_arb_vertex_array_object->integer;
-
-		QGL_ARB_vertex_array_object_PROCS;
-
-		ri.Printf(PRINT_ALL, result[glRefConfig.vertexArrayObject], extension);
 	}
 	else
 	{

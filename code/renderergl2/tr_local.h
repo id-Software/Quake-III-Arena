@@ -694,6 +694,8 @@ typedef enum
 
 	UNIFORM_CUBEMAPINFO,
 
+	UNIFORM_ALPHATEST,
+
 	UNIFORM_COUNT
 } uniform_t;
 

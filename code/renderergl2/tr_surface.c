@@ -546,6 +546,8 @@ static void RB_SurfaceBeam( void )
 					
 	GLSL_SetUniformVec4(sp, UNIFORM_COLOR, colorRed);
 
+	GLSL_SetUniformInt(sp, UNIFORM_ALPHATEST, 0);
+
 	R_DrawElements(tess.numIndexes, tess.firstIndex);
 
 	tess.numIndexes = 0;

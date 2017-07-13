@@ -381,6 +381,7 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 
 // OpenGL 1.3, was GL_ARB_texture_compression
 #define QGL_1_3_PROCS \
+	GLE(void, ActiveTexture, GLenum texture) \
 	GLE(void, CompressedTexImage2D, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data) \
 	GLE(void, CompressedTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data) \
 
@@ -478,97 +479,25 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 #define GL_HALF_FLOAT_ARB                   0x140B
 #endif
 
-// GL_EXT_framebuffer_object
-#define QGL_EXT_framebuffer_object_PROCS \
-	GLE(void, BindRenderbufferEXT, GLenum target, GLuint renderbuffer) \
-	GLE(void, DeleteRenderbuffersEXT, GLsizei n, const GLuint *renderbuffers) \
-	GLE(void, GenRenderbuffersEXT, GLsizei n, GLuint *renderbuffers) \
-	GLE(void, RenderbufferStorageEXT, GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
-	GLE(void, BindFramebufferEXT, GLenum target, GLuint framebuffer) \
-	GLE(void, DeleteFramebuffersEXT, GLsizei n, const GLuint *framebuffers) \
-	GLE(void, GenFramebuffersEXT, GLsizei n, GLuint *framebuffers) \
-	GLE(GLenum, CheckFramebufferStatusEXT, GLenum target) \
-	GLE(void, FramebufferTexture2DEXT, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
-	GLE(void, FramebufferRenderbufferEXT, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
-	GLE(void, GenerateMipmapEXT, GLenum target) \
-
-#ifndef GL_EXT_framebuffer_object
-#define GL_EXT_framebuffer_object
-#define GL_FRAMEBUFFER_EXT                     0x8D40
-#define GL_RENDERBUFFER_EXT                    0x8D41
-#define GL_STENCIL_INDEX1_EXT                  0x8D46
-#define GL_STENCIL_INDEX4_EXT                  0x8D47
-#define GL_STENCIL_INDEX8_EXT                  0x8D48
-#define GL_STENCIL_INDEX16_EXT                 0x8D49
-#define GL_RENDERBUFFER_WIDTH_EXT              0x8D42
-#define GL_RENDERBUFFER_HEIGHT_EXT             0x8D43
-#define GL_RENDERBUFFER_INTERNAL_FORMAT_EXT    0x8D44
-#define GL_RENDERBUFFER_RED_SIZE_EXT           0x8D50
-#define GL_RENDERBUFFER_GREEN_SIZE_EXT         0x8D51
-#define GL_RENDERBUFFER_BLUE_SIZE_EXT          0x8D52
-#define GL_RENDERBUFFER_ALPHA_SIZE_EXT         0x8D53
-#define GL_RENDERBUFFER_DEPTH_SIZE_EXT         0x8D54
-#define GL_RENDERBUFFER_STENCIL_SIZE_EXT       0x8D55
-#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_EXT            0x8CD0
-#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_EXT            0x8CD1
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_EXT          0x8CD2
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_EXT  0x8CD3
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_3D_ZOFFSET_EXT     0x8CD4
-#define GL_COLOR_ATTACHMENT0_EXT                0x8CE0
-#define GL_COLOR_ATTACHMENT1_EXT                0x8CE1
-#define GL_COLOR_ATTACHMENT2_EXT                0x8CE2
-#define GL_COLOR_ATTACHMENT3_EXT                0x8CE3
-#define GL_COLOR_ATTACHMENT4_EXT                0x8CE4
-#define GL_COLOR_ATTACHMENT5_EXT                0x8CE5
-#define GL_COLOR_ATTACHMENT6_EXT                0x8CE6
-#define GL_COLOR_ATTACHMENT7_EXT                0x8CE7
-#define GL_COLOR_ATTACHMENT8_EXT                0x8CE8
-#define GL_COLOR_ATTACHMENT9_EXT                0x8CE9
-#define GL_COLOR_ATTACHMENT10_EXT               0x8CEA
-#define GL_COLOR_ATTACHMENT11_EXT               0x8CEB
-#define GL_COLOR_ATTACHMENT12_EXT               0x8CEC
-#define GL_COLOR_ATTACHMENT13_EXT               0x8CED
-#define GL_COLOR_ATTACHMENT14_EXT               0x8CEE
-#define GL_COLOR_ATTACHMENT15_EXT               0x8CEF
-#define GL_DEPTH_ATTACHMENT_EXT                 0x8D00
-#define GL_STENCIL_ATTACHMENT_EXT               0x8D20
-#define GL_FRAMEBUFFER_COMPLETE_EXT                          0x8CD5
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT             0x8CD6
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT     0x8CD7
-#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT             0x8CD9
-#define GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT                0x8CDA
-#define GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT            0x8CDB
-#define GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT            0x8CDC
-#define GL_FRAMEBUFFER_UNSUPPORTED_EXT                       0x8CDD
-#define GL_FRAMEBUFFER_BINDING_EXT             0x8CA6
-#define GL_RENDERBUFFER_BINDING_EXT            0x8CA7
-#define GL_MAX_COLOR_ATTACHMENTS_EXT           0x8CDF
-#define GL_MAX_RENDERBUFFER_SIZE_EXT           0x84E8
-#define GL_INVALID_FRAMEBUFFER_OPERATION_EXT   0x0506
-#endif
-
-// GL_EXT_framebuffer_blit
-#define QGL_EXT_framebuffer_blit_PROCS \
-	GLE(void, BlitFramebufferEXT, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
-
-#ifndef GL_EXT_framebuffer_blit
-#define GL_EXT_framebuffer_blit
-#define GL_READ_FRAMEBUFFER_EXT                0x8CA8
-#define GL_DRAW_FRAMEBUFFER_EXT                0x8CA9
-#define GL_DRAW_FRAMEBUFFER_BINDING_EXT        0x8CA6
-#define GL_READ_FRAMEBUFFER_BINDING_EXT        0x8CAA
-#endif
-
-// GL_EXT_framebuffer_multisample
-#define QGL_EXT_framebuffer_multisample_PROCS \
-	GLE(void, RenderbufferStorageMultisampleEXT, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
-
-#ifndef GL_EXT_framebuffer_multisample
-#define GL_EXT_framebuffer_multisample
-#define GL_RENDERBUFFER_SAMPLES_EXT                0x8CAB
-#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT  0x8D56
-#define GL_MAX_SAMPLES_EXT                         0x8D57
-#endif
+// OpenGL 3.0, was GL_EXT_framebuffer_object, GL_EXT_framebuffer_blit, GL_EXT_framebuffer_multisample, and GL_ARB_vertex_array_object
+#define QGL_3_0_PROCS \
+	GLE(const GLubyte *, GetStringi, GLenum name, GLuint index) \
+	GLE(void, BindRenderbuffer, GLenum target, GLuint renderbuffer) \
+	GLE(void, DeleteRenderbuffers, GLsizei n, const GLuint *renderbuffers) \
+	GLE(void, GenRenderbuffers, GLsizei n, GLuint *renderbuffers) \
+	GLE(void, RenderbufferStorage, GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
+	GLE(void, BindFramebuffer, GLenum target, GLuint framebuffer) \
+	GLE(void, DeleteFramebuffers, GLsizei n, const GLuint *framebuffers) \
+	GLE(void, GenFramebuffers, GLsizei n, GLuint *framebuffers) \
+	GLE(GLenum, CheckFramebufferStatus, GLenum target) \
+	GLE(void, FramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+	GLE(void, FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+	GLE(void, GenerateMipmap, GLenum target) \
+	GLE(void, BlitFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
+	GLE(void, RenderbufferStorageMultisample, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
+	GLE(void, BindVertexArray, GLuint array) \
+	GLE(void, DeleteVertexArrays, GLsizei n, const GLuint *arrays) \
+	GLE(void, GenVertexArrays, GLsizei n, GLuint *arrays) \
 
 #ifndef GL_ARB_texture_compression_rgtc
 #define GL_ARB_texture_compression_rgtc
@@ -594,17 +523,6 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 #ifndef GL_ARB_seamless_cube_map
 #define GL_ARB_seamless_cube_map
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS               0x884F
-#endif
-
-// GL_ARB_vertex_array_object
-#define QGL_ARB_vertex_array_object_PROCS \
-	GLE(void, BindVertexArray, GLuint array) \
-	GLE(void, DeleteVertexArrays, GLsizei n, const GLuint *arrays) \
-	GLE(void, GenVertexArrays, GLsizei n, GLuint *arrays) \
-
-#ifndef GL_ARB_vertex_array_object
-#define GL_ARB_vertex_array_object
-#define GL_VERTEX_ARRAY_BINDING_ARB                0x85B5
 #endif
 
 // GL_EXT_direct_state_access
@@ -635,10 +553,7 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 QGL_1_3_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
-QGL_EXT_framebuffer_object_PROCS;
-QGL_EXT_framebuffer_blit_PROCS;
-QGL_EXT_framebuffer_multisample_PROCS;
-QGL_ARB_vertex_array_object_PROCS;
+QGL_3_0_PROCS;
 QGL_EXT_direct_state_access_PROCS;
 #undef GLE
 

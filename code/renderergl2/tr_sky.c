@@ -458,6 +458,8 @@ static void DrawSkySide( struct image_s *image, const int mins[2], const int max
 
 		VectorSet4(vector, 0.0, 0.0, 0.0, 0.0);
 		GLSL_SetUniformVec4(sp, UNIFORM_DIFFUSETEXOFFTURB, vector);
+
+		GLSL_SetUniformInt(sp, UNIFORM_ALPHATEST, 0);
 	}
 
 	R_DrawElements(tess.numIndexes - tess.firstIndex, tess.firstIndex);
