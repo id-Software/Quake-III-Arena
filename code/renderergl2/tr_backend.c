@@ -1604,26 +1604,26 @@ const void *RB_PostProcess(const void *data)
 	if (0 && r_sunlightMode->integer)
 	{
 		ivec4_t dstBox;
-		VectorSet4(dstBox, 0, 0, 128, 128);
+		VectorSet4(dstBox, 0, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[0], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 128, 0, 128, 128);
+		VectorSet4(dstBox, 128, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[1], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 256, 0, 128, 128);
+		VectorSet4(dstBox, 256, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[2], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 384, 0, 128, 128);
+		VectorSet4(dstBox, 384, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[3], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 	}
 
-	if (0 && r_shadows->integer == 4)
+	if (1 && r_shadows->integer == 4)
 	{
 		ivec4_t dstBox;
-		VectorSet4(dstBox, 0, glConfig.vidHeight - 128, 128, 128);
+		VectorSet4(dstBox, 512 + 0, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.pshadowMaps[0], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 128, glConfig.vidHeight - 128, 128, 128);
+		VectorSet4(dstBox, 512 + 128, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.pshadowMaps[1], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 256, glConfig.vidHeight - 128, 128, 128);
+		VectorSet4(dstBox, 512 + 256, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.pshadowMaps[2], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
-		VectorSet4(dstBox, 384, glConfig.vidHeight - 128, 128, 128);
+		VectorSet4(dstBox, 512 + 384, glConfig.vidHeight - 128, 128, 128);
 		FBO_BlitFromTexture(tr.pshadowMaps[3], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 	}
 

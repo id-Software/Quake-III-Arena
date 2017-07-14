@@ -322,14 +322,14 @@ void FBO_Init(void)
 		R_CheckFBO(tr.sunRaysFbo);
 	}
 
-	// FIXME: Don't use separate color/depth buffers for a shadow buffer
 	if (MAX_DRAWN_PSHADOWS && tr.pshadowMaps[0])
 	{
 		for( i = 0; i < MAX_DRAWN_PSHADOWS; i++)
 		{
 			tr.pshadowFbos[i] = FBO_Create(va("_shadowmap%d", i), tr.pshadowMaps[i]->width, tr.pshadowMaps[i]->height);
-			FBO_AttachImage(tr.pshadowFbos[i], tr.pshadowMaps[i], GL_COLOR_ATTACHMENT0, 0);
-			FBO_CreateBuffer(tr.pshadowFbos[i], GL_DEPTH_COMPONENT24_ARB, 0, 0);
+			// FIXME: this next line wastes 16mb with 16x512x512 sun shadow maps, skip if OpenGL 4.3+ or ARB_framebuffer_no_attachments
+			FBO_CreateBuffer(tr.pshadowFbos[i], GL_RGBA8, 0, 0);
+			FBO_AttachImage(tr.pshadowFbos[i], tr.pshadowMaps[i], GL_DEPTH_ATTACHMENT, 0);
 			R_CheckFBO(tr.pshadowFbos[i]);
 		}
 	}
