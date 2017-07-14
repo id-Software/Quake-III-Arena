@@ -300,6 +300,7 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 
 #ifdef MISSIONPACK
 	if (g_gametype.integer == GT_1FCTF) {
+		flag_pw = PW_NEUTRALFLAG;
 		enemy_flag_pw = PW_NEUTRALFLAG;
 	} 
 #endif
@@ -485,6 +486,12 @@ void Team_CheckHurtCarrier(gentity_t *targ, gentity_t *attacker)
 		flag_pw = PW_BLUEFLAG;
 	else
 		flag_pw = PW_REDFLAG;
+
+#ifdef MISSIONPACK
+	if (g_gametype.integer == GT_1FCTF) {
+		flag_pw = PW_NEUTRALFLAG;
+	}
+#endif
 
 	// flags
 	if (targ->client->ps.powerups[flag_pw] &&
