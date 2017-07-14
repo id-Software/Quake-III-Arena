@@ -1614,7 +1614,7 @@ const void *RB_PostProcess(const void *data)
 		FBO_BlitFromTexture(tr.sunShadowDepthImage[3], NULL, NULL, NULL, dstBox, NULL, NULL, 0);
 	}
 
-	if (1 && r_shadows->integer == 4)
+	if (0 && r_shadows->integer == 4)
 	{
 		ivec4_t dstBox;
 		VectorSet4(dstBox, 512 + 0, glConfig.vidHeight - 128, 128, 128);
