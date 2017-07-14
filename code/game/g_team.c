@@ -462,7 +462,7 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 
 	if (carrier && carrier != attacker) {
 		VectorSubtract(targ->r.currentOrigin, carrier->r.currentOrigin, v1);
-		VectorSubtract(attacker->r.currentOrigin, carrier->r.currentOrigin, v1);
+		VectorSubtract(attacker->r.currentOrigin, carrier->r.currentOrigin, v2);
 
 		if ( ( ( VectorLength(v1) < CTF_ATTACKER_PROTECT_RADIUS &&
 			trap_InPVS(carrier->r.currentOrigin, targ->r.currentOrigin ) ) ||
