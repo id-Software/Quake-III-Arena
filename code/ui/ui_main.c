@@ -55,20 +55,22 @@ static const int numSkillLevels = ARRAY_LEN( skillLevels );
 
 
 #define UIAS_LOCAL				0
-#define UIAS_GLOBAL1			1
-#define UIAS_GLOBAL2			2
-#define UIAS_GLOBAL3			3
-#define UIAS_GLOBAL4			4
-#define UIAS_GLOBAL5			5
-#define UIAS_FAVORITES			6
+#define UIAS_GLOBAL0			1
+#define UIAS_GLOBAL1			2
+#define UIAS_GLOBAL2			3
+#define UIAS_GLOBAL3			4
+#define UIAS_GLOBAL4			5
+#define UIAS_GLOBAL5			6
+#define UIAS_FAVORITES			7
 
 static const char *netSources[] = {
 	"Local",
-	"Internet1",
-	"Internet2",
-	"Internet3",
-	"Internet4",
-	"Internet5",
+	"Internet",
+	"Master1",
+	"Master2",
+	"Master3",
+	"Master4",
+	"Master5",
 	"Favorites"
 };
 static const int numNetSources = ARRAY_LEN( netSources );
@@ -999,6 +1001,7 @@ int UI_SourceForLAN(void) {
 		default:
 		case UIAS_LOCAL:
 			return AS_LOCAL;
+		case UIAS_GLOBAL0:
 		case UIAS_GLOBAL1:
 		case UIAS_GLOBAL2:
 		case UIAS_GLOBAL3:
@@ -2484,7 +2487,7 @@ static qboolean UI_NetSource_HandleKey(int flags, float *special, int key) {
 		
 			while(ui_netSource.integer >= UIAS_GLOBAL1 && ui_netSource.integer <= UIAS_GLOBAL5)
 			{
-				Com_sprintf(cvarname, sizeof(cvarname), "sv_master%d", ui_netSource.integer);
+				Com_sprintf(cvarname, sizeof(cvarname), "sv_master%d", ui_netSource.integer - UIAS_GLOBAL0);
 				trap_Cvar_VariableStringBuffer(cvarname, masterstr, sizeof(masterstr));
 				if(*masterstr)
 					break;
@@ -6008,7 +6011,7 @@ static void UI_StartServerRefresh(qboolean full, qboolean force)
 	// This function is called with force=qfalse when server browser menu opens or net source changes.
 	// Automatically update local and favorite servers.
 	// Only auto update master server list if there is no server info cache.
-	if ( !force && ( ui_netSource.integer >= UIAS_GLOBAL1 && ui_netSource.integer <= UIAS_GLOBAL5 ) ) {
+	if ( !force && ( ui_netSource.integer >= UIAS_GLOBAL0 && ui_netSource.integer <= UIAS_GLOBAL5 ) ) {
 		if ( trap_LAN_GetServerCount( UI_SourceForLAN() ) > 0 ) {
 			return; // have cached list
 		}
@@ -6041,14 +6044,14 @@ static void UI_StartServerRefresh(qboolean full, qboolean force)
 	}
 
 	uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
-	if( ui_netSource.integer >= UIAS_GLOBAL1 && ui_netSource.integer <= UIAS_GLOBAL5 ) {
+	if( ui_netSource.integer >= UIAS_GLOBAL0 && ui_netSource.integer <= UIAS_GLOBAL5 ) {
 
 		ptr = UI_Cvar_VariableString("debug_protocol");
 		if (strlen(ptr)) {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %s full empty\n", ui_netSource.integer - UIAS_GLOBAL1, ptr ) );
+			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %s full empty\n", ui_netSource.integer - UIAS_GLOBAL0, ptr ) );
 		}
 		else {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %d full empty\n", ui_netSource.integer - UIAS_GLOBAL1, (int)trap_Cvar_VariableValue( "protocol" ) ) );
+			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %d full empty\n", ui_netSource.integer - UIAS_GLOBAL0, (int)trap_Cvar_VariableValue( "protocol" ) ) );
 		}
 	}
 }
