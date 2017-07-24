@@ -4,6 +4,7 @@ uniform vec4   u_ViewInfo; // zfar / znear, zfar, 1/width, 1/height
 
 varying vec2   var_ScreenTex;
 
+#if 0
 vec2 poissonDisc[9] = vec2[9](
 vec2(-0.7055767, 0.196515),    vec2(0.3524343, -0.7791386),
 vec2(0.2391056, 0.9189604),    vec2(-0.07580382, -0.09224417),
@@ -11,6 +12,8 @@ vec2(0.5784913, -0.002528916), vec2(0.192888, 0.4064181),
 vec2(-0.6335801, -0.5247476),  vec2(-0.5579782, 0.7491854),
 vec2(0.7320465, 0.6317794)
 );
+#endif
+
 #define NUM_SAMPLES 3
 
 // Input: It uses texture coords as the random number seed.
@@ -46,6 +49,18 @@ float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNea
 
 float ambientOcclusion(sampler2D depthMap, const vec2 tex, const float zFarDivZNear, const float zFar, const vec2 scale)
 {
+	vec2 poissonDisc[9];
+
+	poissonDisc[0] = vec2(-0.7055767, 0.196515);
+	poissonDisc[1] = vec2(0.3524343, -0.7791386);
+	poissonDisc[2] = vec2(0.2391056, 0.9189604);
+	poissonDisc[3] = vec2(-0.07580382, -0.09224417);
+	poissonDisc[4] = vec2(0.5784913, -0.002528916);
+	poissonDisc[5] = vec2(0.192888, 0.4064181);
+	poissonDisc[6] = vec2(-0.6335801, -0.5247476);
+	poissonDisc[7] = vec2(-0.5579782, 0.7491854);
+	poissonDisc[8] = vec2(0.7320465, 0.6317794);
+
 	float result = 0;
 
 	float sampleZ = getLinearDepth(depthMap, tex, zFarDivZNear);

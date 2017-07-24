@@ -6,7 +6,7 @@ varying vec2   var_ScreenTex;
 
 //float gauss[8] = float[8](0.17, 0.17, 0.16, 0.14, 0.12, 0.1, 0.08, 0.06);
 //float gauss[5] = float[5](0.30, 0.23, 0.097, 0.024, 0.0033);
-float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
+//float gauss[4] = float[4](0.40, 0.24, 0.054, 0.0044);
 //float gauss[3] = float[3](0.60, 0.19, 0.0066);
 #define BLUR_SIZE 4
 
@@ -22,6 +22,12 @@ float getLinearDepth(sampler2D depthMap, const vec2 tex, const float zFarDivZNea
 
 vec4 depthGaussian1D(sampler2D imageMap, sampler2D depthMap, vec2 tex, float zFarDivZNear, float zFar, vec2 scale)
 {
+	float gauss[4];
+
+	gauss[0] = 0.40;
+	gauss[1] = 0.24;
+	gauss[2] = 0.054;
+	gauss[3] = 0.0044;
 
 #if defined(USE_DEPTH)
 	float depthCenter = getLinearDepth(depthMap, tex, zFarDivZNear);
