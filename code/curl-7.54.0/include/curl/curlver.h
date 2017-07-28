@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,16 +26,16 @@
    a script at release-time. This was made its own header file in 7.11.2 */
 
 /* This is the global package copyright */
-#define LIBCURL_COPYRIGHT "1996 - 2014 Daniel Stenberg, <daniel@haxx.se>."
+#define LIBCURL_COPYRIGHT "1996 - 2017 Daniel Stenberg, <daniel@haxx.se>."
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
-#define LIBCURL_VERSION "7.35.0"
+#define LIBCURL_VERSION "7.54.0"
 
 /* The numeric version number is also available "in parts" by using these
    defines: */
 #define LIBCURL_VERSION_MAJOR 7
-#define LIBCURL_VERSION_MINOR 35
+#define LIBCURL_VERSION_MINOR 54
 #define LIBCURL_VERSION_PATCH 0
 
 /* This is the numeric version of the libcurl version number, meant for easier
@@ -52,8 +52,12 @@
    This 6-digit (24 bits) hexadecimal number does not show pre-release number,
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
+
+   Note: This define is the full hex number and _does not_ use the
+   CURL_VERSION_BITS() macro since curl's own configure script greps for it
+   and needs it to contain the full number.
 */
-#define LIBCURL_VERSION_NUM 0x072300
+#define LIBCURL_VERSION_NUM 0x073600
 
 /*
  * This is the date and time when the full source package was created. The
@@ -64,6 +68,10 @@
  *
  * "Mon Feb 12 11:35:33 UTC 2007"
  */
-#define LIBCURL_TIMESTAMP "Wed Jan 29 07:09:27 UTC 2014"
+#define LIBCURL_TIMESTAMP "Wed Apr 19 05:43:55 UTC 2017"
+
+#define CURL_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|z)
+#define CURL_AT_LEAST_VERSION(x,y,z) \
+  (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
 
 #endif /* __CURL_CURLVER_H */
