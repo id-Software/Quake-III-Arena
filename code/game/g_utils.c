@@ -391,7 +391,6 @@ gentity_t *G_Spawn( void ) {
 	gentity_t	*e;
 
 	e = NULL;	// shut up warning
-	i = 0;		// shut up warning
 	for ( force = 0 ; force < 2 ; force++ ) {
 		// if we go through all entities and can't find one to free,
 		// override the normal minimum times before use
