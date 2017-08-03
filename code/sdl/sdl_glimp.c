@@ -499,7 +499,22 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 			}
 			else
 			{
-				ri.Printf(PRINT_ALL, "SDL_GL_CreateContext succeeded, but: %s\n", SDL_GetError());
+				const char *renderer;
+
+				ri.Printf(PRINT_ALL, "SDL_GL_CreateContext succeeded.\n");
+
+				renderer = (const char *)qglGetString(GL_RENDERER);
+				if (renderer && (strstr(renderer, "Software Renderer") || strstr(renderer, "Software Rasterizer")))
+				{
+					ri.Printf(PRINT_ALL, "GL_RENDERER is %s, rejecting context\n", renderer);
+
+					SDL_GL_DeleteContext(SDL_glContext);
+					SDL_glContext = NULL;
+
+					SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, profileMask);
+					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion);
+					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minorVersion);
+				}
 			}
 		}
 		else
