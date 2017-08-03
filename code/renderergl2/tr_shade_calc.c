@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ (int)( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
+#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ ( (int64_t) ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
 
 static float *TableForFunc( genFunc_t func ) 
 {
@@ -204,12 +204,12 @@ void RB_CalcBulgeVertexes( deformStage_t *ds ) {
 	const float *st = ( const float * ) tess.texCoords[0];
 	float		*xyz = ( float * ) tess.xyz;
 	int16_t	*normal = tess.normal[0];
-	float		now;
+	double		now;
 
-	now = backEnd.refdef.time * ds->bulgeSpeed * 0.001f;
+	now = backEnd.refdef.time * 0.001 * ds->bulgeSpeed;
 
 	for ( i = 0; i < tess.numVertexes; i++, xyz += 4, st += 2, normal += 4 ) {
-		int		off;
+		int64_t off;
 		float scale;
 		vec3_t fNormal;
 
@@ -776,18 +776,16 @@ void RB_CalcScaleTexMatrix( const float scale[2], float *matrix )
 */
 void RB_CalcScrollTexMatrix( const float scrollSpeed[2], float *matrix )
 {
-	double timeScale;
+	double timeScale = tess.shaderTime;
 	double adjustedScrollS, adjustedScrollT;
-
-	timeScale = tess.shaderTime;
 
 	adjustedScrollS = scrollSpeed[0] * timeScale;
 	adjustedScrollT = scrollSpeed[1] * timeScale;
 
 	// clamp so coordinates don't continuously get larger, causing problems
 	// with hardware limits
-	adjustedScrollS = (double)adjustedScrollS - floor( adjustedScrollS );
-	adjustedScrollT = (double)adjustedScrollT - floor( adjustedScrollT );
+	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
 
 	matrix[0] = 1.0f; matrix[2] = 0.0f; matrix[4] = adjustedScrollS;
 	matrix[1] = 0.0f; matrix[3] = 1.0f; matrix[5] = adjustedScrollT;

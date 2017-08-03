@@ -66,7 +66,6 @@ R_BindAnimatedImageToTMU
 */
 static void R_BindAnimatedImageToTMU( textureBundle_t *bundle, int tmu ) {
 	int64_t index;
-	double	v;
 
 	if ( bundle->isVideoMap ) {
 		ri.CIN_RunCinematic(bundle->videoMapHandle);
@@ -82,10 +81,8 @@ static void R_BindAnimatedImageToTMU( textureBundle_t *bundle, int tmu ) {
 
 	// it is necessary to do this messy calc to make sure animations line up
 	// exactly with waveforms of the same frequency
-	//index = ri.ftol(tess.shaderTime * bundle->imageAnimationSpeed * FUNCTABLE_SIZE);
-	//index >>= FUNCTABLE_SIZE2;
-	v = tess.shaderTime * bundle->imageAnimationSpeed;
-	index = v;
+	index = tess.shaderTime * bundle->imageAnimationSpeed * FUNCTABLE_SIZE;
+	index >>= FUNCTABLE_SIZE2;
 
 	if ( index < 0 ) {
 		index = 0;	// may happen with shader time offsets

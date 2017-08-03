@@ -189,10 +189,10 @@ typedef enum {
 typedef struct {
 	genFunc_t	func;
 
-	double base;
-	double amplitude;
-	double phase;
-	double frequency;
+	float base;
+	float amplitude;
+	float phase;
+	float frequency;
 } waveForm_t;
 
 #define TR_MAX_TEXMODS 4
@@ -252,7 +252,7 @@ typedef struct {
 typedef struct {
 	image_t			*image[MAX_IMAGE_ANIMATIONS];
 	int				numImageAnimations;
-	double			imageAnimationSpeed;
+	float			imageAnimationSpeed;
 
 	texCoordGen_t	tcGen;
 	vec3_t			tcGenVectors[2];

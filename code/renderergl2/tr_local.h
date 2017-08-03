@@ -268,10 +268,10 @@ typedef enum {
 typedef struct {
 	genFunc_t	func;
 
-	double base;
-	double amplitude;
-	double phase;
-	double frequency;
+	float base;
+	float amplitude;
+	float phase;
+	float frequency;
 } waveForm_t;
 
 #define TR_MAX_TEXMODS 4
@@ -331,7 +331,7 @@ typedef struct {
 typedef struct {
 	image_t			*image[MAX_IMAGE_ANIMATIONS];
 	int				numImageAnimations;
-	double			imageAnimationSpeed;
+	float			imageAnimationSpeed;
 
 	texCoordGen_t	tcGen;
 	vec3_t			tcGenVectors[2];
@@ -478,29 +478,6 @@ typedef struct shader_s {
 
 	struct	shader_s	*next;
 } shader_t;
-
-static ID_INLINE qboolean ShaderRequiresCPUDeforms(const shader_t * shader)
-{
-	if(shader->numDeforms)
-	{
-		const deformStage_t *ds = &shader->deforms[0];
-
-		if (shader->numDeforms > 1)
-			return qtrue;
-
-		switch (ds->deformation)
-		{
-			case DEFORM_WAVE:
-			case DEFORM_BULGE:
-				return qfalse;
-
-			default:
-				return qtrue;
-		}
-	}
-
-	return qfalse;
-}
 
 enum
 {
@@ -1788,6 +1765,32 @@ extern	cvar_t	*r_debugSort;
 extern	cvar_t	*r_printShaders;
 
 extern cvar_t	*r_marksOnTriangleMeshes;
+
+//====================================================================
+
+static ID_INLINE qboolean ShaderRequiresCPUDeforms(const shader_t * shader)
+{
+	if(shader->numDeforms)
+	{
+		const deformStage_t *ds = &shader->deforms[0];
+
+		if (shader->numDeforms > 1)
+			return qtrue;
+
+		switch (ds->deformation)
+		{
+			case DEFORM_WAVE:
+			case DEFORM_BULGE:
+				// need CPU deforms at high level-times to avoid floating point percision loss
+				return ( backEnd.refdef.floatTime != (float)backEnd.refdef.floatTime );
+
+			default:
+				return qtrue;
+		}
+	}
+
+	return qfalse;
+}
 
 //====================================================================
 
