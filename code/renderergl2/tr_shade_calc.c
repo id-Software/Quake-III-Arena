@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ ri.ftol( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
+#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ (int)( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
 
 static float *TableForFunc( genFunc_t func ) 
 {
@@ -776,16 +776,18 @@ void RB_CalcScaleTexMatrix( const float scale[2], float *matrix )
 */
 void RB_CalcScrollTexMatrix( const float scrollSpeed[2], float *matrix )
 {
-	float timeScale = tess.shaderTime;
-	float adjustedScrollS, adjustedScrollT;
+	double timeScale;
+	double adjustedScrollS, adjustedScrollT;
+
+	timeScale = tess.shaderTime;
 
 	adjustedScrollS = scrollSpeed[0] * timeScale;
 	adjustedScrollT = scrollSpeed[1] * timeScale;
 
 	// clamp so coordinates don't continuously get larger, causing problems
 	// with hardware limits
-	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
-	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
+	adjustedScrollS = (double)adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = (double)adjustedScrollT - floor( adjustedScrollT );
 
 	matrix[0] = 1.0f; matrix[2] = 0.0f; matrix[4] = adjustedScrollS;
 	matrix[1] = 0.0f; matrix[3] = 1.0f; matrix[5] = adjustedScrollT;
@@ -805,9 +807,9 @@ void RB_CalcTransformTexMatrix( const texModInfo_t *tmi, float *matrix  )
 */
 void RB_CalcRotateTexMatrix( float degsPerSecond, float *matrix )
 {
-	float timeScale = tess.shaderTime;
-	float degs;
-	int index;
+	double timeScale = tess.shaderTime;
+	double degs;
+	int64_t index;
 	float sinValue, cosValue;
 
 	degs = -degsPerSecond * timeScale;
