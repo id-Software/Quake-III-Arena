@@ -38,8 +38,8 @@ export LD_LIBRARY_PATH
 
 archs=`uname -m`
 case "$archs" in
-	i?86) archs=i386 ;;
-	x86_64) archs="x86_64 i386" ;;
+	i?86) archs=x86 ;;
+	x86_64) archs="x86_64 x86" ;;
 	ppc64) archs="ppc64 ppc" ;;
 esac
 

@@ -11,7 +11,7 @@ fi
 
 
 if [ "X`uname -m`" = "Xi86pc" ]; then
-	ARCH=i386
+	ARCH=x86
 else
 	ARCH=sparc
 fi
@@ -94,7 +94,7 @@ if [ -d ${BUILD_DIR} ]; then
 		fi
 	done
 
-	for EXEC_SO in cgamesparc.so qagamesparc.so uisparc.so cgamei386.so qagamei386.so uii386.so
+	for EXEC_SO in cgamesparc.so qagamesparc.so uisparc.so cgamex86.so qagamex86.so uix86.so
 	do
 		if [ -f ${BUILD_DIR}/baseq3/${EXEC_SO} ]; then
         		${INSTALL_BIN} ${BUILD_DIR}/baseq3/${EXEC_SO} ${PKG_BUILD_DIR}/baseq3/${EXEC_SO}

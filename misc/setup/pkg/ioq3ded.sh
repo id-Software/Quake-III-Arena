@@ -13,7 +13,7 @@ fi
 export LD_LIBRARY_PATH
 
 COMPILE_PLATFORM=`uname|sed -e 's/_.*//'|tr '[:upper:]' '[:lower:]'`
-COMPILE_ARCH=`uname -p | sed -e 's/i.86/i386/'`
+COMPILE_ARCH=`uname -p | sed -e 's/i.86/x86/'`
 
 EXEC_REL=release
 

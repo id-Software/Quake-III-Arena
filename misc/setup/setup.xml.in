@@ -24,12 +24,12 @@ ifelse(HAVE_X86_64,yes,dnl
      <help>you need the binaries to play the game</help>
     </option>
 )dnl
-ifelse(HAVE_I386,yes,dnl
+ifelse(HAVE_X86,yes,dnl
     <option install="true" if="|(x86,x86_64)">
      ioq3 x86 (32 bit) binaries
      <binary libc="any" symlink="ioquake3" icon="quake3.png" name="ioquake3">ioquake3</binary>
      <files>
-       ioquake3.i386.tar
+       ioquake3.x86.tar
      </files>
      <help>you need the binaries to play the game</help>
     </option>

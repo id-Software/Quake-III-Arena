@@ -46,8 +46,8 @@ archs=()
 for arch in $topdir/build/release-*; do
 	arch=${arch##*-}
 	case "$arch" in
-		i386) echo "define(HAVE_I386,yes)dnl" >> defines.m4
-			copystartscript x86
+		x86) echo "define(HAVE_X86,yes)dnl" >> defines.m4
+			copystartscript $arch
 		;;
 		x86_64) echo "define(HAVE_X86_64,yes)dnl" >> defines.m4
 			copystartscript $arch
