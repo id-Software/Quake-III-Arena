@@ -479,9 +479,12 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 #define GL_HALF_FLOAT_ARB                   0x140B
 #endif
 
-// OpenGL 3.0, was GL_EXT_framebuffer_object, GL_EXT_framebuffer_blit, GL_EXT_framebuffer_multisample, and GL_ARB_vertex_array_object
+// OpenGL 3.0 specific
 #define QGL_3_0_PROCS \
 	GLE(const GLubyte *, GetStringi, GLenum name, GLuint index) \
+
+// GL_ARB_framebuffer_object, built-in to OpenGL 3.0
+#define QGL_ARB_framebuffer_object_PROCS \
 	GLE(void, BindRenderbuffer, GLenum target, GLuint renderbuffer) \
 	GLE(void, DeleteRenderbuffers, GLsizei n, const GLuint *renderbuffers) \
 	GLE(void, GenRenderbuffers, GLsizei n, GLuint *renderbuffers) \
@@ -495,6 +498,9 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, GenerateMipmap, GLenum target) \
 	GLE(void, BlitFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
 	GLE(void, RenderbufferStorageMultisample, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) \
+
+// GL_ARB_vertex_array_object, built-in to OpenGL 3.0
+#define QGL_ARB_vertex_array_object_PROCS \
 	GLE(void, BindVertexArray, GLuint array) \
 	GLE(void, DeleteVertexArrays, GLsizei n, const GLuint *arrays) \
 	GLE(void, GenVertexArrays, GLsizei n, GLuint *arrays) \
@@ -554,6 +560,8 @@ QGL_1_3_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
 QGL_3_0_PROCS;
+QGL_ARB_framebuffer_object_PROCS;
+QGL_ARB_vertex_array_object_PROCS;
 QGL_EXT_direct_state_access_PROCS;
 #undef GLE
 
