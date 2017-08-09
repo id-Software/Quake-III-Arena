@@ -928,6 +928,16 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	}
 }
 
+static void SanitizeChatText( char *text ) {
+	int i;
+
+	for ( i = 0; text[i]; i++ ) {
+		if ( text[i] == '\n' || text[i] == '\r' ) {
+			text[i] = ' ';
+		}
+	}
+}
+
 
 /*
 ==================
@@ -949,6 +959,8 @@ static void Cmd_Say_f( gentity_t *ent, int mode, qboolean arg0 ) {
 	{
 		p = ConcatArgs( 1 );
 	}
+
+	SanitizeChatText( p );
 
 	G_Say( ent, NULL, mode, p );
 }
@@ -981,6 +993,8 @@ static void Cmd_Tell_f( gentity_t *ent ) {
 	}
 
 	p = ConcatArgs( 2 );
+
+	SanitizeChatText( p );
 
 	G_LogPrintf( "tell: %s to %s: %s\n", ent->client->pers.netname, target->client->pers.netname, p );
 	G_Say( ent, target, SAY_TELL, p );
@@ -1076,6 +1090,8 @@ static void Cmd_Voice_f( gentity_t *ent, int mode, qboolean arg0, qboolean voice
 		p = ConcatArgs( 1 );
 	}
 
+	SanitizeChatText( p );
+
 	G_Voice( ent, NULL, mode, p, voiceonly );
 }
 
@@ -1107,6 +1123,8 @@ static void Cmd_VoiceTell_f( gentity_t *ent, qboolean voiceonly ) {
 	}
 
 	id = ConcatArgs( 2 );
+
+	SanitizeChatText( id );
 
 	G_LogPrintf( "vtell: %s to %s: %s\n", ent->client->pers.netname, target->client->pers.netname, id );
 	G_Voice( ent, target, SAY_TELL, id, voiceonly );
