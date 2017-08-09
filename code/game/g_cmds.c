@@ -1489,9 +1489,16 @@ void Cmd_CallTeamVote_f( gentity_t *ent ) {
 		trap_Argv( i, &arg2[strlen(arg2)], sizeof( arg2 ) - strlen(arg2) );
 	}
 
-	if( strchr( arg1, ';' ) || strchr( arg2, ';' ) ) {
-		trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string.\n\"" );
-		return;
+	// check for command separators in arg2
+	for( c = arg2; *c; ++c) {
+		switch(*c) {
+			case '\n':
+			case '\r':
+			case ';':
+				trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string.\n\"" );
+				return;
+			break;
+		}
 	}
 
 	if ( !Q_stricmp( arg1, "leader" ) ) {
