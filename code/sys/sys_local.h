@@ -28,12 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MINSDL_MINOR 0
 #define MINSDL_PATCH 0
 
-// Input subsystem
-void IN_Init( void *windowData );
-void IN_Frame( void );
-void IN_Shutdown( void );
-void IN_Restart( void );
-
 // Console
 void CON_Shutdown( void );
 void CON_Init( void );
