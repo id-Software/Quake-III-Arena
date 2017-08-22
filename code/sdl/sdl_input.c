@@ -192,7 +192,18 @@ static keyNum_t IN_TranslateSDLToQ3Key( SDL_Keysym *keysym, qboolean down )
 {
 	keyNum_t key = 0;
 
-	if( keysym->sym >= SDLK_SPACE && keysym->sym < SDLK_DELETE )
+	if( keysym->scancode >= SDL_SCANCODE_1 && keysym->scancode <= SDL_SCANCODE_0 )
+	{
+		// Always map the number keys as such even if they actually map
+		// to other characters (eg, "1" is "&" on an AZERTY keyboard).
+		// This is required for SDL before 2.0.6, except on Windows
+		// which already had this behavior.
+		if( keysym->scancode == SDL_SCANCODE_0 )
+			key = '0';
+		else
+			key = '1' + keysym->scancode - SDL_SCANCODE_1;
+	}
+	else if( keysym->sym >= SDLK_SPACE && keysym->sym < SDLK_DELETE )
 	{
 		// These happen to match the ASCII chars
 		key = (int)keysym->sym;
@@ -280,6 +291,15 @@ static keyNum_t IN_TranslateSDLToQ3Key( SDL_Keysym *keysym, qboolean down )
 			case SDLK_CAPSLOCK:     key = K_CAPSLOCK;      break;
 
 			default:
+				if( !( keysym->sym & SDLK_SCANCODE_MASK ) && keysym->scancode <= 95 )
+				{
+					// Map Unicode characters to 95 world keys using the key's scan code.
+					// FIXME: There aren't enough world keys to cover all the scancodes.
+					// Maybe create a map of scancode to quake key at start up and on
+					// key map change; allocate world key numbers as needed similar
+					// to SDL 1.2.
+					key = K_WORLD_0 + (int)keysym->scancode;
+				}
 				break;
 		}
 	}
