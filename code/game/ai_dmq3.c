@@ -3695,21 +3695,26 @@ void BotMapScripts(bot_state_t *bs) {
 	strncpy(mapname, Info_ValueForKey( info, "mapname" ), sizeof(mapname)-1);
 	mapname[sizeof(mapname)-1] = '\0';
 
-	if (!Q_stricmp(mapname, "q3tourney6")) {
-		vec3_t mins = {700, 204, 672}, maxs = {964, 468, 680};
+	if (!Q_stricmp(mapname, "q3tourney6") || !Q_stricmp(mapname, "q3tourney6_ctf") || !Q_stricmp(mapname, "mpq3tourney6")) {
+		vec3_t mins = {694, 200, 480}, maxs = {968, 472, 680};
 		vec3_t buttonorg = {304, 352, 920};
 		//NOTE: NEVER use the func_bobbing in q3tourney6
 		bs->tfl &= ~TFL_FUNCBOB;
-		//if the bot is below the bounding box
+		//crush area is higher in mpq3tourney6
+		if (!Q_stricmp(mapname, "mpq3tourney6")) {
+			mins[2] += 64;
+			maxs[2] += 64;
+		}
+		//if the bot is in the bounding box of the crush area
 		if (bs->origin[0] > mins[0] && bs->origin[0] < maxs[0]) {
 			if (bs->origin[1] > mins[1] && bs->origin[1] < maxs[1]) {
-				if (bs->origin[2] < mins[2]) {
+				if (bs->origin[2] > mins[2] && bs->origin[2] < maxs[2]) {
 					return;
 				}
 			}
 		}
 		shootbutton = qfalse;
-		//if an enemy is below this bounding box then shoot the button
+		//if an enemy is in the bounding box then shoot the button
 		for (i = 0; i < level.maxclients; i++) {
 
 			if (i == bs->client) continue;
@@ -3722,7 +3727,7 @@ void BotMapScripts(bot_state_t *bs) {
 			//
 			if (entinfo.origin[0] > mins[0] && entinfo.origin[0] < maxs[0]) {
 				if (entinfo.origin[1] > mins[1] && entinfo.origin[1] < maxs[1]) {
-					if (entinfo.origin[2] < mins[2]) {
+					if (entinfo.origin[2] > mins[2] && entinfo.origin[2] < maxs[2]) {
 						//if there's a team mate below the crusher
 						if (BotSameTeam(bs, i)) {
 							shootbutton = qfalse;
@@ -3749,10 +3754,6 @@ void BotMapScripts(bot_state_t *bs) {
 				trap_EA_Attack(bs->client);
 			}
 		}
-	}
-	else if (!Q_stricmp(mapname, "mpq3tourney6")) {
-		//NOTE: NEVER use the func_bobbing in mpq3tourney6
-		bs->tfl &= ~TFL_FUNCBOB;
 	}
 }
 
