@@ -3733,7 +3733,7 @@ void BotMapScripts(bot_state_t *bs) {
 							shootbutton = qfalse;
 							break;
 						}
-						else {
+						else if (bs->enemy == i) {
 							shootbutton = qtrue;
 						}
 					}
