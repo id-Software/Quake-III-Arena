@@ -38,6 +38,13 @@ ifndef SDLDLL
 		SDLDLL=SDL2.dll
 	endif
 endif
+ifndef OPENALDLL
+	ifeq ($(ARCH),x86_64)
+		OPENALDLL=OpenAL64.dll
+	else
+		OPENALDLL=OpenAL32.dll
+	endif
+endif
 
 DEFINES=
 ifeq ($(USE_RENDERER_DLOPEN),1)
@@ -63,7 +70,7 @@ endif
 all: ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe
 
 ioquake3.$(ARCH).nsi: ioquake3.nsi.in
-	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/mingw32/$(PLATFORM)/g;s/x86/$(ARCH)/g;s/SDL2.dll/$(SDLDLL)/g' < $< > $@
+	sed 's/XXXVERSIONXXX/$(VERSION)/;s/XXXRELEASEXXX/$(RELEASE)/;s/mingw32/$(PLATFORM)/g;s/x86/$(ARCH)/g;s/SDL2.dll/$(SDLDLL)/g;s/OpenAL32.dll/$(OPENALDLL)/g' < $< > $@
 
 ioquake3-$(VERSION)-$(RELEASE).$(ARCH).exe: ioquake3.$(ARCH).nsi
 	makensis $(DEFINES) ioquake3.$(ARCH).nsi
