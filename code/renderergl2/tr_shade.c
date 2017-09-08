@@ -87,7 +87,12 @@ static void R_BindAnimatedImageToTMU( textureBundle_t *bundle, int tmu ) {
 	if ( index < 0 ) {
 		index = 0;	// may happen with shader time offsets
 	}
-	index %= bundle->numImageAnimations;
+
+	// Windows x86 doesn't load renderer DLL with 64 bit modulus
+	//index %= bundle->numImageAnimations;
+	while ( index >= bundle->numImageAnimations ) {
+		index -= bundle->numImageAnimations;
+	}
 
 	GL_BindToTMU( bundle->image[ index ], tmu );
 }
