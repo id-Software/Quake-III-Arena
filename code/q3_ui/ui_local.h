@@ -486,6 +486,9 @@ typedef struct {
 
 	animation_t		animations[MAX_ANIMATIONS];
 
+	qboolean		fixedlegs;		// true if legs yaw is always the same as torso yaw
+	qboolean		fixedtorso;		// true if torso never changes yaw
+
 	qhandle_t		weaponModel;
 	qhandle_t		barrelModel;
 	qhandle_t		flashModel;
