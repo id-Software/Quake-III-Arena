@@ -14,7 +14,6 @@ fi
 
 if [ "$1" == "x86" ]; then
 	BUILDARCH=x86
-	DARWIN_GCC_ARCH=i386
 elif [ "$1" == "x86_64" ]; then
 	BUILDARCH=x86_64
 elif [ "$1" == "ppc" ]; then
@@ -23,10 +22,6 @@ else
 	echo "Invalid architecture: $1"
 	echo "Valid architectures are x86, x86_64 or ppc"
 	exit 1
-fi
-
-if [ -z "$DARWIN_GCC_ARCH" ]; then
-	DARWIN_GCC_ARCH=${BUILDARCH}
 fi
 
 CC=gcc-4.0
@@ -46,13 +41,12 @@ fi
 
 unset ARCH_SDK
 unset ARCH_CFLAGS
-unset ARCH_LDFLAGS
+unset ARCH_MACOSX_VERSION_MIN
 
 if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
 	ARCH_SDK=/Developer/SDKs/MacOSX10.5.sdk
-	ARCH_CFLAGS="-arch ${DARWIN_GCC_ARCH} -isysroot /Developer/SDKs/MacOSX10.5.sdk \
-			-DMAC_OS_X_VERSION_MIN_REQUIRED=1050"
-	ARCH_LDFLAGS=" -mmacosx-version-min=10.5"
+	ARCH_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.5.sdk"
+	ARCH_MACOSX_VERSION_MIN="10.5"
 fi
 
 
@@ -71,7 +65,7 @@ NCPU=`sysctl -n hw.ncpu`
 #if [ -d build/release-darwin-${BUILDARCH} ]; then
 #	rm -r build/release-darwin-${BUILDARCH}
 #fi
-(ARCH=${BUILDARCH} CFLAGS=$ARCH_CFLAGS LDFLAGS=$ARCH_LDFLAGS make -j$NCPU) || exit 1;
+(ARCH=${BUILDARCH} CFLAGS=$ARCH_CFLAGS MACOSX_VERSION_MIN=$ARCH_MACOSX_VERSION_MIN make -j$NCPU) || exit 1;
 
 # use the following shell script to build an application bundle
 "./make-macosx-app.sh" release ${BUILDARCH}
