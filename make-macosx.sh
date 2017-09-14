@@ -47,6 +47,8 @@ if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
 	ARCH_SDK=/Developer/SDKs/MacOSX10.5.sdk
 	ARCH_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.5.sdk"
 	ARCH_MACOSX_VERSION_MIN="10.5"
+else
+	ARCH_MACOSX_VERSION_MIN="10.7"
 fi
 
 
@@ -68,4 +70,5 @@ NCPU=`sysctl -n hw.ncpu`
 (ARCH=${BUILDARCH} CFLAGS=$ARCH_CFLAGS MACOSX_VERSION_MIN=$ARCH_MACOSX_VERSION_MIN make -j$NCPU) || exit 1;
 
 # use the following shell script to build an application bundle
+export MACOSX_DEPLOYMENT_TARGET="${ARCH_MACOSX_VERSION_MIN}"
 "./make-macosx-app.sh" release ${BUILDARCH}

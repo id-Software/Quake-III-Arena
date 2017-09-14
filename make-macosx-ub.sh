@@ -88,4 +88,5 @@ echo;echo
 echo
 
 # use the following shell script to build a universal application bundle
+export MACOSX_DEPLOYMENT_TARGET="10.5"
 "./make-macosx-app.sh" release
