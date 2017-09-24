@@ -8,7 +8,6 @@ cd ${MASTER_DIR}
 
 if [ "${OPTIONS}" == "all_options" ];
 then
-	export USE_CODEC_VORBIS=1
 	export USE_FREETYPE=1
 fi
 

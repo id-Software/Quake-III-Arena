@@ -14,8 +14,8 @@ env:
     - CC=gcc
     - CC=clang
     # extra libs
-    - CC=gcc USE_CODEC_VORBIS=1 USE_FREETYPE=1
-    - CC=clang USE_CODEC_VORBIS=1 USE_FREETYPE=1
+    - CC=gcc USE_FREETYPE=1
+    - CC=clang USE_FREETYPE=1
     # cross-compile using mingw
     # dlopen curl to workaround link error because mingw-w64 in trusty is missing strtok_r required by libcurl.a
     - CC= PLATFORM="mingw32" ARCH="x86" USE_CURL_DLOPEN=1
