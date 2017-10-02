@@ -301,8 +301,8 @@ endif
 # Use sdl2-config if all else fails
 ifeq ($(SDL_CFLAGS),)
   ifneq ($(call bin_path, sdl2-config),)
-    SDL_CFLAGS ?= $(shell sdl2-config --cflags)
-    SDL_LIBS ?= $(shell sdl2-config --libs)
+    SDL_CFLAGS = $(shell sdl2-config --cflags)
+    SDL_LIBS = $(shell sdl2-config --libs)
   endif
 endif
 
