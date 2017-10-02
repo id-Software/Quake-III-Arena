@@ -54,6 +54,7 @@ cvar_t *r_centerWindow;
 cvar_t *r_sdlDriver;
 
 int qglMajorVersion, qglMinorVersion;
+int qglesMajorVersion, qglesMinorVersion;
 
 void (APIENTRYP qglActiveTextureARB) (GLenum texture);
 void (APIENTRYP qglClientActiveTextureARB) (GLenum texture);
@@ -239,7 +240,7 @@ static qboolean GLimp_GetProcAddresses( void ) {
 	}
 #endif
 
-	// OpenGL 1.0
+	// OpenGL 1.0 and OpenGL ES 1.0
 	GLE(const GLubyte *, GetString, GLenum name)
 
 	if ( !qglGetString ) {
@@ -252,17 +253,28 @@ static qboolean GLimp_GetProcAddresses( void ) {
 		Com_Error( ERR_FATAL, "GL_VERSION is NULL\n" );
 	}
 
-	sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
+	if ( Q_stricmpn( "OpenGL ES", version, 9 ) == 0 ) {
+		char profile[6]; // ES, ES-CM, or ES-CL
+		sscanf( version, "OpenGL %5s %d.%d", profile, &qglesMajorVersion, &qglesMinorVersion );
+		// common lite profile (no floating point) is not supported
+		if ( Q_stricmp( profile, "ES-CL" ) == 0 ) {
+			qglesMajorVersion = 0;
+			qglesMinorVersion = 0;
+		}
+	} else {
+		sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
+	}
 
-	// require OpenGL 1.1
-	if ( QGL_VERSION_ATLEAST( 1, 1 ) ) {
+	// require OpenGL 1.1 or OpenGL ES 1.0
+	// FIXME: Not all of these functions are available in OpenGL ES
+	if ( QGL_VERSION_ATLEAST( 1, 1 ) /*|| QGLES_VERSION_ATLEAST( 1, 0 )*/ ) {
 		QGL_1_0_PROCS;
 		QGL_1_1_PROCS;
 	} else {
 		Com_Error( ERR_FATAL, "Unsupported OpenGL Version: %s\n", version );
 	}
 
-	if ( QGL_VERSION_ATLEAST( 3, 0 ) ) {
+	if ( QGL_VERSION_ATLEAST( 3, 0 ) || QGLES_VERSION_ATLEAST( 3, 0 ) ) {
 		QGL_3_0_PROCS;
 	}
 
@@ -283,6 +295,8 @@ static void GLimp_ClearProcAddresses( void ) {
 
 	qglMajorVersion = 0;
 	qglMinorVersion = 0;
+	qglesMajorVersion = 0;
+	qglesMinorVersion = 0;
 
 	QGL_1_0_PROCS;
 	QGL_1_1_PROCS;

@@ -306,6 +306,8 @@ QGL_EXT_direct_state_access_PROCS;
 #undef GLE
 
 extern int qglMajorVersion, qglMinorVersion;
+extern int qglesMajorVersion, qglesMinorVersion;
 #define QGL_VERSION_ATLEAST( major, minor ) ( qglMajorVersion > major || ( qglMajorVersion == major && qglMinorVersion >= minor ) )
+#define QGLES_VERSION_ATLEAST( major, minor ) ( qglesMajorVersion > major || ( qglesMajorVersion == major && qglesMinorVersion >= minor ) )
 
 #endif
