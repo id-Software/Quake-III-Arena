@@ -64,8 +64,9 @@ void (APIENTRYP qglLockArraysEXT) (GLint first, GLsizei count);
 void (APIENTRYP qglUnlockArraysEXT) (void);
 
 #define GLE(ret, name, ...) name##proc * qgl##name;
-QGL_1_0_PROCS;
 QGL_1_1_PROCS;
+QGL_DESKTOP_1_1_PROCS;
+QGL_ES_1_1_PROCS;
 QGL_3_0_PROCS;
 #undef GLE
 
@@ -265,11 +266,15 @@ static qboolean GLimp_GetProcAddresses( void ) {
 		sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
 	}
 
-	// require OpenGL 1.1 or OpenGL ES 1.0
-	// FIXME: Not all of these functions are available in OpenGL ES
-	if ( QGL_VERSION_ATLEAST( 1, 1 ) /*|| QGLES_VERSION_ATLEAST( 1, 0 )*/ ) {
-		QGL_1_0_PROCS;
+	if ( QGL_VERSION_ATLEAST( 1, 1 ) ) {
 		QGL_1_1_PROCS;
+		QGL_DESKTOP_1_1_PROCS;
+	} else if ( qglesMajorVersion == 1 && qglesMinorVersion >= 1 ) {
+		// OpenGL ES 1.1 (2.0 is not backward compatible)
+		QGL_1_1_PROCS;
+		QGL_ES_1_1_PROCS;
+		// error so this doesn't segfault due to NULL desktop GL functions being used
+		Com_Error( ERR_FATAL, "Unsupported OpenGL Version: %s\n", version );
 	} else {
 		Com_Error( ERR_FATAL, "Unsupported OpenGL Version: %s\n", version );
 	}
@@ -298,8 +303,9 @@ static void GLimp_ClearProcAddresses( void ) {
 	qglesMajorVersion = 0;
 	qglesMinorVersion = 0;
 
-	QGL_1_0_PROCS;
 	QGL_1_1_PROCS;
+	QGL_DESKTOP_1_1_PROCS;
+	QGL_ES_1_1_PROCS;
 	QGL_3_0_PROCS;
 
 #undef GLE
