@@ -1031,15 +1031,15 @@ void GfxInfo_f( void )
 	ri.Printf( PRINT_ALL, "GL_RENDERER: %s\n", glConfig.renderer_string );
 	ri.Printf( PRINT_ALL, "GL_VERSION: %s\n", glConfig.version_string );
 	ri.Printf( PRINT_ALL, "GL_EXTENSIONS: " );
-	if (glRefConfig.openglMajorVersion >= 3)
+	if ( qglGetStringi )
 	{
 		GLint numExtensions;
 		int i;
 
-		qglGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-		for (i = 0; i < numExtensions; i++)
+		qglGetIntegerv( GL_NUM_EXTENSIONS, &numExtensions );
+		for ( i = 0; i < numExtensions; i++ )
 		{
-			ri.Printf(PRINT_ALL, "%s ", qglGetStringi(GL_EXTENSIONS, i));
+			ri.Printf( PRINT_ALL, "%s ", qglGetStringi( GL_EXTENSIONS, i ) );
 		}
 	}
 	else

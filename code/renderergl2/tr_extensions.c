@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 QGL_1_3_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
-QGL_3_0_PROCS;
 QGL_ARB_framebuffer_object_PROCS;
 QGL_ARB_vertex_array_object_PROCS;
 QGL_EXT_direct_state_access_PROCS;
@@ -48,13 +47,12 @@ void GLimp_InitExtraExtensions()
 	qboolean q_gl_version_at_least_3_2;
 
 	// Check OpenGL version
-	sscanf(glConfig.version_string, "%d.%d", &glRefConfig.openglMajorVersion, &glRefConfig.openglMinorVersion);
-	if (glRefConfig.openglMajorVersion < 2)
+	if ( !QGL_VERSION_ATLEAST( 2, 0 ) )
 		ri.Error(ERR_FATAL, "OpenGL 2.0 required!");
 	ri.Printf(PRINT_ALL, "...using OpenGL %s\n", glConfig.version_string);
 
-	q_gl_version_at_least_3_0 = (glRefConfig.openglMajorVersion >= 3);
-	q_gl_version_at_least_3_2 = (glRefConfig.openglMajorVersion > 3 || (glRefConfig.openglMajorVersion == 3 && glRefConfig.openglMinorVersion > 2));
+	q_gl_version_at_least_3_0 = QGL_VERSION_ATLEAST( 3, 0 );
+	q_gl_version_at_least_3_2 = QGL_VERSION_ATLEAST( 3, 2 );
 
 	// Check if we need Intel graphics specific fixes.
 	glRefConfig.intelGraphics = qfalse;
@@ -78,13 +76,6 @@ void GLimp_InitExtraExtensions()
 
 	// OpenGL 2.0, was GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
 	QGL_2_0_PROCS;
-
-	// OpenGL 3.0 - no matching extension
-	// QGL_*_PROCS becomes several functions, do not remove {}
-	if (q_gl_version_at_least_3_0)
-	{
-		QGL_3_0_PROCS;
-	}
 
 	// OpenGL 3.0 - GL_ARB_framebuffer_object
 	extension = "GL_ARB_framebuffer_object";
