@@ -268,7 +268,7 @@ itemconfig_t *LoadItemConfig(char *filename)
 {
 	int max_iteminfo;
 	token_t token;
-	char path[MAX_PATH];
+	char path[MAX_QPATH];
 	source_t *source;
 	itemconfig_t *ic;
 	iteminfo_t *ii;
