@@ -121,7 +121,7 @@ unsigned int CON_LogRead( char *out, unsigned int outSize )
 	}
 
 	Com_Memcpy( out, consoleLog + readPos, firstChunk );
-	Com_Memcpy( out + firstChunk, out, secondChunk );
+	Com_Memcpy( out + firstChunk, consoleLog, secondChunk );
 
 	readPos = ( readPos + outSize ) % MAX_LOG;
 
