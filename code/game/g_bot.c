@@ -724,6 +724,9 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	}
 	Info_SetValueForKey( userinfo, "characterfile", s );
 
+	// don't send tinfo to bots, they don't parse it
+	Info_SetValueForKey( userinfo, "teamoverlay", "0" );
+
 	// register the userinfo
 	trap_SetUserinfo( clientNum, userinfo );
 
