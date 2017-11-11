@@ -47,7 +47,7 @@ void CG_CheckAmmo( void ) {
 		if ( ! ( weapons & ( 1 << i ) ) ) {
 			continue;
 		}
-		if ( cg.cur_ps->ammo[i] < 0 ) {
+		if ( cg.snap->ps.ammo[i] < 0 ) {
 			continue;
 		}
 		switch ( i ) {
