@@ -899,7 +899,7 @@ static void PM_NoclipMove( void ) {
 ================
 PM_FootstepForSurface
 
-Returns an event number apropriate for the groundsurface
+Returns an event number appropriate for the groundsurface
 ================
 */
 static int PM_FootstepForSurface( void ) {
@@ -1402,7 +1402,7 @@ static void PM_Footsteps( void ) {
 	old = pm->ps->bobCycle;
 	pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
 
-	// if we just crossed a cycle boundary, play an apropriate footstep event
+	// if we just crossed a cycle boundary, play an appropriate footstep event
 	if ( ( ( old + 64 ) ^ ( pm->ps->bobCycle + 64 ) ) & 128 ) {
 		if ( pm->waterlevel == 0 ) {
 			// on ground will only play sounds if running

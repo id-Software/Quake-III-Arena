@@ -345,7 +345,7 @@ static void GlobalVectorToLocal( const vec3_t in, vec3_t out ) {
 =====================
 AutospriteDeform
 
-Assuming all the triangles for this shader are independant
+Assuming all the triangles for this shader are independent
 quads, rebuild them as forward facing sprites
 =====================
 */
@@ -1206,7 +1206,7 @@ void RB_CalcDiffuseColor( unsigned char *colors )
 {
 #if idppc_altivec
 	if (com_altivec->integer) {
-		// must be in a seperate function or G3 systems will crash.
+		// must be in a separate function or G3 systems will crash.
 		RB_CalcDiffuseColor_altivec( colors );
 		return;
 	}

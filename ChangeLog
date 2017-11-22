@@ -634,7 +634,7 @@
     #1 current directory
     #2 fs_homepath
     #3 fs_basepath
-    this was needed to make mod developement easier
+    this was needed to make mod development easier
 
 2001-10-09  Timothee Besset <ttimo@idsoftware.com>
   + https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=51
@@ -814,7 +814,7 @@
 	* rebuilding 1.28b, various fixes on linux build:
 	  - SetProgramPath was renamed to Sys_SetDefaultCDPath in unix_shared.c
 	    updated unix_main.c accordingly
-	  - some prototypes in qgl.h are guarded by #ifndef GL_VERSION_1_2 (ARB extentions)
+	  - some prototypes in qgl.h are guarded by #ifndef GL_VERSION_1_2 (ARB extensions)
 	    those prototypes are needed by linux_glimp for importing functions and casting, added a #ifdef __linux__
 	    (not a clean solution)
 	  - game/q_shared.h
@@ -861,7 +861,7 @@
 2001-04-23  Timothee Besset <ttimo@idsoftware.com>
 
 	* cleanup the mod selection code, remove duplicates
-	* some issues with release builds, my main developement box doesn't build stable binaries with release settings
+	* some issues with release builds, my main development box doesn't build stable binaries with release settings
 	  removing -fomit-frame-pointer seems to fix (there's probably a performance hit)
 	  see OMIT-FRAME-POINTER.txt
 
@@ -984,7 +984,7 @@
 	//* or // /* or variations of this. I reverted to exact mirror
 	image of SOS to be sure - short of removing it's too easy to mistake 
 	live code for dead one.
-	Later: have to change 5 occurences to avoid gcc complaints about
+	Later: have to change 5 occurrences to avoid gcc complaints about
 	nested comment tokens.
 	TODO: somebody please get rid of the cruft in here.
 
@@ -1235,7 +1235,7 @@
 	* code/game/g_cmds.c (G_SayTo): CON_CONNECTED.
 	* code/game/ai_main.c: HOOK added (SOS).
 	* code/botlib/be_aas_move.c (AAS_HorizontalVelocityForJump): 
-	correct fix for FPE occuring (SOS).
+	correct fix for FPE occurring (SOS).
 	* code/game/ai_dmq3.c: initmove.viewoffset (SOS).
 
 	* code/game/q_math.c: guard asser/isnan with Q3_VM (q3asm).
@@ -1679,7 +1679,7 @@
 	* code/game/q_shared.c: Q_strncpyz does zero padding (duh).
 	Note: calls strncpy, which does a zero fill up to destsize.
 	If destsize exceeds memory size, zero padding will overwrite
-	adjacent memory. Suspicion was this happend to botimport.
+	adjacent memory. Suspicion was this happened to botimport.
 
 	* code/qcommon/cvar.c: possible problem in Q_strncpyz call.
 
@@ -1783,7 +1783,7 @@
 	* TEST: running with RC4 data files.
 	TODO: "bot library used before setup" (Q3+TA)
 	TODO: Q3 old mods wreak havoc (graceful bounce)
-	TODO: supress "FreeType code not available" in renderer
+	TODO: suppress "FreeType code not available" in renderer
 	TODO: can't move in Q3
 	TODO: items flicker in Q3
 	TODO: no decals in Q3
@@ -2015,7 +2015,7 @@
 	
 	* TEST: tried executing a script - get bounced.
 	TODO: is there any way to jump into a map?
-	TODO: cl_cinematics 0 (supress all fullscreen RoQ)
+	TODO: cl_cinematics 0 (suppress all fullscreen RoQ)
 	Next: used r_logfile 200 in Win32 (RC4) and Linux.
 	There is a buckload of setup code seemingly not done
 	at all in Linux? Either that, or logging is enabled
@@ -2983,7 +2983,7 @@
         Modules:
           code:      the Q3 engine code, including a jpeg-6/ copy
           common:    code shared by tools
-          libs:      code shared by tools, inlcuding a jpeg6/ copy
+          libs:      code shared by tools, including a jpeg6/ copy
           q3asm:     VM bytecode assembly 
           q3data:    misc. Q3 data conversions
           q3map:     BSP builder

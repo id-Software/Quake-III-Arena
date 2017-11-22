@@ -136,7 +136,7 @@ int BotPopFromActivateGoalStack(bot_state_t *bs);
 void BotClearActivateGoalStack(bot_state_t *bs);
 //returns the team the bot is in
 int BotTeam(bot_state_t *bs);
-//retuns the opposite team of the bot
+//returns the opposite team of the bot
 int BotOppositeTeam(bot_state_t *bs);
 //returns the flag the bot is carrying (CTFFLAG_?)
 int BotCTFCarryingFlag(bot_state_t *bs);

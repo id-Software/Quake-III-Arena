@@ -59,7 +59,7 @@ typedef unsigned char byte;
 #define	MAX_OS_PATH		1024
 #define MEM_BLOCKSIZE 4096
 
-// the dec offsetof macro doesnt work very well...
+// the dec offsetof macro doesn't work very well...
 #define myoffsetof(type,identifier) ((size_t)&((type *)0)->identifier)
 
 

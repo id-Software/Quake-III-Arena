@@ -64,7 +64,7 @@ typedef struct weightconfig_s
 weightconfig_t *ReadWeightConfig(char *filename);
 //free a weight configuration
 void FreeWeightConfig(weightconfig_t *config);
-//writes a weight configuration, returns true if successfull
+//writes a weight configuration, returns true if successful
 qboolean WriteWeightConfig(char *filename, weightconfig_t *config);
 //find the fuzzy weight with the given name
 int FindFuzzyWeight(weightconfig_t *wc, char *name);

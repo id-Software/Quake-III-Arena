@@ -40,7 +40,7 @@ static int genconst(Tree e, int def) {
 			if (isarith(e->type))
 				error("cast from `%t' to `%t' is illegal in constant expressions\n",
 					e->kids[0]->type, e->type);
-			/* fall thru */
+			/* fall through */
 		case CVI: case CVU: case CVF:
 			e = e->kids[0];
 			continue;

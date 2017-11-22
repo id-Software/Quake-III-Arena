@@ -1605,7 +1605,7 @@ bot_moveresult_t BotTravel_WalkOffLedge(bot_movestate_t *ms, aas_reachability_t 
 	VectorSubtract(reach->start, ms->origin, dir);
 	VectorNormalize(dir);
 	BotCheckBlocked(ms, dir, qtrue, &result);
-	//if the reachability start and end are practially above each other
+	//if the reachability start and end are practically above each other
 	VectorSubtract(reach->end, reach->start, dir);
 	dir[2] = 0;
 	reachhordist = VectorLength(dir);
@@ -2744,7 +2744,7 @@ bot_moveresult_t BotTravel_RocketJump(bot_movestate_t *ms, aas_reachability_t *r
 	result.ideal_viewangles[PITCH] = 90;
 	//set the view angles directly
 	EA_View(ms->client, result.ideal_viewangles);
-	//view is important for the movment
+	//view is important for the movement
 	result.flags |= MOVERESULT_MOVEMENTVIEWSET;
 	//select the rocket launcher
 	EA_SelectWeapon(ms->client, (int) weapindex_rocketlauncher->value);
@@ -2804,7 +2804,7 @@ bot_moveresult_t BotTravel_BFGJump(bot_movestate_t *ms, aas_reachability_t *reac
 	result.ideal_viewangles[PITCH] = 90;
 	//set the view angles directly
 	EA_View(ms->client, result.ideal_viewangles);
-	//view is important for the movment
+	//view is important for the movement
 	result.flags |= MOVERESULT_MOVEMENTVIEWSET;
 	//select the rocket launcher
 	EA_SelectWeapon(ms->client, (int) weapindex_bfg10k->value);

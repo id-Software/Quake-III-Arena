@@ -137,7 +137,7 @@ static void CG_TransitionSnapshot( void ) {
 	// execute any server string commands before transitioning entities
 	CG_ExecuteNewServerCommands( cg.nextSnap->serverCommandSequence );
 
-	// if we had a map_restart, set everthing with initial
+	// if we had a map_restart, set everything with initial
 	if ( cg.mapRestart ) {
 	}
 

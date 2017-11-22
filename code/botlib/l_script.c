@@ -218,7 +218,7 @@ char *PunctuationFromNum(script_t *script, int num)
 	{
 		if (script->punctuations[i].n == num) return script->punctuations[i].p;
 	} //end for
-	return "unkown punctuation";
+	return "unknown punctuation";
 } //end of the function PunctuationFromNum
 //===========================================================================
 //
@@ -836,7 +836,7 @@ int PS_ReadPrimitive(script_t *script, token_t *token)
 	token->string[len] = 0;
 	//copy the token into the script structure
 	Com_Memcpy(&script->token, token, sizeof(token_t));
-	//primitive reading successfull
+	//primitive reading successful
 	return 1;
 } //end of the function PS_ReadPrimitive
 //============================================================================

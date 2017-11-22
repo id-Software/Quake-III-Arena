@@ -230,7 +230,7 @@ Cvars for advanced material usage:
 
 Cvars for image interpolation and generation:
 
-*  `r_imageUpsample`                - Use interpolation to artifically increase
+*  `r_imageUpsample`                - Use interpolation to artificially increase
                                    the resolution of all textures.  Looks good
                                    in certain circumstances.
                                      0 - No. (default)

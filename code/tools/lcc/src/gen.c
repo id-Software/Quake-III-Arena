@@ -292,7 +292,7 @@ static void dumptree(Node p) {
 			dumptree(p->kids[0]);
 			break;
 		}
-		/* else fall thru */
+		/* else fall through */
 	case EQ: case NE: case GT: case GE: case LE: case LT:
 	case ASGN: case BOR: case BAND: case BXOR: case RSH: case LSH:
 	case ADD: case SUB:  case DIV: case MUL: case MOD:

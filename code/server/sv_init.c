@@ -128,7 +128,7 @@ void SV_SetConfigstring (int index, const char *val) {
 	// spawning a new server
 	if ( sv.state == SS_GAME || sv.restarting ) {
 
-		// send the data to all relevent clients
+		// send the data to all relevant clients
 		for (i = 0, client = svs.clients; i < sv_maxclients->integer ; i++, client++) {
 			if ( client->state < CS_ACTIVE ) {
 				if ( client->state == CS_PRIMED )
@@ -376,7 +376,7 @@ static void SV_ClearServer(void) {
 ================
 SV_TouchCGame
 
-  touch the cgame.vm so that a pure client can load it if it's in a seperate pk3
+  touch the cgame.vm so that a pure client can load it if it's in a separate pk3
 ================
 */
 static void SV_TouchCGame(void) {
@@ -575,7 +575,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 		Cvar_Set( "sv_pakNames", p );
 
 		// if a dedicated pure server we need to touch the cgame because it could be in a
-		// seperate pk3 file and the client will need to load the latest cgame.qvm
+		// separate pk3 file and the client will need to load the latest cgame.qvm
 		if ( com_dedicated->integer ) {
 			SV_TouchCGame();
 		}

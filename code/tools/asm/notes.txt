@@ -1,5 +1,5 @@
 
-don't do any paramter conversion (double to float, etc)
+don't do any parameter conversion (double to float, etc)
 
 
 

@@ -341,7 +341,7 @@ rescan:
 	// the clientLevelShot command is used during development
 	// to generate 128*128 screenshots from the intermission
 	// point of levels for the menu system to use
-	// we pass it along to the cgame to make apropriate adjustments,
+	// we pass it along to the cgame to make appropriate adjustments,
 	// but we also clear the console and notify lines here
 	if ( !strcmp( cmd, "clientLevelShot" ) ) {
 		// don't do it if we aren't running the server locally,
@@ -1026,7 +1026,7 @@ void CL_SetCGameTime( void ) {
 	}
 
 	// if we are playing a demo back, we can just keep reading
-	// messages from the demo file until the cgame definately
+	// messages from the demo file until the cgame definitely
 	// has valid snapshots to interpolate between
 
 	// a timedemo will always use a deterministic set of time samples

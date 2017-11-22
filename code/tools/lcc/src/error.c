@@ -80,7 +80,7 @@ int fatal(const char *name, const char *fmt, int n) {
 	return 0;
 }
 
-/* printtoken - print current token preceeded by a space */
+/* printtoken - print current token preceded by a space */
 static void printtoken(void) {
 	switch (t) {
 	case ID: fprint(stderr, " `%s'", token); break;

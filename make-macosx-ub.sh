@@ -7,7 +7,7 @@ if [ ! -f Makefile ]; then
 	exit 1
 fi
 
-# we want to use the oldest available SDK for max compatiblity. However 10.4 and older
+# we want to use the oldest available SDK for max compatibility. However 10.4 and older
 # can not build 64bit binaries, making 10.5 the minimum version.   This has been tested 
 # with xcode 3.1 (xcode31_2199_developerdvd.dmg).  It contains the 10.5 SDK and a decent
 # enough gcc to actually compile ioquake3

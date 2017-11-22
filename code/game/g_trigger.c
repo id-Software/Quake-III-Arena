@@ -336,7 +336,7 @@ Any entity that touches this will be hurt.
 It does dmg points of damage each server frame
 Targeting the trigger will toggle its on / off state.
 
-SILENT			supresses playing the sound
+SILENT			suppresses playing the sound
 SLOW			changes the damage rate to once per second
 NO_PROTECTION	*nothing* stops the damage
 

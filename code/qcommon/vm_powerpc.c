@@ -401,7 +401,7 @@ struct symbolic_jump {
 	// extensions / modifiers (branch-link)
 	unsigned long ext;
 
-	// dest_instruction refering to this jump
+	// dest_instruction referring to this jump
 	dest_instruction_t *parent;
 
 	// next jump
@@ -656,7 +656,7 @@ PPC_MakeFastMask( int mask )
  * function local registers,
  *
  * normally only volatile registers are used, but if there aren't enough
- * or function has to preserve some value while calling annother one
+ * or function has to preserve some value while calling another one
  * then caller safe registers are used as well
  */
 static const long int gpr_list[] = {

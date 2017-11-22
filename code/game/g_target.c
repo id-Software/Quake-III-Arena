@@ -102,7 +102,7 @@ void Use_Target_Delay( gentity_t *ent, gentity_t *other, gentity_t *activator ) 
 }
 
 void SP_target_delay( gentity_t *ent ) {
-	// check delay for backwards compatability
+	// check delay for backwards compatibility
 	if ( !G_SpawnFloat( "delay", "0", &ent->wait ) ) {
 		G_SpawnFloat( "wait", "1", &ent->wait );
 	}

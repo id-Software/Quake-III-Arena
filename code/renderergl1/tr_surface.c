@@ -569,7 +569,7 @@ static void VectorArrayNormalize(vec4_t *normals, unsigned int count)
         
         // Vanilla PPC code, but since PPC has a reciprocal square root estimate instruction,
         // runs *much* faster than calling sqrt().  We'll use a single Newton-Raphson
-        // refinement step to get a little more precision.  This seems to yeild results
+        // refinement step to get a little more precision.  This seems to yield results
         // that are correct to 3 decimal places and usually correct to at least 4 (sometimes 5).
         // (That is, for the given input range of about 0.6 to 2.0).
         do {
@@ -844,7 +844,7 @@ static void LerpMeshVertexes(md3Surface_t *surf, float backlerp)
 {
 #if idppc_altivec
 	if (com_altivec->integer) {
-		// must be in a seperate function or G3 systems will crash.
+		// must be in a separate function or G3 systems will crash.
 		LerpMeshVertexes_altivec( surf, backlerp );
 		return;
 	}

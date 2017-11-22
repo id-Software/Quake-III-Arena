@@ -350,7 +350,7 @@ static void GlobalVectorToLocal( const vec3_t in, vec3_t out ) {
 =====================
 AutospriteDeform
 
-Assuming all the triangles for this shader are independant
+Assuming all the triangles for this shader are independent
 quads, rebuild them as forward facing sprites
 =====================
 */

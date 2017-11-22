@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // This file must be identical in the quake and utils directories
 
-// contents flags are seperate bits
+// contents flags are separate bits
 // a given brush can contribute multiple content bits
 
 // these definitions also need to be in q_shared.h!

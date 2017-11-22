@@ -86,7 +86,7 @@ static Tree root1(Tree p) {
 			warning("reference to `%t' elided\n", p->type);
 		if (isptr(p->kids[0]->type) && isvolatile(p->kids[0]->type->type))
 			warning("reference to `volatile %t' elided\n", p->type);
-		/* fall thru */
+		/* fall through */
 	case CVI: case CVF: case CVU: case CVP:
 	case NEG: case BCOM: case FIELD:
 		if (warn++ == 0)

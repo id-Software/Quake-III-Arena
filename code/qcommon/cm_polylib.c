@@ -353,7 +353,7 @@ void	ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist,
 		return;
 	}
 
-	maxpts = in->numpoints+4;	// cant use counts[0]+2 because
+	maxpts = in->numpoints+4;	// can't use counts[0]+2 because
 								// of fp grouping errors
 
 	*front = f = AllocWinding (maxpts);
@@ -462,7 +462,7 @@ void ChopWindingInPlace (winding_t **inout, vec3_t normal, vec_t dist, vec_t eps
 	if (!counts[1])
 		return;		// inout stays the same
 
-	maxpts = in->numpoints+4;	// cant use counts[0]+2 because
+	maxpts = in->numpoints+4;	// can't use counts[0]+2 because
 								// of fp grouping errors
 
 	f = AllocWinding (maxpts);
@@ -574,7 +574,7 @@ void CheckWinding (winding_t *w)
 		if (d < -ON_EPSILON || d > ON_EPSILON)
 			Com_Error (ERR_DROP, "CheckWinding: point off plane");
 	
-	// check the edge isnt degenerate
+	// check the edge isn't degenerate
 		p2 = w->p[j];
 		VectorSubtract (p2, p1, dir);
 		

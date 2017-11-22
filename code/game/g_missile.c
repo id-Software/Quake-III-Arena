@@ -145,7 +145,7 @@ void ProximityMine_Trigger( gentity_t *trigger, gentity_t *other, trace_t *trace
 		}
 	}
 
-	// ok, now check for ability to damage so we don't get triggered thru walls, closed doors, etc...
+	// ok, now check for ability to damage so we don't get triggered through walls, closed doors, etc...
 	if( !CanDamage( other, trigger->s.pos.trBase ) ) {
 		return;
 	}

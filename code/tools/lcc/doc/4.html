@@ -41,7 +41,7 @@ and insisted that pointers fit in unsigned integers (see Sec. 5.1 of <cite>A Ret
 C Compiler</cite>). These assumptions simplified the compiler, and were suitable for
 32-bit architectures. But on 64-bit architectures, such as the DEC ALPHA, it's natural to
 have four sizes of integers and perhaps three sizes of floats, and on 16-bit
-architectures, 32-bit pointers don't fit in unsigned integers. Also, the 3.x constaints
+architectures, 32-bit pointers don't fit in unsigned integers. Also, the 3.x constraints
 limited the use of lcc's back ends for other languages, such as Java.</p>
 
 <p>Version 4.x removes all of these restrictions: It supports any number of sizes for

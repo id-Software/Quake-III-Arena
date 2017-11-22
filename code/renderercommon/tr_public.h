@@ -151,7 +151,7 @@ typedef struct {
 	void	(*CM_DrawDebugSurface)( void (*drawPoly)(int color, int numPoints, float *points) );
 
 	// a -1 return means the file does not exist
-	// NULL can be passed for buf to just determine existance
+	// NULL can be passed for buf to just determine existence
 	int		(*FS_FileIsInPAK)( const char *name, int *pCheckSum );
 	long		(*FS_ReadFile)( const char *name, void **buf );
 	void	(*FS_FreeFile)( void *buf );
