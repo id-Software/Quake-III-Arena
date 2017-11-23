@@ -439,7 +439,7 @@ int AAS_BestReachableArea(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t goalor
 	//VectorSubtract(absmaxs, bbmins, absmaxs);
 	//link an invalid (-1) entity
 	areas = AAS_LinkEntityClientBBox(absmins, absmaxs, -1, PRESENCE_CROUCH);
-	//get the reachable link arae
+	//get the reachable link area
 	areanum = AAS_BestReachableLinkArea(areas);
 	//unlink the invalid entity
 	AAS_UnlinkFromAreas(areas);
