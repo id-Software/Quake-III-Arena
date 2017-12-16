@@ -34,8 +34,10 @@ void UpdatePaths( const char *lccBinary )
 {
 	char basepath[ 1024 ];
 	char *p;
+	size_t basepathsz = sizeof( basepath ) - 1;
 
-	strncpy( basepath, lccBinary, 1024 );
+	strncpy( basepath, lccBinary, basepathsz );
+	basepath[basepathsz] = 0;
 	p = strrchr( basepath, PATH_SEP );
 
 	if( p )

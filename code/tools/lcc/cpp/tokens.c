@@ -315,7 +315,7 @@ puttokens(Tokenrow *trp)
 		if (wbp >= &wbuf[OBS]) {
 			write(1, wbuf, OBS);
 			if (wbp > &wbuf[OBS])
-				memcpy(wbuf, wbuf+OBS, wbp - &wbuf[OBS]);
+				memmove(wbuf, wbuf+OBS, wbp - &wbuf[OBS]);
 			wbp -= OBS;
 		}
 	}
