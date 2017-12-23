@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string.h>
 
 #include "../qcommon/q_shared.h"
+#include "../qcommon/qcommon.h"
 #include "botlib.h"
 #include "be_interface.h"			//for botimport.Print
 #include "l_libvar.h"
@@ -58,6 +59,7 @@ static logfile_t logfile;
 //===========================================================================
 void Log_Open(char *filename)
 {
+	char *ospath;
 	if (!LibVarValue("log", "0")) return;
 	if (!filename || !strlen(filename))
 	{
@@ -69,7 +71,8 @@ void Log_Open(char *filename)
 		botimport.Print(PRT_ERROR, "log file %s is already opened\n", logfile.filename);
 		return;
 	} //end if
-	logfile.fp = fopen(filename, "wb");
+	ospath = FS_BuildOSPath(Cvar_VariableString("fs_homepath"), "", filename);
+	logfile.fp = fopen(ospath, "wb");
 	if (!logfile.fp)
 	{
 		botimport.Print(PRT_ERROR, "can't open the log file %s\n", filename);
