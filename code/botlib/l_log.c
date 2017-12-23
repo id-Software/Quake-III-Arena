@@ -71,7 +71,7 @@ void Log_Open(char *filename)
 		botimport.Print(PRT_ERROR, "log file %s is already opened\n", logfile.filename);
 		return;
 	} //end if
-	ospath = FS_BuildOSPath(Cvar_VariableString("fs_homepath"), "", filename);
+	ospath = FS_BuildOSPath(Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), filename);
 	logfile.fp = fopen(ospath, "wb");
 	if (!logfile.fp)
 	{
