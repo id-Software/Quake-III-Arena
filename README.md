@@ -11,7 +11,7 @@ The intent of this project is to provide a baseline Quake 3 which may be used
 for further development and baseq3 fun.
 Some of the major features currently implemented are:
 
-  * SDL backend
+  * SDL 2 backend
   * OpenAL sound API support (multiple speaker support and better sound
     quality)
   * Full x86_64 support on Linux
