@@ -401,7 +401,7 @@ void Huff_Compress(msg_t *mbuf, int offset) {
 	huff_t		huff;
 
 	size = mbuf->cursize - offset;
-	buffer = mbuf->data+ + offset;
+	buffer = mbuf->data + offset;
 
 	if (size<=0) {
 		return;
