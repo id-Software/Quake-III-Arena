@@ -103,7 +103,7 @@ static int isu8(uint32_t v)
 
 static int NextConstant4(void)
 {
-	return (code[pc] | (code[pc+1]<<8) | (code[pc+2]<<16) | (code[pc+3]<<24));
+	return ((unsigned int)code[pc] | ((unsigned int)code[pc+1]<<8) | ((unsigned int)code[pc+2]<<16) | ((unsigned int)code[pc+3]<<24));
 }
 
 static int	Constant4( void ) {
