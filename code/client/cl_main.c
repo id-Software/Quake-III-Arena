@@ -1245,7 +1245,7 @@ void CL_ClearMemory(qboolean shutdownRef)
 	CL_ShutdownAll(shutdownRef);
 
 	// if not running a server clear the whole hunk
-	if ( !com_sv_running->integer ) {
+	if ( !com_sv_running || !com_sv_running->integer ) {
 		// clear the whole hunk
 		Hunk_Clear();
 		// clear collision map data
@@ -1361,7 +1361,7 @@ static void CL_OldGame(void)
 	{
 		// change back to previous fs_game
 		cl_oldGameSet = qfalse;
-		Cvar_Set2("fs_game", cl_oldGame, qtrue);
+		Cvar_Set("fs_game", cl_oldGame);
 		FS_ConditionalRestart(clc.checksumFeed, qfalse);
 	}
 }
