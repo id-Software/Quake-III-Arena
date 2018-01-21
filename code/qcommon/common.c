@@ -2943,9 +2943,6 @@ Writes key bindings and archived cvars to config file if modified
 ===============
 */
 void Com_WriteConfiguration( void ) {
-#if !defined(DEDICATED) && !defined(STANDALONE)
-	cvar_t	*fs;
-#endif
 	// if we are quiting without fully initializing, make sure
 	// we don't write out anything
 	if ( !com_fullyInitialized ) {
@@ -2961,12 +2958,12 @@ void Com_WriteConfiguration( void ) {
 
 	// not needed for dedicated or standalone
 #if !defined(DEDICATED) && !defined(STANDALONE)
-	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-
 	if(!com_standalone->integer)
 	{
-		if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
-			Com_WriteCDKey( fs->string, &cl_cdkey[16] );
+		const char *gamedir;
+		gamedir = Cvar_VariableString( "fs_game" );
+		if (UI_usesUniqueCDKey() && gamedir[0] != 0) {
+			Com_WriteCDKey( gamedir, &cl_cdkey[16] );
 		} else {
 			Com_WriteCDKey( BASEGAME, cl_cdkey );
 		}

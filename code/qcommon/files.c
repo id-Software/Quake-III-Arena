@@ -3369,14 +3369,10 @@ static void FS_Startup( const char *gameName )
 	}
 
 #ifndef STANDALONE
-	if(!com_standalone->integer)
-	{
-		cvar_t	*fs;
-
+	if (!com_standalone->integer) {
 		Com_ReadCDKey(BASEGAME);
-		fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-		if (fs && fs->string[0] != 0) {
-			Com_AppendCDKey( fs->string );
+		if (fs_gamedirvar->string[0]) {
+			Com_AppendCDKey(fs_gamedirvar->string);
 		}
 	}
 #endif
