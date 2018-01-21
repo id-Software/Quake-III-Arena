@@ -1332,12 +1332,42 @@ void Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultVal
 	// flags. Unfortunately some historical game code (including single player
 	// baseq3) sets both flags. We unset CVAR_ROM for such cvars.
 	if ((flags & (CVAR_ARCHIVE | CVAR_ROM)) == (CVAR_ARCHIVE | CVAR_ROM)) {
-		Com_DPrintf( S_COLOR_YELLOW "WARNING: Unsetting CVAR_ROM cvar '%s', "
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: Unsetting CVAR_ROM from cvar '%s', "
 			"since it is also CVAR_ARCHIVE\n", varName );
 		flags &= ~CVAR_ROM;
 	}
 
-	cv = Cvar_Get(varName, defaultValue, flags | CVAR_VM_CREATED);
+	// Don't allow VM to specific a different creator or other internal flags.
+	if ( flags & CVAR_USER_CREATED ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to set CVAR_USER_CREATED on cvar '%s'\n", varName );
+		flags &= ~CVAR_USER_CREATED;
+	}
+	if ( flags & CVAR_SERVER_CREATED ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to set CVAR_SERVER_CREATED on cvar '%s'\n", varName );
+		flags &= ~CVAR_SERVER_CREATED;
+	}
+	if ( flags & CVAR_PROTECTED ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to set CVAR_PROTECTED on cvar '%s'\n", varName );
+		flags &= ~CVAR_PROTECTED;
+	}
+	if ( flags & CVAR_MODIFIED ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to set CVAR_MODIFIED on cvar '%s'\n", varName );
+		flags &= ~CVAR_MODIFIED;
+	}
+	if ( flags & CVAR_NONEXISTENT ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to set CVAR_NONEXISTENT on cvar '%s'\n", varName );
+		flags &= ~CVAR_NONEXISTENT;
+	}
+
+	cv = Cvar_FindVar(varName);
+
+	// Don't modify cvar if it's protected.
+	if ( cv && ( cv->flags & CVAR_PROTECTED ) ) {
+		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to register protected cvar '%s' with value '%s'%s\n",
+			varName, defaultValue, ( flags & ~cv->flags ) != 0 ? " and new flags" : "" );
+	} else {
+		cv = Cvar_Get(varName, defaultValue, flags | CVAR_VM_CREATED);
+	}
 
 	if (!vmCvar)
 		return;
