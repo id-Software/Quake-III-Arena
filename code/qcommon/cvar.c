@@ -1376,7 +1376,13 @@ void Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultVal
 	if ( cv && ( cv->flags & CVAR_PROTECTED ) ) {
 		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to register protected cvar '%s' with value '%s'%s\n",
 			varName, defaultValue, ( flags & ~cv->flags ) != 0 ? " and new flags" : "" );
-	} else {
+	}
+	// Don't set engine latch cvar to latched value.
+	else if ( cv && ( cv->flags & CVAR_LATCH ) && !( cv->flags & CVAR_VM_CREATED ) ) {
+		cv->flags |= flags;
+		cvar_modifiedFlags |= flags;
+	}
+	else {
 		cv = Cvar_Get(varName, defaultValue, flags | CVAR_VM_CREATED);
 	}
 
