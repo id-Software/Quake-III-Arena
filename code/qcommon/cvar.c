@@ -638,29 +638,18 @@ Cvar_SetSafe
 void Cvar_SetSafe( const char *var_name, const char *value )
 {
 	int flags = Cvar_Flags( var_name );
-	qboolean force = qtrue;
 
-	if ( flags != CVAR_NONEXISTENT )
+	if((flags != CVAR_NONEXISTENT) && (flags & CVAR_PROTECTED))
 	{
-		if ( flags & CVAR_PROTECTED )
-		{
-			if( value )
-				Com_Error( ERR_DROP, "Restricted source tried to set "
-					"\"%s\" to \"%s\"", var_name, value );
-			else
-				Com_Error( ERR_DROP, "Restricted source tried to "
-					"modify \"%s\"", var_name );
-			return;
-		}
-
-		// don't let VMs or server change engine latched cvars instantly
-		if ( ( flags & CVAR_LATCH ) && !( flags & CVAR_VM_CREATED ) )
-		{
-			force = qfalse;
-		}
+		if( value )
+			Com_Error( ERR_DROP, "Restricted source tried to set "
+				"\"%s\" to \"%s\"", var_name, value );
+		else
+			Com_Error( ERR_DROP, "Restricted source tried to "
+				"modify \"%s\"", var_name );
+		return;
 	}
-
-	Cvar_Set2 (var_name, value, force);
+	Cvar_Set( var_name, value );
 }
 
 /*
@@ -1376,13 +1365,7 @@ void Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultVal
 	if ( cv && ( cv->flags & CVAR_PROTECTED ) ) {
 		Com_DPrintf( S_COLOR_YELLOW "WARNING: VM tried to register protected cvar '%s' with value '%s'%s\n",
 			varName, defaultValue, ( flags & ~cv->flags ) != 0 ? " and new flags" : "" );
-	}
-	// Don't set engine latch cvar to latched value.
-	else if ( cv && ( cv->flags & CVAR_LATCH ) && !( cv->flags & CVAR_VM_CREATED ) ) {
-		cv->flags |= flags;
-		cvar_modifiedFlags |= flags;
-	}
-	else {
+	} else {
 		cv = Cvar_Get(varName, defaultValue, flags | CVAR_VM_CREATED);
 	}
 

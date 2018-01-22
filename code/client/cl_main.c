@@ -1361,7 +1361,7 @@ static void CL_OldGame(void)
 	{
 		// change back to previous fs_game
 		cl_oldGameSet = qfalse;
-		Cvar_Set("fs_game", cl_oldGame);
+		Cvar_Set2("fs_game", cl_oldGame, qtrue);
 		FS_ConditionalRestart(clc.checksumFeed, qfalse);
 	}
 }
