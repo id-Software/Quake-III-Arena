@@ -26,25 +26,25 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -66,24 +66,28 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'">
-    <OutDir>..\..\build\q3_ui_debug_ta\</OutDir>
-    <IntDir>..\..\build\q3_ui_debug_ta\</IntDir>
+    <OutDir>..\..\build\debug_ta-msvc12-x86\missionpack\</OutDir>
+    <IntDir>..\..\build\debug_ta-msvc12-x86\missionpack\q3_ui\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>uix86_old</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'">
-    <OutDir>..\..\build\q3_ui_release_ta\</OutDir>
-    <IntDir>..\..\build\q3_ui_release_ta\</IntDir>
+    <OutDir>..\..\build\release_ta-msvc12-x86\missionpack\</OutDir>
+    <IntDir>..\..\build\release_ta-msvc12-x86\missionpack\q3_ui\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>uix86_old</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\build\q3_ui_release\</OutDir>
-    <IntDir>..\..\build\q3_ui_release\</IntDir>
+    <OutDir>..\..\build\release-msvc12-x86\baseq3\</OutDir>
+    <IntDir>..\..\build\release-msvc12-x86\baseq3\q3_ui\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>uix86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\build\q3_ui_debug\</OutDir>
-    <IntDir>..\..\build\q3_ui_debug\</IntDir>
+    <OutDir>..\..\build\debug-msvc12-x86\baseq3\</OutDir>
+    <IntDir>..\..\build\debug-msvc12-x86\baseq3\q3_ui\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>uix86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'">
     <Midl>

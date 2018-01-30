@@ -26,21 +26,25 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -66,24 +70,28 @@
     <IntDir>..\..\build\release_ta-msvc12-x86\client\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ioquake3.x86</TargetName>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\..\build\debug-msvc12-x86\</OutDir>
     <IntDir>..\..\build\debug-msvc12-x86\client\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>ioquake3.x86</TargetName>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\build\release-msvc12-x86\</OutDir>
     <IntDir>..\..\build\release-msvc12-x86\client\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ioquake3.x86</TargetName>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug TA|Win32'">
     <OutDir>..\..\build\debug_ta-msvc12-x86\</OutDir>
     <IntDir>..\..\build\debug_ta-msvc12-x86\client\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>ioquake3.x86</TargetName>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release TA|Win32'">
     <Midl>
@@ -97,7 +105,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl-7.35.0;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\curl-7.54.0\include;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;OPUS_BUILD;HAVE_LRINTF;FLOATING_POINT;FLOAT_APPROX;USE_ALLOCA;MISSIONPACK;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -149,7 +157,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl-7.35.0;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\curl-7.54.0\include;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;OPUS_BUILD;HAVE_LRINTF;FLOATING_POINT;FLOAT_APPROX;USE_ALLOCA;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -171,7 +179,7 @@
       <ResourceOutputFileName>..\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2main.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2main.lib;SDL2.lib;OpenGL32.lib;msvcrtd.lib;psapi.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ioquake3.x86.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -202,7 +210,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl-7.35.0;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\curl-7.54.0\include;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;OPUS_BUILD;HAVE_LRINTF;FLOATING_POINT;FLOAT_APPROX;USE_ALLOCA;USE_INTERNAL_JPEG;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -248,7 +256,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\libcurl-7.35.0;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\code\SDL2\include;..\..\code\curl-7.54.0\include;..\..\code\AL;..\..\code\opus-1.1.4\include;..\..\code\opus-1.1.4\celt;..\..\code\opus-1.1.4\silk;..\..\code\opus-1.1.4\silk\float;..\..\code\zlib;..\..\code\jpeg-8c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;BOTLIB;USE_ICON;USE_CURL;USE_CURL_DLOPEN;USE_OPENAL;USE_OPENAL_DLOPEN;USE_VOIP;OPUS_BUILD;HAVE_LRINTF;FLOATING_POINT;FLOAT_APPROX;USE_ALLOCA;MISSIONPACK;USE_RENDERER_DLOPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -270,7 +278,7 @@
       <ResourceOutputFileName>..\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2main.lib;SDL2.lib;OpenGL32.lib;msvcrt.lib;psapi.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;advapi32.lib;winmm.lib;wsock32.lib;ws2_32.lib;SDL2main.lib;SDL2.lib;OpenGL32.lib;msvcrtd.lib;psapi.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ioquake3.x86.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\code\libs\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -856,6 +864,7 @@
     </ClCompile>
     <ClCompile Include="..\..\code\sys\con_log.c" />
     <ClCompile Include="..\..\code\sys\con_passive.c" />
+    <ClCompile Include="..\..\code\sys\sys_autoupdater.c" />
     <ClCompile Include="..\..\code\sys\sys_main.c" />
     <ClCompile Include="..\..\code\sys\sys_win32.c" />
     <ClCompile Include="..\..\code\zlib\adler32.c" />
@@ -930,16 +939,15 @@
     <ClInclude Include="..\..\code\botlib\l_struct.h" />
     <ClInclude Include="..\..\code\botlib\l_utils.h" />
     <ClInclude Include="..\..\code\cgame\cg_public.h" />
-    <ClInclude Include="..\..\code\cgame\tr_types.h" />
     <ClInclude Include="..\..\code\client\client.h" />
     <ClInclude Include="..\..\code\client\cl_curl.h" />
+    <ClInclude Include="..\..\code\client\keycodes.h" />
     <ClInclude Include="..\..\code\client\keys.h" />
     <ClInclude Include="..\..\code\client\qal.h" />
     <ClInclude Include="..\..\code\client\snd_local.h" />
     <ClInclude Include="..\..\code\client\snd_public.h" />
     <ClInclude Include="..\..\code\game\bg_public.h" />
     <ClInclude Include="..\..\code\game\g_public.h" />
-    <ClInclude Include="..\..\code\libspeex\config.h" />
     <ClInclude Include="..\..\code\qcommon\cm_local.h" />
     <ClInclude Include="..\..\code\qcommon\cm_patch.h" />
     <ClInclude Include="..\..\code\qcommon\cm_polylib.h" />
@@ -951,15 +959,12 @@
     <ClInclude Include="..\..\code\qcommon\surfaceflags.h" />
     <ClInclude Include="..\..\code\qcommon\unzip.h" />
     <ClInclude Include="..\..\code\qcommon\vm_local.h" />
-    <ClInclude Include="..\..\code\renderer\qgl.h" />
-    <ClInclude Include="..\..\code\renderer\tr_local.h" />
-    <ClInclude Include="..\..\code\renderer\tr_public.h" />
+    <ClInclude Include="..\..\code\renderercommon\qgl.h" />
+    <ClInclude Include="..\..\code\renderercommon\tr_types.h" />
+    <ClInclude Include="..\..\code\renderercommon\tr_public.h" />
     <ClInclude Include="..\..\code\server\server.h" />
     <ClInclude Include="..\..\code\sys\win_resource.h" />
-    <ClInclude Include="..\..\code\ui\keycodes.h" />
     <ClInclude Include="..\..\code\ui\ui_public.h" />
-    <ClInclude Include="..\..\code\win32\resource.h" />
-    <ClInclude Include="..\..\code\win32\win_local.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\code\sys\win_resource.rc" />
