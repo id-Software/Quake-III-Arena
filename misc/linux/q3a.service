@@ -1,18 +1,12 @@
 [Unit]
-Description=This service spawns a ioquake3 dedicated server with sane defaults
-# However, these defaults may not apply to all use cases.
-# See comments below for further details
+Description=This service spawns an ioquake3 Internet server
+# A map will need to be loaded for players to be able to join.
+# For additional settings see http://wiki.ioquake3.org/Sys_Admin_Guide
 
 [Service]
 User=q3a
-ExecStart=$(which ioq3ded.x86_64) +set dedicated 2
+ExecStart=/usr/local/games/quake3/ioq3ded.x86_64 +set dedicated 2
 Restart=on-abort
-# there are several options to tweak the server's performance:
-# net_port defines the UDP-port used for connections to the server
-# fs_game should be the mod you want to play. Not necessary for vanilla-q3/FFA
-# dedicated 0 is non-dedicted an not available with ioq3ded, 1 is LAN, 2 is Internet
-# sv_pure 1 prevents clients from using their own pk3-files
-# com_hunkmegs defaults to 56, should be 128/192/256 on a modern system(?)
 
 [Install]
 WantedBy=multi-user.target
