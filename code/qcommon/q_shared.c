@@ -746,13 +746,14 @@ qboolean Q_isintegral( float f )
 	return (int)f == f;
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 /*
 =============
 Q_vsnprintf
- 
+
 Special wrapper function for Microsoft's broken _vsnprintf() function.
-MinGW comes with its own snprintf() which is not broken.
+MinGW comes with its own vsnprintf() which is not broken. mingw-w64
+however, uses Microsoft's broken _vsnprintf() function.
 =============
 */
 
