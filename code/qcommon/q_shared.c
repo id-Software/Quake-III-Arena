@@ -660,15 +660,15 @@ Com_HexStrToInt
 */
 int Com_HexStrToInt( const char *str )
 {
-	if ( !str || !str[ 0 ] )
+	if ( !str )
 		return -1;
 
 	// check for hex code
-	if( str[ 0 ] == '0' && str[ 1 ] == 'x' )
+	if( str[ 0 ] == '0' && str[ 1 ] == 'x' && str[ 2 ] != '\0' )
 	{
-		int i, n = 0;
+		int i, n = 0, len = strlen( str );
 
-		for( i = 2; i < strlen( str ); i++ )
+		for( i = 2; i < len; i++ )
 		{
 			char digit;
 
