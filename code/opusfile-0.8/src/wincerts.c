@@ -100,7 +100,8 @@ static int op_capi_get_by_subject(X509_LOOKUP *_lu,int _type,X509_NAME *_name,
          representation for something, it's the answer that 9 of them would
          give you back.
         I don't think OpenSSL's encoding qualifies.*/
-      find_para.cbData=_name->bytes->length;
+      if(OP_UNLIKELY(_name->bytes->length>MAXDWORD))return 0;
+      find_para.cbData=(DWORD)_name->bytes->length;
       find_para.pbData=(unsigned char *)_name->bytes->data;
       cert=CertFindCertificateInStore(h_store,X509_ASN_ENCODING,0,
        CERT_FIND_SUBJECT_NAME,&find_para,NULL);
@@ -122,7 +123,8 @@ static int op_capi_get_by_subject(X509_LOOKUP *_lu,int _type,X509_NAME *_name,
       ret=op_capi_retrieve_by_subject(_lu,_type,_name,_ret);
       if(ret>0)return ret;
       memset(&cert_info,0,sizeof(cert_info));
-      cert_info.Issuer.cbData=_name->bytes->length;
+      if(OP_UNLIKELY(_name->bytes->length>MAXDWORD))return 0;
+      cert_info.Issuer.cbData=(DWORD)_name->bytes->length;
       cert_info.Issuer.pbData=(unsigned char *)_name->bytes->data;
       memset(&find_para,0,sizeof(find_para));
       find_para.pCertInfo=&cert_info;
