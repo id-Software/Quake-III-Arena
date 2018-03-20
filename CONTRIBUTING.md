@@ -2,7 +2,7 @@
 
 The following is a set of guidelines for contributing to ioquake3 which is hosted in the [The ioquake Group](https://github.com/ioquake) on Github. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
-#### Table Of Contents
+## Table Of Contents
 
 [I don't want to read this whole thing, I just have a question!!!](#i-dont-want-to-read-this-whole-thing-i-just-have-a-question)
 
@@ -51,7 +51,7 @@ Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/).
 Explain the problem and include additional details to help maintainers reproduce the problem:
 
 * **Use a clear and descriptive title** for the issue to identify the problem.
-* **Describe the exact steps which reproduce the problem** in as many details as possible. For example, start by explaining how you started ioquake3, e.g. which command exactly you used in the terminal, or how you started ioquake3 with a shortcut. When listing steps, **don't just say what you did, but explain how you did it**. For example, if you statrted a new map, explain if you used the menu, or a keyboard macro, or a / command in the ioquake3 console, and if so which one?
+* **Describe the exact steps which reproduce the problem** in as many details as possible. For example, start by explaining how you started ioquake3, e.g. which command exactly you used in the terminal, or how you started ioquake3 with a shortcut. When listing steps, **don't just say what you did, but explain how you did it**. For example, if you started a new map, explain if you used the menu, or a keyboard macro, or a / command in the ioquake3 console, and if so which one?
 * **Provide specific examples to demonstrate the steps**. Include links to files or GitHub projects, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
 * **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
 * **Explain which behavior you expected to see instead and why.**
@@ -72,13 +72,13 @@ Include details about your configuration and environment:
 * **What's the name and version of the OS you're using?**
 * **What graphics card or chipset is in your computer?**
 
-###Helping others
+### Helping others
 People have questions, they ask them on our [forums](https://discourse.ioquake.org/), [Facebook](https://www.facebook.com/ioquake3/), [Live Chat](http://wiki.ioquake3.org/Live_Chat), and on other services and websites. Answer them if you can, and add them to the [Players Guide](http://wiki.ioquake3.org/Players_Guide) on the wiki or [Sys Admin Guide](http://wiki.ioquake3.org/Sys_Admin_Guide) if the same questions keep coming up. If the answers are already in the one of our guides, copy and paste the answer and then link the people asking questions to those pages if they have more questions.
 
-###Donate
+### Donate
 Money buys servers, hosting, and time. We can [accept donations](http://ioquake3.org/donate/) although we are not yet a 501(c)(3) nonprofit.
 
-###Social Media
+### Social Media
 Throw ioquake3 a [Like on Facebook](https://www.facebook.com/ioquake3/) or [follow ioquake3 on Twitter](https://twitter.com/ioquake3). Let other Quake 3 players know about ioquake3, some people are still playing with id's client!
 
 ### Suggesting Enhancements
