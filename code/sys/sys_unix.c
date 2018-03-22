@@ -928,6 +928,14 @@ qboolean Sys_DllExtension( const char *name ) {
 		return qtrue;
 	}
 
+#ifdef __APPLE__
+	// Allow system frameworks without dylib extensions
+	// i.e., /System/Library/Frameworks/OpenAL.framework/OpenAL
+	if ( strncmp( name, "/System/Library/Frameworks/", 27 ) == 0 ) {
+		return qtrue;
+	}
+#endif
+
 	// Check for format of filename.so.1.2.3
 	p = strstr( name, DLL_EXT "." );
 
