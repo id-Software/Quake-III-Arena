@@ -291,7 +291,6 @@ ifneq ($(call bin_path, pkg-config),)
   OPENAL_LIBS ?= $(shell pkg-config --silence-errors --libs openal)
   SDL_CFLAGS ?= $(shell pkg-config --silence-errors --cflags sdl2|sed 's/-Dmain=SDL_main//')
   SDL_LIBS ?= $(shell pkg-config --silence-errors --libs sdl2)
-  FREETYPE_CFLAGS ?= $(shell pkg-config --silence-errors --cflags freetype2)
 else
   # assume they're in the system default paths (no -I or -L needed)
   CURL_LIBS ?= -lcurl
