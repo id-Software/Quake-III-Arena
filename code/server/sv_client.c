@@ -671,18 +671,16 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 
 	if ( isBot ) {
 		SV_BotFreeClient( drop - svs.clients );
-	}
 
-	// nuke user info
-	SV_SetUserinfo( drop - svs.clients, "" );
-	
-	if ( isBot ) {
 		// bots shouldn't go zombie, as there's no real net connection.
 		drop->state = CS_FREE;
 	} else {
 		Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
 		drop->state = CS_ZOMBIE;		// become free in a few seconds
 	}
+
+	// nuke user info
+	SV_SetUserinfo( drop - svs.clients, "" );
 
 	// if this was the last client on the server, send a heartbeat
 	// to the master so it is known the server is empty
