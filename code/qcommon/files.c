@@ -3458,17 +3458,17 @@ static void FS_CheckPak0( void )
 {
 	searchpath_t	*path;
 	pack_t		*curpack;
+	const char	*pakBasename;
 	qboolean founddemo = qfalse;
 	unsigned int foundPak = 0, foundTA = 0;
 
 	for( path = fs_searchpaths; path; path = path->next )
 	{
-		const char* pakBasename = path->pack->pakBasename;
-
 		if(!path->pack)
 			continue;
 
 		curpack = path->pack;
+		pakBasename = curpack->pakBasename;
 
 		if(!Q_stricmpn( curpack->pakGamename, "demoq3", MAX_OSPATH )
 				&& !Q_stricmpn( pakBasename, "pak0", MAX_OSPATH ))
