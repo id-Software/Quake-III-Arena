@@ -341,7 +341,7 @@ static void IN_GobbleMotionEvents( void )
 IN_ActivateMouse
 ===============
 */
-static void IN_ActivateMouse( void )
+static void IN_ActivateMouse( qboolean isFullscreen )
 {
 	if (!mouseAvailable || !SDL_WasInit( SDL_INIT_VIDEO ) )
 		return;
@@ -355,7 +355,7 @@ static void IN_ActivateMouse( void )
 	}
 
 	// in_nograb makes no sense in fullscreen mode
-	if( !Cvar_VariableIntegerValue("r_fullscreen") )
+	if( !isFullscreen )
 	{
 		if( in_nograb->modified || !mouseActive )
 		{
@@ -379,15 +379,15 @@ static void IN_ActivateMouse( void )
 IN_DeactivateMouse
 ===============
 */
-static void IN_DeactivateMouse( void )
+static void IN_DeactivateMouse( qboolean isFullscreen )
 {
 	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
 		return;
 
 	// Always show the cursor when the mouse is disabled,
 	// but not when fullscreen
-	if( !Cvar_VariableIntegerValue("r_fullscreen") )
-		SDL_ShowCursor( 1 );
+	if( !isFullscreen )
+		SDL_ShowCursor( SDL_TRUE );
 
 	if( !mouseAvailable )
 		return;
@@ -1174,23 +1174,26 @@ void IN_Frame( void )
 	// If not DISCONNECTED (main menu) or ACTIVE (in game), we're loading
 	loading = ( clc.state != CA_DISCONNECTED && clc.state != CA_ACTIVE );
 
+	// update isFullscreen since it might of changed since the last vid_restart
+	cls.glconfig.isFullscreen = Cvar_VariableIntegerValue( "r_fullscreen" ) != 0;
+
 	if( !cls.glconfig.isFullscreen && ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) )
 	{
 		// Console is down in windowed mode
-		IN_DeactivateMouse( );
+		IN_DeactivateMouse( cls.glconfig.isFullscreen );
 	}
 	else if( !cls.glconfig.isFullscreen && loading )
 	{
 		// Loading in windowed mode
-		IN_DeactivateMouse( );
+		IN_DeactivateMouse( cls.glconfig.isFullscreen );
 	}
 	else if( !( SDL_GetWindowFlags( SDL_window ) & SDL_WINDOW_INPUT_FOCUS ) )
 	{
 		// Window not got focus
-		IN_DeactivateMouse( );
+		IN_DeactivateMouse( cls.glconfig.isFullscreen );
 	}
 	else
-		IN_ActivateMouse( );
+		IN_ActivateMouse( cls.glconfig.isFullscreen );
 
 	IN_ProcessEvents( );
 
@@ -1236,7 +1239,7 @@ void IN_Init( void *windowData )
 	SDL_StartTextInput( );
 
 	mouseAvailable = ( in_mouse->value != 0 );
-	IN_DeactivateMouse( );
+	IN_DeactivateMouse( Cvar_VariableIntegerValue( "r_fullscreen" ) != 0 );
 
 	appState = SDL_GetWindowFlags( SDL_window );
 	Cvar_SetValue( "com_unfocused",	!( appState & SDL_WINDOW_INPUT_FOCUS ) );
@@ -1255,7 +1258,7 @@ void IN_Shutdown( void )
 {
 	SDL_StopTextInput( );
 
-	IN_DeactivateMouse( );
+	IN_DeactivateMouse( Cvar_VariableIntegerValue( "r_fullscreen" ) != 0 );
 	mouseAvailable = qfalse;
 
 	IN_ShutdownJoystick( );
