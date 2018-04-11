@@ -679,11 +679,24 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 		trap_Cvar_SetValue( "r_mode", s_graphicsoptions.mode.curvalue );
 
 	trap_Cvar_SetValue( "r_fullscreen", s_graphicsoptions.fs.curvalue );
-
-	trap_Cvar_Reset("r_colorbits");
-	trap_Cvar_Reset("r_depthbits");
-	trap_Cvar_Reset("r_stencilbits");
-
+	switch ( s_graphicsoptions.colordepth.curvalue )
+	{
+	case 0:
+		trap_Cvar_SetValue( "r_colorbits", 0 );
+		trap_Cvar_SetValue( "r_depthbits", 0 );
+		trap_Cvar_Reset( "r_stencilbits" );
+		break;
+	case 1:
+		trap_Cvar_SetValue( "r_colorbits", 16 );
+		trap_Cvar_SetValue( "r_depthbits", 16 );
+		trap_Cvar_SetValue( "r_stencilbits", 0 );
+		break;
+	case 2:
+		trap_Cvar_SetValue( "r_colorbits", 32 );
+		trap_Cvar_SetValue( "r_depthbits", 24 );
+		trap_Cvar_SetValue( "r_stencilbits", 8 );
+		break;
+	}
 	trap_Cvar_SetValue( "r_vertexLight", s_graphicsoptions.lighting.curvalue );
 
 	if ( s_graphicsoptions.geometry.curvalue == 2 )
