@@ -3268,6 +3268,7 @@ static void UI_RunMenuScript(char **args) {
 				trap_Cvar_Set("ui_cdkeyvalid", "CD Key does not appear to be valid.");
 			}
 		} else if (Q_stricmp(name, "loadArenas") == 0) {
+			UI_LoadArenasIntoMapList();
 			UI_MapCountByGameType(qfalse);
 			Menu_SetFeederSelection(NULL, FEEDER_ALLMAPS, 0, "createserver");
 		} else if (Q_stricmp(name, "saveControls") == 0) {
