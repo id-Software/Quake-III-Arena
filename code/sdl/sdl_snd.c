@@ -96,7 +96,9 @@ static struct
 	{ AUDIO_U16LSB, "AUDIO_U16LSB" },
 	{ AUDIO_S16LSB, "AUDIO_S16LSB" },
 	{ AUDIO_U16MSB, "AUDIO_U16MSB" },
-	{ AUDIO_S16MSB, "AUDIO_S16MSB" }
+	{ AUDIO_S16MSB, "AUDIO_S16MSB" },
+	{ AUDIO_F32LSB, "AUDIO_F32LSB" },
+	{ AUDIO_F32MSB, "AUDIO_F32MSB" }
 };
 
 static int formatToStringTableSize = ARRAY_LEN( formatToStringTable );
@@ -228,7 +230,8 @@ qboolean SNDDMA_Init(void)
 	}
 
 	dmapos = 0;
-	dma.samplebits = obtained.format & 0xFF;  // first byte of format is bits.
+	dma.samplebits = SDL_AUDIO_BITSIZE(obtained.format);
+	dma.isfloat = SDL_AUDIO_ISFLOAT(obtained.format);
 	dma.channels = obtained.channels;
 	dma.samples = tmp;
 	dma.submission_chunk = 1;

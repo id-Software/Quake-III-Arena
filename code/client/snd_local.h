@@ -67,6 +67,7 @@ typedef struct {
 	int			samples;				// mono samples in buffer
 	int			submission_chunk;		// don't mix less than this #
 	int			samplebits;
+	int			isfloat;
 	int			speed;
 	byte		*buffer;
 } dma_t;

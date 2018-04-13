@@ -368,6 +368,9 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   afd.a.rate = dma.speed;
   afd.a.format = WAV_FORMAT_PCM;
   afd.a.channels = dma.channels;
+  /* !!! FIXME: if CL_WriteAVIAudioFrame() is ever called from somewhere other
+     !!! FIXME:  than S_TransferStereo16(), we will need to handle/convert
+     !!! FIXME:  float32 samples for AVI writing. */
   afd.a.bits = dma.samplebits;
   afd.a.sampleSize = ( afd.a.bits / 8 ) * afd.a.channels;
 

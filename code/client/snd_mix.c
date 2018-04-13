@@ -184,7 +184,22 @@ void S_TransferPaintBuffer(int endtime)
 		out_idx = s_paintedtime * dma.channels & out_mask;
 		step = 3 - dma.channels;
 
-		if (dma.samplebits == 16)
+		if ((dma.isfloat) && (dma.samplebits == 32))
+		{
+			float *out = (float *) pbuf;
+			while (count--)
+			{
+				val = *p >> 8;
+				p+= step;
+				if (val > 0x7fff)
+					val = 0x7fff;
+				else if (val < -32767)  /* clamp to one less than max to make division max out at -1.0f. */
+					val = -32767;
+				out[out_idx] = ((float) val) / 32767.0f;
+				out_idx = (out_idx + 1) & out_mask;
+			}
+		}
+		else if (dma.samplebits == 16)
 		{
 			short *out = (short *) pbuf;
 			while (count--)
