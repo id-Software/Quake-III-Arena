@@ -45,6 +45,8 @@ cvar_t *s_sdlMixSamps;
 static int dmapos = 0;
 static int dmasize = 0;
 
+static SDL_AudioDeviceID sdlPlaybackDevice;
+
 #ifdef USE_VOIP
 static SDL_AudioDeviceID sdlCaptureDevice;
 static cvar_t *s_sdlCapture;
@@ -239,9 +241,10 @@ qboolean SNDDMA_Init(void)
 	desired.channels = (int) s_sdlChannels->value;
 	desired.callback = SNDDMA_AudioCallback;
 
-	if (SDL_OpenAudio(&desired, &obtained) == -1)
+	sdlPlaybackDevice = SDL_OpenAudioDevice(NULL, SDL_FALSE, &desired, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	if (sdlPlaybackDevice == 0)
 	{
-		Com_Printf("SDL_OpenAudio() failed: %s\n", SDL_GetError());
+		Com_Printf("SDL_OpenAudioDevice() failed: %s\n", SDL_GetError());
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 		return qfalse;
 	}
@@ -309,7 +312,7 @@ qboolean SNDDMA_Init(void)
 	sdlMasterGain = 1.0f;
 
 	Com_Printf("Starting SDL audio callback...\n");
-	SDL_PauseAudio(0);  // start callback.
+	SDL_PauseAudioDevice(sdlPlaybackDevice, 0);  // start callback.
 	// don't unpause the capture device; we'll do that in StartCapture.
 
 	Com_Printf("SDL audio initialized.\n");
@@ -334,13 +337,19 @@ SNDDMA_Shutdown
 */
 void SNDDMA_Shutdown(void)
 {
-	Com_Printf("Closing SDL audio device...\n");
-	SDL_CloseAudio();
+	if (sdlPlaybackDevice != 0)
+	{
+		Com_Printf("Closing SDL audio playback device...\n");
+		SDL_CloseAudioDevice(sdlPlaybackDevice);
+		Com_Printf("SDL audio playback device closed.\n");
+		sdlPlaybackDevice = 0;
+	}
 
 	if (sdlCaptureDevice)
 	{
 		Com_Printf("Closing SDL audio capture device...\n");
 		SDL_CloseAudioDevice(sdlCaptureDevice);
+		Com_Printf("SDL audio capture device closed.\n");
 		sdlCaptureDevice = 0;
 	}
 
@@ -361,7 +370,7 @@ Send sound to device if buffer isn't really the dma buffer
 */
 void SNDDMA_Submit(void)
 {
-	SDL_UnlockAudio();
+	SDL_UnlockAudioDevice(sdlPlaybackDevice);
 }
 
 /*
@@ -371,7 +380,7 @@ SNDDMA_BeginPainting
 */
 void SNDDMA_BeginPainting (void)
 {
-	SDL_LockAudio();
+	SDL_LockAudioDevice(sdlPlaybackDevice);
 }
 
 
