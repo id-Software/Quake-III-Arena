@@ -176,6 +176,15 @@ void	SNDDMA_BeginPainting (void);
 
 void	SNDDMA_Submit(void);
 
+#ifdef USE_VOIP
+void SNDDMA_StartCapture(void);
+int SNDDMA_AvailableCaptureSamples(void);
+void SNDDMA_Capture(int samples, byte *data);
+void SNDDMA_StopCapture(void);
+void SNDDMA_MasterGain(float val);
+#endif
+
+
 //====================================================================
 
 #define	MAX_CHANNELS			96

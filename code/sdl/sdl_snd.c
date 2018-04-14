@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../qcommon/q_shared.h"
 #include "../client/snd_local.h"
+#include "../client/client.h"
 
 qboolean snd_inited = qfalse;
 
@@ -43,6 +44,13 @@ cvar_t *s_sdlMixSamps;
 /* The audio callback. All the magic happens here. */
 static int dmapos = 0;
 static int dmasize = 0;
+
+#ifdef USE_VOIP
+static SDL_AudioDeviceID sdlCaptureDevice;
+static cvar_t *s_sdlCapture;
+static float sdlMasterGain = 1.0f;
+#endif
+
 
 /*
 ===============
@@ -83,6 +91,40 @@ static void SNDDMA_AudioCallback(void *userdata, Uint8 *stream, int len)
 
 	if (dmapos >= dmasize)
 		dmapos = 0;
+
+#ifdef USE_VOIP
+	if (sdlMasterGain != 1.0f)
+	{
+		int i;
+		if (dma.isfloat && (dma.samplebits == 32))
+		{
+			float *ptr = (float *) stream;
+			len /= sizeof (*ptr);
+			for (i = 0; i < len; i++, ptr++)
+			{
+				*ptr *= sdlMasterGain;
+			}
+		}
+		else if (dma.samplebits == 16)
+		{
+			Sint16 *ptr = (Sint16 *) stream;
+			len /= sizeof (*ptr);
+			for (i = 0; i < len; i++, ptr++)
+			{
+				*ptr = (Sint16) (((float) *ptr) * sdlMasterGain);
+			}
+		}
+		else if (dma.samplebits == 8)
+		{
+			Uint8 *ptr = (Uint8 *) stream;
+			len /= sizeof (*ptr);
+			for (i = 0; i < len; i++, ptr++)
+			{
+				*ptr = (Uint8) (((float) *ptr) * sdlMasterGain);
+			}
+		}
+	}
+#endif
 }
 
 static struct
@@ -236,8 +278,39 @@ qboolean SNDDMA_Init(void)
 	dmasize = (dma.samples * (dma.samplebits/8));
 	dma.buffer = calloc(1, dmasize);
 
+#ifdef USE_VOIP
+	// !!! FIXME: some of these SDL_OpenAudioDevice() values should be cvars.
+	s_sdlCapture = Cvar_Get( "s_sdlCapture", "1", CVAR_ARCHIVE | CVAR_LATCH );
+	if (!s_sdlCapture->integer)
+	{
+		Com_Printf("SDL audio capture support disabled by user ('+set s_sdlCapture 1' to enable)\n");
+	}
+#if USE_MUMBLE
+	else if (cl_useMumble->integer)
+	{
+		Com_Printf("SDL audio capture support disabled for Mumble support\n");
+	}
+#endif
+	else
+	{
+		/* !!! FIXME: list available devices and let cvar specify one, like OpenAL does */
+		SDL_AudioSpec spec;
+		SDL_zero(spec);
+		spec.freq = 48000;
+		spec.format = AUDIO_S16SYS;
+		spec.channels = 1;
+		spec.samples = VOIP_MAX_PACKET_SAMPLES * 4;
+		sdlCaptureDevice = SDL_OpenAudioDevice(NULL, SDL_TRUE, &spec, NULL, 0);
+		Com_Printf( "SDL capture device %s.\n",
+				    (sdlCaptureDevice == 0) ? "failed to open" : "opened");
+	}
+#endif
+
+	sdlMasterGain = 1.0f;
+
 	Com_Printf("Starting SDL audio callback...\n");
 	SDL_PauseAudio(0);  // start callback.
+	// don't unpause the capture device; we'll do that in StartCapture.
 
 	Com_Printf("SDL audio initialized.\n");
 	snd_inited = qtrue;
@@ -263,12 +336,20 @@ void SNDDMA_Shutdown(void)
 {
 	Com_Printf("Closing SDL audio device...\n");
 	SDL_CloseAudio();
+
+	if (sdlCaptureDevice)
+	{
+		Com_Printf("Closing SDL audio capture device...\n");
+		SDL_CloseAudioDevice(sdlCaptureDevice);
+		sdlCaptureDevice = 0;
+	}
+
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	free(dma.buffer);
 	dma.buffer = NULL;
 	dmapos = dmasize = 0;
 	snd_inited = qfalse;
-	Com_Printf("SDL audio device shut down.\n");
+	Com_Printf("SDL audio shut down.\n");
 }
 
 /*
@@ -292,3 +373,48 @@ void SNDDMA_BeginPainting (void)
 {
 	SDL_LockAudio();
 }
+
+
+#ifdef USE_VOIP
+void SNDDMA_StartCapture(void)
+{
+	if (sdlCaptureDevice)
+	{
+		SDL_ClearQueuedAudio(sdlCaptureDevice);
+		SDL_PauseAudioDevice(sdlCaptureDevice, 0);
+	}
+}
+
+int SNDDMA_AvailableCaptureSamples(void)
+{
+	// divided by 2 to convert from bytes to (mono16) samples.
+	return sdlCaptureDevice ? (SDL_GetQueuedAudioSize(sdlCaptureDevice) / 2) : 0;
+}
+
+void SNDDMA_Capture(int samples, byte *data)
+{
+	// multiplied by 2 to convert from (mono16) samples to bytes.
+	if (sdlCaptureDevice)
+	{
+		SDL_DequeueAudio(sdlCaptureDevice, data, samples * 2);
+	}
+	else
+	{
+		SDL_memset(data, '\0', samples * 2);
+	}
+}
+
+void SNDDMA_StopCapture(void)
+{
+	if (sdlCaptureDevice)
+	{
+		SDL_PauseAudioDevice(sdlCaptureDevice, 1);
+	}
+}
+
+void SNDDMA_MasterGain( float val )
+{
+	sdlMasterGain = val;
+}
+#endif
+

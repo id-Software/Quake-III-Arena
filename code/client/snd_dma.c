@@ -119,32 +119,31 @@ void S_Base_SoundInfo(void) {
 static
 void S_Base_StartCapture( void )
 {
-	// !!! FIXME: write me.
+	SNDDMA_StartCapture();
 }
 
 static
 int S_Base_AvailableCaptureSamples( void )
 {
-	// !!! FIXME: write me.
-	return 0;
+	return SNDDMA_AvailableCaptureSamples();
 }
 
 static
 void S_Base_Capture( int samples, byte *data )
 {
-	// !!! FIXME: write me.
+	SNDDMA_Capture(samples, data);
 }
 
 static
 void S_Base_StopCapture( void )
 {
-	// !!! FIXME: write me.
+	SNDDMA_StopCapture();
 }
 
 static
 void S_Base_MasterGain( float val )
 {
-	// !!! FIXME: write me.
+	SNDDMA_MasterGain(val);
 }
 #endif
 
