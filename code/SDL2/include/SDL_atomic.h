@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -56,8 +56,8 @@
  * All of the atomic operations that modify memory are full memory barriers.
  */
 
-#ifndef _SDL_atomic_h_
-#define _SDL_atomic_h_
+#ifndef SDL_atomic_h_
+#define SDL_atomic_h_
 
 #include "SDL_stdinc.h"
 #include "SDL_platform.h"
@@ -118,13 +118,16 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
  * The compiler barrier prevents the compiler from reordering
  * reads and writes to globally visible variables across the call.
  */
-#if defined(_MSC_VER) && (_MSC_VER > 1200)
+#if defined(_MSC_VER) && (_MSC_VER > 1200) && !defined(__clang__)
 void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
 #define SDL_CompilerBarrier()   _ReadWriteBarrier()
 #elif (defined(__GNUC__) && !defined(__EMSCRIPTEN__)) || (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x5120))
 /* This is correct for all CPUs when using GCC or Solaris Studio 12.1+. */
 #define SDL_CompilerBarrier()   __asm__ __volatile__ ("" : : : "memory")
+#elif defined(__WATCOMC__)
+extern _inline void SDL_CompilerBarrier (void);
+#pragma aux SDL_CompilerBarrier = "" parm [] modify exact [];
 #else
 #define SDL_CompilerBarrier()   \
 { SDL_SpinLock _tmp = 0; SDL_AtomicLock(&_tmp); SDL_AtomicUnlock(&_tmp); }
@@ -149,18 +152,24 @@ void _ReadWriteBarrier(void);
  * For more information on these semantics, take a look at the blog post:
  * http://preshing.com/20120913/acquire-and-release-semantics
  */
+extern DECLSPEC void SDLCALL SDL_MemoryBarrierReleaseFunction(void);
+extern DECLSPEC void SDLCALL SDL_MemoryBarrierAcquireFunction(void);
+
 #if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
 #define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("lwsync" : : : "memory")
 #define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("lwsync" : : : "memory")
+#elif defined(__GNUC__) && defined(__aarch64__)
+#define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("dmb ish" : : : "memory")
+#define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("dmb ish" : : : "memory")
 #elif defined(__GNUC__) && defined(__arm__)
 #if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
 #define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("dmb ish" : : : "memory")
 #define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("dmb ish" : : : "memory")
-#elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__)
+#elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_5TE__)
 #ifdef __thumb__
 /* The mcr instruction isn't available in thumb mode, use real functions */
-extern DECLSPEC void SDLCALL SDL_MemoryBarrierRelease();
-extern DECLSPEC void SDLCALL SDL_MemoryBarrierAcquire();
+#define SDL_MemoryBarrierRelease()   SDL_MemoryBarrierReleaseFunction()
+#define SDL_MemoryBarrierAcquire()   SDL_MemoryBarrierAcquireFunction()
 #else
 #define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" : : "r"(0) : "memory")
 #define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" : : "r"(0) : "memory")
@@ -263,6 +272,6 @@ extern DECLSPEC void* SDLCALL SDL_AtomicGetPtr(void **a);
 
 #include "close_code.h"
 
-#endif /* _SDL_atomic_h_ */
+#endif /* SDL_atomic_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */

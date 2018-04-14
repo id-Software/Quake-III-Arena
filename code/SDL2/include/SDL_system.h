@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,8 +25,8 @@
  *  Include file for platform specific SDL API functions
  */
 
-#ifndef _SDL_system_h
-#define _SDL_system_h
+#ifndef SDL_system_h_
+#define SDL_system_h_
 
 #include "SDL_stdinc.h"
 #include "SDL_keyboard.h"
@@ -96,7 +96,7 @@ extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
    This returns JNIEnv*, but the prototype is void* so we don't need jni.h
  */
-extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv();
+extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv(void);
 
 /**
    \brief Get the SDL Activity object for the application
@@ -106,7 +106,12 @@ extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv();
    It is the caller's responsibility to properly release it
    (using env->Push/PopLocalFrame or manually with env->DeleteLocalRef)
  */
-extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity();
+extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity(void);
+
+/**
+   \brief Return true if the application is running on Android TV
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_IsAndroidTV(void);
 
 /**
    See the official Android developer guide for more information:
@@ -121,7 +126,7 @@ extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity();
    This path is unique to your application and cannot be written to
    by other applications.
  */
-extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath();
+extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath(void);
 
 /**
    \brief Get the current state of external storage, a bitmask of these values:
@@ -130,7 +135,7 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath();
 
    If external storage is currently unavailable, this will return 0.
 */
-extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState();
+extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState(void);
 
 /**
    \brief Get the path used for external storage for this application.
@@ -138,7 +143,7 @@ extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState();
    This path is unique to your application, but is public and can be
    written to by other applications.
  */
-extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
+extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath(void);
 
 #endif /* __ANDROID__ */
 
@@ -167,6 +172,25 @@ typedef enum
         Files written here may be deleted at any time. */
     SDL_WINRT_PATH_TEMP_FOLDER
 } SDL_WinRT_Path;
+
+
+/**
+ *  \brief WinRT Device Family
+ */
+typedef enum
+{
+    /** \brief Unknown family  */
+    SDL_WINRT_DEVICEFAMILY_UNKNOWN,
+
+    /** \brief Desktop family*/
+    SDL_WINRT_DEVICEFAMILY_DESKTOP,
+
+    /** \brief Mobile family (for example smartphone) */
+    SDL_WINRT_DEVICEFAMILY_MOBILE,
+
+    /** \brief XBox family */
+    SDL_WINRT_DEVICEFAMILY_XBOX,
+} SDL_WinRT_DeviceFamily;
 
 
 /**
@@ -203,6 +227,13 @@ extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path
  */
 extern DECLSPEC const char * SDLCALL SDL_WinRTGetFSPathUTF8(SDL_WinRT_Path pathType);
 
+/**
+ *  \brief Detects the device family of WinRT plattform on runtime
+ *
+ *  \return Device family
+ */
+extern DECLSPEC SDL_WinRT_DeviceFamily SDLCALL SDL_WinRTGetDeviceFamily();
+
 #endif /* __WINRT__ */
 
 /* Ends C function definitions when using C++ */
@@ -211,6 +242,6 @@ extern DECLSPEC const char * SDLCALL SDL_WinRTGetFSPathUTF8(SDL_WinRT_Path pathT
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_system_h */
+#endif /* SDL_system_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */

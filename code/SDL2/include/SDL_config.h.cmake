@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,8 +19,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
+#ifndef SDL_config_h_
+#define SDL_config_h_
 
 /**
  *  \file SDL_config.h.in
@@ -47,40 +47,32 @@
 #cmakedefine HAVE_GCC_ATOMICS @HAVE_GCC_ATOMICS@
 #cmakedefine HAVE_GCC_SYNC_LOCK_TEST_AND_SET @HAVE_GCC_SYNC_LOCK_TEST_AND_SET@
 
-#cmakedefine HAVE_D3D_H @HAVE_D3D_H@
-#cmakedefine HAVE_D3D11_H @HAVE_D3D11_H@
-#cmakedefine HAVE_DDRAW_H @HAVE_DDRAW_H@
-#cmakedefine HAVE_DSOUND_H @HAVE_DSOUND_H@
-#cmakedefine HAVE_DINPUT_H @HAVE_DINPUT_H@
-#cmakedefine HAVE_XAUDIO2_H @HAVE_XAUDIO2_H@
-#cmakedefine HAVE_XINPUT_H @HAVE_XINPUT_H@
-#cmakedefine HAVE_DXGI_H @HAVE_DXGI_H@
-
 /* Comment this if you want to build without any C library requirements */
 #cmakedefine HAVE_LIBC 1
 #if HAVE_LIBC
 
 /* Useful headers */
-#cmakedefine HAVE_ALLOCA_H 1
-#cmakedefine HAVE_SYS_TYPES_H 1
-#cmakedefine HAVE_STDIO_H 1
 #cmakedefine STDC_HEADERS 1
-#cmakedefine HAVE_STDLIB_H 1
-#cmakedefine HAVE_STDARG_H 1
-#cmakedefine HAVE_MALLOC_H 1
-#cmakedefine HAVE_MEMORY_H 1
-#cmakedefine HAVE_STRING_H 1
-#cmakedefine HAVE_STRINGS_H 1
-#cmakedefine HAVE_INTTYPES_H 1
-#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_ALLOCA_H 1
 #cmakedefine HAVE_CTYPE_H 1
-#cmakedefine HAVE_MATH_H 1
+#cmakedefine HAVE_FLOAT_H 1
 #cmakedefine HAVE_ICONV_H 1
+#cmakedefine HAVE_INTTYPES_H 1
+#cmakedefine HAVE_LIMITS_H 1
+#cmakedefine HAVE_MALLOC_H 1
+#cmakedefine HAVE_MATH_H 1
+#cmakedefine HAVE_MEMORY_H 1
 #cmakedefine HAVE_SIGNAL_H 1
-#cmakedefine HAVE_ALTIVEC_H 1
+#cmakedefine HAVE_STDARG_H 1
+#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_STDIO_H 1
+#cmakedefine HAVE_STDLIB_H 1
+#cmakedefine HAVE_STRINGS_H 1
+#cmakedefine HAVE_STRING_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_WCHAR_H 1
 #cmakedefine HAVE_PTHREAD_NP_H 1
-#cmakedefine HAVE_LIBUDEV_H 1
-#cmakedefine HAVE_DBUS_DBUS_H 1
+#cmakedefine HAVE_LIBUNWIND_H 1
 
 /* C library functions */
 #cmakedefine HAVE_MALLOC 1
@@ -101,10 +93,13 @@
 #cmakedefine HAVE_MEMCPY 1
 #cmakedefine HAVE_MEMMOVE 1
 #cmakedefine HAVE_MEMCMP 1
+#cmakedefine HAVE_WCSLEN 1
+#cmakedefine HAVE_WCSLCPY 1
+#cmakedefine HAVE_WCSLCAT 1
+#cmakedefine HAVE_WCSCMP 1
 #cmakedefine HAVE_STRLEN 1
 #cmakedefine HAVE_STRLCPY 1
 #cmakedefine HAVE_STRLCAT 1
-#cmakedefine HAVE_STRDUP 1
 #cmakedefine HAVE__STRREV 1
 #cmakedefine HAVE__STRUPR 1
 #cmakedefine HAVE__STRLWR 1
@@ -135,25 +130,41 @@
 #cmakedefine HAVE_VSSCANF 1
 #cmakedefine HAVE_VSNPRINTF 1
 #cmakedefine HAVE_M_PI 1
-#cmakedefine HAVE_ATAN 1
-#cmakedefine HAVE_ATAN2 1
 #cmakedefine HAVE_ACOS 1
+#cmakedefine HAVE_ACOSF 1
 #cmakedefine HAVE_ASIN 1
+#cmakedefine HAVE_ASINF 1
+#cmakedefine HAVE_ATAN 1
+#cmakedefine HAVE_ATANF 1
+#cmakedefine HAVE_ATAN2 1
+#cmakedefine HAVE_ATAN2F 1
 #cmakedefine HAVE_CEIL 1
+#cmakedefine HAVE_CEILF 1
 #cmakedefine HAVE_COPYSIGN 1
+#cmakedefine HAVE_COPYSIGNF 1
 #cmakedefine HAVE_COS 1
 #cmakedefine HAVE_COSF 1
 #cmakedefine HAVE_FABS 1
+#cmakedefine HAVE_FABSF 1
 #cmakedefine HAVE_FLOOR 1
+#cmakedefine HAVE_FLOORF 1
+#cmakedefine HAVE_FMOD 1
+#cmakedefine HAVE_FMODF 1
 #cmakedefine HAVE_LOG 1
+#cmakedefine HAVE_LOGF 1
+#cmakedefine HAVE_LOG10 1
+#cmakedefine HAVE_LOG10F 1
 #cmakedefine HAVE_POW 1
+#cmakedefine HAVE_POWF 1
 #cmakedefine HAVE_SCALBN 1
+#cmakedefine HAVE_SCALBNF 1
 #cmakedefine HAVE_SIN 1
 #cmakedefine HAVE_SINF 1
 #cmakedefine HAVE_SQRT 1
 #cmakedefine HAVE_SQRTF 1
 #cmakedefine HAVE_TAN 1
 #cmakedefine HAVE_TANF 1
+#cmakedefine HAVE_FOPEN64 1
 #cmakedefine HAVE_FSEEKO 1
 #cmakedefine HAVE_FSEEKO64 1
 #cmakedefine HAVE_SIGACTION 1
@@ -169,13 +180,35 @@
 #cmakedefine HAVE_PTHREAD_SETNAME_NP 1
 #cmakedefine HAVE_PTHREAD_SET_NAME_NP 1
 #cmakedefine HAVE_SEM_TIMEDWAIT 1
+#cmakedefine HAVE_GETAUXVAL 1
+#cmakedefine HAVE_POLL 1
+
 #elif __WIN32__
 #cmakedefine HAVE_STDARG_H 1
 #cmakedefine HAVE_STDDEF_H 1
+#cmakedefine HAVE_FLOAT_H 1
 #else
 /* We may need some replacement for stdarg.h here */
 #include <stdarg.h>
 #endif /* HAVE_LIBC */
+
+#cmakedefine HAVE_ALTIVEC_H 1
+#cmakedefine HAVE_DBUS_DBUS_H 1
+#cmakedefine HAVE_FCITX_FRONTEND_H 1
+#cmakedefine HAVE_IBUS_IBUS_H 1
+#cmakedefine HAVE_IMMINTRIN_H 1
+#cmakedefine HAVE_LIBSAMPLERATE_H 1
+#cmakedefine HAVE_LIBUDEV_H 1
+
+#cmakedefine HAVE_D3D_H @HAVE_D3D_H@
+#cmakedefine HAVE_D3D11_H @HAVE_D3D11_H@
+#cmakedefine HAVE_DDRAW_H @HAVE_DDRAW_H@
+#cmakedefine HAVE_DSOUND_H @HAVE_DSOUND_H@
+#cmakedefine HAVE_DINPUT_H @HAVE_DINPUT_H@
+#cmakedefine HAVE_XINPUT_H @HAVE_XINPUT_H@
+#cmakedefine HAVE_DXGI_H @HAVE_DXGI_H@
+#cmakedefine HAVE_XINPUT_GAMEPAD_EX @HAVE_XINPUT_GAMEPAD_EX@
+#cmakedefine HAVE_XINPUT_STATE_EX @HAVE_XINPUT_STATE_EX@
 
 /* SDL internal assertion support */
 #cmakedefine SDL_DEFAULT_ASSERT_LEVEL @SDL_DEFAULT_ASSERT_LEVEL@
@@ -197,35 +230,37 @@
 #cmakedefine SDL_FILESYSTEM_DISABLED @SDL_FILESYSTEM_DISABLED@
 
 /* Enable various audio drivers */
-#cmakedefine SDL_AUDIO_DRIVER_ANDROID @SDL_AUDIO_DRIVER_ANDROID@
 #cmakedefine SDL_AUDIO_DRIVER_ALSA @SDL_AUDIO_DRIVER_ALSA@
 #cmakedefine SDL_AUDIO_DRIVER_ALSA_DYNAMIC @SDL_AUDIO_DRIVER_ALSA_DYNAMIC@
+#cmakedefine SDL_AUDIO_DRIVER_ANDROID @SDL_AUDIO_DRIVER_ANDROID@
 #cmakedefine SDL_AUDIO_DRIVER_ARTS @SDL_AUDIO_DRIVER_ARTS@
 #cmakedefine SDL_AUDIO_DRIVER_ARTS_DYNAMIC @SDL_AUDIO_DRIVER_ARTS_DYNAMIC@
-#cmakedefine SDL_AUDIO_DRIVER_PULSEAUDIO @SDL_AUDIO_DRIVER_PULSEAUDIO@
-#cmakedefine SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC @SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC@
-#cmakedefine SDL_AUDIO_DRIVER_HAIKU @SDL_AUDIO_DRIVER_HAIKU@
-#cmakedefine SDL_AUDIO_DRIVER_BSD @SDL_AUDIO_DRIVER_BSD@
 #cmakedefine SDL_AUDIO_DRIVER_COREAUDIO @SDL_AUDIO_DRIVER_COREAUDIO@
 #cmakedefine SDL_AUDIO_DRIVER_DISK @SDL_AUDIO_DRIVER_DISK@
-#cmakedefine SDL_AUDIO_DRIVER_DUMMY @SDL_AUDIO_DRIVER_DUMMY@
-#cmakedefine SDL_AUDIO_DRIVER_XAUDIO2 @SDL_AUDIO_DRIVER_XAUDIO2@
 #cmakedefine SDL_AUDIO_DRIVER_DSOUND @SDL_AUDIO_DRIVER_DSOUND@
+#cmakedefine SDL_AUDIO_DRIVER_DUMMY @SDL_AUDIO_DRIVER_DUMMY@
+#cmakedefine SDL_AUDIO_DRIVER_EMSCRIPTEN @SDL_AUDIO_DRIVER_EMSCRIPTEN@
 #cmakedefine SDL_AUDIO_DRIVER_ESD @SDL_AUDIO_DRIVER_ESD@
 #cmakedefine SDL_AUDIO_DRIVER_ESD_DYNAMIC @SDL_AUDIO_DRIVER_ESD_DYNAMIC@
+#cmakedefine SDL_AUDIO_DRIVER_FUSIONSOUND @SDL_AUDIO_DRIVER_FUSIONSOUND@
+#cmakedefine SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC @SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC@
+#cmakedefine SDL_AUDIO_DRIVER_HAIKU @SDL_AUDIO_DRIVER_HAIKU@
+#cmakedefine SDL_AUDIO_DRIVER_JACK @SDL_AUDIO_DRIVER_JACK@
+#cmakedefine SDL_AUDIO_DRIVER_JACK_DYNAMIC @SDL_AUDIO_DRIVER_JACK_DYNAMIC@
 #cmakedefine SDL_AUDIO_DRIVER_NAS @SDL_AUDIO_DRIVER_NAS@
 #cmakedefine SDL_AUDIO_DRIVER_NAS_DYNAMIC @SDL_AUDIO_DRIVER_NAS_DYNAMIC@
-#cmakedefine SDL_AUDIO_DRIVER_SNDIO @SDL_AUDIO_DRIVER_SNDIO@
-#cmakedefine SDL_AUDIO_DRIVER_SNDIO_DYNAMIC @SDL_AUDIO_DRIVER_SNDIO_DYNAMIC@
+#cmakedefine SDL_AUDIO_DRIVER_NETBSD @SDL_AUDIO_DRIVER_NETBSD@
 #cmakedefine SDL_AUDIO_DRIVER_OSS @SDL_AUDIO_DRIVER_OSS@
 #cmakedefine SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H @SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H@
 #cmakedefine SDL_AUDIO_DRIVER_PAUDIO @SDL_AUDIO_DRIVER_PAUDIO@
+#cmakedefine SDL_AUDIO_DRIVER_PULSEAUDIO @SDL_AUDIO_DRIVER_PULSEAUDIO@
+#cmakedefine SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC @SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC@
 #cmakedefine SDL_AUDIO_DRIVER_QSA @SDL_AUDIO_DRIVER_QSA@
+#cmakedefine SDL_AUDIO_DRIVER_SNDIO @SDL_AUDIO_DRIVER_SNDIO@
+#cmakedefine SDL_AUDIO_DRIVER_SNDIO_DYNAMIC @SDL_AUDIO_DRIVER_SNDIO_DYNAMIC@
 #cmakedefine SDL_AUDIO_DRIVER_SUNAUDIO @SDL_AUDIO_DRIVER_SUNAUDIO@
+#cmakedefine SDL_AUDIO_DRIVER_WASAPI @SDL_AUDIO_DRIVER_WASAPI@
 #cmakedefine SDL_AUDIO_DRIVER_WINMM @SDL_AUDIO_DRIVER_WINMM@
-#cmakedefine SDL_AUDIO_DRIVER_FUSIONSOUND @SDL_AUDIO_DRIVER_FUSIONSOUND@
-#cmakedefine SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC @SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC@
-#cmakedefine SDL_AUDIO_DRIVER_EMSCRIPTEN @SDL_AUDIO_DRIVER_EMSCRIPTEN@
 
 /* Enable various input drivers */
 #cmakedefine SDL_INPUT_LINUXEV @SDL_INPUT_LINUXEV@
@@ -248,9 +283,9 @@
 #cmakedefine SDL_HAPTIC_IOKIT @SDL_HAPTIC_IOKIT@
 #cmakedefine SDL_HAPTIC_DINPUT @SDL_HAPTIC_DINPUT@
 #cmakedefine SDL_HAPTIC_XINPUT @SDL_HAPTIC_XINPUT@
+#cmakedefine SDL_HAPTIC_ANDROID @SDL_HAPTIC_ANDROID@
 
 /* Enable various shared object loading systems */
-#cmakedefine SDL_LOADSO_HAIKU @SDL_LOADSO_HAIKU@
 #cmakedefine SDL_LOADSO_DLOPEN @SDL_LOADSO_DLOPEN@
 #cmakedefine SDL_LOADSO_DUMMY @SDL_LOADSO_DUMMY@
 #cmakedefine SDL_LOADSO_LDG @SDL_LOADSO_LDG@
@@ -281,6 +316,10 @@
 #cmakedefine SDL_VIDEO_DRIVER_RPI @SDL_VIDEO_DRIVER_RPI@
 #cmakedefine SDL_VIDEO_DRIVER_VIVANTE @SDL_VIDEO_DRIVER_VIVANTE@
 #cmakedefine SDL_VIDEO_DRIVER_VIVANTE_VDK @SDL_VIDEO_DRIVER_VIVANTE_VDK@
+
+#cmakedefine SDL_VIDEO_DRIVER_KMSDRM @SDL_VIDEO_DRIVER_KMSDRM@
+#cmakedefine SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC @SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC@
+#cmakedefine SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM @SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM@
 
 #cmakedefine SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH @SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH@
 #cmakedefine SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC @SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC@
@@ -320,6 +359,7 @@
 #cmakedefine SDL_VIDEO_RENDER_OGL_ES @SDL_VIDEO_RENDER_OGL_ES@
 #cmakedefine SDL_VIDEO_RENDER_OGL_ES2 @SDL_VIDEO_RENDER_OGL_ES2@
 #cmakedefine SDL_VIDEO_RENDER_DIRECTFB @SDL_VIDEO_RENDER_DIRECTFB@
+#cmakedefine SDL_VIDEO_RENDER_METAL @SDL_VIDEO_RENDER_METAL@
 
 /* Enable OpenGL support */
 #cmakedefine SDL_VIDEO_OPENGL @SDL_VIDEO_OPENGL@
@@ -332,6 +372,9 @@
 #cmakedefine SDL_VIDEO_OPENGL_EGL @SDL_VIDEO_OPENGL_EGL@
 #cmakedefine SDL_VIDEO_OPENGL_OSMESA @SDL_VIDEO_OPENGL_OSMESA@
 #cmakedefine SDL_VIDEO_OPENGL_OSMESA_DYNAMIC @SDL_VIDEO_OPENGL_OSMESA_DYNAMIC@
+
+/* Enable Vulkan support */
+#cmakedefine SDL_VIDEO_VULKAN @SDL_VIDEO_VULKAN@
 
 /* Enable system power support */
 #cmakedefine SDL_POWER_ANDROID @SDL_POWER_ANDROID@
@@ -355,6 +398,8 @@
 #cmakedefine SDL_ASSEMBLY_ROUTINES @SDL_ASSEMBLY_ROUTINES@
 #cmakedefine SDL_ALTIVEC_BLITTERS @SDL_ALTIVEC_BLITTERS@
 
+/* Enable dynamic libsamplerate support */
+#cmakedefine SDL_LIBSAMPLERATE_DYNAMIC @SDL_LIBSAMPLERATE_DYNAMIC@
 
 /* Platform specific definitions */
 #if !defined(__WIN32__)
@@ -416,4 +461,4 @@ typedef unsigned int uintptr_t;
 #  endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 #endif /* __WIN32__ */
 
-#endif /* _SDL_config_h */
+#endif /* SDL_config_h_ */

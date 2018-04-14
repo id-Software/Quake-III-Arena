@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,8 +26,8 @@
  *  data streams.  It can easily be extended to files, memory, etc.
  */
 
-#ifndef _SDL_rwops_h
-#define _SDL_rwops_h
+#ifndef SDL_rwops_h_
+#define SDL_rwops_h_
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
@@ -39,12 +39,12 @@ extern "C" {
 #endif
 
 /* RWops Types */
-#define SDL_RWOPS_UNKNOWN   0   /* Unknown stream type */
-#define SDL_RWOPS_WINFILE   1   /* Win32 file */
-#define SDL_RWOPS_STDFILE   2   /* Stdio file */
-#define SDL_RWOPS_JNIFILE   3   /* Android asset */
-#define SDL_RWOPS_MEMORY    4   /* Memory stream */
-#define SDL_RWOPS_MEMORY_RO 5   /* Read-Only memory stream */
+#define SDL_RWOPS_UNKNOWN   0U  /**< Unknown stream type */
+#define SDL_RWOPS_WINFILE   1U  /**< Win32 file */
+#define SDL_RWOPS_STDFILE   2U  /**< Stdio file */
+#define SDL_RWOPS_JNIFILE   3U  /**< Android asset */
+#define SDL_RWOPS_MEMORY    4U  /**< Memory stream */
+#define SDL_RWOPS_MEMORY_RO 5U  /**< Read-Only memory stream */
 
 /**
  * This is the read/write operation structure -- very basic.
@@ -191,6 +191,29 @@ extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops * area);
 
 
 /**
+ *  Load all the data from an SDL data stream.
+ *
+ *  The data is allocated with a zero byte at the end (null terminated)
+ *
+ *  If \c datasize is not NULL, it is filled with the size of the data read.
+ *
+ *  If \c freesrc is non-zero, the stream will be closed after being read.
+ *
+ *  The data should be freed with SDL_free().
+ *
+ *  \return the data, or NULL if there was an error.
+ */
+extern DECLSPEC void *SDLCALL SDL_LoadFile_RW(SDL_RWops * src, size_t *datasize,
+                                                    int freesrc);
+
+/**
+ *  Load an entire file.
+ *
+ *  Convenience macro.
+ */
+#define SDL_LoadFile(file, datasize)   SDL_LoadFile_RW(SDL_RWFromFile(file, "rb"), datasize, 1)
+
+/**
  *  \name Read endian functions
  *
  *  Read an item of the specified endianness and return in native format.
@@ -226,6 +249,6 @@ extern DECLSPEC size_t SDLCALL SDL_WriteBE64(SDL_RWops * dst, Uint64 value);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_rwops_h */
+#endif /* SDL_rwops_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -61,6 +61,12 @@
 #  else
 #   define DECLSPEC __declspec(dllexport)
 #  endif
+# elif defined(__OS2__)
+#   ifdef BUILD_SDL
+#    define DECLSPEC    __declspec(dllexport)
+#   else
+#    define DECLSPEC
+#   endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #   define DECLSPEC __attribute__ ((visibility("default")))
@@ -74,6 +80,11 @@
 #ifndef SDLCALL
 #if (defined(__WIN32__) || defined(__WINRT__)) && !defined(__GNUC__)
 #define SDLCALL __cdecl
+#elif defined(__OS2__) || defined(__EMX__)
+#define SDLCALL _System
+# if defined (__GNUC__) && !defined(_System)
+#  define _System /* for old EMX/GCC compat.  */
+# endif
 #else
 #define SDLCALL
 #endif
@@ -111,7 +122,7 @@
 #elif defined(_MSC_VER) || defined(__BORLANDC__) || \
       defined(__DMC__) || defined(__SC__) || \
       defined(__WATCOMC__) || defined(__LCC__) || \
-      defined(__DECC)
+      defined(__DECC) || defined(__CC_ARM)
 #define SDL_INLINE __inline
 #ifndef __inline__
 #define __inline__ __inline
@@ -133,6 +144,16 @@
 #define SDL_FORCE_INLINE static SDL_INLINE
 #endif
 #endif /* SDL_FORCE_INLINE not defined */
+
+#ifndef SDL_NORETURN
+#if defined(__GNUC__)
+#define SDL_NORETURN __attribute__((noreturn))
+#elif defined(_MSC_VER)
+#define SDL_NORETURN __declspec(noreturn)
+#else
+#define SDL_NORETURN
+#endif
+#endif /* SDL_NORETURN not defined */
 
 /* Apparently this is needed by several Windows compilers */
 #if !defined(__MACH__)

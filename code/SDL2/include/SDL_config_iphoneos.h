@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,8 +19,9 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_iphoneos_h
-#define _SDL_config_iphoneos_h
+#ifndef SDL_config_iphoneos_h_
+#define SDL_config_iphoneos_h_
+#define SDL_config_h_
 
 #include "SDL_platform.h"
 
@@ -32,16 +33,19 @@
 
 #define HAVE_GCC_ATOMICS    1
 
-#define HAVE_ALLOCA_H       1
-#define HAVE_SYS_TYPES_H    1
-#define HAVE_STDIO_H    1
 #define STDC_HEADERS    1
-#define HAVE_STRING_H   1
-#define HAVE_INTTYPES_H 1
-#define HAVE_STDINT_H   1
+#define HAVE_ALLOCA_H       1
 #define HAVE_CTYPE_H    1
+#define HAVE_INTTYPES_H 1
+#define HAVE_LIMITS_H   1
 #define HAVE_MATH_H 1
 #define HAVE_SIGNAL_H   1
+#define HAVE_STDINT_H   1
+#define HAVE_STDIO_H    1
+#define HAVE_STRING_H   1
+#define HAVE_SYS_TYPES_H    1
+/* The libunwind functions are only available on x86 */
+/* #undef HAVE_LIBUNWIND_H */
 
 /* C library functions */
 #define HAVE_MALLOC 1
@@ -64,7 +68,6 @@
 #define HAVE_STRLEN 1
 #define HAVE_STRLCPY    1
 #define HAVE_STRLCAT    1
-#define HAVE_STRDUP 1
 #define HAVE_STRCHR 1
 #define HAVE_STRRCHR    1
 #define HAVE_STRSTR 1
@@ -82,19 +85,34 @@
 #define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF  1
 #define HAVE_M_PI   1
+#define HAVE_ACOS   1
+#define HAVE_ACOSF  1
+#define HAVE_ASIN   1
+#define HAVE_ASINF  1
 #define HAVE_ATAN   1
+#define HAVE_ATANF  1
 #define HAVE_ATAN2  1
-#define HAVE_ACOS  1
-#define HAVE_ASIN  1
+#define HAVE_ATAN2F 1
 #define HAVE_CEIL   1
+#define HAVE_CEILF  1
 #define HAVE_COPYSIGN   1
+#define HAVE_COPYSIGNF  1
 #define HAVE_COS    1
 #define HAVE_COSF   1
 #define HAVE_FABS   1
+#define HAVE_FABSF  1
 #define HAVE_FLOOR  1
+#define HAVE_FLOORF 1
+#define HAVE_FMOD   1
+#define HAVE_FMODF  1
 #define HAVE_LOG    1
+#define HAVE_LOGF   1
+#define HAVE_LOG10  1
+#define HAVE_LOG10F 1
 #define HAVE_POW    1
+#define HAVE_POWF   1
 #define HAVE_SCALBN 1
+#define HAVE_SCALBNF    1
 #define HAVE_SIN    1
 #define HAVE_SINF   1
 #define HAVE_SQRT   1
@@ -119,11 +137,7 @@
 #define SDL_JOYSTICK_MFI 1
 
 /* Enable Unix style SO loading */
-/* Technically this works, but violates the iOS dev agreement prior to iOS 8 */
-/* #define SDL_LOADSO_DLOPEN 1 */
-
-/* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
-#define SDL_LOADSO_DISABLED 1
+#define SDL_LOADSO_DLOPEN 1
 
 /* Enable various threading systems */
 #define SDL_THREAD_PTHREAD  1
@@ -136,11 +150,26 @@
 #define SDL_VIDEO_DRIVER_UIKIT  1
 #define SDL_VIDEO_DRIVER_DUMMY  1
 
-/* enable OpenGL ES */
+/* Enable OpenGL ES */
 #define SDL_VIDEO_OPENGL_ES2 1
 #define SDL_VIDEO_OPENGL_ES 1
 #define SDL_VIDEO_RENDER_OGL_ES 1
 #define SDL_VIDEO_RENDER_OGL_ES2    1
+
+/* Metal supported on 64-bit devices running iOS 8.0 and tvOS 9.0 and newer */
+#if !TARGET_OS_SIMULATOR && !TARGET_CPU_ARM && ((__IPHONE_OS_VERSION_MIN_REQUIRED >= 80000) || (__TV_OS_VERSION_MIN_REQUIRED >= 90000))
+#define SDL_PLATFORM_SUPPORTS_METAL	1
+#else
+#define SDL_PLATFORM_SUPPORTS_METAL	0
+#endif
+
+#if SDL_PLATFORM_SUPPORTS_METAL
+#define SDL_VIDEO_RENDER_METAL  1
+#endif
+
+#if SDL_PLATFORM_SUPPORTS_METAL
+#define SDL_VIDEO_VULKAN 1
+#endif
 
 /* Enable system power support */
 #define SDL_POWER_UIKIT 1
@@ -159,4 +188,4 @@
 /* enable filesystem support */
 #define SDL_FILESYSTEM_COCOA   1
 
-#endif /* _SDL_config_iphoneos_h */
+#endif /* SDL_config_iphoneos_h_ */

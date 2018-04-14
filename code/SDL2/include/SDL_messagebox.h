@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,8 +19,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_messagebox_h
-#define _SDL_messagebox_h
+#ifndef SDL_messagebox_h_
+#define SDL_messagebox_h_
 
 #include "SDL_stdinc.h"
 #include "SDL_video.h"      /* For SDL_Window */
@@ -139,6 +139,6 @@ extern DECLSPEC int SDLCALL SDL_ShowSimpleMessageBox(Uint32 flags, const char *t
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_messagebox_h */
+#endif /* SDL_messagebox_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */

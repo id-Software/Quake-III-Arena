@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,8 +34,8 @@
  *      Others: standard error output (stderr)
  */
 
-#ifndef _SDL_log_h
-#define _SDL_log_h
+#ifndef SDL_log_h_
+#define SDL_log_h_
 
 #include "SDL_stdinc.h"
 
@@ -186,7 +186,7 @@ extern DECLSPEC void SDLCALL SDL_LogMessageV(int category,
 /**
  *  \brief The prototype for the log output function
  */
-typedef void (*SDL_LogOutputFunction)(void *userdata, int category, SDL_LogPriority priority, const char *message);
+typedef void (SDLCALL *SDL_LogOutputFunction)(void *userdata, int category, SDL_LogPriority priority, const char *message);
 
 /**
  *  \brief Get the current log output function.
@@ -206,6 +206,6 @@ extern DECLSPEC void SDLCALL SDL_LogSetOutputFunction(SDL_LogOutputFunction call
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_log_h */
+#endif /* SDL_log_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */

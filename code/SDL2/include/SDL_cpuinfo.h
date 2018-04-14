@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,14 +25,20 @@
  *  CPU feature detection for SDL.
  */
 
-#ifndef _SDL_cpuinfo_h
-#define _SDL_cpuinfo_h
+#ifndef SDL_cpuinfo_h_
+#define SDL_cpuinfo_h_
 
 #include "SDL_stdinc.h"
 
 /* Need to do this here because intrin.h has C++ code in it */
 /* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500) && (defined(_M_IX86) || defined(_M_X64))
+#ifdef __clang__
+/* Many of the intrinsics SDL uses are not implemented by clang with Visual Studio */
+#undef __MMX__
+#undef __SSE__
+#undef __SSE2__
+#else
 #include <intrin.h>
 #ifndef _WIN64
 #define __MMX__
@@ -40,28 +46,37 @@
 #endif
 #define __SSE__
 #define __SSE2__
+#endif /* __clang__ */
 #elif defined(__MINGW64_VERSION_MAJOR)
 #include <intrin.h>
 #else
 #ifdef __ALTIVEC__
-#if HAVE_ALTIVEC_H && !defined(__APPLE_ALTIVEC__)
+#if HAVE_ALTIVEC_H && !defined(__APPLE_ALTIVEC__) && !defined(SDL_DISABLE_ALTIVEC_H)
 #include <altivec.h>
 #undef pixel
+#undef bool
 #endif
 #endif
-#ifdef __MMX__
-#include <mmintrin.h>
-#endif
-#ifdef __3dNOW__
+#if defined(__3dNOW__) && !defined(SDL_DISABLE_MM3DNOW_H)
 #include <mm3dnow.h>
 #endif
-#ifdef __SSE__
+#if HAVE_IMMINTRIN_H && !defined(SDL_DISABLE_IMMINTRIN_H)
+#include <immintrin.h>
+#else
+#if defined(__MMX__) && !defined(SDL_DISABLE_MMINTRIN_H)
+#include <mmintrin.h>
+#endif
+#if defined(__SSE__) && !defined(SDL_DISABLE_XMMINTRIN_H)
 #include <xmmintrin.h>
 #endif
-#ifdef __SSE2__
+#if defined(__SSE2__) && !defined(SDL_DISABLE_EMMINTRIN_H)
 #include <emmintrin.h>
 #endif
+#if defined(__SSE3__) && !defined(SDL_DISABLE_PMMINTRIN_H)
+#include <pmmintrin.h>
 #endif
+#endif /* HAVE_IMMINTRIN_H */
+#endif /* compiler version */
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -145,6 +160,11 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasAVX(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_HasAVX2(void);
 
 /**
+ *  This function returns true if the CPU has NEON (ARM SIMD) features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasNEON(void);
+
+/**
  *  This function returns the amount of RAM configured in the system, in MB.
  */
 extern DECLSPEC int SDLCALL SDL_GetSystemRAM(void);
@@ -156,6 +176,6 @@ extern DECLSPEC int SDLCALL SDL_GetSystemRAM(void);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_cpuinfo_h */
+#endif /* SDL_cpuinfo_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */
