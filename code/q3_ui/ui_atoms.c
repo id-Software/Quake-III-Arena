@@ -512,6 +512,10 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 	int		width;
 	float	sizeScale;
 
+	if( !str ) {
+		return;
+	}
+
 	sizeScale = UI_ProportionalSizeScale( style );
 
 	switch( style & UI_FORMATMASK ) {
