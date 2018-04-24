@@ -498,7 +498,12 @@ ifeq ($(PLATFORM),darwin)
   #  1. IF you try, this Makefile will still drop libSDL-2.0.0.dylib into the builddir
   #  2. Debugger warns that you have 2- which one will be used is undefined
   ifeq ($(USE_LOCAL_HEADERS),1)
-    BASE_CFLAGS += -I$(SDLHDIR)/include
+    # libSDL2-2.0.0.dylib for PPC is SDL 2.0.1 + changes to compile
+    ifeq ($(ARCH),ppc)
+      BASE_CFLAGS += -I$(SDLHDIR)/include-macppc
+    else
+      BASE_CFLAGS += -I$(SDLHDIR)/include
+    endif
   endif
 
   # We copy sdlmain before ranlib'ing it so that subversion doesn't think
