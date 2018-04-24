@@ -37,12 +37,33 @@ if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
 	PPC_MACOSX_VERSION_MIN="10.5"
 fi
 
+# SDL 2.0.5+ (x86, x86_64) only supports MacOSX 10.6 and later
+if [ -d /Developer/SDKs/MacOSX10.6.sdk ]; then
+	X86_64_SDK=/Developer/SDKs/MacOSX10.6.sdk
+	X86_64_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.6.sdk"
+	X86_64_MACOSX_VERSION_MIN="10.6"
+
+	X86_SDK=/Developer/SDKs/MacOSX10.6.sdk
+	X86_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.6.sdk"
+	X86_MACOSX_VERSION_MIN="10.6"
+else
+	# Don't try to compile with 10.5 version min
+	X86_64_SDK=
+	X86_SDK=
+fi
+# end SDL 2.0.5
+
 if [ -z $X86_64_SDK ] || [ -z $X86_SDK ] || [ -z $PPC_SDK ]; then
 	echo "\
 ERROR: This script is for building a Universal Binary.  You cannot build
        for a different architecture unless you have the proper Mac OS X SDKs
        installed.  If you just want to to compile for your own system run
-       'make-macosx.sh' instead of this script."
+       'make-macosx.sh' instead of this script.
+
+       In order to build a binary with maximum compatibility you must
+       build on Mac OS X 10.6 and have the MacOSX10.5 and MacOSX10.6
+       SDKs installed from the Xcode install disk Packages folder."
+
 	exit 1
 fi
 
@@ -50,15 +71,6 @@ echo "Building X86_64 Client/Dedicated Server against \"$X86_64_SDK\""
 echo "Building X86 Client/Dedicated Server against \"$X86_SDK\""
 echo "Building PPC Client/Dedicated Server against \"$PPC_SDK\""
 echo
-
-if [ "$X86_64_SDK" != "/Developer/SDKs/MacOSX10.5.sdk" ] || \
-        [ "$X86_SDK" != "/Developer/SDKs/MacOSX10.5.sdk" ]; then
-	echo "\
-WARNING: in order to build a binary with maximum compatibility you must
-         build on Mac OS X 10.5 using Xcode 3.1 and have the MacOSX10.5
-         SDKs installed from the Xcode install disk Packages folder."
-sleep 3
-fi
 
 # For parallel make on multicore boxes...
 NCPU=`sysctl -n hw.ncpu`
@@ -89,4 +101,7 @@ echo
 
 # use the following shell script to build a universal application bundle
 export MACOSX_DEPLOYMENT_TARGET="10.5"
+export MACOSX_DEPLOYMENT_TARGET_PPC="$PPC_MACOSX_VERSION_MIN"
+export MACOSX_DEPLOYMENT_TARGET_X86="$X86_MACOSX_VERSION_MIN"
+export MACOSX_DEPLOYMENT_TARGET_X86_64="$X86_64_MACOSX_VERSION_MIN"
 "./make-macosx-app.sh" release

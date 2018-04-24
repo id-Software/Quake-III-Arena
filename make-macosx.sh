@@ -43,10 +43,18 @@ unset ARCH_SDK
 unset ARCH_CFLAGS
 unset ARCH_MACOSX_VERSION_MIN
 
-if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
-	ARCH_SDK=/Developer/SDKs/MacOSX10.5.sdk
-	ARCH_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.5.sdk"
+# SDL 2.0.1 (ppc) supports MacOSX 10.5
+# SDL 2.0.5+ (x86, x86_64) supports MacOSX 10.6 and later
+if [ $BUILDARCH = "ppc" ]; then
+	if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
+		ARCH_SDK=/Developer/SDKs/MacOSX10.5.sdk
+		ARCH_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.5.sdk"
+	fi
 	ARCH_MACOSX_VERSION_MIN="10.5"
+elif [ -d /Developer/SDKs/MacOSX10.6.sdk ]; then
+	ARCH_SDK=/Developer/SDKs/MacOSX10.6.sdk
+	ARCH_CFLAGS="-isysroot /Developer/SDKs/MacOSX10.6.sdk"
+	ARCH_MACOSX_VERSION_MIN="10.6"
 else
 	ARCH_MACOSX_VERSION_MIN="10.7"
 fi
@@ -71,4 +79,7 @@ NCPU=`sysctl -n hw.ncpu`
 
 # use the following shell script to build an application bundle
 export MACOSX_DEPLOYMENT_TARGET="${ARCH_MACOSX_VERSION_MIN}"
+export MACOSX_DEPLOYMENT_TARGET_PPC=
+export MACOSX_DEPLOYMENT_TARGET_X86=
+export MACOSX_DEPLOYMENT_TARGET_X86_64=
 "./make-macosx-app.sh" release ${BUILDARCH}
