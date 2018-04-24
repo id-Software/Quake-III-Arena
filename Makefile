@@ -480,6 +480,9 @@ ifeq ($(PLATFORM),darwin)
   BASE_CFLAGS += -fno-strict-aliasing -fno-common -pipe
 
   ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_LOCAL_HEADERS),1)
+      CLIENT_CFLAGS += -I/System/Library/Frameworks/OpenAL.framework/Headers
+    endif
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += -framework OpenAL
     endif
@@ -494,9 +497,9 @@ ifeq ($(PLATFORM),darwin)
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
 
-  # FIXME: It is not possible to build using system SDL2 framework
-  #  1. IF you try, this Makefile will still drop libSDL-2.0.0.dylib into the builddir
-  #  2. Debugger warns that you have 2- which one will be used is undefined
+  CLIENT_LIBS += -framework IOKit
+  RENDERER_LIBS += -framework OpenGL
+
   ifeq ($(USE_LOCAL_HEADERS),1)
     # libSDL2-2.0.0.dylib for PPC is SDL 2.0.1 + changes to compile
     ifeq ($(ARCH),ppc)
@@ -506,14 +509,18 @@ ifeq ($(PLATFORM),darwin)
     endif
   endif
 
-  # We copy sdlmain before ranlib'ing it so that subversion doesn't think
-  #  the file has been modified by each build.
-  LIBSDLMAIN=$(B)/libSDL2main.a
-  LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDL2main.a
-  CLIENT_LIBS += -framework IOKit \
-    $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
-  RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
-  CLIENT_EXTRA_FILES += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+    # We copy sdlmain before ranlib'ing it so that subversion doesn't think
+    #  the file has been modified by each build.
+    LIBSDLMAIN=$(B)/libSDL2main.a
+    LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDL2main.a
+    CLIENT_LIBS += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+    RENDERER_LIBS += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+    CLIENT_EXTRA_FILES += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+  else
+    BASE_CFLAGS += -I/Library/Frameworks/SDL2.framework/Headers
+    CLIENT_LIBS += -framework SDL2
+    RENDERER_LIBS += -framework SDL2
+  endif
 
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
