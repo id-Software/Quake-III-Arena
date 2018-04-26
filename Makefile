@@ -507,7 +507,6 @@ ifeq ($(PLATFORM),darwin)
     else
       BASE_CFLAGS += -I$(SDLHDIR)/include
     endif
-  endif
 
     # We copy sdlmain before ranlib'ing it so that subversion doesn't think
     #  the file has been modified by each build.
