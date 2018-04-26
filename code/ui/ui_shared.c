@@ -3547,8 +3547,14 @@ qboolean Item_Bind_HandleKey(itemDef_t *item, int key, qboolean down) {
 			case K_BACKSPACE:
 				id = BindingIDFromName(item->cvar);
 				if (id != -1) {
-					g_bindings[id].bind1 = -1;
-					g_bindings[id].bind2 = -1;
+					if( g_bindings[id].bind1 != -1 ) {
+						DC->setBinding( g_bindings[id].bind1, "" );
+						g_bindings[id].bind1 = -1;
+					}
+					if( g_bindings[id].bind2 != -1 ) {
+						DC->setBinding( g_bindings[id].bind2, "" );
+						g_bindings[id].bind2 = -1;
+					}
 				}
 				Controls_SetConfig(qtrue);
 				g_waitingForKey = qfalse;
