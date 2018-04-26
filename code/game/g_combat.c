@@ -1141,7 +1141,7 @@ qboolean CanDamage (gentity_t *targ, vec3_t origin) {
 
 	VectorCopy(midpoint, dest);
 	dest[0] += offsetmins[0];
-	dest[1] += offsetmins[2];
+	dest[1] += offsetmins[1];
 	dest[2] += offsetmins[2];
 	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
 
