@@ -22,9 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_shade_calc.c
 
 #include "tr_local.h"
-#if idppc_altivec && !defined(__APPLE__)
-#include <altivec.h>
-#endif
 
 
 #define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ ( (int64_t) ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
@@ -1082,77 +1079,6 @@ void RB_CalcSpecularAlpha( unsigned char *alphas ) {
 **
 ** The basic vertex lighting calc
 */
-#if idppc_altivec
-static void RB_CalcDiffuseColor_altivec( unsigned char *colors )
-{
-	int				i;
-	float			*v, *normal;
-	trRefEntity_t	*ent;
-	int				ambientLightInt;
-	vec3_t			lightDir;
-	int				numVertexes;
-	vector unsigned char vSel = VECCONST_UINT8(0x00, 0x00, 0x00, 0xff,
-                                               0x00, 0x00, 0x00, 0xff,
-                                               0x00, 0x00, 0x00, 0xff,
-                                               0x00, 0x00, 0x00, 0xff);
-	vector float ambientLightVec;
-	vector float directedLightVec;
-	vector float lightDirVec;
-	vector float normalVec0, normalVec1;
-	vector float incomingVec0, incomingVec1, incomingVec2;
-	vector float zero, jVec;
-	vector signed int jVecInt;
-	vector signed short jVecShort;
-	vector unsigned char jVecChar, normalPerm;
-	ent = backEnd.currentEntity;
-	ambientLightInt = ent->ambientLightInt;
-	// A lot of this could be simplified if we made sure
-	// entities light info was 16-byte aligned.
-	jVecChar = vec_lvsl(0, ent->ambientLight);
-	ambientLightVec = vec_ld(0, (vector float *)ent->ambientLight);
-	jVec = vec_ld(11, (vector float *)ent->ambientLight);
-	ambientLightVec = vec_perm(ambientLightVec,jVec,jVecChar);
-
-	jVecChar = vec_lvsl(0, ent->directedLight);
-	directedLightVec = vec_ld(0,(vector float *)ent->directedLight);
-	jVec = vec_ld(11,(vector float *)ent->directedLight);
-	directedLightVec = vec_perm(directedLightVec,jVec,jVecChar);	 
-
-	jVecChar = vec_lvsl(0, ent->lightDir);
-	lightDirVec = vec_ld(0,(vector float *)ent->lightDir);
-	jVec = vec_ld(11,(vector float *)ent->lightDir);
-	lightDirVec = vec_perm(lightDirVec,jVec,jVecChar);	 
-
-	zero = (vector float)vec_splat_s8(0);
-	VectorCopy( ent->lightDir, lightDir );
-
-	v = tess.xyz[0];
-	normal = tess.normal[0];
-
-	normalPerm = vec_lvsl(0,normal);
-	numVertexes = tess.numVertexes;
-	for (i = 0 ; i < numVertexes ; i++, v += 4, normal += 4) {
-		normalVec0 = vec_ld(0,(vector float *)normal);
-		normalVec1 = vec_ld(11,(vector float *)normal);
-		normalVec0 = vec_perm(normalVec0,normalVec1,normalPerm);
-		incomingVec0 = vec_madd(normalVec0, lightDirVec, zero);
-		incomingVec1 = vec_sld(incomingVec0,incomingVec0,4);
-		incomingVec2 = vec_add(incomingVec0,incomingVec1);
-		incomingVec1 = vec_sld(incomingVec1,incomingVec1,4);
-		incomingVec2 = vec_add(incomingVec2,incomingVec1);
-		incomingVec0 = vec_splat(incomingVec2,0);
-		incomingVec0 = vec_max(incomingVec0,zero);
-		normalPerm = vec_lvsl(12,normal);
-		jVec = vec_madd(incomingVec0, directedLightVec, ambientLightVec);
-		jVecInt = vec_cts(jVec,0);	// RGBx
-		jVecShort = vec_pack(jVecInt,jVecInt);		// RGBxRGBx
-		jVecChar = vec_packsu(jVecShort,jVecShort);	// RGBxRGBxRGBxRGBx
-		jVecChar = vec_sel(jVecChar,vSel,vSel);		// RGBARGBARGBARGBA replace alpha with 255
-		vec_ste((vector unsigned int)jVecChar,0,(unsigned int *)&colors[i*4]);	// store color
-	}
-}
-#endif
-
 static void RB_CalcDiffuseColor_scalar( unsigned char *colors )
 {
 	int				i, j;
@@ -1206,7 +1132,7 @@ void RB_CalcDiffuseColor( unsigned char *colors )
 {
 #if idppc_altivec
 	if (com_altivec->integer) {
-		// must be in a separate function or G3 systems will crash.
+		// must be in a separate translation unit or G3 systems will crash.
 		RB_CalcDiffuseColor_altivec( colors );
 		return;
 	}
