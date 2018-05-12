@@ -504,7 +504,7 @@ ifeq ($(PLATFORM),darwin)
 
   ifeq ($(USE_LOCAL_HEADERS),1)
     # libSDL2-2.0.0.dylib for PPC is SDL 2.0.1 + changes to compile
-    ifeq ($(ARCH),ppc)
+    ifneq ($(findstring $(ARCH),ppc ppc64),)
       BASE_CFLAGS += -I$(SDLHDIR)/include-macppc
     else
       BASE_CFLAGS += -I$(SDLHDIR)/include
