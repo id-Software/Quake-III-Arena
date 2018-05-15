@@ -1067,6 +1067,8 @@ void GLSL_InitGPUShaders(void)
 
 			if (r_cubeMapping->integer)
 				Q_strcat(extradefines, 1024, "#define USE_CUBEMAP\n");
+			else if (r_deluxeSpecular->value > 0.000001f)
+				Q_strcat(extradefines, 1024, va("#define r_deluxeSpecular %f\n", r_deluxeSpecular->value));
 
 			switch (r_glossType->integer)
 			{

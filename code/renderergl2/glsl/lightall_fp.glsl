@@ -309,6 +309,9 @@ void main()
 
 	NL = clamp(dot(N, L), 0.0, 1.0);
 	NE = clamp(dot(N, E), 0.0, 1.0);
+	H = normalize(L + E);
+	EH = clamp(dot(E, H), 0.0, 1.0);
+	NH = clamp(dot(N, H), 0.0, 1.0);
 
   #if defined(USE_SPECULARMAP)
 	vec4 specular = texture2D(u_SpecularMap, texCoords);
@@ -350,6 +353,14 @@ void main()
   #endif
 
 	reflectance  = CalcDiffuse(diffuse.rgb, NH, EH, roughness);
+
+  #if defined(r_deluxeSpecular)
+    #if defined(USE_LIGHT_VECTOR)
+	reflectance += CalcSpecular(specular.rgb, NH, EH, roughness) * r_deluxeSpecular;
+    #else
+	reflectance += CalcSpecular(specular.rgb, NH, EH, pow(roughness, r_deluxeSpecular));
+    #endif
+  #endif
 
 	gl_FragColor.rgb  = lightColor   * reflectance * (attenuation * NL);
 	gl_FragColor.rgb += ambientColor * diffuse.rgb;
