@@ -266,7 +266,7 @@ static qboolean GLimp_GetProcAddresses( void ) {
 		sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
 	}
 
-	if ( QGL_VERSION_ATLEAST( 1, 1 ) ) {
+	if ( QGL_VERSION_ATLEAST( 1, 2 ) ) {
 		QGL_1_1_PROCS;
 		QGL_DESKTOP_1_1_PROCS;
 	} else if ( qglesMajorVersion == 1 && qglesMinorVersion >= 1 ) {
