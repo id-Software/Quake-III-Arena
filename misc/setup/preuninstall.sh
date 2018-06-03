@@ -1,5 +1,5 @@
 #!/bin/sh
-rmdir --ignore-fail-on-non-empty demoq3 missionpack 2>&1 >/dev/null
+rmdir --ignore-fail-on-non-empty demoq3 missionpack >/dev/null 2>&1
 if test -e "$SETUP_INSTALLPATH"/ioquake3.desktop.in; then
   xdg_desktop_menu=`which xdg-desktop-menu 2>/dev/null`
   if test "x$xdg_desktop_menu" = x; then
