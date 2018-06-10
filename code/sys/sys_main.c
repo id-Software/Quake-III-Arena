@@ -112,6 +112,14 @@ Restart the input subsystem
 */
 void Sys_In_Restart_f( void )
 {
+#ifndef DEDICATED
+	if( !SDL_WasInit( SDL_INIT_VIDEO ) )
+	{
+		Com_Printf( "in_restart: Cannot restart input while video is shutdown\n" );
+		return;
+	}
+#endif
+
 	IN_Restart( );
 }
 
