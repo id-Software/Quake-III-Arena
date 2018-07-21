@@ -308,6 +308,13 @@ static void GLimp_ClearProcAddresses( void ) {
 	QGL_ES_1_1_PROCS;
 	QGL_3_0_PROCS;
 
+	qglActiveTextureARB = NULL;
+	qglClientActiveTextureARB = NULL;
+	qglMultiTexCoord2fARB = NULL;
+
+	qglLockArraysEXT = NULL;
+	qglUnlockArraysEXT = NULL;
+
 #undef GLE
 }
 
