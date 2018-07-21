@@ -261,7 +261,6 @@ void RB_ShadowFinish( void ) {
 	qglEnable( GL_STENCIL_TEST );
 	qglStencilFunc( GL_NOTEQUAL, 0, 255 );
 
-	qglDisable (GL_CLIP_PLANE0);
 	GL_Cull( CT_TWO_SIDED );
 
 	GL_BindToTMU( tr.whiteImage, TB_COLORMAP );

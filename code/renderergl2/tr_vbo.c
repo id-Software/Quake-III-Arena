@@ -751,7 +751,7 @@ void VaoCache_Commit(void)
 	if (indexSet < vc.surfaceIndexSets + vc.numSurfaces)
 	{
 		tess.firstIndex = indexSet->bufferOffset / sizeof(glIndex_t);
-		//ri.Printf(PRINT_ALL, "firstIndex %d numIndexes %d as %d\n", tess.firstIndex, tess.numIndexes, batchLength - vc.batchLengths);
+		//ri.Printf(PRINT_ALL, "firstIndex %d numIndexes %d as %d\n", tess.firstIndex, tess.numIndexes, (int)(batchLength - vc.batchLengths));
 		//ri.Printf(PRINT_ALL, "vc.numSurfaces %d vc.numBatches %d\n", vc.numSurfaces, vc.numBatches);
 	}
 	// If not, rebuffer the batch
@@ -792,7 +792,7 @@ void VaoCache_Commit(void)
 			vcq.indexCommitSize += indexesSize;
 		}
 
-		//ri.Printf(PRINT_ALL, "committing %d to %d, %d to %d as %d\n", vcq.vertexCommitSize, vc.vertexOffset, vcq.indexCommitSize, vc.indexOffset, batchLength - vc.batchLengths);
+		//ri.Printf(PRINT_ALL, "committing %d to %d, %d to %d as %d\n", vcq.vertexCommitSize, vc.vertexOffset, vcq.indexCommitSize, vc.indexOffset, (int)(batchLength - vc.batchLengths));
 
 		if (vcq.vertexCommitSize)
 		{
@@ -812,9 +812,6 @@ void VaoCache_Commit(void)
 
 void VaoCache_Init(void)
 {
-	srfVert_t vert;
-	int dataSize;
-
 	vc.vao = R_CreateVao("VaoCache", NULL, VAOCACHE_VERTEX_BUFFER_SIZE, NULL, VAOCACHE_INDEX_BUFFER_SIZE, VAO_USAGE_DYNAMIC);
 
 	vc.vao->attribs[ATTR_INDEX_POSITION].enabled       = 1;
@@ -849,21 +846,21 @@ void VaoCache_Init(void)
 	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].normalized = GL_TRUE;
 	vc.vao->attribs[ATTR_INDEX_COLOR].normalized          = GL_TRUE;
 
-	vc.vao->attribs[ATTR_INDEX_POSITION].offset       = 0;        dataSize  = sizeof(vert.xyz);
-	vc.vao->attribs[ATTR_INDEX_TEXCOORD].offset       = dataSize; dataSize += sizeof(vert.st);
-	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].offset     = dataSize; dataSize += sizeof(vert.lightmap);
-	vc.vao->attribs[ATTR_INDEX_NORMAL].offset         = dataSize; dataSize += sizeof(vert.normal);
-	vc.vao->attribs[ATTR_INDEX_TANGENT].offset        = dataSize; dataSize += sizeof(vert.tangent);
-	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = dataSize; dataSize += sizeof(vert.lightdir);
-	vc.vao->attribs[ATTR_INDEX_COLOR].offset          = dataSize; dataSize += sizeof(vert.color);
+	vc.vao->attribs[ATTR_INDEX_POSITION].offset       = offsetof(srfVert_t, xyz);
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].offset       = offsetof(srfVert_t, st);
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].offset     = offsetof(srfVert_t, lightmap);
+	vc.vao->attribs[ATTR_INDEX_NORMAL].offset         = offsetof(srfVert_t, normal);
+	vc.vao->attribs[ATTR_INDEX_TANGENT].offset        = offsetof(srfVert_t, tangent);
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].offset = offsetof(srfVert_t, lightdir);
+	vc.vao->attribs[ATTR_INDEX_COLOR].offset          = offsetof(srfVert_t, color);
 
-	vc.vao->attribs[ATTR_INDEX_POSITION].stride       = dataSize;
-	vc.vao->attribs[ATTR_INDEX_TEXCOORD].stride       = dataSize;
-	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].stride     = dataSize;
-	vc.vao->attribs[ATTR_INDEX_NORMAL].stride         = dataSize;
-	vc.vao->attribs[ATTR_INDEX_TANGENT].stride        = dataSize;
-	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].stride = dataSize;
-	vc.vao->attribs[ATTR_INDEX_COLOR].stride          = dataSize;
+	vc.vao->attribs[ATTR_INDEX_POSITION].stride       = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_TEXCOORD].stride       = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_LIGHTCOORD].stride     = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_NORMAL].stride         = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_TANGENT].stride        = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_LIGHTDIRECTION].stride = sizeof(srfVert_t);
+	vc.vao->attribs[ATTR_INDEX_COLOR].stride          = sizeof(srfVert_t);
 
 	Vao_SetVertexPointers(vc.vao);
 
@@ -888,7 +885,7 @@ void VaoCache_CheckAdd(qboolean *endSurface, qboolean *recycleVertexBuffer, qboo
 
 	if (vc.vao->vertexesSize < vc.vertexOffset + vcq.vertexCommitSize + vertexesSize)
 	{
-		//ri.Printf(PRINT_ALL, "out of space in vertex cache: %d < %d + %d + %d\n", vc.vao->vertexesSize, vc.vertexOffset, vc.vertexCommitSize, vertexesSize);
+		//ri.Printf(PRINT_ALL, "out of space in vertex cache: %d < %d + %d + %d\n", vc.vao->vertexesSize, vc.vertexOffset, vcq.vertexCommitSize, vertexesSize);
 		*recycleVertexBuffer = qtrue;
 		*recycleIndexBuffer = qtrue;
 		*endSurface = qtrue;
@@ -966,6 +963,6 @@ void VaoCache_AddSurface(srfVert_t *verts, int numVerts, glIndex_t *indexes, int
 	queueEntry->numIndexes = numIndexes;
 	vcq.numSurfaces++;
 
-	vcq.vertexCommitSize += sizeof(srfVert_t) * numVerts;;
+	vcq.vertexCommitSize += sizeof(srfVert_t) * numVerts;
 	vcq.indexCommitSize += sizeof(glIndex_t) * numIndexes;
 }

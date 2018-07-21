@@ -61,7 +61,7 @@ float ambientOcclusion(sampler2D depthMap, const vec2 tex, const float zFarDivZN
 	poissonDisc[7] = vec2(-0.5579782, 0.7491854);
 	poissonDisc[8] = vec2(0.7320465, 0.6317794);
 
-	float result = 0;
+	float result = 0.0;
 
 	float sampleZ = getLinearDepth(depthMap, tex, zFarDivZNear);
 	float scaleZ = zFarDivZNear * sampleZ;

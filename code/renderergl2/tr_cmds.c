@@ -203,11 +203,11 @@ void	R_AddCapShadowmapCmd( int map, int cubeSide ) {
 
 /*
 =============
-R_PostProcessingCmd
+R_AddPostProcessCmd
 
 =============
 */
-void	R_AddPostProcessCmd( ) {
+void	R_AddPostProcessCmd( void ) {
 	postProcessCommand_t	*cmd;
 
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );

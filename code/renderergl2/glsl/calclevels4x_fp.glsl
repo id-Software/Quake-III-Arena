@@ -56,5 +56,5 @@ void main()
 	current.y *= 0.0625;
 #endif
 
-	gl_FragColor = vec4(current, 1.0f);
+	gl_FragColor = vec4(current, 1.0);
 }

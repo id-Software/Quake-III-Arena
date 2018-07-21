@@ -526,10 +526,6 @@ void RB_RenderFlares (void) {
 		return;		// none visible
 	}
 
-	if ( backEnd.viewParms.isPortal ) {
-		qglDisable (GL_CLIP_PLANE0);
-	}
-
 	Mat4Copy(glState.projection, oldprojection);
 	Mat4Copy(glState.modelview, oldmodelview);
 	Mat4Identity(matrix);
