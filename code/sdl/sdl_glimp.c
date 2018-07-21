@@ -65,7 +65,9 @@ void (APIENTRYP qglUnlockArraysEXT) (void);
 
 #define GLE(ret, name, ...) name##proc * qgl##name;
 QGL_1_1_PROCS;
+QGL_1_1_FIXED_FUNCTION_PROCS;
 QGL_DESKTOP_1_1_PROCS;
+QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 QGL_ES_1_1_PROCS;
 QGL_3_0_PROCS;
 #undef GLE
@@ -227,7 +229,7 @@ GLimp_GetProcAddresses
 Get addresses for OpenGL functions.
 ===============
 */
-static qboolean GLimp_GetProcAddresses( void ) {
+static qboolean GLimp_GetProcAddresses( qboolean coreContext ) {
 	qboolean success = qtrue;
 	const char *version;
 
@@ -266,12 +268,18 @@ static qboolean GLimp_GetProcAddresses( void ) {
 		sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
 	}
 
-	if ( QGL_VERSION_ATLEAST( 1, 2 ) ) {
+	if ( coreContext && QGL_VERSION_ATLEAST( 3, 2 ) ) {
 		QGL_1_1_PROCS;
 		QGL_DESKTOP_1_1_PROCS;
+	} else if ( QGL_VERSION_ATLEAST( 1, 2 ) ) {
+		QGL_1_1_PROCS;
+		QGL_1_1_FIXED_FUNCTION_PROCS;
+		QGL_DESKTOP_1_1_PROCS;
+		QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 	} else if ( qglesMajorVersion == 1 && qglesMinorVersion >= 1 ) {
 		// OpenGL ES 1.1 (2.0 is not backward compatible)
 		QGL_1_1_PROCS;
+		QGL_1_1_FIXED_FUNCTION_PROCS;
 		QGL_ES_1_1_PROCS;
 		// error so this doesn't segfault due to NULL desktop GL functions being used
 		Com_Error( ERR_FATAL, "Unsupported OpenGL Version: %s\n", version );
@@ -304,7 +312,9 @@ static void GLimp_ClearProcAddresses( void ) {
 	qglesMinorVersion = 0;
 
 	QGL_1_1_PROCS;
+	QGL_1_1_FIXED_FUNCTION_PROCS;
 	QGL_DESKTOP_1_1_PROCS;
+	QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 	QGL_ES_1_1_PROCS;
 	QGL_3_0_PROCS;
 
@@ -613,7 +623,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 
 				ri.Printf(PRINT_ALL, "SDL_GL_CreateContext succeeded.\n");
 
-				if ( GLimp_GetProcAddresses() )
+				if ( GLimp_GetProcAddresses( qtrue ) )
 				{
 					renderer = (const char *)qglGetString(GL_RENDERER);
 				}
@@ -653,7 +663,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 				continue;
 			}
 
-			if ( !GLimp_GetProcAddresses() )
+			if ( !GLimp_GetProcAddresses( qfalse ) )
 			{
 				ri.Printf( PRINT_ALL, "GLimp_GetProcAddresses() failed\n" );
 				GLimp_ClearProcAddresses();
