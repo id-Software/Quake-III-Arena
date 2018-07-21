@@ -30,26 +30,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tr_local.h"
 #include "tr_dsa.h"
 
-#define GLE(ret, name, ...) name##proc * qgl##name;
-QGL_1_3_PROCS;
-QGL_1_5_PROCS;
-QGL_2_0_PROCS;
-QGL_ARB_framebuffer_object_PROCS;
-QGL_ARB_vertex_array_object_PROCS;
-QGL_EXT_direct_state_access_PROCS;
-#undef GLE
-
 void GLimp_InitExtraExtensions()
 {
 	char *extension;
 	const char* result[3] = { "...ignoring %s\n", "...using %s\n", "...%s not found\n" };
 	qboolean q_gl_version_at_least_3_0;
 	qboolean q_gl_version_at_least_3_2;
-
-	// Check OpenGL version
-	if ( !QGL_VERSION_ATLEAST( 2, 0 ) )
-		ri.Error(ERR_FATAL, "OpenGL 2.0 required!");
-	ri.Printf(PRINT_ALL, "...using OpenGL %s\n", glConfig.version_string);
 
 	q_gl_version_at_least_3_0 = QGL_VERSION_ATLEAST( 3, 0 );
 	q_gl_version_at_least_3_2 = QGL_VERSION_ATLEAST( 3, 2 );
@@ -67,15 +53,9 @@ void GLimp_InitExtraExtensions()
 	// GL function loader, based on https://gist.github.com/rygorous/16796a0c876cf8a5f542caddb55bce8a
 #define GLE(ret, name, ...) qgl##name = (name##proc *) SDL_GL_GetProcAddress("gl" #name);
 
-	// OpenGL 1.3, was GL_ARB_texture_compression
-	QGL_1_3_PROCS;
-
-	// OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
-	QGL_1_5_PROCS;
+	// OpenGL 1.5 - GL_ARB_occlusion_query
 	glRefConfig.occlusionQuery = qtrue;
-
-	// OpenGL 2.0, was GL_ARB_shading_language_100, GL_ARB_vertex_program, GL_ARB_shader_objects, and GL_ARB_vertex_shader
-	QGL_2_0_PROCS;
+	QGL_ARB_occlusion_query_PROCS;
 
 	// OpenGL 3.0 - GL_ARB_framebuffer_object
 	extension = "GL_ARB_framebuffer_object";

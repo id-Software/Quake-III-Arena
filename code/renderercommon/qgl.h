@@ -123,11 +123,14 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, Vertex3f, GLfloat x, GLfloat y, GLfloat z) \
 	GLE(void, Vertex3fv, const GLfloat *v) \
 
-// OpenGL ES 1.1 but not desktop OpenGL 1.x
+// OpenGL ES 1.1 and OpenGL ES 2.0 but not desktop OpenGL 1.x
 #define QGL_ES_1_1_PROCS \
 	GLE(void, ClearDepthf, GLclampf depth) \
-	GLE(void, ClipPlanef, GLenum plane, const GLfloat *equation) \
 	GLE(void, DepthRangef, GLclampf near_val, GLclampf far_val) \
+
+// OpenGL ES 1.1 but not OpenGL ES 2.0 or desktop OpenGL 1.x
+#define QGL_ES_1_1_FIXED_FUNCTION_PROCS \
+	GLE(void, ClipPlanef, GLenum plane, const GLfloat *equation) \
 	GLE(void, Frustumf, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near_val, GLfloat far_val) \
 	GLE(void, Orthof, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near_val, GLfloat far_val) \
 
@@ -137,14 +140,17 @@ extern void (APIENTRYP qglUnlockArraysEXT) (void);
 	GLE(void, CompressedTexImage2D, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data) \
 	GLE(void, CompressedTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data) \
 
-// OpenGL 1.5, was GL_ARB_vertex_buffer_object and GL_ARB_occlusion_query
-#define QGL_1_5_PROCS \
+// GL_ARB_occlusion_query, built-in to OpenGL 1.5 but not OpenGL ES 2.0
+#define QGL_ARB_occlusion_query_PROCS \
 	GLE(void, GenQueries, GLsizei n, GLuint *ids) \
 	GLE(void, DeleteQueries, GLsizei n, const GLuint *ids) \
 	GLE(void, BeginQuery, GLenum target, GLuint id) \
 	GLE(void, EndQuery, GLenum target) \
 	GLE(void, GetQueryObjectiv, GLuint id, GLenum pname, GLint *params) \
 	GLE(void, GetQueryObjectuiv, GLuint id, GLenum pname, GLuint *params) \
+
+// OpenGL 1.5, was GL_ARB_vertex_buffer_object
+#define QGL_1_5_PROCS \
 	GLE(void, BindBuffer, GLenum target, GLuint buffer) \
 	GLE(void, DeleteBuffers, GLsizei n, const GLuint *buffers) \
 	GLE(void, GenBuffers, GLsizei n, GLuint *buffers) \
@@ -313,10 +319,12 @@ QGL_1_1_FIXED_FUNCTION_PROCS;
 QGL_DESKTOP_1_1_PROCS;
 QGL_DESKTOP_1_1_FIXED_FUNCTION_PROCS;
 QGL_ES_1_1_PROCS;
+QGL_ES_1_1_FIXED_FUNCTION_PROCS;
 QGL_1_3_PROCS;
 QGL_1_5_PROCS;
 QGL_2_0_PROCS;
 QGL_3_0_PROCS;
+QGL_ARB_occlusion_query_PROCS;
 QGL_ARB_framebuffer_object_PROCS;
 QGL_ARB_vertex_array_object_PROCS;
 QGL_EXT_direct_state_access_PROCS;

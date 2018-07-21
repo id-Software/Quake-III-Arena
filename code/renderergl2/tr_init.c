@@ -258,7 +258,7 @@ static void InitOpenGL( void )
 	{
 		GLint		temp;
 		
-		GLimp_Init( qtrue );
+		GLimp_Init( qfalse );
 		GLimp_InitExtraExtensions();
 
 		// OpenGL driver constants
