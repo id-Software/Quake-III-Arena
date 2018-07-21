@@ -687,8 +687,13 @@ vcq;
 // srfVert_t is 60 bytes
 // assuming each vert is referenced 4 times, need 16 bytes (4 glIndex_t) per vert
 // -> need about 4/15ths the space for indexes as vertexes
+#if GL_INDEX_TYPE == GL_UNSIGNED_SHORT
+#define VAOCACHE_VERTEX_BUFFER_SIZE (sizeof(srfVert_t) * USHRT_MAX)
+#define VAOCACHE_INDEX_BUFFER_SIZE (sizeof(glIndex_t) * USHRT_MAX * 4)
+#else // GL_UNSIGNED_INT
 #define VAOCACHE_VERTEX_BUFFER_SIZE (16 * 1024 * 1024)
 #define VAOCACHE_INDEX_BUFFER_SIZE (5 * 1024 * 1024)
+#endif
 
 typedef struct buffered_s
 {

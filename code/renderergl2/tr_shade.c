@@ -38,7 +38,7 @@ R_DrawElements
 ==================
 */
 
-void R_DrawElements( int numIndexes, glIndex_t firstIndex)
+void R_DrawElements( int numIndexes, int firstIndex )
 {
 	qglDrawElements(GL_TRIANGLES, numIndexes, GL_INDEX_TYPE, BUFFER_OFFSET(firstIndex * sizeof(glIndex_t)));
 }
