@@ -802,7 +802,7 @@ static qboolean GLimp_StartDriverAndSetMode(int mode, qboolean fullscreen, qbool
 GLimp_InitExtensions
 ===============
 */
-static void GLimp_InitExtensions( void )
+static void GLimp_InitExtensions( qboolean fixedFunction )
 {
 	if ( !r_allowExtensions->integer )
 	{
@@ -854,88 +854,91 @@ static void GLimp_InitExtensions( void )
 		}
 	}
 
-
-	// GL_EXT_texture_env_add
-	glConfig.textureEnvAddAvailable = qfalse;
-	if ( SDL_GL_ExtensionSupported( "GL_EXT_texture_env_add" ) )
+	// OpenGL 1 fixed function pipeline
+	if ( fixedFunction )
 	{
-		if ( r_ext_texture_env_add->integer )
+		// GL_EXT_texture_env_add
+		glConfig.textureEnvAddAvailable = qfalse;
+		if ( SDL_GL_ExtensionSupported( "GL_EXT_texture_env_add" ) )
 		{
-			glConfig.textureEnvAddAvailable = qtrue;
-			ri.Printf( PRINT_ALL, "...using GL_EXT_texture_env_add\n" );
-		}
-		else
-		{
-			glConfig.textureEnvAddAvailable = qfalse;
-			ri.Printf( PRINT_ALL, "...ignoring GL_EXT_texture_env_add\n" );
-		}
-	}
-	else
-	{
-		ri.Printf( PRINT_ALL, "...GL_EXT_texture_env_add not found\n" );
-	}
-
-	// GL_ARB_multitexture
-	qglMultiTexCoord2fARB = NULL;
-	qglActiveTextureARB = NULL;
-	qglClientActiveTextureARB = NULL;
-	if ( SDL_GL_ExtensionSupported( "GL_ARB_multitexture" ) )
-	{
-		if ( r_ext_multitexture->value )
-		{
-			qglMultiTexCoord2fARB = SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
-			qglActiveTextureARB = SDL_GL_GetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
-
-			if ( qglActiveTextureARB )
+			if ( r_ext_texture_env_add->integer )
 			{
-				GLint glint = 0;
-				qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glint );
-				glConfig.numTextureUnits = (int) glint;
-				if ( glConfig.numTextureUnits > 1 )
-				{
-					ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture\n" );
-				}
-				else
-				{
-					qglMultiTexCoord2fARB = NULL;
-					qglActiveTextureARB = NULL;
-					qglClientActiveTextureARB = NULL;
-					ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
-				}
+				glConfig.textureEnvAddAvailable = qtrue;
+				ri.Printf( PRINT_ALL, "...using GL_EXT_texture_env_add\n" );
+			}
+			else
+			{
+				glConfig.textureEnvAddAvailable = qfalse;
+				ri.Printf( PRINT_ALL, "...ignoring GL_EXT_texture_env_add\n" );
 			}
 		}
 		else
 		{
-			ri.Printf( PRINT_ALL, "...ignoring GL_ARB_multitexture\n" );
+			ri.Printf( PRINT_ALL, "...GL_EXT_texture_env_add not found\n" );
 		}
-	}
-	else
-	{
-		ri.Printf( PRINT_ALL, "...GL_ARB_multitexture not found\n" );
-	}
 
-	// GL_EXT_compiled_vertex_array
-	if ( SDL_GL_ExtensionSupported( "GL_EXT_compiled_vertex_array" ) )
-	{
-		if ( r_ext_compiled_vertex_array->value )
+		// GL_ARB_multitexture
+		qglMultiTexCoord2fARB = NULL;
+		qglActiveTextureARB = NULL;
+		qglClientActiveTextureARB = NULL;
+		if ( SDL_GL_ExtensionSupported( "GL_ARB_multitexture" ) )
 		{
-			ri.Printf( PRINT_ALL, "...using GL_EXT_compiled_vertex_array\n" );
-			qglLockArraysEXT = ( void ( APIENTRY * )( GLint, GLint ) ) SDL_GL_GetProcAddress( "glLockArraysEXT" );
-			qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) SDL_GL_GetProcAddress( "glUnlockArraysEXT" );
-			if (!qglLockArraysEXT || !qglUnlockArraysEXT)
+			if ( r_ext_multitexture->value )
 			{
-				ri.Error (ERR_FATAL, "bad getprocaddress");
+				qglMultiTexCoord2fARB = SDL_GL_GetProcAddress( "glMultiTexCoord2fARB" );
+				qglActiveTextureARB = SDL_GL_GetProcAddress( "glActiveTextureARB" );
+				qglClientActiveTextureARB = SDL_GL_GetProcAddress( "glClientActiveTextureARB" );
+
+				if ( qglActiveTextureARB )
+				{
+					GLint glint = 0;
+					qglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glint );
+					glConfig.numTextureUnits = (int) glint;
+					if ( glConfig.numTextureUnits > 1 )
+					{
+						ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture\n" );
+					}
+					else
+					{
+						qglMultiTexCoord2fARB = NULL;
+						qglActiveTextureARB = NULL;
+						qglClientActiveTextureARB = NULL;
+						ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
+					}
+				}
+			}
+			else
+			{
+				ri.Printf( PRINT_ALL, "...ignoring GL_ARB_multitexture\n" );
 			}
 		}
 		else
 		{
-			ri.Printf( PRINT_ALL, "...ignoring GL_EXT_compiled_vertex_array\n" );
+			ri.Printf( PRINT_ALL, "...GL_ARB_multitexture not found\n" );
 		}
-	}
-	else
-	{
-		ri.Printf( PRINT_ALL, "...GL_EXT_compiled_vertex_array not found\n" );
+
+		// GL_EXT_compiled_vertex_array
+		if ( SDL_GL_ExtensionSupported( "GL_EXT_compiled_vertex_array" ) )
+		{
+			if ( r_ext_compiled_vertex_array->value )
+			{
+				ri.Printf( PRINT_ALL, "...using GL_EXT_compiled_vertex_array\n" );
+				qglLockArraysEXT = ( void ( APIENTRY * )( GLint, GLint ) ) SDL_GL_GetProcAddress( "glLockArraysEXT" );
+				qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) SDL_GL_GetProcAddress( "glUnlockArraysEXT" );
+				if (!qglLockArraysEXT || !qglUnlockArraysEXT)
+				{
+					ri.Error (ERR_FATAL, "bad getprocaddress");
+				}
+			}
+			else
+			{
+				ri.Printf( PRINT_ALL, "...ignoring GL_EXT_compiled_vertex_array\n" );
+			}
+		}
+		else
+		{
+			ri.Printf( PRINT_ALL, "...GL_EXT_compiled_vertex_array not found\n" );
+		}
 	}
 
 	textureFilterAnisotropic = qfalse;
@@ -1064,7 +1067,7 @@ success:
 	}
 
 	// initialize extensions
-	GLimp_InitExtensions( );
+	GLimp_InitExtensions( fixedFunction );
 
 	ri.Cvar_Get( "r_availableModes", "", CVAR_ROM );
 
