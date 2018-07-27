@@ -987,7 +987,7 @@ static void ComputePoseMats( iqmData_t *data, int frame, int oldframe,
 				
 			} else {
 				InterpolateMatrix( mat1 + 12*i, mat2 + 12*i,
-						   backlerp, mat );
+						   backlerp, mat + 12*i );
 			}
 		}
 	}
