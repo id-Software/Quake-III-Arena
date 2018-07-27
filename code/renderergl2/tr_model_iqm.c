@@ -143,7 +143,7 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	iqmBounds_t		*bounds;
 	unsigned short		*framedata;
 	char			*str;
-	int			i, j;
+	int			i, j, k;
 	float			jointInvMats[IQM_MAX_JOINTS * 12] = {0.0f};
 	float			*mat, *matInv;
 	size_t			size, joint_names;
@@ -152,6 +152,12 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	srfIQModel_t		*surface;
 	char			meshName[MAX_QPATH];
 	int				vertexArrayFormat[IQM_COLOR+1];
+	int				allocateInfluences;
+	byte *blendIndexes;
+	union {
+		byte *b;
+		float *f;
+	} blendWeights;
 
 	if( filesize < sizeof(iqmHeader_t) ) {
 		return qfalse;
@@ -210,6 +216,11 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	for ( i = 0; i < ARRAY_LEN( vertexArrayFormat ); i++ ) {
 		vertexArrayFormat[i] = -1;
 	}
+
+	blendIndexes = NULL;
+	blendWeights.b = NULL;
+
+	allocateInfluences = 0;
 
 	if ( header->num_meshes )
 	{
@@ -288,12 +299,18 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 					vertexarray->size != 4 ) {
 					return qfalse;
 				}
+				blendIndexes = (byte*)header + vertexarray->offset;
 				break;
 			case IQM_BLENDWEIGHTS:
 				if( (vertexarray->format != IQM_FLOAT &&
 					 vertexarray->format != IQM_UBYTE) ||
 				    vertexarray->size != 4 ) {
 					return qfalse;
+				}
+				if( vertexarray->format == IQM_FLOAT ) {
+					blendWeights.f = (float*)( (byte*)header + vertexarray->offset );
+				} else {
+					blendWeights.b = (byte*)header + vertexarray->offset;
 				}
 				break;
 			case IQM_COLOR:
@@ -327,9 +344,6 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			ri.Printf( PRINT_WARNING, "R_LoadIQM: %s is missing IQM_TANGENT array.\n", mod_name );
 			return qfalse;
 		}
-
-		// FIXME: don't require colors array when drawing
-		vertexArrayFormat[IQM_COLOR] = IQM_UBYTE;
 
 		// check and swap triangles
 		if( IQM_CheckRange( header, header->ofs_triangles,
@@ -390,6 +404,38 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			    mesh->name >= header->num_text ||
 			    mesh->material >= header->num_text ) {
 				return qfalse;
+			}
+
+			// find number of unique blend influences per mesh
+			if( header->num_joints ) {
+				for( j = 0; j < mesh->num_vertexes; j++ ) {
+					int vtx = mesh->first_vertex + j;
+
+					for( k = 0; k < j; k++ ) {
+						int influence = mesh->first_vertex + k;
+
+						if( *(int*)&blendIndexes[4*influence] != *(int*)&blendIndexes[4*vtx] ) {
+							continue;
+						}
+
+						if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
+							if ( blendWeights.f[4*influence+0] == blendWeights.f[4*vtx+0] &&
+							     blendWeights.f[4*influence+1] == blendWeights.f[4*vtx+1] &&
+							     blendWeights.f[4*influence+2] == blendWeights.f[4*vtx+2] &&
+							     blendWeights.f[4*influence+3] == blendWeights.f[4*vtx+3] ) {
+								break;
+							}
+						} else {
+							if ( *(int*)&blendWeights.b[4*influence] == *(int*)&blendWeights.b[4*vtx] ) {
+								break;
+							}
+						}
+					}
+
+					if ( k == j ) {
+						allocateInfluences++;
+					}
+				}
 			}
 		}
 	}
@@ -503,18 +549,19 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			size += header->num_vertexes * 4 * sizeof(float);	// tangents
 		}
 
-		if ( vertexArrayFormat[IQM_BLENDINDEXES] != -1 ) {
-			size += header->num_vertexes * 4 * sizeof(byte);	// blendIndexes
-		}
-
-		if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_UBYTE ) {
-			size += header->num_vertexes * 4 * sizeof(byte);	// blendWeights
-		} else if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
-			size += header->num_vertexes * 4 * sizeof(float);	// blendWeights
-		}
-
 		if ( vertexArrayFormat[IQM_COLOR] != -1 ) {
 			size += header->num_vertexes * 4 * sizeof(byte);	// colors
+		}
+
+		if ( allocateInfluences ) {
+			size += header->num_vertexes * sizeof(int);			// influences
+			size += allocateInfluences * 4 * sizeof(byte);		// influenceBlendIndexes
+
+			if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_UBYTE ) {
+				size += allocateInfluences * 4 * sizeof(byte);	// influenceBlendWeights
+			} else if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
+				size += allocateInfluences * 4 * sizeof(float);	// influenceBlendWeights
+			}
 		}
 	}
 	if( header->num_joints ) {
@@ -564,22 +611,25 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 			dataPtr += header->num_vertexes * 4 * sizeof(float);	// tangents
 		}
 
-		if ( vertexArrayFormat[IQM_BLENDINDEXES] != -1 ) {
-			iqmData->blendIndexes = (byte*)dataPtr;
-			dataPtr += header->num_vertexes * 4 * sizeof(byte);		// blendIndexes
-		}
-
-		if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_UBYTE ) {
-			iqmData->blendWeights.b = (byte*)dataPtr;
-			dataPtr += header->num_vertexes * 4 * sizeof(byte);		// blendWeights
-		} else if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
-			iqmData->blendWeights.f = (float*)dataPtr;
-			dataPtr += header->num_vertexes * 4 * sizeof(float);	// blendWeights
-		}
-
 		if ( vertexArrayFormat[IQM_COLOR] != -1 ) {
 			iqmData->colors = (byte*)dataPtr;
 			dataPtr += header->num_vertexes * 4 * sizeof(byte);		// colors
+		}
+
+		if ( allocateInfluences ) {
+			iqmData->influences = (int*)dataPtr;
+			dataPtr += header->num_vertexes * sizeof(int);			// influences
+
+			iqmData->influenceBlendIndexes = (byte*)dataPtr;
+			dataPtr += allocateInfluences * 4 * sizeof(byte);		// influenceBlendIndexes
+
+			if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_UBYTE ) {
+				iqmData->influenceBlendWeights.b = (byte*)dataPtr;
+				dataPtr += allocateInfluences * 4 * sizeof(byte);	// influenceBlendWeights
+			} else if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
+				iqmData->influenceBlendWeights.f = (float*)dataPtr;
+				dataPtr += allocateInfluences * 4 * sizeof(float);	// influenceBlendWeights
+			}
 		}
 	}
 	if( header->num_joints ) {
@@ -665,33 +715,75 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 					    n * sizeof(float) );
 				break;
 			case IQM_BLENDINDEXES:
-				if( vertexarray->format == IQM_INT ) {
-					int *data = (int*)((byte*)header + vertexarray->offset);
-					for ( j = 0; j < n; j++ ) {
-						iqmData->blendIndexes[j] = (byte)data[j];
-					}
-				} else {
-					Com_Memcpy( iqmData->blendIndexes,
-							(byte *)header + vertexarray->offset,
-							n * sizeof(byte) );
-				}
-				break;
 			case IQM_BLENDWEIGHTS:
-				if( vertexarray->format == IQM_FLOAT ) {
-					Com_Memcpy( iqmData->blendWeights.f,
-							(byte *)header + vertexarray->offset,
-							n * sizeof(float) );
-				} else {
-					Com_Memcpy( iqmData->blendWeights.b,
-							(byte *)header + vertexarray->offset,
-							n * sizeof(byte) );
-				}
 				break;
 			case IQM_COLOR:
 				Com_Memcpy( iqmData->colors,
 					    (byte *)header + vertexarray->offset,
 					    n * sizeof(byte) );
 				break;
+			}
+		}
+
+		// find unique blend influences per mesh
+		if( allocateInfluences ) {
+			int vtx, influence, totalInfluences = 0;
+
+			surface = iqmData->surfaces;
+			for( i = 0; i < header->num_meshes; i++, surface++ ) {
+				surface->first_influence = totalInfluences;
+				surface->num_influences = 0;
+
+				for( j = 0; j < surface->num_vertexes; j++ ) {
+					vtx = surface->first_vertex + j;
+
+					for( k = 0; k < surface->num_influences; k++ ) {
+						influence = surface->first_influence + k;
+
+						if( *(int*)&iqmData->influenceBlendIndexes[4*influence] != *(int*)&blendIndexes[4*vtx] ) {
+							continue;
+						}
+
+						if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
+							if ( iqmData->influenceBlendWeights.f[4*influence+0] == blendWeights.f[4*vtx+0] &&
+							     iqmData->influenceBlendWeights.f[4*influence+1] == blendWeights.f[4*vtx+1] &&
+							     iqmData->influenceBlendWeights.f[4*influence+2] == blendWeights.f[4*vtx+2] &&
+							     iqmData->influenceBlendWeights.f[4*influence+3] == blendWeights.f[4*vtx+3] ) {
+								break;
+							}
+						} else {
+							if ( *(int*)&iqmData->influenceBlendWeights.b[4*influence] == *(int*)&blendWeights.b[4*vtx] ) {
+								break;
+							}
+						}
+					}
+
+					iqmData->influences[vtx] = surface->first_influence + k;
+
+					if( k == surface->num_influences ) {
+						influence = surface->first_influence + k;
+
+						iqmData->influenceBlendIndexes[4*influence+0] = blendIndexes[4*vtx+0];
+						iqmData->influenceBlendIndexes[4*influence+1] = blendIndexes[4*vtx+1];
+						iqmData->influenceBlendIndexes[4*influence+2] = blendIndexes[4*vtx+2];
+						iqmData->influenceBlendIndexes[4*influence+3] = blendIndexes[4*vtx+3];
+
+						if( vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT ) {
+							iqmData->influenceBlendWeights.f[4*influence+0] = blendWeights.f[4*vtx+0];
+							iqmData->influenceBlendWeights.f[4*influence+1] = blendWeights.f[4*vtx+1];
+							iqmData->influenceBlendWeights.f[4*influence+2] = blendWeights.f[4*vtx+2];
+							iqmData->influenceBlendWeights.f[4*influence+3] = blendWeights.f[4*vtx+3];
+						} else {
+							iqmData->influenceBlendWeights.b[4*influence+0] = blendWeights.b[4*vtx+0];
+							iqmData->influenceBlendWeights.b[4*influence+1] = blendWeights.b[4*vtx+1];
+							iqmData->influenceBlendWeights.b[4*influence+2] = blendWeights.b[4*vtx+2];
+							iqmData->influenceBlendWeights.b[4*influence+3] = blendWeights.b[4*vtx+3];
+						}
+
+						totalInfluences++;
+						surface->num_influences++;
+					}
+				}
 			}
 		}
 	}
@@ -1110,8 +1202,15 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	srfIQModel_t	*surf = (srfIQModel_t *)surface;
 	iqmData_t	*data = surf->data;
 	float		jointMats[IQM_MAX_JOINTS * 12];
+	float		influenceVtxMat[SHADER_MAX_VERTEXES * 12];
+	float		influenceNrmMat[SHADER_MAX_VERTEXES * 9];
 	int		i;
 
+	float		*xyz;
+	float		*normal;
+	float		*tangent;
+	float		*texCoords;
+	byte		*color;
 	vec4_t		*outXYZ;
 	int16_t	*outNormal;
 	int16_t	*outTangent;
@@ -1128,106 +1227,181 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 
 	RB_CHECKOVERFLOW( surf->num_vertexes, surf->num_triangles * 3 );
 
+	xyz = &data->positions[surf->first_vertex * 3];
+	normal = &data->normals[surf->first_vertex * 3];
+	tangent = &data->tangents[surf->first_vertex * 4];
+	texCoords = &data->texcoords[surf->first_vertex * 2];
+
+	if ( data->colors ) {
+		color = &data->colors[surf->first_vertex * 4];
+	} else {
+		color = NULL;
+	}
+
 	outXYZ = &tess.xyz[tess.numVertexes];
 	outNormal = tess.normal[tess.numVertexes];
 	outTangent = tess.tangent[tess.numVertexes];
 	outTexCoord = &tess.texCoords[tess.numVertexes];
 	outColor = tess.color[tess.numVertexes];
 
-	// compute interpolated joint matrices
 	if ( data->num_poses > 0 ) {
+		// compute interpolated joint matrices
 		ComputePoseMats( data, frame, oldframe, backlerp, jointMats );
-	}
 
-	// transform vertexes and fill other data
-	for( i = 0; i < surf->num_vertexes;
-	     i++, outXYZ++, outNormal+=4, outTexCoord++, outColor+=4 ) {
-		int	j, k;
-		float	vtxMat[12];
-		float	nrmMat[9];
-		int	vtx = i + surf->first_vertex;
-		float	blendWeights[4];
-		int		numWeights;
+		// compute vertex blend influence matricies
+		for( i = 0; i < surf->num_influences; i++ ) {
+			int influence = surf->first_influence + i;
+			float *vtxMat = &influenceVtxMat[12*i];
+			float *nrmMat = &influenceNrmMat[9*i];
+			int	j;
+			float	blendWeights[4];
+			int		numWeights;
 
-		for ( numWeights = 0; numWeights < 4; numWeights++ ) {
-			if ( data->blendWeightsType == IQM_FLOAT )
-				blendWeights[numWeights] = data->blendWeights.f[4*vtx + numWeights];
-			else
-				blendWeights[numWeights] = (float)data->blendWeights.b[4*vtx + numWeights] / 255.0f;
+			for ( numWeights = 0; numWeights < 4; numWeights++ ) {
+				if ( data->blendWeightsType == IQM_FLOAT )
+					blendWeights[numWeights] = data->influenceBlendWeights.f[4*influence + numWeights];
+				else
+					blendWeights[numWeights] = (float)data->influenceBlendWeights.b[4*influence + numWeights] / 255.0f;
 
-			if ( blendWeights[numWeights] <= 0 )
-				break;
-		}
+				if ( blendWeights[numWeights] <= 0.0f )
+					break;
+			}
 
-		if ( data->num_poses == 0 || numWeights == 0 ) {
-			// no blend joint, use identity matrix.
-			Com_Memcpy( vtxMat, identityMatrix, 12 * sizeof (float) );
-		} else {
-			// compute the vertex matrix by blending the up to
-			// four blend weights
-			Com_Memset( vtxMat, 0, 12 * sizeof (float) );
-			for( j = 0; j < numWeights; j++ ) {
-				for( k = 0; k < 12; k++ ) {
-					vtxMat[k] += blendWeights[j] * jointMats[12*data->blendIndexes[4*vtx + j] + k];
+			if ( numWeights == 0 ) {
+				// no blend joint, use identity matrix.
+				vtxMat[0] = identityMatrix[0];
+				vtxMat[1] = identityMatrix[1];
+				vtxMat[2] = identityMatrix[2];
+				vtxMat[3] = identityMatrix[3];
+				vtxMat[4] = identityMatrix[4];
+				vtxMat[5] = identityMatrix[5];
+				vtxMat[6] = identityMatrix[6];
+				vtxMat[7] = identityMatrix[7];
+				vtxMat[8] = identityMatrix[8];
+				vtxMat[9] = identityMatrix[9];
+				vtxMat[10] = identityMatrix[10];
+				vtxMat[11] = identityMatrix[11];
+			} else {
+				// compute the vertex matrix by blending the up to
+				// four blend weights
+				vtxMat[0] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 0];
+				vtxMat[1] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 1];
+				vtxMat[2] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 2];
+				vtxMat[3] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 3];
+				vtxMat[4] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 4];
+				vtxMat[5] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 5];
+				vtxMat[6] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 6];
+				vtxMat[7] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 7];
+				vtxMat[8] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 8];
+				vtxMat[9] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 9];
+				vtxMat[10] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 10];
+				vtxMat[11] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 11];
+
+				for( j = 1; j < numWeights; j++ ) {
+					vtxMat[0] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 0];
+					vtxMat[1] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 1];
+					vtxMat[2] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 2];
+					vtxMat[3] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 3];
+					vtxMat[4] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 4];
+					vtxMat[5] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 5];
+					vtxMat[6] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 6];
+					vtxMat[7] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 7];
+					vtxMat[8] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 8];
+					vtxMat[9] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 9];
+					vtxMat[10] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 10];
+					vtxMat[11] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 11];
 				}
 			}
+
+			// compute the normal matrix as transpose of the adjoint
+			// of the vertex matrix
+			nrmMat[ 0] = vtxMat[ 5]*vtxMat[10] - vtxMat[ 6]*vtxMat[ 9];
+			nrmMat[ 1] = vtxMat[ 6]*vtxMat[ 8] - vtxMat[ 4]*vtxMat[10];
+			nrmMat[ 2] = vtxMat[ 4]*vtxMat[ 9] - vtxMat[ 5]*vtxMat[ 8];
+			nrmMat[ 3] = vtxMat[ 2]*vtxMat[ 9] - vtxMat[ 1]*vtxMat[10];
+			nrmMat[ 4] = vtxMat[ 0]*vtxMat[10] - vtxMat[ 2]*vtxMat[ 8];
+			nrmMat[ 5] = vtxMat[ 1]*vtxMat[ 8] - vtxMat[ 0]*vtxMat[ 9];
+			nrmMat[ 6] = vtxMat[ 1]*vtxMat[ 6] - vtxMat[ 2]*vtxMat[ 5];
+			nrmMat[ 7] = vtxMat[ 2]*vtxMat[ 4] - vtxMat[ 0]*vtxMat[ 6];
+			nrmMat[ 8] = vtxMat[ 0]*vtxMat[ 5] - vtxMat[ 1]*vtxMat[ 4];
 		}
 
-		// compute the normal matrix as transpose of the adjoint
-		// of the vertex matrix
-		nrmMat[ 0] = vtxMat[ 5]*vtxMat[10] - vtxMat[ 6]*vtxMat[ 9];
-		nrmMat[ 1] = vtxMat[ 6]*vtxMat[ 8] - vtxMat[ 4]*vtxMat[10];
-		nrmMat[ 2] = vtxMat[ 4]*vtxMat[ 9] - vtxMat[ 5]*vtxMat[ 8];
-		nrmMat[ 3] = vtxMat[ 2]*vtxMat[ 9] - vtxMat[ 1]*vtxMat[10];
-		nrmMat[ 4] = vtxMat[ 0]*vtxMat[10] - vtxMat[ 2]*vtxMat[ 8];
-		nrmMat[ 5] = vtxMat[ 1]*vtxMat[ 8] - vtxMat[ 0]*vtxMat[ 9];
-		nrmMat[ 6] = vtxMat[ 1]*vtxMat[ 6] - vtxMat[ 2]*vtxMat[ 5];
-		nrmMat[ 7] = vtxMat[ 2]*vtxMat[ 4] - vtxMat[ 0]*vtxMat[ 6];
-		nrmMat[ 8] = vtxMat[ 0]*vtxMat[ 5] - vtxMat[ 1]*vtxMat[ 4];
+		// transform vertexes and fill other data
+		for( i = 0; i < surf->num_vertexes;
+		     i++, xyz+=3, normal+=3, tangent+=4, texCoords+=2,
+		     outXYZ++, outNormal+=4, outTangent+=4, outTexCoord++ ) {
+			int influence = data->influences[surf->first_vertex + i] - surf->first_influence;
+			float *vtxMat = &influenceVtxMat[12*influence];
+			float *nrmMat = &influenceNrmMat[9*influence];
 
-		(*outTexCoord)[0] = data->texcoords[2*vtx + 0];
-		(*outTexCoord)[1] = data->texcoords[2*vtx + 1];
+			(*outTexCoord)[0] = texCoords[0];
+			(*outTexCoord)[1] = texCoords[1];
 
-		(*outXYZ)[0] =
-			vtxMat[ 0] * data->positions[3*vtx+0] +
-			vtxMat[ 1] * data->positions[3*vtx+1] +
-			vtxMat[ 2] * data->positions[3*vtx+2] +
-			vtxMat[ 3];
-		(*outXYZ)[1] =
-			vtxMat[ 4] * data->positions[3*vtx+0] +
-			vtxMat[ 5] * data->positions[3*vtx+1] +
-			vtxMat[ 6] * data->positions[3*vtx+2] +
-			vtxMat[ 7];
-		(*outXYZ)[2] =
-			vtxMat[ 8] * data->positions[3*vtx+0] +
-			vtxMat[ 9] * data->positions[3*vtx+1] +
-			vtxMat[10] * data->positions[3*vtx+2] +
-			vtxMat[11];
-		(*outXYZ)[3] = 1.0f;
+			(*outXYZ)[0] =
+				vtxMat[ 0] * xyz[0] +
+				vtxMat[ 1] * xyz[1] +
+				vtxMat[ 2] * xyz[2] +
+				vtxMat[ 3];
+			(*outXYZ)[1] =
+				vtxMat[ 4] * xyz[0] +
+				vtxMat[ 5] * xyz[1] +
+				vtxMat[ 6] * xyz[2] +
+				vtxMat[ 7];
+			(*outXYZ)[2] =
+				vtxMat[ 8] * xyz[0] +
+				vtxMat[ 9] * xyz[1] +
+				vtxMat[10] * xyz[2] +
+				vtxMat[11];
 
-		{
-			vec3_t normal;
-			vec4_t tangent;
+			{
+				vec3_t unpackedNormal;
+				vec4_t unpackedTangent;
 
-			normal[0] = DotProduct(&nrmMat[0], &data->normals[3*vtx]);
-			normal[1] = DotProduct(&nrmMat[3], &data->normals[3*vtx]);
-			normal[2] = DotProduct(&nrmMat[6], &data->normals[3*vtx]);
+				unpackedNormal[0] = DotProduct(&nrmMat[0], normal);
+				unpackedNormal[1] = DotProduct(&nrmMat[3], normal);
+				unpackedNormal[2] = DotProduct(&nrmMat[6], normal);
+
+				R_VaoPackNormal(outNormal, unpackedNormal);
+
+				unpackedTangent[0] = DotProduct(&nrmMat[0], tangent);
+				unpackedTangent[1] = DotProduct(&nrmMat[3], tangent);
+				unpackedTangent[2] = DotProduct(&nrmMat[6], tangent);
+				unpackedTangent[3] = tangent[3];
+
+				R_VaoPackTangent(outTangent, unpackedTangent);
+			}
+		}
+	} else {
+		// copy vertexes and fill other data
+		for( i = 0; i < surf->num_vertexes;
+		     i++, xyz+=3, normal+=3, tangent+=4, texCoords+=2,
+		     outXYZ++, outNormal+=4, outTangent+=4, outTexCoord++ ) {
+			(*outTexCoord)[0] = texCoords[0];
+			(*outTexCoord)[1] = texCoords[1];
+
+			(*outXYZ)[0] = xyz[0];
+			(*outXYZ)[1] = xyz[1];
+			(*outXYZ)[2] = xyz[2];
 
 			R_VaoPackNormal(outNormal, normal);
-
-			tangent[0] = DotProduct(&nrmMat[0], &data->tangents[4*vtx]);
-			tangent[1] = DotProduct(&nrmMat[3], &data->tangents[4*vtx]);
-			tangent[2] = DotProduct(&nrmMat[6], &data->tangents[4*vtx]);
-			tangent[3] = data->tangents[4*vtx+3];
-
 			R_VaoPackTangent(outTangent, tangent);
-			outTangent+=4;
 		}
+	}
 
-		outColor[0] = data->colors[4*vtx+0] * 257;
-		outColor[1] = data->colors[4*vtx+1] * 257;
-		outColor[2] = data->colors[4*vtx+2] * 257;
-		outColor[3] = data->colors[4*vtx+3] * 257;
+	if ( color ) {
+		for( i = 0; i < surf->num_vertexes; i++, color+=4, outColor+=4 ) {
+			outColor[0] = color[0] * 257;
+			outColor[1] = color[1] * 257;
+			outColor[2] = color[2] * 257;
+			outColor[3] = color[3] * 257;
+		}
+	} else {
+		for( i = 0; i < surf->num_vertexes; i++, outColor+=4 ) {
+			outColor[0] = 0;
+			outColor[1] = 0;
+			outColor[2] = 0;
+			outColor[3] = 0;
+		}
 	}
 
 	tri = data->triangles + 3 * surf->first_triangle;
