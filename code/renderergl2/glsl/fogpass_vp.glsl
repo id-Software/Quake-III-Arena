@@ -6,6 +6,9 @@ attribute vec4  attr_TexCoord0;
 #if defined(USE_VERTEX_ANIMATION)
 attribute vec3  attr_Position2;
 attribute vec3  attr_Normal2;
+#elif defined(USE_BONE_ANIMATION)
+attribute vec4 attr_BoneIndexes;
+attribute vec4 attr_BoneWeights;
 #endif
 
 uniform vec4    u_FogDistance;
@@ -22,6 +25,8 @@ uniform mat4    u_ModelViewProjectionMatrix;
 
 #if defined(USE_VERTEX_ANIMATION)
 uniform float   u_VertexLerp;
+#elif defined(USE_BONE_ANIMATION)
+uniform mat4 u_BoneMatrix[MAX_GLSL_BONES];
 #endif
 
 uniform vec4  u_Color;
@@ -102,6 +107,15 @@ void main()
 #if defined(USE_VERTEX_ANIMATION)
 	vec3 position = mix(attr_Position, attr_Position2, u_VertexLerp);
 	vec3 normal   = mix(attr_Normal,   attr_Normal2,   u_VertexLerp);
+#elif defined(USE_BONE_ANIMATION)
+	mat4 vtxMat  = u_BoneMatrix[int(attr_BoneIndexes.x)] * attr_BoneWeights.x;
+	     vtxMat += u_BoneMatrix[int(attr_BoneIndexes.y)] * attr_BoneWeights.y;
+	     vtxMat += u_BoneMatrix[int(attr_BoneIndexes.z)] * attr_BoneWeights.z;
+	     vtxMat += u_BoneMatrix[int(attr_BoneIndexes.w)] * attr_BoneWeights.w;
+	mat3 nrmMat = mat3(cross(vtxMat[1].xyz, vtxMat[2].xyz), cross(vtxMat[2].xyz, vtxMat[0].xyz), cross(vtxMat[0].xyz, vtxMat[1].xyz));
+
+	vec3 position  = vec3(vtxMat * vec4(attr_Position, 1.0));
+	vec3 normal    = normalize(nrmMat * attr_Normal);
 #else
 	vec3 position = attr_Position;
 	vec3 normal   = attr_Normal;
