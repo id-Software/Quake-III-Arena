@@ -58,11 +58,6 @@ static void Matrix34Multiply( float *a, float *b, float *out ) {
 	out[10] = a[8] * b[2] + a[9] * b[6] + a[10] * b[10];
 	out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
 }
-static void Matrix34Multiply_OnlySetOrigin( float *a, float *b, float *out ) {
-	out[ 3] = a[0] * b[3] + a[1] * b[7] + a[ 2] * b[11] + a[ 3];
-	out[ 7] = a[4] * b[3] + a[5] * b[7] + a[ 6] * b[11] + a[ 7];
-	out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
-}
 static void InterpolateMatrix( float *a, float *b, float lerp, float *mat ) {
 	float unLerp = 1.0f - lerp;
 
@@ -1124,18 +1119,6 @@ static void ComputePoseMats( iqmData_t *data, int frame, int oldframe,
 	int	*joint = data->jointParents;
 	int	i;
 
-	if ( data->num_poses == 0 ) {
-		for( i = 0; i < data->num_joints; i++, joint++ ) {
-			if( *joint >= 0 ) {
-				Matrix34Multiply( mat + 12 * *joint,
-						  identityMatrix, mat + 12*i );
-			} else {
-				Com_Memcpy( mat + 12*i, identityMatrix, 12 * sizeof(float) );
-			}
-		}
-		return;
-	}
-
 	if ( oldframe == frame ) {
 		mat1 = data->poseMats + 12 * data->num_poses * frame;
 		for( i = 0; i < data->num_poses; i++, joint++ ) {
@@ -1171,6 +1154,11 @@ static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
 	float	*mat1;
 	int	i;
 
+	if ( data->num_poses == 0 ) {
+		Com_Memcpy( mat, data->jointMats, data->num_joints * 12 * sizeof(float) );
+		return;
+	}
+
 	ComputePoseMats( data, frame, oldframe, backlerp, mat );
 
 	for( i = 0; i < data->num_joints; i++ ) {
@@ -1179,7 +1167,7 @@ static void ComputeJointMats( iqmData_t *data, int frame, int oldframe,
 
 		Com_Memcpy(outmat, mat1, sizeof(outmat));
 
-		Matrix34Multiply_OnlySetOrigin( outmat, data->jointMats + 12 * i, mat1 );
+		Matrix34Multiply( outmat, data->jointMats + 12*i, mat1 );
 	}
 }
 
@@ -1194,7 +1182,7 @@ Compute vertices for this model surface
 void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	srfIQModel_t	*surf = (srfIQModel_t *)surface;
 	iqmData_t	*data = surf->data;
-	float		jointMats[IQM_MAX_JOINTS * 12];
+	float		poseMats[IQM_MAX_JOINTS * 12];
 	float		influenceVtxMat[SHADER_MAX_VERTEXES * 12];
 	float		influenceNrmMat[SHADER_MAX_VERTEXES * 9];
 	int		i;
@@ -1235,7 +1223,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 
 	if ( data->num_poses > 0 ) {
 		// compute interpolated joint matrices
-		ComputePoseMats( data, frame, oldframe, backlerp, jointMats );
+		ComputePoseMats( data, frame, oldframe, backlerp, poseMats );
 
 		// compute vertex blend influence matricies
 		for( i = 0; i < surf->num_influences; i++ ) {
@@ -1273,32 +1261,32 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 			} else {
 				// compute the vertex matrix by blending the up to
 				// four blend weights
-				vtxMat[0] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 0];
-				vtxMat[1] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 1];
-				vtxMat[2] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 2];
-				vtxMat[3] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 3];
-				vtxMat[4] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 4];
-				vtxMat[5] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 5];
-				vtxMat[6] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 6];
-				vtxMat[7] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 7];
-				vtxMat[8] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 8];
-				vtxMat[9] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 9];
-				vtxMat[10] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 10];
-				vtxMat[11] = blendWeights[0] * jointMats[12 * data->influenceBlendIndexes[4*influence + 0] + 11];
+				vtxMat[0] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 0];
+				vtxMat[1] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 1];
+				vtxMat[2] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 2];
+				vtxMat[3] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 3];
+				vtxMat[4] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 4];
+				vtxMat[5] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 5];
+				vtxMat[6] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 6];
+				vtxMat[7] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 7];
+				vtxMat[8] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 8];
+				vtxMat[9] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 9];
+				vtxMat[10] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 10];
+				vtxMat[11] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 11];
 
 				for( j = 1; j < numWeights; j++ ) {
-					vtxMat[0] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 0];
-					vtxMat[1] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 1];
-					vtxMat[2] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 2];
-					vtxMat[3] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 3];
-					vtxMat[4] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 4];
-					vtxMat[5] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 5];
-					vtxMat[6] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 6];
-					vtxMat[7] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 7];
-					vtxMat[8] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 8];
-					vtxMat[9] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 9];
-					vtxMat[10] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 10];
-					vtxMat[11] += blendWeights[j] * jointMats[12 * data->influenceBlendIndexes[4*influence + j] + 11];
+					vtxMat[0] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 0];
+					vtxMat[1] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 1];
+					vtxMat[2] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 2];
+					vtxMat[3] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 3];
+					vtxMat[4] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 4];
+					vtxMat[5] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 5];
+					vtxMat[6] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 6];
+					vtxMat[7] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 7];
+					vtxMat[8] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 8];
+					vtxMat[9] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 9];
+					vtxMat[10] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 10];
+					vtxMat[11] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 11];
 				}
 			}
 
