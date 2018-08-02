@@ -566,6 +566,8 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	}
 	if( header->ofs_bounds ) {
 		size += header->num_frames * 6 * sizeof(float);		// model bounds
+	} else if( header->num_meshes && header->num_frames == 0 ) {
+		size += 6 * sizeof(float);							// model bounds
 	}
 
 	mod->type = MOD_IQM;
@@ -641,6 +643,9 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 	if( header->ofs_bounds ) {
 		iqmData->bounds = (float*)dataPtr;
 		dataPtr += header->num_frames * 6 * sizeof(float);	// model bounds
+	} else if( header->num_meshes && header->num_frames == 0 ) {
+		iqmData->bounds = (float*)dataPtr;
+		dataPtr += 6 * sizeof(float);						// model bounds
 	}
 
 	if( header->num_meshes )
@@ -905,6 +910,15 @@ qboolean R_LoadIQM( model_t *mod, void *buffer, int filesize, const char *mod_na
 
 			mat += 6;
 			bounds++;
+		}
+	}
+	else if( header->num_meshes && header->num_frames == 0 )
+	{
+		mat = iqmData->bounds;
+
+		ClearBounds( &iqmData->bounds[0], &iqmData->bounds[3] );
+		for ( i = 0 ; i < header->num_vertexes ; i++ ) {
+			AddPointToBounds( &iqmData->positions[i*3], &iqmData->bounds[0], &iqmData->bounds[3] );
 		}
 	}
 
