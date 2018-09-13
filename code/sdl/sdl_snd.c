@@ -267,14 +267,8 @@ qboolean SNDDMA_Init(void)
 	if (!tmp)
 		tmp = (obtained.samples * obtained.channels) * 10;
 
-	if (tmp & (tmp - 1))  // not a power of two? Seems to confuse something.
-	{
-		int val = 1;
-		while (val < tmp)
-			val <<= 1;
-
-		tmp = val;
-	}
+	// samples must be divisible by number of channels
+	tmp -= tmp % obtained.channels;
 
 	dmapos = 0;
 	dma.samplebits = SDL_AUDIO_BITSIZE(obtained.format);
