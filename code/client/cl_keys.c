@@ -825,6 +825,7 @@ to be configured even if they don't have defined names.
 */
 int Key_StringToKeynum( char *str ) {
 	keyname_t	*kn;
+	int			n;
 	
 	if ( !str || !str[0] ) {
 		return -1;
@@ -834,12 +835,9 @@ int Key_StringToKeynum( char *str ) {
 	}
 
 	// check for hex code
-	if ( strlen( str ) == 4 ) {
-		int n = Com_HexStrToInt( str );
-
-		if ( n >= 0 ) {
-			return n;
-		}
+	n = Com_HexStrToInt( str );
+	if ( n >= 0 && n < MAX_KEYS ) {
+		return n;
 	}
 
 	// scan for a text match
