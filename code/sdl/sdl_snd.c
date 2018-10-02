@@ -272,6 +272,7 @@ qboolean SNDDMA_Init(void)
 	dma.isfloat = SDL_AUDIO_ISFLOAT(obtained.format);
 	dma.channels = obtained.channels;
 	dma.samples = tmp;
+	dma.fullsamples = dma.samples / dma.channels;
 	dma.submission_chunk = 1;
 	dma.speed = obtained.freq;
 	dmasize = (dma.samples * (dma.samplebits/8));

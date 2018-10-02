@@ -119,24 +119,24 @@ void S_TransferStereo16 (unsigned long *pbuf, int endtime)
 	while (ls_paintedtime < endtime)
 	{
 	// handle recirculating buffer issues
-		lpos = ls_paintedtime & ((dma.samples>>1)-1);
+		lpos = ls_paintedtime % dma.fullsamples;
 
-		snd_out = (short *) pbuf + (lpos<<1);
+		snd_out = (short *) pbuf + (lpos<<1); // lpos * dma.channels
 
-		snd_linear_count = (dma.samples>>1) - lpos;
+		snd_linear_count = dma.fullsamples - lpos;
 		if (ls_paintedtime + snd_linear_count > endtime)
 			snd_linear_count = endtime - ls_paintedtime;
 
-		snd_linear_count <<= 1;
+		snd_linear_count <<= 1; // snd_linear_count *= dma.channels
 
 	// write a linear blast of samples
 		S_WriteLinearBlastStereo16 ();
 
 		snd_p += snd_linear_count;
-		ls_paintedtime += (snd_linear_count>>1);
+		ls_paintedtime += (snd_linear_count>>1); // snd_linear_count / dma.channels
 
 		if( CL_VideoRecording( ) )
-			CL_WriteAVIAudioFrame( (byte *)snd_out, snd_linear_count << 1 );
+			CL_WriteAVIAudioFrame( (byte *)snd_out, snd_linear_count << 1 ); // snd_linear_count * (dma.samplebits/8)
 	}
 }
 
@@ -175,15 +175,15 @@ void S_TransferPaintBuffer(int endtime)
 	{	// general case
 		p = (int *) paintbuffer;
 		count = (endtime - s_paintedtime) * dma.channels;
-		out_idx = s_paintedtime * dma.channels % dma.samples;
-		step = 3 - MIN( dma.channels, 2 );
+		out_idx = (s_paintedtime * dma.channels) % dma.samples;
+		step = 3 - MIN(dma.channels, 2);
 
 		if ((dma.isfloat) && (dma.samplebits == 32))
 		{
 			float *out = (float *) pbuf;
 			for (i=0 ; i<count ; i++)
 			{
-				if ( i % dma.channels >= 2 )
+				if ((i % dma.channels) >= 2)
 				{
 					val = 0;
 				}
@@ -205,7 +205,7 @@ void S_TransferPaintBuffer(int endtime)
 			short *out = (short *) pbuf;
 			for (i=0 ; i<count ; i++)
 			{
-				if ( i % dma.channels >= 2 )
+				if ((i % dma.channels) >= 2)
 				{
 					val = 0;
 				}
@@ -227,7 +227,7 @@ void S_TransferPaintBuffer(int endtime)
 			unsigned char *out = (unsigned char *) pbuf;
 			for (i=0 ; i<count ; i++)
 			{
-				if ( i % dma.channels >= 2 )
+				if ((i % dma.channels) >= 2)
 				{
 					val = 0;
 				}
