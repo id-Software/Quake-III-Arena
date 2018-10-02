@@ -98,7 +98,7 @@ void S_Base_SoundInfo(void) {
 	if (!s_soundStarted) {
 		Com_Printf ("sound system not started\n");
 	} else {
-		Com_Printf("%5d stereo\n", dma.channels - 1);
+		Com_Printf("%5d channels\n", dma.channels);
 		Com_Printf("%5d samples\n", dma.samples);
 		Com_Printf("%5d samplebits (%s)\n", dma.samplebits, dma.isfloat ? "float" : "int");
 		Com_Printf("%5d submission_chunk\n", dma.submission_chunk);
