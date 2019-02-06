@@ -184,6 +184,11 @@ Cvars for advanced material usage:
                                      1 - Use parallax occlusion mapping.
                                      2 - Use relief mapping. (slower)
 
+*  `r_parallaxMapShadows`           - Enable self-shadowing on parallax map
+                                   supported materials.
+                                     0 - No. (default)
+                                     1 - Yes.
+
 *  `r_baseSpecular`                 - Set the specular reflectance of materials
                                    which don't include a specular map or
                                    use the specularReflectance keyword.

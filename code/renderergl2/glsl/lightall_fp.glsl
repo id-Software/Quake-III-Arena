@@ -143,6 +143,35 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 
 	return bestDepth;
 }
+
+float LightRay(vec2 dp, vec2 ds, sampler2D normalMap)
+{
+	const int linearSearchSteps = 16;
+
+	// current size of search window
+	float size = 1.0 / float(linearSearchSteps);
+
+	// current height from initial texel depth
+	float height = 0.0;
+
+	float startDepth = SampleDepth(normalMap, dp);
+
+	// find a collision or escape
+	for(int i = 0; i < linearSearchSteps - 1; ++i)
+	{
+		height += size;
+
+		if (startDepth < height)
+			return 1.0;
+		
+		float t = SampleDepth(normalMap, dp + ds * height);
+
+		if (startDepth > t + height)
+			return 0.0;
+	}
+
+	return 1.0;
+}
 #endif
 
 vec3 CalcDiffuse(vec3 diffuseAlbedo, float NH, float EH, float roughness)
@@ -252,7 +281,7 @@ void main()
 	vec2 texCoords = var_TexCoords.xy;
 
 #if defined(USE_PARALLAXMAP)
-	vec3 offsetDir = viewDir * tangentToWorld;
+	vec3 offsetDir = E * tangentToWorld;
 
 	offsetDir.xy *= -u_NormalScale.a / offsetDir.z;
 
@@ -318,6 +347,13 @@ void main()
 	lightColor *= shadowValue * (1.0 - u_PrimaryLightAmbient.r) + u_PrimaryLightAmbient.r;
     #endif
   #endif
+
+  #if defined(USE_PARALLAXMAP) && defined(USE_PARALLAXMAP_SHADOWS)
+	offsetDir = L * tangentToWorld;
+	offsetDir.xy *= u_NormalScale.a / offsetDir.z;
+	lightColor *= LightRay(texCoords, offsetDir.xy, u_NormalMap);
+  #endif
+
 
   #if !defined(USE_LIGHT_VECTOR)
 	ambientColor = lightColor;
@@ -456,6 +492,12 @@ void main()
 
 	// enable when point lights are supported as primary lights
 	//lightColor *= CalcLightAttenuation(float(u_PrimaryLightDir.w > 0.0), u_PrimaryLightDir.w / sqrLightDist);
+
+  #if defined(USE_PARALLAXMAP) && defined(USE_PARALLAXMAP_SHADOWS)
+	offsetDir = L2 * tangentToWorld;
+	offsetDir.xy *= u_NormalScale.a / offsetDir.z;
+	lightColor *= LightRay(texCoords, offsetDir.xy, u_NormalMap);
+  #endif
 
 	gl_FragColor.rgb += lightColor * reflectance * NL2;
   #endif

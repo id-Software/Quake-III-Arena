@@ -1122,6 +1122,9 @@ void GLSL_InitGPUShaders(void)
 					Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP\n");
 					if (r_parallaxMapping->integer > 1)
 						Q_strcat(extradefines, 1024, "#define USE_RELIEFMAP\n");
+
+					if (r_parallaxMapShadows->integer)
+						Q_strcat(extradefines, 1024, "#define USE_PARALLAXMAP_SHADOWS\n");
 				}
 			}
 
