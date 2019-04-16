@@ -285,6 +285,12 @@ static void InitOpenGL( void )
 		}
 	}
 
+	// check for GLSL function textureCubeLod()
+	if ( r_cubeMapping->integer && !QGL_VERSION_ATLEAST( 3, 0 ) ) {
+		ri.Printf( PRINT_WARNING, "WARNING: Disabled r_cubeMapping because it requires OpenGL 3.0\n" );
+		ri.Cvar_Set( "r_cubeMapping", "0" );
+	}
+
 	// set default state
 	GL_SetDefaultState();
 }
