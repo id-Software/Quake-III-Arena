@@ -1484,19 +1484,20 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 			float *nrmMat = &influenceNrmMat[9*i];
 			int	j;
 			float	blendWeights[4];
-			int		numWeights;
 
-			for ( numWeights = 0; numWeights < 4; numWeights++ ) {
-				if ( data->blendWeightsType == IQM_FLOAT )
-					blendWeights[numWeights] = data->influenceBlendWeights.f[4*influence + numWeights];
-				else
-					blendWeights[numWeights] = (float)data->influenceBlendWeights.b[4*influence + numWeights] / 255.0f;
-
-				if ( blendWeights[numWeights] <= 0.0f )
-					break;
+			if ( data->blendWeightsType == IQM_FLOAT ) {
+				blendWeights[0] = data->influenceBlendWeights.f[4*influence + 0];
+				blendWeights[1] = data->influenceBlendWeights.f[4*influence + 1];
+				blendWeights[2] = data->influenceBlendWeights.f[4*influence + 2];
+				blendWeights[3] = data->influenceBlendWeights.f[4*influence + 3];
+			} else {
+				blendWeights[0] = (float)data->influenceBlendWeights.b[4*influence + 0] / 255.0f;
+				blendWeights[1] = (float)data->influenceBlendWeights.b[4*influence + 1] / 255.0f;
+				blendWeights[2] = (float)data->influenceBlendWeights.b[4*influence + 2] / 255.0f;
+				blendWeights[3] = (float)data->influenceBlendWeights.b[4*influence + 3] / 255.0f;
 			}
 
-			if ( numWeights == 0 ) {
+			if ( blendWeights[0] <= 0.0f ) {
 				// no blend joint, use identity matrix.
 				vtxMat[0] = identityMatrix[0];
 				vtxMat[1] = identityMatrix[1];
@@ -1526,7 +1527,11 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 				vtxMat[10] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 10];
 				vtxMat[11] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 11];
 
-				for( j = 1; j < numWeights; j++ ) {
+				for( j = 1; j < 3; j++ ) {
+					if ( blendWeights[j] <= 0.0f ) {
+						break;
+					}
+
 					vtxMat[0] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 0];
 					vtxMat[1] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 1];
 					vtxMat[2] += blendWeights[j] * poseMats[12 * data->influenceBlendIndexes[4*influence + j] + 2];
