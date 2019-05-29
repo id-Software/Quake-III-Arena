@@ -154,7 +154,8 @@ static vec_t QuatNormalize2( const quat_t v, quat_t out) {
 		out[2] = v[2]*ilength;
 		out[3] = v[3]*ilength;
 	} else {
-		out[0] = out[1] = out[2] = out[3] = 0;
+		out[0] = out[1] = out[2] = 0;
+		out[3] = -1;
 	}
 
 	return length;
