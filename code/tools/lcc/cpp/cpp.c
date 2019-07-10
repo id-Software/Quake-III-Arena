@@ -19,6 +19,15 @@ int	ifdepth;
 int	ifsatisfied[NIF];
 int	skipping;
 
+time_t reproducible_time()
+{
+	char *source_date_epoch;
+	time_t t;
+	if ((source_date_epoch = getenv("SOURCE_DATE_EPOCH")) == NULL ||
+		(t = (time_t)strtol(source_date_epoch, NULL, 10)) <= 0)
+		return time(NULL);
+	return t;
+}
 
 int
 main(int argc, char **argv)
@@ -28,7 +37,7 @@ main(int argc, char **argv)
 	char ebuf[BUFSIZ];
 
 	setbuf(stderr, ebuf);
-	t = time(NULL);
+	t = reproducible_time();
 	curtime = ctime(&t);
 	maketokenrow(3, &tr);
 	expandlex();
