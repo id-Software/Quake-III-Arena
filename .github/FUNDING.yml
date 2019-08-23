@@ -1,0 +1,14 @@
+# These are supported funding model platforms
+
+patreon: timedoctor
+open_collective: # Replace with a single Open Collective username
+ko_fi: jackslater
+tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
+community_bridge: # Replace with a single Community Bridge project-name e.g., cloud-foundry
+liberapay: # Replace with a single Liberapay username
+issuehunt: # Replace with a single IssueHunt username
+otechie: # Replace with a single Otechie username
+custom: ['https://www.patreon.com/icculus', 'https://www.patreon.com/SmileTheory', 'https://ko-fi.com/zturtleman']
+
+
+#please add your links to this if you've been a long-time contributor!
