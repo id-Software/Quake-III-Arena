@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>quake3_flat</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.ioquake3.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -21,11 +21,13 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>3cd8b49-2013-07-17</string>
+	<string>de7123ac-2019-10-11</string>
 	<key>CGDisableCoalescedUpdates</key>
 	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
+	<key>NSHighResolutionCapable</key>
+	<false/>
 	<key>NSHumanReadableCopyright</key>
 	<string>QUAKE III ARENA Copyright © 1999-2000 id Software, Inc. All rights reserved.</string>
 	<key>NSPrincipalClass</key>

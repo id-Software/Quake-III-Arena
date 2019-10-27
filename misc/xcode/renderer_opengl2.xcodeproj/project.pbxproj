@@ -50,7 +50,6 @@
 		2758B9C6178FBBAC007F6582 /* q_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758B9C0178FBBAC007F6582 /* q_shared.c */; };
 		2758B9CC178FBC8B007F6582 /* libjpeg8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2758B9CB178FBC8B007F6582 /* libjpeg8.a */; };
 		2758B9CE178FBCBC007F6582 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2758B9CD178FBCBC007F6582 /* OpenGL.framework */; };
-		2758B9D0178FBCDC007F6582 /* libSDL-1.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2758B9CF178FBCDC007F6582 /* libSDL-1.2.0.dylib */; };
 		2758BA2C178FCFC0007F6582 /* bokeh_fp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758B9F3178FCFC0007F6582 /* bokeh_fp.c */; };
 		2758BA2D178FCFC0007F6582 /* bokeh_vp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758B9F5178FCFC0007F6582 /* bokeh_vp.c */; };
 		2758BA2E178FCFC0007F6582 /* calclevels4x_fp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758B9F7178FCFC0007F6582 /* calclevels4x_fp.c */; };
@@ -79,6 +78,9 @@
 		2758BA45178FCFC1007F6582 /* texturecolor_vp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758BA26178FCFC0007F6582 /* texturecolor_vp.c */; };
 		2758BA46178FCFC1007F6582 /* tonemap_fp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758BA28178FCFC0007F6582 /* tonemap_fp.c */; };
 		2758BA47178FCFC1007F6582 /* tonemap_vp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758BA2A178FCFC0007F6582 /* tonemap_vp.c */; };
+		A163B2622193D8FC00C48278 /* libSDL2-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */; };
+		A163B2662193DF8300C48278 /* tr_image_dds.c in Sources */ = {isa = PBXBuildFile; fileRef = A163B2642193DF8200C48278 /* tr_image_dds.c */; };
+		A163B2672193DF8300C48278 /* tr_dsa.c in Sources */ = {isa = PBXBuildFile; fileRef = A163B2652193DF8300C48278 /* tr_dsa.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -197,6 +199,10 @@
 		2758BA29178FCFC0007F6582 /* tonemap_fp.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tonemap_fp.glsl; sourceTree = "<group>"; };
 		2758BA2A178FCFC0007F6582 /* tonemap_vp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tonemap_vp.c; sourceTree = "<group>"; };
 		2758BA2B178FCFC0007F6582 /* tonemap_vp.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tonemap_vp.glsl; sourceTree = "<group>"; };
+		A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2-2.0.0.dylib"; path = "../../code/libs/macosx/libSDL2-2.0.0.dylib"; sourceTree = "<group>"; };
+		A163B2632193DF8200C48278 /* tr_dsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tr_dsa.h; sourceTree = "<group>"; };
+		A163B2642193DF8200C48278 /* tr_image_dds.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tr_image_dds.c; sourceTree = "<group>"; };
+		A163B2652193DF8300C48278 /* tr_dsa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tr_dsa.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,9 +210,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A163B2622193D8FC00C48278 /* libSDL2-2.0.0.dylib in Frameworks */,
 				2758B9CC178FBC8B007F6582 /* libjpeg8.a in Frameworks */,
 				2758B9CE178FBCBC007F6582 /* OpenGL.framework in Frameworks */,
-				2758B9D0178FBCDC007F6582 /* libSDL-1.2.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +267,8 @@
 				2758B961178FBB77007F6582 /* tr_bsp.c */,
 				2758B962178FBB77007F6582 /* tr_cmds.c */,
 				2758B963178FBB77007F6582 /* tr_curve.c */,
+				A163B2652193DF8300C48278 /* tr_dsa.c */,
+				A163B2632193DF8200C48278 /* tr_dsa.h */,
 				2758B964178FBB77007F6582 /* tr_extensions.c */,
 				2758B965178FBB77007F6582 /* tr_extramath.c */,
 				2758B966178FBB77007F6582 /* tr_extramath.h */,
@@ -269,6 +277,7 @@
 				2758B969178FBB77007F6582 /* tr_fbo.h */,
 				2758B96A178FBB77007F6582 /* tr_flares.c */,
 				2758B96B178FBB77007F6582 /* tr_glsl.c */,
+				A163B2642193DF8200C48278 /* tr_image_dds.c */,
 				2758B96C178FBB77007F6582 /* tr_image.c */,
 				2758B96D178FBB77007F6582 /* tr_init.c */,
 				2758B96E178FBB77007F6582 /* tr_light.c */,
@@ -329,6 +338,7 @@
 		2758B9C9178FBC6F007F6582 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */,
 				2758B9CD178FBCBC007F6582 /* OpenGL.framework */,
 			);
 			name = Frameworks;
@@ -435,15 +445,16 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = io;
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 1110;
 				ORGANIZATIONNAME = ioquake;
 			};
 			buildConfigurationList = 274FAC18178FAF0C00B17C7A /* Build configuration list for PBXProject "renderer_opengl2" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 274FAC14178FAF0C00B17C7A;
 			productRefGroup = 274FAC1E178FAF0C00B17C7A /* Products */;
@@ -515,6 +526,7 @@
 				2758B999178FBB77007F6582 /* tr_scene.c in Sources */,
 				2758B99A178FBB77007F6582 /* tr_shade_calc.c in Sources */,
 				2758B99B178FBB77007F6582 /* tr_shade.c in Sources */,
+				A163B2672193DF8300C48278 /* tr_dsa.c in Sources */,
 				2758B99C178FBB77007F6582 /* tr_shader.c in Sources */,
 				2758B99D178FBB77007F6582 /* tr_shadows.c in Sources */,
 				2758B99E178FBB77007F6582 /* tr_sky.c in Sources */,
@@ -560,6 +572,7 @@
 				2758BA45178FCFC1007F6582 /* texturecolor_vp.c in Sources */,
 				2758BA46178FCFC1007F6582 /* tonemap_fp.c in Sources */,
 				2758BA47178FCFC1007F6582 /* tonemap_vp.c in Sources */,
+				A163B2662193DF8300C48278 /* tr_image_dds.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -570,18 +583,33 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"USE_LOCAL_HEADERS=1",
@@ -590,11 +618,13 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_VERSION = "";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -604,25 +634,41 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "USE_LOCAL_HEADERS=1";
 				GCC_VERSION = "";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -630,9 +676,11 @@
 		274FAC22178FAF0C00B17C7A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/jpeg-8c\"",
-					"\"$(SRCROOT)/../../code/SDL12/include\"",
+					"\"$(SRCROOT)/../../code/SDL2/include\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/libs/macosx\"",
@@ -645,9 +693,11 @@
 		274FAC23178FAF0C00B17C7A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/jpeg-8c\"",
-					"\"$(SRCROOT)/../../code/SDL12/include\"",
+					"\"$(SRCROOT)/../../code/SDL2/include\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/libs/macosx\"",

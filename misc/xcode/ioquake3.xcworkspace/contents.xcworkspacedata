@@ -26,9 +26,9 @@
       location = "group:jpeg8.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:speex.xcodeproj">
+      location = "container:ioquake3.xcodeproj">
    </FileRef>
    <FileRef
-      location = "container:ioquake3.xcodeproj">
+      location = "group:opus.xcodeproj">
    </FileRef>
 </Workspace>
