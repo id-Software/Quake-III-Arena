@@ -3,6 +3,7 @@ Makefile.local
 *.swp
 *tags
 *~
+code/renderergl2/glsl/*.c
 
 # OS X
 ####################

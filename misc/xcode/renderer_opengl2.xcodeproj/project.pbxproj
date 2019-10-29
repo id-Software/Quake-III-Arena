@@ -427,7 +427,6 @@
 				2758B9F2178FCB65007F6582 /* Run Script - Generate C From GLSL Files */,
 				274FAC19178FAF0C00B17C7A /* Sources */,
 				274FAC1A178FAF0C00B17C7A /* Frameworks */,
-				2758BA48178FD003007F6582 /* Run Script - Delete GLSL-Generated C Files */,
 			);
 			buildRules = (
 			);
@@ -480,20 +479,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "GLSLPATH=\"${SRCROOT}/../../code/renderergl2/glsl\"\n\nfunction glslToDotC()\n{\n    INFILE=\"${1}\"\n    INEXT=\"${1##*.}\"\n    INSTRIP=\"${1##*/}\"\n    INBASE=\"${INSTRIP%.glsl}\"\n    OUTFILE=\"${1%.glsl}.c\"\n\n    if [ ! ${INFILE} ] || [ ! -e ${INFILE} ]; then\n        echo \"**** ERROR: no input file\"\n        exit -1\n    fi\n\n    if [ ${INEXT} != \"glsl\" ]; then\n        echo \"**** ERROR: input file must have .glsl extension\"\n        exit -2\n    fi\n\n    echo \"const char *fallbackShader_${INBASE} =\" > ${OUTFILE}\n    cat ${INFILE} | sed 's/^/\\\"/;s/$/\\\\n\\\"/' >> ${OUTFILE}\n    echo \";\" >> ${OUTFILE}\n}\n\npushd \"${GLSLPATH}\"\n\nfind *.glsl | while read GLSLFILE; do glslToDotC \"${GLSLFILE}\"; done\n\npopd\n";
-		};
-		2758BA48178FD003007F6582 /* Run Script - Delete GLSL-Generated C Files */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script - Delete GLSL-Generated C Files";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "GLSLPATH=\"${SRCROOT}/../../code/renderergl2/glsl\"\n\npushd \"${GLSLPATH}\"\n\nfind *.c -delete\n\npopd\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
