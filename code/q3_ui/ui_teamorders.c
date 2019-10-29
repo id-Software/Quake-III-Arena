@@ -295,7 +295,7 @@ static void UI_TeamOrdersMenu_BuildBotList( void ) {
 	int		numPlayers;
 	int		isBot;
 	int		n;
-	char	playerTeam = '3';
+	char	playerTeam;
 	char	botTeam;
 	char	info[MAX_INFO_STRING];
 
@@ -312,13 +312,15 @@ static void UI_TeamOrdersMenu_BuildBotList( void ) {
 	numPlayers = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 	teamOrdersMenuInfo.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
 
-	for( n = 0; n < numPlayers && teamOrdersMenuInfo.numBots < 9; n++ ) {
-		trap_GetConfigString( CS_PLAYERS + n, info, MAX_INFO_STRING );
+	trap_GetConfigString( CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING );
+	playerTeam = *Info_ValueForKey( info, "t" );
 
+	for( n = 0; n < numPlayers && teamOrdersMenuInfo.numBots < 9; n++ ) {
 		if( n == cs.clientNum ) {
-			playerTeam = *Info_ValueForKey( info, "t" );
 			continue;
 		}
+
+		trap_GetConfigString( CS_PLAYERS + n, info, MAX_INFO_STRING );
 
 		isBot = atoi( Info_ValueForKey( info, "skill" ) );
 		if( !isBot ) {
