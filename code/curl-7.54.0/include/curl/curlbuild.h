@@ -288,19 +288,34 @@
 #  define CURL_SIZEOF_CURL_SOCKLEN_T 4
 
 #elif defined(__LCC__)
-#  define CURL_SIZEOF_LONG           4
-#  define CURL_TYPEOF_CURL_OFF_T     long
-#  define CURL_FORMAT_CURL_OFF_T     "ld"
-#  define CURL_FORMAT_CURL_OFF_TU    "lu"
-#  define CURL_FORMAT_OFF_T          "%ld"
-#  define CURL_SIZEOF_CURL_OFF_T     4
-#  define CURL_SUFFIX_CURL_OFF_T     L
-#  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
-#  define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#  if defined(__e2k__) /* MCST eLbrus C Compiler */
+#    define CURL_SIZEOF_LONG           8
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_FORMAT_OFF_T          "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T     8
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#    define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#    define CURL_PULL_SYS_TYPES_H      1
+#    define CURL_PULL_SYS_SOCKET_H     1
+#  else                /* Local (or Little) C Compiler */
+#    define CURL_SIZEOF_LONG           4
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_FORMAT_OFF_T          "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T     4
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T int
+#    define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#  endif
 
 #elif defined(__SYMBIAN32__)
-#  if defined(__EABI__)  /* Treat all ARM compilers equally */
+#  if defined(__EABI__) /* Treat all ARM compilers equally */
 #    define CURL_SIZEOF_LONG           4
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
@@ -539,7 +554,8 @@
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64__) || \
-        defined(__x86_64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__sparc64__)
+        defined(__x86_64__) || defined(__ppc64__) || defined(__powerpc64__) || defined(__sparc64__) || \
+        defined(__e2k__) /* MCST Elbrus 2000 */
 #    define CURL_SIZEOF_LONG           8
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
