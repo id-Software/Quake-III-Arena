@@ -1,0 +1,47 @@
+name: Build
+on: [push]
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: sudo apt install libsdl2-dev
+    - name: Compile
+      run: make release
+      env:
+        ARCHIVE: 1
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Linux
+        path: build/*.zip
+  windows:
+    name: Windows
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - name: Compile
+      run: |
+        choco install zip
+        make release
+      env:
+        ARCHIVE: 1
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Windows
+        path: build/*.zip
+  macos:
+    name: macOS
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Compile
+      run: make release
+      env:
+        ARCHIVE: 1
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macOS
+        path: build/*.zip
