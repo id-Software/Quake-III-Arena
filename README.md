@@ -1,3 +1,5 @@
+![Build](https://github.com/ioquake/ioq3/workflows/Build/badge.svg)
+
                    ,---------------------------------------.
                    |   _                     _       ____  |
                    |  (_)___  __ _ _  _ __ _| |_____|__ /  |
