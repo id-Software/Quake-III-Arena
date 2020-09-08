@@ -8,7 +8,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
-      run: sudo apt install libsdl2-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsdl2-dev
     - name: Compile
       run: make release
       env:
