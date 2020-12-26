@@ -634,7 +634,19 @@ ifdef MINGW
 
   ifeq ($(COMPILE_PLATFORM),cygwin)
     TOOLS_BINEXT=.exe
-    TOOLS_CC=$(CC)
+
+    # Under cygwin the default of using gcc for TOOLS_CC won't work, so
+    # we need to figure out the appropriate compiler to use, based on the
+    # host architecture that we're running under (as tools run on the host)
+    ifeq ($(COMPILE_ARCH),x86_64)
+      TOOLS_MINGW_PREFIXES=x86_64-w64-mingw32 amd64-mingw32msvc
+    endif
+    ifeq ($(COMPILE_ARCH),x86)
+      TOOLS_MINGW_PREFIXES=i686-w64-mingw32 i586-mingw32msvc i686-pc-mingw32
+    endif
+
+    TOOLS_CC=$(firstword $(strip $(foreach TOOLS_MINGW_PREFIX, $(TOOLS_MINGW_PREFIXES), \
+      $(call bin_path, $(TOOLS_MINGW_PREFIX)-gcc))))
   endif
 
   LIBS= -lws2_32 -lwinmm -lpsapi
