@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "l_libvar.h"
 #include "l_log.h"
 #include "l_memory.h"
@@ -38,20 +38,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "l_precomp.h"
 #include "l_struct.h"
 #include "aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "botlib.h"
+#include "be_aas.h"
 #include "be_aas_funcs.h"
 #include "be_interface.h"
 #include "be_ai_weight.h"		//fuzzy weights
-#include "../game/be_ai_weap.h"
+#include "be_ai_weap.h"
 
 //#define DEBUG_AI_WEAP
 
 //structure field offsets
-#define WEAPON_OFS(x) (int)&(((weaponinfo_t *)0)->x)
-#define PROJECTILE_OFS(x) (int)&(((projectileinfo_t *)0)->x)
+#define WEAPON_OFS(x) (size_t)&(((weaponinfo_t *)0)->x)
+#define PROJECTILE_OFS(x) (size_t)&(((projectileinfo_t *)0)->x)
 
-//weapon definition // bk001212 - static
+//weapon definition
 static fielddef_t weaponinfo_fields[] =
 {
 {"number", WEAPON_OFS(number), FT_INT},						//weapon number
@@ -83,7 +83,7 @@ static fielddef_t weaponinfo_fields[] =
 static fielddef_t projectileinfo_fields[] =
 {
 {"name", PROJECTILE_OFS(name), FT_STRING},					//name of the projectile
-{"model", WEAPON_OFS(model), FT_STRING},						//model of the projectile
+{"model", PROJECTILE_OFS(model), FT_STRING},					//model of the projectile
 {"flags", PROJECTILE_OFS(flags), FT_INT},						//special flags
 {"gravity", PROJECTILE_OFS(gravity), FT_FLOAT},				//amount of gravity applied to the projectile [0,1]
 {"damage", PROJECTILE_OFS(damage), FT_INT},					//damage of the projectile
@@ -153,12 +153,12 @@ bot_weaponstate_t *BotWeaponStateFromHandle(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		botimport.Print(PRT_FATAL, "weapon state handle %d out of range\n", handle);
 		return NULL;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		botimport.Print(PRT_FATAL, "invalid weapon state %d\n", handle);
 		return NULL;
 	} //end if
 	return botweaponstates[handle];
@@ -199,7 +199,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 {
 	int max_weaponinfo, max_projectileinfo;
 	token_t token;
-	char path[MAX_PATH];
+	char path[MAX_QPATH];
 	int i, j;
 	source_t *source;
 	weaponconfig_t *wc;
@@ -219,7 +219,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 		max_projectileinfo = 32;
 		LibVarSet("max_projectileinfo", "32");
 	} //end if
-	strncpy(path, filename, MAX_PATH);
+	Q_strncpyz(path, filename, sizeof(path));
 	PC_SetBaseFolder(BOTFILESBASEFOLDER);
 	source = LoadSourceFile(path);
 	if (!source)
@@ -440,18 +440,6 @@ int BotChooseBestFightWeapon(int weaponstate, int *inventory)
 //===========================================================================
 void BotResetWeaponState(int weaponstate)
 {
-	struct weightconfig_s *weaponweightconfig;
-	int *weaponweightindex;
-	bot_weaponstate_t *ws;
-
-	ws = BotWeaponStateFromHandle(weaponstate);
-	if (!ws) return;
-	weaponweightconfig = ws->weaponweightconfig;
-	weaponweightindex = ws->weaponweightindex;
-
-	//Com_Memset(ws, 0, sizeof(bot_weaponstate_t));
-	ws->weaponweightconfig = weaponweightconfig;
-	ws->weaponweightindex = weaponweightindex;
 } //end of the function BotResetWeaponState
 //========================================================================
 //
@@ -483,12 +471,12 @@ void BotFreeWeaponState(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		botimport.Print(PRT_FATAL, "weapon state handle %d out of range\n", handle);
 		return;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		botimport.Print(PRT_FATAL, "invalid weapon state %d\n", handle);
 		return;
 	} //end if
 	BotFreeWeaponWeights(handle);

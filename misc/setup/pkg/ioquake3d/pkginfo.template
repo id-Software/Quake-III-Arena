@@ -1,0 +1,12 @@
+CLASSES=none
+BASEDIR=/usr/local/share/games
+TZ=PST
+PATH=/sbin:/usr/sbin:/usr/bin:/usr/sadm/install/bin
+PKG=ioquake3d
+NAME=ioquake3 patch data files for Solaris 10 (X11,GLX,SDL)
+VERSION=
+CATEGORY=application,graphics,opengl
+DESC=ioquake3 patch data files for Solaris 10 (http://www.ioquake3.org/)
+VENDOR=http://www.ioquake3.org/
+EMAIL=quake@cojot.name
+PKGSAV=/var/sadm/pkg/ioquake3d/save

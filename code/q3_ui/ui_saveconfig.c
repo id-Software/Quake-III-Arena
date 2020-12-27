@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -85,7 +85,7 @@ static void UI_SaveConfigMenu_SaveEvent( void *ptr, int event ) {
 		return;
 	}
 
-	COM_StripExtension(saveConfig.savename.field.buffer, configname );
+	COM_StripExtension(saveConfig.savename.field.buffer, configname, sizeof(configname));
 	trap_Cmd_ExecuteText( EXEC_APPEND, va( "writeconfig %s.cfg\n", configname ) );
 	UI_PopMenu();
 }

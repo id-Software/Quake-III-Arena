@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -28,10 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * $Archive: /source/code/botlib/l_precomp.h $
  *
  *****************************************************************************/
-
-#ifndef MAX_PATH
-	#define MAX_PATH			MAX_QPATH
-#endif
 
 #ifndef PATH_SEPERATORSTR
 	#if defined(WIN32)|defined(_WIN32)|defined(__NT__)|defined(__WINDOWS__)|defined(__WINDOWS_386__)
@@ -117,7 +113,7 @@ int PC_ExpectTokenType(source_t *source, int type, int subtype, token_t *token);
 int PC_ExpectAnyToken(source_t *source, token_t *token);
 //returns true when the token is available
 int PC_CheckTokenString(source_t *source, char *string);
-//returns true an reads the token when a token with the given type is available
+//returns true and reads the token when a token with the given type is available
 int PC_CheckTokenType(source_t *source, int type, int subtype, token_t *token);
 //skip tokens until the given token string is read
 int PC_SkipUntilString(source_t *source, char *string);
@@ -152,9 +148,9 @@ source_t *LoadSourceMemory(char *ptr, int length, char *name);
 //free the given source
 void FreeSource(source_t *source);
 //print a source error
-void QDECL SourceError(source_t *source, char *str, ...);
+void QDECL SourceError(source_t *source, char *str, ...) __attribute__ ((format (printf, 2, 3)));
 //print a source warning
-void QDECL SourceWarning(source_t *source, char *str, ...);
+void QDECL SourceWarning(source_t *source, char *str, ...)  __attribute__ ((format (printf, 2, 3)));
 
 #ifdef BSPC
 // some of BSPC source does include game/q_shared.h and some does not

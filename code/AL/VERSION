@@ -1,0 +1,5 @@
+This file identifies the version of the AL headers in this directory. If you
+change or update the AL headers in any way, please make sure you also update
+this file.
+
+openal-soft-1.15.1

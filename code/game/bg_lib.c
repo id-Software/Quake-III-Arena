@@ -3,7 +3,9 @@
 // bg_lib,c -- standard C library replacement routines used by code
 // compiled for the virtual machine
 
-#include "q_shared.h"
+#ifdef Q3_VM
+
+#include "../qcommon/q_shared.h"
 
 /*-
  * Copyright (c) 1992, 1993
@@ -17,11 +19,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
+ * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,6 +36,8 @@
  * SUCH DAMAGE.
  */
 
+#include "bg_lib.h"
+
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
 static char sccsid[] = "@(#)qsort.c	8.1 (Berkeley) 6/4/93";
@@ -45,27 +45,18 @@ static char sccsid[] = "@(#)qsort.c	8.1 (Berkeley) 6/4/93";
 static const char rcsid[] =
 #endif /* LIBC_SCCS and not lint */
 
-// bk001127 - needed for DLL's
-#if !defined( Q3_VM )
-typedef int		 cmp_t(const void *, const void *);
-#endif
-
 static char* med3(char *, char *, char *, cmp_t *);
 static void	 swapfunc(char *, char *, int, int);
-
-#ifndef min
-#define min(a, b)	(a) < (b) ? a : b
-#endif
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 #define swapcode(TYPE, parmi, parmj, n) { 		\
 	long i = (n) / sizeof (TYPE); 			\
-	register TYPE *pi = (TYPE *) (parmi); 		\
-	register TYPE *pj = (TYPE *) (parmj); 		\
+	TYPE *pi = (TYPE *) (parmi); 			\
+	TYPE *pj = (TYPE *) (parmj); 			\
 	do { 						\
-		register TYPE	t = *pi;		\
+		TYPE	t = *pi;			\
 		*pi++ = *pj;				\
 		*pj++ = t;				\
         } while (--i > 0);				\
@@ -172,9 +163,9 @@ loop:	SWAPINIT(a, es);
 	}
 
 	pn = (char *)a + n * es;
-	r = min(pa - (char *)a, pb - pa);
+	r = MIN(pa - (char *)a, pb - pa);
 	vecswap(a, pb - r, r);
-	r = min(pd - pc, pn - pd - es);
+	r = MIN(pd - pc, pn - pd - es);
 	vecswap(pb, pn - r, r);
 	if ((r = pb - pa) > es)
 		qsort(a, r / es, es, cmp);
@@ -188,12 +179,6 @@ loop:	SWAPINIT(a, es);
 }
 
 //==================================================================================
-
-
-// this file is excluded from release builds because of intrinsics
-
-// bk001211 - gcc errors on compiling strcpy:  parse error before `__extension__'
-#if defined ( Q3_VM )
 
 size_t strlen( const char *string ) {
 	const char	*s;
@@ -248,7 +233,29 @@ char *strchr( const char *string, int c ) {
 		}
 		string++;
 	}
-	return (char *)0;
+	
+	if(c)
+		return NULL;
+	else
+		return (char *) string;
+}
+
+char *strrchr(const char *string, int c)
+{
+	const char *found = NULL;
+	
+	while(*string)
+	{
+		if(*string == c)
+			found = string;
+
+		string++;
+	}
+	
+	if(c)
+		return (char *) found;
+	else
+		return (char *) string;
 }
 
 char *strstr( const char *string, const char *strCharSet ) {
@@ -267,12 +274,7 @@ char *strstr( const char *string, const char *strCharSet ) {
 	}
 	return (char *)0;
 }
-#endif // bk001211
 
-// bk001120 - presumably needed for Mac
-//#if !defined(_MSC_VER) && !defined(__linux__)
-// bk001127 - undid undo
-#if defined ( Q3_VM )
 int tolower( int c ) {
 	if ( c >= 'A' && c <= 'Z' ) {
 		c += 'a' - 'A';
@@ -288,21 +290,29 @@ int toupper( int c ) {
 	return c;
 }
 
-#endif
-//#ifndef _MSC_VER
+void *memmove(void *dest, const void *src, size_t count)
+{
+	size_t		i;
 
-void *memmove( void *dest, const void *src, size_t count ) {
-	int		i;
-
-	if ( dest > src ) {
-		for ( i = count-1 ; i >= 0 ; i-- ) {
-			((char *)dest)[i] = ((char *)src)[i];
+	if(count)
+	{
+		if(dest > src)
+		{
+			i = count;
+			
+			do
+			{
+				i--;
+				((char *) dest)[i] = ((char *) src)[i];
+			} while(i > 0);
 		}
-	} else {
-		for ( i = 0 ; i < count ; i++ ) {
-			((char *)dest)[i] = ((char *)src)[i];
+		else
+		{
+			for(i = 0; i < count; i++)
+				((char *) dest)[i] = ((char *) src)[i];
 		}
 	}
+	
 	return dest;
 }
 
@@ -758,13 +768,46 @@ double atan2( double y, double x ) {
 
 #endif
 
-#ifdef Q3_VM
-// bk001127 - guarded this tan replacement 
-// ld: undefined versioned symbol name tan@@GLIBC_2.0
+/*
+===============
+powN
+
+Raise a double to a integer power
+===============
+*/
+static double powN( double base, int exp )
+{
+	if( exp >= 0 )
+	{
+		double result = 1.0;
+
+		// calculate x, x^2, x^4, ... by repeated squaring
+		// and multiply together the ones corresponding to the
+		// binary digits of the exponent
+		// e.g. x^73 = x^(1 + 8 + 64) = x * x^8 * x^64
+		while( exp > 0 )
+		{
+			if( exp % 2 == 1 )
+				result *= base;
+
+			base *= base;
+			exp /= 2;
+		}
+
+		return result;
+	}
+	// if exp is INT_MIN, the next clause will be upset,
+	// because -exp isn't representable
+	else if( exp == INT_MIN )
+		return powN( base, exp + 1 ) / base;
+	// x < 0
+	else
+		return 1.0 / powN( base, -exp );
+}
+
 double tan( double x ) {
 	return sin(x) / cos(x);
 }
-#endif
 
 
 static int randSeed = 0;
@@ -849,7 +892,7 @@ double _atof( const char **stringPtr ) {
 	const char	*string;
 	float sign;
 	float value;
-	int		c = '0'; // bk001211 - uninitialized use possible
+	int		c = '0';
 
 	string = *stringPtr;
 
@@ -913,12 +956,191 @@ double _atof( const char **stringPtr ) {
 	return value * sign;
 }
 
+/*
+==============
+strtod
 
-// bk001120 - presumably needed for Mac
-//#if !defined ( _MSC_VER ) && ! defined ( __linux__ )
+Without an errno variable, this is a fair bit less useful than it is in libc
+but it's still a fair bit more capable than atof or _atof
+Handles inf[inity], nan (ignoring case), hexadecimals, and decimals
+Handles decimal exponents like 10e10 and hex exponents like 0x7f8p20
+10e10 == 10000000000 (power of ten)
+0x7f8p20 == 0x7f800000 (decimal power of two)
+The variable pointed to by endptr will hold the location of the first character
+in the nptr string that was not used in the conversion
+==============
+*/
+double strtod( const char *nptr, char **endptr )
+{
+	double res;
+	qboolean neg = qfalse;
 
-// bk001127 - undid undo
-#if defined ( Q3_VM )
+	// skip whitespace
+	while( isspace( *nptr ) )
+		nptr++;
+
+	// special string parsing
+	if( Q_stricmpn( nptr, "nan", 3 ) == 0 )
+	{
+		floatint_t nan;
+
+		if( endptr )
+			*endptr = (char *)&nptr[3];
+
+		// nan can be followed by a bracketed number (in hex, octal,
+		// or decimal) which is then put in the mantissa
+		// this can be used to generate signalling or quiet NaNs, for
+		// example (though I doubt it'll ever be used)
+		// note that nan(0) is infinity!
+		if( nptr[3] == '(' )
+		{
+			char *end;
+			int mantissa = strtol( &nptr[4], &end, 0 );
+			if( *end == ')' )
+			{
+				nan.ui = 0x7f800000 | ( mantissa & 0x7fffff );
+				if( endptr )
+					*endptr = &end[1];
+				return nan.f;
+			}
+		}
+		nan.ui = 0x7fffffff;
+		return nan.f;
+	}
+	if( Q_stricmpn( nptr, "inf", 3 ) == 0 )
+	{
+		floatint_t inf;
+		inf.ui = 0x7f800000;
+		if( endptr == NULL )
+			return inf.f;
+		if( Q_stricmpn( &nptr[3], "inity", 5 ) == 0 )
+			*endptr = (char *)&nptr[8];
+		else
+			*endptr = (char *)&nptr[3];
+		return inf.f;
+	}
+
+	// normal numeric parsing
+	// sign
+	if( *nptr == '-' )
+	{
+		nptr++;
+		neg = qtrue;
+	}
+	else if( *nptr == '+' )
+		nptr++;
+	// hex
+	if( Q_stricmpn( nptr, "0x", 2 ) == 0 )
+	{
+		// track if we use any digits
+		const char *s = &nptr[1], *end = s;
+		nptr += 2;
+		res = 0;
+		while( qtrue )
+		{
+			if( isdigit( *nptr ) )
+				res = 16 * res + ( *nptr++ - '0' );
+			else if( *nptr >= 'A' && *nptr <= 'F' )
+				res = 16 * res + 10 + *nptr++ - 'A';
+			else if( *nptr >= 'a' && *nptr <= 'f' )
+				res = 16 * res + 10 + *nptr++ - 'a';
+			else
+				break;
+		}
+		// if nptr moved, save it
+		if( end + 1 < nptr )
+			end = nptr;
+		if( *nptr == '.' )
+		{
+			float place;
+			nptr++;
+			// 1.0 / 16.0 == 0.0625
+			// I don't expect the float accuracy to hold out for
+			// very long but since we need to know the length of
+			// the string anyway we keep on going regardless
+			for( place = 0.0625;; place /= 16.0 )
+			{
+				if( isdigit( *nptr ) )
+					res += place * ( *nptr++ - '0' );
+				else if( *nptr >= 'A' && *nptr <= 'F' )
+					res += place * ( 10 + *nptr++ - 'A' );
+				else if( *nptr >= 'a' && *nptr <= 'f' )
+					res += place * ( 10 + *nptr++ - 'a' );
+				else
+					break;
+			}
+			if( end < nptr )
+				end = nptr;
+		}
+		// parse an optional exponent, representing multiplication
+		// by a power of two
+		// exponents are only valid if we encountered at least one
+		// digit already (and have therefore set end to something)
+		if( end != s && tolower( *nptr ) == 'p' )
+		{
+			int exp;
+			// apparently (confusingly) the exponent should be
+			// decimal
+			exp = strtol( &nptr[1], (char **)&end, 10 );
+			if( &nptr[1] == end )
+			{
+				// no exponent
+				if( endptr )
+					*endptr = (char *)nptr;
+				return res;
+			}
+
+			res *= powN( 2, exp );
+		}
+		if( endptr )
+			*endptr = (char *)end;
+		return res;
+	}
+	// decimal
+	else
+	{
+		// track if we find any digits
+		const char *end = nptr, *p = nptr;
+		// this is most of the work
+		for( res = 0; isdigit( *nptr );
+			res = 10 * res + *nptr++ - '0' );
+		// if nptr moved, we read something
+		if( end < nptr )
+			end = nptr;
+		if( *nptr == '.' )
+		{
+			// fractional part
+			float place;
+			nptr++;
+			for( place = 0.1; isdigit( *nptr ); place /= 10.0 )
+				res += ( *nptr++ - '0' ) * place;
+			// if nptr moved, we read something
+			if( end + 1 < nptr )
+				end = nptr;
+		}
+		// exponent
+		// meaningless without having already read digits, so check
+		// we've set end to something
+		if( p != end && tolower( *nptr ) == 'e' )
+		{
+			int exp;
+			exp = strtol( &nptr[1], (char **)&end, 10 );
+			if( &nptr[1] == end )
+			{
+				// no exponent
+				if( endptr )
+					*endptr = (char *)nptr;
+				return res;
+			}
+
+			res *= powN( 10, exp );
+		}
+		if( endptr )
+			*endptr = (char *)end;
+		return res;
+	}
+}
+
 int atoi( const char *string ) {
 	int		sign;
 	int		value;
@@ -1014,6 +1236,97 @@ int _atoi( const char **stringPtr ) {
 	return value * sign;
 }
 
+/*
+==============
+strtol
+
+Handles any base from 2 to 36. If base is 0 then it guesses
+decimal, hex, or octal based on the format of the number (leading 0 or 0x)
+Will not overflow - returns LONG_MIN or LONG_MAX as appropriate
+*endptr is set to the location of the first character not used
+==============
+*/
+long strtol( const char *nptr, char **endptr, int base )
+{
+	long res;
+	qboolean pos = qtrue;
+
+	if( endptr )
+		*endptr = (char *)nptr;
+	// bases other than 0, 2, 8, 16 are very rarely used, but they're
+	// not much extra effort to support
+	if( base < 0 || base == 1 || base > 36 )
+		return 0;
+	// skip leading whitespace
+	while( isspace( *nptr ) )
+		nptr++;
+	// sign
+	if( *nptr == '-' )
+	{
+		nptr++;
+		pos = qfalse;
+	}
+	else if( *nptr == '+' )
+		nptr++;
+	// look for base-identifying sequences e.g. 0x for hex, 0 for octal
+	if( nptr[0] == '0' )
+	{
+		nptr++;
+		// 0 is always a valid digit
+		if( endptr )
+			*endptr = (char *)nptr;
+		if( *nptr == 'x' || *nptr == 'X' )
+		{
+			if( base != 0 && base != 16 )
+			{
+				// can't be hex, reject x (accept 0)
+				if( endptr )
+					*endptr = (char *)nptr;
+				return 0;
+			}
+			nptr++;
+			base = 16;
+		}
+		else if( base == 0 )
+			base = 8;
+	}
+	else if( base == 0 )
+		base = 10;
+	res = 0;
+	while( qtrue )
+	{
+		int val;
+		if( isdigit( *nptr ) )
+			val = *nptr - '0';
+		else if( islower( *nptr ) )
+			val = 10 + *nptr - 'a';
+		else if( isupper( *nptr ) )
+			val = 10 + *nptr - 'A';
+		else
+			break;
+		if( val >= base )
+			break;
+		// we go negative because LONG_MIN is further from 0 than
+		// LONG_MAX
+		if( res < ( LONG_MIN + val ) / base )
+			res = LONG_MIN; // overflow
+		else
+			res = res * base - val;
+		nptr++;
+		if( endptr )
+			*endptr = (char *)nptr;
+	}
+	if( pos )
+	{
+		// can't represent LONG_MIN positive
+		if( res == LONG_MIN )
+			res = LONG_MAX;
+		else
+			res = -res;
+	}
+	return res;
+}
+
 int abs( int n ) {
 	return n < 0 ? -n : n;
 }
@@ -1026,274 +1339,738 @@ double fabs( double x ) {
 
 //=========================================================
 
-
-#define ALT			0x00000001		/* alternate form */
-#define HEXPREFIX	0x00000002		/* add 0x or 0X prefix */
-#define LADJUST		0x00000004		/* left adjustment */
-#define LONGDBL		0x00000008		/* long double */
-#define LONGINT		0x00000010		/* long integer */
-#define QUADINT		0x00000020		/* quad integer */
-#define SHORTINT	0x00000040		/* short integer */
-#define ZEROPAD		0x00000080		/* zero (as opposed to blank) pad */
-#define FPT			0x00000100		/* floating point number */
-
-#define to_digit(c)		((c) - '0')
-#define is_digit(c)		((unsigned)to_digit(c) <= 9)
-#define to_char(n)		((n) + '0')
-
-void AddInt( char **buf_p, int val, int width, int flags ) {
-	char	text[32];
-	int		digits;
-	int		signedVal;
-	char	*buf;
-
-	digits = 0;
-	signedVal = val;
-	if ( val < 0 ) {
-		val = -val;
-	}
-	do {
-		text[digits++] = '0' + val % 10;
-		val /= 10;
-	} while ( val );
-
-	if ( signedVal < 0 ) {
-		text[digits++] = '-';
-	}
-
-	buf = *buf_p;
-
-	if( !( flags & LADJUST ) ) {
-		while ( digits < width ) {
-			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
-			width--;
-		}
-	}
-
-	while ( digits-- ) {
-		*buf++ = text[digits];
-		width--;
-	}
-
-	if( flags & LADJUST ) {
-		while ( width-- ) {
-			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
-		}
-	}
-
-	*buf_p = buf;
-}
-
-void AddFloat( char **buf_p, float fval, int width, int prec ) {
-	char	text[32];
-	int		digits;
-	float	signedVal;
-	char	*buf;
-	int		val;
-
-	// get the sign
-	signedVal = fval;
-	if ( fval < 0 ) {
-		fval = -fval;
-	}
-
-	// write the float number
-	digits = 0;
-	val = (int)fval;
-	do {
-		text[digits++] = '0' + val % 10;
-		val /= 10;
-	} while ( val );
-
-	if ( signedVal < 0 ) {
-		text[digits++] = '-';
-	}
-
-	buf = *buf_p;
-
-	while ( digits < width ) {
-		*buf++ = ' ';
-		width--;
-	}
-
-	while ( digits-- ) {
-		*buf++ = text[digits];
-	}
-
-	*buf_p = buf;
-
-	if (prec < 0)
-		prec = 6;
-	// write the fraction
-	digits = 0;
-	while (digits < prec) {
-		fval -= (int) fval;
-		fval *= 10.0;
-		val = (int) fval;
-		text[digits++] = '0' + val % 10;
-	}
-
-	if (digits > 0) {
-		buf = *buf_p;
-		*buf++ = '.';
-		for (prec = 0; prec < digits; prec++) {
-			*buf++ = text[prec];
-		}
-		*buf_p = buf;
-	}
-}
-
-
-void AddString( char **buf_p, char *string, int width, int prec ) {
-	int		size;
-	char	*buf;
-
-	buf = *buf_p;
-
-	if ( string == NULL ) {
-		string = "(null)";
-		prec = -1;
-	}
-
-	if ( prec >= 0 ) {
-		for( size = 0; size < prec; size++ ) {
-			if( string[size] == '\0' ) {
-				break;
-			}
-		}
-	}
-	else {
-		size = strlen( string );
-	}
-
-	width -= size;
-
-	while( size-- ) {
-		*buf++ = *string++;
-	}
-
-	while( width-- > 0 ) {
-		*buf++ = ' ';
-	}
-
-	*buf_p = buf;
-}
+/* 
+ * New implementation by Patrick Powell and others for vsnprintf.
+ * Supports length checking in strings.
+*/
 
 /*
-vsprintf
+ * Copyright Patrick Powell 1995
+ * This code is based on code written by Patrick Powell (papowell@astart.com)
+ * It may be used for any purpose as long as this notice remains intact
+ * on all source code distributions
+ */
 
-I'm not going to support a bunch of the more arcane stuff in here
-just to keep it simpler.  For example, the '*' and '$' are not
-currently supported.  I've tried to make it so that it will just
-parse and ignore formats we don't support.
-*/
-int vsprintf( char *buffer, const char *fmt, va_list argptr ) {
-	int		*arg;
-	char	*buf_p;
-	char	ch;
-	int		flags;
-	int		width;
-	int		prec;
-	int		n;
-	char	sign;
+/**************************************************************
+ * Original:
+ * Patrick Powell Tue Apr 11 09:48:21 PDT 1995
+ * A bombproof version of doprnt (dopr) included.
+ * Sigh.  This sort of thing is always nasty do deal with.  Note that
+ * the version here does not include floating point...
+ *
+ * snprintf() is used instead of sprintf() as it does limit checks
+ * for string length.  This covers a nasty loophole.
+ *
+ * The other functions are there to prevent NULL pointers from
+ * causing nast effects.
+ *
+ * More Recently:
+ *  Brandon Long <blong@fiction.net> 9/15/96 for mutt 0.43
+ *  This was ugly.  It is still ugly.  I opted out of floating point
+ *  numbers, but the formatter understands just about everything
+ *  from the normal C string format, at least as far as I can tell from
+ *  the Solaris 2.5 printf(3S) man page.
+ *
+ *  Brandon Long <blong@fiction.net> 10/22/97 for mutt 0.87.1
+ *    Ok, added some minimal floating point support, which means this
+ *    probably requires libm on most operating systems.  Don't yet
+ *    support the exponent (e,E) and sigfig (g,G).  Also, fmtint()
+ *    was pretty badly broken, it just wasn't being exercised in ways
+ *    which showed it, so that's been fixed.  Also, formatted the code
+ *    to mutt conventions, and removed dead code left over from the
+ *    original.  Also, there is now a builtin-test, just compile with:
+ *           gcc -DTEST_SNPRINTF -o snprintf snprintf.c -lm
+ *    and run snprintf for results.
+ * 
+ *  Thomas Roessler <roessler@guug.de> 01/27/98 for mutt 0.89i
+ *    The PGP code was using unsigned hexadecimal formats. 
+ *    Unfortunately, unsigned formats simply didn't work.
+ *
+ *  Michael Elkins <me@cs.hmc.edu> 03/05/98 for mutt 0.90.8
+ *    The original code assumed that both snprintf() and vsnprintf() were
+ *    missing.  Some systems only have snprintf() but not vsnprintf(), so
+ *    the code is now broken down under HAVE_SNPRINTF and HAVE_VSNPRINTF.
+ *
+ *  Andrew Tridgell (tridge@samba.org) Oct 1998
+ *    fixed handling of %.0f
+ *    added test for HAVE_LONG_DOUBLE
+ *
+ *  Russ Allbery <rra@stanford.edu> 2000-08-26
+ *    fixed return value to comply with C99
+ *    fixed handling of snprintf(NULL, ...)
+ *
+ *  Hrvoje Niksic <hniksic@arsdigita.com> 2000-11-04
+ *    include <config.h> instead of "config.h".
+ *    moved TEST_SNPRINTF stuff out of HAVE_SNPRINTF ifdef.
+ *    include <stdio.h> for NULL.
+ *    added support and test cases for long long.
+ *    don't declare argument types to (v)snprintf if stdarg is not used.
+ *    use int instead of short int as 2nd arg to va_arg.
+ *
+ **************************************************************/
 
-	buf_p = buffer;
-	arg = (int *)argptr;
+/* BDR 2002-01-13  %e and %g were being ignored.  Now do something,
+   if not necessarily correctly */
 
-	while( qtrue ) {
-		// run through the format string until we hit a '%' or '\0'
-		for ( ch = *fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++ ) {
-			*buf_p++ = ch;
-		}
-		if ( ch == '\0' ) {
-			goto done;
-		}
-
-		// skip over the '%'
-		fmt++;
-
-		// reset formatting state
-		flags = 0;
-		width = 0;
-		prec = -1;
-		sign = '\0';
-
-rflag:
-		ch = *fmt++;
-reswitch:
-		switch( ch ) {
-		case '-':
-			flags |= LADJUST;
-			goto rflag;
-		case '.':
-			n = 0;
-			while( is_digit( ( ch = *fmt++ ) ) ) {
-				n = 10 * n + ( ch - '0' );
-			}
-			prec = n < 0 ? -1 : n;
-			goto reswitch;
-		case '0':
-			flags |= ZEROPAD;
-			goto rflag;
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			n = 0;
-			do {
-				n = 10 * n + ( ch - '0' );
-				ch = *fmt++;
-			} while( is_digit( ch ) );
-			width = n;
-			goto reswitch;
-		case 'c':
-			*buf_p++ = (char)*arg;
-			arg++;
-			break;
-		case 'd':
-		case 'i':
-			AddInt( &buf_p, *arg, width, flags );
-			arg++;
-			break;
-		case 'f':
-			AddFloat( &buf_p, *(double *)arg, width, prec );
-#ifdef __LCC__
-			arg += 1;	// everything is 32 bit in my compiler
+#if (SIZEOF_LONG_DOUBLE > 0)
+/* #ifdef HAVE_LONG_DOUBLE */
+#define LDOUBLE long double
 #else
-			arg += 2;
+#define LDOUBLE double
 #endif
-			break;
-		case 's':
-			AddString( &buf_p, (char *)*arg, width, prec );
-			arg++;
-			break;
-		case '%':
-			*buf_p++ = ch;
-			break;
-		default:
-			*buf_p++ = (char)*arg;
-			arg++;
-			break;
-		}
-	}
 
-done:
-	*buf_p = 0;
-	return buf_p - buffer;
+#if (SIZEOF_LONG_LONG > 0)
+/* #ifdef HAVE_LONG_LONG */
+# define LLONG long long
+#else
+# define LLONG long
+#endif
+
+static int dopr (char *buffer, size_t maxlen, const char *format, 
+                 va_list args);
+static int fmtstr (char *buffer, size_t *currlen, size_t maxlen,
+		   char *value, int flags, int min, int max);
+static int fmtint (char *buffer, size_t *currlen, size_t maxlen,
+		   LLONG value, int base, int min, int max, int flags);
+static int fmtfp (char *buffer, size_t *currlen, size_t maxlen,
+		  LDOUBLE fvalue, int min, int max, int flags);
+static int dopr_outch (char *buffer, size_t *currlen, size_t maxlen, char c );
+
+/*
+ * dopr(): poor man's version of doprintf
+ */
+
+/* format read states */
+#define DP_S_DEFAULT 0
+#define DP_S_FLAGS   1
+#define DP_S_MIN     2
+#define DP_S_DOT     3
+#define DP_S_MAX     4
+#define DP_S_MOD     5
+#define DP_S_MOD_L   6
+#define DP_S_CONV    7
+#define DP_S_DONE    8
+
+/* format flags - Bits */
+#define DP_F_MINUS 	(1 << 0)
+#define DP_F_PLUS  	(1 << 1)
+#define DP_F_SPACE 	(1 << 2)
+#define DP_F_NUM   	(1 << 3)
+#define DP_F_ZERO  	(1 << 4)
+#define DP_F_UP    	(1 << 5)
+#define DP_F_UNSIGNED 	(1 << 6)
+
+/* Conversion Flags */
+#define DP_C_SHORT   1
+#define DP_C_LONG    2
+#define DP_C_LLONG   3
+#define DP_C_LDOUBLE 4
+
+#define char_to_int(p) (p - '0')
+
+static int dopr (char *buffer, size_t maxlen, const char *format, va_list args)
+{
+  char ch;
+  LLONG value;
+  LDOUBLE fvalue;
+  char *strvalue;
+  int min;
+  int max;
+  int state;
+  int flags;
+  int cflags;
+  int total;
+  size_t currlen;
+  
+  state = DP_S_DEFAULT;
+  currlen = flags = cflags = min = 0;
+  max = -1;
+  ch = *format++;
+  total = 0;
+
+  while (state != DP_S_DONE)
+  {
+    if (ch == '\0')
+      state = DP_S_DONE;
+
+    switch(state) 
+    {
+    case DP_S_DEFAULT:
+      if (ch == '%') 
+	state = DP_S_FLAGS;
+      else 
+	total += dopr_outch (buffer, &currlen, maxlen, ch);
+      ch = *format++;
+      break;
+    case DP_S_FLAGS:
+      switch (ch) 
+      {
+      case '-':
+	flags |= DP_F_MINUS;
+        ch = *format++;
+	break;
+      case '+':
+	flags |= DP_F_PLUS;
+        ch = *format++;
+	break;
+      case ' ':
+	flags |= DP_F_SPACE;
+        ch = *format++;
+	break;
+      case '#':
+	flags |= DP_F_NUM;
+        ch = *format++;
+	break;
+      case '0':
+	flags |= DP_F_ZERO;
+        ch = *format++;
+	break;
+      default:
+	state = DP_S_MIN;
+	break;
+      }
+      break;
+    case DP_S_MIN:
+      if ('0' <= ch && ch <= '9')
+      {
+	min = 10*min + char_to_int (ch);
+	ch = *format++;
+      } 
+      else if (ch == '*') 
+      {
+	min = va_arg (args, int);
+	ch = *format++;
+	state = DP_S_DOT;
+      } 
+      else 
+	state = DP_S_DOT;
+      break;
+    case DP_S_DOT:
+      if (ch == '.') 
+      {
+	state = DP_S_MAX;
+	ch = *format++;
+      } 
+      else 
+	state = DP_S_MOD;
+      break;
+    case DP_S_MAX:
+      if ('0' <= ch && ch <= '9')
+      {
+	if (max < 0)
+	  max = 0;
+	max = 10*max + char_to_int (ch);
+	ch = *format++;
+      } 
+      else if (ch == '*') 
+      {
+	max = va_arg (args, int);
+	ch = *format++;
+	state = DP_S_MOD;
+      } 
+      else 
+	state = DP_S_MOD;
+      break;
+    case DP_S_MOD:
+      switch (ch) 
+      {
+      case 'h':
+	cflags = DP_C_SHORT;
+	ch = *format++;
+	break;
+      case 'l':
+	cflags = DP_C_LONG;
+	ch = *format++;
+	break;
+      case 'L':
+	cflags = DP_C_LDOUBLE;
+	ch = *format++;
+	break;
+      default:
+	break;
+      }
+      if (cflags != DP_C_LONG)
+	state = DP_S_CONV;
+      else
+	state = DP_S_MOD_L;
+      break;
+    case DP_S_MOD_L:
+      switch (ch)
+	{
+	case 'l':
+	  cflags = DP_C_LLONG;
+	  ch = *format++;
+	  break;
+	default:
+	  break;
+	}
+      state = DP_S_CONV;
+      break;
+    case DP_S_CONV:
+      switch (ch) 
+      {
+      case 'd':
+      case 'i':
+	if (cflags == DP_C_SHORT) 
+	  value = (short int)va_arg (args, int);
+	else if (cflags == DP_C_LONG)
+	  value = va_arg (args, long int);
+	else if (cflags == DP_C_LLONG)
+	  value = va_arg (args, LLONG);
+	else
+	  value = va_arg (args, int);
+	total += fmtint (buffer, &currlen, maxlen, value, 10, min, max, flags);
+	break;
+      case 'o':
+	flags |= DP_F_UNSIGNED;
+	if (cflags == DP_C_SHORT)
+//	  value = (unsigned short int) va_arg (args, unsigned short int); // Thilo: This does not work because the rcc compiler cannot do that cast correctly.
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1); // Using this workaround instead.
+	else if (cflags == DP_C_LONG)
+	  value = va_arg (args, unsigned long int);
+	else if (cflags == DP_C_LLONG)
+	  value = va_arg (args, unsigned LLONG);
+	else
+	  value = va_arg (args, unsigned int);
+	total += fmtint (buffer, &currlen, maxlen, value, 8, min, max, flags);
+	break;
+      case 'u':
+	flags |= DP_F_UNSIGNED;
+	if (cflags == DP_C_SHORT)
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1);
+	else if (cflags == DP_C_LONG)
+	  value = va_arg (args, unsigned long int);
+	else if (cflags == DP_C_LLONG)
+	  value = va_arg (args, unsigned LLONG);
+	else
+	  value = va_arg (args, unsigned int);
+	total += fmtint (buffer, &currlen, maxlen, value, 10, min, max, flags);
+	break;
+      case 'X':
+	flags |= DP_F_UP;
+      case 'x':
+	flags |= DP_F_UNSIGNED;
+	if (cflags == DP_C_SHORT)
+	  value = va_arg (args, unsigned int) & ( (1 << sizeof(unsigned short int) * 8) - 1);
+	else if (cflags == DP_C_LONG)
+	  value = va_arg (args, unsigned long int);
+	else if (cflags == DP_C_LLONG)
+	  value = va_arg (args, unsigned LLONG);
+	else
+	  value = va_arg (args, unsigned int);
+	total += fmtint (buffer, &currlen, maxlen, value, 16, min, max, flags);
+	break;
+      case 'f':
+	if (cflags == DP_C_LDOUBLE)
+	  fvalue = va_arg (args, LDOUBLE);
+	else
+	  fvalue = va_arg (args, double);
+	/* um, floating point? */
+	total += fmtfp (buffer, &currlen, maxlen, fvalue, min, max, flags);
+	break;
+      case 'E':
+	flags |= DP_F_UP;
+      case 'e':
+	if (cflags == DP_C_LDOUBLE)
+	  fvalue = va_arg (args, LDOUBLE);
+	else
+	  fvalue = va_arg (args, double);
+	/* um, floating point? */
+	total += fmtfp (buffer, &currlen, maxlen, fvalue, min, max, flags);
+	break;
+      case 'G':
+	flags |= DP_F_UP;
+      case 'g':
+	if (cflags == DP_C_LDOUBLE)
+	  fvalue = va_arg (args, LDOUBLE);
+	else
+	  fvalue = va_arg (args, double);
+	/* um, floating point? */
+	total += fmtfp (buffer, &currlen, maxlen, fvalue, min, max, flags);
+	break;
+      case 'c':
+	total += dopr_outch (buffer, &currlen, maxlen, va_arg (args, int));
+	break;
+      case 's':
+	strvalue = va_arg (args, char *);
+	total += fmtstr (buffer, &currlen, maxlen, strvalue, flags, min, max);
+	break;
+      case 'p':
+	strvalue = va_arg (args, void *);
+	total += fmtint (buffer, &currlen, maxlen, (long) strvalue, 16, min,
+                         max, flags);
+	break;
+      case 'n':
+	if (cflags == DP_C_SHORT) 
+	{
+	  short int *num;
+	  num = va_arg (args, short int *);
+	  *num = currlen;
+        }
+	else if (cflags == DP_C_LONG) 
+	{
+	  long int *num;
+	  num = va_arg (args, long int *);
+	  *num = currlen;
+        } 
+	else if (cflags == DP_C_LLONG) 
+	{
+	  LLONG *num;
+	  num = va_arg (args, LLONG *);
+	  *num = currlen;
+        } 
+	else 
+	{
+	  int *num;
+	  num = va_arg (args, int *);
+	  *num = currlen;
+        }
+	break;
+      case '%':
+	total += dopr_outch (buffer, &currlen, maxlen, ch);
+	break;
+      case 'w':
+	/* not supported yet, treat as next char */
+	ch = *format++;
+	break;
+      default:
+	/* Unknown, skip */
+	break;
+      }
+      ch = *format++;
+      state = DP_S_DEFAULT;
+      flags = cflags = min = 0;
+      max = -1;
+      break;
+    case DP_S_DONE:
+      break;
+    default:
+      /* hmm? */
+      break; /* some picky compilers need this */
+    }
+  }
+  if (maxlen > 0)
+    buffer[currlen] = '\0';
+  return total;
+}
+
+static int fmtstr (char *buffer, size_t *currlen, size_t maxlen,
+                   char *value, int flags, int min, int max)
+{
+  int padlen, strln;     /* amount to pad */
+  int cnt = 0;
+  int total = 0;
+  
+  if (value == 0)
+  {
+    value = "<NULL>";
+  }
+
+  for (strln = 0; value[strln]; ++strln); /* strlen */
+  if (max >= 0 && max < strln)
+    strln = max;
+  padlen = min - strln;
+  if (padlen < 0) 
+    padlen = 0;
+  if (flags & DP_F_MINUS) 
+    padlen = -padlen; /* Left Justify */
+
+  while (padlen > 0)
+  {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    --padlen;
+  }
+  while (*value && ((max < 0) || (cnt < max)))
+  {
+    total += dopr_outch (buffer, currlen, maxlen, *value++);
+    ++cnt;
+  }
+  while (padlen < 0)
+  {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    ++padlen;
+  }
+  return total;
+}
+
+/* Have to handle DP_F_NUM (ie 0x and 0 alternates) */
+
+static int fmtint (char *buffer, size_t *currlen, size_t maxlen,
+		   LLONG value, int base, int min, int max, int flags)
+{
+  int signvalue = 0;
+  unsigned LLONG uvalue;
+  char convert[24];
+  int place = 0;
+  int spadlen = 0; /* amount to space pad */
+  int zpadlen = 0; /* amount to zero pad */
+  const char *digits;
+  int total = 0;
+  
+  if (max < 0)
+    max = 0;
+
+  uvalue = value;
+
+  if(!(flags & DP_F_UNSIGNED))
+  {
+    if( value < 0 ) {
+      signvalue = '-';
+      uvalue = -value;
+    }
+    else
+      if (flags & DP_F_PLUS)  /* Do a sign (+/i) */
+	signvalue = '+';
+    else
+      if (flags & DP_F_SPACE)
+	signvalue = ' ';
+  }
+  
+  if (flags & DP_F_UP)
+    /* Should characters be upper case? */
+    digits = "0123456789ABCDEF";
+  else
+    digits = "0123456789abcdef";
+
+  do {
+    convert[place++] = digits[uvalue % (unsigned)base];
+    uvalue = (uvalue / (unsigned)base );
+  } while(uvalue && (place < sizeof (convert)));
+  if (place == sizeof (convert)) place--;
+  convert[place] = 0;
+
+  zpadlen = max - place;
+  spadlen = min - MAX (max, place) - (signvalue ? 1 : 0);
+  if (zpadlen < 0) zpadlen = 0;
+  if (spadlen < 0) spadlen = 0;
+  if (flags & DP_F_ZERO)
+  {
+    zpadlen = MAX(zpadlen, spadlen);
+    spadlen = 0;
+  }
+  if (flags & DP_F_MINUS) 
+    spadlen = -spadlen; /* Left Justifty */
+
+#ifdef DEBUG_SNPRINTF
+  dprint (1, (debugfile, "zpad: %d, spad: %d, min: %d, max: %d, place: %d\n",
+      zpadlen, spadlen, min, max, place));
+#endif
+
+  /* Spaces */
+  while (spadlen > 0) 
+  {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    --spadlen;
+  }
+
+  /* Sign */
+  if (signvalue) 
+    total += dopr_outch (buffer, currlen, maxlen, signvalue);
+
+  /* Zeros */
+  if (zpadlen > 0) 
+  {
+    while (zpadlen > 0)
+    {
+      total += dopr_outch (buffer, currlen, maxlen, '0');
+      --zpadlen;
+    }
+  }
+
+  /* Digits */
+  while (place > 0) 
+    total += dopr_outch (buffer, currlen, maxlen, convert[--place]);
+  
+  /* Left Justified spaces */
+  while (spadlen < 0) {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    ++spadlen;
+  }
+
+  return total;
+}
+
+static LDOUBLE abs_val (LDOUBLE value)
+{
+  LDOUBLE result = value;
+
+  if (value < 0)
+    result = -value;
+
+  return result;
+}
+
+static long round (LDOUBLE value)
+{
+  long intpart;
+
+  intpart = value;
+  value = value - intpart;
+  if (value >= 0.5)
+    intpart++;
+
+  return intpart;
+}
+
+static int fmtfp (char *buffer, size_t *currlen, size_t maxlen,
+		  LDOUBLE fvalue, int min, int max, int flags)
+{
+  int signvalue = 0;
+  LDOUBLE ufvalue;
+  char iconvert[20];
+  char fconvert[20];
+  int iplace = 0;
+  int fplace = 0;
+  int padlen = 0; /* amount to pad */
+  int zpadlen = 0; 
+  int caps = 0;
+  int total = 0;
+  long intpart;
+  long fracpart;
+  
+  /* 
+   * AIX manpage says the default is 0, but Solaris says the default
+   * is 6, and sprintf on AIX defaults to 6
+   */
+  if (max < 0)
+    max = 6;
+
+  ufvalue = abs_val (fvalue);
+
+  if (fvalue < 0)
+    signvalue = '-';
+  else
+    if (flags & DP_F_PLUS)  /* Do a sign (+/i) */
+      signvalue = '+';
+    else
+      if (flags & DP_F_SPACE)
+	signvalue = ' ';
+
+#if 0
+  if (flags & DP_F_UP) caps = 1; /* Should characters be upper case? */
+#endif
+
+  intpart = ufvalue;
+
+  /* 
+   * Sorry, we only support 9 digits past the decimal because of our 
+   * conversion method
+   */
+  if (max > 9)
+    max = 9;
+
+  /* We "cheat" by converting the fractional part to integer by
+   * multiplying by a factor of 10
+   */
+  fracpart = round ((powN (10, max)) * (ufvalue - intpart));
+
+  if (fracpart >= powN (10, max))
+  {
+    intpart++;
+    fracpart -= powN (10, max);
+  }
+
+#ifdef DEBUG_SNPRINTF
+  dprint (1, (debugfile, "fmtfp: %f =? %d.%d\n", fvalue, intpart, fracpart));
+#endif
+
+  /* Convert integer part */
+  do {
+    iconvert[iplace++] =
+      (caps? "0123456789ABCDEF":"0123456789abcdef")[intpart % 10];
+    intpart = (intpart / 10);
+  } while(intpart && (iplace < 20));
+  if (iplace == 20) iplace--;
+  iconvert[iplace] = 0;
+
+  /* Convert fractional part */
+  do {
+    fconvert[fplace++] =
+      (caps? "0123456789ABCDEF":"0123456789abcdef")[fracpart % 10];
+    fracpart = (fracpart / 10);
+  } while(fracpart && (fplace < 20));
+  if (fplace == 20) fplace--;
+  fconvert[fplace] = 0;
+
+  /* -1 for decimal point, another -1 if we are printing a sign */
+  padlen = min - iplace - max - 1 - ((signvalue) ? 1 : 0); 
+  zpadlen = max - fplace;
+  if (zpadlen < 0)
+    zpadlen = 0;
+  if (padlen < 0) 
+    padlen = 0;
+  if (flags & DP_F_MINUS) 
+    padlen = -padlen; /* Left Justifty */
+
+  if ((flags & DP_F_ZERO) && (padlen > 0)) 
+  {
+    if (signvalue) 
+    {
+      total += dopr_outch (buffer, currlen, maxlen, signvalue);
+      --padlen;
+      signvalue = 0;
+    }
+    while (padlen > 0)
+    {
+      total += dopr_outch (buffer, currlen, maxlen, '0');
+      --padlen;
+    }
+  }
+  while (padlen > 0)
+  {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    --padlen;
+  }
+  if (signvalue) 
+    total += dopr_outch (buffer, currlen, maxlen, signvalue);
+
+  while (iplace > 0) 
+    total += dopr_outch (buffer, currlen, maxlen, iconvert[--iplace]);
+
+  /*
+   * Decimal point.  This should probably use locale to find the correct
+   * char to print out.
+   */
+  if (max > 0)
+  {
+    total += dopr_outch (buffer, currlen, maxlen, '.');
+
+    while (zpadlen-- > 0)
+      total += dopr_outch (buffer, currlen, maxlen, '0');
+
+    while (fplace > 0) 
+      total += dopr_outch (buffer, currlen, maxlen, fconvert[--fplace]);
+  }
+
+  while (padlen < 0) 
+  {
+    total += dopr_outch (buffer, currlen, maxlen, ' ');
+    ++padlen;
+  }
+
+  return total;
+}
+
+static int dopr_outch (char *buffer, size_t *currlen, size_t maxlen, char c)
+{
+  if (*currlen + 1 < maxlen)
+    buffer[(*currlen)++] = c;
+  return 1;
+}
+
+int Q_vsnprintf(char *str, size_t length, const char *fmt, va_list args)
+{
+	return dopr(str, length, fmt, args);
 }
 
 /* this is really crappy */
 int sscanf( const char *buffer, const char *fmt, ... ) {
 	int		cmd;
-	int		**arg;
+	va_list		ap;
 	int		count;
+	size_t		len;
 
-	arg = (int **)&fmt + 1;
+	va_start (ap, fmt);
 	count = 0;
 
 	while ( *fmt ) {
@@ -1302,22 +2079,40 @@ int sscanf( const char *buffer, const char *fmt, ... ) {
 			continue;
 		}
 
-		cmd = fmt[1];
-		fmt += 2;
+		fmt++;
+		cmd = *fmt;
+
+		if (isdigit (cmd)) {
+			len = (size_t)_atoi (&fmt);
+			cmd = *(fmt - 1);
+		} else {
+			len = MAX_STRING_CHARS - 1;
+			fmt++;
+		}
 
 		switch ( cmd ) {
 		case 'i':
 		case 'd':
 		case 'u':
-			**arg = _atoi( &buffer );
+			*(va_arg (ap, int *)) = _atoi( &buffer );
 			break;
 		case 'f':
-			*(float *)*arg = _atof( &buffer );
+			*(va_arg (ap, float *)) = _atof( &buffer );
 			break;
+		case 's':
+			{
+			char *s = va_arg (ap, char *);
+			while (isspace (*buffer))
+				buffer++;
+			while (*buffer && !isspace (*buffer) && len-- > 0 )
+				*s++ = *buffer++;
+			*s++ = '\0';
+			break;
+			}
 		}
-		arg++;
 	}
 
+	va_end (ap);
 	return count;
 }
 

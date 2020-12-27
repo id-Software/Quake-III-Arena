@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -76,11 +76,8 @@ static void CG_TransitionEntity( centity_t *cent ) {
 ==================
 CG_SetInitialSnapshot
 
-This will only happen on the very first snapshot, or
-on tourney restarts.  All other times will use 
-CG_TransitionSnapshot instead.
-
-FIXME: Also called by map_restart?
+This will only happen on the very first snapshot.
+All other times will use CG_TransitionSnapshot instead.
 ==================
 */
 void CG_SetInitialSnapshot( snapshot_t *snap ) {
@@ -140,8 +137,8 @@ static void CG_TransitionSnapshot( void ) {
 	// execute any server string commands before transitioning entities
 	CG_ExecuteNewServerCommands( cg.nextSnap->serverCommandSequence );
 
-	// if we had a map_restart, set everthing with initial
-	if ( !cg.snap ) {
+	// if we had a map_restart, set everything with initial
+	if ( cg.mapRestart ) {
 	}
 
 	// clear the currentValid flag for all entities in the existing snapshot
@@ -261,7 +258,7 @@ static snapshot_t *CG_ReadNextSnapshot( void ) {
 	snapshot_t	*dest;
 
 	if ( cg.latestSnapshotNum > cgs.processedSnapshotNum + 1000 ) {
-		CG_Printf( "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i", 
+		CG_Printf( "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i\n", 
 			cg.latestSnapshotNum, cgs.processedSnapshotNum );
 	}
 

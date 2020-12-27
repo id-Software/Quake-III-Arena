@@ -1,0 +1,222 @@
+; NSIS description file for ioquake3 installer
+;
+; EDIT WITH CARE!
+;
+; This file is used to automatically build the installers in the
+; openSUSE build service, don't break this!
+;
+; you have to copy OpenAL32.dll here manually
+
+!define MULTIUSER_MUI
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY "Software\ioquake3"
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "Install_Mode"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "Software\ioquake3"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "Install_Dir"
+!define MULTIUSER_INSTALLMODE_INSTDIR "ioquake3"
+!include MultiUser.nsh
+
+!include "MUI2.nsh"
+!define MUI_ICON "../quake3.ico"
+
+; The name of the installer
+Name "ioquake3"
+
+; The file to write
+OutFile "ioquake3-XXXVERSIONXXX-XXXRELEASEXXX.x86.exe"
+
+; The default installation directory
+; set by Multiuser.nsh
+;InstallDir $PROGRAMFILES\ioquake3
+
+; Registry key to check for directory (so if you install again, it will
+; overwrite the old one automatically)
+; handled by Multiuser.nsh
+;InstallDirRegKey HKLM "Software\ioquake3" "Install_Dir"
+
+;--------------------------------
+;Interface Settings
+
+!define MUI_ABORTWARNING
+
+;--------------------------------
+;Pages
+
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
+;!insertmacro MUI_PAGE_LICENSE "../../COPYING.txt"
+!define MUI_COMPONENTSPAGE_NODESC
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+;--------------------------------
+;Languages
+
+!insertmacro MUI_LANGUAGE "English"
+
+;--------------------------------
+
+;--------------------------------
+;Multiuser stuff
+Function .onInit
+  !insertmacro MULTIUSER_INIT
+FunctionEnd
+
+Function un.onInit
+  !insertmacro MULTIUSER_UNINIT
+FunctionEnd
+
+; The stuff to install
+Section "ioquake3 (required)"
+
+  SectionIn RO
+
+  ; Set output path to the installation directory.
+  SetOutPath $INSTDIR
+
+!ifndef USE_INTERNAL_SPEEX
+  File "libspeex.dll"
+!endif
+!ifndef USE_INTERNAL_ZLIB
+  File "zlib1.dll"
+!endif
+!ifndef USE_INTERNAL_JPEG
+  File "jpeg8c.dll"
+!endif
+
+  ; Put file there
+  File "../../build/release-mingw32-x86/ioq3ded.x86.exe"
+  File "../../build/release-mingw32-x86/ioquake3.x86.exe"
+!ifdef USE_RENDERER_DLOPEN
+  File "../../build/release-mingw32-x86/renderer_opengl1_x86.dll"
+  File "../../build/release-mingw32-x86/renderer_opengl2_x86.dll"
+!endif
+
+  File "../../COPYING.txt"
+  File "/oname=README.txt" "../../README.md"
+  File "../../id-readme.txt"
+  File "../../voip-readme.txt"
+
+  SetOutPath "$INSTDIR\baseq3"
+  File "../../build/release-mingw32-x86/baseq3/cgamex86.dll"
+  File "../../build/release-mingw32-x86/baseq3/qagamex86.dll"
+  File "../../build/release-mingw32-x86/baseq3/uix86.dll"
+  SetOutPath "$INSTDIR\missionpack"
+  File "../../build/release-mingw32-x86/missionpack/cgamex86.dll"
+  File "../../build/release-mingw32-x86/missionpack/qagamex86.dll"
+  File "../../build/release-mingw32-x86/missionpack/uix86.dll"
+
+  ; Write the installation path into the registry
+  WriteRegStr SHCTX "Software\ioquake3" ${MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME} "$INSTDIR"
+  WriteRegStr SHCTX "Software\ioquake3" ${MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME} "$MultiUser.InstallMode"
+
+  ; Write the uninstall keys for Windows
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "DisplayName" "ioquake3"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoModify" 1
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3" "NoRepair" 1
+  WriteUninstaller "uninstall.exe"
+
+SectionEnd
+
+; Optional section (can be disabled by the user)
+Section "Start Menu Shortcuts"
+
+  CreateDirectory "$SMPROGRAMS\ioquake3"
+  CreateShortCut "$SMPROGRAMS\ioquake3\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\ioquake3\ioquake3.lnk" "$INSTDIR\ioquake3.x86.exe" "" "$INSTDIR\ioquake3.x86.exe" 0
+
+SectionEnd
+
+Section "SDL2.dll"
+
+  SetOutPath $INSTDIR
+
+  File "../../build/release-mingw32-x86/SDL2.dll"
+
+SectionEnd
+
+!ifdef USE_OPENAL_DLOPEN
+Section "OpenAL-Soft library"
+
+  SetOutPath $INSTDIR
+
+  File "OpenAL32.dll"
+
+SectionEnd
+!endif
+
+!ifdef USE_CURL_DLOPEN
+Section "libcurl"
+
+  SetOutPath $INSTDIR
+
+  File "libcurl-4.dll"
+
+SectionEnd
+!endif
+
+;--------------------------------
+
+; Uninstaller
+
+Section "Uninstall"
+
+  ; Remove registry keys
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\ioquake3"
+  DeleteRegKey SHCTX "Software\ioquake3"
+
+  ; Remove files and uninstaller
+  Delete $INSTDIR\baseq3\cgamex86.dll
+  Delete $INSTDIR\baseq3\qagamex86.dll
+  Delete $INSTDIR\baseq3\uix86.dll
+  Delete $INSTDIR\missionpack\cgamex86.dll
+  Delete $INSTDIR\missionpack\qagamex86.dll
+  Delete $INSTDIR\missionpack\uix86.dll
+  Delete $INSTDIR\ioquake3.x86.exe
+  Delete $INSTDIR\ioq3ded.x86.exe
+!ifdef USE_RENDERER_DLOPEN
+  Delete $INSTDIR\renderer_opengl1_x86.dll
+  Delete $INSTDIR\renderer_opengl2_x86.dll
+!endif
+
+  Delete $INSTDIR\COPYING.txt
+  Delete $INSTDIR\README.txt
+  Delete $INSTDIR\id-readme.txt
+  Delete $INSTDIR\voip-readme.txt
+
+!ifndef USE_INTERNAL_SPEEX
+  Delete $INSTDIR\libspeex.dll
+!endif
+!ifndef USE_INTERNAL_ZLIB
+  Delete $INSTDIR\zlib1.dll
+!endif
+!ifndef USE_INTERNAL_JPEG
+  Delete $INSTDIR\jpeg8c.dll
+!endif
+
+  Delete $INSTDIR\SDL2.dll
+!ifdef USE_OPENAL_DLOPEN
+  Delete $INSTDIR\OpenAL32.dll
+!endif
+!ifdef USE_CURL_DLOPEN
+  Delete $INSTDIR\libcurl-4.dll
+!endif
+
+  Delete $INSTDIR\uninstall.exe
+
+  ; Remove shortcuts, if any
+  Delete "$SMPROGRAMS\ioquake3\Uninstall.lnk"
+  Delete "$SMPROGRAMS\ioquake3\ioquake3.lnk"
+
+  ; Remove directories used
+  RMDir "$SMPROGRAMS\ioquake3"
+  RMDir "$INSTDIR\baseq3"
+  RMDir "$INSTDIR\missionpack"
+  RMDir "$INSTDIR"
+
+SectionEnd

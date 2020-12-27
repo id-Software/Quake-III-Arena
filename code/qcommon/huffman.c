@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Compression book.  The ranks are not actually stored, but implicitly defined
  * by the location of a node within a doubly-linked list */
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 static int			bloc = 0;
@@ -37,6 +37,16 @@ void	Huff_putBit( int bit, byte *fout, int *offset) {
 	fout[(bloc>>3)] |= bit << (bloc&7);
 	bloc++;
 	*offset = bloc;
+}
+
+int		Huff_getBloc(void)
+{
+	return bloc;
+}
+
+void	Huff_setBloc(int _bloc)
+{
+	bloc = _bloc;
 }
 
 int		Huff_getBit( byte *fin, int *offset) {
@@ -263,15 +273,20 @@ int Huff_Receive (node_t *node, int *ch, byte *fin) {
 	}
 	if (!node) {
 		return 0;
-//		Com_Error(ERR_DROP, "Illegal tree!\n");
+//		Com_Error(ERR_DROP, "Illegal tree!");
 	}
 	return (*ch = node->symbol);
 }
 
 /* Get a symbol */
-void Huff_offsetReceive (node_t *node, int *ch, byte *fin, int *offset) {
+void Huff_offsetReceive (node_t *node, int *ch, byte *fin, int *offset, int maxoffset) {
 	bloc = *offset;
 	while (node && node->symbol == INTERNAL_NODE) {
+		if (bloc >= maxoffset) {
+			*ch = 0;
+			*offset = maxoffset + 1;
+			return;
+		}
 		if (get_bit(fin)) {
 			node = node->right;
 		} else {
@@ -281,18 +296,22 @@ void Huff_offsetReceive (node_t *node, int *ch, byte *fin, int *offset) {
 	if (!node) {
 		*ch = 0;
 		return;
-//		Com_Error(ERR_DROP, "Illegal tree!\n");
+//		Com_Error(ERR_DROP, "Illegal tree!");
 	}
 	*ch = node->symbol;
 	*offset = bloc;
 }
 
 /* Send the prefix code for this node */
-static void send(node_t *node, node_t *child, byte *fout) {
+static void send(node_t *node, node_t *child, byte *fout, int maxoffset) {
 	if (node->parent) {
-		send(node->parent, node, fout);
+		send(node->parent, node, fout, maxoffset);
 	}
 	if (child) {
+		if (bloc >= maxoffset) {
+			bloc = maxoffset + 1;
+			return;
+		}
 		if (node->right == child) {
 			add_bit(1, fout);
 		} else {
@@ -302,22 +321,22 @@ static void send(node_t *node, node_t *child, byte *fout) {
 }
 
 /* Send a symbol */
-void Huff_transmit (huff_t *huff, int ch, byte *fout) {
+void Huff_transmit (huff_t *huff, int ch, byte *fout, int maxoffset) {
 	int i;
 	if (huff->loc[ch] == NULL) { 
 		/* node_t hasn't been transmitted, send a NYT, then the symbol */
-		Huff_transmit(huff, NYT, fout);
+		Huff_transmit(huff, NYT, fout, maxoffset);
 		for (i = 7; i >= 0; i--) {
 			add_bit((char)((ch >> i) & 0x1), fout);
 		}
 	} else {
-		send(huff->loc[ch], NULL, fout);
+		send(huff->loc[ch], NULL, fout, maxoffset);
 	}
 }
 
-void Huff_offsetTransmit (huff_t *huff, int ch, byte *fout, int *offset) {
+void Huff_offsetTransmit (huff_t *huff, int ch, byte *fout, int *offset, int maxoffset) {
 	bloc = *offset;
-	send(huff->loc[ch], NULL, fout);
+	send(huff->loc[ch], NULL, fout, maxoffset);
 	*offset = bloc;
 }
 
@@ -352,7 +371,7 @@ void Huff_Decompress(msg_t *mbuf, int offset) {
 	for ( j = 0; j < cch; j++ ) {
 		ch = 0;
 		// don't overflow reading from the messages
-		// FIXME: would it be better to have a overflow check in get_bit ?
+		// FIXME: would it be better to have an overflow check in get_bit ?
 		if ( (bloc >> 3) > size ) {
 			seq[j] = 0;
 			break;
@@ -382,7 +401,7 @@ void Huff_Compress(msg_t *mbuf, int offset) {
 	huff_t		huff;
 
 	size = mbuf->cursize - offset;
-	buffer = mbuf->data+ + offset;
+	buffer = mbuf->data + offset;
 
 	if (size<=0) {
 		return;
@@ -395,7 +414,6 @@ void Huff_Compress(msg_t *mbuf, int offset) {
 	huff.tree->weight = 0;
 	huff.lhead->next = huff.lhead->prev = NULL;
 	huff.tree->parent = huff.tree->left = huff.tree->right = NULL;
-	huff.loc[NYT] = huff.tree;
 
 	seq[0] = (size>>8);
 	seq[1] = size&0xff;
@@ -404,7 +422,7 @@ void Huff_Compress(msg_t *mbuf, int offset) {
 
 	for (i=0; i<size; i++ ) {
 		ch = buffer[i];
-		Huff_transmit(&huff, ch, seq);						/* Transmit symbol */
+		Huff_transmit(&huff, ch, seq, size<<3);						/* Transmit symbol */
 		Huff_addRef(&huff, (byte)ch);								/* Do update */
 	}
 
@@ -432,6 +450,5 @@ void Huff_Init(huffman_t *huff) {
 	huff->compressor.tree->weight = 0;
 	huff->compressor.lhead->next = huff->compressor.lhead->prev = NULL;
 	huff->compressor.tree->parent = huff->compressor.tree->left = huff->compressor.tree->right = NULL;
-	huff->compressor.loc[NYT] = huff->compressor.tree;
 }
 

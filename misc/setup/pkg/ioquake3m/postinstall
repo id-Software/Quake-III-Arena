@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# @(#)postinstall	$Id: postinstall,v 1.2 2006/01/25 13:22:56 coyote Exp $
+#
+# postinstall script for quake3
+
+quake3_dir=$BASEDIR
+
+exit 0
+

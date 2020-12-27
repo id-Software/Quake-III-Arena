@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -312,15 +312,15 @@ static void UI_TeamOrdersMenu_BuildBotList( void ) {
 	numPlayers = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 	teamOrdersMenuInfo.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
 
+	trap_GetConfigString( CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING );
+	playerTeam = *Info_ValueForKey( info, "t" );
+
 	for( n = 0; n < numPlayers && teamOrdersMenuInfo.numBots < 9; n++ ) {
-		trap_GetConfigString( CS_PLAYERS + n, info, MAX_INFO_STRING );
-
-		playerTeam = TEAM_SPECTATOR; // bk001204 = possible uninit use
-
 		if( n == cs.clientNum ) {
-			playerTeam = *Info_ValueForKey( info, "t" );
 			continue;
 		}
+
+		trap_GetConfigString( CS_PLAYERS + n, info, MAX_INFO_STRING );
 
 		isBot = atoi( Info_ValueForKey( info, "skill" ) );
 		if( !isBot ) {

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -42,7 +42,7 @@ Testmodel will create a fake entity 100 units in front of the current view
 position, directly facing the viewer.  It will remain immobile, so you can
 move around it to view it from different angles.
 
-Testgun will cause the model to follow the player around and supress the real
+Testgun will cause the model to follow the player around and suppress the real
 view weapon model.  The default frame 0 of most guns is completely off screen,
 so you will probably have to cycle a couple frames to see it.
 
@@ -71,6 +71,7 @@ can then be moved around
 void CG_TestModel_f (void) {
 	vec3_t		angles;
 
+	cg.testGun = qfalse;
 	memset( &cg.testModelEntity, 0, sizeof(cg.testModelEntity) );
 	if ( trap_Argc() < 2 ) {
 		return;
@@ -96,7 +97,6 @@ void CG_TestModel_f (void) {
 	angles[ROLL] = 0;
 
 	AnglesToAxis( angles, cg.testModelEntity.axis );
-	cg.testGun = qfalse;
 }
 
 /*
@@ -108,6 +108,11 @@ Replaces the current view weapon with the given model
 */
 void CG_TestGun_f (void) {
 	CG_TestModel_f();
+
+	if ( !cg.testModelEntity.hModel ) {
+		return;
+	}
+
 	cg.testGun = qtrue;
 	cg.testModelEntity.renderfx = RF_MINLIGHT | RF_DEPTHHACK | RF_FIRST_PERSON;
 }
@@ -149,7 +154,7 @@ static void CG_AddTestModel (void) {
 		return;
 	}
 
-	// if testing a gun, set the origin reletive to the view origin
+	// if testing a gun, set the origin relative to the view origin
 	if ( cg.testGun ) {
 		VectorCopy( cg.refdef.vieworg, cg.testModelEntity.origin );
 		VectorCopy( cg.refdef.viewaxis[0], cg.testModelEntity.axis[0] );
@@ -269,7 +274,7 @@ static void CG_OffsetThirdPersonView( void ) {
 			VectorCopy( trace.endpos, view );
 			view[2] += (1.0 - trace.fraction) * 32;
 			// try another trace to this position, because a tunnel may have the ceiling
-			// close enogh that this is poking out
+			// close enough that this is poking out
 
 			CG_Trace( &trace, cg.refdef.vieworg, mins, maxs, view, cg.predictedPlayerState.clientNum, MASK_SOLID );
 			VectorCopy( trace.endpos, view );
@@ -334,9 +339,6 @@ static void CG_OffsetFirstPersonView( void ) {
 		origin[2] += cg.predictedPlayerState.viewheight;
 		return;
 	}
-
-	// add angles based on weapon kick
-	VectorAdd (angles, cg.kick_angles, angles);
 
 	// add angles based on damage kick
 	if ( cg.damageTime ) {
@@ -421,10 +423,6 @@ static void CG_OffsetFirstPersonView( void ) {
 
 	// add step offset
 	CG_StepOffset();
-
-	// add kick offset
-
-	VectorAdd (origin, cg.kick_origin, origin);
 
 	// pivot the eye based on a neck length
 #if 0
@@ -513,9 +511,7 @@ static int CG_CalcFov( void ) {
 			}
 		} else {
 			f = ( cg.time - cg.zoomTime ) / (float)ZOOM_TIME;
-			if ( f > 1.0 ) {
-				fov_x = fov_x;
-			} else {
+			if ( f <= 1.0 ) {
 				fov_x = zoomFov + f * ( fov_x - zoomFov );
 			}
 		}
@@ -564,6 +560,10 @@ static void CG_DamageBlendBlob( void ) {
 	int			t;
 	int			maxTime;
 	refEntity_t		ent;
+
+	if (!cg_blood.integer) {
+		return;
+	}
 
 	if ( !cg.damageValue ) {
 		return;
@@ -682,7 +682,7 @@ static int CG_CalcViewValues( void ) {
 		CG_OffsetFirstPersonView();
 	}
 
-	// position eye reletive to origin
+	// position eye relative to origin
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 
 	if ( cg.hyperspace ) {
@@ -801,7 +801,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	CG_PredictPlayerState();
 
 	// decide on third person view
-	cg.renderingThirdPerson = cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0);
+	cg.renderingThirdPerson = cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR
+							&& (cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0));
 
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
@@ -823,8 +824,10 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// add buffered sounds
 	CG_PlayBufferedSounds();
 
+#ifdef MISSIONPACK
 	// play buffered voice chats
 	CG_PlayBufferedVoiceChats();
+#endif
 
 	// finish up the rest of the refdef
 	if ( cg.testModelEntity.hModel ) {

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -128,7 +128,7 @@ typedef struct bot_state_s
 	playerState_t cur_ps;							//current player state
 	int last_eFlags;								//last ps flags
 	usercmd_t lastucmd;								//usercmd from last frame
-	int entityeventTime[1024];						//last entity event time
+	int entityeventTime[MAX_GENTITIES];				//last entity event time
 	//
 	bot_settings_t settings;						//several bot settings
 	int (*ainode)(struct bot_state_s *bs);			//current AI node
@@ -192,7 +192,6 @@ typedef struct bot_state_s
 	float lastair_time;								//last time the bot had air
 	float teleport_time;							//last time the bot teleported
 	float camp_time;								//last time camped
-	float camp_range;								//camp range
 	float weaponchange_time;						//time the bot started changing weapons
 	float firethrottlewait_time;					//amount of time to wait
 	float firethrottleshoot_time;					//amount of time to shoot
@@ -228,7 +227,7 @@ typedef struct bot_state_s
 	int decisionmaker;								//player who decided to go for this goal
 	int ordered;									//true if ordered to do something
 	float order_time;								//time ordered to do something
-	int owndecision_time;							//time the bot made it's own decision
+	int owndecision_time;							//time the bot made its own decision
 	bot_goal_t teamgoal;							//the team goal
 	bot_goal_t altroutegoal;						//alternative route goal
 	float reachedaltroutegoal_time;					//time the bot reached the alt route goal
@@ -249,7 +248,7 @@ typedef struct bot_state_s
 	float leadmessage_time;							//last time a messaged was sent to the team mate
 	float leadbackup_time;							//time backing up towards team mate
 	//
-	char teamleader[32];							//netname of the team leader
+	char teamleader[MAX_NETNAME];					//netname of the team leader
 	float askteamleader_time;						//time asked for team leader
 	float becometeamleader_time;					//time the bot will become the team leader
 	float teamgiveorders_time;						//time to give team orders
@@ -264,11 +263,6 @@ typedef struct bot_state_s
 	int ctfstrategy;								//ctf strategy
 	char subteam[32];								//sub team name
 	float formation_dist;							//formation team mate intervening space
-	char formation_teammate[16];					//netname of the team mate the bot uses for relative positioning
-	float formation_angle;							//angle relative to the formation team mate
-	vec3_t formation_dir;							//the direction the formation is moving in
-	vec3_t formation_origin;						//origin the bot uses for relative positioning
-	bot_goal_t formation_goal;						//formation goal
 
 	bot_activategoal_t *activatestack;				//first activate goal on the stack
 	bot_activategoal_t activategoalheap[MAX_ACTIVATESTACK];	//activate goal heap
@@ -290,7 +284,7 @@ extern float floattime;
 #define FloatTime() floattime
 
 // from the game source
-void	QDECL BotAI_Print(int type, char *fmt, ...);
+void	QDECL BotAI_Print(int type, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
 void	QDECL QDECL BotAI_BotInitialChat( bot_state_t *bs, char *type, ... );
 void	BotAI_Trace(bsp_trace_t *bsptrace, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int passent, int contentmask);
 int		BotAI_GetClientState( int clientNum, playerState_t *state );

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -449,7 +449,7 @@ CG_DrawTourneyScoreboard
 Draw the oversize scoreboard for tournements
 =================
 */
-void CG_DrawOldTourneyScoreboard( void ) {
+void CG_DrawTourneyScoreboard( void ) {
 	const char		*s;
 	vec4_t			color;
 	int				min, tens, ones;
@@ -463,15 +463,15 @@ void CG_DrawOldTourneyScoreboard( void ) {
 		trap_SendClientCommand( "score" );
 	}
 
-	color[0] = 1;
-	color[1] = 1;
-	color[2] = 1;
-	color[3] = 1;
-
 	// draw the dialog background
 	color[0] = color[1] = color[2] = 0;
 	color[3] = 1;
 	CG_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color );
+
+	color[0] = 1;
+	color[1] = 1;
+	color[2] = 1;
+	color[3] = 1;
 
 	// print the mesage of the day
 	s = CG_ConfigString( CS_MOTD );

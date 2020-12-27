@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -82,8 +82,8 @@ void Favorites_Add( void )
 			return;
 		}
 		
-		// use first empty or non-numeric available slot
-		if ((adrstr[0]  < '0' || adrstr[0] > '9' ) && !best)
+		// use first empty available slot
+		if (!adrstr[0] && !best)
 			best = i+1;
 	}
 
@@ -128,11 +128,11 @@ static void ServerInfo_MenuDraw( void )
 	const char		*s;
 	char			key[MAX_INFO_KEY];
 	char			value[MAX_INFO_VALUE];
-	int				y;
+	int				i = 0, y;
 
 	y = SCREEN_HEIGHT/2 - s_serverinfo.numlines*(SMALLCHAR_HEIGHT)/2 - 20;
 	s = s_serverinfo.info;
-	while ( s ) {
+	while ( s && i < s_serverinfo.numlines ) {
 		Info_NextPair( &s, key, value );
 		if ( !key[0] ) {
 			break;
@@ -144,6 +144,7 @@ static void ServerInfo_MenuDraw( void )
 		UI_DrawString(SCREEN_WIDTH*0.50 + 8,y,value,UI_LEFT|UI_SMALLFONT,text_color_normal);
 
 		y += SMALLCHAR_HEIGHT;
+		i++;
 	}
 
 	Menu_Draw( &s_serverinfo.menu );

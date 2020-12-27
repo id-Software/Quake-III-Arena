@@ -15,14 +15,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 //
 // bg_slidemove.c -- part of bg_pmove functionality
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "bg_local.h"
 
@@ -158,8 +158,10 @@ qboolean	PM_SlideMove( qboolean gravity ) {
 			// slide along the plane
 			PM_ClipVelocity (pm->ps->velocity, planes[i], clipVelocity, OVERCLIP );
 
-			// slide along the plane
-			PM_ClipVelocity (endVelocity, planes[i], endClipVelocity, OVERCLIP );
+			if ( gravity ) {
+				// slide along the plane
+				PM_ClipVelocity (endVelocity, planes[i], endClipVelocity, OVERCLIP );
+			}
 
 			// see if there is a second plane that the new move enters
 			for ( j = 0 ; j < numplanes ; j++ ) {
@@ -172,7 +174,10 @@ qboolean	PM_SlideMove( qboolean gravity ) {
 
 				// try clipping the move to the plane
 				PM_ClipVelocity( clipVelocity, planes[j], clipVelocity, OVERCLIP );
-				PM_ClipVelocity( endClipVelocity, planes[j], endClipVelocity, OVERCLIP );
+
+				if ( gravity ) {
+					PM_ClipVelocity( endClipVelocity, planes[j], endClipVelocity, OVERCLIP );
+				}
 
 				// see if it goes back into the first clip plane
 				if ( DotProduct( clipVelocity, planes[i] ) >= 0 ) {
@@ -185,10 +190,12 @@ qboolean	PM_SlideMove( qboolean gravity ) {
 				d = DotProduct( dir, pm->ps->velocity );
 				VectorScale( dir, d, clipVelocity );
 
-				CrossProduct (planes[i], planes[j], dir);
-				VectorNormalize( dir );
-				d = DotProduct( dir, endVelocity );
-				VectorScale( dir, d, endClipVelocity );
+				if ( gravity ) {
+					CrossProduct (planes[i], planes[j], dir);
+					VectorNormalize( dir );
+					d = DotProduct( dir, endVelocity );
+					VectorScale( dir, d, endClipVelocity );
+				}
 
 				// see if there is a third plane the the new move enters
 				for ( k = 0 ; k < numplanes ; k++ ) {
@@ -207,7 +214,11 @@ qboolean	PM_SlideMove( qboolean gravity ) {
 
 			// if we have fixed all interactions, try another move
 			VectorCopy( clipVelocity, pm->ps->velocity );
-			VectorCopy( endClipVelocity, endVelocity );
+
+			if ( gravity ) {
+				VectorCopy( endClipVelocity, endVelocity );
+			}
+
 			break;
 		}
 	}
@@ -232,7 +243,7 @@ PM_StepSlideMove
 */
 void PM_StepSlideMove( qboolean gravity ) {
 	vec3_t		start_o, start_v;
-	vec3_t		down_o, down_v;
+//	vec3_t		down_o, down_v;
 	trace_t		trace;
 //	float		down_dist, up_dist;
 //	vec3_t		delta, delta2;
@@ -256,8 +267,8 @@ void PM_StepSlideMove( qboolean gravity ) {
 		return;
 	}
 
-	VectorCopy (pm->ps->origin, down_o);
-	VectorCopy (pm->ps->velocity, down_v);
+	//VectorCopy (pm->ps->origin, down_o);
+	//VectorCopy (pm->ps->velocity, down_v);
 
 	VectorCopy (start_o, up);
 	up[2] += STEPSIZE;

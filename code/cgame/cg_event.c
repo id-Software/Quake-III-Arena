@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "cg_local.h"
 
 // for the voice chats
-#ifdef MISSIONPACK // bk001205
+#ifdef MISSIONPACK
 #include "../../ui/menudef.h"
 #endif
 //==========================================================================
@@ -188,7 +188,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			if( gender == GENDER_FEMALE ) {
 				message = "found her prox mine";
 			} else if ( gender == GENDER_NEUTER ) {
-				message = "found it's prox mine";
+				message = "found its prox mine";
 			} else {
 				message = "found his prox mine";
 			}
@@ -418,6 +418,56 @@ static void CG_ItemPickup( int itemNum ) {
 
 }
 
+/*
+================
+CG_WaterLevel
+
+Returns waterlevel for entity origin
+================
+*/
+int CG_WaterLevel(centity_t *cent) {
+	vec3_t point;
+	int contents, sample1, sample2, anim, waterlevel;
+	int viewheight;
+
+	anim = cent->currentState.legsAnim & ~ANIM_TOGGLEBIT;
+
+	if (anim == LEGS_WALKCR || anim == LEGS_IDLECR) {
+		viewheight = CROUCH_VIEWHEIGHT;
+	} else {
+		viewheight = DEFAULT_VIEWHEIGHT;
+	}
+
+	//
+	// get waterlevel, accounting for ducking
+	//
+	waterlevel = 0;
+
+	point[0] = cent->lerpOrigin[0];
+	point[1] = cent->lerpOrigin[1];
+	point[2] = cent->lerpOrigin[2] + MINS_Z + 1;
+	contents = CG_PointContents(point, -1);
+
+	if (contents & MASK_WATER) {
+		sample2 = viewheight - MINS_Z;
+		sample1 = sample2 / 2;
+		waterlevel = 1;
+		point[2] = cent->lerpOrigin[2] + MINS_Z + sample1;
+		contents = CG_PointContents(point, -1);
+
+		if (contents & MASK_WATER) {
+			waterlevel = 2;
+			point[2] = cent->lerpOrigin[2] + MINS_Z + sample2;
+			contents = CG_PointContents(point, -1);
+
+			if (contents & MASK_WATER) {
+				waterlevel = 3;
+			}
+		}
+	}
+
+	return waterlevel;
+}
 
 /*
 ================
@@ -443,9 +493,16 @@ void CG_PainEvent( centity_t *cent, int health ) {
 	} else {
 		snd = "*pain100_1.wav";
 	}
-	trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE, 
-		CG_CustomSound( cent->currentState.number, snd ) );
-
+	// play a gurp sound instead of a normal pain sound
+	if (CG_WaterLevel(cent) == 3) {
+		if (rand()&1) {
+			trap_S_StartSound(NULL, cent->currentState.number, CHAN_VOICE, CG_CustomSound(cent->currentState.number, "sound/player/gurp1.wav"));
+		} else {
+			trap_S_StartSound(NULL, cent->currentState.number, CHAN_VOICE, CG_CustomSound(cent->currentState.number, "sound/player/gurp2.wav"));
+		}
+	} else {
+		trap_S_StartSound(NULL, cent->currentState.number, CHAN_VOICE, CG_CustomSound(cent->currentState.number, snd));
+	}
 	// save pain time for programitic twitch animation
 	cent->pe.painTime = cg.time;
 	cent->pe.painDirection ^= 1;
@@ -599,11 +656,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		DEBUGNAME("EV_JUMP_PAD");
 //		CG_Printf( "EV_JUMP_PAD w/effect #%i\n", es->eventParm );
 		{
-			localEntity_t	*smoke;
 			vec3_t			up = {0, 0, 1};
 
 
-			smoke = CG_SmokePuff( cent->lerpOrigin, up, 
+			CG_SmokePuff( cent->lerpOrigin, up, 
 						  32, 
 						  1, 1, 1, 0.33f,
 						  1000, 
@@ -816,6 +872,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		DEBUGNAME("EV_USE_ITEM14");
 		CG_UseItem( cent );
 		break;
+	case EV_USE_ITEM15:
+		DEBUGNAME("EV_USE_ITEM15");
+		CG_UseItem( cent );
+		break;
 
 	//=================================================================
 
@@ -923,8 +983,18 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_RAILTRAIL:
 		DEBUGNAME("EV_RAILTRAIL");
 		cent->currentState.weapon = WP_RAILGUN;
+		
+		if(es->clientNum == cg.snap->ps.clientNum && !cg.renderingThirdPerson)
+		{
+			if(cg_drawGun.integer == 2)
+				VectorMA(es->origin2, 8, cg.refdef.viewaxis[1], es->origin2);
+			else if(cg_drawGun.integer == 3)
+				VectorMA(es->origin2, 4, cg.refdef.viewaxis[1], es->origin2);
+		}
+
+		CG_RailTrail(ci, es->origin2, es->pos.trBase);
+
 		// if the end was on a nomark surface, don't make an explosion
-		CG_RailTrail( ci, es->origin2, es->pos.trBase );
 		if ( es->eventParm != 255 ) {
 			ByteToDir( es->eventParm, dir );
 			CG_MissileHitWall( es->weapon, es->clientNum, position, dir, IMPACTSOUND_DEFAULT );
@@ -972,19 +1042,19 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			DEBUGNAME("EV_GLOBAL_TEAM_SOUND");
 			switch( es->eventParm ) {
 				case GTS_RED_CAPTURE: // CTF: red team captured the blue flag, 1FCTF: red team captured the neutral flag
-					if ( cgs.clientinfo[cg.clientNum].team == TEAM_RED )
+					if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED )
 						CG_AddBufferedSound( cgs.media.captureYourTeamSound );
 					else
 						CG_AddBufferedSound( cgs.media.captureOpponentSound );
 					break;
 				case GTS_BLUE_CAPTURE: // CTF: blue team captured the red flag, 1FCTF: blue team captured the neutral flag
-					if ( cgs.clientinfo[cg.clientNum].team == TEAM_BLUE )
+					if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE )
 						CG_AddBufferedSound( cgs.media.captureYourTeamSound );
 					else
 						CG_AddBufferedSound( cgs.media.captureOpponentSound );
 					break;
 				case GTS_RED_RETURN: // CTF: blue flag returned, 1FCTF: never used
-					if ( cgs.clientinfo[cg.clientNum].team == TEAM_RED )
+					if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED )
 						CG_AddBufferedSound( cgs.media.returnYourTeamSound );
 					else
 						CG_AddBufferedSound( cgs.media.returnOpponentSound );
@@ -992,7 +1062,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 					CG_AddBufferedSound( cgs.media.blueFlagReturnedSound );
 					break;
 				case GTS_BLUE_RETURN: // CTF red flag returned, 1FCTF: neutral flag returned
-					if ( cgs.clientinfo[cg.clientNum].team == TEAM_BLUE )
+					if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE )
 						CG_AddBufferedSound( cgs.media.returnYourTeamSound );
 					else
 						CG_AddBufferedSound( cgs.media.returnOpponentSound );
@@ -1005,15 +1075,15 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 					if (cg.snap->ps.powerups[PW_BLUEFLAG] || cg.snap->ps.powerups[PW_NEUTRALFLAG]) {
 					}
 					else {
-					if (cgs.clientinfo[cg.clientNum].team == TEAM_BLUE) {
+						if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE) {
 #ifdef MISSIONPACK
 							if (cgs.gametype == GT_1FCTF) 
 								CG_AddBufferedSound( cgs.media.yourTeamTookTheFlagSound );
 							else
 #endif
-						 	CG_AddBufferedSound( cgs.media.enemyTookYourFlagSound );
+							CG_AddBufferedSound( cgs.media.enemyTookYourFlagSound );
 						}
-						else if (cgs.clientinfo[cg.clientNum].team == TEAM_RED) {
+						else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED) {
 #ifdef MISSIONPACK
 							if (cgs.gametype == GT_1FCTF)
 								CG_AddBufferedSound( cgs.media.enemyTookTheFlagSound );
@@ -1028,7 +1098,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 					if (cg.snap->ps.powerups[PW_REDFLAG] || cg.snap->ps.powerups[PW_NEUTRALFLAG]) {
 					}
 					else {
-						if (cgs.clientinfo[cg.clientNum].team == TEAM_RED) {
+						if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED) {
 #ifdef MISSIONPACK
 							if (cgs.gametype == GT_1FCTF)
 								CG_AddBufferedSound( cgs.media.yourTeamTookTheFlagSound );
@@ -1036,7 +1106,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 #endif
 							CG_AddBufferedSound( cgs.media.enemyTookYourFlagSound );
 						}
-						else if (cgs.clientinfo[cg.clientNum].team == TEAM_BLUE) {
+						else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE) {
 #ifdef MISSIONPACK
 							if (cgs.gametype == GT_1FCTF)
 								CG_AddBufferedSound( cgs.media.enemyTookTheFlagSound );
@@ -1046,16 +1116,18 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 						}
 					}
 					break;
+#ifdef MISSIONPACK
 				case GTS_REDOBELISK_ATTACKED: // Overload: red obelisk is being attacked
-					if (cgs.clientinfo[cg.clientNum].team == TEAM_RED) {
+					if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED) {
 						CG_AddBufferedSound( cgs.media.yourBaseIsUnderAttackSound );
 					}
 					break;
 				case GTS_BLUEOBELISK_ATTACKED: // Overload: blue obelisk is being attacked
-					if (cgs.clientinfo[cg.clientNum].team == TEAM_BLUE) {
+					if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE) {
 						CG_AddBufferedSound( cgs.media.yourBaseIsUnderAttackSound );
 					}
 					break;
+#endif
 
 				case GTS_REDTEAM_SCORED:
 					CG_AddBufferedSound(cgs.media.redScoredSound);
@@ -1096,8 +1168,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_DEATH2:
 	case EV_DEATH3:
 		DEBUGNAME("EV_DEATHx");
-		trap_S_StartSound( NULL, es->number, CHAN_VOICE, 
-				CG_CustomSound( es->number, va("*death%i.wav", event - EV_DEATH1 + 1) ) );
+
+		if (CG_WaterLevel(cent) == 3) {
+			trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*drown.wav"));
+		} else {
+			trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
+		}
+
 		break;
 
 

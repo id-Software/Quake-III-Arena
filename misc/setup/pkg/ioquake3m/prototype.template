@@ -1,0 +1,7 @@
+!default 0755 root bin
+i pkginfo
+i depend
+i postinstall
+i postremove
+i preinstall
+i preremove

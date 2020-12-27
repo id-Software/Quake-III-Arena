@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -64,7 +64,7 @@ typedef struct weightconfig_s
 weightconfig_t *ReadWeightConfig(char *filename);
 //free a weight configuration
 void FreeWeightConfig(weightconfig_t *config);
-//writes a weight configuration, returns true if successfull
+//writes a weight configuration, returns true if successful
 qboolean WriteWeightConfig(char *filename, weightconfig_t *config);
 //find the fuzzy weight with the given name
 int FindFuzzyWeight(weightconfig_t *wc, char *name);

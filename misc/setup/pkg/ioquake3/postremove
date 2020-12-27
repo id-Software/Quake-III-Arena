@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# @(#)postremove	$Id: postremove,v 1.3 2006/01/21 12:54:52 coyote Exp $
+#
+# postremove script for quake3
+
+quake3_dir=$BASEDIR
+dest_dir=${PKG_INSTALL_ROOT}/usr/local/bin
+
+if [ -d ${dest_dir} ]; then
+	for inst_script in ioq3ded.sh ioquake3.sh
+	do
+		dest_script=${dest_dir}/${inst_script}
+		if [ -h ${dest_script} ]; then
+			rm -f ${dest_script}
+		fi
+	done
+fi
+
+exit 0
+

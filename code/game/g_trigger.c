@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -84,7 +84,7 @@ void Touch_Multi( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	multi_trigger( self, other );
 }
 
-/*QUAKED trigger_multiple (.5 .5 .5) ?
+/*QUAKED trigger_multiple (.5 .5 .5) ? RED_ONLY BLUE_ONLY
 "wait" : Seconds between triggerings, 0.5 default, -1 = one time only.
 "random"	wait variance, default is 0
 Variable sized repeatable trigger.  Must be targeted at one or more entities.
@@ -336,7 +336,7 @@ Any entity that touches this will be hurt.
 It does dmg points of damage each server frame
 Targeting the trigger will toggle its on / off state.
 
-SILENT			supresses playing the sound
+SILENT			suppresses playing the sound
 SLOW			changes the damage rate to once per second
 NO_PROTECTION	*nothing* stops the damage
 
@@ -390,14 +390,13 @@ void SP_trigger_hurt( gentity_t *self ) {
 		self->damage = 5;
 	}
 
-	self->r.contents = CONTENTS_TRIGGER;
-
-	if ( self->spawnflags & 2 ) {
-		self->use = hurt_use;
-	}
+	self->use = hurt_use;
 
 	// link in to the world if starting active
-	if ( ! (self->spawnflags & 1) ) {
+	if ( self->spawnflags & 1 ) {
+		trap_UnlinkEntity (self);
+	}
+	else {
 		trap_LinkEntity (self);
 	}
 }

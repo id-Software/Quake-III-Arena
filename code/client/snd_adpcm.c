@@ -25,7 +25,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /*
 ** Intel/DVI ADPCM coder/decoder.
 **
-** The algorithm for this coder was taken from the IMA Compatability Project
+** The algorithm for this coder was taken from the IMA Compatibility Project
 ** proceedings, Vol 2, Number 2; May 1992.
 **
 ** Version 1.2, 18-Dec-92.
@@ -278,7 +278,7 @@ void S_AdpcmGetSamples(sndBuffer *chunk, short *to) {
 
 	out = (byte *)chunk->sndChunk;
 	// get samples
-	S_AdpcmDecode( out, to, SND_CHUNK_SIZE_BYTE*2, &state );
+	S_AdpcmDecode((char *) out, to, SND_CHUNK_SIZE_BYTE*2, &state );
 }
 
 
@@ -310,7 +310,7 @@ void S_AdpcmEncodeSound( sfx_t *sfx, short *samples ) {
 		newchunk = SND_malloc();
 		if (sfx->soundData == NULL) {
 			sfx->soundData = newchunk;
-		} else {
+		} else if (chunk != NULL) {
 			chunk->next = newchunk;
 		}
 		chunk = newchunk;
@@ -322,7 +322,7 @@ void S_AdpcmEncodeSound( sfx_t *sfx, short *samples ) {
 		out = (byte *)chunk->sndChunk;
 
 		// encode the samples
-		S_AdpcmEncode( samples + inOffset, out, n, &state );
+		S_AdpcmEncode( samples + inOffset, (char *) out, n, &state );
 
 		inOffset += n;
 		count -= n;

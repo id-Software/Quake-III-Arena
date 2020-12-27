@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -50,7 +50,7 @@ typedef struct botlib_globals_s
 
 extern botlib_globals_t botlibglobals;
 extern botlib_import_t botimport;
-extern int bot_developer;					//true if developer is on
+extern int botDeveloper;					//true if developer is on
 
 //
 int Sys_MilliSeconds(void);
