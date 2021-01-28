@@ -29,6 +29,8 @@
 #include "config.h"
 #endif
 
+#if defined (__i386__) || defined(__x86_64__)
+
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <smmintrin.h>
@@ -86,4 +88,5 @@ void celt_fir_sse4_1(const opus_val16 *x,
    RESTORE_STACK;
 }
 
+#endif
 #endif

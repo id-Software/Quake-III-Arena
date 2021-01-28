@@ -50,7 +50,7 @@
 		2758B9C6178FBBAC007F6582 /* q_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 2758B9C0178FBBAC007F6582 /* q_shared.c */; };
 		2758B9CC178FBC8B007F6582 /* libjpeg8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2758B9CB178FBC8B007F6582 /* libjpeg8.a */; };
 		2758B9CE178FBCBC007F6582 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2758B9CD178FBCBC007F6582 /* OpenGL.framework */; };
-		A163B2622193D8FC00C48278 /* libSDL2-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */; };
+		A115085E25B9CD6F000CF482 /* libSDL2-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */; };
 		A163B2662193DF8300C48278 /* tr_image_dds.c in Sources */ = {isa = PBXBuildFile; fileRef = A163B2642193DF8200C48278 /* tr_image_dds.c */; };
 		A163B2672193DF8300C48278 /* tr_dsa.c in Sources */ = {isa = PBXBuildFile; fileRef = A163B2652193DF8300C48278 /* tr_dsa.c */; };
 		A1F1105D23F21AF10030D586 /* shadowfill_fp.c in Sources */ = {isa = PBXBuildFile; fileRef = A1F1104123F21AF00030D586 /* shadowfill_fp.c */; };
@@ -171,6 +171,8 @@
 		2758BA27178FCFC0007F6582 /* texturecolor_vp.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texturecolor_vp.glsl; sourceTree = "<group>"; };
 		2758BA29178FCFC0007F6582 /* tonemap_fp.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tonemap_fp.glsl; sourceTree = "<group>"; };
 		2758BA2B178FCFC0007F6582 /* tonemap_vp.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tonemap_vp.glsl; sourceTree = "<group>"; };
+		A11507FA25B52155000CF482 /* libSDL2-2.0.14.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2-2.0.14.dylib"; path = "../../code/libs/macosx/libSDL2-2.0.14.dylib"; sourceTree = "<group>"; };
+		A115082B25B533FB000CF482 /* libSDL2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL2.dylib; path = ../../code/libs/macosx/libSDL2.dylib; sourceTree = "<group>"; };
 		A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2-2.0.0.dylib"; path = "../../code/libs/macosx/libSDL2-2.0.0.dylib"; sourceTree = "<group>"; };
 		A163B2632193DF8200C48278 /* tr_dsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tr_dsa.h; sourceTree = "<group>"; };
 		A163B2642193DF8200C48278 /* tr_image_dds.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tr_image_dds.c; sourceTree = "<group>"; };
@@ -210,7 +212,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A163B2622193D8FC00C48278 /* libSDL2-2.0.0.dylib in Frameworks */,
+				A115085E25B9CD6F000CF482 /* libSDL2-2.0.0.dylib in Frameworks */,
 				2758B9CC178FBC8B007F6582 /* libjpeg8.a in Frameworks */,
 				2758B9CE178FBCBC007F6582 /* OpenGL.framework in Frameworks */,
 			);
@@ -338,6 +340,8 @@
 		2758B9C9178FBC6F007F6582 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A115082B25B533FB000CF482 /* libSDL2.dylib */,
+				A11507FA25B52155000CF482 /* libSDL2-2.0.14.dylib */,
 				A163B2612193D8FC00C48278 /* libSDL2-2.0.0.dylib */,
 				2758B9CD178FBCBC007F6582 /* OpenGL.framework */,
 			);
@@ -444,7 +448,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = io;
-				LastUpgradeCheck = 1110;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = ioquake;
 			};
 			buildConfigurationList = 274FAC18178FAF0C00B17C7A /* Build configuration list for PBXProject "renderer_opengl2" */;
@@ -583,6 +587,7 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -609,9 +614,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 			};
 			name = Debug;
 		};
@@ -634,6 +640,7 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -653,8 +660,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 			};
 			name = Release;
 		};
@@ -662,15 +670,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"USE_LOCAL_HEADERS=1",
+					"DEBUG=1",
+					"$(inherited)",
+					"GL_SILENCE_DEPRECATION=1",
+				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/jpeg-8c\"",
 					"\"$(SRCROOT)/../../code/SDL2/include\"",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../code/libs/macosx\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-dqrqeayrbnbwitdwenoviousqwyc/Build/Products/Debug\"",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../code/libs/macosx\"";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -679,15 +690,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"USE_LOCAL_HEADERS=1",
+					"GL_SILENCE_DEPRECATION=1",
+				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../code/jpeg-8c\"",
 					"\"$(SRCROOT)/../../code/SDL2/include\"",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../code/libs/macosx\"",
-					"\"$(SRCROOT)/../../../../../../Library/Developer/Xcode/DerivedData/ioquake3-dqrqeayrbnbwitdwenoviousqwyc/Build/Products/Debug\"",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../code/libs/macosx\"";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
