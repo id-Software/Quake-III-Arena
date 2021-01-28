@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qasm-inline.h"
 
+#if defined (__i386__) || defined(__x86_64__)
 static const unsigned short fpucw = 0x0C7F;
 
 /*
@@ -97,3 +98,4 @@ int qvmftolx87(void)
   
   return retval;
 }
+#endif

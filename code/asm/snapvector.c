@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "qasm-inline.h"
 #include "../qcommon/q_shared.h"
 
+#if defined (__i386__) || defined(__x86_64__)
+
 /*
  * GNU inline asm version of qsnapvector
  * See MASM snapvector.asm for commentary
@@ -71,3 +73,5 @@ void qsnapvectorx87(vec3_t vec)
 		: "memory"
 	);
 }
+
+#endif

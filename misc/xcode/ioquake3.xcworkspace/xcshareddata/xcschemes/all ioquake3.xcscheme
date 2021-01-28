@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1110"
+   LastUpgradeVersion = "1230"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,7 +16,21 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2735319414D125FD00EB7BD6"
                BuildableName = "cgame.dylib"
-               BlueprintName = "cgame"
+               BlueprintName = "cgame - baseq3"
+               ReferencedContainer = "container:cgame.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A137C9C6258DCEE8009AC639"
+               BuildableName = "cgame.dylib"
+               BlueprintName = "cgame - missionpack"
                ReferencedContainer = "container:cgame.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,8 +43,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "273531B314D126C300EB7BD6"
-               BuildableName = "game.dylib"
-               BlueprintName = "game"
+               BuildableName = "qagame.dylib"
+               BlueprintName = "game - baseq3"
                ReferencedContainer = "container:game.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,10 +56,24 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "273531C614D1270700EB7BD6"
-               BuildableName = "q3_ui.dylib"
-               BlueprintName = "q3_ui"
-               ReferencedContainer = "container:q3_ui.xcodeproj">
+               BlueprintIdentifier = "A137C98D258DCD55009AC639"
+               BuildableName = "qagame.dylib"
+               BlueprintName = "game - missionpack"
+               ReferencedContainer = "container:game.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A137C91B258DC8DF009AC639"
+               BuildableName = "ui.dylib"
+               BlueprintName = "ui - baseq3"
+               ReferencedContainer = "container:ui.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -58,7 +86,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "273531D814D1272300EB7BD6"
                BuildableName = "ui.dylib"
-               BlueprintName = "ui"
+               BlueprintName = "ui - missionpack"
                ReferencedContainer = "container:ui.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -126,10 +154,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2758BA56179059C1007F6582"
-               BuildableName = "libspeex.a"
-               BlueprintName = "speex"
-               ReferencedContainer = "container:speex.xcodeproj">
+               BlueprintIdentifier = "A1665093218BF75B0086B74B"
+               BuildableName = "libopus.dylib"
+               BlueprintName = "opus"
+               ReferencedContainer = "container:opus.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -171,7 +199,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2735319414D125FD00EB7BD6"
             BuildableName = "cgame.dylib"
-            BlueprintName = "cgame"
+            BlueprintName = "cgame - baseq3"
             ReferencedContainer = "container:cgame.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -182,6 +210,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "2735319414D125FD00EB7BD6"
+            BuildableName = "cgame.dylib"
+            BlueprintName = "cgame - baseq3"
+            ReferencedContainer = "container:cgame.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
