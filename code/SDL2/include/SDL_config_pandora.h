@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,24 +36,22 @@
 
 #define SDL_BYTEORDER 1234
 
-#define STDC_HEADERS 1
 #define HAVE_ALLOCA_H 1
-#define HAVE_CTYPE_H 1
-#define HAVE_ICONV_H 1
-#define HAVE_INTTYPES_H 1
-#define HAVE_LIMITS_H 1
-#define HAVE_MALLOC_H 1
-#define HAVE_MATH_H 1
-#define HAVE_MEMORY_H 1
-#define HAVE_SIGNAL_H 1
-#define HAVE_STDARG_H 1
-#define HAVE_STDINT_H 1
-#define HAVE_STDIO_H 1
-#define HAVE_STDLIB_H 1
-#define HAVE_STRINGS_H 1
-#define HAVE_STRING_H 1
 #define HAVE_SYS_TYPES_H 1
-
+#define HAVE_STDIO_H 1
+#define STDC_HEADERS 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STDARG_H 1
+#define HAVE_MALLOC_H 1
+#define HAVE_MEMORY_H 1
+#define HAVE_STRING_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_STDINT_H 1
+#define HAVE_CTYPE_H 1
+#define HAVE_MATH_H 1
+#define HAVE_ICONV_H 1
+#define HAVE_SIGNAL_H 1
 #define HAVE_MALLOC 1
 #define HAVE_CALLOC 1
 #define HAVE_REALLOC 1
@@ -70,6 +68,7 @@
 #define HAVE_MEMCPY 1
 #define HAVE_MEMMOVE 1
 #define HAVE_STRLEN 1
+#define HAVE_STRDUP 1
 #define HAVE_STRCHR 1
 #define HAVE_STRRCHR 1
 #define HAVE_STRSTR 1
@@ -93,7 +92,6 @@
 #define HAVE_FABS 1
 #define HAVE_FLOOR 1
 #define HAVE_LOG 1
-#define HAVE_LOG10 1
 #define HAVE_SCALBN 1
 #define HAVE_SIN 1
 #define HAVE_SINF 1

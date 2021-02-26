@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,17 +33,16 @@
 
 #define HAVE_GCC_ATOMICS    1
 
-#define STDC_HEADERS    1
 #define HAVE_ALLOCA_H       1
-#define HAVE_CTYPE_H    1
+#define HAVE_SYS_TYPES_H    1
+#define HAVE_STDIO_H    1
+#define STDC_HEADERS    1
+#define HAVE_STRING_H   1
 #define HAVE_INTTYPES_H 1
-#define HAVE_LIMITS_H   1
+#define HAVE_STDINT_H   1
+#define HAVE_CTYPE_H    1
 #define HAVE_MATH_H 1
 #define HAVE_SIGNAL_H   1
-#define HAVE_STDINT_H   1
-#define HAVE_STDIO_H    1
-#define HAVE_STRING_H   1
-#define HAVE_SYS_TYPES_H    1
 
 /* C library functions */
 #define HAVE_MALLOC 1
@@ -66,6 +65,7 @@
 #define HAVE_STRLEN 1
 #define HAVE_STRLCPY    1
 #define HAVE_STRLCAT    1
+#define HAVE_STRDUP 1
 #define HAVE_STRCHR 1
 #define HAVE_STRRCHR    1
 #define HAVE_STRSTR 1
@@ -83,34 +83,19 @@
 #define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF  1
 #define HAVE_M_PI   1
-#define HAVE_ACOS   1
-#define HAVE_ACOSF  1
-#define HAVE_ASIN   1
-#define HAVE_ASINF  1
 #define HAVE_ATAN   1
-#define HAVE_ATANF  1
 #define HAVE_ATAN2  1
-#define HAVE_ATAN2F 1
+#define HAVE_ACOS  1
+#define HAVE_ASIN  1
 #define HAVE_CEIL   1
-#define HAVE_CEILF  1
 #define HAVE_COPYSIGN   1
-#define HAVE_COPYSIGNF  1
 #define HAVE_COS    1
 #define HAVE_COSF   1
 #define HAVE_FABS   1
-#define HAVE_FABSF  1
 #define HAVE_FLOOR  1
-#define HAVE_FLOORF 1
-#define HAVE_FMOD   1
-#define HAVE_FMODF  1
 #define HAVE_LOG    1
-#define HAVE_LOGF   1
-#define HAVE_LOG10  1
-#define HAVE_LOG10F 1
 #define HAVE_POW    1
-#define HAVE_POWF   1
 #define HAVE_SCALBN 1
-#define HAVE_SCALBNF    1
 #define HAVE_SIN    1
 #define HAVE_SINF   1
 #define HAVE_SQRT   1
