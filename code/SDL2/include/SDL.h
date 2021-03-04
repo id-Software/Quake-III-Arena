@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -47,16 +47,20 @@
 #include "SDL_loadso.h"
 #include "SDL_log.h"
 #include "SDL_messagebox.h"
+#include "SDL_metal.h"
 #include "SDL_mutex.h"
 #include "SDL_power.h"
 #include "SDL_render.h"
 #include "SDL_rwops.h"
+#include "SDL_sensor.h"
 #include "SDL_shape.h"
 #include "SDL_system.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "SDL_version.h"
 #include "SDL_video.h"
+#include "SDL_locale.h"
+#include "SDL_misc.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -80,10 +84,11 @@ extern "C" {
 #define SDL_INIT_HAPTIC         0x00001000u
 #define SDL_INIT_GAMECONTROLLER 0x00002000u  /**< SDL_INIT_GAMECONTROLLER implies SDL_INIT_JOYSTICK */
 #define SDL_INIT_EVENTS         0x00004000u
+#define SDL_INIT_SENSOR         0x00008000u
 #define SDL_INIT_NOPARACHUTE    0x00100000u  /**< compatibility; this flag is ignored. */
 #define SDL_INIT_EVERYTHING ( \
                 SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | \
-                SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER \
+                SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR \
             )
 /* @} */
 
