@@ -50,6 +50,7 @@ if [ "$2" != "" ]; then
 		echo " x86"
 		echo " x86_64"
 		echo " ppc"
+		echo " arm64"
 		echo
 		exit 1
 	fi
