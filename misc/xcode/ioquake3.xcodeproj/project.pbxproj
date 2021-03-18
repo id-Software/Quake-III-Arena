@@ -51,8 +51,6 @@
 		2735379E14D8F13E000D6E73 /* botlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2735379B14D8F13E000D6E73 /* botlib.a */; };
 		274FAB79178FA81800B17C7A /* snd_main.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB78178FA81700B17C7A /* snd_main.c */; };
 		274FAB7B178FA86E00B17C7A /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB7A178FA86E00B17C7A /* md5.c */; };
-		274FAB86178FA97400B17C7A /* ftola.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB7D178FA97100B17C7A /* ftola.c */; };
-		274FAB87178FA98500B17C7A /* snapvector.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB81178FA97100B17C7A /* snapvector.c */; };
 		274FAB88178FA98E00B17C7A /* snd_mixa.s in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB82178FA97100B17C7A /* snd_mixa.s */; };
 		274FAB8A178FA9AA00B17C7A /* matha.s in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB7E178FA97100B17C7A /* matha.s */; };
 		274FABFD178FAC4900B17C7A /* vm_x86.c in Sources */ = {isa = PBXBuildFile; fileRef = 2711BE9E14D136DF005EB142 /* vm_x86.c */; };
@@ -90,6 +88,8 @@
 		A163B25A2193AEA100C48278 /* libopus.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A1665973219341DF0086B74B /* libopus.dylib */; };
 		A163B25C2193AF1E00C48278 /* renderer_opengl1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A163B25B2193AF1E00C48278 /* renderer_opengl1.dylib */; };
 		A1665971219107490086B74B /* sys_autoupdater.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665970219107490086B74B /* sys_autoupdater.c */; };
+		A1F3185E2603127800A11B0E /* ftola.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB7D178FA97100B17C7A /* ftola.c */; };
+		A1F318612603128500A11B0E /* snapvector.c in Sources */ = {isa = PBXBuildFile; fileRef = 274FAB81178FA97100B17C7A /* snapvector.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -909,6 +909,7 @@
 				27AAD00E178E007B0093DFC0 /* snd_openal.c in Sources */,
 				27AAD011178E00AB0093DFC0 /* ioapi.c in Sources */,
 				27AAD013178E00C30093DFC0 /* net_ip.c in Sources */,
+				A1F3185E2603127800A11B0E /* ftola.c in Sources */,
 				27AAD016178E00CE0093DFC0 /* puff.c in Sources */,
 				27AAD01B178E00E80093DFC0 /* q_math.c in Sources */,
 				27AAD01C178E00E80093DFC0 /* q_shared.c in Sources */,
@@ -916,12 +917,11 @@
 				27AAD02D178E013E0093DFC0 /* sdl_snd.c in Sources */,
 				274FAB79178FA81800B17C7A /* snd_main.c in Sources */,
 				274FAB7B178FA86E00B17C7A /* md5.c in Sources */,
-				274FAB86178FA97400B17C7A /* ftola.c in Sources */,
-				274FAB87178FA98500B17C7A /* snapvector.c in Sources */,
 				274FAB88178FA98E00B17C7A /* snd_mixa.s in Sources */,
 				274FAB8A178FA9AA00B17C7A /* matha.s in Sources */,
 				274FABFD178FAC4900B17C7A /* vm_x86.c in Sources */,
 				274FABFE178FAC6E00B17C7A /* tr_noise.c in Sources */,
+				A1F318612603128500A11B0E /* snapvector.c in Sources */,
 				278714D917911C1300094CA3 /* libmumblelink.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

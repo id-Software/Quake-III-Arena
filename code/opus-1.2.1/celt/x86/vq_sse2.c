@@ -30,8 +30,6 @@
 #include "config.h"
 #endif
 
-#if defined (__i386__) || defined(__x86_64__)
-
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include "celt_lpc.h"
@@ -216,5 +214,4 @@ opus_val16 op_pvq_search_sse2(celt_norm *_X, int *iy, int K, int N, int arch)
    return yy;
 }
 
-#endif
 #endif

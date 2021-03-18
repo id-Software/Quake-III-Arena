@@ -29,8 +29,6 @@
 #include "config.h"
 #endif
 
-#if defined (__i386__) || defined(__x86_64__)
-
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
@@ -194,5 +192,4 @@ void xcorr_kernel_sse4_1(const opus_val16 * x, const opus_val16 * y, opus_val32 
     initSum = _mm_add_epi32(initSum, vecSum);
     _mm_storeu_si128((__m128i *)sum, initSum);
 }
-#endif
 #endif
