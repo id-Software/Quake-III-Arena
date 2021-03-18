@@ -56,12 +56,8 @@
 		A1665F3C2193AAEC0086B74B /* celt_lpc.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665ACD2193AAEB0086B74B /* celt_lpc.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F3D2193AAEC0086B74B /* celt_encoder.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665ACE2193AAEB0086B74B /* celt_encoder.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F3E2193AAEC0086B74B /* rate.h in Headers */ = {isa = PBXBuildFile; fileRef = A1665ACF2193AAEB0086B74B /* rate.h */; };
-		A1665F3F2193AAEC0086B74B /* vq_sse2.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD12193AAEB0086B74B /* vq_sse2.c */; settings = {COMPILER_FLAGS = "-w"; }; };
-		A1665F402193AAEC0086B74B /* pitch_sse4_1.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD22193AAEB0086B74B /* pitch_sse4_1.c */; settings = {COMPILER_FLAGS = "-w"; }; };
-		A1665F412193AAEC0086B74B /* pitch_sse2.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD32193AAEB0086B74B /* pitch_sse2.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F422193AAEC0086B74B /* x86cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD42193AAEB0086B74B /* x86cpu.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F432193AAEC0086B74B /* x86_celt_map.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD52193AAEB0086B74B /* x86_celt_map.c */; settings = {COMPILER_FLAGS = "-w"; }; };
-		A1665F442193AAEC0086B74B /* celt_lpc_sse.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD62193AAEB0086B74B /* celt_lpc_sse.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F452193AAEC0086B74B /* pitch_sse.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665AD72193AAEB0086B74B /* pitch_sse.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665F462193AAEC0086B74B /* x86cpu.h in Headers */ = {isa = PBXBuildFile; fileRef = A1665AD82193AAEB0086B74B /* x86cpu.h */; };
 		A1665F472193AAEC0086B74B /* celt_lpc_sse.h in Headers */ = {isa = PBXBuildFile; fileRef = A1665AD92193AAEB0086B74B /* celt_lpc_sse.h */; };
@@ -186,7 +182,6 @@
 		A1665FCE2193AAEC0086B74B /* main_sse.h in Headers */ = {isa = PBXBuildFile; fileRef = A1665B682193AAEB0086B74B /* main_sse.h */; };
 		A1665FCF2193AAEC0086B74B /* SigProc_FIX_sse.h in Headers */ = {isa = PBXBuildFile; fileRef = A1665B692193AAEB0086B74B /* SigProc_FIX_sse.h */; };
 		A1665FD02193AAEC0086B74B /* x86_silk_map.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665B6A2193AAEB0086B74B /* x86_silk_map.c */; settings = {COMPILER_FLAGS = "-w"; }; };
-		A1665FD12193AAEC0086B74B /* VAD_sse.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665B6B2193AAEB0086B74B /* VAD_sse.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665FD52193AAEC0086B74B /* biquad_alt.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665B6F2193AAEB0086B74B /* biquad_alt.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665FD62193AAEC0086B74B /* tables_LTP.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665B702193AAEB0086B74B /* tables_LTP.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A1665FD72193AAEC0086B74B /* LPC_analysis_filter_FLP.c in Sources */ = {isa = PBXBuildFile; fileRef = A1665B722193AAEB0086B74B /* LPC_analysis_filter_FLP.c */; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -1197,8 +1192,6 @@
 				A1665FC52193AAEC0086B74B /* warped_autocorrelation_FIX.c in Sources */,
 				A1665FEC2193AAEC0086B74B /* pitch_analysis_core_FLP.c in Sources */,
 				A1665FB02193AAEC0086B74B /* schur64_FIX.c in Sources */,
-				A1665F442193AAEC0086B74B /* celt_lpc_sse.c in Sources */,
-				A1665F3F2193AAEC0086B74B /* vq_sse2.c in Sources */,
 				A16660102193AAEC0086B74B /* NLSF_VQ_weights_laroia.c in Sources */,
 				A1665FF42193AAEC0086B74B /* residual_energy_FLP.c in Sources */,
 				A1665FEF2193AAEC0086B74B /* corrMatrix_FLP.c in Sources */,
@@ -1247,10 +1240,8 @@
 				A1665FD92193AAEC0086B74B /* regularize_correlations_FLP.c in Sources */,
 				A1665E7F2193AAEC0086B74B /* stream.c in Sources */,
 				A1665F4A2193AAEC0086B74B /* pitch.c in Sources */,
-				A1665F402193AAEC0086B74B /* pitch_sse4_1.c in Sources */,
 				A1665FB12193AAEC0086B74B /* LTP_scale_ctrl_FIX.c in Sources */,
 				A1665FE52193AAEC0086B74B /* find_LTP_FLP.c in Sources */,
-				A1665FD12193AAEC0086B74B /* VAD_sse.c in Sources */,
 				A1665FD02193AAEC0086B74B /* x86_silk_map.c in Sources */,
 				A1665F732193AAEC0086B74B /* init_encoder.c in Sources */,
 				A1665F342193AAEC0086B74B /* mathops.c in Sources */,
@@ -1262,7 +1253,6 @@
 				A1665F262193AAEC0086B74B /* mdct.c in Sources */,
 				A1665F4F2193AAEC0086B74B /* entcode.c in Sources */,
 				A166602B2193AAED0086B74B /* mlp_data.c in Sources */,
-				A1665F412193AAEC0086B74B /* pitch_sse2.c in Sources */,
 				A1665F872193AAEC0086B74B /* table_LSF_cos.c in Sources */,
 				A16660112193AAEC0086B74B /* resampler_down2_3.c in Sources */,
 				A1665F802193AAEC0086B74B /* stereo_LR_to_MS.c in Sources */,

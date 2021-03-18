@@ -350,6 +350,7 @@ if [ -n "${MACOSX_DEPLOYMENT_TARGET_PPC}" ] || [ -n "${MACOSX_DEPLOYMENT_TARGET_
         <key>x86_64</key>
         <string>${MACOSX_DEPLOYMENT_TARGET_X86_64}</string>"
 	fi
+	
 	if [ -n "${MACOSX_DEPLOYMENT_TARGET_ARM64}" ]; then
 	PLIST="${PLIST}
         <key>arm64</key>
