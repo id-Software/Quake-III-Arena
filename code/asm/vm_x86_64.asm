@@ -30,9 +30,15 @@
 ; uint8_t qvmcall64(int *programStack, int *opStack, intptr_t *instructionPointers, byte *dataBase);
 
 qvmcall64 PROC
-  push rsi							; push non-volatile registers to stack
+  push r12							; push all non-volatile registers to stack
+  push r13
+  push r14
+  push r15
   push rdi
+  push rsi
   push rbx
+  push rbp
+  
   ; need to save pointer in rcx so we can write back the programData value to caller
   push rcx
 
@@ -48,9 +54,14 @@ qvmcall64 PROC
   mov dword ptr [rcx], esi			; write back the programStack value
   mov al, bl						; return opStack offset
 
+  pop rbp							; restore all non-volatile registers after the call
   pop rbx
-  pop rdi
   pop rsi
+  pop rdi
+  pop r15
+  pop r14
+  pop r13
+  pop r12
   
   ret
 qvmcall64 ENDP
