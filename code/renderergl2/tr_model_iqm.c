@@ -1528,7 +1528,7 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 				vtxMat[10] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 10];
 				vtxMat[11] = blendWeights[0] * poseMats[12 * data->influenceBlendIndexes[4*influence + 0] + 11];
 
-				for( j = 1; j < 3; j++ ) {
+				for( j = 1; j < 4; j++ ) {
 					if ( blendWeights[j] <= 0.0f ) {
 						break;
 					}
