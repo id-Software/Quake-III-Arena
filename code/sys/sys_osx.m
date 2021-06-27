@@ -49,10 +49,10 @@ dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *t
 	[alert setMessageText: [NSString stringWithUTF8String: title]];
 	[alert setInformativeText: [NSString stringWithUTF8String: message]];
 
-	if( type == DT_ERROR )
-		[alert setAlertStyle: NSAlertStyleCritical];
-	else
-		[alert setAlertStyle: NSAlertStyleWarning];
+    if( type == DT_ERROR )
+        [alert setAlertStyle: NSCriticalAlertStyle];
+    else
+        [alert setAlertStyle: NSWarningAlertStyle];
 
 	switch( type )
 	{
