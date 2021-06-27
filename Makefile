@@ -480,7 +480,7 @@ ifeq ($(PLATFORM),darwin)
     BASE_CFLAGS += -arch x86_64
   endif
   ifeq ($(ARCH),arm64)
-    HAVE_VM_COMPILED=false # TODO: implement compiled vm
+    # HAVE_VM_COMPILED=false # TODO: implement compiled vm
     BASE_CFLAGS += -arch arm64
   endif
 
