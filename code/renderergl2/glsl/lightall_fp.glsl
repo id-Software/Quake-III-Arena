@@ -144,7 +144,6 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 	}
 #endif
 
-	return bestDepth;
 	return bestDepth - r_parallaxMapOffset;
 }
 
