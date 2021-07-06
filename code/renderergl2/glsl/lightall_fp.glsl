@@ -201,7 +201,7 @@ vec3 CalcSpecular(vec3 specular, float NH, float EH, float roughness)
 	float rr = roughness*roughness;
 	float rrrr = rr*rr;
 	float d = (NH * NH) * (rrrr - 1.0) + 1.0;
-	float v = (EH * EH) * (roughness + 0.5);
+	float v = (EH * EH) * (roughness + 0.5) + EPSILON;
 	return specular * (rrrr / (4.0 * d * d * v));
 }
 
