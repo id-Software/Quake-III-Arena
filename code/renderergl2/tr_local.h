@@ -1778,6 +1778,7 @@ extern  cvar_t  *r_normalMapping;
 extern  cvar_t  *r_specularMapping;
 extern  cvar_t  *r_deluxeMapping;
 extern  cvar_t  *r_parallaxMapping;
+extern  cvar_t  *r_parallaxMapOffset;
 extern  cvar_t  *r_parallaxMapShadows;
 extern  cvar_t  *r_cubeMapping;
 extern  cvar_t  *r_cubemapSize;

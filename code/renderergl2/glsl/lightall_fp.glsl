@@ -89,6 +89,9 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 	// current size of search window
 	float size = 1.0 / float(linearSearchSteps);
 
+	// adjust position if offset above surface
+	dp -= ds * r_parallaxMapOffset;
+
 	// current depth position
 	float depth = 0.0;
 
@@ -142,6 +145,7 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 #endif
 
 	return bestDepth;
+	return bestDepth - r_parallaxMapOffset;
 }
 
 float LightRay(vec2 dp, vec2 ds, sampler2D normalMap)
