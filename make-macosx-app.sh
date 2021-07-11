@@ -372,6 +372,8 @@ PLIST="${PLIST}
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
     <false/>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<false/>
 </dict>
 </plist>
 "
