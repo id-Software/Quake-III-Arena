@@ -264,7 +264,8 @@ void main()
 	float NL, NH, NE, EH, attenuation;
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, var_Normal.xyz);
+	vec3 surfNormal = (!gl_FrontFacing ? var_Normal : -var_Normal).xyz;
+	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, surfNormal);
 	viewDir = vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w);
 	E = normalize(viewDir);
 #endif
@@ -335,7 +336,7 @@ void main()
 	N.z = sqrt(clamp((0.25 - N.x * N.x) - N.y * N.y, 0.0, 1.0));
 	N = tangentToWorld * N;
   #else
-	N = var_Normal.xyz;
+	N = surfNormal;
   #endif
 
 	N = normalize(N);
@@ -361,7 +362,7 @@ void main()
 
   #if !defined(USE_LIGHT_VECTOR)
 	ambientColor = lightColor;
-	float surfNL = clamp(dot(var_Normal.xyz, L), 0.0, 1.0);
+	float surfNL = clamp(dot(surfNormal, L), 0.0, 1.0);
 
 	// reserve 25% ambient to avoid black areas on normalmaps
 	lightColor *= 0.75;
