@@ -260,6 +260,7 @@
 		27B0E9F41743E0A800DB1F32 /* null_snddma.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = null_snddma.c; sourceTree = "<group>"; };
 		A115087325BA520A000CF482 /* libSDL2-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2-2.0.0.dylib"; path = "../../code/libs/macosx/libSDL2-2.0.0.dylib"; sourceTree = "<group>"; };
 		A1203448257C937600CA384C /* renderer_opengl2.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = renderer_opengl2.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		A13ED16726EDA78B00D6A6AC /* ioquake3.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ioquake3.entitlements; path = ioquake3/ioquake3.entitlements; sourceTree = "<group>"; };
 		A1403E57256F15E700DFAD74 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ioquake3/Images.xcassets; sourceTree = "<group>"; };
 		A163B25B2193AF1E00C48278 /* renderer_opengl1.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = renderer_opengl1.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1665037218BF45D0086B74B /* SDL_opengles2_gl2ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SDL_opengles2_gl2ext.h; sourceTree = "<group>"; };
@@ -549,6 +550,7 @@
 		273531E014D1275D00EB7BD6 = {
 			isa = PBXGroup;
 			children = (
+				A13ED16726EDA78B00D6A6AC /* ioquake3.entitlements */,
 				2711BE6A14D1364A005EB142 /* code */,
 				273531EE14D1275D00EB7BD6 /* Frameworks */,
 				2711BCC414D12CC6005EB142 /* Libraries */,
@@ -801,6 +803,11 @@
 				CLASSPREFIX = io;
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = ioquake;
+				TargetAttributes = {
+					273531EA14D1275D00EB7BD6 = {
+						DevelopmentTeam = 9UY8SFDNQ8;
+					};
+				};
 			};
 			buildConfigurationList = 273531E514D1275D00EB7BD6 /* Build configuration list for PBXProject "ioquake3" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1055,8 +1062,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = ioquake3/ioquake3.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9UY8SFDNQ8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ioquake3-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1083,8 +1093,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = ioquake3/ioquake3.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9UY8SFDNQ8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ioquake3-Prefix.pch";
 				HEADER_SEARCH_PATHS = (

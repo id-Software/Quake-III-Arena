@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,11 +42,12 @@
 #undef volatile
 
 /* C datatypes */
-#ifdef __LP64__
+#if defined(__LP64__) || defined(_LP64) || defined(_WIN64)
 #define SIZEOF_VOIDP 8
 #else
 #define SIZEOF_VOIDP 4
 #endif
+
 #undef HAVE_GCC_ATOMICS
 #undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET
 
@@ -99,6 +100,7 @@
 #undef HAVE_WCSLEN
 #undef HAVE_WCSLCPY
 #undef HAVE_WCSLCAT
+#undef HAVE__WCSDUP
 #undef HAVE_WCSDUP
 #undef HAVE_WCSSTR
 #undef HAVE_WCSCMP
@@ -119,7 +121,6 @@
 #undef HAVE_STRRCHR
 #undef HAVE_STRSTR
 #undef HAVE_STRTOK_R
-#undef HAVE_STRTOK_S
 #undef HAVE_ITOA
 #undef HAVE__LTOA
 #undef HAVE__UITOA
@@ -170,8 +171,12 @@
 #undef HAVE_LOGF
 #undef HAVE_LOG10
 #undef HAVE_LOG10F
+#undef HAVE_LROUND
+#undef HAVE_LROUNDF
 #undef HAVE_POW
 #undef HAVE_POWF
+#undef HAVE_ROUND
+#undef HAVE_ROUNDF
 #undef HAVE_SCALBN
 #undef HAVE_SCALBNF
 #undef HAVE_SIN
@@ -220,6 +225,7 @@
 #undef HAVE_IMMINTRIN_H
 #undef HAVE_LIBUDEV_H
 #undef HAVE_LIBSAMPLERATE_H
+#undef HAVE_LIBDECOR_H
 
 #undef HAVE_DDRAW_H
 #undef HAVE_DINPUT_H
@@ -279,6 +285,8 @@
 #undef SDL_AUDIO_DRIVER_OSS
 #undef SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H
 #undef SDL_AUDIO_DRIVER_PAUDIO
+#undef SDL_AUDIO_DRIVER_PIPEWIRE
+#undef SDL_AUDIO_DRIVER_PIPEWIRE_DYNAMIC
 #undef SDL_AUDIO_DRIVER_PULSEAUDIO
 #undef SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC
 #undef SDL_AUDIO_DRIVER_QSA
@@ -287,11 +295,13 @@
 #undef SDL_AUDIO_DRIVER_SUNAUDIO
 #undef SDL_AUDIO_DRIVER_WASAPI
 #undef SDL_AUDIO_DRIVER_WINMM
+#undef SDL_AUDIO_DRIVER_OS2
 
 /* Enable various input drivers */
 #undef SDL_INPUT_LINUXEV
 #undef SDL_INPUT_FBSDKBIO
 #undef SDL_INPUT_LINUXKD
+#undef SDL_INPUT_WSCONS
 #undef SDL_JOYSTICK_HAIKU
 #undef SDL_JOYSTICK_DINPUT
 #undef SDL_JOYSTICK_XINPUT
@@ -301,8 +311,9 @@
 #undef SDL_JOYSTICK_LINUX
 #undef SDL_JOYSTICK_ANDROID
 #undef SDL_JOYSTICK_WINMM
+#undef SDL_JOYSTICK_OS2
 #undef SDL_JOYSTICK_USBHID
-#undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
+#undef SDL_HAVE_MACHINE_JOYSTICK_H
 #undef SDL_JOYSTICK_HIDAPI
 #undef SDL_JOYSTICK_RAWINPUT
 #undef SDL_JOYSTICK_EMSCRIPTEN
@@ -325,18 +336,22 @@
 #undef SDL_LOADSO_DUMMY
 #undef SDL_LOADSO_LDG
 #undef SDL_LOADSO_WINDOWS
+#undef SDL_LOADSO_OS2
 
 /* Enable various threading systems */
+#undef SDL_THREAD_GENERIC_COND_SUFFIX
 #undef SDL_THREAD_PTHREAD
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP
 #undef SDL_THREAD_WINDOWS
+#undef SDL_THREAD_OS2
 
 /* Enable various timer systems */
 #undef SDL_TIMER_HAIKU
 #undef SDL_TIMER_DUMMY
 #undef SDL_TIMER_UNIX
 #undef SDL_TIMER_WINDOWS
+#undef SDL_TIMER_OS2
 
 /* Enable various video drivers */
 #undef SDL_VIDEO_DRIVER_HAIKU
@@ -351,6 +366,7 @@
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_EGL
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_CURSOR
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_XKBCOMMON
+#undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_LIBDECOR
 #undef SDL_VIDEO_DRIVER_X11
 #undef SDL_VIDEO_DRIVER_RPI
 #undef SDL_VIDEO_DRIVER_KMSDRM
@@ -381,6 +397,7 @@
 #undef SDL_VIDEO_DRIVER_NACL
 #undef SDL_VIDEO_DRIVER_VIVANTE
 #undef SDL_VIDEO_DRIVER_VIVANTE_VDK
+#undef SDL_VIDEO_DRIVER_OS2
 #undef SDL_VIDEO_DRIVER_QNX
 
 #undef SDL_VIDEO_RENDER_D3D
@@ -427,6 +444,7 @@
 #undef SDL_FILESYSTEM_NACL
 #undef SDL_FILESYSTEM_ANDROID
 #undef SDL_FILESYSTEM_EMSCRIPTEN
+#undef SDL_FILESYSTEM_OS2
 
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES
