@@ -184,6 +184,11 @@ Cvars for advanced material usage:
                                      1 - Use parallax occlusion mapping.
                                      2 - Use relief mapping. (slower)
 
+*  `r_parallaxMapOffset`            - Set the parallax height offset.
+                                     0    - Values map to -255 - 0. (default)
+                                     0.5  - Values map to -127 - 127.
+                                     1.0  - Values map to 0 - 255.
+
 *  `r_parallaxMapShadows`           - Enable self-shadowing on parallax map
                                    supported materials.
                                      0 - No. (default)

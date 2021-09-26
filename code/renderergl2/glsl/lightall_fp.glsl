@@ -89,6 +89,9 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 	// current size of search window
 	float size = 1.0 / float(linearSearchSteps);
 
+	// adjust position if offset above surface
+	dp -= ds * r_parallaxMapOffset;
+
 	// current depth position
 	float depth = 0.0;
 
@@ -141,7 +144,7 @@ float RayIntersectDisplaceMap(vec2 dp, vec2 ds, sampler2D normalMap)
 	}
 #endif
 
-	return bestDepth;
+	return bestDepth - r_parallaxMapOffset;
 }
 
 float LightRay(vec2 dp, vec2 ds, sampler2D normalMap)
@@ -201,7 +204,7 @@ vec3 CalcSpecular(vec3 specular, float NH, float EH, float roughness)
 	float rr = roughness*roughness;
 	float rrrr = rr*rr;
 	float d = (NH * NH) * (rrrr - 1.0) + 1.0;
-	float v = (EH * EH) * (roughness + 0.5);
+	float v = (EH * EH) * (roughness + 0.5) + EPSILON;
 	return specular * (rrrr / (4.0 * d * d * v));
 }
 
@@ -261,7 +264,8 @@ void main()
 	float NL, NH, NE, EH, attenuation;
 
 #if defined(USE_LIGHT) && !defined(USE_FAST_LIGHT)
-	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, var_Normal.xyz);
+	vec3 surfNormal = (!gl_FrontFacing ? var_Normal : -var_Normal).xyz;
+	mat3 tangentToWorld = mat3(var_Tangent.xyz, var_Bitangent.xyz, surfNormal);
 	viewDir = vec3(var_Normal.w, var_Tangent.w, var_Bitangent.w);
 	E = normalize(viewDir);
 #endif
@@ -332,7 +336,7 @@ void main()
 	N.z = sqrt(clamp((0.25 - N.x * N.x) - N.y * N.y, 0.0, 1.0));
 	N = tangentToWorld * N;
   #else
-	N = var_Normal.xyz;
+	N = surfNormal;
   #endif
 
 	N = normalize(N);
@@ -358,7 +362,7 @@ void main()
 
   #if !defined(USE_LIGHT_VECTOR)
 	ambientColor = lightColor;
-	float surfNL = clamp(dot(var_Normal.xyz, L), 0.0, 1.0);
+	float surfNL = clamp(dot(surfNormal, L), 0.0, 1.0);
 
 	// reserve 25% ambient to avoid black areas on normalmaps
 	lightColor *= 0.75;

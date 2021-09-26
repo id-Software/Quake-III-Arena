@@ -33,6 +33,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "../sys/sys_local.h"
 
+#if !SDL_VERSION_ATLEAST(2, 0, 17)
+#define KMOD_SCROLL KMOD_RESERVED
+#endif
+
 static cvar_t *in_keyboardDebug     = NULL;
 
 static SDL_GameController *gamepad = NULL;
@@ -84,7 +88,7 @@ static void IN_PrintKey( const SDL_Keysym *keysym, keyNum_t key, qboolean down )
 	if( keysym->mod & KMOD_NUM )      Com_Printf( " KMOD_NUM" );
 	if( keysym->mod & KMOD_CAPS )     Com_Printf( " KMOD_CAPS" );
 	if( keysym->mod & KMOD_MODE )     Com_Printf( " KMOD_MODE" );
-	if( keysym->mod & KMOD_RESERVED ) Com_Printf( " KMOD_RESERVED" );
+	if( keysym->mod & KMOD_SCROLL )   Com_Printf( " KMOD_SCROLL" );
 
 	Com_Printf( " Q:0x%02x(%s)\n", key, Key_KeynumToString( key ) );
 }
