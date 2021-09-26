@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,7 +33,7 @@
 
 /* Make sure that this isn't included by Visual C++ */
 #ifdef _MSC_VER
-#error You should run hg revert SDL_config.h
+#error You should run hg revert SDL_config.h 
 #endif
 
 /* C language features */
@@ -50,32 +50,43 @@
 #undef HAVE_GCC_ATOMICS
 #undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET
 
+#undef HAVE_DDRAW_H
+#undef HAVE_DINPUT_H
+#undef HAVE_DSOUND_H
+#undef HAVE_DXGI_H
+#undef HAVE_XINPUT_H
+#undef HAVE_XINPUT_GAMEPAD_EX
+#undef HAVE_XINPUT_STATE_EX
+
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
 #if HAVE_LIBC
 
 /* Useful headers */
-#undef STDC_HEADERS
 #undef HAVE_ALLOCA_H
-#undef HAVE_CTYPE_H
-#undef HAVE_FLOAT_H
-#undef HAVE_ICONV_H
-#undef HAVE_INTTYPES_H
-#undef HAVE_LIMITS_H
-#undef HAVE_MALLOC_H
-#undef HAVE_MATH_H
-#undef HAVE_MEMORY_H
-#undef HAVE_SIGNAL_H
-#undef HAVE_STDARG_H
-#undef HAVE_STDINT_H
-#undef HAVE_STDIO_H
-#undef HAVE_STDLIB_H
-#undef HAVE_STRINGS_H
-#undef HAVE_STRING_H
 #undef HAVE_SYS_TYPES_H
+#undef HAVE_STDIO_H
+#undef STDC_HEADERS
+#undef HAVE_STDLIB_H
+#undef HAVE_STDARG_H
+#undef HAVE_MALLOC_H
+#undef HAVE_MEMORY_H
+#undef HAVE_STRING_H
+#undef HAVE_STRINGS_H
 #undef HAVE_WCHAR_H
+#undef HAVE_INTTYPES_H
+#undef HAVE_STDINT_H
+#undef HAVE_CTYPE_H
+#undef HAVE_MATH_H
+#undef HAVE_ICONV_H
+#undef HAVE_SIGNAL_H
+#undef HAVE_ALTIVEC_H
 #undef HAVE_PTHREAD_NP_H
-#undef HAVE_LIBUNWIND_H
+#undef HAVE_LIBUDEV_H
+#undef HAVE_DBUS_DBUS_H
+#undef HAVE_IBUS_IBUS_H
+#undef HAVE_FCITX_FRONTEND_H
+#undef HAVE_LIBSAMPLERATE_H
 
 /* C library functions */
 #undef HAVE_MALLOC
@@ -99,17 +110,11 @@
 #undef HAVE_WCSLEN
 #undef HAVE_WCSLCPY
 #undef HAVE_WCSLCAT
-#undef HAVE_WCSDUP
-#undef HAVE_WCSSTR
 #undef HAVE_WCSCMP
-#undef HAVE_WCSNCMP
-#undef HAVE_WCSCASECMP
-#undef HAVE__WCSICMP
-#undef HAVE_WCSNCASECMP
-#undef HAVE__WCSNICMP
 #undef HAVE_STRLEN
 #undef HAVE_STRLCPY
 #undef HAVE_STRLCAT
+#undef HAVE_STRDUP
 #undef HAVE__STRREV
 #undef HAVE__STRUPR
 #undef HAVE__STRLWR
@@ -118,8 +123,6 @@
 #undef HAVE_STRCHR
 #undef HAVE_STRRCHR
 #undef HAVE_STRSTR
-#undef HAVE_STRTOK_R
-#undef HAVE_STRTOK_S
 #undef HAVE_ITOA
 #undef HAVE__LTOA
 #undef HAVE__UITOA
@@ -144,44 +147,25 @@
 #undef HAVE_SNPRINTF
 #undef HAVE_VSNPRINTF
 #undef HAVE_M_PI
-#undef HAVE_ACOS
-#undef HAVE_ACOSF
-#undef HAVE_ASIN
-#undef HAVE_ASINF
 #undef HAVE_ATAN
-#undef HAVE_ATANF
 #undef HAVE_ATAN2
-#undef HAVE_ATAN2F
+#undef HAVE_ACOS
+#undef HAVE_ASIN
 #undef HAVE_CEIL
-#undef HAVE_CEILF
 #undef HAVE_COPYSIGN
-#undef HAVE_COPYSIGNF
 #undef HAVE_COS
 #undef HAVE_COSF
-#undef HAVE_EXP
-#undef HAVE_EXPF
 #undef HAVE_FABS
-#undef HAVE_FABSF
 #undef HAVE_FLOOR
-#undef HAVE_FLOORF
-#undef HAVE_FMOD
-#undef HAVE_FMODF
 #undef HAVE_LOG
-#undef HAVE_LOGF
-#undef HAVE_LOG10
-#undef HAVE_LOG10F
 #undef HAVE_POW
-#undef HAVE_POWF
 #undef HAVE_SCALBN
-#undef HAVE_SCALBNF
 #undef HAVE_SIN
 #undef HAVE_SINF
 #undef HAVE_SQRT
 #undef HAVE_SQRTF
 #undef HAVE_TAN
 #undef HAVE_TANF
-#undef HAVE_TRUNC
-#undef HAVE_TRUNCF
 #undef HAVE_FOPEN64
 #undef HAVE_FSEEKO
 #undef HAVE_FSEEKO64
@@ -199,40 +183,13 @@
 #undef HAVE_PTHREAD_SET_NAME_NP
 #undef HAVE_SEM_TIMEDWAIT
 #undef HAVE_GETAUXVAL
-#undef HAVE_ELF_AUX_INFO
 #undef HAVE_POLL
-#undef HAVE__EXIT
 
 #else
-#define HAVE_STDARG_H 1
-#define HAVE_STDDEF_H 1
-#define HAVE_STDINT_H 1
+#define HAVE_STDARG_H   1
+#define HAVE_STDDEF_H   1
+#define HAVE_STDINT_H   1
 #endif /* HAVE_LIBC */
-
-#undef HAVE_ALTIVEC_H
-#undef HAVE_DBUS_DBUS_H
-#undef HAVE_FCITX
-#undef HAVE_SYS_INOTIFY_H
-#undef HAVE_INOTIFY_INIT
-#undef HAVE_INOTIFY_INIT1
-#undef HAVE_INOTIFY
-#undef HAVE_IBUS_IBUS_H
-#undef HAVE_IMMINTRIN_H
-#undef HAVE_LIBUDEV_H
-#undef HAVE_LIBSAMPLERATE_H
-
-#undef HAVE_DDRAW_H
-#undef HAVE_DINPUT_H
-#undef HAVE_DSOUND_H
-#undef HAVE_DXGI_H
-#undef HAVE_XINPUT_H
-
-#undef HAVE_MMDEVICEAPI_H
-#undef HAVE_AUDIOCLIENT_H
-#undef HAVE_SENSORSAPI_H
-
-#undef HAVE_XINPUT_GAMEPAD_EX
-#undef HAVE_XINPUT_STATE_EX
 
 /* SDL internal assertion support */
 #undef SDL_DEFAULT_ASSERT_LEVEL
@@ -245,7 +202,6 @@
 #undef SDL_FILE_DISABLED
 #undef SDL_JOYSTICK_DISABLED
 #undef SDL_HAPTIC_DISABLED
-#undef SDL_SENSOR_DISABLED
 #undef SDL_LOADSO_DISABLED
 #undef SDL_RENDER_DISABLED
 #undef SDL_THREADS_DISABLED
@@ -287,38 +243,28 @@
 #undef SDL_AUDIO_DRIVER_SUNAUDIO
 #undef SDL_AUDIO_DRIVER_WASAPI
 #undef SDL_AUDIO_DRIVER_WINMM
+#undef SDL_AUDIO_DRIVER_XAUDIO2
 
 /* Enable various input drivers */
 #undef SDL_INPUT_LINUXEV
-#undef SDL_INPUT_FBSDKBIO
 #undef SDL_INPUT_LINUXKD
+#undef SDL_INPUT_TSLIB
 #undef SDL_JOYSTICK_HAIKU
 #undef SDL_JOYSTICK_DINPUT
 #undef SDL_JOYSTICK_XINPUT
 #undef SDL_JOYSTICK_DUMMY
 #undef SDL_JOYSTICK_IOKIT
-#undef SDL_JOYSTICK_MFI
 #undef SDL_JOYSTICK_LINUX
 #undef SDL_JOYSTICK_ANDROID
 #undef SDL_JOYSTICK_WINMM
 #undef SDL_JOYSTICK_USBHID
 #undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
-#undef SDL_JOYSTICK_HIDAPI
-#undef SDL_JOYSTICK_RAWINPUT
 #undef SDL_JOYSTICK_EMSCRIPTEN
-#undef SDL_JOYSTICK_VIRTUAL
 #undef SDL_HAPTIC_DUMMY
-#undef SDL_HAPTIC_ANDROID
 #undef SDL_HAPTIC_LINUX
 #undef SDL_HAPTIC_IOKIT
 #undef SDL_HAPTIC_DINPUT
 #undef SDL_HAPTIC_XINPUT
-
-/* Enable various sensor drivers */
-#undef SDL_SENSOR_ANDROID
-#undef SDL_SENSOR_COREMOTION
-#undef SDL_SENSOR_WINDOWS
-#undef SDL_SENSOR_DUMMY
 
 /* Enable various shared object loading systems */
 #undef SDL_LOADSO_DLOPEN
@@ -351,6 +297,9 @@
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_EGL
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_CURSOR
 #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_XKBCOMMON
+#undef SDL_VIDEO_DRIVER_MIR
+#undef SDL_VIDEO_DRIVER_MIR_DYNAMIC
+#undef SDL_VIDEO_DRIVER_MIR_DYNAMIC_XKBCOMMON
 #undef SDL_VIDEO_DRIVER_X11
 #undef SDL_VIDEO_DRIVER_RPI
 #undef SDL_VIDEO_DRIVER_KMSDRM
@@ -389,7 +338,6 @@
 #undef SDL_VIDEO_RENDER_OGL_ES
 #undef SDL_VIDEO_RENDER_OGL_ES2
 #undef SDL_VIDEO_RENDER_DIRECTFB
-#undef SDL_VIDEO_RENDER_METAL
 
 /* Enable OpenGL support */
 #undef SDL_VIDEO_OPENGL
@@ -405,9 +353,6 @@
 
 /* Enable Vulkan support */
 #undef SDL_VIDEO_VULKAN
-
-/* Enable Metal support */
-#undef SDL_VIDEO_METAL
 
 /* Enable system power support */
 #undef SDL_POWER_LINUX
@@ -431,17 +376,12 @@
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES
 #undef SDL_ALTIVEC_BLITTERS
-#undef SDL_ARM_SIMD_BLITTERS
-#undef SDL_ARM_NEON_BLITTERS
 
 /* Enable ime support */
 #undef SDL_USE_IME
 
 /* Enable dynamic udev support */
 #undef SDL_UDEV_DYNAMIC
-
-/* Enable dynamic libusb support */
-#undef SDL_LIBUSB_DYNAMIC
 
 /* Enable dynamic libsamplerate support */
 #undef SDL_LIBSAMPLERATE_DYNAMIC
