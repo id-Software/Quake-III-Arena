@@ -122,6 +122,18 @@ char *Sys_GogPath( void )
 
 /*
 ================
+Sys_MicrosoftStorePath
+================
+*/
+char* Sys_MicrosoftStorePath(void)
+{
+	// Microsoft Store doesn't exist on Mac/Linux
+	return microsoftStorePath;
+}
+
+
+/*
+================
 Sys_Milliseconds
 ================
 */
