@@ -50,6 +50,9 @@ static char steamPath[ MAX_OSPATH ] = { 0 };
 // Used to store the GOG Quake 3 installation path
 static char gogPath[ MAX_OSPATH ] = { 0 };
 
+// Used to store the Microsoft Store Quake 3 installation path
+static char microsoftStorePath[MAX_OSPATH] = { 0 };
+
 /*
 ==================
 Sys_DefaultHomePath
