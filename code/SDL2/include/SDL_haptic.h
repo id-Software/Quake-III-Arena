@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -116,6 +116,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/* FIXME: For SDL 2.1, adjust all the magnitude variables to be Uint16 (0xFFFF).
+ *
+ * At the moment the magnitude variables are mixed between signed/unsigned, and
+ * it is also not made clear that ALL of those variables expect a max of 0x7FFF.
+ *
+ * Some platforms may have higher precision than that (Linux FF, Windows XInput)
+ * so we should fix the inconsistency in favor of higher possible precision,
+ * adjusting for platforms that use different scales.
+ * -flibit
+ */
 
 /**
  *  \typedef SDL_Haptic
@@ -325,6 +336,14 @@ typedef struct _SDL_Haptic SDL_Haptic;
  */
 #define SDL_HAPTIC_SPHERICAL  2
 
+/**
+ *  \brief Use this value to play an effect on the steering wheel axis. This 
+ *  provides better compatibility across platforms and devices as SDL will guess 
+ *  the correct axis.
+ *  \sa SDL_HapticDirection
+ */
+#define SDL_HAPTIC_STEERING_AXIS 3
+
 /* @} *//* Direction encodings */
 
 /* @} *//* Haptic features */
@@ -433,6 +452,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
  *  \sa SDL_HAPTIC_POLAR
  *  \sa SDL_HAPTIC_CARTESIAN
  *  \sa SDL_HAPTIC_SPHERICAL
+ *  \sa SDL_HAPTIC_STEERING_AXIS
  *  \sa SDL_HapticEffect
  *  \sa SDL_HapticNumAxes
  */
@@ -656,8 +676,8 @@ typedef struct SDL_HapticRamp
  * This struct is exclusively for the ::SDL_HAPTIC_LEFTRIGHT effect.
  *
  * The Left/Right effect is used to explicitly control the large and small
- * motors, commonly found in modern game controllers. One motor is high
- * frequency, the other is low frequency.
+ * motors, commonly found in modern game controllers. The small (right) motor
+ * is high frequency, and the large (left) motor is low frequency.
  *
  * \sa SDL_HAPTIC_LEFTRIGHT
  * \sa SDL_HapticEffect
@@ -668,7 +688,7 @@ typedef struct SDL_HapticLeftRight
     Uint16 type;            /**< ::SDL_HAPTIC_LEFTRIGHT */
 
     /* Replay */
-    Uint32 length;          /**< Duration of the effect. */
+    Uint32 length;          /**< Duration of the effect in milliseconds. */
 
     /* Rumble */
     Uint16 large_magnitude; /**< Control of the large controller motor. */

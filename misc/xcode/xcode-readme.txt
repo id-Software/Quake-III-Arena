@@ -26,7 +26,6 @@ LIBRARIES:
 
 TODO:
 - dedicated support
-- missionpack support
 - curl.xcodeproj
 - ogg.xcodeproj (ogg vorbis support)
 - zlib.xcodeproj
