@@ -13,7 +13,7 @@ Makefile.local
 .DS_Store
 .LSOverride
 Icon?
-make-macosx-values.sh
+make-macosx-values.local
 
 # Xcode
 ####################

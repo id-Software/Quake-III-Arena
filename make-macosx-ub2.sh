@@ -1,5 +1,4 @@
 #!/bin/bash
-CC=gcc-4.0
 
 cd `dirname $0`
 if [ ! -f Makefile ]; then
@@ -24,7 +23,7 @@ echo "Building X86_64 Client/Dedicated Server"
 echo "Building ARM64 Client/Dedicated Server"
 echo
 
-if [ $1 == "" ]; then
+if [ "$1" == "" ]; then
 	echo "Run script with a 'notarize' flag to perform signing and notarization."
 fi
 
@@ -59,7 +58,7 @@ fi
 
 if [ "$1" == "notarize" ]; then
 	# user-specific values
-	# specify the actual values in a separate file called make-macosx-values.sh
+	# specify the actual values in a separate file called make-macosx-values.local
 
 	# ****************************************************************************************
 	# identity as specified in Keychain
@@ -75,7 +74,7 @@ if [ "$1" == "notarize" ]; then
 	ASC_PROVIDER="XXXXXXXXX"
 	# ****************************************************************************************
 
-	source make-macosx-values.sh
+	source make-macosx-values.local
 
 	# release build location
 	RELEASE_LOCATION="build/release-darwin-universal2"

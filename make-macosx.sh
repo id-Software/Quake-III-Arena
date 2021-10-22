@@ -22,7 +22,7 @@ elif [ "$1" == "arm64" ]; then
 	BUILDARCH=arm64
 else
 	echo "Invalid architecture: $1"
-	echo "Valid architectures are x86, x86_64, arm64 or ppc"
+	echo "Valid architectures are arm64, x86_64, x86, or ppc"
 	exit 1
 fi
 
