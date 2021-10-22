@@ -232,10 +232,12 @@ Sys_MicrosoftStorePath
 */
 char* Sys_MicrosoftStorePath(void)
 {
+#ifdef MSSTORE_PATH
 	if (!microsoftStorePath[0]) 
 	{
 		Q_strcat(microsoftStorePath, MAX_OSPATH, "C:\\Program Files\\ModifiableWindowsApps\\Quake 3\\EN");
 	}
+#endif
 	return microsoftStorePath;
 }
 
