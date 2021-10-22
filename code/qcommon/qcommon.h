@@ -1123,6 +1123,7 @@ void	Sys_SetDefaultInstallPath(const char *path);
 char	*Sys_DefaultInstallPath(void);
 char	*Sys_SteamPath(void);
 char	*Sys_GogPath(void);
+char	*Sys_MicrosoftStorePath(void);
 
 #ifdef __APPLE__
 char    *Sys_DefaultAppPath(void);

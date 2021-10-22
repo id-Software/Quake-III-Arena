@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\code\qcommon\puff.c" />
+    <ClCompile Include="..\..\code\qcommon\q_math.c" />
+    <ClCompile Include="..\..\code\qcommon\q_shared.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_font.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_bmp.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_jpg.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_pcx.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_png.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_image_tga.c" />
+    <ClCompile Include="..\..\code\renderercommon\tr_noise.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_animation.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_backend.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_bsp.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_cmds.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_curve.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_extensions.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_extramath.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_fbo.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_flares.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_glsl.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_image.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_image_dds.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_init.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_light.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_main.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_marks.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_mesh.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_model.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_model_iqm.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_postprocess.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_scene.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shade.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shader.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shade_calc.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_shadows.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_sky.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_subs.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_surface.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_vbo.c" />
+    <ClCompile Include="..\..\code\renderergl2\tr_world.c" />
+    <ClCompile Include="..\..\code\sdl\sdl_gamma.c" />
+    <ClCompile Include="..\..\code\sdl\sdl_glimp.c" />
+    <ClCompile Include="..\..\code\jpeg-8c\jaricom.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcapimin.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcapistd.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcarith.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jccoefct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jccolor.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcdctmgr.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jchuff.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcinit.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmainct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmarker.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcmaster.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcomapi.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcparam.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcprepct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jcsample.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jctrans.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdapimin.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdapistd.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdarith.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdatadst.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdatasrc.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdcoefct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdcolor.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jddctmgr.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdhuff.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdinput.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmainct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmarker.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmaster.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdmerge.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdpostct.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdsample.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jdtrans.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jerror.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctflt.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctfst.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jfdctint.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctflt.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctfst.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jidctint.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jmemmgr.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jmemnobs.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jquant1.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jquant2.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\jpeg-8c\jutils.c">
+      <Filter>jpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\bokeh_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\bokeh_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\calclevels4x_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\calclevels4x_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\depthblur_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\depthblur_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\dlight_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\dlight_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\down4x_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\down4x_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\fogpass_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\fogpass_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\generic_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\generic_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\lightall_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\lightall_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\pshadow_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\pshadow_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowfill_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowfill_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowmask_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\shadowmask_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\ssao_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\ssao_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\texturecolor_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\texturecolor_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\tonemap_fp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\build\dynamic\renderergl2\tonemap_vp.c">
+      <Filter>dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\renderergl2\tr_dsa.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\cgame\tr_types.h" />
+    <ClInclude Include="..\..\code\client\snd_local.h" />
+    <ClInclude Include="..\..\code\client\snd_public.h" />
+    <ClInclude Include="..\..\code\qcommon\puff.h" />
+    <ClInclude Include="..\..\code\qcommon\qcommon.h" />
+    <ClInclude Include="..\..\code\qcommon\qfiles.h" />
+    <ClInclude Include="..\..\code\qcommon\q_shared.h" />
+    <ClInclude Include="..\..\code\qcommon\surfaceflags.h" />
+    <ClInclude Include="..\..\code\qcommon\unzip.h" />
+    <ClInclude Include="..\..\code\qcommon\vm_local.h" />
+    <ClInclude Include="..\..\code\renderercommon\qgl.h" />
+    <ClInclude Include="..\..\code\renderercommon\tr_public.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_extramath.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_extratypes.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_fbo.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_local.h" />
+    <ClInclude Include="..\..\code\renderergl2\tr_postprocess.h" />
+    <ClInclude Include="..\..\code\server\server.h" />
+    <ClInclude Include="..\..\code\ui\ui_public.h" />
+    <ClInclude Include="..\..\code\win32\resource.h" />
+    <ClInclude Include="..\..\code\win32\win_local.h" />
+    <ClInclude Include="..\..\code\jpeg-6b\jchuff.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jconfig.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jdct.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jdhuff.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jerror.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jinclude.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jmemsys.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jmorecfg.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jpegint.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jpeglib.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\jpeg-6b\jversion.h">
+      <Filter>jpeg</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="jpeg">
+      <UniqueIdentifier>{8da41ebb-15ff-4640-8b12-c2ec23c68e77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dynamic">
+      <UniqueIdentifier>{e6c65cf2-d575-4c8e-bdbb-e19a5775e5a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{3f4484f0-65ac-4160-9569-ba63ede6dfee}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
