@@ -78,13 +78,21 @@ For Windows,
   1. Please refer to the excellent instructions here:
      http://wiki.ioquake3.org/Building_ioquake3
 
-For Mac OS X, building a Universal Binary
+For Mac OS X, building a Universal Binary (x86_64, x86, ppc)
   1. Install MacOSX SDK packages from XCode.  For maximum compatibility,
-     install MacOSX10.4u.sdk and MacOSX10.3.9.sdk, and MacOSX10.2.8.sdk.
+     install MacOSX10.5.sdk and MacOSX10.6.sdk.
   2. Change to the directory containing this README file.
   3. Run './make-macosx-ub.sh'
-  4. Copy the resulting ioquake3.app in /build/release-darwin-ub to your
-     /Applications/ioquake3 folder.
+  4. Copy the resulting ioquake3.app in /build/release-darwin-universal
+     to your /Applications/ioquake3 folder.
+
+For Mac OS X, building a Universal Binary 2 (arm64, x86_64)
+  1. Install MacOSX SDK packages from XCode.  Building for arm64 requires
+     MacOSX11.sdk or later.
+  2. Change to the directory containing this README file.
+  3. Run './make-macosx-ub2.sh'
+  4. Copy the resulting ioquake3.app in /build/release-darwin-universal2
+     to your /Applications/ioquake3 folder.
 
 Installation, for *nix
   1. Set the COPYDIR variable in the shell to be where you installed Quake 3
