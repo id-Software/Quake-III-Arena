@@ -175,7 +175,7 @@ void S_TransferPaintBuffer(int endtime)
 	{	// general case
 		p = (int *) paintbuffer;
 		count = (endtime - s_paintedtime) * dma.channels;
-		out_idx = (s_paintedtime * dma.channels) % dma.samples;
+		out_idx = ((unsigned int)s_paintedtime * dma.channels) % dma.samples;
 		step = 3 - MIN(dma.channels, 2);
 
 		if ((dma.isfloat) && (dma.samplebits == 32))
