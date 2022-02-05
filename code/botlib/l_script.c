@@ -643,7 +643,7 @@ int PS_ReadNumber(script_t *script, token_t *token)
 		//hexadecimal
 		while((c >= '0' && c <= '9') ||
 					(c >= 'a' && c <= 'f') ||
-					(c >= 'A' && c <= 'A'))
+					(c >= 'A' && c <= 'F'))
 		{
 			token->string[len++] = *script->script_p++;
 			if (len >= MAX_TOKEN)
