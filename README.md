@@ -66,7 +66,11 @@ https://discourse.ioquake.org
 <a href="https://icculus.org/">icculus dot org<br/>
 <img src="http://icculus.org/icculus-org-now.png" width="300px"></a>
 </p>
-
+---
+<p>
+<a href="https://nuclearmonster.com/">Nuclear Monster<br/>
+<img src="https://user-images.githubusercontent.com/903791/152968830-dd08737b-55c6-4ac6-9610-31121ea0e8c6.png" width="300px"></a>
+</p>
 
 # Compilation and installation
 
