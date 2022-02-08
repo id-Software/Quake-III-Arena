@@ -6,7 +6,7 @@
 !define RELEASE "1"
 !define MODDIR "q3ctc"
 !define PUBLISHER "The ioquake3 Team"
-!define URL "http://ioquake3.org/"
+!define URL "https://ioquake3.org/"
 ; uncomment if the mod works without baseq3
 ;!define STANDALONE
 

@@ -119,3 +119,34 @@ ioquake3 can be developed locally. For instructions on how to do this, see [the 
 
 * Fill in [the required template](PULL_REQUEST_TEMPLATE.md)
 * Do not include issue numbers in the PR title.
+
+
+### Building Official Installers
+
+This is a reminder for how official installers should be built:
+
+  * Please include the id patch pk3s in your installer, which are available
+    from http://ioquake3.org/patch-data/ subject to agreement to the id
+    EULA. Your installer shall also ask the user to agree to this EULA (which
+    is in the /web/include directory for your convenience) and subsequently
+    refuse to continue the installation of the patch pk3s and pak0.pk3 if they
+    do not.
+
+  * Please don't require pak0.pk3, since not everyone using the engine
+    plans on playing Quake 3 Arena on it. It's fine to (optionally) assist the
+    user in copying the file or tell them how.
+
+  * It is fine to just install the binaries without requiring id EULA agreement,
+    providing pak0.pk3 and the patch pk3s are not referred to or included in the
+    installer.
+
+  * Please include at least a libSDL2 so/dylib/dll on every platform.
+
+  * Please include an OpenAL so/dylib/dll, since every platform should be using
+    it by now.
+
+  * Please be prepared to alter your installer on the whim of the maintainers.
+
+  * Your installer will be mirrored to an "official" directory, thus making it
+    a done deal.
+

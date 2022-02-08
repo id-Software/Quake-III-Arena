@@ -40,12 +40,12 @@ The original id software readme that accompanied the Q3 source release has been
 renamed to id-readme.txt so as to prevent confusion. Please refer to the
 website for updated status.
 
-More documentation including a Player's Guide and Sysadmin Guide is on:
-http://wiki.ioquake3.org/
+More documentation including a Player's Guide and Sysadmin Guide are on:
+https://ioquake3.org/help/
 
 If you've got issues that you aren't sure are worth filing as bugs, or just
 want to chat, please visit our forums:
-http://discourse.ioquake.org
+https://discourse.ioquake.org
 
 # Thank You:
 
@@ -76,9 +76,9 @@ For *nix
 
 For Windows,
   1. Please refer to the excellent instructions here:
-     http://wiki.ioquake3.org/Building_ioquake3
+     https://ioquake3.org/help/building-ioquake3/
 
-For Mac OS X, building a Universal Binary (x86_64, x86, ppc)
+For macOS, building a Universal Binary (x86_64, x86, ppc)
   1. Install MacOSX SDK packages from XCode.  For maximum compatibility,
      install MacOSX10.5.sdk and MacOSX10.6.sdk.
   2. Change to the directory containing this README file.
@@ -526,38 +526,6 @@ and provide players with the same Quake 3 experience they've had for years.
 We do have graphical improvements with the new renderer, but they are off by default.
 See opengl2-readme.md for more information.
 
-# Building Official Installers
-
-We need help getting automated installers on all the platforms that ioquake3
-supports. We don't necessarily care about all the installers being identical,
-but we have some general guidelines:
-
-  * Please include the id patch pk3s in your installer, which are available
-    from http://ioquake3.org/patch-data/ subject to agreement to the id
-    EULA. Your installer shall also ask the user to agree to this EULA (which
-    is in the /web/include directory for your convenience) and subsequently
-    refuse to continue the installation of the patch pk3s and pak0.pk3 if they
-    do not.
-
-  * Please don't require pak0.pk3, since not everyone using the engine
-    plans on playing Quake 3 Arena on it. It's fine to (optionally) assist the
-    user in copying the file or tell them how.
-
-  * It is fine to just install the binaries without requiring id EULA agreement,
-    providing pak0.pk3 and the patch pk3s are not referred to or included in the
-    installer.
-
-  * Please include at least a libSDL2 so/dylib/dll on every platform.
-
-  * Please include an OpenAL so/dylib/dll, since every platform should be using
-    it by now.
-
-  * Please be prepared to alter your installer on the whim of the maintainers.
-
-  * Your installer will be mirrored to an "official" directory, thus making it
-    a done deal.
-
-
 # Credits
 
 Maintainers
@@ -567,7 +535,7 @@ Maintainers
   * Thilo Schulz <arny@ats.s.bawue.de>
   * Tim Angus <tim@ngus.net>
   * Tony J. White <tjw@tjw.org>
-  * Zachary J. Slater <zachary@ioquake.org>
+  * Jack Slater <jack@ioquake.org>
   * Zack Middleton <zturtleman@gmail.com>
 
 Significant contributions from
