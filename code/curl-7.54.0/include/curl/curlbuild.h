@@ -288,7 +288,7 @@
 #  define CURL_SIZEOF_CURL_SOCKLEN_T 4
 
 #elif defined(__LCC__)
-#  if defined(__e2k__) /* MCST eLbrus C Compiler */
+#  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
 #    define CURL_SIZEOF_LONG           8
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
