@@ -460,7 +460,7 @@ int BotChat_ExitGame(bot_state_t *bs) {
 		if (random() > rnd) return qfalse;
 	}
 	if (BotNumActivePlayers() <= 1) return qfalse;
-	//
+	
 	BotAI_BotInitialChat(bs, "game_exit",
 				EasyClientName(bs->client, name, 32),	// 0
 				BotRandomOpponentName(bs),				// 1
