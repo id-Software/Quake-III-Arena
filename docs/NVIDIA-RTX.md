@@ -145,3 +145,42 @@ in-game actions. This engine upgrade does not claim otherwise.
 The engine is tracked as a Git submodule at a fixed upstream commit so its
 license files and attribution remain with the upstream project. The legacy
 source tree and this repository's existing license notices remain intact.
+
+
+## Official Quake III Arena 1.32 / 1.32c multiplayer support
+
+The pinned ReForged source declares `PROTOCOL_VERSION 68` in
+`engine/code/qcommon/qcommon.h`. Its server initialization, server browser
+responses, and client connection checks use that shared constant. Protocol 68
+is the official Quake III Arena 1.32 network protocol and is retained by 1.32c.
+This provides the wire-protocol baseline for connecting to original 1.32c
+multiplayer servers; it is not a promise of compatibility with older 1.16,
+1.29, or 1.31 servers.
+
+The official 1.32 point release also supplies updated game data. The separate
+1.32c update is a later executable security update; it does not change the
+protocol number. To stage the official patch-data PK3 files from a legally
+obtained patch-data package, initialize the engine submodule, install the
+original Quake III Arena and Team Arena data, then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\\scripts\\install-q3-132-patch-data.ps1 \\
+  -PatchDataPath "C:\\Path\\To\\PatchData" \\
+  -GamePath "C:\\Path\\To\\Quake III Arena"
+```
+
+The script copies the patch package's `pak*.pk3` files from both `baseq3`
+and `missionpack`, requires the eight `baseq3/pak1.pk3` through
+`pak8.pk3` files, and checks that the selected engine source still defines
+protocol 68. It does not download, include, or redistribute proprietary game
+data. It does not install the original 1.32c executable, PunkBuster, or claim
+to port all 1.32c executable security fixes into the ReForged source.
+
+For network compatibility context, ioquake3 explicitly documents that its
+legacy protocol is compatible with the final id Software 1.32c release:
+https://ioquake3.org/help/sys-admin-guide/
+
+The engine's existing protocol-68 constant was verified in the pinned
+upstream source at `f85ead64d13be64196aa665325e086337bd16caf`. No protocol
+number was changed by this repository update. Multiplayer runtime testing
+against an original 1.32c client/server has not yet been performed.
