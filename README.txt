@@ -5,7 +5,9 @@ Git submodule. It contains the Vulkan renderer, ray-tracing implementation,
 shaders, and CMake project. The previous source tree under code/ is preserved
 unchanged as a legacy fallback. Windows build targets include x86 and x64;
 amd64 and x86-64 are aliases for the same 64-bit target. See docs/NVIDIA-RTX.md
-for platform limits, architecture instructions, and the build script.
+for platform limits, architecture instructions, and dependency pins. Run
+scripts/update-dependencies.ps1 to prepare the pinned stb and TinyJPEG updates;
+the Windows build script runs this automatically.
 
 The AI-agent gateway remains in agent-control/. It is a separate authenticated
 service and is not yet connected to in-game engine commands.
