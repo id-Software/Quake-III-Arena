@@ -73,7 +73,7 @@
   });
 
   askButton.addEventListener("click", async () => {
-    const base = byId("gateway").value.trim().replace(/\\/$/, "");
+    const base = byId("gateway").value.trim().replace(/\/$/, "");
     const key = byId("check-key").value;
     const prompt = byId("prompt").value.trim();
     if (!providerSelect.value || !prompt) {
