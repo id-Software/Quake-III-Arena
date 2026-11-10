@@ -1,10 +1,13 @@
-NVIDIA RTX / VULKAN RENDERER
-----------------------------
-A pinned upstream Quake III Vulkan ray-tracing implementation is included as the
-vendor/Quake-III-Arena-R Git submodule. See docs/NVIDIA-RTX.md for setup and
-build instructions. The original source tree and AI-agent gateway are preserved;
-the RTX submodule is a separate renderer starting point and is not yet wired
-into the original tree's build as a replacement executable.
+NVIDIA RTX ENGINE UPGRADE
+-------------------------
+The ReForged Quake III Arena R source is now available as the pinned engine/
+Git submodule. It contains the Vulkan renderer, ray-tracing implementation,
+shaders, and CMake project. The previous source tree under code/ is preserved
+unchanged as a legacy fallback. See docs/NVIDIA-RTX.md for platform limits,
+checkout instructions, and the Windows build script.
+
+The AI-agent gateway remains in agent-control/. It is a separate authenticated
+service and is not yet connected to in-game engine commands.
 
 Quake III Arena GPL source release
 ==================================
