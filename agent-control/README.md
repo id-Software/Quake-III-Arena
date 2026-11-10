@@ -50,10 +50,12 @@ The authenticated gateway now includes a provider selector and prompt interface.
 - xAI
 - DeepSeek
 - OpenRouter
+- NVIDIA NIM (hosted NVIDIA API Catalog)
+- NVIDIA NIM (self-hosted)
 - Ollama (local)
 - LM Studio (local)
 
-The first eight providers use their hosted APIs. Ollama and LM Studio use local OpenAI-compatible endpoints. Only providers with server-side credentials (or local providers) are selectable. The browser receives provider names and model IDs, never provider API keys.
+The hosted NVIDIA NIM option uses NVIDIA's OpenAI-compatible API Catalog endpoint. The self-hosted NVIDIA NIM option uses a local OpenAI-compatible NIM endpoint. The other hosted providers use their respective APIs. Ollama and LM Studio use local OpenAI-compatible endpoints. Only providers with server-side credentials (or local providers) are selectable. The browser receives provider names and model IDs, never provider API keys.
 
 ### Configure providers
 
@@ -68,10 +70,15 @@ export GROQ_API_KEY='...'
 export XAI_API_KEY='...'
 export DEEPSEEK_API_KEY='...'
 export OPENROUTER_API_KEY='...'
+export NVIDIA_API_KEY='...'
+# Optional: choose a different NVIDIA-hosted model
+export NVIDIA_MODEL='nvidia/llama-3.3-nemotron-super-49b-v1.5'
 python3 server.py
 ```
 
 You do not need to configure every provider. Model IDs can be overridden with OPENAI_MODEL, ANTHROPIC_MODEL, GOOGLE_MODEL, MISTRAL_MODEL, GROQ_MODEL, XAI_MODEL, DEEPSEEK_MODEL, and OPENROUTER_MODEL. Defaults are examples and may need updating as providers retire or rename models.
+
+For NVIDIA-hosted inference, create an API key in the NVIDIA API Catalog and set NVIDIA_API_KEY. NVIDIA model IDs can be selected in the panel's editable Model ID field; the default is nvidia/llama-3.3-nemotron-super-49b-v1.5. For self-hosted NVIDIA NIM, start a NIM container and set NVIDIA_NIM_BASE_URL (default http://127.0.0.1:8000/v1/chat/completions) and optionally NVIDIA_NIM_MODEL (default meta/llama-3.1-8b-instruct). The self-hosted endpoint does not require an API key by default; configure your deployment's authentication separately if exposed beyond localhost.
 
 For local inference, start Ollama or LM Studio on the same host as the gateway. Optional settings: OLLAMA_BASE_URL (default http://127.0.0.1:11434/v1/chat/completions), OLLAMA_MODEL, LM_STUDIO_BASE_URL (default http://127.0.0.1:1234/v1/chat/completions), and LM_STUDIO_MODEL.
 
