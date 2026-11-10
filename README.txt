@@ -207,3 +207,20 @@ COMPILING ON MAC
 ================
 
 the project file for compiling on Mac OS X is in code/macosx/Quake3.pbproj
+
+
+OFFICIAL QUAKE III ARENA 1.32 / 1.32c MULTIPLAYER DATA
+----------------------------------------------------
+The pinned ReForged engine source declares PROTOCOL_VERSION 68, the network
+protocol used by the official Quake III Arena 1.32 and 1.32c releases. The
+repository includes a staging script for legally obtained official 1.32 patch
+data. After initializing the engine submodule and installing the original
+Quake III Arena and Team Arena data, run:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\install-q3-132-patch-data.ps1 -PatchDataPath "C:\Path\To\PatchData" -GamePath "C:\Path\To\Quake III Arena"
+
+The script copies the PK3 patch data into baseq3/ and missionpack/ and checks
+that the engine source still declares protocol 68. It does not download or
+redistribute commercial game data. The original 1.32c executable installer is
+not bundled, and staging PK3 files does not independently certify that the
+source includes every 1.32c executable security fix. See docs/QUAKE3-132-MULTIPLAYER.md.
