@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Quake III — AI Agent Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="mark">Q3</span><div><p class="eyebrow">QUAKE III ARENA</p><h1>AI AGENT CONTROL</h1></div></div>
+      <span class="state"><i></i> LOCAL CONTROL PANEL</span>
+    </header>
+    <section class="intro">
+      <p class="eyebrow">AGENT ACCESS / AUTHENTICATION</p>
+      <h2>Control access.<br><em>Keep the arena yours.</em></h2>
+      <p class="lede">Generate an agent credential and verify that the configured agent gateway accepts it. The key is displayed once and is never saved by this page.</p>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">01 / CREDENTIAL</p><h3>Agent key</h3></div><span class="tag">32-BYTE RANDOM</span></div>
+      <p class="muted">Create a high-entropy bearer key for an authorized AI agent. Configure the same value as <code>AGENT_API_KEY</code> on the gateway host.</p>
+      <button id="generate" class="primary">Generate agent key <span>↗</span></button>
+      <div id="key-wrap" class="key-wrap" hidden>
+        <label for="agent-key">New key — copy it now</label>
+        <div class="key-row"><input id="agent-key" type="text" readonly autocomplete="off"><button id="copy" class="secondary">Copy</button></div>
+        <p class="notice">This key is not stored in browser storage. Reloading this page clears it.</p>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">02 / GATEWAY</p><h3>Connection check</h3></div><span class="tag">BEARER AUTH</span></div>
+      <label for="gateway">Gateway URL</label>
+      <input id="gateway" type="url" value="http://127.0.0.1:8765" spellcheck="false">
+      <label for="check-key">Agent key</label>
+      <input id="check-key" type="password" placeholder="Paste configured agent key" autocomplete="off">
+      <button id="check" class="secondary">Verify agent access</button>
+      <div id="result" class="result" role="status" aria-live="polite">Not checked yet.</div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">03 / MODEL PROVIDER</p><h3>AI model connection</h3></div><span class="tag">MULTI-PROVIDER</span></div>
+      <p class="muted">Choose a provider configured on the gateway. Provider API keys stay on the server and are never exposed to this browser.</p>
+      <label for="provider">AI provider</label>
+      <select id="provider"><option value="">Load providers after verifying access</option></select>
+      <label for="model">Model ID</label>
+      <input id="model" type="text" placeholder="Provider default model">
+      <label for="prompt">Prompt</label>
+      <textarea id="prompt" rows="5" maxlength="12000" placeholder="Ask the selected model something..."></textarea>
+      <button id="ask" class="primary" disabled>Send to AI model <span>↗</span></button>
+      <div id="ai-result" class="result" role="status" aria-live="polite">Verify gateway access to load configured providers.</div>
+    </section>
+    <footer><span>AI AGENT EDITION</span><span>UNAUTHORIZED CLIENTS MUST BE REJECTED</span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

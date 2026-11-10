@@ -1,0 +1,3 @@
+[submodule "vendor/Quake-III-Arena-R"]
+	path = vendor/Quake-III-Arena-R
+	url = https://github.com/fknfilewalker/Quake-III-Arena-R.git
