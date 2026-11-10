@@ -26,6 +26,40 @@ The previous `vendor/Quake-III-Arena-R` submodule path is replaced by
 git submodule update --init --recursive
 ```
 
+## Dependency audit and pinned updates
+
+The engine's nested submodules are initialized from the upstream engine commit,
+then the build preparation script checks out these tested-for-source-compatibility
+revisions:
+
+| Dependency | Previous pinned revision | Updated revision | Reason |
+|---|---|---|---|
+| [stb](https://github.com/nothings/stb) | `2c2908f50515dcd939f24be261c3ccbcd277bb49` | `2b2e64bc4778df6a06fbea3a5dbe61f7a76ecf19` | Brings stb headers forward to the March 2026 revision while retaining `stb_image_resize2.h`, which `code/renderer/tr_image.c` includes. The October 2026 upstream revision moved that header out of the stb repository, so it is not used here. |
+| [TinyJPEG](https://github.com/serge-rgb/TinyJPEG) | `56b6635a23a439a86026c81a5e6c4d27c2d35cd0` | `e978b746714abad76e0f00264d2a154b52de8fc1` | Applies the upstream big-endian byte-order fix; the public header API remains the same. |
+
+Run the dependency preparation independently:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\update-dependencies.ps1
+```
+
+The RTX build script runs this step automatically before CMake configuration.
+The script fetches exact commit IDs and verifies each checked-out revision;
+it does not follow moving `master` branches. Because the engine itself remains
+a pinned upstream submodule, these dependency overrides are applied to the
+nested submodule working directories at build preparation time. A fresh clone
+should run the script again after initializing submodules.
+
+The AI gateway has no third-party Python packages: `agent-control/server.py`
+uses only the Python standard library. The native engine also depends on
+system-provided CMake, Vulkan SDK, OpenGL, and (on Linux) X11 development
+libraries; their versions are selected by the host platform and are not
+vendored or automatically replaced by this script.
+
+This is a source-level dependency update, not a claim that all architecture
+builds or runtime paths have passed CI. Compile and test x86 and x64 separately
+after installing matching 32-bit/64-bit Vulkan loader and driver components.
+
 ## Windows architecture targets
 
 The build script accepts all three requested architecture labels:
