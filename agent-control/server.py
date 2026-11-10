@@ -26,6 +26,8 @@ PROVIDERS = {
     "xai": {"name": "xAI", "env": "XAI_API_KEY", "model_env": "XAI_MODEL", "model": "grok-3-mini", "kind": "openai", "url": "https://api.x.ai/v1/chat/completions"},
     "deepseek": {"name": "DeepSeek", "env": "DEEPSEEK_API_KEY", "model_env": "DEEPSEEK_MODEL", "model": "deepseek-chat", "kind": "openai", "url": "https://api.deepseek.com/chat/completions"},
     "openrouter": {"name": "OpenRouter", "env": "OPENROUTER_API_KEY", "model_env": "OPENROUTER_MODEL", "model": "openai/gpt-4.1-mini", "kind": "openai", "url": "https://openrouter.ai/api/v1/chat/completions"},
+    "nvidia": {"name": "NVIDIA NIM", "env": "NVIDIA_API_KEY", "model_env": "NVIDIA_MODEL", "model": "nvidia/llama-3.3-nemotron-super-49b-v1.5", "kind": "openai", "url": "https://integrate.api.nvidia.com/v1/chat/completions"},
+    "nvidia-nim-local": {"name": "NVIDIA NIM (self-hosted)", "env": None, "model_env": "NVIDIA_NIM_MODEL", "model": "meta/llama-3.1-8b-instruct", "kind": "openai", "url_env": "NVIDIA_NIM_BASE_URL", "url": "http://127.0.0.1:8000/v1/chat/completions", "local": True},
     "ollama": {"name": "Ollama (local)", "env": None, "model_env": "OLLAMA_MODEL", "model": "qwen2.5:7b", "kind": "openai", "url_env": "OLLAMA_BASE_URL", "url": "http://127.0.0.1:11434/v1/chat/completions", "local": True},
     "lmstudio": {"name": "LM Studio (local)", "env": None, "model_env": "LM_STUDIO_MODEL", "model": "local-model", "kind": "openai", "url_env": "LM_STUDIO_BASE_URL", "url": "http://127.0.0.1:1234/v1/chat/completions", "local": True},
 }
