@@ -3,8 +3,9 @@ NVIDIA RTX ENGINE UPGRADE
 The ReForged Quake III Arena R source is now available as the pinned engine/
 Git submodule. It contains the Vulkan renderer, ray-tracing implementation,
 shaders, and CMake project. The previous source tree under code/ is preserved
-unchanged as a legacy fallback. See docs/NVIDIA-RTX.md for platform limits,
-checkout instructions, and the Windows build script.
+unchanged as a legacy fallback. Windows build targets include x86 and x64;
+amd64 and x86-64 are aliases for the same 64-bit target. See docs/NVIDIA-RTX.md
+for platform limits, architecture instructions, and the build script.
 
 The AI-agent gateway remains in agent-control/. It is a separate authenticated
 service and is not yet connected to in-game engine commands.
