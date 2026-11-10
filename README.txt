@@ -1,6 +1,12 @@
 Quake III Arena GPL source release
 ==================================
 
+AI AGENT EDITION
+----------------
+This repository is an AI-agent-oriented development fork of the Quake III Arena GPL source release. The original engine source and its third-party license notices remain subject to their respective terms. The agent-control directory currently provides an authentication gateway and browser control panel; it is not yet connected to the game engine and does not execute in-game commands.
+
+The original build notes below describe the historical source release. They are not a claim that the current fork has been successfully built or tested on every listed platform.
+
 This file contains the following sections:
 
 LICENSE
@@ -48,14 +54,10 @@ lines	file(s)
 Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.
 
 License to copy and use this software is granted provided that it is identified 
-as the <93>RSA Data Security, Inc. MD4 Message-Digest Algorithm<94> in all mater
-ial mentioning or referencing this software or this function.
-License is also granted to make and use derivative works provided that such work
-s are identified as <93>derived from the RSA Data Security, Inc. MD4 Message-Dig
+as the <93>RSA Data Security, Inc. MD4 Message-Digest Algorithm<94> in all material mentioning or referencing this software or this function.
+License is also granted to make and use derivative works provided that such works are identified as <93>derived from the RSA Data Security, Inc. MD4 Message-Dig
 est Algorithm<94> in all material mentioning or referencing the derived work.
-RSA Data Security, Inc. makes no representations concerning either the merchanta
-bility of this software or the suitability of this software for any particular p
-urpose. It is provided <93>as is<94> without express or implied warranty of any 
+RSA Data Security, Inc. makes no representations concerning either the merchantability of this software or the suitability of this software for any particular purpose. It is provided "as is" without express or implied warranty of any 
 kind.
 
 checksums are used to validate pak files
@@ -163,7 +165,7 @@ q3asm/					assembly to qvm bytecode compiler
 q3map/					map compiler ( .map -> .bsp ) - this is the version that comes with Q3Radiant 200f
 q3radiant/				Q3Radiant map editor build 200f ( common/ and libs/ are support dirs for radiant )
 
-While we made sure we were still able to compile the game on Windows, GNU/Linux and Mac, this build didn't get any kind of extensive testing so it may not work completely right. Whenever an id game is released under GPL, several projects start making the source code more friendly to nowaday's compilers and environements. If you are picking up this release weeks/months/years after we uploaded it, you probably want to look around on the net for cleaned up versions of this codebase as well.
+While we made sure we were still able to compile the game on Windows, GNU/Linux and Mac, this build didn't get any kind of extensive testing so it may not work completely right. Whenever an id game is released under GPL, several projects start making the source code more friendly to modern compilers and environments. If you are picking up this release weeks/months/years after we uploaded it, you probably want to look around on the net for cleaned up versions of this codebase as well.
 
 COMPILING ON WIN32
 ==================
@@ -180,7 +182,7 @@ the qvm batch files are in code/game code/cgame code/q3_ui code/ui ..
 COMPILING ON GNU/LINUX
 ==================
 
-the build system using cons, which may be known as scons's perl ancestor now
+the build system uses Cons, a Perl-based predecessor to SCons
 you don't have to track it down though, the build script is provided in the tree
 you will need nasm and gcc 2.95
 make sure you have the X Direct Graphics Access and X Video Mode extensions headers for your X11
@@ -190,4 +192,4 @@ a typical compile command goes like this:
 COMPILING ON MAC
 ================
 
-project file for OSX compile is in code/macosx/Quake3.pbproj
+the project file for compiling on Mac OS X is in code/macosx/Quake3.pbproj
