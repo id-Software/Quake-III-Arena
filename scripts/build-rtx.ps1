@@ -1,13 +1,13 @@
 param(
     [string]$Generator = "Visual Studio 17 2022",
-    [string]$Architecture = "x64",
+    [ValidateSet("x86", "amd64", "x86-64", "all")]
+    [string]$Architecture = "amd64",
     [string]$Configuration = "Release"
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $EngineDir = Join-Path $RepoRoot "engine"
-$BuildDir = Join-Path $RepoRoot "build-rtx"
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "Git is required to initialize the engine submodule."
@@ -26,10 +26,36 @@ if (-not (Test-Path (Join-Path $EngineDir "CMakeLists.txt"))) {
     throw "The engine submodule is missing. Run: git submodule update --init --recursive"
 }
 
-cmake -S $EngineDir -B $BuildDir -G $Generator -A $Architecture
-if ($LASTEXITCODE -ne 0) { throw "CMake configuration failed." }
+function Build-Target {
+    param([string]$Name, [string]$VisualStudioArchitecture)
 
-cmake --build $BuildDir --config $Configuration
-if ($LASTEXITCODE -ne 0) { throw "Engine build failed." }
+    $BuildDir = Join-Path $RepoRoot ("build-rtx-" + $Name)
+    Write-Host ""
+    Write-Host "Configuring $Name ($VisualStudioArchitecture)..."
 
-Write-Host "Build completed. Check engine/bin for the generated executable and libraries."
+    cmake -S $EngineDir -B $BuildDir -G $Generator -A $VisualStudioArchitecture
+    if ($LASTEXITCODE -ne 0) { throw "CMake configuration failed for $Name." }
+
+    cmake --build $BuildDir --config $Configuration
+    if ($LASTEXITCODE -ne 0) { throw "Engine build failed for $Name." }
+
+    Write-Host "$Name build completed."
+}
+
+switch ($Architecture) {
+    "x86" {
+        Build-Target -Name "x86" -VisualStudioArchitecture "Win32"
+    }
+    { $_ -in "amd64", "x86-64" } {
+        # AMD64 and x86-64 are aliases for the same 64-bit target.
+        Build-Target -Name "x64" -VisualStudioArchitecture "x64"
+    }
+    "all" {
+        # Build each distinct architecture once; amd64 and x86-64 are equivalent.
+        Build-Target -Name "x86" -VisualStudioArchitecture "Win32"
+        Build-Target -Name "x64" -VisualStudioArchitecture "x64"
+    }
+}
+
+Write-Host ""
+Write-Host "Build outputs are under engine/bin and the CMake build directories."
