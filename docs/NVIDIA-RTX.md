@@ -26,34 +26,61 @@ The previous `vendor/Quake-III-Arena-R` submodule path is replaced by
 git submodule update --init --recursive
 ```
 
-## Windows build
+## Windows architecture targets
 
-The pinned upstream project documents a CMake build on Windows. Install:
+The build script accepts all three requested architecture labels:
+
+| Requested label | CMake / Visual Studio target | Meaning |
+|---|---|---|
+| `x86` | `Win32` | 32-bit Intel/AMD |
+| `amd64` | `x64` | 64-bit AMD64 |
+| `x86-64` | `x64` | Same 64-bit architecture as AMD64 |
+| `all` | `Win32` and `x64` | Builds both distinct architectures once |
+
+AMD64 and x86-64 are aliases, not separate processor architectures, so the
+script intentionally does not compile the same 64-bit target twice.
+
+Install:
 
 - CMake 3.14 or newer
-- Visual Studio C++ desktop development tools
+- Visual Studio C++ desktop development tools (including x86 and x64
+  toolchains)
 - The Vulkan SDK
+- For an x86 build, the 32-bit Vulkan loader and compatible 32-bit NVIDIA
+  driver components must also be installed
 - An NVIDIA GPU and driver that expose the legacy
   `VK_NV_ray_tracing` extension required by this revision
 
-From the repository root, run:
+From the repository root, build one target:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Architecture x86
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Architecture amd64
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Architecture x86-64
+```
+
+Build both distinct architectures:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Architecture all
 ```
 
 Or configure/build manually:
 
 ```powershell
-cmake -S engine -B build-rtx -G "Visual Studio 17 2022" -A x64
-cmake --build build-rtx --config Release
+cmake -S engine -B build-rtx-x86 -G "Visual Studio 17 2022" -A Win32
+cmake --build build-rtx-x86 --config Release
+
+cmake -S engine -B build-rtx-x64 -G "Visual Studio 17 2022" -A x64
+cmake --build build-rtx-x64 --config Release
 ```
 
 The upstream CMake project sets the executable and library output directories
 inside `engine/bin/`. This repository does not include Quake III commercial
 game data; set `fs_basePath` to a legally obtained installation when running
-the game. The upstream README also requires copying `engine/blue_noise_textures`
-into `baseq3/blue_noise_textures` and using native game modules:
+the game. The upstream README also requires copying
+`engine/blue_noise_textures` into `baseq3/blue_noise_textures` and using
+native game modules:
 
 ```text
 +set fs_basePath "C:\\Path\\To\\Quake III" +set sv_pure 0 +set vm_game 0 +set vm_cgame 0 +set vm_ui 0
@@ -63,7 +90,7 @@ into `baseq3/blue_noise_textures` and using native game modules:
 
 | Platform | Status in this upstream revision |
 |---|---|
-| Windows | CMake path and NVIDIA `VK_NV_ray_tracing` extension are present; this is the intended RTX build target. |
+| Windows | CMake path and NVIDIA `VK_NV_ray_tracing` extension are present; this is the intended RTX build target. The x86 and x64 configurations are exposed by the build script, but neither has been compiled or verified in this repository session. |
 | macOS | CMake/Vulkan (MoltenVK) setup exists, but the pinned source does not enable the NVIDIA ray-tracing extension there. Do not describe this as a verified RTX build. |
 | Linux | The Vulkan surface setup and Vulkan CMake discovery are incomplete in this revision. The Linux target links the OpenGL path; Linux RTX is not supported by this pinned source as-is. |
 
