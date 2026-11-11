@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -28,14 +28,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WIN32
 #include <direct.h>
 #include <windows.h>
-#endif
-
-#ifdef __linux
-#include <unistd.h>
-#endif
-
-#ifdef NeXT
+#elif defined(NeXT)
 #include <libc.h>
+#else
+#include <unistd.h>
 #endif
 
 #define	BASEDIRNAME	"quake"		// assumed to have a 2 or 3 following
@@ -67,9 +63,9 @@ char	*ex_argv[MAX_EX_ARGC];
 void ExpandWildcards( int *argc, char ***argv )
 {
 	struct _finddata_t fileinfo;
-	int		handle;
+	intptr_t	handle;
 	int		i;
-	char	filename[1024];
+	char	filename[2048];
 	char	filebase[1024];
 	char	*path;
 
@@ -92,7 +88,7 @@ void ExpandWildcards( int *argc, char ***argv )
 
 		do
 		{
-			sprintf (filename, "%s%s", filebase, fileinfo.name);
+			snprintf (filename, sizeof(filename), "%s%s", filebase, fileinfo.name);
 			ex_argv[ex_argc++] = copystring (filename);
 		} while (_findnext( handle, &fileinfo ) != -1);
 
@@ -130,7 +126,7 @@ void Error( const char *error, ... )
 	vsprintf (text, error,argptr);
 	va_end (argptr);
 
-	sprintf (text2, "%s\nGetLastError() = %i", text, err);
+	snprintf (text2, sizeof(text2), "%s\nGetLastError() = %i", text, err);
     MessageBox(NULL, text2, "Error", 0 /* MB_OK */ );
 
 	exit (1);
@@ -189,7 +185,7 @@ void _printf( const char *format, ... ) {
 	vsprintf (text, format, argptr);
 	va_end (argptr);
 
-  printf(text);
+  printf("%s", text);
 
 #ifdef WIN32
   if (!lookedForServer) {
@@ -316,39 +312,39 @@ char *ExpandArg (const char *path)
 char *ExpandPath (const char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (!qdir[0])
 		Error ("ExpandPath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':') {
 		strcpy( full, path );
 		return full;
 	}
-	sprintf (full, "%s%s", qdir, path);
+	snprintf (full, sizeof(full), "%s%s", qdir, path);
 	return full;
 }
 
 char *ExpandGamePath (const char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (!qdir[0])
 		Error ("ExpandGamePath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':') {
 		strcpy( full, path );
 		return full;
 	}
-	sprintf (full, "%s%s", gamedir, path);
+	snprintf (full, sizeof(full), "%s%s", gamedir, path);
 	return full;
 }
 
 char *ExpandPathAndArchive (const char *path)
 {
 	char	*expanded;
-	char	archivename[1024];
+	char	archivename[2048];
 
 	expanded = ExpandPath (path);
 
 	if (archive)
 	{
-		sprintf (archivename, "%s/%s", archivedir, path);
+		snprintf (archivename, sizeof(archivename), "%s/%s", archivedir, path);
 		QCopyFile (expanded, archivename);
 	}
 	return expanded;
@@ -400,10 +396,12 @@ void Q_getwd (char *out)
 	int i = 0;
 
 #ifdef WIN32
-   _getcwd (out, 256);
+   if (_getcwd (out, 256) == NULL)
+     strcpy(out, ".");  /* shrug */
    strcat (out, "\\");
 #else
-   getcwd (out, 256);
+   if (getcwd (out, 256) == NULL)
+     strcpy(out, ".");  /* shrug */
    strcat (out, "/");
 #endif
 
@@ -561,7 +559,7 @@ int Q_stricmp (const char *s1, const char *s2)
 }
 
 
-char *strupr (char *start)
+char *Q_strupr (char *start)
 {
 	char	*in;
 	in = start;
@@ -573,7 +571,7 @@ char *strupr (char *start)
 	return start;
 }
 
-char *strlower (char *start)
+char *Q_strlower (char *start)
 {
 	char	*in;
 	in = start;
@@ -636,12 +634,29 @@ int Q_filelength (FILE *f)
 	return end;
 }
 
+#ifdef MAX_PATH
+#undef MAX_PATH
+#endif
+#define MAX_PATH 4096
+static FILE* myfopen(const char* filename, const char* mode)
+{
+	char* p;
+	char fn[MAX_PATH];
+
+	fn[0] = '\0';
+	strncat(fn, filename, sizeof(fn)-1);
+
+	for(p=fn;*p;++p) if(*p == '\\') *p = '/';
+
+	return fopen(fn, mode);
+}
+
 
 FILE *SafeOpenWrite (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen(filename, "wb");
+	f = myfopen(filename, "wb");
 
 	if (!f)
 		Error ("Error opening %s: %s",filename,strerror(errno));
@@ -653,7 +668,7 @@ FILE *SafeOpenRead (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen(filename, "rb");
+	f = myfopen(filename, "rb");
 
 	if (!f)
 		Error ("Error opening %s: %s",filename,strerror(errno));
@@ -685,7 +700,7 @@ qboolean	FileExists (const char *filename)
 {
 	FILE	*f;
 
-	f = fopen (filename, "r");
+	f = myfopen (filename, "r");
 	if (!f)
 		return qfalse;
 	fclose (f);
@@ -719,7 +734,7 @@ int    LoadFile( const char *filename, void **bufferptr )
 ==============
 LoadFileBlock
 -
-rounds up memory allocation to 4K boundry
+rounds up memory allocation to 4K boundary
 -
 ==============
 */
@@ -761,7 +776,7 @@ int    TryLoadFile (const char *filename, void **bufferptr)
 
 	*bufferptr = NULL;
 
-	f = fopen (filename, "rb");
+	f = myfopen (filename, "rb");
 	if (!f)
 		return -1;
 	length = Q_filelength (f);
@@ -795,7 +810,7 @@ void DefaultExtension (char *path, const char *extension)
 {
 	char    *src;
 //
-// if path doesnt have a .EXT, append extension
+// if path doesn't have a .EXT, append extension
 // (extension should include the .)
 //
 	src = path + strlen(path) - 1;
@@ -962,13 +977,7 @@ int ParseNum (const char *str)
 ============================================================================
 */
 
-#ifdef _SGI_SOURCE
-#define	__BIG_ENDIAN__
-#endif
-
-#ifdef __BIG_ENDIAN__
-
-short   LittleShort (short l)
+short   ShortSwap (short l)
 {
 	byte    b1,b2;
 
@@ -978,13 +987,7 @@ short   LittleShort (short l)
 	return (b1<<8) + b2;
 }
 
-short   BigShort (short l)
-{
-	return l;
-}
-
-
-int    LittleLong (int l)
+int    LongSwap (int l)
 {
 	byte    b1,b2,b3,b4;
 
@@ -996,88 +999,19 @@ int    LittleLong (int l)
 	return ((int)b1<<24) + ((int)b2<<16) + ((int)b3<<8) + b4;
 }
 
-int    BigLong (int l)
-{
-	return l;
-}
+typedef union {
+    float	f;
+    unsigned int i;
+} _FloatByteUnion;
 
+float FloatSwap (const float *f) {
+	_FloatByteUnion out;
 
-float	LittleFloat (float l)
-{
-	union {byte b[4]; float f;} in, out;
-	
-	in.f = l;
-	out.b[0] = in.b[3];
-	out.b[1] = in.b[2];
-	out.b[2] = in.b[1];
-	out.b[3] = in.b[0];
-	
+	out.f = *f;
+	out.i = LongSwap(out.i);
+
 	return out.f;
 }
-
-float	BigFloat (float l)
-{
-	return l;
-}
-
-
-#else
-
-
-short   BigShort (short l)
-{
-	byte    b1,b2;
-
-	b1 = l&255;
-	b2 = (l>>8)&255;
-
-	return (b1<<8) + b2;
-}
-
-short   LittleShort (short l)
-{
-	return l;
-}
-
-
-int    BigLong (int l)
-{
-	byte    b1,b2,b3,b4;
-
-	b1 = l&255;
-	b2 = (l>>8)&255;
-	b3 = (l>>16)&255;
-	b4 = (l>>24)&255;
-
-	return ((int)b1<<24) + ((int)b2<<16) + ((int)b3<<8) + b4;
-}
-
-int    LittleLong (int l)
-{
-	return l;
-}
-
-float	BigFloat (float l)
-{
-	union {byte b[4]; float f;} in, out;
-	
-	in.f = l;
-	out.b[0] = in.b[3];
-	out.b[1] = in.b[2];
-	out.b[2] = in.b[1];
-	out.b[3] = in.b[0];
-	
-	return out.f;
-}
-
-float	LittleFloat (float l)
-{
-	return l;
-}
-
-
-#endif
-
 
 //=======================================================
 

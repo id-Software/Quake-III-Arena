@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.16)
+project(Quake3Q3ASM VERSION 1.0 LANGUAGES C)
+
+add_executable(q3asm q3asm.c cmdlib.c)
+target_compile_features(q3asm PRIVATE c_std_99)
+set_target_properties(q3asm PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED YES)
+if(WIN32)
+  target_compile_definitions(q3asm PRIVATE WIN32)
+endif()
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(q3asm PRIVATE -Wall -Wextra -Wno-unused-parameter)
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+  find_package(Python3 COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    add_test(NAME q3asm-format-compatibility
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_q3asm.py --binary $<TARGET_FILE:q3asm>)
+  endif()
+endif()
