@@ -1,10 +1,11 @@
 import os
+import struct
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
 
-from asset_catalog import build_catalog, scan_archive
+from asset_catalog import build_catalog, scan_archive, _md3_tag_names
 
 
 class AssetCatalogTests(unittest.TestCase):
@@ -27,6 +28,11 @@ class AssetCatalogTests(unittest.TestCase):
             self.assertEqual(result["maps"], ["q3dm1"])
             self.assertTrue(result["players"][0]["has_animation_cfg"])
             self.assertFalse((root / "models").exists())
+
+    def test_md3_attachment_tags_are_parsed(self):
+        header = struct.pack("<4si64s9i", b"IDP3", 15, b"", 0, 1, 1, 0, 0, 108, 108, 220, 220)
+        tag = b"tag_weapon\\0".ljust(64, b"\\0") + (b"\\0" * 48)
+        self.assertEqual(_md3_tag_names(header + tag), ["tag_weapon"])
 
     def test_unsafe_zip_paths_are_ignored(self):
         with tempfile.TemporaryDirectory() as temp:
