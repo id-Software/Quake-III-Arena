@@ -31,7 +31,7 @@ class AssetCatalogTests(unittest.TestCase):
 
     def test_md3_attachment_tags_are_parsed(self):
         header = struct.pack("<4si64s9i", b"IDP3", 15, b"", 0, 1, 1, 0, 0, 108, 108, 220, 220)
-        tag = b"tag_weapon\\0".ljust(64, b"\\0") + (b"\\0" * 48)
+        tag = b"tag_weapon\0".ljust(64, b"\0") + (b"\0" * 48)
         self.assertEqual(_md3_tag_names(header + tag), ["tag_weapon"])
 
     def test_unsafe_zip_paths_are_ignored(self):
