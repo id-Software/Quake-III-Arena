@@ -30,6 +30,7 @@
 	loadMenu { "ui/default.menu" }
 	loadMenu { "ui/addfilter.menu" }
 	loadMenu { "ui/error.menu" }
+	loadMenu { "ui/moderation.menu" }
 	loadMenu { "ui/serverinfo.menu" }
 	loadMenu { "ui/findplayer.menu" }
 	loadMenu { "ui/endofgame.menu" }

@@ -315,6 +315,7 @@ extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
 //
 extern void MainMenu_Cache( void );
 extern void UI_MainMenu(void);
+extern void UI_AgentControlMenu( void );
 extern void UI_RegisterCvars( void );
 extern void UI_UpdateCvars( void );
 

@@ -46,6 +46,8 @@ INGAME MENU
 #define ID_QUIT					17
 #define ID_RESUME				18
 #define ID_TEAMORDERS			19
+#define ID_AI_CONTROL			20
+#define ID_AI_STOP			21
 
 
 typedef struct {
@@ -54,6 +56,8 @@ typedef struct {
 	menubitmap_s	frame;
 	menutext_s		team;
 	menutext_s		setup;
+	menutext_s		agentControl;
+	menutext_s		agentStop;
 	menutext_s		server;
 	menutext_s		leave;
 	menutext_s		restart;
@@ -113,6 +117,14 @@ void InGame_Event( void *ptr, int notification ) {
 
 	case ID_SETUP:
 		UI_SetupMenu();
+		break;
+
+	case ID_AI_CONTROL:
+		UI_AgentControlMenu();
+		break;
+
+	case ID_AI_STOP:
+		trap_Cmd_ExecuteText( EXEC_APPEND, "agent_stop\n" );
 		break;
 
 	case ID_LEAVEARENA:
@@ -249,6 +261,30 @@ void InGame_MenuInit( void ) {
 	s_ingame.setup.color				= color_red;
 	s_ingame.setup.style				= UI_CENTER|UI_SMALLFONT;
 
+
+	y += INGAME_MENU_VERTICAL_SPACING;
+	s_ingame.agentControl.generic.type		= MTYPE_PTEXT;
+	s_ingame.agentControl.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	s_ingame.agentControl.generic.x			= 320;
+	s_ingame.agentControl.generic.y			= y;
+	s_ingame.agentControl.generic.id		= ID_AI_CONTROL;
+	s_ingame.agentControl.generic.callback	= InGame_Event;
+	s_ingame.agentControl.string			= "AI CONTROL";
+	s_ingame.agentControl.color				= color_red;
+	s_ingame.agentControl.style				= UI_CENTER|UI_SMALLFONT;
+
+
+	y += INGAME_MENU_VERTICAL_SPACING;
+	s_ingame.agentStop.generic.type		= MTYPE_PTEXT;
+	s_ingame.agentStop.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	s_ingame.agentStop.generic.x			= 320;
+	s_ingame.agentStop.generic.y			= y;
+	s_ingame.agentStop.generic.id		= ID_AI_STOP;
+	s_ingame.agentStop.generic.callback	= InGame_Event;
+	s_ingame.agentStop.string			= "STOP AI CONTROL";
+	s_ingame.agentStop.color				= color_yellow;
+	s_ingame.agentStop.style				= UI_CENTER|UI_SMALLFONT;
+
 	y += INGAME_MENU_VERTICAL_SPACING;
 	s_ingame.server.generic.type		= MTYPE_PTEXT;
 	s_ingame.server.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -313,6 +349,8 @@ void InGame_MenuInit( void ) {
 	Menu_AddItem( &s_ingame.menu, &s_ingame.removebots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.teamorders );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.setup );
+	Menu_AddItem( &s_ingame.menu, &s_ingame.agentControl );
+	Menu_AddItem( &s_ingame.menu, &s_ingame.agentStop );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.server );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.restart );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.resume );

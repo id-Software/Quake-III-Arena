@@ -1,5 +1,43 @@
+SHA-256 BUILD CHECKSUMS
+-----------------------
+Every successful build now generates SHA256SUMS.txt in its build directory.
+Verify a Windows build with:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\sha256.ps1 -Mode Verify -Path .\build-rtx-x64
+
+Regenerate a manifest with -Mode Generate. On Linux, verify with:
+
+  cd build-opengl-linux && sha256sum --check SHA256SUMS.txt
+
+SHA-256 detects file changes but does not authenticate the publisher. Use
+signed manifests or signed releases when publisher authenticity is required.
+
+OPENGL-ONLY LEGACY BUILD
+------------------------
+A separate OpenGL-only build is available without the Vulkan SDK. Windows:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture x86
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture amd64
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture all
+
+Linux:
+
+  sh ./scripts/build-opengl-legacy.sh
+
+This builds the upstream ReForged project's original branch, pinned at
+c95f4cecf7e0fec92e275d06645d5f2d14db286c. That branch uses OpenGL and has no
+Vulkan CMake dependency. It is a separate legacy engine line, not a Vulkan-
+free build of the RTX-enabled reforged branch. Modern compiler compatibility
+and runtime have not yet been tested. See docs/OPENGL-LEGACY-RENDERER.md.
+
 Quake III Arena GPL source release
 ==================================
+
+AI AGENT EDITION
+----------------
+This repository is an AI-agent-oriented development fork of the Quake III Arena GPL source release. The original engine source and its third-party license notices remain subject to their respective terms. The agent-control directory currently provides an authentication gateway and browser control panel; it is not yet connected to the game engine and does not execute in-game commands.
+
+The original build notes below describe the historical source release. They are not a claim that the current fork has been successfully built or tested on every listed platform.
 
 This file contains the following sections:
 
@@ -48,14 +86,10 @@ lines	file(s)
 Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.
 
 License to copy and use this software is granted provided that it is identified 
-as the <93>RSA Data Security, Inc. MD4 Message-Digest Algorithm<94> in all mater
-ial mentioning or referencing this software or this function.
-License is also granted to make and use derivative works provided that such work
-s are identified as <93>derived from the RSA Data Security, Inc. MD4 Message-Dig
+as the <93>RSA Data Security, Inc. MD4 Message-Digest Algorithm<94> in all material mentioning or referencing this software or this function.
+License is also granted to make and use derivative works provided that such works are identified as <93>derived from the RSA Data Security, Inc. MD4 Message-Dig
 est Algorithm<94> in all material mentioning or referencing the derived work.
-RSA Data Security, Inc. makes no representations concerning either the merchanta
-bility of this software or the suitability of this software for any particular p
-urpose. It is provided <93>as is<94> without express or implied warranty of any 
+RSA Data Security, Inc. makes no representations concerning either the merchantability of this software or the suitability of this software for any particular purpose. It is provided "as is" without express or implied warranty of any 
 kind.
 
 checksums are used to validate pak files
@@ -163,7 +197,7 @@ q3asm/					assembly to qvm bytecode compiler
 q3map/					map compiler ( .map -> .bsp ) - this is the version that comes with Q3Radiant 200f
 q3radiant/				Q3Radiant map editor build 200f ( common/ and libs/ are support dirs for radiant )
 
-While we made sure we were still able to compile the game on Windows, GNU/Linux and Mac, this build didn't get any kind of extensive testing so it may not work completely right. Whenever an id game is released under GPL, several projects start making the source code more friendly to nowaday's compilers and environements. If you are picking up this release weeks/months/years after we uploaded it, you probably want to look around on the net for cleaned up versions of this codebase as well.
+While we made sure we were still able to compile the game on Windows, GNU/Linux and Mac, this build didn't get any kind of extensive testing so it may not work completely right. Whenever an id game is released under GPL, several projects start making the source code more friendly to modern compilers and environments. If you are picking up this release weeks/months/years after we uploaded it, you probably want to look around on the net for cleaned up versions of this codebase as well.
 
 COMPILING ON WIN32
 ==================
@@ -180,7 +214,7 @@ the qvm batch files are in code/game code/cgame code/q3_ui code/ui ..
 COMPILING ON GNU/LINUX
 ==================
 
-the build system using cons, which may be known as scons's perl ancestor now
+the build system uses Cons, a Perl-based predecessor to SCons
 you don't have to track it down though, the build script is provided in the tree
 you will need nasm and gcc 2.95
 make sure you have the X Direct Graphics Access and X Video Mode extensions headers for your X11
@@ -190,4 +224,58 @@ a typical compile command goes like this:
 COMPILING ON MAC
 ================
 
-project file for OSX compile is in code/macosx/Quake3.pbproj
+the project file for compiling on Mac OS X is in code/macosx/Quake3.pbproj
+
+
+OFFICIAL QUAKE III ARENA 1.32 / 1.32c MULTIPLAYER DATA
+----------------------------------------------------
+The pinned ReForged engine source declares PROTOCOL_VERSION 68, the network
+protocol used by the official Quake III Arena 1.32 and 1.32c releases. The
+repository includes a staging script for legally obtained official 1.32 patch
+data. After initializing the engine submodule and installing the original
+Quake III Arena and Team Arena data, run:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\install-q3-132-patch-data.ps1 -PatchDataPath "C:\Path\To\PatchData" -GamePath "C:\Path\To\Quake III Arena"
+
+The script copies the PK3 patch data into baseq3/ and missionpack/ and checks
+that the engine source still declares protocol 68. It does not download or
+redistribute commercial game data. The original 1.32c executable installer is
+not bundled, and staging PK3 files does not independently certify that the
+source includes every 1.32c executable security fix. See docs/QUAKE3-132-MULTIPLAYER.md.
+
+
+AMD GPU RAY TRACING
+-------------------
+An optional Vulkan/KHR hardware ray-tracing backend is the target for AMD
+RDNA 2+ GPUs. The current OpenGL renderer remains the fallback. Hardware ray
+tracing is not implemented in this revision; see docs/AMD-RAY-TRACING.md for
+the backend design, required Vulkan features, and acceptance criteria.
+
+
+AMD VULKAN RAY-TRACING CAPABILITY PROBE
+---------------------------------------
+A standalone probe checks whether an AMD GPU and its Vulkan driver expose the
+KHR hardware ray-tracing feature set. Build with CMake 3.16+, a C++11 compiler,
+and Vulkan 1.2 SDK/loader:
+
+  cmake -S tools/amd-vulkan-rt-probe -B build-amd-rt-probe
+  cmake --build build-amd-rt-probe --config Release
+
+This checks device/driver capability only. The engine's existing Vulkan ray
+tracing implementation still uses NVIDIA-specific VK_NV interfaces; the KHR
+renderer port required for AMD in-game ray tracing is not complete. See
+ docs/AMD-RAY-TRACING.md and tools/amd-vulkan-rt-probe/README.md.
+
+FULL QUAKE III ARENA GAME-DATA SETUP
+------------------------------------
+The repository does not redistribute commercial game data. For a complete
+base-game install, provide legally obtained baseq3/pak0.pk3 through pak8.pk3
+and stage them with:
+
+  sh ./scripts/install-q3a-data.sh "/path/to/source-data" "/path/to/Quake3"
+
+On Windows, use scripts/install-q3a-data.ps1 with -SourceDataRoot and
+-GameInstallRoot. Both scripts validate the PK3 archives before copying;
+optional missionpack PK3 files are staged when supplied. See
+ docs/QUAKE3A-GAME-DATA.md. The uploaded pak1(1).pk3 in this conversation
+contains only seven CFG files and is not an official game-data archive.

@@ -43,7 +43,8 @@ QVM files
 ========================================================================
 */
 
-#define	VM_MAGIC	0x12721444
+#define	VM_MAGIC			0x12721444
+#define	VM_MAGIC_VER2	0x12721445
 typedef struct {
 	int		vmMagic;
 
@@ -56,6 +57,7 @@ typedef struct {
 	int		dataLength;
 	int		litLength;			// ( dataLength - litLength ) should be byteswapped on load
 	int		bssLength;			// zero filled memory appended to datalength
+	int		jtrgLength;			// VM_MAGIC_VER2 jump-table target count
 } vmHeader_t;
 
 

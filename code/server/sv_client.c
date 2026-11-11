@@ -490,6 +490,20 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 		}
 	}
 
+	/*
+	 * Notify the local agent gateway for OBS. The datagram contains only a
+	 * fixed event marker: no player name, chat text, or matched phrase.
+	 * Gateway listener is loopback-only on UDP/27991.
+	 */
+	if ( !Q_stricmp( reason, "Chat policy violation" ) ) {
+		netadr_t moderationAddress;
+		const char *moderationEvent = "Q3MOD1";
+		if ( NET_StringToAdr( "127.0.0.1:27991", &moderationAddress ) ) {
+			NET_SendPacket( NS_SERVER, strlen( moderationEvent ),
+				moderationEvent, moderationAddress );
+		}
+	}
+
 	// Kill any download
 	SV_CloseDownload( drop );
 

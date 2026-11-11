@@ -721,6 +721,7 @@ This is also called on Com_Error and Com_Quit, so it shouldn't cause any errors
 =====================
 */
 void CL_Disconnect( qboolean showMainMenu ) {
+	if ( cl_agent_running ) CL_AgentStop_f();
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
 	}
@@ -999,6 +1000,14 @@ void CL_Disconnect_f( void ) {
 	SCR_StopCinematic();
 	Cvar_Set("ui_singlePlayerActive", "0");
 	if ( cls.state != CA_DISCONNECTED && cls.state != CA_CINEMATIC ) {
+		/*
+		 * The server sends this fixed reason in its reliable disconnect
+		 * command. Never display the triggering chat text or matched term.
+		 */
+		if ( Cmd_Argc() > 1 && !Q_stricmp( Cmd_Argv(1), "Chat policy violation" ) ) {
+			Com_Error( ERR_DISCONNECT,
+				"CHRIS HANSEN WOULD LIKE A WORD.\nYour connection was terminated for violating the server's prohibited-content terminology policy." );
+		}
 		Com_Error (ERR_DISCONNECT, "Disconnected from server");
 	}
 }
@@ -1994,6 +2003,38 @@ CL_Frame
 
 ==================
 */
+
+static qboolean cl_agent_running = qfalse;
+static int cl_agent_last_telemetry = 0;
+
+static void CL_AgentTelemetry( void ) {
+	char key[128], addressText[64], packet[512];
+	netadr_t address;
+	int port = 27992;
+	if ( !cl_agent_running ) return;
+	if ( cls.keyCatchers & (KEYCATCH_UI|KEYCATCH_CONSOLE) ) { CL_AgentStop_f(); return; }
+	if ( cls.state != CA_ACTIVE || !cl.snap.valid ) return;
+	if ( cls.realtime - cl_agent_last_telemetry < 200 ) return;
+	cl_agent_last_telemetry = cls.realtime;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	if ( strncmp(key, "q3a_", 4) != 0 ) return;
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) return;
+	Com_sprintf(packet, sizeof(packet),
+		"{\"type\":\"Q3STATE1\",\"key\":\"%s\",\"server_time\":%d,"
+		"\"origin\":[%.1f,%.1f,%.1f],\"velocity\":[%.1f,%.1f,%.1f],"
+		"\"angles\":[%.1f,%.1f,%.1f],\"health\":%d,\"weapon\":%d}",
+		key, cl.snap.serverTime,
+		cl.snap.ps.origin[0], cl.snap.ps.origin[1], cl.snap.ps.origin[2],
+		cl.snap.ps.velocity[0], cl.snap.ps.velocity[1], cl.snap.ps.velocity[2],
+		cl.snap.ps.viewangles[0], cl.snap.ps.viewangles[1], cl.snap.ps.viewangles[2],
+		cl.snap.ps.stats[STAT_HEALTH], cl.snap.ps.weapon );
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+}
+
+
 void CL_Frame ( int msec ) {
 
 	if ( !com_cl_running->integer ) {
@@ -2045,6 +2086,7 @@ void CL_Frame ( int msec ) {
 
 	// send intentions now
 	CL_SendCmd();
+	CL_AgentTelemetry();
 
 	// resend a connection request if necessary
 	CL_CheckForResend();
@@ -2262,6 +2304,63 @@ void CL_SetModel_f( void ) {
 CL_Init
 ====================
 */
+
+/* Local authenticated game-to-agent-gateway UDP request. */
+static void CL_AgentControl_f( void ) {
+	static const char *providers[] = { "openai", "anthropic", "google", "mistral", "groq", "xai", "deepseek", "openrouter", "nvidia", "ollama", "lmstudio" };
+	char key[128], prompt[768], escaped[1400], packet[1600], addressText[64];
+	netadr_t address;
+	int provider, i, out, port;
+	qboolean validKey = qtrue;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	Cvar_VariableStringBuffer( "q3_agent_prompt", prompt, sizeof(prompt) );
+	provider = (int)Cvar_VariableValue( "q3_agent_provider" );
+	if ( provider < 0 || provider >= (int)(sizeof(providers) / sizeof(providers[0])) ) { Com_Printf("AI Control: invalid provider selection.\n"); return; }
+	if ( strncmp(key, "q3a_", 4) != 0 || strlen(key) < 36 || strlen(key) > 127 ) { Com_Printf("AI Control: enter the generated gateway bearer key first.\n"); return; }
+	for ( i = 4; key[i]; i++ ) {
+		if ( !((key[i] >= '0' && key[i] <= '9') || (key[i] >= 'a' && key[i] <= 'f') || (key[i] >= 'A' && key[i] <= 'F')) ) { validKey = qfalse; break; }
+	}
+	if ( !validKey ) { Com_Printf("AI Control: key must be hexadecimal.\n"); return; }
+	if ( !prompt[0] ) { Com_Printf("AI Control: enter a task first.\n"); return; }
+	out = 0;
+	for ( i = 0; prompt[i] && out < (int)sizeof(escaped)-8; i++ ) {
+		unsigned char ch = (unsigned char)prompt[i];
+		if ( ch == '"' || ch == '\\' ) { escaped[out++] = '\\'; escaped[out++] = ch; }
+		else if ( ch >= 32 && ch < 127 ) escaped[out++] = ch;
+		else if ( ch == '\n' || ch == '\r' || ch == '\t' ) escaped[out++] = ' ';
+	}
+	escaped[out] = '\0';
+	port = 27992;
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) { Com_Printf("AI Control: bad local gateway address.\n"); return; }
+	Com_sprintf(packet, sizeof(packet), "{\"type\":\"Q3AI1\",\"key\":\"%s\",\"provider\":\"%s\",\"prompt\":\"%s\",\"continuous\":true}", key, providers[provider], escaped);
+	if ( strlen(packet) >= 1400 ) { Com_Printf("AI Control: task too long.\n"); return; }
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+	cl_agent_running = qtrue;
+	Com_Printf("AI Control: request sent to local gateway (%s).\n", providers[provider]);
+}
+
+
+static void CL_AgentStop_f( void ) {
+	char key[128], packet[160], addressText[64];
+	netadr_t address;
+	int port = 27992;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	if ( strncmp(key, "q3a_", 4) != 0 || strlen(key) < 36 || strlen(key) > 127 ) {
+		Com_Printf("AI Control: enter the generated gateway bearer key before stopping.\n"); return;
+	}
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) return;
+	Com_sprintf(packet, sizeof(packet), "Q3STOP1|%s", key);
+	cl_agent_running = qfalse;
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+	Com_Printf("AI Control: stop requested.\n");
+}
+
 void CL_Init( void ) {
 	Com_Printf( "----- Client Initialization -----\n" );
 
@@ -2392,6 +2491,8 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("fs_openedList", CL_OpenedPK3List_f );
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	Cmd_AddCommand ("model", CL_SetModel_f );
+	Cmd_AddCommand ("agent_control", CL_AgentControl_f );
+	Cmd_AddCommand ("agent_stop", CL_AgentStop_f );
 	CL_InitRef();
 
 	SCR_Init ();
@@ -2411,6 +2512,7 @@ CL_Shutdown
 ===============
 */
 void CL_Shutdown( void ) {
+	if ( cl_agent_running ) CL_AgentStop_f();
 	static qboolean recursive = qfalse;
 	
 	Com_Printf( "----- CL_Shutdown -----\n" );
@@ -2447,6 +2549,8 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand ("serverstatus");
 	Cmd_RemoveCommand ("showip");
 	Cmd_RemoveCommand ("model");
+	Cmd_RemoveCommand ("agent_control");
+	Cmd_RemoveCommand ("agent_stop");
 
 	Cvar_Set( "cl_running", "0" );
 

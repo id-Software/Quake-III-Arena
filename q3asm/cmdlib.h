@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
+along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __CMDLIB__
 #define __CMDLIB__
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable : 4244)     // MIPS
 #pragma warning(disable : 4136)     // X86
 #pragma warning(disable : 4051)     // ALPHA
@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <time.h>
 #include <stdarg.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 #pragma intrinsic( memset, memcpy )
 
@@ -59,7 +59,7 @@ typedef unsigned char byte;
 #define	MAX_OS_PATH		1024
 #define MEM_BLOCKSIZE 4096
 
-// the dec offsetof macro doesnt work very well...
+// the dec offsetof macro doesn't work very well...
 #define myoffsetof(type,identifier) ((size_t)&((type *)0)->identifier)
 
 
@@ -67,8 +67,8 @@ typedef unsigned char byte;
 extern int myargc;
 extern char **myargv;
 
-char *strupr (char *in);
-char *strlower (char *in);
+char *Q_strupr (char *in);
+char *Q_strlower (char *in);
 int Q_strncasecmp( const char *s1, const char *s2, int n );
 int Q_stricmp( const char *s1, const char *s2 );
 void Q_getwd( char *out );
@@ -114,14 +114,6 @@ void 	ExtractFileBase( const char *path, char *dest );
 void	ExtractFileExtension( const char *path, char *dest );
 
 int 	ParseNum (const char *str);
-
-short	BigShort (short l);
-short	LittleShort (short l);
-int		BigLong (int l);
-int		LittleLong (int l);
-float	BigFloat (float l);
-float	LittleFloat (float l);
-
 
 char *COM_Parse (char *data);
 
