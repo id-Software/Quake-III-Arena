@@ -7,6 +7,12 @@ does not execute game commands or connect to the Quake III engine yet.
 import hmac
 import json
 import os
+import platform
+import re
+import threading
+import time
+
+from input_bridge import backend_name, execute_action
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -117,7 +123,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(401, {"error": "unauthorized"})
             return
         if self.path == "/api/agent/status":
-            self.send_json(200, {"name": "Quake III Agent Gateway", "authenticated": True, "engine_connected": False})
+            self.send_json(200, {"name": "Quake III Agent Gateway", "authenticated": True, "engine_connected": False, "input_backend": backend_name()})
             return
         if self.path == "/api/models":
             models = [{"id": key, "name": value["name"], "model": provider_model(key, value),
@@ -131,7 +137,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.authorized():
             self.send_json(401, {"error": "unauthorized"})
             return
-        if self.path != "/api/ai/chat":
+        if self.path not in ("/api/ai/chat", "/api/ai/control", "/api/agent/control"):
             self.send_json(404, {"error": "not_found"})
             return
         try:
@@ -140,6 +146,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(413, {"error": "request_size_invalid"})
                 return
             body = json.loads(self.rfile.read(length).decode("utf-8"))
+            if self.path == "/api/agent/control":
+                result = execute_action(body.get("action"))
+                self.send_json(200, result)
+                return
             provider_id = body.get("provider")
             prompt = body.get("prompt", "")
             if provider_id not in PROVIDERS:
@@ -155,8 +165,23 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(model, str) or not model.strip() or len(model) > 200:
                 self.send_json(400, {"error": "invalid_model"})
                 return
-            answer = call_provider(provider_id, model, prompt.strip())
-            self.send_json(200, {"provider": provider_id, "model": model, "response": answer})
+            if self.path == "/api/ai/control":
+                control_prompt = ("You are controlling a Quake III Arena player in a live multiplayer match. " +
+                    "Translate the request into exactly one short control pulse. Return ONLY a JSON object with fields " +
+                    "move (none|forward|back), strafe (none|left|right), jump (boolean), crouch (boolean), " +
+                    "attack (boolean), look_x (integer -100..100), look_y (integer -100..100), " +
+                    "duration_ms (integer 40..250). No markdown or explanation. Do not invent fields. " +
+                    "Use 120ms by default and release all keys after each pulse. User request: " + prompt.strip())
+                answer = call_provider(provider_id, model, control_prompt)
+                cleaned = answer.strip()
+                if cleaned.startswith("```"):
+                    cleaned = re.sub(r"^```(?:json)?\\s*|\\s*```$", "", cleaned, flags=re.IGNORECASE)
+                action = json.loads(cleaned)
+                result = execute_action(action)
+                self.send_json(200, {"provider": provider_id, "model": model, "response": answer, "control": result})
+            else:
+                answer = call_provider(provider_id, model, prompt.strip())
+                self.send_json(200, {"provider": provider_id, "model": model, "response": answer})
         except (ValueError, KeyError, IndexError, TypeError) as error:
             self.send_json(502, {"error": "invalid_provider_response", "detail": str(error)[:500]})
         except Exception as error:
