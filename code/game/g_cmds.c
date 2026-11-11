@@ -836,6 +836,31 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 
 #define EC		"\x19"
 
+/*
+ * Server-authoritative terminology moderation. Rejected content is never
+ * logged, echoed, or broadcast.
+ */
+static qboolean G_ChatPolicyViolation( const char *message ) {
+	static const char *blocked[] = {
+		"csam", "childporn", "childpornography",
+		"childsexualabusematerial", "childsexualexploitationmaterial",
+		"childsexabuse"
+	};
+	char normalized[MAX_SAY_TEXT];
+	int i, j, k;
+	j = 0;
+	for ( i = 0; message[i] && j < sizeof(normalized) - 1; i++ ) {
+		char c = message[i];
+		if ( c >= 'A' && c <= 'Z' ) c = (char)(c - 'A' + 'a');
+		if ( (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') )
+			normalized[j++] = c;
+	}
+	normalized[j] = '\0';
+	for ( k = 0; k < sizeof(blocked) / sizeof(blocked[0]); k++ )
+		if ( strstr( normalized, blocked[k] ) ) return qtrue;
+	return qfalse;
+}
+
 void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) {
 	int			j;
 	gentity_t	*other;
@@ -847,6 +872,12 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 
 	if ( g_gametype.integer < GT_TEAM && mode == SAY_TEAM ) {
 		mode = SAY_ALL;
+	}
+
+	/* Check before any logging, console echo, or delivery. */
+	if ( G_ChatPolicyViolation( chatText ) ) {
+		trap_DropClient( ent - g_entities, "Chat policy violation" );
+		return;
 	}
 
 	switch ( mode ) {
@@ -1044,7 +1075,6 @@ static void Cmd_Tell_f( gentity_t *ent ) {
 
 	p = ConcatArgs( 2 );
 
-	G_LogPrintf( "tell: %s to %s: %s\n", ent->client->pers.netname, target->client->pers.netname, p );
 	G_Say( ent, target, SAY_TELL, p );
 	// don't tell to the player self if it was already directed to this player
 	// also don't send the chat back to a bot
