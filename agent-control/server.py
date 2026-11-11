@@ -363,7 +363,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(200, {"event": event})
             return
         if self.path == "/api/agent/status":
-            self.send_json(200, {"name": "Quake III Agent Gateway", "authenticated": True, "engine_connected": False, "input_backend": backend_name()})
+            self.send_json(200, {"name": "Quake III Agent Gateway", "authenticated": True, "engine_connected": current_agent_state() is not None, "input_backend": backend_name()})
             return
         if self.path == "/api/models":
             models = [{"id": key, "name": value["name"], "model": provider_model(key, value),
