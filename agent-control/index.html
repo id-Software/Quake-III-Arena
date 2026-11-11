@@ -49,6 +49,15 @@
       <button id="ask" class="primary" disabled>Send to AI model <span>↗</span></button>
       <div id="ai-result" class="result" role="status" aria-live="polite">Verify gateway access to load configured providers.</div>
     </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">04 / LIVE MULTIPLAYER</p><h3>AI movement control</h3></div><span class="tag">SHORT INPUT PULSES</span></div>
+      <p class="muted">Ask the selected model to move the foreground Quake III client. The gateway accepts only movement, strafe, jump, crouch, attack and bounded mouse-look actions. Keep the Quake III window focused.</p>
+      <label for="control-prompt">Movement instruction</label>
+      <textarea id="control-prompt" rows="3" maxlength="2000" placeholder="Move forward, strafe left, look toward the opponent, and jump."></textarea>
+      <button id="control" class="primary" disabled>Execute AI movement <span>↗</span></button>
+      <div id="control-result" class="result" role="status" aria-live="polite">Verify access and load a model before using live controls.</div>
+      <p class="notice">Each model action is a 40–250 ms input pulse. The bridge releases keys after every pulse; repeat control requests for continued movement. Windows and Linux X11 are supported. Wayland-only Linux sessions are not supported.</p>
+    </section>
     <footer><span>AI AGENT EDITION</span><span>UNAUTHORIZED CLIENTS MUST BE REJECTED</span></footer>
   </main>
   <script src="app.js"></script>
