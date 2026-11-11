@@ -2,12 +2,20 @@ param(
     [string]$Generator = "Visual Studio 17 2022",
     [ValidateSet("x86", "amd64", "x86-64", "all")]
     [string]$Architecture = "amd64",
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [ValidateSet("RTX", "OpenGL")]
+    [string]$Renderer = "RTX"
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $EngineDir = Join-Path $RepoRoot "engine"
+
+if ($Renderer -eq "OpenGL") {
+    & (Join-Path $PSScriptRoot "build-opengl-legacy.ps1") -Generator $Generator -Architecture $Architecture -Configuration $Configuration
+    if ($LASTEXITCODE -ne 0) { throw "Legacy OpenGL build failed." }
+    return
+}
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "Git is required to initialize the engine submodule."
