@@ -92,3 +92,41 @@ python3 -m unittest -v test_input_bridge.py
 ```
 
 The tests validate action allowlisting and focus guards. They do not replace live desktop testing on each target OS/compositor.
+
+## Quake III PK3 asset discovery and AI selection
+
+The gateway includes a read-only PK3 catalog for the original game assets. It scans archive directory entries without extracting files or modifying the archives.
+
+Set `Q3_ASSET_ROOT` to the directory containing your legally obtained `.pk3` files. For example:
+
+```sh
+cd agent-control
+export Q3_ASSET_ROOT="$HOME/quake3/baseq3"
+export AGENT_API_KEY='your-agent-key'
+python3 server.py
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:Q3_ASSET_ROOT = "C:\\Games\\Quake III Arena\\baseq3"
+$env:AGENT_API_KEY = "your-agent-key"
+python server.py
+```
+
+Copy your own `pak0.pk3` and any other game PK3 archives into that folder. Do not commit the archives to this repository. The scanner looks for up to 64 top-level PK3 files and indexes:
+
+- Player model directories under `models/players/`, including MD3/MDC files, skin files and animation.cfg presence.
+- Weapon model directories under `models/weapons2/`.
+- Map-object groups under `models/mapobjects/`.
+- BSP maps under `maps/`, plus shader and texture counts.
+
+After verifying gateway access, use **Scan local Quake III PK3 archives** in the control panel. The authenticated `GET /api/assets` endpoint returns the catalog. The **Ask AI to select assets** button calls `POST /api/ai/asset-plan`; the model receives a compact catalog and must return exact asset names. The gateway validates every selected name against the scanned catalog before returning it. Unknown or invented asset names are rejected.
+
+The asset selector currently provides discovery and validated planning only. It does not yet change the running game's player configuration, spawn a map, or hot-load models in a live match; that requires an engine-side runtime integration. The catalog and selection API are read-only with respect to game archives.
+
+Run the asset catalog unit tests from this directory:
+
+```sh
+python3 -m unittest -v test_asset_catalog.py
+```
