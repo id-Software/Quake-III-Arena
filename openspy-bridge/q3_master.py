@@ -67,7 +67,7 @@ class Directory:
 
     def list_packet(self, game, protocol, now=None):
         if game not in self.games or protocol not in self.protocols:
-            return RESPONSE_PREFIX + b"\\EOT"
+            return [RESPONSE_PREFIX + b"\\EOT"]
         self.expire(now)
         entries = []
         for server in sorted(self.servers.values(), key=lambda item: (item.host, item.port)):
