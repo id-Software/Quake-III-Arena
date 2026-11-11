@@ -46,6 +46,7 @@ INGAME MENU
 #define ID_QUIT					17
 #define ID_RESUME				18
 #define ID_TEAMORDERS			19
+#define ID_AI_CONTROL			20
 
 
 typedef struct {
@@ -54,6 +55,7 @@ typedef struct {
 	menubitmap_s	frame;
 	menutext_s		team;
 	menutext_s		setup;
+	menutext_s		agentControl;
 	menutext_s		server;
 	menutext_s		leave;
 	menutext_s		restart;
