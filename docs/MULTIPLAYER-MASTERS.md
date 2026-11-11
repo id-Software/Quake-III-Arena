@@ -30,6 +30,14 @@ Consequently, OpenSpy cannot currently be selected as a drop-in Quake III master
 
 If OpenSpy adds explicit Quake III / id Tech 3 master-protocol support, or a compatible bridge is developed and tested, its endpoint can be added to this configuration. Until then, the native Quake III masters above are the supported public server-list services. Direct IP connection remains available independently of master-server listings.
 
+## Self-hosted Quake III master bridge
+
+A small native-protocol directory service is included at `openspy-bridge/q3_master.py`.
+It accepts Quake III heartbeats and answers native `getservers` requests on UDP
+27950. See [the bridge README](../openspy-bridge/README.md) for startup and
+client configuration. This is a self-hosted Quake III directory, not an OpenSpy
+backend integration.
+
 ## Client server browser
 
 The server-side `sv_master1` through `sv_master5` settings control where a dedicated server publishes its heartbeat. They do not automatically rewrite every stock Quake III client's built-in Internet browser master address. Client browser behavior depends on the game executable and UI module; modern ioquake3-derived clients support configurable master lists more broadly than the original 1.32 client.
