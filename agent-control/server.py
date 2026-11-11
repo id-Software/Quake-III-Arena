@@ -6,6 +6,7 @@ does not execute game commands or connect to the Quake III engine yet.
 """
 import hmac
 import json
+import math
 import os
 import re
 import socketserver
@@ -139,7 +140,7 @@ def record_agent_state(datagram):
         if not all(isinstance(v, list) and len(v) == 3 for v in (origin, velocity, angles)):
             return False
         values = origin + velocity + angles
-        if any(type(v) not in (int, float) or abs(v) > 100000 for v in values):
+        if any(type(v) not in (int, float) or not math.isfinite(v) or abs(v) > 100000 for v in values):
             return False
         health, weapon, server_time = item.get("health"), item.get("weapon"), item.get("server_time")
         if type(health) is not int or not -1000 <= health <= 10000:

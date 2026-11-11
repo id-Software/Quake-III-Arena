@@ -2011,7 +2011,9 @@ static void CL_AgentTelemetry( void ) {
 	char key[128], addressText[64], packet[512];
 	netadr_t address;
 	int port = 27992;
-	if ( !cl_agent_running || cls.state != CA_ACTIVE || !cl.snap.valid ) return;
+	if ( !cl_agent_running ) return;
+	if ( cls.keyCatchers & (KEYCATCH_UI|KEYCATCH_CONSOLE) ) { CL_AgentStop_f(); return; }
+	if ( cls.state != CA_ACTIVE || !cl.snap.valid ) return;
 	if ( cls.realtime - cl_agent_last_telemetry < 200 ) return;
 	cl_agent_last_telemetry = cls.realtime;
 	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
