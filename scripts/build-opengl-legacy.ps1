@@ -10,6 +10,7 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot
 $LegacyDir = Join-Path $RepoRoot "build\legacy-opengl-source"
 $LegacyCommit = "c95f4cecf7e0fec92e275d06645d5f2d14db286c"
 $LegacyUrl = "https://github.com/fknfilewalker/Quake-III-Arena-R.git"
+$ChecksumScript = Join-Path $PSScriptRoot "sha256.ps1"
 
 foreach ($tool in @("git", "cmake")) {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
@@ -46,6 +47,9 @@ function Build-OpenGL {
 
     cmake --build $BuildDir --config $Configuration
     if ($LASTEXITCODE -ne 0) { throw "OpenGL engine build failed for $Name." }
+
+    & $ChecksumScript -Mode Generate -Path $BuildDir
+    if ($LASTEXITCODE -ne 0) { throw "SHA-256 generation failed for $Name." }
 }
 
 switch ($Architecture) {
