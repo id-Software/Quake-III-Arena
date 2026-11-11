@@ -23,10 +23,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "cmdlib.h"
 #include "mathlib.h"
 #include "qfiles.h"
+#include <stdint.h>
 
 /* QVM headers are always serialized little-endian. */
 #if (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)) || (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__))
 #define Q3_BIG_ENDIAN
+static int Q3LittleLong(int value) {
+	uint32_t v = (uint32_t)value;
+	return (int)(((v & 0x000000ffU) << 24) |
+	             ((v & 0x0000ff00U) << 8)  |
+	             ((v & 0x00ff0000U) >> 8)  |
+	             ((v & 0xff000000U) >> 24));
+}
+#define LittleLong(x) Q3LittleLong(x)
 #endif
 
 /* 19079 total symbols in FI, 2002 Jan 23 */

@@ -1,0 +1,35 @@
+name: Q3ASM build and compatibility tests
+
+on:
+  push:
+    paths:
+      - "q3asm/**"
+      - ".github/workflows/q3asm.yml"
+  pull_request:
+    paths:
+      - "q3asm/**"
+      - ".github/workflows/q3asm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  q3asm:
+    name: Q3ASM on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Configure
+        run: cmake -S q3asm -B build/q3asm -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/q3asm --config Release
+      - name: Test QVM compatibility
+        run: ctest --test-dir build/q3asm -C Release --output-on-failure
