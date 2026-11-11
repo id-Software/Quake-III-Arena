@@ -120,6 +120,53 @@ AGENT_UDP_PORT = int(os.environ.get("Q3_AGENT_UDP_PORT", "27992"))
 AGENT_UDP_PROVIDERS = set(PROVIDERS.keys())
 
 
+
+_agent_state_lock = threading.Lock()
+_agent_state = {"received_at": 0.0, "data": None}
+
+
+def record_agent_state(datagram):
+    if len(datagram) > 512:
+        return False
+    try:
+        item = json.loads(datagram.decode("utf-8"))
+        if not isinstance(item, dict) or item.get("type") != "Q3STATE1":
+            return False
+        key = item.get("key")
+        if not isinstance(key, str) or not EXPECTED_KEY or not hmac.compare_digest(key, EXPECTED_KEY):
+            return False
+        origin, velocity, angles = item.get("origin"), item.get("velocity"), item.get("angles")
+        if not all(isinstance(v, list) and len(v) == 3 for v in (origin, velocity, angles)):
+            return False
+        values = origin + velocity + angles
+        if any(type(v) not in (int, float) or abs(v) > 100000 for v in values):
+            return False
+        health, weapon, server_time = item.get("health"), item.get("weapon"), item.get("server_time")
+        if type(health) is not int or not -1000 <= health <= 10000:
+            return False
+        if type(weapon) is not int or not 0 <= weapon <= 64:
+            return False
+        if type(server_time) is not int or server_time < 0:
+            return False
+        safe = {"origin": origin, "velocity": velocity, "angles": angles,
+                "health": health, "weapon": weapon, "server_time": server_time}
+        with _agent_state_lock:
+            _agent_state["received_at"] = time.monotonic()
+            _agent_state["data"] = safe
+        return True
+    except (ValueError, UnicodeDecodeError, TypeError):
+        return False
+
+
+def current_agent_state():
+    with _agent_state_lock:
+        data = _agent_state["data"]
+        age = time.monotonic() - _agent_state["received_at"]
+        if data is None or age > 2.5:
+            return None
+        return {"age_seconds": round(age, 2), **data}
+
+
 _agent_session_lock = threading.Lock()
 _agent_session = None
 _AGENT_MAX_SESSION_SECONDS = 30 * 60
@@ -132,6 +179,8 @@ def _agent_session_worker(stop_event, provider_id, prompt):
     step = 0
     while not stop_event.is_set() and time.monotonic() < deadline:
         step += 1
+        telemetry = current_agent_state()
+        state_text = json.dumps(telemetry, separators=(",", ":")) if telemetry else "unavailable or stale"
         control_prompt = (
             "Continuous Quake III control session. Choose the next short movement pulse "
             "for this task. Return ONLY JSON: move (none|forward|back), "
@@ -140,7 +189,7 @@ def _agent_session_worker(stop_event, provider_id, prompt):
             "No extra keys or markdown. Release all keys after every pulse. "
             "You receive NO screenshots, coordinates, health, map, opponents, or game "
             "telemetry; do not claim to perceive the game. If task complete or unable "
-            "to progress safely, return neutral controls. Task: " + prompt
+            "to progress safely, return neutral controls. Latest player telemetry: " + state_text + ". Task: " + prompt
         )
         try:
             answer = call_provider(provider_id, model, control_prompt).strip()
@@ -230,6 +279,9 @@ def run_agent_datagram(datagram):
 class AgentUDPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
+            if self.request[0].startswith(b'{"type":"Q3STATE1"'):
+                record_agent_state(self.request[0])
+                return
             if self.request[0].startswith(b"Q3STOP1|"):
                 key = self.request[0][8:].decode("ascii")
                 if not EXPECTED_KEY or not hmac.compare_digest(key, EXPECTED_KEY):

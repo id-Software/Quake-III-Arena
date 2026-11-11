@@ -2002,6 +2002,36 @@ CL_Frame
 
 ==================
 */
+
+static qboolean cl_agent_running = qfalse;
+static int cl_agent_last_telemetry = 0;
+
+static void CL_AgentTelemetry( void ) {
+	char key[128], addressText[64], packet[512];
+	netadr_t address;
+	int port = 27992;
+	if ( !cl_agent_running || cls.state != CA_ACTIVE || !cl.snap.valid ) return;
+	if ( cls.realtime - cl_agent_last_telemetry < 200 ) return;
+	cl_agent_last_telemetry = cls.realtime;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	if ( strncmp(key, "q3a_", 4) != 0 ) return;
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) return;
+	Com_sprintf(packet, sizeof(packet),
+		"{\"type\":\"Q3STATE1\",\"key\":\"%s\",\"server_time\":%d,"
+		"\"origin\":[%.1f,%.1f,%.1f],\"velocity\":[%.1f,%.1f,%.1f],"
+		"\"angles\":[%.1f,%.1f,%.1f],\"health\":%d,\"weapon\":%d}",
+		key, cl.snap.serverTime,
+		cl.snap.ps.origin[0], cl.snap.ps.origin[1], cl.snap.ps.origin[2],
+		cl.snap.ps.velocity[0], cl.snap.ps.velocity[1], cl.snap.ps.velocity[2],
+		cl.snap.ps.viewangles[0], cl.snap.ps.viewangles[1], cl.snap.ps.viewangles[2],
+		cl.snap.ps.stats[STAT_HEALTH], cl.snap.ps.weapon );
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+}
+
+
 void CL_Frame ( int msec ) {
 
 	if ( !com_cl_running->integer ) {
@@ -2053,6 +2083,7 @@ void CL_Frame ( int msec ) {
 
 	// send intentions now
 	CL_SendCmd();
+	CL_AgentTelemetry();
 
 	// resend a connection request if necessary
 	CL_CheckForResend();
@@ -2304,6 +2335,7 @@ static void CL_AgentControl_f( void ) {
 	Com_sprintf(packet, sizeof(packet), "{\"type\":\"Q3AI1\",\"key\":\"%s\",\"provider\":\"%s\",\"prompt\":\"%s\",\"continuous\":true}", key, providers[provider], escaped);
 	if ( strlen(packet) >= 1400 ) { Com_Printf("AI Control: task too long.\n"); return; }
 	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+	cl_agent_running = qtrue;
 	Com_Printf("AI Control: request sent to local gateway (%s).\n", providers[provider]);
 }
 
@@ -2321,6 +2353,7 @@ static void CL_AgentStop_f( void ) {
 	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
 	if ( !NET_StringToAdr(addressText, &address) ) return;
 	Com_sprintf(packet, sizeof(packet), "Q3STOP1|%s", key);
+	cl_agent_running = qfalse;
 	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
 	Com_Printf("AI Control: stop requested.\n");
 }
