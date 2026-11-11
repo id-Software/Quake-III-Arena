@@ -1,4 +1,5 @@
 """Unit tests for the Quake III input bridge validation (no game required)."""
+import os
 import unittest
 from unittest import mock
 
@@ -36,7 +37,19 @@ class InputBridgeTests(unittest.TestCase):
         })
         pulse.assert_called_once_with(["w", "a", "space"], False, 8, -4, 100)
         self.assertTrue(result["executed"])
-        self.assertEqual(result["backend"], "windows-sendinput")
+        self.assertEqual(result["backend"], "windows-user32")
+
+    @mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0"}, clear=False)
+    @mock.patch("input_bridge.platform.system", return_value="Linux")
+    def test_wayland_requires_explicit_focus_opt_in(self, _system):
+        with mock.patch.dict(os.environ, {"Q3_AGENT_ALLOW_UNVERIFIED_WAYLAND_FOCUS": "0"}):
+            with self.assertRaisesRegex(RuntimeError, "Wayland cannot expose"):
+                input_bridge.require_game_foreground()
+
+    @mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0", "Q3_AGENT_ALLOW_UNVERIFIED_WAYLAND_FOCUS": "1"}, clear=False)
+    @mock.patch("input_bridge.platform.system", return_value="Linux")
+    def test_wayland_opt_in_is_explicit(self, _system):
+        self.assertIn("not verifiable", input_bridge.require_game_foreground())
 
     @mock.patch("input_bridge.foreground_window", return_value="Firefox")
     def test_requires_quake_window_focus(self, _focus):
