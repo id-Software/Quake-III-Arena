@@ -58,6 +58,23 @@
       <div id="control-result" class="result" role="status" aria-live="polite">Verify access and load a model before using live controls.</div>
       <p class="notice">Each model action is a 40–250 ms input pulse. The bridge releases keys after every pulse; repeat control requests for continued movement. Windows, Linux X11/Wayland, and macOS are supported. Wayland requires an explicit opt-in because focus cannot be verified generically.</p>
     </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">05 / GAME DATA</p><h3>PK3 asset browser</h3></div><span class="tag">READ-ONLY SCAN</span></div>
+      <p class="muted">Index player models, weapon models, map objects, maps, skins, animation files and asset metadata from PK3 archives in the configured game-data folder. Archives are read in place and never extracted or modified.</p>
+      <button id="scan-assets" class="secondary">Scan local Quake III PK3 archives</button>
+      <div id="asset-status" class="result" role="status" aria-live="polite">Set Q3_ASSET_ROOT on the gateway to the folder containing your .pk3 files, then scan.</div>
+      <div class="asset-grid">
+        <div><label for="asset-player">Player model</label><select id="asset-player"><option value="">Scan archives first</option></select></div>
+        <div><label for="asset-weapon">Weapon model</label><select id="asset-weapon"><option value="">Scan archives first</option></select></div>
+        <div><label for="asset-map">Map</label><select id="asset-map"><option value="">Scan archives first</option></select></div>
+        <div><label for="asset-mapobject">Map object set</label><select id="asset-mapobject"><option value="">Scan archives first</option></select></div>
+      </div>
+      <label for="asset-prompt">Describe the setup you want the AI to choose</label>
+      <textarea id="asset-prompt" rows="3" maxlength="2000" placeholder="Choose a fast competitive player model, a rocket launcher model, and a small duel map."></textarea>
+      <button id="asset-plan" class="primary" disabled>Ask AI to select assets <span>↗</span></button>
+      <div id="asset-plan-result" class="result" role="status" aria-live="polite">Scan assets and configure an AI provider to request a catalog-validated selection.</div>
+      <p class="notice">This feature catalogs assets and generates validated selections. It does not yet change the running game or load maps/models into a live match. The engine-side selection bridge is a separate integration step.</p>
+    </section>
     <footer><span>AI AGENT EDITION</span><span>UNAUTHORIZED CLIENTS MUST BE REJECTED</span></footer>
   </main>
   <script src="app.js"></script>
