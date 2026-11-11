@@ -1,40 +1,20 @@
 OPENGL-ONLY LEGACY BUILD
 ------------------------
-A separate OpenGL-only build is available without the Vulkan SDK. Run:
+A separate OpenGL-only build is available without the Vulkan SDK. Windows:
 
   powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture x86
   powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture amd64
   powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture all
+
+Linux:
+
+  sh ./scripts/build-opengl-legacy.sh
 
 This builds the upstream ReForged project's original branch, pinned at
 c95f4cecf7e0fec92e275d06645d5f2d14db286c. That branch uses OpenGL and has no
 Vulkan CMake dependency. It is a separate legacy engine line, not a Vulkan-
 free build of the RTX-enabled reforged branch. Modern compiler compatibility
 and runtime have not yet been tested. See docs/OPENGL-LEGACY-RENDERER.md.
-
-OPENGL RENDERER OPTION
-----------------------
-The pinned ReForged renderer includes an OpenGL backend as an alternative to
-Vulkan. On Windows, launch with +set r_glDriver opengl32 +set r_rtx 0; on
-Linux, use +set r_glDriver libGL.so.1 +set r_rtx 0. A Windows PowerShell
-launcher is provided at scripts/launch-opengl.ps1. This is a runtime renderer
-selection, not a separate Vulkan-free build: the current upstream CMake
-configuration still requires the Vulkan SDK to compile. See
- docs/OPENGL-LEGACY-RENDERER.md for usage and limitations.
-
-NVIDIA RTX ENGINE UPGRADE
--------------------------
-The ReForged Quake III Arena R source is now available as the pinned engine/
-Git submodule. It contains the Vulkan renderer, ray-tracing implementation,
-shaders, and CMake project. The previous source tree under code/ is preserved
-unchanged as a legacy fallback. Windows build targets include x86 and x64;
-amd64 and x86-64 are aliases for the same 64-bit target. See docs/NVIDIA-RTX.md
-for platform limits, architecture instructions, and dependency pins. Run
-scripts/update-dependencies.ps1 to prepare the pinned stb and TinyJPEG updates;
-the Windows build script runs this automatically.
-
-The AI-agent gateway remains in agent-control/. It is a separate authenticated
-service and is not yet connected to in-game engine commands.
 
 Quake III Arena GPL source release
 ==================================
