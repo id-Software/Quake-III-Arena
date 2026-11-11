@@ -153,6 +153,7 @@ def _macos_pulse(keys, attack, look_x, look_y, duration):
     import ctypes
     from ctypes import c_void_p, c_uint32, c_bool, c_double, c_int
     cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    cf = ctypes.CDLL("/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
     class CGPoint(ctypes.Structure):
         _fields_ = [("x", c_double), ("y", c_double)]
     cg.CGEventCreateKeyboardEvent.restype = c_void_p
@@ -163,7 +164,7 @@ def _macos_pulse(keys, attack, look_x, look_y, duration):
     cg.CGEventGetLocation.restype = CGPoint
     cg.CGEventGetLocation.argtypes = [c_void_p]
     cg.CGEventCreate.restype = c_void_p
-    cg.CFRelease.argtypes = [c_void_p]
+    cf.CFRelease.argtypes = [c_void_p]
 
     def post(event):
         if not event:
@@ -171,7 +172,7 @@ def _macos_pulse(keys, attack, look_x, look_y, duration):
         try:
             cg.CGEventPost(0, event)  # kCGHIDEventTap
         finally:
-            cg.CFRelease(event)
+            cf.CFRelease(event)
 
     pressed = []
     attack_down = False
@@ -186,7 +187,7 @@ def _macos_pulse(keys, attack, look_x, look_y, duration):
             try:
                 point = cg.CGEventGetLocation(current)
             finally:
-                cg.CFRelease(current)
+                cf.CFRelease(current)
         elif attack or look_x or look_y:
             raise RuntimeError("macOS could not read the pointer location.")
         if attack:
