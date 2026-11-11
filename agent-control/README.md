@@ -158,3 +158,6 @@ The loop is task-driven only: the model receives no screenshots, player coordina
 
 
 The running client also sends authenticated player telemetry to the loopback gateway approximately five times per second while the session is active: snapshot time, player origin, velocity, view angles, health, and current weapon. The gateway uses only telemetry received within the last 2.5 seconds when asking for the next action. This does not include enemy locations, full entity state, map geometry, or screenshots.
+
+
+The gateway ends the session if authenticated player telemetry disappears or becomes older than 2.5 seconds, including after disconnecting from a match. It also stops on provider/input errors or after the 30-minute session cap.

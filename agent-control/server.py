@@ -180,21 +180,36 @@ def _agent_session_worker(stop_event, provider_id, prompt):
     while not stop_event.is_set() and time.monotonic() < deadline:
         step += 1
         telemetry = current_agent_state()
-        state_text = json.dumps(telemetry, separators=(",", ":")) if telemetry else "unavailable or stale"
+        if telemetry is None and step == 1:
+            stop_event.wait(0.8)
+            telemetry = current_agent_state()
+        if telemetry is None:
+            print("AI continuous session stopped: player telemetry is missing or stale.")
+            break
+        state_text = json.dumps(telemetry, separators=(",", ":"))
         control_prompt = (
             "Continuous Quake III control session. Choose the next short movement pulse "
             "for this task. Return ONLY JSON: move (none|forward|back), "
             "strafe (none|left|right), jump/crouch/attack (booleans), "
             "look_x/look_y (integers -100..100), duration_ms (integer 40..250). "
             "No extra keys or markdown. Release all keys after every pulse. "
-            "You receive NO screenshots, coordinates, health, map, opponents, or game "
-            "telemetry; do not claim to perceive the game. If task complete or unable "
-            "to progress safely, return neutral controls. Latest player telemetry: " + state_text + ". Task: " + prompt
+            "You receive limited player telemetry, but no screenshots, enemy positions, or map "
+            "geometry. Use the supplied telemetry as the only observation and do not "
+            "invent unseen events. If task complete or unable to progress safely, "
+            "return neutral controls. Latest player telemetry: " + state_text + ". Task: " + prompt
         )
         try:
             answer = call_provider(provider_id, model, control_prompt).strip()
+            tick = chr(96)
+            if answer.startswith(tick * 3):
+                answer = answer.strip().strip(tick).strip()
+                if answer[:4].lower() == "json":
+                    answer = answer[4:].strip()
             action = json.loads(answer)
             if stop_event.is_set():
+                break
+            if current_agent_state() is None:
+                print("AI continuous session stopped: player telemetry became stale.")
                 break
             result = execute_action(action)
             if step == 1 or step % 20 == 0:

@@ -721,6 +721,7 @@ This is also called on Com_Error and Com_Quit, so it shouldn't cause any errors
 =====================
 */
 void CL_Disconnect( qboolean showMainMenu ) {
+	if ( cl_agent_running ) CL_AgentStop_f();
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
 	}
@@ -2509,6 +2510,7 @@ CL_Shutdown
 ===============
 */
 void CL_Shutdown( void ) {
+	if ( cl_agent_running ) CL_AgentStop_f();
 	static qboolean recursive = qfalse;
 	
 	Com_Printf( "----- CL_Shutdown -----\n" );
