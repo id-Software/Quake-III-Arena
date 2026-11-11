@@ -7,10 +7,7 @@ does not execute game commands or connect to the Quake III engine yet.
 import hmac
 import json
 import os
-import platform
 import re
-import threading
-import time
 
 from input_bridge import backend_name, execute_action
 import urllib.error
@@ -175,7 +172,7 @@ class Handler(BaseHTTPRequestHandler):
                 answer = call_provider(provider_id, model, control_prompt)
                 cleaned = answer.strip()
                 if cleaned.startswith("```"):
-                    cleaned = re.sub(r"^```(?:json)?\\s*|\\s*```$", "", cleaned, flags=re.IGNORECASE)
+                    cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
                 action = json.loads(cleaned)
                 result = execute_action(action)
                 self.send_json(200, {"provider": provider_id, "model": model, "response": answer, "control": result})
