@@ -1,3 +1,13 @@
+OPENGL RENDERER OPTION
+----------------------
+The pinned ReForged renderer includes an OpenGL backend as an alternative to
+Vulkan. On Windows, launch with +set r_glDriver opengl32 +set r_rtx 0; on
+Linux, use +set r_glDriver libGL.so.1 +set r_rtx 0. A Windows PowerShell
+launcher is provided at scripts/launch-opengl.ps1. This is a runtime renderer
+selection, not a separate Vulkan-free build: the current upstream CMake
+configuration still requires the Vulkan SDK to compile. See
+ docs/OPENGL-LEGACY-RENDERER.md for usage and limitations.
+
 NVIDIA RTX ENGINE UPGRADE
 -------------------------
 The ReForged Quake III Arena R source is now available as the pinned engine/
