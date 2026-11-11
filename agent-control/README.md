@@ -32,15 +32,35 @@ For a remote deployment, use HTTPS, keep the key in a protected environment vari
 
 ## Live multiplayer input bridge
 
-The gateway can now send short, allowlisted desktop input pulses to the foreground Quake III Arena client. It does not patch the engine or inject code into the process: it uses the same keyboard/mouse input path as a human player, so the normal client user-command and multiplayer network path remains in use.
+The gateway sends short, allowlisted desktop input pulses to the foreground Quake III Arena client. It does not patch the engine or inject code into the process: it uses the normal keyboard/mouse input path, so the client sends ordinary player commands through its multiplayer network path.
 
-Supported actions: forward/back, left/right strafe, jump, crouch, attack, and relative mouse look. Each pulse is limited to 40–250 ms and all held keys/buttons are released afterward. The foreground window title must identify Quake III Arena. The bridge never runs console commands or arbitrary shell commands.
+Supported actions: forward/back, left/right strafe, jump, crouch, attack, and relative mouse look. Each pulse is limited to 40–250 ms and held keys/buttons are released afterward. The bridge never runs Quake console commands or arbitrary shell commands.
 
-- Windows: uses the native Windows keyboard/mouse input API.
-- Linux X11: requires `xdotool` and a Quake III window with focus.
-- Linux Wayland-only sessions and macOS are not supported by this input backend yet.
+- Windows: native Windows user32 keyboard/mouse events; foreground game-window title is checked.
+- Linux X11: requires `xdotool` and a focused Quake III window.
+- Linux Wayland: requires `ydotool` plus the `ydotoold` daemon and uinput permissions. Wayland has no compositor-independent API for querying the focused application's title, so set `Q3_AGENT_ALLOW_UNVERIFIED_WAYLAND_FOCUS=1` only after focusing Quake III. This is an explicit opt-in; the bridge cannot verify focus on Wayland.
+- macOS: uses built-in CoreGraphics events and checks the frontmost application with AppleScript. The terminal/Python process may need Accessibility permission in System Settings → Privacy & Security → Accessibility.
 
-The `/api/ai/control` endpoint asks the selected model for one JSON control pulse, validates the schema, and sends it to the focused game. `/api/agent/control` accepts a precomputed action object from an authenticated external agent. Both require the agent bearer key. Repeated requests are needed for continuous movement; the bridge intentionally does not leave keys held between requests. The game window must be focused, and the user should only use this against servers where automated play is permitted.
+The `/api/ai/control` endpoint asks the selected model for one JSON control pulse, validates the schema, and sends it to the focused game. `/api/agent/control` accepts a precomputed action object from an authenticated external agent. Both require the agent bearer key. Repeated requests are needed for continuous movement; the bridge intentionally does not leave keys held between requests. Only use automated play on servers where it is permitted.
+
+## Linux Wayland and macOS setup
+
+### Linux Wayland
+
+Install `ydotool` using your distribution's package manager and start its `ydotoold` daemon in the same logged-in session. Ensure the user can access the daemon socket and uinput device. Focus Quake III, then start the gateway with:
+
+```sh
+export Q3_AGENT_ALLOW_UNVERIFIED_WAYLAND_FOCUS=1
+python3 server.py
+```
+
+The opt-in is necessary because Wayland intentionally prevents a generic application from inspecting another application's focus. Do not change focus while agent control is active.
+
+### macOS
+
+No third-party Python package is required. Start the gateway in the logged-in graphical session. If macOS prompts for permission, grant Accessibility access to Terminal or the Python process under **System Settings → Privacy & Security → Accessibility**. Keep Quake III as the frontmost application.
+
+Both backends preserve the bounded action schema. Their behavior should be tested on the target compositor/macOS version before live multiplayer use.
 
 ## Key handling
 
@@ -48,56 +68,13 @@ The generated key is shown in the page and copied only on user action. It is not
 
 ## Multi-provider AI model gateway
 
-The authenticated gateway now includes a provider selector and prompt interface. It supports:
+The authenticated gateway includes a provider selector and prompt interface. It supports OpenAI, Anthropic, Google Gemini, Mistral, Groq, xAI, DeepSeek, OpenRouter, NVIDIA NIM (hosted and self-hosted), Ollama, and LM Studio. Provider API keys stay on the server. Only configured providers are selectable.
 
-- OpenAI
-- Anthropic
-- Google Gemini
-- Mistral
-- Groq
-- xAI
-- DeepSeek
-- OpenRouter
-- NVIDIA NIM (hosted NVIDIA API Catalog)
-- NVIDIA NIM (self-hosted)
-- Ollama (local)
-- LM Studio (local)
+Set `AGENT_API_KEY` and whichever provider credentials you use. Model IDs and local endpoint URLs can be overridden with the environment variables documented in the gateway configuration. Defaults are examples and may need updating as providers retire or rename models.
 
-The hosted NVIDIA NIM option uses NVIDIA's OpenAI-compatible API Catalog endpoint. The self-hosted NVIDIA NIM option uses a local OpenAI-compatible NIM endpoint. The other hosted providers use their respective APIs. Ollama and LM Studio use local OpenAI-compatible endpoints. Only providers with server-side credentials (or local providers) are selectable. The browser receives provider names and model IDs, never provider API keys.
-
-### Configure providers
-
-Set AGENT_API_KEY as before, then add whichever provider credentials you use:
-
-```sh
-export OPENAI_API_KEY='...'
-export ANTHROPIC_API_KEY='...'
-export GOOGLE_API_KEY='...'
-export MISTRAL_API_KEY='...'
-export GROQ_API_KEY='...'
-export XAI_API_KEY='...'
-export DEEPSEEK_API_KEY='...'
-export OPENROUTER_API_KEY='...'
-export NVIDIA_API_KEY='...'
-# Optional: choose a different NVIDIA-hosted model
-export NVIDIA_MODEL='nvidia/llama-3.3-nemotron-super-49b-v1.5'
-python3 server.py
-```
-
-You do not need to configure every provider. Model IDs can be overridden with OPENAI_MODEL, ANTHROPIC_MODEL, GOOGLE_MODEL, MISTRAL_MODEL, GROQ_MODEL, XAI_MODEL, DEEPSEEK_MODEL, and OPENROUTER_MODEL. Defaults are examples and may need updating as providers retire or rename models.
-
-For NVIDIA-hosted inference, create an API key in the NVIDIA API Catalog and set NVIDIA_API_KEY. NVIDIA model IDs can be selected in the panel's editable Model ID field; the default is nvidia/llama-3.3-nemotron-super-49b-v1.5. For self-hosted NVIDIA NIM, start a NIM container and set NVIDIA_NIM_BASE_URL (default http://127.0.0.1:8000/v1/chat/completions) and optionally NVIDIA_NIM_MODEL (default meta/llama-3.1-8b-instruct). The self-hosted endpoint does not require an API key by default; configure your deployment's authentication separately if exposed beyond localhost.
-
-For local inference, start Ollama or LM Studio on the same host as the gateway. Optional settings: OLLAMA_BASE_URL (default http://127.0.0.1:11434/v1/chat/completions), OLLAMA_MODEL, LM_STUDIO_BASE_URL (default http://127.0.0.1:1234/v1/chat/completions), and LM_STUDIO_MODEL.
-
-The gateway endpoints GET /api/models and POST /api/ai/chat both require the agent bearer key. Prompts are limited to 12,000 characters and request bodies to 64 KiB. Provider calls have a 90-second timeout.
-
-**Scope:** This adds model-provider connectivity for agent tooling. It does not yet translate model output into Quake III game actions or connect to the engine. Review model output before using it to drive any future game-control bridge.
-
+The gateway endpoints `GET /api/models`, `POST /api/ai/chat`, `POST /api/ai/control`, and `POST /api/agent/control` require the agent bearer key. Prompts are limited to 12,000 characters and request bodies to 64 KiB. Provider calls have a 90-second timeout.
 
 ## Live control API example
-
-Send a short forward-and-jump pulse to the focused game window:
 
 ```sh
 curl -X POST http://127.0.0.1:8765/api/agent/control \
@@ -106,22 +83,12 @@ curl -X POST http://127.0.0.1:8765/api/agent/control \
   -d '{"action":{"move":"forward","jump":true,"duration_ms":150}}'
 ```
 
-Ask the selected AI provider to choose and execute a pulse through
-`POST /api/ai/control` using the same provider/model/prompt fields as the chat
-endpoint. The response includes the validated action and foreground window.
-
-Linux X11 setup: install `xdotool` from your distribution packages. Start the
-gateway in the same desktop session as Quake III. Keep the game window focused.
-
-
 ## Input bridge validation tests
 
-Run the standard-library unit tests from this directory:
+Run from this directory:
 
 ```sh
 python3 -m unittest -v test_input_bridge.py
 ```
 
-These tests cover action allowlisting, direction and duration bounds, mouse
-limits, button types, and the foreground-window guard. They do not replace a
-live Windows/Linux desktop test with a running Quake III multiplayer client.
+The tests validate action allowlisting and focus guards. They do not replace live desktop testing on each target OS/compositor.
