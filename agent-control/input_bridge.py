@@ -3,6 +3,7 @@
 Only emits short, allowlisted keyboard/mouse input pulses. It never executes
 console commands, shell commands, or arbitrary process memory operations.
 """
+import os
 import platform
 import shutil
 import subprocess
@@ -19,7 +20,7 @@ def backend_name():
     system = platform.system()
     if system == "Windows":
         return "windows-sendinput"
-    if system == "Linux" and shutil.which("xdotool") and (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+    if system == "Linux" and shutil.which("xdotool") and os.environ.get("DISPLAY"):
         return "linux-xdotool"
     return None
 
