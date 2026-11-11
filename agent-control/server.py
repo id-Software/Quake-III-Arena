@@ -8,6 +8,10 @@ import hmac
 import json
 import os
 import re
+import socketserver
+import threading
+import time
+import uuid
 
 from input_bridge import backend_name, execute_action
 from asset_catalog import build_catalog
@@ -18,7 +22,33 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HOST = os.environ.get("AGENT_GATEWAY_HOST", "127.0.0.1")
 PORT = int(os.environ.get("AGENT_GATEWAY_PORT", "8765"))
 EXPECTED_KEY = os.environ.get("AGENT_API_KEY", "")
-ALLOWED_ORIGINS = {"http://127.0.0.1:8000", "http://localhost:8000"}
+ALLOWED_ORIGINS = {"http://127.0.0.1:8000", "http://localhost:8000", "null"}
+MODERATION_UDP_HOST = "127.0.0.1"
+MODERATION_UDP_PORT = 27991
+_moderation_lock = threading.Lock()
+_moderation_latest = {"id": "", "timestamp": 0, "reason": ""}
+
+
+def record_moderation_event(datagram):
+    """Accept only the fixed game-server event marker; discard all other data."""
+    if datagram != b"Q3MOD1":
+        return False
+    event = {"id": uuid.uuid4().hex, "timestamp": int(time.time()),
+             "reason": "chat_policy_violation"}
+    with _moderation_lock:
+        _moderation_latest.update(event)
+    return True
+
+
+class ModerationUDPHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        record_moderation_event(self.request[0])
+
+
+class ModerationUDPServer(socketserver.ThreadingUDPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
 
 # Model IDs can be changed without editing code. Secrets are never sent to the browser.
 PROVIDERS = {
@@ -119,6 +149,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.authorized():
             self.send_json(401, {"error": "unauthorized"})
+            return
+        if self.path == "/api/moderation/latest":
+            with _moderation_lock:
+                event = dict(_moderation_latest)
+            self.send_json(200, {"event": event})
             return
         if self.path == "/api/agent/status":
             self.send_json(200, {"name": "Quake III Agent Gateway", "authenticated": True, "engine_connected": False, "input_backend": backend_name()})
@@ -246,5 +281,11 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     if len(EXPECTED_KEY) < 32:
         raise SystemExit("Set AGENT_API_KEY to a random value of at least 32 characters.")
+    moderation_server = ModerationUDPServer(
+        (MODERATION_UDP_HOST, MODERATION_UDP_PORT), ModerationUDPHandler)
+    threading.Thread(target=moderation_server.serve_forever,
+                     name="q3-moderation-udp", daemon=True).start()
     print("Quake III Agent Gateway listening on http://%s:%d" % (HOST, PORT))
+    print("Quake III moderation events listening on UDP %s:%d" %
+          (MODERATION_UDP_HOST, MODERATION_UDP_PORT))
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

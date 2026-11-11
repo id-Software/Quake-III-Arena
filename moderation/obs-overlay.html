@@ -1,13 +1,60 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quake III moderation notice</title>
 <style>
-html,body{margin:0;background:transparent;color:#fff;font-family:Arial,sans-serif}
-#notice{display:none;position:absolute;top:8%;left:50%;transform:translateX(-50%);max-width:90%;padding:22px 30px;background:rgba(12,12,12,.94);border:3px solid #c62828;text-align:center;font-weight:700;text-shadow:0 2px 3px #000}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent;color:#fff;font-family:Arial,sans-serif}
+#notice{display:none;position:absolute;top:8%;left:50%;transform:translateX(-50%);width:min(90%,1000px);padding:22px 30px;background:rgba(12,12,12,.94);border:3px solid #c62828;text-align:center;font-weight:700;text-shadow:0 2px 3px #000;box-sizing:border-box}
 #headline{font-size:clamp(24px,4vw,48px);color:#ff5252}#detail{margin-top:10px;font-size:clamp(14px,2vw,22px)}
-</style></head><body>
-<div id="notice" role="status" aria-live="polite"><div id="headline">CHRIS HANSEN WOULD LIKE A WORD.</div>
-<div id="detail">A player was removed for violating the server's prohibited-content terminology policy.</div></div>
+#settings{position:absolute;left:12px;bottom:12px;width:min(420px,90%);padding:14px;background:#111e;border:1px solid #777;border-radius:6px;font:13px Arial,sans-serif}
+#settings[hidden]{display:none}#settings label{display:block;margin:8px 0 4px}#settings input{box-sizing:border-box;width:100%;padding:7px;background:#222;color:#fff;border:1px solid #666}
+#settings button{margin-top:10px;padding:7px 12px}#status{margin-top:8px;color:#ddd}
+</style></head>
+<body>
+<div id="notice" role="status" aria-live="polite">
+ <div id="headline">CHRIS HANSEN WOULD LIKE A WORD.</div>
+ <div id="detail">A player was removed for violating the server's prohibited-content terminology policy.</div>
+</div>
+<div id="settings">
+ <strong>Quake III moderation overlay setup</strong>
+ <label for="gateway">Gateway URL</label><input id="gateway" value="http://127.0.0.1:8765">
+ <label for="token">Gateway bearer key</label><input id="token" type="password" autocomplete="off" placeholder="Paste AGENT_API_KEY">
+ <button id="save">Save and connect</button>
+ <button id="clear">Clear saved key</button>
+ <div id="status">Enter the gateway key. It is stored in this OBS browser source's local storage.</div>
+</div>
 <script>
-/* Fixed-copy OBS overlay shell. Wire to the authenticated moderation event API before use. */
+(() => {
+ const $=id=>document.getElementById(id), notice=$("notice"), settings=$("settings");
+ let gateway=localStorage.getItem("q3mod_gateway")||"http://127.0.0.1:8765";
+ let token=localStorage.getItem("q3mod_token")||"", lastId="", hideAt=0;
+ $("gateway").value=gateway; $("token").value=token;
+ if(token) settings.hidden=true;
+ $("save").addEventListener("click",()=>{
+   gateway=$("gateway").value.trim().replace(/\/$/,"");
+   token=$("token").value.trim();
+   if(!/^https?:\/\//i.test(gateway)||!token){$("status").textContent="Enter a valid gateway URL and key.";return;}
+   localStorage.setItem("q3mod_gateway",gateway);localStorage.setItem("q3mod_token",token);
+   settings.hidden=true;$("status").textContent="Connected configuration saved.";
+ });
+ $("clear").addEventListener("click",()=>{
+   localStorage.removeItem("q3mod_token");localStorage.removeItem("q3mod_gateway");
+   token="";settings.hidden=false;$("token").value="";
+ });
+ async function poll(){
+   if(!token){settings.hidden=false;return;}
+   try{
+     const response=await fetch(gateway+"/api/moderation/latest",{headers:{Authorization:"Bearer "+token},cache:"no-store"});
+     if(!response.ok)throw new Error("Gateway returned "+response.status);
+     const data=await response.json(),event=data.event||{};
+     if(event.id&&event.id!==lastId){
+       lastId=event.id;notice.style.display="block";hideAt=Date.now()+12000;
+     }
+     if(notice.style.display==="block"&&Date.now()>hideAt)notice.style.display="none";
+     $("status").textContent="Connected. Waiting for moderation events.";
+   }catch(e){$("status").textContent="Overlay connection error: "+e.message;settings.hidden=false;}
+ }
+ setInterval(poll,1000);poll();
+})();
 </script></body></html>

@@ -1,0 +1,53 @@
+/*
+ * Moderation disconnect notice. The client selects this only for the
+ * fixed server disconnect reason "Chat policy violation".
+ */
+{
+	menuDef {
+		name "moderation_popmenu"
+		fullScreen 0
+		visible 1
+		rect 82 142 476 196
+		style WINDOW_STYLE_FILLED
+		border WINDOW_BORDER_FULL
+		borderSize 2
+		backColor 0 0 0 0.96
+		borderColor 0.85 0.12 0.12 1
+		foreColor 1 1 1 1
+		focusColor 1 1 1 1
+		onESC { close moderation_popmenu }
+		itemDef {
+			name "moderation_headline"
+			type ITEM_TYPE_TEXT
+			rect 102 160 436 46
+			text "CHRIS HANSEN WOULD LIKE A WORD."
+			textfont 3
+			textscale 0.34
+			textalign 1
+			textalignx 218
+			foreColor 1 0.2 0.2 1
+		}
+		itemDef {
+			name "moderation_body"
+			type ITEM_TYPE_TEXT
+			rect 112 214 416 62
+			text "Your connection was terminated for violating the server's prohibited-content terminology policy."
+			textfont 2
+			textscale 0.22
+			textalign 1
+			textalignx 208
+			foreColor 1 1 1 1
+		}
+		itemDef {
+			name "moderation_hint"
+			type ITEM_TYPE_TEXT
+			rect 112 292 416 24
+			text "Press ESC to return to the main menu."
+			textfont 2
+			textscale 0.18
+			textalign 1
+			textalignx 208
+			foreColor 0.75 0.75 0.75 1
+		}
+	}
+}

@@ -5260,7 +5260,11 @@ void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
 			trap_Cvar_VariableStringBuffer("com_errorMessage", buf, sizeof(buf));
 			if (strlen(buf)) {
 				if (!ui_singlePlayerActive.integer) {
-					Menus_ActivateByName("error_popmenu");
+					if ( strstr( buf, "CHRIS HANSEN WOULD LIKE A WORD." ) ) {
+						Menus_ActivateByName("moderation_popmenu");
+					} else {
+						Menus_ActivateByName("error_popmenu");
+					}
 				} else {
 					trap_Cvar_Set("com_errorMessage", "");
 				}

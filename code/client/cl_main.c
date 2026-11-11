@@ -999,6 +999,14 @@ void CL_Disconnect_f( void ) {
 	SCR_StopCinematic();
 	Cvar_Set("ui_singlePlayerActive", "0");
 	if ( cls.state != CA_DISCONNECTED && cls.state != CA_CINEMATIC ) {
+		/*
+		 * The server sends this fixed reason in its reliable disconnect
+		 * command. Never display the triggering chat text or matched term.
+		 */
+		if ( Cmd_Argc() > 1 && !Q_stricmp( Cmd_Argv(1), "Chat policy violation" ) ) {
+			Com_Error( ERR_DISCONNECT,
+				"CHRIS HANSEN WOULD LIKE A WORD.\\nYour connection was terminated for violating the server's prohibited-content terminology policy." );
+		}
 		Com_Error (ERR_DISCONNECT, "Disconnected from server");
 	}
 }
