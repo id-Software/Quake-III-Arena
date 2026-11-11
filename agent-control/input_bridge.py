@@ -136,15 +136,15 @@ def _ydotool_pulse(keys, attack, look_x, look_y, duration):
             pressed.append(code)
         if attack:
             # BTN_LEFT is Linux input event code 0x110 (272).
-            subprocess.run([binary, "click", "--down", "0x110"], check=True, timeout=2)
+            subprocess.run([binary, "click", "0x40"], check=True, timeout=2)
             attack_down = True
         if look_x or look_y:
-            subprocess.run([binary, "mousemove", "--", str(look_x), str(look_y)],
+            subprocess.run([binary, "mousemove", "-x", str(look_x), "-y", str(look_y)],
                            check=True, timeout=2)
         time.sleep(duration / 1000.0)
     finally:
         if attack_down:
-            subprocess.run([binary, "click", "--up", "0x110"], check=False, timeout=2)
+            subprocess.run([binary, "click", "0x80"], check=False, timeout=2)
         for code in reversed(pressed):
             subprocess.run([binary, "key", str(code) + ":0"], check=False, timeout=2)
 
@@ -180,17 +180,19 @@ def _macos_pulse(keys, attack, look_x, look_y, duration):
             code = MAC_KEYCODE[key]
             post(cg.CGEventCreateKeyboardEvent(None, code, True))
             pressed.append(code)
-        if attack:
-            post(cg.CGEventCreateMouseEvent(None, 1, CGPoint(0, 0), 0))
-            attack_down = True
-        if look_x or look_y:
-            current = cg.CGEventCreate(None)
-            if not current:
-                raise RuntimeError("macOS could not read the pointer location.")
+        current = cg.CGEventCreate(None) if (attack or look_x or look_y) else None
+        point = CGPoint(0, 0)
+        if current:
             try:
                 point = cg.CGEventGetLocation(current)
             finally:
                 cg.CFRelease(current)
+        elif attack or look_x or look_y:
+            raise RuntimeError("macOS could not read the pointer location.")
+        if attack:
+            post(cg.CGEventCreateMouseEvent(None, 1, point, 0))
+            attack_down = True
+        if look_x or look_y:
             point.x += look_x
             point.y += look_y
             post(cg.CGEventCreateMouseEvent(None, 5, point, 0))
