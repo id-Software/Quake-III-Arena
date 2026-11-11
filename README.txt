@@ -1,3 +1,17 @@
+OPENGL-ONLY LEGACY BUILD
+------------------------
+A separate OpenGL-only build is available without the Vulkan SDK. Run:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture x86
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture amd64
+  powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture all
+
+This builds the upstream ReForged project's original branch, pinned at
+c95f4cecf7e0fec92e275d06645d5f2d14db286c. That branch uses OpenGL and has no
+Vulkan CMake dependency. It is a separate legacy engine line, not a Vulkan-
+free build of the RTX-enabled reforged branch. Modern compiler compatibility
+and runtime have not yet been tested. See docs/OPENGL-LEGACY-RENDERER.md.
+
 OPENGL RENDERER OPTION
 ----------------------
 The pinned ReForged renderer includes an OpenGL backend as an alternative to
