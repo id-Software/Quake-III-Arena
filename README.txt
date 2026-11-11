@@ -250,3 +250,18 @@ An optional Vulkan/KHR hardware ray-tracing backend is the target for AMD
 RDNA 2+ GPUs. The current OpenGL renderer remains the fallback. Hardware ray
 tracing is not implemented in this revision; see docs/AMD-RAY-TRACING.md for
 the backend design, required Vulkan features, and acceptance criteria.
+
+
+AMD VULKAN RAY-TRACING CAPABILITY PROBE
+---------------------------------------
+A standalone probe checks whether an AMD GPU and its Vulkan driver expose the
+KHR hardware ray-tracing feature set. Build with CMake 3.16+, a C++11 compiler,
+and Vulkan 1.2 SDK/loader:
+
+  cmake -S tools/amd-vulkan-rt-probe -B build-amd-rt-probe
+  cmake --build build-amd-rt-probe --config Release
+
+This checks device/driver capability only. The engine's existing Vulkan ray
+tracing implementation still uses NVIDIA-specific VK_NV interfaces; the KHR
+renderer port required for AMD in-game ray tracing is not complete. See
+ docs/AMD-RAY-TRACING.md and tools/amd-vulkan-rt-probe/README.md.
