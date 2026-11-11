@@ -52,3 +52,45 @@ separate Vulkan-free legacy build target. A truly Vulkan-independent build
 needs a source/build-system change upstream that conditionally excludes the
 Vulkan renderer sources, headers, and link dependency. Do not treat the
 OpenGL launch option as proof that this has been completed.
+
+## Vulkan-free OpenGL build target
+
+The ReForged `reforged` engine revision is not cleanly separable into an
+OpenGL-only binary: its renderer headers and initialization code include
+Vulkan-specific types and entry points, and its CMake project requires Vulkan.
+Rather than pretending a CMake toggle removes those dependencies, this
+repository now provides a separate, reproducible legacy OpenGL build target
+using the same upstream project's `original` branch. That branch's CMake
+configuration links OpenGL and does not call `find_package(Vulkan)` or link
+`Vulkan::Vulkan`.
+
+The legacy source is pinned to upstream commit
+`c95f4cecf7e0fec92e275d06645d5f2d14db286c`. Build it on Windows with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture x86
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture amd64
+powershell -ExecutionPolicy Bypass -File .\scripts\build-rtx.ps1 -Renderer OpenGL -Architecture all
+```
+
+This target clones and checks out the pinned `original` source into
+`build/legacy-opengl-source`, initializes its stb and TinyJPEG submodules,
+and builds into separate `build-opengl-x86` / `build-opengl-x64` directories.
+It does not require the Vulkan SDK. It is a separate legacy engine line, not
+the RTX-enabled ReForged source with Vulkan surgically removed. The older
+source revision may need compiler or platform compatibility fixes on modern
+toolchains; this repository session has not run or verified these builds.
+
+On Linux, the pinned branch's documented CMake path can be used after
+installing its OpenGL and X11 development dependencies:
+
+```sh
+git clone https://github.com/fknfilewalker/Quake-III-Arena-R.git quake3-opengl
+git -C quake3-opengl checkout c95f4cecf7e0fec92e275d06645d5f2d14db286c
+git -C quake3-opengl submodule update --init --recursive
+cmake -S quake3-opengl -B quake3-opengl-build
+cmake --build quake3-opengl-build --config Release
+```
+
+The pinned upstream Linux CMake target also links legacy X11 libraries, so
+current Linux distributions may need additional compatibility packages.
