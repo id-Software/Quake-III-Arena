@@ -56,6 +56,7 @@ typedef struct {
 	menutext_s		teamArena;
 	menutext_s		mods;
 	menutext_s		exit;
+	menutext_s		agentControl;
 
 	qhandle_t		bannerModel;
 } mainmenu_t;
@@ -69,6 +70,163 @@ typedef struct {
 } errorMessage_t;
 
 static errorMessage_t s_errorMessage;
+
+/* Native in-game AI gateway configuration menu. */
+#define ID_AGENT_GATEWAY  201
+#define ID_AGENT_KEY      202
+#define ID_AGENT_PROVIDER 203
+#define ID_AGENT_SAVE     204
+#define ID_AGENT_BACK     205
+
+typedef struct {
+	menuframework_s menu;
+	menutext_s banner, gatewayLabel, keyLabel, providerLabel, save, back, note;
+	menufield_s gateway, key;
+	menulist_s provider;
+} agentControlMenu_t;
+
+static agentControlMenu_t s_agentControl;
+static const char *s_agentProviders[] = {
+	"OpenAI", "Anthropic", "Google Gemini", "Mistral", "Groq",
+	"xAI", "DeepSeek", "OpenRouter", "NVIDIA NIM", "Ollama", "LM Studio"
+};
+
+static void AgentControl_MenuEvent( void *ptr, int event ) {
+	if ( event != QM_ACTIVATED ) return;
+	switch ( ((menucommon_s *)ptr)->id ) {
+	case ID_AGENT_SAVE:
+		trap_Cvar_Set( "q3_agent_gateway", s_agentControl.gateway.field.buffer );
+		trap_Cvar_Set( "q3_agent_key", s_agentControl.key.field.buffer );
+		{
+			char provider[16];
+			Com_sprintf( provider, sizeof(provider), "%d", s_agentControl.provider.curvalue );
+			trap_Cvar_Set( "q3_agent_provider", provider );
+		}
+		s_agentControl.note.string = "SETTINGS SAVED. LIVE INPUT STILL USES THE GATEWAY BRIDGE.";
+		s_agentControl.note.color = color_yellow;
+		break;
+	case ID_AGENT_BACK:
+		UI_PopMenu();
+		break;
+	}
+}
+
+static void AgentControl_MenuInit( void ) {
+	char value[256];
+	memset( &s_agentControl, 0, sizeof(s_agentControl) );
+	s_agentControl.menu.wrapAround = qtrue;
+	s_agentControl.menu.fullscreen = qtrue;
+
+	s_agentControl.banner.generic.type = MTYPE_BTEXT;
+	s_agentControl.banner.generic.x = 320;
+	s_agentControl.banner.generic.y = 24;
+	s_agentControl.banner.string = "AI AGENT CONTROL";
+	s_agentControl.banner.color = color_white;
+	s_agentControl.banner.style = UI_CENTER;
+
+	s_agentControl.gatewayLabel.generic.type = MTYPE_PTEXT;
+	s_agentControl.gatewayLabel.generic.flags = QMF_RIGHT_JUSTIFY | QMF_INACTIVE;
+	s_agentControl.gatewayLabel.generic.x = 250;
+	s_agentControl.gatewayLabel.generic.y = 145;
+	s_agentControl.gatewayLabel.string = "GATEWAY";
+	s_agentControl.gatewayLabel.color = color_white;
+	s_agentControl.gatewayLabel.style = UI_RIGHT | UI_SMALLFONT;
+
+	s_agentControl.gateway.generic.type = MTYPE_FIELD;
+	s_agentControl.gateway.generic.id = ID_AGENT_GATEWAY;
+	s_agentControl.gateway.generic.x = 270;
+	s_agentControl.gateway.generic.y = 145;
+	s_agentControl.gateway.field.widthInChars = 40;
+	s_agentControl.gateway.field.maxchars = 127;
+	trap_Cvar_VariableStringBuffer( "q3_agent_gateway", value, sizeof(value) );
+	Q_strncpyz( s_agentControl.gateway.field.buffer,
+		value[0] ? value : "http://127.0.0.1:8765",
+		sizeof(s_agentControl.gateway.field.buffer) );
+	MenuField_Init( &s_agentControl.gateway );
+
+	s_agentControl.keyLabel.generic.type = MTYPE_PTEXT;
+	s_agentControl.keyLabel.generic.flags = QMF_RIGHT_JUSTIFY | QMF_INACTIVE;
+	s_agentControl.keyLabel.generic.x = 250;
+	s_agentControl.keyLabel.generic.y = 190;
+	s_agentControl.keyLabel.string = "AGENT KEY";
+	s_agentControl.keyLabel.color = color_white;
+	s_agentControl.keyLabel.style = UI_RIGHT | UI_SMALLFONT;
+
+	s_agentControl.key.generic.type = MTYPE_FIELD;
+	s_agentControl.key.generic.id = ID_AGENT_KEY;
+	s_agentControl.key.generic.x = 270;
+	s_agentControl.key.generic.y = 190;
+	s_agentControl.key.field.widthInChars = 40;
+	s_agentControl.key.field.maxchars = 127;
+	trap_Cvar_VariableStringBuffer( "q3_agent_key", value, sizeof(value) );
+	Q_strncpyz( s_agentControl.key.field.buffer, value,
+		sizeof(s_agentControl.key.field.buffer) );
+	MenuField_Init( &s_agentControl.key );
+
+	s_agentControl.providerLabel.generic.type = MTYPE_PTEXT;
+	s_agentControl.providerLabel.generic.flags = QMF_RIGHT_JUSTIFY | QMF_INACTIVE;
+	s_agentControl.providerLabel.generic.x = 250;
+	s_agentControl.providerLabel.generic.y = 235;
+	s_agentControl.providerLabel.string = "AI PROVIDER";
+	s_agentControl.providerLabel.color = color_white;
+	s_agentControl.providerLabel.style = UI_RIGHT | UI_SMALLFONT;
+
+	s_agentControl.provider.generic.type = MTYPE_SPINCONTROL;
+	s_agentControl.provider.generic.id = ID_AGENT_PROVIDER;
+	s_agentControl.provider.generic.x = 270;
+	s_agentControl.provider.generic.y = 235;
+	s_agentControl.provider.itemnames = s_agentProviders;
+	s_agentControl.provider.numitems = sizeof(s_agentProviders) / sizeof(s_agentProviders[0]);
+	s_agentControl.provider.curvalue = (int)trap_Cvar_VariableValue( "q3_agent_provider" );
+	if (s_agentControl.provider.curvalue < 0 ||
+		s_agentControl.provider.curvalue >= s_agentControl.provider.numitems)
+		s_agentControl.provider.curvalue = 0;
+
+	s_agentControl.note.generic.type = MTYPE_PTEXT;
+	s_agentControl.note.generic.flags = QMF_INACTIVE | QMF_CENTER_JUSTIFY;
+	s_agentControl.note.generic.x = 320;
+	s_agentControl.note.generic.y = 290;
+	s_agentControl.note.string = "Start the Agent Gateway before connecting.";
+	s_agentControl.note.color = color_yellow;
+	s_agentControl.note.style = UI_CENTER | UI_SMALLFONT;
+
+	s_agentControl.save.generic.type = MTYPE_PTEXT;
+	s_agentControl.save.generic.flags = QMF_CENTER_JUSTIFY | QMF_PULSEIFFOCUS;
+	s_agentControl.save.generic.id = ID_AGENT_SAVE;
+	s_agentControl.save.generic.callback = AgentControl_MenuEvent;
+	s_agentControl.save.generic.x = 320;
+	s_agentControl.save.generic.y = 350;
+	s_agentControl.save.string = "SAVE AI SETTINGS";
+	s_agentControl.save.color = color_red;
+	s_agentControl.save.style = UI_CENTER;
+
+	s_agentControl.back.generic.type = MTYPE_PTEXT;
+	s_agentControl.back.generic.flags = QMF_CENTER_JUSTIFY | QMF_PULSEIFFOCUS;
+	s_agentControl.back.generic.id = ID_AGENT_BACK;
+	s_agentControl.back.generic.callback = AgentControl_MenuEvent;
+	s_agentControl.back.generic.x = 320;
+	s_agentControl.back.generic.y = 384;
+	s_agentControl.back.string = "BACK";
+	s_agentControl.back.color = color_red;
+	s_agentControl.back.style = UI_CENTER;
+
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.banner );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.gatewayLabel );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.gateway );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.keyLabel );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.key );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.providerLabel );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.provider );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.note );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.save );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.back );
+}
+
+static void UI_AgentControlMenu( void ) {
+	AgentControl_MenuInit();
+	UI_PushMenu( &s_agentControl.menu );
+}
+
 
 /*
 =================
@@ -123,6 +281,10 @@ void Main_MenuEvent (void* ptr, int event) {
 	case ID_TEAMARENA:
 		trap_Cvar_Set( "fs_game", "missionpack");
 		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart;" );
+		break;
+
+	case ID_AGENT_CONTROL:
+		UI_AgentControlMenu();
 		break;
 
 	case ID_EXIT:
@@ -391,6 +553,17 @@ void UI_MainMenu( void ) {
 	s_main.mods.style					= style;
 
 	y += MAIN_MENU_VERTICAL_SPACING;
+	s_main.agentControl.generic.type		= MTYPE_PTEXT;
+	s_main.agentControl.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	s_main.agentControl.generic.x			= 320;
+	s_main.agentControl.generic.y			= y;
+	s_main.agentControl.generic.id			= ID_AGENT_CONTROL;
+	s_main.agentControl.generic.callback	= Main_MenuEvent;
+	s_main.agentControl.string				= "AI CONTROL";
+	s_main.agentControl.color				= color_red;
+	s_main.agentControl.style				= style;
+
+	y += MAIN_MENU_VERTICAL_SPACING;
 	s_main.exit.generic.type				= MTYPE_PTEXT;
 	s_main.exit.generic.flags				= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
 	s_main.exit.generic.x					= 320;
@@ -410,6 +583,7 @@ void UI_MainMenu( void ) {
 		Menu_AddItem( &s_main.menu,	&s_main.teamArena );
 	}
 	Menu_AddItem( &s_main.menu,	&s_main.mods );
+	Menu_AddItem( &s_main.menu,	&s_main.agentControl );
 	Menu_AddItem( &s_main.menu,	&s_main.exit );             
 
 	trap_Key_SetCatcher( KEYCATCH_UI );

@@ -130,3 +130,12 @@ Run the asset catalog unit tests from this directory:
 ```sh
 python3 -m unittest -v test_asset_catalog.py
 ```
+
+
+## Native in-game AI Control menu
+
+The Quake III main menu now has an **AI CONTROL** entry. The native menu lets you enter the Agent Gateway URL, provide the bearer key, choose a configured provider, and save those settings to engine cvars. The key is held in a runtime cvar and is not marked for config-file archiving.
+
+Default gateway: `http://127.0.0.1:8765`.
+
+This initial native UI change is the configuration front-end only. Live player movement is still executed by the existing desktop gateway input bridge; the engine-side HTTP bridge and in-menu prompt/action loop are not yet implemented. Saving these values does not itself connect the game to the gateway.
