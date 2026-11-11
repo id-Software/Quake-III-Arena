@@ -2282,8 +2282,8 @@ static void CL_AgentControl_f( void ) {
 	Cvar_VariableStringBuffer( "q3_agent_prompt", prompt, sizeof(prompt) );
 	provider = (int)Cvar_VariableValue( "q3_agent_provider" );
 	if ( provider < 0 || provider >= (int)(sizeof(providers) / sizeof(providers[0])) ) { Com_Printf("AI Control: invalid provider selection.\n"); return; }
-	if ( strlen(key) < 32 || strlen(key) > 127 ) { Com_Printf("AI Control: enter the gateway bearer key first.\n"); return; }
-	for ( i = 0; key[i]; i++ ) {
+	if ( strncmp(key, "q3a_", 4) != 0 || strlen(key) < 36 || strlen(key) > 127 ) { Com_Printf("AI Control: enter the generated gateway bearer key first.\n"); return; }
+	for ( i = 4; key[i]; i++ ) {
 		if ( !((key[i] >= '0' && key[i] <= '9') || (key[i] >= 'a' && key[i] <= 'f') || (key[i] >= 'A' && key[i] <= 'F')) ) { validKey = qfalse; break; }
 	}
 	if ( !validKey ) { Com_Printf("AI Control: key must be hexadecimal.\n"); return; }

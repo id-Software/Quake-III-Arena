@@ -138,7 +138,7 @@ The Quake III main menu now has an **AI CONTROL** entry. The native menu lets yo
 
 Default gateway: `http://127.0.0.1:8765`.
 
-This initial native UI change is the configuration front-end only. Live player movement is still executed by the existing desktop gateway input bridge; the engine-side HTTP bridge and in-menu prompt/action loop are not yet implemented. Saving these values does not itself connect the game to the gateway.
+The native menu can now submit a task to the local gateway and trigger one bounded player-control pulse through the desktop input bridge.
 
 
 ## Native in-game AI control bridge
