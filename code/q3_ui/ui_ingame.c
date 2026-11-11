@@ -115,6 +115,10 @@ void InGame_Event( void *ptr, int notification ) {
 		UI_SetupMenu();
 		break;
 
+	case ID_AI_CONTROL:
+		UI_AgentControlMenu();
+		break;
+
 	case ID_LEAVEARENA:
 		trap_Cmd_ExecuteText( EXEC_APPEND, "disconnect\n" );
 		break;
@@ -249,6 +253,18 @@ void InGame_MenuInit( void ) {
 	s_ingame.setup.color				= color_red;
 	s_ingame.setup.style				= UI_CENTER|UI_SMALLFONT;
 
+
+	y += INGAME_MENU_VERTICAL_SPACING;
+	s_ingame.agentControl.generic.type		= MTYPE_PTEXT;
+	s_ingame.agentControl.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	s_ingame.agentControl.generic.x			= 320;
+	s_ingame.agentControl.generic.y			= y;
+	s_ingame.agentControl.generic.id		= ID_AI_CONTROL;
+	s_ingame.agentControl.generic.callback	= InGame_Event;
+	s_ingame.agentControl.string			= "AI CONTROL";
+	s_ingame.agentControl.color				= color_red;
+	s_ingame.agentControl.style				= UI_CENTER|UI_SMALLFONT;
+
 	y += INGAME_MENU_VERTICAL_SPACING;
 	s_ingame.server.generic.type		= MTYPE_PTEXT;
 	s_ingame.server.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -313,6 +329,7 @@ void InGame_MenuInit( void ) {
 	Menu_AddItem( &s_ingame.menu, &s_ingame.removebots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.teamorders );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.setup );
+	Menu_AddItem( &s_ingame.menu, &s_ingame.agentControl );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.server );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.restart );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.resume );

@@ -264,7 +264,7 @@ static void AgentControl_MenuInit( void ) {
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.back );
 }
 
-static void UI_AgentControlMenu( void ) {
+void UI_AgentControlMenu( void ) {
 	AgentControl_MenuInit();
 	UI_PushMenu( &s_agentControl.menu );
 }
