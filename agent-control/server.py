@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Authenticated multi-provider AI gateway for Quake III agent tooling.
 
-Provider API keys stay on this server in environment variables. This gateway
-does not execute game commands or connect to the Quake III engine yet.
+Provider API keys stay on this server in environment variables. Authenticated loopback UDP requests carry bounded player telemetry and control-session commands; allowlisted input is executed by the local desktop input bridge.
 """
 import hmac
 import json
