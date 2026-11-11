@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only Quake III PK3 asset catalog. Never extracts or modifies game data."""
 import os
+import struct
 import zipfile
 from pathlib import Path, PurePosixPath
 
@@ -17,6 +18,31 @@ def _member_parts(name):
     if path.is_absolute() or any(part in ("", ".", "..") for part in path.parts):
         return None
     return tuple(part.lower() for part in path.parts)
+
+
+def _md3_tag_names(data):
+    """Read tag names from the first frame of an MD3 file."""
+    if len(data) < 108:
+        return []
+    try:
+        ident, version, _name, _flags, frames, tags, _surfaces, _skins, _frames_off, tags_off, _surfaces_off, end_off = struct.unpack_from(
+            "<4si64s9i", data, 0)
+    except struct.error:
+        return []
+    if ident != b"IDP3" or version != 15 or frames < 1 or tags < 0:
+        return []
+    if end_off > len(data) or tags_off < 108 or tags_off > end_off:
+        return []
+    names = []
+    for index in range(min(tags, 4096)):
+        offset = tags_off + index * 112
+        if offset + 64 > len(data) or offset + 112 > end_off:
+            break
+        raw_name = data[offset:offset + 64].split(b"\\0", 1)[0]
+        name = raw_name.decode("ascii", "replace").strip()
+        if name and name not in names:
+            names.append(name)
+    return names
 
 
 def _new_model(name):
@@ -60,6 +86,13 @@ def scan_archive(archive_path):
                     rel = "/".join(parts[3:])
                     if suffix in MODEL_EXTENSIONS:
                         model["md3"].append(rel)
+                        if suffix == ".md3" and entry.file_size <= 16 * 1024 * 1024:
+                            try:
+                                for tag_name in _md3_tag_names(archive.read(entry)):
+                                    if tag_name not in model["tags"]:
+                                        model["tags"].append(tag_name)
+                            except (OSError, RuntimeError, zipfile.BadZipFile):
+                                pass
                     elif suffix == ".skin":
                         model["skins"].append(rel)
                     elif parts[-1] == "animation.cfg":
