@@ -116,7 +116,7 @@ python server.py
 
 Copy your own `pak0.pk3` and any other game PK3 archives into that folder. Do not commit the archives to this repository. The scanner looks for up to 64 top-level PK3 files and indexes:
 
-- Player model directories under `models/players/`, including MD3/MDC files, skin files and animation.cfg presence.
+- Player model directories under `models/players/`, including MD3/MDC files, skin files, animation.cfg presence and MD3 attachment tag names.
 - Weapon model directories under `models/weapons2/`.
 - Map-object groups under `models/mapobjects/`.
 - BSP maps under `maps/`, plus shader and texture counts.
