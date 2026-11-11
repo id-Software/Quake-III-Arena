@@ -178,12 +178,13 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 compact = {
                     "players": [{"name": item["name"], "skins": item["skins"][:12],
+                                 "tags": item["tags"][:20],
                                  "has_animation_cfg": item["has_animation_cfg"],
                                  "md3_count": len(item["md3"])} for item in catalog["players"][:300]],
-                    "weapons": [{"name": item["name"], "md3_count": len(item["md3"])}
-                                for item in catalog["weapons"][:200]],
-                    "mapobjects": [{"name": item["name"], "md3_count": len(item["md3"])}
-                                   for item in catalog["mapobjects"][:300]],
+                    "weapons": [{"name": item["name"], "tags": item["tags"][:20],
+                                 "md3_count": len(item["md3"])} for item in catalog["weapons"][:200]],
+                    "mapobjects": [{"name": item["name"], "tags": item["tags"][:20],
+                                   "md3_count": len(item["md3"])} for item in catalog["mapobjects"][:300]],
                     "maps": catalog["maps"][:500],
                 }
                 plan_prompt = (
