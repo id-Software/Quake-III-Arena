@@ -56,7 +56,7 @@
       <textarea id="control-prompt" rows="3" maxlength="2000" placeholder="Move forward, strafe left, look toward the opponent, and jump."></textarea>
       <button id="control" class="primary" disabled>Execute AI movement <span>↗</span></button>
       <div id="control-result" class="result" role="status" aria-live="polite">Verify access and load a model before using live controls.</div>
-      <p class="notice">Each model action is a 40–250 ms input pulse. The bridge releases keys after every pulse; repeat control requests for continued movement. Windows and Linux X11 are supported. Wayland-only Linux sessions are not supported.</p>
+      <p class="notice">Each model action is a 40–250 ms input pulse. The bridge releases keys after every pulse; repeat control requests for continued movement. Windows, Linux X11/Wayland, and macOS are supported. Wayland requires an explicit opt-in because focus cannot be verified generically.</p>
     </section>
     <footer><span>AI AGENT EDITION</span><span>UNAUTHORIZED CLIENTS MUST BE REJECTED</span></footer>
   </main>
