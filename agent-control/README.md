@@ -139,3 +139,12 @@ The Quake III main menu now has an **AI CONTROL** entry. The native menu lets yo
 Default gateway: `http://127.0.0.1:8765`.
 
 This initial native UI change is the configuration front-end only. Live player movement is still executed by the existing desktop gateway input bridge; the engine-side HTTP bridge and in-menu prompt/action loop are not yet implemented. Saving these values does not itself connect the game to the gateway.
+
+
+## Native in-game AI control bridge
+
+The AI CONTROL menu includes a task field and START AI CONTROL. The client sends a bounded JSON datagram over Quake III's cross-platform UDP networking layer to 127.0.0.1:27992. Override the port with the client cvar q3_agent_udp_port and matching gateway environment variable Q3_AGENT_UDP_PORT.
+
+The gateway authenticates the hexadecimal agent key, asks the selected configured provider for one short allowlisted movement pulse, and executes it through the existing foreground-game input bridge. Its UDP listener binds to loopback only. Start server.py with the same AGENT_API_KEY entered in the menu.
+
+The model receives the written task, not screenshots or live game telemetry. Each menu submission produces one bounded pulse rather than continuous autonomous play; submit another task for another pulse. The game-side key is a runtime cvar and is not archived to the normal config file.

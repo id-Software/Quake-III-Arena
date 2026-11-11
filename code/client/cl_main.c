@@ -2270,6 +2270,43 @@ void CL_SetModel_f( void ) {
 CL_Init
 ====================
 */
+
+/* Local authenticated game-to-agent-gateway UDP request. */
+static void CL_AgentControl_f( void ) {
+	static const char *providers[] = { "openai", "anthropic", "google", "mistral", "groq", "xai", "deepseek", "openrouter", "nvidia", "ollama", "lmstudio" };
+	char key[128], prompt[768], escaped[1400], packet[1600], addressText[64];
+	netadr_t address;
+	int provider, i, out, port;
+	qboolean validKey = qtrue;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	Cvar_VariableStringBuffer( "q3_agent_prompt", prompt, sizeof(prompt) );
+	provider = (int)Cvar_VariableValue( "q3_agent_provider" );
+	if ( provider < 0 || provider >= (int)(sizeof(providers) / sizeof(providers[0])) ) { Com_Printf("AI Control: invalid provider selection.\n"); return; }
+	if ( strlen(key) < 32 || strlen(key) > 127 ) { Com_Printf("AI Control: enter the gateway bearer key first.\n"); return; }
+	for ( i = 0; key[i]; i++ ) {
+		if ( !((key[i] >= '0' && key[i] <= '9') || (key[i] >= 'a' && key[i] <= 'f') || (key[i] >= 'A' && key[i] <= 'F')) ) { validKey = qfalse; break; }
+	}
+	if ( !validKey ) { Com_Printf("AI Control: key must be hexadecimal.\n"); return; }
+	if ( !prompt[0] ) { Com_Printf("AI Control: enter a task first.\n"); return; }
+	out = 0;
+	for ( i = 0; prompt[i] && out < (int)sizeof(escaped)-8; i++ ) {
+		unsigned char ch = (unsigned char)prompt[i];
+		if ( ch == '"' || ch == '\\' ) { escaped[out++] = '\\'; escaped[out++] = ch; }
+		else if ( ch >= 32 && ch < 127 ) escaped[out++] = ch;
+		else if ( ch == '\n' || ch == '\r' || ch == '\t' ) escaped[out++] = ' ';
+	}
+	escaped[out] = '\0';
+	port = 27992;
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) { Com_Printf("AI Control: bad local gateway address.\n"); return; }
+	Com_sprintf(packet, sizeof(packet), "{\"type\":\"Q3AI1\",\"key\":\"%s\",\"provider\":\"%s\",\"prompt\":\"%s\"}", key, providers[provider], escaped);
+	if ( strlen(packet) >= 1400 ) { Com_Printf("AI Control: task too long.\n"); return; }
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+	Com_Printf("AI Control: request sent to local gateway (%s).\n", providers[provider]);
+}
+
 void CL_Init( void ) {
 	Com_Printf( "----- Client Initialization -----\n" );
 
@@ -2400,6 +2437,7 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("fs_openedList", CL_OpenedPK3List_f );
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	Cmd_AddCommand ("model", CL_SetModel_f );
+	Cmd_AddCommand ("agent_control", CL_AgentControl_f );
 	CL_InitRef();
 
 	SCR_Init ();
@@ -2455,6 +2493,7 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand ("serverstatus");
 	Cmd_RemoveCommand ("showip");
 	Cmd_RemoveCommand ("model");
+	Cmd_RemoveCommand ("agent_control");
 
 	Cvar_Set( "cl_running", "0" );
 

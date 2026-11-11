@@ -114,6 +114,67 @@ def call_provider(provider_id, model, prompt):
     raise RuntimeError("Unsupported provider adapter.")
 
 
+
+AGENT_UDP_HOST = "127.0.0.1"
+AGENT_UDP_PORT = int(os.environ.get("Q3_AGENT_UDP_PORT", "27992"))
+AGENT_UDP_PROVIDERS = set(PROVIDERS.keys())
+
+
+def parse_agent_datagram(datagram):
+    if len(datagram) > 1400:
+        raise ValueError("agent_datagram_too_large")
+    request = json.loads(datagram.decode("utf-8"))
+    if not isinstance(request, dict) or request.get("type") != "Q3AI1":
+        raise ValueError("invalid_agent_datagram")
+    key, provider, prompt = request.get("key"), request.get("provider"), request.get("prompt")
+    if not isinstance(key, str) or len(key) < 32 or len(key) > 127:
+        raise ValueError("invalid_agent_key")
+    if not isinstance(provider, str) or provider not in AGENT_UDP_PROVIDERS:
+        raise ValueError("unknown_provider")
+    if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 240:
+        raise ValueError("invalid_agent_prompt")
+    return key, provider, prompt.strip()
+
+
+def run_agent_datagram(datagram):
+    key, provider_id, prompt = parse_agent_datagram(datagram)
+    if not EXPECTED_KEY or not hmac.compare_digest(key, EXPECTED_KEY):
+        raise PermissionError("unauthorized")
+    config = PROVIDERS[provider_id]
+    if not provider_available(config):
+        raise RuntimeError("provider_not_configured")
+    model = provider_model(provider_id, config)
+    control_prompt = (
+        "Control a Quake III player with one short input pulse. Return ONLY JSON: "
+        "move (none|forward|back), strafe (none|left|right), jump (boolean), "
+        "crouch (boolean), attack (boolean), look_x/look_y (integers -100..100), "
+        "duration_ms (integer 40..250). No extra fields or markdown. Use 120ms. "
+        "No screenshots or game telemetry are available; do not claim to see the game. "
+        "User task: " + prompt
+    )
+    answer = call_provider(provider_id, model, control_prompt).strip()
+    if answer.startswith("\`\`\`"):
+        answer = re.sub(r"^\`\`\`(?:json)?\s*|\s*\`\`\`$", "", answer, flags=re.IGNORECASE)
+    result = execute_action(json.loads(answer))
+    return {"provider": provider_id, "model": model, "control": result}
+
+
+class AgentUDPHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        try:
+            result = run_agent_datagram(self.request[0])
+            print("AI control pulse executed (%s, %dms)" % (result["provider"], result["control"]["duration_ms"]))
+        except PermissionError:
+            print("Rejected unauthenticated local AI control request.")
+        except Exception as error:
+            print("AI control request failed: %s" % str(error)[:240])
+
+
+class AgentUDPServer(socketserver.ThreadingUDPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "Q3AgentGateway/0.2"
 
@@ -281,11 +342,15 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     if len(EXPECTED_KEY) < 32:
         raise SystemExit("Set AGENT_API_KEY to a random value of at least 32 characters.")
+    agent_server = AgentUDPServer((AGENT_UDP_HOST, AGENT_UDP_PORT), AgentUDPHandler)
+    threading.Thread(target=agent_server.serve_forever, name="q3-agent-udp", daemon=True).start()
     moderation_server = ModerationUDPServer(
         (MODERATION_UDP_HOST, MODERATION_UDP_PORT), ModerationUDPHandler)
     threading.Thread(target=moderation_server.serve_forever,
                      name="q3-moderation-udp", daemon=True).start()
     print("Quake III Agent Gateway listening on http://%s:%d" % (HOST, PORT))
+    print("Quake III AI control listening on UDP %s:%d" %
+          (AGENT_UDP_HOST, AGENT_UDP_PORT))
     print("Quake III moderation events listening on UDP %s:%d" %
           (MODERATION_UDP_HOST, MODERATION_UDP_PORT))
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

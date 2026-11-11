@@ -77,11 +77,12 @@ static errorMessage_t s_errorMessage;
 #define ID_AGENT_PROVIDER 203
 #define ID_AGENT_SAVE     204
 #define ID_AGENT_BACK     205
+#define ID_AGENT_RUN      206
 
 typedef struct {
 	menuframework_s menu;
-	menutext_s banner, gatewayLabel, keyLabel, providerLabel, save, back, note;
-	menufield_s gateway, key;
+	menutext_s banner, gatewayLabel, keyLabel, providerLabel, promptLabel, save, run, back, note;
+	menufield_s gateway, key, prompt;
 	menulist_s provider;
 } agentControlMenu_t;
 
@@ -102,8 +103,20 @@ static void AgentControl_MenuEvent( void *ptr, int event ) {
 			Com_sprintf( provider, sizeof(provider), "%d", s_agentControl.provider.curvalue );
 			trap_Cvar_Set( "q3_agent_provider", provider );
 		}
-		s_agentControl.note.string = "SETTINGS SAVED. LIVE INPUT STILL USES THE GATEWAY BRIDGE.";
+		s_agentControl.note.string = "SETTINGS SAVED. LOCAL GATEWAY READY.";
 		s_agentControl.note.color = color_yellow;
+		break;
+	case ID_AGENT_RUN:
+		trap_Cvar_Set( "q3_agent_gateway", s_agentControl.gateway.field.buffer );
+		trap_Cvar_Set( "q3_agent_key", s_agentControl.key.field.buffer );
+		{
+			char provider[16];
+			Com_sprintf( provider, sizeof(provider), "%d", s_agentControl.provider.curvalue );
+			trap_Cvar_Set( "q3_agent_provider", provider );
+		}
+		trap_Cvar_Set( "q3_agent_prompt", s_agentControl.prompt.field.buffer );
+		trap_Cmd_ExecuteText( EXEC_APPEND, "agent_control\n" );
+		UI_ForceMenuOff();
 		break;
 	case ID_AGENT_BACK:
 		UI_PopMenu();
@@ -185,17 +198,43 @@ static void AgentControl_MenuInit( void ) {
 	s_agentControl.note.generic.type = MTYPE_PTEXT;
 	s_agentControl.note.generic.flags = QMF_INACTIVE | QMF_CENTER_JUSTIFY;
 	s_agentControl.note.generic.x = 320;
-	s_agentControl.note.generic.y = 290;
-	s_agentControl.note.string = "Start the Agent Gateway before connecting.";
+	s_agentControl.note.generic.y = 325;
+	s_agentControl.note.string = "Gateway must run locally on UDP port 27992.";
 	s_agentControl.note.color = color_yellow;
 	s_agentControl.note.style = UI_CENTER | UI_SMALLFONT;
+
+
+	s_agentControl.promptLabel.generic.type = MTYPE_PTEXT;
+	s_agentControl.promptLabel.generic.flags = QMF_RIGHT_JUSTIFY | QMF_INACTIVE;
+	s_agentControl.promptLabel.generic.x = 250;
+	s_agentControl.promptLabel.generic.y = 280;
+	s_agentControl.promptLabel.string = "TASK";
+	s_agentControl.promptLabel.color = color_white;
+	s_agentControl.promptLabel.style = UI_RIGHT | UI_SMALLFONT;
+	s_agentControl.prompt.generic.type = MTYPE_FIELD;
+	s_agentControl.prompt.generic.x = 270;
+	s_agentControl.prompt.generic.y = 280;
+	s_agentControl.prompt.field.widthInChars = 40;
+	s_agentControl.prompt.field.maxchars = 240;
+	trap_Cvar_VariableStringBuffer( "q3_agent_prompt", value, sizeof(value) );
+	Q_strncpyz( s_agentControl.prompt.field.buffer, value, sizeof(s_agentControl.prompt.field.buffer) );
+	MenuField_Init( &s_agentControl.prompt );
+	s_agentControl.run.generic.type = MTYPE_PTEXT;
+	s_agentControl.run.generic.flags = QMF_CENTER_JUSTIFY | QMF_PULSEIFFOCUS;
+	s_agentControl.run.generic.id = ID_AGENT_RUN;
+	s_agentControl.run.generic.callback = AgentControl_MenuEvent;
+	s_agentControl.run.generic.x = 320;
+	s_agentControl.run.generic.y = 360;
+	s_agentControl.run.string = "START AI CONTROL";
+	s_agentControl.run.color = color_red;
+	s_agentControl.run.style = UI_CENTER;
 
 	s_agentControl.save.generic.type = MTYPE_PTEXT;
 	s_agentControl.save.generic.flags = QMF_CENTER_JUSTIFY | QMF_PULSEIFFOCUS;
 	s_agentControl.save.generic.id = ID_AGENT_SAVE;
 	s_agentControl.save.generic.callback = AgentControl_MenuEvent;
 	s_agentControl.save.generic.x = 320;
-	s_agentControl.save.generic.y = 350;
+	s_agentControl.save.generic.y = 397;
 	s_agentControl.save.string = "SAVE AI SETTINGS";
 	s_agentControl.save.color = color_red;
 	s_agentControl.save.style = UI_CENTER;
@@ -205,7 +244,7 @@ static void AgentControl_MenuInit( void ) {
 	s_agentControl.back.generic.id = ID_AGENT_BACK;
 	s_agentControl.back.generic.callback = AgentControl_MenuEvent;
 	s_agentControl.back.generic.x = 320;
-	s_agentControl.back.generic.y = 384;
+	s_agentControl.back.generic.y = 430;
 	s_agentControl.back.string = "BACK";
 	s_agentControl.back.color = color_red;
 	s_agentControl.back.style = UI_CENTER;
@@ -217,7 +256,10 @@ static void AgentControl_MenuInit( void ) {
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.key );
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.providerLabel );
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.provider );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.promptLabel );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.prompt );
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.note );
+	Menu_AddItem( &s_agentControl.menu, &s_agentControl.run );
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.save );
 	Menu_AddItem( &s_agentControl.menu, &s_agentControl.back );
 }
