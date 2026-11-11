@@ -10,6 +10,7 @@ import os
 import re
 
 from input_bridge import backend_name, execute_action
+from asset_catalog import build_catalog
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -128,13 +129,17 @@ class Handler(BaseHTTPRequestHandler):
                       for key, value in PROVIDERS.items()]
             self.send_json(200, {"providers": models})
             return
+        if self.path == "/api/assets":
+            catalog = build_catalog()
+            self.send_json(200, catalog)
+            return
         self.send_json(404, {"error": "not_found"})
 
     def do_POST(self):
         if not self.authorized():
             self.send_json(401, {"error": "unauthorized"})
             return
-        if self.path not in ("/api/ai/chat", "/api/ai/control", "/api/agent/control"):
+        if self.path not in ("/api/ai/chat", "/api/ai/control", "/api/agent/control", "/api/ai/asset-plan"):
             self.send_json(404, {"error": "not_found"})
             return
         try:
@@ -161,6 +166,54 @@ class Handler(BaseHTTPRequestHandler):
             model = body.get("model") or provider_model(provider_id, PROVIDERS[provider_id])
             if not isinstance(model, str) or not model.strip() or len(model) > 200:
                 self.send_json(400, {"error": "invalid_model"})
+                return
+            if self.path == "/api/ai/asset-plan":
+                if len(prompt) > 2000:
+                    self.send_json(400, {"error": "asset_request_too_long"})
+                    return
+                catalog = build_catalog()
+                if not catalog["archives"]:
+                    self.send_json(409, {"error": "no_pk3_archives_found",
+                                         "detail": "Place your legally obtained .pk3 files in Q3_ASSET_ROOT."})
+                    return
+                compact = {
+                    "players": [{"name": item["name"], "skins": item["skins"][:12],
+                                 "has_animation_cfg": item["has_animation_cfg"],
+                                 "md3_count": len(item["md3"])} for item in catalog["players"][:300]],
+                    "weapons": [{"name": item["name"], "md3_count": len(item["md3"])}
+                                for item in catalog["weapons"][:200]],
+                    "mapobjects": [{"name": item["name"], "md3_count": len(item["md3"])}
+                                   for item in catalog["mapobjects"][:300]],
+                    "maps": catalog["maps"][:500],
+                }
+                plan_prompt = (
+                    "Choose assets ONLY from this Quake III asset catalog. Return only one JSON object "
+                    "with keys player_model, weapon_model, map, mapobject, reason. Use exact catalog "
+                    "names; use null for any category with no suitable match. Keep reason under 400 chars. "
+                    "Do not invent assets. Catalog: " + json.dumps(compact, separators=(",", ":")) +
+                    "\nUser's desired setup: " + prompt.strip()
+                )
+                answer = call_provider(provider_id, model, plan_prompt)
+                cleaned = answer.strip()
+                if cleaned.startswith("```"):
+                    cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
+                plan = json.loads(cleaned)
+                allowed = {
+                    "player_model": {item["name"] for item in catalog["players"]},
+                    "weapon_model": {item["name"] for item in catalog["weapons"]},
+                    "map": set(catalog["maps"]),
+                    "mapobject": {item["name"] for item in catalog["mapobjects"]},
+                }
+                for field, choices in allowed.items():
+                    value = plan.get(field)
+                    if value is not None and value not in choices:
+                        self.send_json(502, {"error": "model_selected_unknown_asset",
+                                             "field": field, "value": value})
+                        return
+                result = {field: plan.get(field) for field in allowed}
+                result["reason"] = str(plan.get("reason", ""))[:400]
+                result["catalog_counts"] = catalog["counts"]
+                self.send_json(200, {"provider": provider_id, "model": model, "plan": result})
                 return
             if self.path == "/api/ai/control":
                 control_prompt = ("You are controlling a Quake III Arena player in a live multiplayer match. " +
