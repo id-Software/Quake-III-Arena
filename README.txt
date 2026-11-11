@@ -1,3 +1,17 @@
+SHA-256 BUILD CHECKSUMS
+-----------------------
+Every successful build now generates SHA256SUMS.txt in its build directory.
+Verify a Windows build with:
+
+  powershell -ExecutionPolicy Bypass -File .\scripts\sha256.ps1 -Mode Verify -Path .\build-rtx-x64
+
+Regenerate a manifest with -Mode Generate. On Linux, verify with:
+
+  cd build-opengl-linux && sha256sum --check SHA256SUMS.txt
+
+SHA-256 detects file changes but does not authenticate the publisher. Use
+signed manifests or signed releases when publisher authenticity is required.
+
 OPENGL-ONLY LEGACY BUILD
 ------------------------
 A separate OpenGL-only build is available without the Vulkan SDK. Windows:
