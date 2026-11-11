@@ -41,3 +41,18 @@ sha256sum --check SHA256SUMS.txt
 SHA-256 detects changes and corruption but does not authenticate who produced
 the files. Use a trusted detached signature or signed release for publisher
 authentication.
+
+## In-game multiplayer chat
+
+The game-side command `/sha256 <message>` calculates the SHA-256 digest of
+the supplied text and posts the 64-character hexadecimal result to global
+multiplayer chat. For example:
+
+```text
+/sha256 hello world
+```
+
+The command hashes the exact argument text assembled by the game command
+parser. It is a convenience for comparing message text; it does not sign,
+authenticate, or otherwise prove who sent a chat message. It is implemented
+in the legacy game module at `code/game/g_cmds.c`.
