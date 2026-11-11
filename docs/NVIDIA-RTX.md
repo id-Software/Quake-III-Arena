@@ -189,3 +189,13 @@ against an original 1.32c client/server has not yet been performed.
 ## OpenGL renderer option for legacy systems
 
 The pinned renderer already includes an OpenGL backend alongside Vulkan. Select it at runtime with `+set r_glDriver opengl32 +set r_rtx 0` on Windows or `+set r_glDriver libGL.so.1 +set r_rtx 0` on Linux. A PowerShell helper is available at `scripts/launch-opengl.ps1`; usage and limitations are documented in `docs/OPENGL-LEGACY-RENDERER.md`. This selects OpenGL at runtime but does not remove the upstream CMake requirement for the Vulkan SDK during compilation. It is not yet a Vulkan-independent build, and compatibility with genuinely old OpenGL hardware has not been tested.
+
+## Separate OpenGL-only legacy build
+
+For systems that cannot use the Vulkan SDK or the ReForged Vulkan renderer,
+this repository has a separate OpenGL-only build path based on the upstream
+`original` branch pinned at `c95f4cecf7e0fec92e275d06645d5f2d14db286c`.
+Use `scripts/build-rtx.ps1 -Renderer OpenGL -Architecture x86|amd64|all`.
+This builds a distinct legacy engine and does not change the RTX engine
+submodule or remove Vulkan from the ReForged source. See
+`docs/OPENGL-LEGACY-RENDERER.md` for full instructions and limitations.
