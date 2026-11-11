@@ -10,6 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $EngineDir = Join-Path $RepoRoot "engine"
+$ChecksumScript = Join-Path $PSScriptRoot "sha256.ps1"
 
 if ($Renderer -eq "OpenGL") {
     & (Join-Path $PSScriptRoot "build-opengl-legacy.ps1") -Generator $Generator -Architecture $Architecture -Configuration $Configuration
@@ -47,7 +48,9 @@ function Build-Target {
     cmake --build $BuildDir --config $Configuration
     if ($LASTEXITCODE -ne 0) { throw "Engine build failed for $Name." }
 
-    Write-Host "$Name build completed."
+    & $ChecksumScript -Mode Generate -Path $BuildDir
+    if ($LASTEXITCODE -ne 0) { throw "SHA-256 generation failed for $Name." }
+    Write-Host "$Name build completed; checksums: $BuildDir\SHA256SUMS.txt"
 }
 
 switch ($Architecture) {
