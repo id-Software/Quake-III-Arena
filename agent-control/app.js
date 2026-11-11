@@ -107,7 +107,7 @@
   });
 
   controlButton.addEventListener("click", async () => {
-    const base = byId("gateway").value.trim().replace(/\\/$/, "");
+    const base = byId("gateway").value.trim().replace(/\/$/, "");
     const key = byId("check-key").value;
     const prompt = byId("control-prompt").value.trim();
     if (!providerSelect.value || !prompt) {
@@ -142,7 +142,7 @@
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "Gateway rejected the credential (HTTP " + response.status + ").");
-      result.textContent = "Access verified. Gateway: " + (body.name || "Quake III Agent Gateway") + ". Game-engine integration: " + (body.engine_connected ? "connected" : "not connected yet") + ".";
+      result.textContent = "Access verified. Gateway: " + (body.name || "Quake III Agent Gateway") + ". Input backend: " + (body.input_backend || "unavailable") + ".";
       result.className = "result ok";
       await loadProviders(base, key);
     } catch (error) {
