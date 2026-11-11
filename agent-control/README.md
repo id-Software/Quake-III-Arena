@@ -109,7 +109,7 @@ python3 server.py
 On Windows PowerShell:
 
 ```powershell
-$env:Q3_ASSET_ROOT = "C:\\Games\\Quake III Arena\\baseq3"
+$env:Q3_ASSET_ROOT = "C:\Games\Quake III Arena\baseq3"
 $env:AGENT_API_KEY = "your-agent-key"
 python server.py
 ```
