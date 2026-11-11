@@ -14,3 +14,8 @@ select, textarea {
 textarea { resize: vertical; line-height: 1.5; }
 .ai-output { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; }
 button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* PK3 asset browser */
+.asset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
+.asset-grid>div{min-width:0}
+@media(max-width:560px){.asset-grid{grid-template-columns:1fr}}
