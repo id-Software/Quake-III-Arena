@@ -39,19 +39,16 @@ Pass additional game arguments after the executable path with
 - Turns off the RTX feature path.
 - Does not require an NVIDIA ray-tracing-capable GPU or the
   `VK_NV_ray_tracing` extension at runtime.
-- Does **not** currently make the upstream CMake build independent of Vulkan:
-  the pinned upstream CMake configuration still discovers and links Vulkan
-  as a required build dependency. The current Windows build script therefore
-  still requires the Vulkan SDK to compile the combined renderer.
+- The combined ReForged build still requires Vulkan at compile time. For a
+  genuinely Vulkan-free build, use the separate legacy OpenGL build target
+  described below.
 - Does not guarantee support for very old OpenGL implementations. Actual
   compatibility depends on the OpenGL version/extensions and driver expected
   by this renderer revision. No legacy-hardware test has been performed.
 
-This is an OpenGL runtime choice in the existing combined renderer, not yet a
-separate Vulkan-free legacy build target. A truly Vulkan-independent build
-needs a source/build-system change upstream that conditionally excludes the
-Vulkan renderer sources, headers, and link dependency. Do not treat the
-OpenGL launch option as proof that this has been completed.
+This runtime selector is for the combined ReForged engine. The separate
+Vulkan-free legacy build target below is the route for machines that cannot
+install or use Vulkan.
 
 ## Vulkan-free OpenGL build target
 
@@ -94,3 +91,17 @@ cmake --build quake3-opengl-build --config Release
 
 The pinned upstream Linux CMake target also links legacy X11 libraries, so
 current Linux distributions may need additional compatibility packages.
+
+## Linux build helper
+
+From the repository root, run:
+
+```sh
+sh ./scripts/build-opengl-legacy.sh
+```
+
+The helper uses the same pinned OpenGL-only upstream revision and initializes
+its submodules. The upstream Linux CMake target links legacy X11 libraries
+(including Xxf86dga and Xxf86vm); install the corresponding OpenGL/GLU and X11
+development packages first. This old Linux dependency set may require
+compatibility packages on modern distributions.
