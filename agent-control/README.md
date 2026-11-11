@@ -112,3 +112,16 @@ endpoint. The response includes the validated action and foreground window.
 
 Linux X11 setup: install `xdotool` from your distribution packages. Start the
 gateway in the same desktop session as Quake III. Keep the game window focused.
+
+
+## Input bridge validation tests
+
+Run the standard-library unit tests from this directory:
+
+```sh
+python3 -m unittest -v test_input_bridge.py
+```
+
+These tests cover action allowlisting, direction and duration bounds, mouse
+limits, button types, and the foreground-window guard. They do not replace a
+live Windows/Linux desktop test with a running Quake III multiplayer client.
