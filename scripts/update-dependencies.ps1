@@ -1,10 +1,11 @@
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $EngineDir = Join-Path $RepoRoot "engine"
+$LccDir = Join-Path $RepoRoot "qvmtools/q3lcc"
 
 # These revisions are intentionally pinned, not floating branch heads.
 # stb 2b2e64b retains stb_image_resize2.h, which this renderer includes.
-# stb's later 2026-10-19 commit moved that header out of the stb repository.
+# TinyJPEG is pinned to the renderer-compatible revision below.
 $Dependencies = @(
     @{
         Name = "stb"
@@ -22,8 +23,8 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "Git is required to update engine dependencies."
 }
 
-git -C $RepoRoot submodule update --init --recursive -- engine
-if ($LASTEXITCODE -ne 0) { throw "Failed to initialize the engine submodule tree." }
+git -C $RepoRoot submodule update --init --recursive -- engine qvmtools/q3lcc
+if ($LASTEXITCODE -ne 0) { throw "Failed to initialize engine or QVM compiler submodules." }
 
 foreach ($Dependency in $Dependencies) {
     if (-not (Test-Path (Join-Path $Dependency.Path ".git"))) {
@@ -48,4 +49,10 @@ foreach ($Dependency in $Dependencies) {
     Write-Host "$($Dependency.Name) is pinned at $Actual"
 }
 
+$ExpectedLcc = "814e3808346aba20f994fa83fca4f9d37124c67c"
+$ActualLcc = (git -C $LccDir rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $ActualLcc -ne $ExpectedLcc) {
+    throw "QVM LCC revision mismatch. Expected $ExpectedLcc, got $ActualLcc."
+}
+Write-Host "QVM LCC 4.2 is pinned at $ActualLcc"
 Write-Host "All pinned engine dependencies are ready."

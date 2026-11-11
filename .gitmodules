@@ -1,3 +1,6 @@
 [submodule "engine"]
 	path = engine
 	url = https://github.com/fknfilewalker/Quake-III-Arena-R.git
+[submodule "qvmtools/q3lcc"]
+	path = qvmtools/q3lcc
+	url = https://github.com/ec-/q3lcc.git
