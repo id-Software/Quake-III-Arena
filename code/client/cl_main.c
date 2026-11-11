@@ -2301,10 +2301,28 @@ static void CL_AgentControl_f( void ) {
 	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
 	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
 	if ( !NET_StringToAdr(addressText, &address) ) { Com_Printf("AI Control: bad local gateway address.\n"); return; }
-	Com_sprintf(packet, sizeof(packet), "{\"type\":\"Q3AI1\",\"key\":\"%s\",\"provider\":\"%s\",\"prompt\":\"%s\"}", key, providers[provider], escaped);
+	Com_sprintf(packet, sizeof(packet), "{\"type\":\"Q3AI1\",\"key\":\"%s\",\"provider\":\"%s\",\"prompt\":\"%s\",\"continuous\":true}", key, providers[provider], escaped);
 	if ( strlen(packet) >= 1400 ) { Com_Printf("AI Control: task too long.\n"); return; }
 	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
 	Com_Printf("AI Control: request sent to local gateway (%s).\n", providers[provider]);
+}
+
+
+static void CL_AgentStop_f( void ) {
+	char key[128], packet[160], addressText[64];
+	netadr_t address;
+	int port = 27992;
+	Cvar_VariableStringBuffer( "q3_agent_key", key, sizeof(key) );
+	if ( strncmp(key, "q3a_", 4) != 0 || strlen(key) < 36 || strlen(key) > 127 ) {
+		Com_Printf("AI Control: enter the generated gateway bearer key before stopping.\n"); return;
+	}
+	Cvar_VariableStringBuffer("q3_agent_udp_port", addressText, sizeof(addressText));
+	if ( addressText[0] ) { int p = atoi(addressText); if (p >= 1024 && p <= 65535) port = p; }
+	Com_sprintf(addressText, sizeof(addressText), "127.0.0.1:%d", port);
+	if ( !NET_StringToAdr(addressText, &address) ) return;
+	Com_sprintf(packet, sizeof(packet), "Q3STOP1|%s", key);
+	NET_SendPacket(NS_CLIENT, (int)strlen(packet), packet, address);
+	Com_Printf("AI Control: stop requested.\n");
 }
 
 void CL_Init( void ) {
@@ -2438,6 +2456,7 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	Cmd_AddCommand ("model", CL_SetModel_f );
 	Cmd_AddCommand ("agent_control", CL_AgentControl_f );
+	Cmd_AddCommand ("agent_stop", CL_AgentStop_f );
 	CL_InitRef();
 
 	SCR_Init ();
@@ -2494,6 +2513,7 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand ("showip");
 	Cmd_RemoveCommand ("model");
 	Cmd_RemoveCommand ("agent_control");
+	Cmd_RemoveCommand ("agent_stop");
 
 	Cvar_Set( "cl_running", "0" );
 

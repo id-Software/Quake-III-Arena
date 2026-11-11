@@ -148,3 +148,10 @@ The AI CONTROL menu includes a task field and START AI CONTROL. The client sends
 The gateway authenticates the hexadecimal agent key, asks the selected configured provider for one short allowlisted movement pulse, and executes it through the existing foreground-game input bridge. Its UDP listener binds to loopback only. Start server.py with the same AGENT_API_KEY entered in the menu.
 
 The model receives the written task, not screenshots or live game telemetry. Each menu submission produces one bounded pulse rather than continuous autonomous play; submit another task for another pulse. The game-side key is a runtime cvar and is not archived to the normal config file.
+
+
+## Continuous autonomous control
+
+Selecting START AI CONTROL starts a continuous gateway session. The gateway requests a fresh short action from the configured provider, executes that allowlisted pulse, waits briefly, and repeats. Reopening the in-game pause menu exposes STOP AI CONTROL; the same stop request is available from the game console with the command agent_stop. Starting a second session replaces the first. Sessions have a 30-minute hard limit and stop on provider, parsing, or input errors.
+
+The loop is task-driven only: the model receives no screenshots, player coordinates, health, map state, or opponent telemetry. It therefore cannot yet react intelligently to changing game situations. This is continuous repeated control, not vision-based autonomous gameplay.

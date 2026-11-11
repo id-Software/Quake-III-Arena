@@ -120,6 +120,66 @@ AGENT_UDP_PORT = int(os.environ.get("Q3_AGENT_UDP_PORT", "27992"))
 AGENT_UDP_PROVIDERS = set(PROVIDERS.keys())
 
 
+_agent_session_lock = threading.Lock()
+_agent_session = None
+_AGENT_MAX_SESSION_SECONDS = 30 * 60
+_AGENT_ACTION_INTERVAL_SECONDS = 0.35
+
+def _agent_session_worker(stop_event, provider_id, prompt):
+    config = PROVIDERS[provider_id]
+    model = provider_model(provider_id, config)
+    deadline = time.monotonic() + _AGENT_MAX_SESSION_SECONDS
+    step = 0
+    while not stop_event.is_set() and time.monotonic() < deadline:
+        step += 1
+        control_prompt = (
+            "Continuous Quake III control session. Choose the next short movement pulse "
+            "for this task. Return ONLY JSON: move (none|forward|back), "
+            "strafe (none|left|right), jump/crouch/attack (booleans), "
+            "look_x/look_y (integers -100..100), duration_ms (integer 40..250). "
+            "No extra keys or markdown. Release all keys after every pulse. "
+            "You receive NO screenshots, coordinates, health, map, opponents, or game "
+            "telemetry; do not claim to perceive the game. If task complete or unable "
+            "to progress safely, return neutral controls. Task: " + prompt
+        )
+        try:
+            answer = call_provider(provider_id, model, control_prompt).strip()
+            action = json.loads(answer)
+            if stop_event.is_set():
+                break
+            result = execute_action(action)
+            if step == 1 or step % 20 == 0:
+                print("AI continuous session: pulse %d (%dms)" % (step, result["duration_ms"]))
+        except Exception as error:
+            print("AI continuous session stopped after error: %s" % str(error)[:240])
+            break
+        stop_event.wait(_AGENT_ACTION_INTERVAL_SECONDS)
+    if time.monotonic() >= deadline:
+        print("AI continuous session reached its 30-minute safety limit.")
+    stop_event.set()
+
+def start_agent_session(provider_id, prompt):
+    global _agent_session
+    with _agent_session_lock:
+        if _agent_session is not None:
+            _agent_session["stop"].set()
+        stop_event = threading.Event()
+        worker = threading.Thread(target=_agent_session_worker,
+            args=(stop_event, provider_id, prompt),
+            name="q3-agent-control-session", daemon=True)
+        _agent_session = {"stop": stop_event, "thread": worker}
+        worker.start()
+
+def stop_agent_session():
+    with _agent_session_lock:
+        if _agent_session is None:
+            return False
+        _agent_session["stop"].set()
+        return True
+
+
+
+
 def parse_agent_datagram(datagram):
     if len(datagram) > 1400:
         raise ValueError("agent_datagram_too_large")
@@ -133,17 +193,25 @@ def parse_agent_datagram(datagram):
         raise ValueError("unknown_provider")
     if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 240:
         raise ValueError("invalid_agent_prompt")
-    return key, provider, prompt.strip()
+    if not key.startswith("q3a_") or any(ch not in "0123456789abcdefABCDEF" for ch in key[4:]):
+        raise ValueError("invalid_agent_key_format")
+    continuous = request.get("continuous", False)
+    if not isinstance(continuous, bool):
+        raise ValueError("continuous_must_be_boolean")
+    return key, provider, prompt.strip(), continuous
 
 
 def run_agent_datagram(datagram):
-    key, provider_id, prompt = parse_agent_datagram(datagram)
+    key, provider_id, prompt, continuous = parse_agent_datagram(datagram)
     if not EXPECTED_KEY or not hmac.compare_digest(key, EXPECTED_KEY):
         raise PermissionError("unauthorized")
     config = PROVIDERS[provider_id]
     if not provider_available(config):
         raise RuntimeError("provider_not_configured")
     model = provider_model(provider_id, config)
+    if continuous:
+        start_agent_session(provider_id, prompt)
+        return {"provider": provider_id, "session": "started", "continuous": True}
     control_prompt = (
         "Control a Quake III player with one short input pulse. Return ONLY JSON: "
         "move (none|forward|back), strafe (none|left|right), jump (boolean), "
@@ -162,8 +230,18 @@ def run_agent_datagram(datagram):
 class AgentUDPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
+            if self.request[0].startswith(b"Q3STOP1|"):
+                key = self.request[0][8:].decode("ascii")
+                if not EXPECTED_KEY or not hmac.compare_digest(key, EXPECTED_KEY):
+                    raise PermissionError("unauthorized")
+                stopped = stop_agent_session()
+                print("AI continuous session stop requested." if stopped else "No AI session was running.")
+                return
             result = run_agent_datagram(self.request[0])
-            print("AI control pulse executed (%s, %dms)" % (result["provider"], result["control"]["duration_ms"]))
+            if result.get("continuous"):
+                print("AI continuous session started (%s)." % result["provider"])
+            else:
+                print("AI control pulse executed (%s, %dms)" % (result["provider"], result["control"]["duration_ms"]))
         except PermissionError:
             print("Rejected unauthenticated local AI control request.")
         except Exception as error:
