@@ -184,3 +184,8 @@ The engine's existing protocol-68 constant was verified in the pinned
 upstream source at `f85ead64d13be64196aa665325e086337bd16caf`. No protocol
 number was changed by this repository update. Multiplayer runtime testing
 against an original 1.32c client/server has not yet been performed.
+
+
+## OpenGL renderer option for legacy systems
+
+The pinned renderer already includes an OpenGL backend alongside Vulkan. Select it at runtime with `+set r_glDriver opengl32 +set r_rtx 0` on Windows or `+set r_glDriver libGL.so.1 +set r_rtx 0` on Linux. A PowerShell helper is available at `scripts/launch-opengl.ps1`; usage and limitations are documented in `docs/OPENGL-LEGACY-RENDERER.md`. This selects OpenGL at runtime but does not remove the upstream CMake requirement for the Vulkan SDK during compilation. It is not yet a Vulkan-independent build, and compatibility with genuinely old OpenGL hardware has not been tested.
