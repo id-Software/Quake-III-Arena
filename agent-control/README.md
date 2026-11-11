@@ -30,9 +30,17 @@ Then open `http://127.0.0.1:8000` from the `agent-control` directory. Set the ga
 
 For a remote deployment, use HTTPS, keep the key in a protected environment variable or secret manager, restrict network access, and do not expose the development server directly to the public internet. The sample server binds to loopback by default.
 
-## Integration status
+## Live multiplayer input bridge
 
-The gateway currently authenticates an agent and reports whether an engine connection exists; it does **not** yet control a running Quake III process. The next engineering step is a narrow, allowlisted command bridge inside the engine/server, with explicit validation and no arbitrary console-command execution. The original player client remains available for ordinary human play; agent authentication is a separate interface.
+The gateway can now send short, allowlisted desktop input pulses to the foreground Quake III Arena client. It does not patch the engine or inject code into the process: it uses the same keyboard/mouse input path as a human player, so the normal client user-command and multiplayer network path remains in use.
+
+Supported actions: forward/back, left/right strafe, jump, crouch, attack, and relative mouse look. Each pulse is limited to 40–250 ms and all held keys/buttons are released afterward. The foreground window title must identify Quake III Arena. The bridge never runs console commands or arbitrary shell commands.
+
+- Windows: uses the native Windows keyboard/mouse input API.
+- Linux X11: requires `xdotool` and a Quake III window with focus.
+- Linux Wayland-only sessions and macOS are not supported by this input backend yet.
+
+The `/api/ai/control` endpoint asks the selected model for one JSON control pulse, validates the schema, and sends it to the focused game. `/api/agent/control` accepts a precomputed action object from an authenticated external agent. Both require the agent bearer key. Repeated requests are needed for continuous movement; the bridge intentionally does not leave keys held between requests. The game window must be focused, and the user should only use this against servers where automated play is permitted.
 
 ## Key handling
 
@@ -85,3 +93,22 @@ For local inference, start Ollama or LM Studio on the same host as the gateway. 
 The gateway endpoints GET /api/models and POST /api/ai/chat both require the agent bearer key. Prompts are limited to 12,000 characters and request bodies to 64 KiB. Provider calls have a 90-second timeout.
 
 **Scope:** This adds model-provider connectivity for agent tooling. It does not yet translate model output into Quake III game actions or connect to the engine. Review model output before using it to drive any future game-control bridge.
+
+
+## Live control API example
+
+Send a short forward-and-jump pulse to the focused game window:
+
+```sh
+curl -X POST http://127.0.0.1:8765/api/agent/control \
+  -H "Authorization: Bearer $AGENT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"action":{"move":"forward","jump":true,"duration_ms":150}}'
+```
+
+Ask the selected AI provider to choose and execute a pulse through
+`POST /api/ai/control` using the same provider/model/prompt fields as the chat
+endpoint. The response includes the validated action and foreground window.
+
+Linux X11 setup: install `xdotool` from your distribution packages. Start the
+gateway in the same desktop session as Quake III. Keep the game window focused.
