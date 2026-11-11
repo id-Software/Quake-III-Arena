@@ -265,3 +265,17 @@ This checks device/driver capability only. The engine's existing Vulkan ray
 tracing implementation still uses NVIDIA-specific VK_NV interfaces; the KHR
 renderer port required for AMD in-game ray tracing is not complete. See
  docs/AMD-RAY-TRACING.md and tools/amd-vulkan-rt-probe/README.md.
+
+FULL QUAKE III ARENA GAME-DATA SETUP
+------------------------------------
+The repository does not redistribute commercial game data. For a complete
+base-game install, provide legally obtained baseq3/pak0.pk3 through pak8.pk3
+and stage them with:
+
+  sh ./scripts/install-q3a-data.sh "/path/to/source-data" "/path/to/Quake3"
+
+On Windows, use scripts/install-q3a-data.ps1 with -SourceDataRoot and
+-GameInstallRoot. Both scripts validate the PK3 archives before copying;
+optional missionpack PK3 files are staged when supplied. See
+ docs/QUAKE3A-GAME-DATA.md. The uploaded pak1(1).pk3 in this conversation
+contains only seven CFG files and is not an official game-data archive.
