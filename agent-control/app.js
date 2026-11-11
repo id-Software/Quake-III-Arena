@@ -37,6 +37,8 @@
   const modelField = byId("model");
   const askButton = byId("ask");
   const aiResult = byId("ai-result");
+  const controlButton = byId("control");
+  const controlResult = byId("control-result");
 
   async function loadProviders(base, key) {
     const response = await fetch(base + "/api/models", {
@@ -58,10 +60,12 @@
       providerSelect.value = firstReady.id;
       modelField.value = firstReady.model;
       askButton.disabled = false;
+      controlButton.disabled = false;
       aiResult.textContent = "Providers loaded. Select a configured provider and send a prompt.";
       aiResult.className = "result ok";
     } else {
       askButton.disabled = true;
+      controlButton.disabled = true;
       aiResult.textContent = "No providers configured. Add one or more provider API keys to the gateway environment.";
       aiResult.className = "result bad";
     }
@@ -100,6 +104,24 @@
     } finally {
       askButton.disabled = false;
     }
+  });
+
+  controlButton.addEventListener("click", async () => {
+    const base = byId("gateway").value.trim().replace(/\\/$/, "");
+    const key = byId("check-key").value;
+    const prompt = byId("control-prompt").value.trim();
+    if (!providerSelect.value || !prompt) {
+      controlResult.textContent = "Choose a configured model and describe the movement."; controlResult.className = "result bad"; return;
+    }
+    controlButton.disabled = true; controlResult.textContent = "Model is planning a short movement pulse…"; controlResult.className = "result";
+    try {
+      const response = await fetch(base + "/api/ai/control", { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerSelect.value, model: modelField.value.trim(), prompt }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.detail || body.error || "Control request failed.");
+      controlResult.textContent = "Input sent to " + body.control.window + ". Action: " + JSON.stringify(body.control.action);
+      controlResult.className = "result ok";
+    } catch (error) { controlResult.textContent = "Control failed: " + error.message; controlResult.className = "result bad"; }
+    finally { controlButton.disabled = false; }
   });
 
   checkButton.addEventListener("click", async () => {
