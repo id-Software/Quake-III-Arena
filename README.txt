@@ -242,3 +242,11 @@ that the engine source still declares protocol 68. It does not download or
 redistribute commercial game data. The original 1.32c executable installer is
 not bundled, and staging PK3 files does not independently certify that the
 source includes every 1.32c executable security fix. See docs/QUAKE3-132-MULTIPLAYER.md.
+
+
+AMD GPU RAY TRACING
+-------------------
+An optional Vulkan/KHR hardware ray-tracing backend is the target for AMD
+RDNA 2+ GPUs. The current OpenGL renderer remains the fallback. Hardware ray
+tracing is not implemented in this revision; see docs/AMD-RAY-TRACING.md for
+the backend design, required Vulkan features, and acceptance criteria.
