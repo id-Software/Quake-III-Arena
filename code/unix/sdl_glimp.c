@@ -10,7 +10,7 @@ over from linux_glimp.c.
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "../renderer/tr_local.h"
 #include "../client/client.h"
@@ -42,7 +42,9 @@ static char s_extensions[65536];
 static void *SDLGetProc( const char *name )
 {
 	void *p = SDL_GL_GetProcAddress( name );
+#ifndef _WIN32
 	if ( !p ) p = dlsym( RTLD_DEFAULT, name );
+#endif
 	return p;
 }
 
@@ -432,7 +434,12 @@ static int GLW_SetMode( int mode, qboolean fullscreen )
 		SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, tdepthbits );
 		SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, tstencilbits );
 		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+#ifndef __APPLE__
+		// Q3 uses the fixed-function pipeline. Mesa/Windows need the compatibility
+		// profile asked for; macOS only offers fixed-function in its default
+		// (legacy 2.1) context, and refuses a "compatibility" request.
 		SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY );
+#endif
 
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 		if ( fullscreen ) flags |= SDL_WINDOW_FULLSCREEN;
@@ -606,3 +613,9 @@ void IN_Frame( void )
 }
 
 void IN_Activate( void ) {}
+
+#ifndef __linux__
+// the joystick code (linux_joystick.c) uses the Linux joystick API; no joystick elsewhere yet
+void IN_StartupJoystick( void ) {}
+void IN_JoyMove( void ) {}
+#endif

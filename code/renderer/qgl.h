@@ -30,6 +30,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <GL/gl.h>
 
+#elif defined( USE_SDL )
+
+// SDL2 platform layer (Linux, macOS, BSD, ...): GL header from SDL, no GLX/WGL.
+// Extension typedefs are declared below by this file, not by SDL.
+#define NO_SDL_GLEXT
+#include <SDL_opengl.h>
+
 #elif defined( _WIN32 )
 
 #pragma warning (disable: 4201)
@@ -157,7 +164,7 @@ extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 //===========================================================================
 
 // non-windows systems will just redefine qgl* to gl*
-#if !defined( _WIN32 ) && !defined(MACOS_X) && !defined( __linux__ ) && !defined( __FreeBSD__ ) // rb010123
+#if !defined( USE_SDL ) && !defined( _WIN32 ) && !defined(MACOS_X) && !defined( __linux__ ) && !defined( __FreeBSD__ ) // rb010123
 
 #include "qgl_linked.h"
 
@@ -544,7 +551,7 @@ extern BOOL ( WINAPI * qwglSwapIntervalEXT)( int interval );
 
 #endif	// _WIN32
 
-#if ( (defined __linux__ )  || (defined __FreeBSD__ ) ) // rb010123
+#if !defined( USE_SDL ) && ( (defined __linux__ )  || (defined __FreeBSD__ ) ) // rb010123
 
 //FX Mesa Functions
 // bk001129 - from cvs1.17 (mkv)

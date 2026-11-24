@@ -351,6 +351,8 @@ void Sys_Init(void)
   Cvar_Set( "arch", "linux i386" );
 #elif defined __x86_64__
   Cvar_Set( "arch", "linux x86_64" );
+#elif defined __aarch64__
+  Cvar_Set( "arch", "linux arm64" );
 #elif defined __alpha__
   Cvar_Set( "arch", "linux alpha" );
 #elif defined __sparc__
@@ -367,6 +369,14 @@ void Sys_Init(void)
 
 #else
   Cvar_Set( "arch", "linux unknown" );
+#endif
+#elif defined __APPLE__
+#if defined __x86_64__
+  Cvar_Set( "arch", "darwin x86_64" );
+#elif defined __aarch64__ || defined __arm64__
+  Cvar_Set( "arch", "darwin arm64" );
+#else
+  Cvar_Set( "arch", "darwin unknown" );
 #endif
 #elif defined __sun__
 #if defined __i386__
@@ -728,6 +738,8 @@ void *Sys_LoadDll( const char *name, char *fqpath ,
   snprintf (fname, sizeof(fname), "%si386.so", name);
 #elif defined __x86_64__
   snprintf (fname, sizeof(fname), "%sx86_64.so", name);
+#elif defined __aarch64__ || defined __arm64__
+  snprintf (fname, sizeof(fname), "%sarm64.so", name);
 #elif defined __powerpc__   //rcg010207 - PPC support.
   snprintf (fname, sizeof(fname), "%sppc.so", name);
 #elif defined __axp__

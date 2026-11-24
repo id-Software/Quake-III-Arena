@@ -1,0 +1,162 @@
+#
+# Quake III Arena -- portable SDL2 build (Linux, macOS, FreeBSD; x86_64, arm64, ...)
+#
+# This is a self-contained alternative to the legacy Makefile in this directory
+# (which only knows i386 and the old X11/OSS backends). It builds a C-only engine
+# (no JIT, no assembly) with the SDL2 platform layer; the game, cgame and ui run
+# as QVMs in the interpreter.
+#
+#   make -f Makefile.sdl                     release client + dedicated server
+#   make -f Makefile.sdl CONFIG=debug        debug build
+#   make -f Makefile.sdl CC=clang            another compiler
+#   make -f Makefile.sdl client | ded
+#
+# Output: ../../build/<os>-<arch>-<config>/{quake3,q3ded}   (delete that directory to clean)
+# Requires: SDL2 development files and either pkg-config or sdl2-config.
+#
+
+OS_NAME   := $(shell uname -s | tr 'A-Z' 'a-z')
+UNAME_M   := $(shell uname -m)
+
+# normalise the architecture name
+ifneq (,$(filter x86_64 amd64,$(UNAME_M)))
+  ARCH := x86_64
+else ifneq (,$(filter arm64 aarch64,$(UNAME_M)))
+  ARCH := arm64
+else ifneq (,$(filter i386 i486 i586 i686,$(UNAME_M)))
+  ARCH := i386
+else
+  ARCH := $(UNAME_M)
+endif
+
+CONFIG ?= release
+BUILD  ?= ../../build/$(OS_NAME)-$(ARCH)-$(CONFIG)
+
+# ---- directories ---------------------------------------------------------------
+TOP    := ..
+CDIR   := $(TOP)/client
+SDIR   := $(TOP)/server
+CMDIR  := $(TOP)/qcommon
+GDIR   := $(TOP)/game
+BLIBDIR:= $(TOP)/botlib
+JPDIR  := $(TOP)/jpeg-6
+RDIR   := $(TOP)/renderer
+NDIR   := $(TOP)/null
+UDIR   := $(TOP)/unix
+
+# ---- SDL2 -------------------------------------------------------------------------
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2 2>/dev/null || sdl2-config --cflags 2>/dev/null)
+SDL_LIBS   := $(shell pkg-config --libs sdl2 2>/dev/null || sdl2-config --libs 2>/dev/null)
+
+# ---- compiler flags ----------------------------------------------------------------
+# -fsigned-char: the code assumes signed char (arm defaults to unsigned)
+# -std=gnu89 -fcommon: this is C89-era code (current compilers default to C17/-fno-common)
+# -w: the code base is not warning-clean under modern compilers
+BASE_CFLAGS := -pipe -fsigned-char -std=gnu89 -fcommon -fno-strict-aliasing -w -MMD -MP -DC_ONLY
+ifeq ($(CONFIG),debug)
+  OPT_CFLAGS := -g -O1
+else
+  OPT_CFLAGS := -DNDEBUG -O2 -fomit-frame-pointer -ffast-math
+endif
+CLIENT_CFLAGS := $(BASE_CFLAGS) $(OPT_CFLAGS) -DUSE_SDL $(SDL_CFLAGS)
+DED_CFLAGS    := $(BASE_CFLAGS) $(OPT_CFLAGS) -DDEDICATED
+
+ifeq ($(OS_NAME),darwin)
+  LIBS := -lm
+else
+  LIBS := -ldl -lm
+endif
+
+# ---- sources -----------------------------------------------------------------------
+SRC_CLIENT := \
+	cl_cgame cl_cin cl_console cl_input cl_keys cl_main \
+	cl_net_chan cl_parse cl_scrn cl_ui snd_adpcm snd_dma \
+	snd_mem snd_mix snd_wavelet
+
+SRC_SERVER := \
+	sv_bot sv_ccmds sv_client sv_game sv_init sv_main \
+	sv_net_chan sv_snapshot sv_world
+
+SRC_QCOMMON := \
+	cm_load cm_patch cm_polylib cm_test cm_trace cmd \
+	common cvar files md4 msg net_chan \
+	huffman unzip vm vm_interpreted
+
+SRC_GAME := \
+	q_math q_shared
+
+SRC_BOTLIB := \
+	be_aas_bspq3 be_aas_cluster be_aas_debug be_aas_entity be_aas_file be_aas_main \
+	be_aas_move be_aas_optimize be_aas_reach be_aas_route be_aas_routealt be_aas_sample \
+	be_ai_char be_ai_chat be_ai_gen be_ai_goal be_ai_move be_ai_weap \
+	be_ai_weight be_ea be_interface l_crc l_libvar l_log \
+	l_memory l_precomp l_script l_struct
+
+SRC_JPEG := \
+	jcapimin jchuff jcinit jccoefct jccolor jfdctflt \
+	jcdctmgr jcphuff jcmainct jcmarker jcmaster jcomapi \
+	jcparam jcprepct jcsample jdapimin jdapistd jdatasrc \
+	jdcoefct jdcolor jddctmgr jdhuff jdinput jdmainct \
+	jdmarker jdmaster jdpostct jdsample jdtrans jerror \
+	jidctflt jmemmgr jmemnobs jutils
+
+SRC_RENDERER := \
+	tr_animation tr_backend tr_bsp tr_cmds tr_curve tr_flares \
+	tr_font tr_image tr_init tr_light tr_main tr_marks \
+	tr_mesh tr_model tr_noise tr_scene tr_shade tr_shade_calc \
+	tr_shader tr_shadows tr_sky tr_surface tr_world
+
+SRC_NULL := \
+	null_client null_input null_snddma
+
+# platform layer
+UNIX_COMMON := unix_main unix_net unix_shared linux_common linux_signals
+SDL_LAYER   := linux_qgl sdl_glimp sdl_snd
+ifeq ($(OS_NAME),linux)
+  SDL_LAYER += linux_joystick
+endif
+
+# ---- object lists ------------------------------------------------------------------
+CL_OBJ  := $(addprefix $(BUILD)/client/,$(addsuffix .o,$(SRC_CLIENT) $(SRC_SERVER) $(SRC_QCOMMON) \
+             $(SRC_GAME) $(SRC_BOTLIB) $(SRC_JPEG) $(SRC_RENDERER) $(UNIX_COMMON) $(SDL_LAYER)))
+DED_OBJ := $(addprefix $(BUILD)/ded/,$(addsuffix .o,$(SRC_SERVER) $(SRC_QCOMMON) $(SRC_GAME) \
+             $(SRC_BOTLIB) $(SRC_NULL) $(UNIX_COMMON)))
+
+all: client ded
+client: $(BUILD)/quake3
+ded: $(BUILD)/q3ded
+
+$(BUILD)/quake3: $(CL_OBJ)
+	$(CC) -o $@ $(CL_OBJ) $(SDL_LIBS) $(LIBS)
+
+$(BUILD)/q3ded: $(DED_OBJ)
+	$(CC) -o $@ $(DED_OBJ) $(LIBS)
+
+# ---- compile rules: one static pattern rule per source directory -----------------
+# $(call RULES,<object dir>,<source dir>,<flags>,<basenames>)
+define RULES
+$(addprefix $(BUILD)/$(1)/,$(addsuffix .o,$(4))): $(BUILD)/$(1)/%.o: $(2)/%.c
+	@mkdir -p $$(@D)
+	$(CC) $(3) -c -o $$@ $$<
+endef
+
+$(eval $(call RULES,client,$(CDIR),$(CLIENT_CFLAGS),$(SRC_CLIENT)))
+$(eval $(call RULES,client,$(SDIR),$(CLIENT_CFLAGS),$(SRC_SERVER)))
+$(eval $(call RULES,client,$(CMDIR),$(CLIENT_CFLAGS),$(SRC_QCOMMON)))
+$(eval $(call RULES,client,$(GDIR),$(CLIENT_CFLAGS),$(SRC_GAME)))
+$(eval $(call RULES,client,$(BLIBDIR),$(CLIENT_CFLAGS) -DBOTLIB,$(SRC_BOTLIB)))
+$(eval $(call RULES,client,$(JPDIR),$(CLIENT_CFLAGS),$(SRC_JPEG)))
+$(eval $(call RULES,client,$(RDIR),$(CLIENT_CFLAGS),$(SRC_RENDERER)))
+$(eval $(call RULES,client,$(UDIR),$(CLIENT_CFLAGS),$(UNIX_COMMON) $(SDL_LAYER)))
+
+$(eval $(call RULES,ded,$(SDIR),$(DED_CFLAGS),$(SRC_SERVER)))
+$(eval $(call RULES,ded,$(CMDIR),$(DED_CFLAGS),$(SRC_QCOMMON)))
+$(eval $(call RULES,ded,$(GDIR),$(DED_CFLAGS),$(SRC_GAME)))
+$(eval $(call RULES,ded,$(BLIBDIR),$(BASE_CFLAGS) $(OPT_CFLAGS) -DBOTLIB,$(SRC_BOTLIB)))
+$(eval $(call RULES,ded,$(NDIR),$(DED_CFLAGS),$(SRC_NULL)))
+$(eval $(call RULES,ded,$(UDIR),$(DED_CFLAGS),$(UNIX_COMMON)))
+
+# header dependencies generated by -MMD
+-include $(CL_OBJ:.o=.d) $(DED_OBJ:.o=.d)
+
+.PHONY: all client ded

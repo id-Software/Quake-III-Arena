@@ -30,16 +30,42 @@ Not tested or not available:
   the release; fonts are prebuilt in the paks).
 - Internet play and the original master server are not tested.
 
+## Platforms
+
+| Platform | Status |
+|---|---|
+| Linux x86_64 | built and played (gcc and clang) |
+| Linux arm64 | should work (same code path); built by CI only |
+| macOS (Apple Silicon / Intel) | prepared, **not yet run**: built by CI only |
+| FreeBSD, others with SDL2 | untested |
+| Windows | not supported yet |
+
+The engine is C-only (no JIT, no assembly) and 64-bit clean, so there is
+nothing CPU-specific. Everything platform-dependent lives in the SDL2 layer
+(`code/unix/sdl_glimp.c`, `sdl_snd.c`).
+
 ## Building
 
-Requirements: gcc, make, `pkg-config`, SDL2 development files (`SDL2-devel` on
-Fedora, `libsdl2-dev` on Debian/Ubuntu), and python3 for the QVM packaging
-script. The old Cons build is not used.
+Requirements: a C compiler (gcc or clang), make, SDL2 development files
+(`SDL2-devel` on Fedora, `libsdl2-dev` on Debian/Ubuntu, `brew install sdl2`
+on macOS), and python3 for the QVM script.
 
 ```sh
 cd code/unix
-make release          # builds releasex86_64/linuxquake3 and linuxq3ded
+make -f Makefile.sdl -j8                 # client + dedicated server
+make -f Makefile.sdl CC=clang -j8        # another compiler
+make -f Makefile.sdl CONFIG=debug -j8    # debug build
 ```
+
+Output goes to `build/<os>-<arch>-<config>/` (`quake3` and `q3ded`). Delete
+that directory to clean. Header dependencies are tracked, so rebuilds are
+correct.
+
+`Makefile.sdl` is the portable build. The original `Makefile` (i386 only,
+X11/OSS) is kept as it was, apart from an x86_64 branch.
+
+The GitHub Actions workflow (`.github/workflows/build.yml`) builds on Linux
+x86_64, Linux arm64 and macOS arm64, and runs the QVM build.
 
 ## Game data
 
@@ -75,14 +101,22 @@ cd code/unix
 ./run_q3.sh +set fs_game missionpack          # Team Arena
 ```
 
+The home directory (config, saves, screenshots) is `~/.q3a` on Linux and
+`~/Library/Application Support/Quake3` on macOS.
+
 `run_q3.sh` points the game at `run/` and sets `sv_pure 0`. Any extra
 arguments are passed to the game. Console commands typed in-game need a
 leading `/`, otherwise they are sent as chat.
 
 ## What changed from the original release
 
-- **x86_64 build** in `code/unix/Makefile`: C-only, interpreted QVMs,
-  `-std=gnu89`, no 32-bit flags, no `-Werror`.
+- **Portable build** `code/unix/Makefile.sdl`: C-only, interpreted QVMs,
+  `-std=gnu89`, OS and architecture detection (Linux, macOS, x86_64, arm64).
+  The legacy Makefile also got an x86_64 branch.
+- **Portability groundwork**: the renderer takes its GL header from SDL (no
+  GLX/X11 needed), macOS-specific context setup, home directory and
+  `Sys_ProcessorCount`, arm64 CPU strings, and C versions of the float helpers
+  on every non-i386 target.
 - **SDL2 platform layer**: `code/unix/sdl_glimp.c` (window, GL context, input,
   gamma) and `code/unix/sdl_snd.c` (audio). `linux_qgl.c` loads GL functions
   through SDL when built with `-DUSE_SDL`. The old X11/GLX/OSS files are kept

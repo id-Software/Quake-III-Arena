@@ -48,7 +48,7 @@ build() {
     rm -rf "$WORK/$name"; mkdir -p "$WORK/$name/vm"
     for src in $(grep -oE '\.\./[A-Za-z0-9_/.]+\.c' "$CODE/$sd/$bat" | sort -u); do
         ( cd "$WORK/$name/vm" && q3lcc -DQ3_VM $defs -S -Wf-target=bytecode -Wf-g \
-            -I"$CODE/cgame" -I"$CODE/game" -I"$uiinc" "$(realpath -m "$CODE/$sd/vm/$src")" 2>&1 \
+            -I"$CODE/cgame" -I"$CODE/game" -I"$uiinc" "$(python3 -I -c 'import os,sys; print(os.path.normpath(sys.argv[1]))' "$CODE/$sd/vm/$src")" 2>&1 \
             | grep -v "warning:" ) || true
         [ -f "$WORK/$name/vm/$(basename "${src%.c}").asm" ] || { echo "FAILED to compile $src"; exit 1; }
     done

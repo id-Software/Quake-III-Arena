@@ -5,7 +5,7 @@ Q3's mixer writes into a ring buffer (dma.buffer); an SDL audio callback
 drains it and reports the read position through SNDDMA_GetDMAPos.
 ===========================================================================
 */
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "../game/q_shared.h"
 #include "../client/snd_local.h"

@@ -38,6 +38,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <float.h>
 #include "../renderer/tr_local.h"
 #include "unix_glw.h"
+#ifdef USE_SDL
+#include <SDL.h>
+#endif
 
 // bk001129 - from cvs1.17 (mkv)
 //#if defined(__FX__)
@@ -59,6 +62,7 @@ fxMesaContext (*qfxMesaGetCurrentContext)(void);
 void (*qfxMesaSwapBuffers)(void);
 #endif
 
+#ifndef USE_SDL
 //GLX Functions
 XVisualInfo * (*qglXChooseVisual)( Display *dpy, int screen, int *attribList );
 GLXContext (*qglXCreateContext)( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct );
@@ -66,6 +70,7 @@ void (*qglXDestroyContext)( Display *dpy, GLXContext ctx );
 Bool (*qglXMakeCurrent)( Display *dpy, GLXDrawable drawable, GLXContext ctx);
 void (*qglXCopyContext)( Display *dpy, GLXContext src, GLXContext dst, GLuint mask );
 void (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
+#endif
 
 void ( APIENTRY * qglAccum )(GLenum op, GLfloat value);
 void ( APIENTRY * qglAlphaFunc )(GLenum func, GLclampf ref);
@@ -3008,20 +3013,23 @@ void QGL_Shutdown( void )
 	qfxMesaSwapBuffers           = NULL;
 #endif
 
+#ifndef USE_SDL
 	qglXChooseVisual             = NULL;
 	qglXCreateContext            = NULL;
 	qglXDestroyContext           = NULL;
 	qglXMakeCurrent              = NULL;
 	qglXCopyContext              = NULL;
 	qglXSwapBuffers              = NULL;
+#endif
 }
 
 #ifdef USE_SDL
-#include <SDL2/SDL.h>
 static void *SDL_GPA( const char *name )
 {
 	void *p = SDL_GL_GetProcAddress( name );
+#ifndef _WIN32
 	if ( !p ) p = dlsym( RTLD_DEFAULT, name );
+#endif
 	return p;
 }
 #define GPA( a ) SDL_GPA( a )
@@ -3431,12 +3439,14 @@ qboolean QGL_Init( const char *dllname )
 	qfxMesaSwapBuffers           =  GPA("fxMesaSwapBuffers");
 #endif
 
+#ifndef USE_SDL
 	qglXChooseVisual             =  GPA("glXChooseVisual");
 	qglXCreateContext            =  GPA("glXCreateContext");
 	qglXDestroyContext           =  GPA("glXDestroyContext");
 	qglXMakeCurrent              =  GPA("glXMakeCurrent");
 	qglXCopyContext              =  GPA("glXCopyContext");
 	qglXSwapBuffers              =  GPA("glXSwapBuffers");
+#endif
 
 	qglLockArraysEXT = 0;
 	qglUnlockArraysEXT = 0;

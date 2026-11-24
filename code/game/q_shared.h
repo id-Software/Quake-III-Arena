@@ -243,7 +243,7 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 
 // the mac compiler can't handle >32k of locals, so we
 // just waste space and make big arrays static...
-#ifdef __linux__
+#if defined(__linux__) || ( defined(__APPLE__) && !defined(MACOS_X) )
 
 // bk001205 - from Makefile
 #define stricmp strcasecmp
@@ -251,14 +251,24 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 #define	MAC_STATIC // bk: FIXME
 #define ID_INLINE inline 
 
-#ifdef __i386__
-#define	CPUSTRING	"linux-i386"
-#elif defined __x86_64__
-#define	CPUSTRING	"linux-x86_64"
-#elif defined __axp__
-#define	CPUSTRING	"linux-alpha"
+#if defined(__APPLE__)
+#define OSSTRING	"darwin"
 #else
-#define	CPUSTRING	"linux-other"
+#define OSSTRING	"linux"
+#endif
+
+#ifdef __i386__
+#define	CPUSTRING	OSSTRING "-i386"
+#elif defined __x86_64__
+#define	CPUSTRING	OSSTRING "-x86_64"
+#elif defined __aarch64__ || defined __arm64__
+#define	CPUSTRING	OSSTRING "-arm64"
+#elif defined __arm__
+#define	CPUSTRING	OSSTRING "-arm"
+#elif defined __axp__
+#define	CPUSTRING	OSSTRING "-alpha"
+#else
+#define	CPUSTRING	OSSTRING "-other"
 #endif
 
 #define	PATH_SEP '/'

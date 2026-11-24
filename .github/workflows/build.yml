@@ -1,0 +1,45 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "Linux x86_64 (gcc)",   os: ubuntu-latest }
+          - { name: "Linux arm64 (gcc)",    os: ubuntu-24.04-arm }
+          - { name: "macOS arm64 (clang)",  os: macos-latest }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SDL2 (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+
+      - name: Install SDL2 (macOS)
+        if: runner.os == 'macOS'
+        run: brew install sdl2
+
+      - name: Build engine (client + dedicated server)
+        working-directory: code/unix
+        run: make -f Makefile.sdl -j4
+
+      - name: Build game QVMs (lcc + q3asm)
+        working-directory: code/unix
+        run: ./build_qvms.sh
+
+      - name: Dedicated server starts
+        run: |
+          # no game data in CI: the server should start and then stop with a
+          # "couldn't load default.cfg" error, which proves the binary links and runs
+          out=$(build/*/q3ded +quit 2>&1 || true)
+          echo "$out" | head -20
+          echo "$out" | grep -q "Q3 1.32b"

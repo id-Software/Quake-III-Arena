@@ -139,7 +139,8 @@ int Sys_XTimeToSysTime (unsigned long xtime)
 #endif
 
 //#if 0 // bk001215 - see snapvector.nasm for replacement
-#if (defined __APPLE__) || (defined __x86_64__) // rcg010206 - using this for PPC builds...
+// C versions for everything without the i386 nasm assembly (x86_64, arm64, ppc, macOS ...)
+#if !defined(__i386__)
 long fastftol( float f ) { // bk001213 - from win32/win_shared.c
   //static int tmp;
   //	__asm fld f
@@ -390,7 +391,7 @@ char *Sys_DefaultHomePath(void)
             
 	if ((p = getenv("HOME")) != NULL) {
 		Q_strncpyz(homePath, p, sizeof(homePath));
-#ifdef MACOS_X
+#if defined(MACOS_X) || defined(__APPLE__)
 		Q_strcat(homePath, sizeof(homePath), "/Library/Application Support/Quake3");
 #else
 		Q_strcat(homePath, sizeof(homePath), "/.q3a");
@@ -425,7 +426,7 @@ char *Sys_GetCurrentUser( void )
 	return p->pw_name;
 }
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 // TTimo 
 // sysconf() in libc, POSIX.1 compliant
 unsigned int Sys_ProcessorCount()
