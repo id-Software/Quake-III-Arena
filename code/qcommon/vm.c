@@ -837,7 +837,9 @@ void VM_LogSyscalls( int *args ) {
 
 
 
-#if defined(__x86_64__) // 64-bit: no JIT. (was oDLL_ONLY) bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
+// No JIT: used by Makefile.sdl builds (Q3_NO_JIT, any CPU) and the legacy x86_64 build.
+// (was oDLL_ONLY) bk010215
+#if defined(Q3_NO_JIT) || defined(__x86_64__)
 int	VM_CallCompiled( vm_t *vm, int *args ) {
   // no JIT on this platform: run the bytecode interpreter instead
   return VM_CallInterpreted( vm, args );

@@ -52,7 +52,7 @@ SDL_LIBS   := $(shell pkg-config --libs sdl2 2>/dev/null || sdl2-config --libs 2
 # -fsigned-char: the code assumes signed char (arm defaults to unsigned)
 # -std=gnu89 -fcommon: this is C89-era code (current compilers default to C17/-fno-common)
 # -w: the code base is not warning-clean under modern compilers
-BASE_CFLAGS := -pipe -fsigned-char -std=gnu89 -fcommon -fno-strict-aliasing -w -MMD -MP -DC_ONLY
+BASE_CFLAGS := -pipe -fsigned-char -std=gnu89 -fcommon -fno-strict-aliasing -w -MMD -MP -DC_ONLY -DQ3_NO_JIT
 ifeq ($(CONFIG),debug)
   OPT_CFLAGS := -g -O1
 else
