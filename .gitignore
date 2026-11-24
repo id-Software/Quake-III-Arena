@@ -1,0 +1,6 @@
+# local game data and build output
+/run/
+/q3radiant/quake3.zip
+/build_qvm/
+/code/unix/releasex86_64/
+/code/unix/debugx86_64/
