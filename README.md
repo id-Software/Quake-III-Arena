@@ -35,8 +35,8 @@ Not tested or not available:
 | Platform | Status |
 |---|---|
 | Linux x86_64 | built and played (gcc and clang) |
-| Linux arm64 | should work (same code path); built by CI only |
-| macOS (Apple Silicon / Intel) | prepared, **not yet run**: built by CI only |
+| Linux arm64 | builds in CI (not run) |
+| macOS (Apple Silicon / Intel) | prepared, **not yet built or run** (no CI job for it yet) |
 | FreeBSD, others with SDL2 | untested |
 | Windows | not supported yet |
 
@@ -65,7 +65,7 @@ correct.
 X11/OSS) is kept as it was, apart from an x86_64 branch.
 
 The GitHub Actions workflow (`.github/workflows/build.yml`) builds on Linux
-x86_64, Linux arm64 and macOS arm64, and runs the QVM build.
+x86_64 and Linux arm64 and runs the QVM build.
 
 ## Game data
 

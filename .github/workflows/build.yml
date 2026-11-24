@@ -15,7 +15,6 @@ jobs:
         include:
           - { name: "Linux x86_64 (gcc)",   os: ubuntu-latest }
           - { name: "Linux arm64 (gcc)",    os: ubuntu-24.04-arm }
-          - { name: "macOS arm64 (clang)",  os: macos-latest }
 
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +22,6 @@ jobs:
       - name: Install SDL2 (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
-
-      - name: Install SDL2 (macOS)
-        if: runner.os == 'macOS'
-        run: brew install sdl2
 
       - name: Build engine (client + dedicated server)
         working-directory: code/unix
