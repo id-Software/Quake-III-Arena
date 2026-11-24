@@ -2651,7 +2651,11 @@ void QGL_Shutdown( void )
 {
 	if ( glw_state.OpenGLLib )
 	{
+#ifdef USE_SDL
+		SDL_GL_UnloadLibrary();
+#else
 		dlclose ( glw_state.OpenGLLib );
+#endif
 		glw_state.OpenGLLib = NULL;
 	}
 
@@ -3012,7 +3016,18 @@ void QGL_Shutdown( void )
 	qglXSwapBuffers              = NULL;
 }
 
+#ifdef USE_SDL
+#include <SDL2/SDL.h>
+static void *SDL_GPA( const char *name )
+{
+	void *p = SDL_GL_GetProcAddress( name );
+	if ( !p ) p = dlsym( RTLD_DEFAULT, name );
+	return p;
+}
+#define GPA( a ) SDL_GPA( a )
+#else
 #define GPA( a ) dlsym( glw_state.OpenGLLib, a )
+#endif
 
 void *qwglGetProcAddress(char *symbol)
 {
@@ -3034,7 +3049,22 @@ void *qwglGetProcAddress(char *symbol)
 
 qboolean QGL_Init( const char *dllname )
 {
+#ifdef USE_SDL
+	// SDL owns the GL library; load it before any window is created
+	if ( SDL_InitSubSystem( SDL_INIT_VIDEO ) != 0 ) {
+		ri.Printf( PRINT_ALL, "QGL_Init: SDL_InitSubSystem(VIDEO) failed: %s\n", SDL_GetError() );
+		return qfalse;
+	}
+	if ( SDL_GL_LoadLibrary( NULL ) != 0 ) {
+		ri.Printf( PRINT_ALL, "QGL_Init: SDL_GL_LoadLibrary failed: %s\n", SDL_GetError() );
+		SDL_QuitSubSystem( SDL_INIT_VIDEO );
+		return qfalse;
+	}
+	glw_state.OpenGLLib = (void *)1; // non-NULL marker: GL is available
+	if ( 0 )
+#else
 	if ( ( glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY|RTLD_GLOBAL ) ) == 0 )
+#endif
 	{
 		char	fn[1024];
 		// FILE *fp; // bk001204 - unused

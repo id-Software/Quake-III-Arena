@@ -2503,7 +2503,7 @@ static void FS_AddGameDirectory( const char *path, const char *dir ) {
 		sorted[i] = pakfiles[i];
 	}
 
-	qsort( sorted, numfiles, 4, paksort );
+	qsort( sorted, numfiles, sizeof( sorted[0] ), paksort );
 
 	for ( i = 0 ; i < numfiles ; i++ ) {
 		pakfile = FS_BuildOSPath( path, dir, sorted[i] );
@@ -2837,6 +2837,14 @@ if the full version is not found
 */
 static void FS_SetRestrictions( void ) {
 	searchpath_t	*path;
+
+	// This is a GPL source build: it has no retail productid, so the original
+	// code would always fall into restricted demo mode (demota/ only, fixed pak
+	// checksum, no dll/loose files). Only restrict if explicitly asked to with
+	// "+set fs_restrict 1".
+	if ( !fs_restrict->integer ) {
+		return;
+	}
 
 #ifndef PRE_RELEASE_DEMO
 	char	*productId;

@@ -93,6 +93,13 @@ ifeq ($(PLATFORM),linux)
     RPMARCH=alpha
     VENDOR=dec
   else
+    ifneq (,$(findstring x86_64,$(shell uname -m)))
+      # 64-bit build: C-only (no JIT, no asm), QVMs run in the interpreter
+      ARCH=x86_64
+      RPMARCH=x86_64
+      VENDOR=unknown
+      DLL_ONLY=false
+    else
     ifneq (,$(findstring ppc,$(shell uname -m)))
       #used for linux builds
       MESADIR=/usr/src/DRI-CVS/xc/xc/
@@ -107,6 +114,7 @@ ifeq ($(PLATFORM),linux)
       VENDOR=unknown
       DLL_ONLY=false
     endif
+    endif
   endif
 
   # bk001205: no mo'  -I/usr/include/glide, no FX
@@ -119,7 +127,7 @@ ifeq ($(PLATFORM),linux)
 
 
   #GL_CFLAGS = -I$(MESADIR)/include -I/usr/X11R6/include
-  GL_CFAGS = -I/usr/X11R6/include
+  GL_CFLAGS = -I/usr/X11R6/include
 
   # bk001204 - need -O for -Wall for uninitialized
   # bk001205 - took out -O to get assertions (NDEBUG)
@@ -129,6 +137,13 @@ ifeq ($(PLATFORM),linux)
   DEBUG_CFLAGS += -DNO_MOUSEGRAB
   DEBUG_CFLAGS += -O
 #  DEBUG_CFLAGS=$(BASE_CFLAGS) -g  -Wall -O
+  ifeq ($(ARCH),x86_64)
+    CC=gcc
+    # gcc 16 defaults to C23; this code base is C89/GNU89
+    BASE_CFLAGS += -std=gnu89 -fcommon -fno-strict-aliasing -DC_ONLY -DUSE_SDL -w $(shell pkg-config --cflags sdl2)
+    DEBUG_CFLAGS = $(BASE_CFLAGS) -g -DNO_MOUSEGRAB -O
+    RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O2 -fomit-frame-pointer -ffast-math
+  else
   ifeq ($(ARCH),axp)
     CC=pgcc
     RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
@@ -151,6 +166,7 @@ ifeq ($(PLATFORM),linux)
 #      RELEASE_CFLAGS=$(BASE_CFLAGS) -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium -pipe -ffast-math -malign-loops=2 -malign-jumps=2 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce
     endif
   endif
+  endif
 
   LIBEXT=a
 
@@ -164,9 +180,18 @@ ifeq ($(PLATFORM),linux)
   THREAD_LDFLAGS=-lpthread
   LDFLAGS=-ldl -lm
   GLLDFLAGS=-L/usr/X11R6/lib -lX11 -lXext -lXxf86dga -lXxf86vm
+  ifeq ($(ARCH),x86_64)
+    GLLDFLAGS=$(shell pkg-config --libs sdl2)
+  endif
 
   ifeq ($(ARCH),axp)
     TARGETS=\
+	  $(B)/$(PLATFORM)q3ded
+  else
+  ifeq ($(ARCH),x86_64)
+    # game/cgame/ui come from pak0.pk3 as QVMs (interpreted)
+    TARGETS=\
+	  $(B)/$(PLATFORM)quake3 \
 	  $(B)/$(PLATFORM)q3ded
   else
     TARGETS=\
@@ -185,6 +210,7 @@ ifeq ($(PLATFORM),linux)
 #	  $(B)/missionpack/vm/qagame.qvm \
 #	  $(B)/missionpack/vm/cgame.qvm \
 #	  $(B)/missionpack/vm/ui.qvm
+  endif
   endif
 
 ## $(B)/$(PLATFORM)q3static   \
@@ -514,21 +540,8 @@ Q3OBJ = \
 	\
 	$(B)/client/unix_main.o \
 	$(B)/client/unix_net.o \
-	$(B)/client/unix_shared.o \
-	\
-	$(B)/client/ahoptim.o  \
-	$(B)/client/autohint.o \
-	$(B)/client/ftbase.o   \
-	$(B)/client/ftdebug.o  \
-	$(B)/client/ftglyph.o  \
-	$(B)/client/ftinit.o   \
-	$(B)/client/ftmm.o     \
-	$(B)/client/ftsystem.o \
-	$(B)/client/raster1.o  \
-	$(B)/client/sfnt.o     \
-	$(B)/client/sfobjs.o   \
-	$(B)/client/smooth.o   \
-	$(B)/client/truetype.o
+	$(B)/client/unix_shared.o
+# (FreeType objects removed: ft2/ is not part of this source release, fonts are prebuilt)
 #	\
 #	$(B)/client/q_parse.o \
 #	$(B)/client/math_quaternion.o \
@@ -595,6 +608,17 @@ else
     ifeq ($(ARCH),i386)
 		Q3POBJ += $(B)/client/ftol.o $(B)/client/snapvector.o
 		Q3POBJ_SMP += $(B)/client/ftol.o $(B)/client/snapvector.o
+    endif
+
+    ifeq ($(ARCH),x86_64)
+		# SDL2 platform layer, C-only math/mixer
+		Q3POBJ=\
+			$(B)/client/linux_common.o \
+			$(B)/client/linux_signals.o \
+			$(B)/client/linux_qgl.o \
+			$(B)/client/sdl_glimp.o \
+			$(B)/client/linux_joystick.o \
+			$(B)/client/sdl_snd.o
     endif
 
 endif
@@ -758,6 +782,9 @@ $(B)/client/linux_joystick.o : $(UDIR)/linux_joystick.c; $(DO_CC)
 $(B)/client/linux_qgl.o : $(UDIR)/linux_qgl.c; $(DO_CC)  $(GL_CFLAGS) 
 $(B)/client/linux_input.o : $(UDIR)/linux_input.c; $(DO_CC) 
 $(B)/client/linux_snd.o : $(UDIR)/linux_snd.c; $(DO_CC) 
+$(B)/client/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_CC)
+$(B)/client/sdl_glimp.o : $(UDIR)/sdl_glimp.c; $(DO_CC)  $(GL_CFLAGS)
+$(B)/client/sdl_snd.o : $(UDIR)/sdl_snd.c; $(DO_CC)
 $(B)/client/snd_mixa.o : $(UDIR)/snd_mixa.s; $(DO_AS) 
 $(B)/client/matha.o : $(UDIR)/matha.s; $(DO_AS) 
 
@@ -909,6 +936,7 @@ Q3DOBJ = \
 	$(B)/ded/l_struct.o \
 	\
 	$(B)/ded/linux_common.o \
+	$(B)/ded/linux_signals.o \
 	$(B)/ded/unix_main.o \
 	$(B)/ded/unix_net.o \
 	$(B)/ded/unix_shared.o \
@@ -985,6 +1013,7 @@ $(B)/ded/l_script.o : $(BLIBDIR)/l_script.c; $(DO_BOT_CC)
 $(B)/ded/l_struct.o : $(BLIBDIR)/l_struct.c; $(DO_BOT_CC) 
 
 $(B)/ded/linux_common.o : $(UDIR)/linux_common.c; $(DO_CC)
+$(B)/ded/linux_signals.o : $(UDIR)/linux_signals.c; $(DO_DED_CC)
 $(B)/ded/unix_main.o : $(UDIR)/unix_main.c; $(DO_DED_CC) 
 $(B)/ded/unix_net.o : $(UDIR)/unix_net.c; $(DO_DED_CC) 
 $(B)/ded/unix_shared.o : $(UDIR)/unix_shared.c; $(DO_DED_CC) 

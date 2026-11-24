@@ -78,6 +78,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #else
 
+#include <stdint.h>
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -252,6 +253,8 @@ static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 
 #ifdef __i386__
 #define	CPUSTRING	"linux-i386"
+#elif defined __x86_64__
+#define	CPUSTRING	"linux-x86_64"
 #elif defined __axp__
 #define	CPUSTRING	"linux-alpha"
 #else

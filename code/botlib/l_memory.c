@@ -38,6 +38,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define MEMORYMANEGER
 
 #define MEM_ID		0x12345678l
+// keep returned blocks 16-byte aligned (token_t holds a long double)
+#define MEM_HDR_SIZE 16
 #define HUNK_ID		0x87654321l
 
 int allocatedmemory;
@@ -345,11 +347,11 @@ void *GetMemory(unsigned long size)
 	void *ptr;
 	unsigned long int *memid;
 
-	ptr = botimport.GetMemory(size + sizeof(unsigned long int));
+	ptr = botimport.GetMemory(size + MEM_HDR_SIZE);
 	if (!ptr) return NULL;
 	memid = (unsigned long int *) ptr;
 	*memid = MEM_ID;
-	return (unsigned long int *) ((char *) ptr + sizeof(unsigned long int));
+	return (unsigned long int *) ((char *) ptr + MEM_HDR_SIZE);
 } //end of the function GetMemory
 //===========================================================================
 //
@@ -387,11 +389,11 @@ void *GetHunkMemory(unsigned long size)
 	void *ptr;
 	unsigned long int *memid;
 
-	ptr = botimport.HunkAlloc(size + sizeof(unsigned long int));
+	ptr = botimport.HunkAlloc(size + MEM_HDR_SIZE);
 	if (!ptr) return NULL;
 	memid = (unsigned long int *) ptr;
 	*memid = HUNK_ID;
-	return (unsigned long int *) ((char *) ptr + sizeof(unsigned long int));
+	return (unsigned long int *) ((char *) ptr + MEM_HDR_SIZE);
 } //end of the function GetHunkMemory
 //===========================================================================
 //
@@ -424,7 +426,7 @@ void FreeMemory(void *ptr)
 {
 	unsigned long int *memid;
 
-	memid = (unsigned long int *) ((char *) ptr - sizeof(unsigned long int));
+	memid = (unsigned long int *) ((char *) ptr - MEM_HDR_SIZE);
 
 	if (*memid == MEM_ID)
 	{

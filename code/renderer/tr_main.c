@@ -1003,7 +1003,8 @@ qsort replacement
 
 =================
 */
-#define	SWAP_DRAW_SURF(a,b) temp=((int *)a)[0];((int *)a)[0]=((int *)b)[0];((int *)b)[0]=temp; temp=((int *)a)[1];((int *)a)[1]=((int *)b)[1];((int *)b)[1]=temp;
+// swap whole structs: drawSurf_t is 16 bytes on 64-bit (pointer member), not 8
+#define	SWAP_DRAW_SURF(a,b) do { drawSurf_t swapTmp_ = *(drawSurf_t *)(a); *(drawSurf_t *)(a) = *(drawSurf_t *)(b); *(drawSurf_t *)(b) = swapTmp_; } while (0)
 
 /* this parameter defines the cutoff between using quick sort and
    insertion sort for arrays; arrays with lengths shorter or equal to the
@@ -1046,9 +1047,6 @@ void qsortFast (
     int stkptr;                 /* stack for saving sub-array to be processed */
 	int	temp;
 
-	if ( sizeof(drawSurf_t) != 8 ) {
-		ri.Error( ERR_DROP, "change SWAP_DRAW_SURF macro" );
-	}
 
     /* Note: the number of stack entries required is no more than
        1 + log2(size), so 30 is sufficient for any array */

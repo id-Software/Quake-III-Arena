@@ -19,6 +19,7 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
+#include <stdint.h>
 #include "vm_local.h"
 
 #ifdef DEBUG_VM // bk001204
@@ -479,7 +480,7 @@ nextInstruction2:
 
 				src = (int *)&image[ r0&dataMask ];
 				dest = (int *)&image[ r1&dataMask ];
-				if ( ( (int)src | (int)dest | count ) & 3 ) {
+				if ( ( (intptr_t)src | (intptr_t)dest | count ) & 3 ) {
 					Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
 				}
 				count >>= 2;

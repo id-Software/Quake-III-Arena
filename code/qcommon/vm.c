@@ -698,10 +698,21 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
                             args[4],  args[5],  args[6], args[7],
                             args[8],  args[9], args[10], args[11],
                             args[12], args[13], args[14], args[15]);
-	} else if ( vm->compiled ) {
-		r = VM_CallCompiled( vm, &callnum );
 	} else {
-		r = VM_CallInterpreted( vm, &callnum );
+		// On x86_64 variadic arguments are passed in registers, so &callnum[1] is not
+		// the next argument. Gather them with stdarg into a contiguous array.
+		int vmargs[17];
+		vmargs[0] = callnum;
+		va_start(ap, callnum);
+		for (i = 1; i < 17; i++) {
+			vmargs[i] = va_arg(ap, int);
+		}
+		va_end(ap);
+		if ( vm->compiled ) {
+			r = VM_CallCompiled( vm, vmargs );
+		} else {
+			r = VM_CallInterpreted( vm, vmargs );
+		}
 	}
 
 	if ( oldVM != NULL ) // bk001220 - assert(currentVM!=NULL) for oldVM==NULL
@@ -826,10 +837,14 @@ void VM_LogSyscalls( int *args ) {
 
 
 
-#ifdef oDLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
+#if defined(__x86_64__) // 64-bit: no JIT. (was oDLL_ONLY) bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
 int	VM_CallCompiled( vm_t *vm, int *args ) {
-  return(0); 
+  // no JIT on this platform: run the bytecode interpreter instead
+  return VM_CallInterpreted( vm, args );
 }
 
-void VM_Compile( vm_t *vm, vmHeader_t *header ) {}
+void VM_Compile( vm_t *vm, vmHeader_t *header ) {
+  vm->compiled = qfalse;
+  VM_PrepareInterpreter( vm, header );
+}
 #endif // DLL_ONLY
